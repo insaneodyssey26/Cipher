@@ -18,6 +18,8 @@ import com.example.cipherspend.core.data.local.pref.ThemePreferences
 import com.example.cipherspend.core.security.BiometricAuthenticator
 import com.example.cipherspend.ui.dashboard.DashboardScreen
 import com.example.cipherspend.ui.dashboard.DashboardViewModel
+import com.example.cipherspend.ui.insights.InsightsScreen
+import com.example.cipherspend.ui.insights.InsightsViewModel
 import com.example.cipherspend.ui.settings.SettingsScreen
 import com.example.cipherspend.ui.settings.SettingsViewModel
 import com.example.cipherspend.ui.theme.CipherSpendTheme
@@ -79,6 +81,19 @@ class MainActivity : AppCompatActivity() {
                                 viewModel = viewModel,
                                 onNavigateToSettings = {
                                     navController.navigate("settings")
+                                },
+                                onNavigateToInsights = {
+                                    navController.navigate("insights")
+                                }
+                            )
+                        }
+
+                        composable("insights") {
+                            val viewModel: InsightsViewModel = hiltViewModel()
+                            InsightsScreen(
+                                viewModel = viewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
                                 }
                             )
                         }

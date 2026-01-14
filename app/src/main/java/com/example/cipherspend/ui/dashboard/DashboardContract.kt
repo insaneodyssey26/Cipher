@@ -17,11 +17,7 @@ class DashboardContract {
         val transactions: List<TransactionEntity> = emptyList(),
         val totalBalance: Double = 0.0,
         val totalIncome: Double = 0.0,
-        val totalExpenses: Double = 0.0,
-        val spendingVelocity: VelocityData = VelocityData(),
-        val netWorthHistory: List<Point> = emptyList(),
-        val calendarHeatmap: Map<Long, Double> = emptyMap(),
-        val categoryBreakdown: List<CategoryData> = emptyList()
+        val totalExpenses: Double = 0.0
     ) : UiState
 
     data class VelocityData(
