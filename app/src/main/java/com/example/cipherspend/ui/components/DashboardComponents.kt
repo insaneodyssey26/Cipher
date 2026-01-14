@@ -1,5 +1,6 @@
 package com.example.cipherspend.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -7,9 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,14 +18,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.ui.theme.ExpenseRed
 import com.example.cipherspend.ui.theme.IncomeGreen
@@ -44,36 +49,45 @@ fun BalanceOverviewCard(
         }
     }
 
-    Card(
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(32.dp),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            ),
+            .height(240.dp),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialTheme.colorScheme.secondaryContainer
+                .fillMaxSize()
+                .drawBehind {
+                    val path = Path().apply {
+                        moveTo(0f, size.height * 0.7f)
+                        quadraticBezierTo(
+                            size.width * 0.3f, size.height * 0.6f,
+                            size.width * 0.6f, size.height * 0.8f
+                        )
+                        quadraticBezierTo(
+                            size.width * 0.8f, size.height * 0.9f,
+                            size.width, size.height * 0.7f
+                        )
+                        lineTo(size.width, size.height)
+                        lineTo(0f, size.height)
+                        close()
+                    }
+                    drawPath(
+                        path = path,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)
                         )
                     )
-                )
+                }
+                .padding(28.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(28.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -81,54 +95,56 @@ fun BalanceOverviewCard(
                 ) {
                     Column {
                         Text(
-                            text = "Total Balance",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            text = "TOTAL BALANCE",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                letterSpacing = 2.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = currencyFormatter.format(totalBalance),
-                            style = MaterialTheme.typography.displaySmall.copy(
-                                fontWeight = FontWeight.ExtraBold
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 36.sp
                             ),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                     
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        modifier = Modifier.size(48.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.AccountBalanceWallet,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.weight(1f))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    FinancialMetricCard(
+                    MiniStatItem(
                         label = "Income",
                         amount = income,
-                        icon = Icons.Default.KeyboardArrowDown,
-                        tint = IncomeGreen,
+                        icon = Icons.Default.ArrowDownward,
+                        color = IncomeGreen,
                         modifier = Modifier.weight(1f)
                     )
-                    FinancialMetricCard(
-                        label = "Expenses",
+                    MiniStatItem(
+                        label = "Spent",
                         amount = expenses,
-                        icon = Icons.Default.KeyboardArrowUp,
-                        tint = ExpenseRed,
+                        icon = Icons.Default.ArrowUpward,
+                        color = ExpenseRed,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -138,11 +154,11 @@ fun BalanceOverviewCard(
 }
 
 @Composable
-fun FinancialMetricCard(
+fun MiniStatItem(
     label: String,
     amount: Double,
     icon: ImageVector,
-    tint: Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     val currencyFormatter = remember {
@@ -154,80 +170,40 @@ fun FinancialMetricCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
+        color = Color.Black.copy(alpha = 0.05f)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = tint
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    modifier = Modifier.size(16.dp),
+                    tint = color
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = currencyFormatter.format(amount),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = tint
-            )
+            Column {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = currencyFormatter.format(amount),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
-    }
-}
-
-@Composable
-fun EmptyTransactionsState() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
-                contentDescription = null,
-                modifier = Modifier.size(60.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text(
-            text = "No Transactions Yet",
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = "Your financial transactions will appear here\nwhen detected from SMS messages",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
@@ -242,107 +218,139 @@ fun TransactionCard(
         }
     }
 
-    val dateFormatter = remember {
-        SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
-    }
-
     val timeFormatter = remember {
         SimpleDateFormat("hh:mm a", Locale.getDefault())
     }
 
-    Card(
+    val dayFormatter = remember {
+        SimpleDateFormat("dd MMM", Locale.getDefault())
+    }
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { }
-            ),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 2.dp
-        )
+            .padding(horizontal = 20.dp),
+        color = Color.Transparent
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            // High-end Date Badge
+            Column(
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (transaction.isIncome) 
-                            IncomeGreen.copy(alpha = 0.15f)
-                        else 
-                            ExpenseRed.copy(alpha = 0.15f)
-                    ),
-                contentAlignment = Alignment.Center
+                    .width(45.dp)
+                    .padding(end = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = if (transaction.isIncome) 
-                        Icons.Default.KeyboardArrowDown 
-                    else 
-                        Icons.Default.KeyboardArrowUp,
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                    tint = if (transaction.isIncome) IncomeGreen else ExpenseRed
+                Text(
+                    text = dayFormatter.format(Date(transaction.timestamp)).split(" ")[0],
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = dayFormatter.format(Date(transaction.timestamp)).split(" ")[1].uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             }
 
+            // Vertical Divider
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(40.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Merchant Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.merchant,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = dateFormatter.format(Date(transaction.timestamp)),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    Box(
-                        modifier = Modifier
-                            .size(3.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
-                    )
-                    
-                    Text(
-                        text = timeFormatter.format(Date(transaction.timestamp)),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = timeFormatter.format(Date(transaction.timestamp)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             }
 
-            Text(
-                text = "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = if (transaction.isIncome) IncomeGreen else ExpenseRed
-            )
+            // Amount with Type indicator
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${if (transaction.isIncome) "+" else "-"}₹${"%,.2f".format(transaction.amount)}",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (transaction.isIncome) "CREDIT" else "DEBIT",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp
+                    ),
+                    color = if (transaction.isIncome) IncomeGreen.copy(alpha = 0.7f) else ExpenseRed.copy(alpha = 0.7f)
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun EmptyTransactionsState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 64.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier.size(100.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Clean Slate",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Black
+            ),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        
+        Text(
+            text = "Waiting for your first transaction...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
     }
 }
