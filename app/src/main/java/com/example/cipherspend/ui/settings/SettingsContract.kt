@@ -9,6 +9,7 @@ class SettingsContract {
         data class UpdateTheme(val theme: AppTheme) : Intent()
         data class SetBiometricEnabled(val enabled: Boolean) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
+        data class SetAutoLockTimeout(val timeoutMillis: Long) : Intent()
         data class SetCurrency(val currency: String) : Intent()
         object ClearAllData : Intent()
     }
@@ -17,6 +18,7 @@ class SettingsContract {
         val theme: AppTheme = AppTheme.SYSTEM,
         val isBiometricEnabled: Boolean = true,
         val isPrivacyModeEnabled: Boolean = false,
+        val autoLockTimeout: Long = 0L,
         val currency: String = "INR",
         val isDataCleared: Boolean = false
     ) : UiState

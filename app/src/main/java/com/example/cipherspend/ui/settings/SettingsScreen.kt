@@ -36,6 +36,15 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showTimeoutDialog by remember { mutableStateOf(false) }
+
+    val timeoutOptions = listOf(
+        "Immediately" to 0L,
+        "30 Seconds" to 30_000L,
+        "1 Minute" to 60_000L,
+        "5 Minutes" to 300_000L,
+        "Never" to Long.MAX_VALUE
+    )
 
     Scaffold(
         topBar = {
@@ -119,6 +128,19 @@ fun SettingsScreen(
                     }
                 )
                 SettingsDivider()
+                ActionOption(
+                    icon = Icons.Default.Timer,
+                    title = "Auto-Lock Timer",
+                    subtitle = when (state.autoLockTimeout) {
+                        0L -> "Immediately"
+                        30_000L -> "30 Seconds"
+                        60_000L -> "1 Minute"
+                        300_000L -> "5 Minutes"
+                        else -> "Never"
+                    },
+                    onClick = { showTimeoutDialog = true }
+                )
+                SettingsDivider()
                 ToggleOption(
                     icon = Icons.Default.VisibilityOff,
                     title = "Privacy Mode",
@@ -152,6 +174,39 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    if (showTimeoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showTimeoutDialog = false },
+            title = { Text("Auto-Lock Timeout", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    timeoutOptions.forEach { (label, value) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.handleIntent(SettingsContract.Intent.SetAutoLockTimeout(value))
+                                    showTimeoutDialog = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = state.autoLockTimeout == value,
+                                onClick = null
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = label, style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+            },
+            confirmButton = { },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
 
     if (showDeleteDialog) {

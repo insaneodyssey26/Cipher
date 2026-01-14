@@ -21,6 +21,8 @@ class UserPreferences @Inject constructor(
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
         val PRIVACY_MODE = booleanPreferencesKey("privacy_mode")
         val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
+        val AUTO_LOCK_TIMEOUT = longPreferencesKey("auto_lock_timeout")
+        val LAST_STOP_TIME = longPreferencesKey("last_stop_time")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -28,7 +30,9 @@ class UserPreferences @Inject constructor(
             theme = AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name),
             isBiometricEnabled = preferences[Keys.BIOMETRIC_ENABLED] ?: true,
             isPrivacyModeEnabled = preferences[Keys.PRIVACY_MODE] ?: false,
-            currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR"
+            currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR",
+            autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L, // 0 = Immediately
+            lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L
         )
     }
 
@@ -47,11 +51,21 @@ class UserPreferences @Inject constructor(
     suspend fun setCurrency(currency: String) {
         context.dataStore.edit { it[Keys.PREFERRED_CURRENCY] = currency }
     }
+
+    suspend fun setAutoLockTimeout(timeoutMillis: Long) {
+        context.dataStore.edit { it[Keys.AUTO_LOCK_TIMEOUT] = timeoutMillis }
+    }
+
+    suspend fun setLastStopTime(timestamp: Long) {
+        context.dataStore.edit { it[Keys.LAST_STOP_TIME] = timestamp }
+    }
 }
 
 data class UserSettings(
     val theme: AppTheme,
     val isBiometricEnabled: Boolean,
     val isPrivacyModeEnabled: Boolean,
-    val currency: String
+    val currency: String,
+    val autoLockTimeout: Long,
+    val lastStopTime: Long
 )

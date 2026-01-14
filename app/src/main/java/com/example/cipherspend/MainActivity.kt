@@ -13,6 +13,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,6 +30,7 @@ import com.example.cipherspend.ui.settings.SettingsScreen
 import com.example.cipherspend.ui.settings.SettingsViewModel
 import com.example.cipherspend.ui.theme.CipherSpendTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -43,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val settings by userPreferences.settingsFlow.collectAsState(initial = null)
+            val scope = rememberCoroutineScope()
             
             settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()
@@ -54,14 +59,33 @@ class MainActivity : AppCompatActivity() {
 
                 CipherSpendTheme(darkTheme = darkTheme) {
                     var isAuthenticated by remember { 
-                        mutableStateOf(!userSettings.isBiometricEnabled || !biometricAuthenticator.isBiometricAvailable()) 
+                        val shouldLock = userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()
+                        val timeDiff = System.currentTimeMillis() - userSettings.lastStopTime
+                        val isGracePeriodOver = timeDiff > userSettings.autoLockTimeout
+                        
+                        mutableStateOf(!shouldLock || !isGracePeriodOver)
+                    }
+
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_STOP) {
+                                scope.launch {
+                                    userPreferences.setLastStopTime(System.currentTimeMillis())
+                                }
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
                     }
 
                     val permissionLauncher = rememberLauncherForActivityResult(
                         ActivityResultContracts.RequestPermission()
                     ) { }
 
-                    LaunchedEffect(Unit) {
+                    LaunchedEffect(isAuthenticated) {
                         permissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
                         
                         if (userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable() && !isAuthenticated) {

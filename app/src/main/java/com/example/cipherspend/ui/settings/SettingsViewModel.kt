@@ -32,6 +32,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
+            is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeoutMillis)
             is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.currency)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
         }
@@ -45,6 +46,7 @@ class SettingsViewModel @Inject constructor(
                         theme = settings.theme,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
+                        autoLockTimeout = settings.autoLockTimeout,
                         currency = settings.currency
                     )
                 }
@@ -62,6 +64,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun updatePrivacyMode(enabled: Boolean) {
         viewModelScope.launch { userPreferences.setPrivacyModeEnabled(enabled) }
+    }
+
+    private fun updateAutoLockTimeout(timeout: Long) {
+        viewModelScope.launch { userPreferences.setAutoLockTimeout(timeout) }
     }
 
     private fun updateCurrency(currency: String) {
