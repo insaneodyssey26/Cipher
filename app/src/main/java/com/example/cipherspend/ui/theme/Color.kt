@@ -30,8 +30,8 @@ val onSurfaceLight = Color(0xFF191C20)
 val surfaceVariantLight = Color(0xFFDFE2EB)
 val onSurfaceVariantLight = Color(0xFF43474E)
 
-// Dark Palette - Deep & Immersive
-val primaryDark = Color(0xFF9ECAFF)
+// Dark Palette - Pitch Black AMOLED
+val primaryDark = Color(0xFFD0E4FF)
 val onPrimaryDark = Color(0xFF003258)
 val primaryContainerDark = Color(0xFF00497D)
 val onPrimaryContainerDark = Color(0xFFD1E4FF)
@@ -51,11 +51,11 @@ val onErrorDark = Color(0xFF690005)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)
 
-val backgroundDark = Color(0xFF001B2B) // Deep midnight
+val backgroundDark = Color(0xFF000000) // Pitch Black
 val onBackgroundDark = Color(0xFFE2E2E6)
-val surfaceDark = Color(0xFF001B2B)
+val surfaceDark = Color(0xFF000000) // Pitch Black
 val onSurfaceDark = Color(0xFFE2E2E6)
-val surfaceVariantDark = Color(0xFF43474E)
+val surfaceVariantDark = Color(0xFF1A1C1E) // Darker variant for cards
 val onSurfaceVariantDark = Color(0xFFC3C7CF)
 
 // Accent Colors for Transactions
