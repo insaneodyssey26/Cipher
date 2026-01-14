@@ -7,6 +7,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -73,7 +76,31 @@ class MainActivity : AppCompatActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "dashboard"
+                        startDestination = "dashboard",
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(500))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { -it / 3 },
+                                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(500))
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { -it / 3 },
+                                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(500))
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(500, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(500))
+                        }
                     ) {
                         composable("dashboard") {
                             val viewModel: DashboardViewModel = hiltViewModel()
