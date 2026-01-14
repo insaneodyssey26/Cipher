@@ -7,7 +7,7 @@ import com.example.cipherspend.core.data.local.entity.TransactionEntity
 
 @Database(
     entities = [TransactionEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
