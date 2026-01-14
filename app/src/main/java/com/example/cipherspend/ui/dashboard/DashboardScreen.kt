@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.*
 import com.example.cipherspend.ui.theme.*
 
@@ -21,10 +22,12 @@ import com.example.cipherspend.ui.theme.*
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
+    userPreferences: UserPreferences,
     onNavigateToSettings: () -> Unit,
     onNavigateToInsights: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val settings by userPreferences.settingsFlow.collectAsState(initial = null)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -32,6 +35,8 @@ fun DashboardScreen(
             DashboardTopBar(onSettingsClick = onNavigateToSettings)
         }
     ) { padding ->
+        val privacyMode = settings?.isPrivacyModeEnabled ?: false
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -43,7 +48,8 @@ fun DashboardScreen(
                 BalanceOverviewCard(
                     totalBalance = state.totalBalance,
                     income = state.totalIncome,
-                    expenses = state.totalExpenses
+                    expenses = state.totalExpenses,
+                    isPrivacyMode = privacyMode
                 )
             }
 
@@ -105,6 +111,7 @@ fun DashboardScreen(
                 ) { transaction ->
                     TransactionCard(
                         transaction = transaction,
+                        isPrivacyMode = privacyMode,
                         onDelete = { 
                             viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) 
                         }

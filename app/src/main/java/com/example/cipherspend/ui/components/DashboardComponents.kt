@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,7 +31,8 @@ import java.util.*
 fun BalanceOverviewCard(
     totalBalance: Double,
     income: Double,
-    expenses: Double
+    expenses: Double,
+    isPrivacyMode: Boolean = false
 ) {
     val currencyFormatter = remember {
         NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
@@ -73,7 +71,7 @@ fun BalanceOverviewCard(
                         color = colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = currencyFormatter.format(totalBalance),
+                        text = if (isPrivacyMode) "₹ •••••" else currencyFormatter.format(totalBalance),
                         style = MaterialTheme.typography.displayMedium.copy(
                             fontWeight = FontWeight.Black,
                             fontSize = 32.sp
@@ -119,6 +117,7 @@ fun BalanceOverviewCard(
                     label = "Income",
                     amount = income,
                     color = IncomeGreen,
+                    isPrivacyMode = isPrivacyMode,
                     modifier = Modifier.weight(1f)
                 )
                 Box(
@@ -132,6 +131,7 @@ fun BalanceOverviewCard(
                     label = "Spent",
                     amount = expenses,
                     color = ExpenseRed,
+                    isPrivacyMode = isPrivacyMode,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -144,6 +144,7 @@ fun StatPill(
     label: String,
     amount: Double,
     color: Color,
+    isPrivacyMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val currencyFormatter = remember {
@@ -162,7 +163,7 @@ fun StatPill(
             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
         )
         Text(
-            text = currencyFormatter.format(amount),
+            text = if (isPrivacyMode) "₹ •••" else currencyFormatter.format(amount),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold
             ),
@@ -174,6 +175,7 @@ fun StatPill(
 @Composable
 fun TransactionCard(
     transaction: TransactionEntity,
+    isPrivacyMode: Boolean = false,
     onDelete: (TransactionEntity) -> Unit
 ) {
     val currencyFormatter = remember {
@@ -247,7 +249,11 @@ fun TransactionCard(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}",
+                    text = if (isPrivacyMode) {
+                        "${if (transaction.isIncome) "+" else "-"} ₹ •••"
+                    } else {
+                        "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
+                    },
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Black,
                         fontSize = 18.sp

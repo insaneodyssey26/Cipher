@@ -31,4 +31,7 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE timestamp >= :startTime")
     fun getTransactionsSince(startTime: Long): Flow<List<TransactionEntity>>
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAllTransactions()
 }

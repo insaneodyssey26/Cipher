@@ -1,5 +1,6 @@
 package com.example.cipherspend.ui.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,15 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.SettingsSuggest
-import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.cipherspend.core.data.local.pref.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,15 +30,17 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Settings",
+                        text = "Configuration",
                         style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-0.5).sp
                         )
                     )
                 },
@@ -71,114 +69,135 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             SectionHeader(title = "Appearance")
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            SettingsCard {
+                ThemeOption(
+                    icon = Icons.Default.LightMode,
+                    title = "Light",
+                    isSelected = state.theme == AppTheme.LIGHT,
+                    onClick = { viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.LIGHT)) }
                 )
-            ) {
-                Column {
-                    ThemeOption(
-                        icon = Icons.Default.LightMode,
-                        title = "Light Theme",
-                        subtitle = "Bright and clean interface",
-                        isSelected = state.currentTheme == AppTheme.LIGHT,
-                        onClick = {
-                            viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.LIGHT))
-                        }
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
-                        thickness = 0.5.dp
-                    )
-
-                    ThemeOption(
-                        icon = Icons.Default.DarkMode,
-                        title = "Dark Theme",
-                        subtitle = "Easy on your eyes",
-                        isSelected = state.currentTheme == AppTheme.DARK,
-                        onClick = {
-                            viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.DARK))
-                        }
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
-                        thickness = 0.5.dp
-                    )
-
-                    ThemeOption(
-                        icon = Icons.Default.SettingsSuggest,
-                        title = "System Default",
-                        subtitle = "Follow system settings",
-                        isSelected = state.currentTheme == AppTheme.SYSTEM,
-                        onClick = {
-                            viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.SYSTEM))
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            SectionHeader(title = "Security")
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                SettingsDivider()
+                ThemeOption(
+                    icon = Icons.Default.DarkMode,
+                    title = "Dark",
+                    isSelected = state.theme == AppTheme.DARK,
+                    onClick = { viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.DARK)) }
                 )
-            ) {
-                InfoItem(
-                    icon = Icons.Default.Security,
-                    label = "Encryption",
-                    value = "AES-256 Enabled",
-                    iconTint = MaterialTheme.colorScheme.primary
+                SettingsDivider()
+                ThemeOption(
+                    icon = Icons.Default.SettingsSuggest,
+                    title = "System",
+                    isSelected = state.theme == AppTheme.SYSTEM,
+                    onClick = { viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.SYSTEM)) }
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionHeader(title = "About")
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            SectionHeader(title = "Security & Privacy")
+            SettingsCard {
+                ToggleOption(
+                    icon = Icons.Default.Fingerprint,
+                    title = "Biometric Lock",
+                    subtitle = "Require authentication on entry",
+                    checked = state.isBiometricEnabled,
+                    onCheckedChange = { viewModel.handleIntent(SettingsContract.Intent.SetBiometricEnabled(it)) }
                 )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    InfoRow(label = "App Name", value = "CipherSpend")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    InfoRow(label = "Version", value = "1.0.0")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    InfoRow(label = "Build Type", value = "Release")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    InfoRow(label = "Database", value = "SQLCipher")
-                }
+                SettingsDivider()
+                ToggleOption(
+                    icon = Icons.Default.VisibilityOff,
+                    title = "Privacy Mode",
+                    subtitle = "Mask balances in public spaces",
+                    checked = state.isPrivacyModeEnabled,
+                    onCheckedChange = { viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) }
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+
+            SectionHeader(title = "Data Management")
+            SettingsCard {
+                ActionOption(
+                    icon = Icons.Default.DeleteSweep,
+                    title = "Clear All Data",
+                    subtitle = "Irreversibly delete all local records",
+                    iconColor = MaterialTheme.colorScheme.error,
+                    onClick = { showDeleteDialog = true }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            // App Version Info
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "CipherSpend v1.0.0",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete all data?", fontWeight = FontWeight.Bold) },
+            text = { Text("This will permanently remove all your transaction history from this device. This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.handleIntent(SettingsContract.Intent.ClearAllData)
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete Everything")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
 }
 
 @Composable
 private fun SectionHeader(title: String) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold
+        text = title.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.5.sp
         ),
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
+    )
+}
+
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+        content = content
+    )
+}
+
+@Composable
+private fun SettingsDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
     )
 }
 
@@ -186,7 +205,6 @@ private fun SectionHeader(title: String) {
 private fun ThemeOption(
     icon: ImageVector,
     title: String,
-    subtitle: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -198,70 +216,34 @@ private fun ThemeOption(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isSelected) 
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-                    else 
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = if (isSelected)
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            modifier = Modifier.weight(1f)
+        )
         if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
 
 @Composable
-private fun InfoItem(
+private fun ToggleOption(
     icon: ImageVector,
-    label: String,
-    value: String,
-    iconTint: Color
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -270,57 +252,59 @@ private fun InfoItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(iconTint.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = iconTint
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            }
         }
-
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
+            Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        )
     }
 }
 
 @Composable
-private fun InfoRow(label: String, value: String) {
+private fun ActionOption(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    iconColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: () -> Unit
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = iconColor.copy(alpha = 0.1f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(imageVector = icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
+            }
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
+            Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
     }
 }
