@@ -18,18 +18,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import com.example.cipherspend.core.data.local.pref.AppTheme
+import com.example.cipherspend.core.security.BiometricAuthenticator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    biometricAuthenticator: BiometricAuthenticator,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -101,7 +106,17 @@ fun SettingsScreen(
                     title = "Biometric Lock",
                     subtitle = "Require authentication on entry",
                     checked = state.isBiometricEnabled,
-                    onCheckedChange = { viewModel.handleIntent(SettingsContract.Intent.SetBiometricEnabled(it)) }
+                    onCheckedChange = { isEnabling ->
+                        if (isEnabling && biometricAuthenticator.isBiometricAvailable()) {
+                            biometricAuthenticator.authenticate(
+                                activity = context as FragmentActivity,
+                                onSuccess = { viewModel.handleIntent(SettingsContract.Intent.SetBiometricEnabled(true)) },
+                                onError = { }
+                            )
+                        } else {
+                            viewModel.handleIntent(SettingsContract.Intent.SetBiometricEnabled(isEnabling))
+                        }
+                    }
                 )
                 SettingsDivider()
                 ToggleOption(
@@ -128,7 +143,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
             
-            // App Version Info
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "CipherSpend v1.0.0",

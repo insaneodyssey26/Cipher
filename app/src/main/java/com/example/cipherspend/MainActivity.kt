@@ -132,6 +132,7 @@ class MainActivity : AppCompatActivity() {
                                 val viewModel: SettingsViewModel = hiltViewModel()
                                 SettingsScreen(
                                     viewModel = viewModel,
+                                    biometricAuthenticator = biometricAuthenticator,
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }
