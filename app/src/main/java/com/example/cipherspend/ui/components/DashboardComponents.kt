@@ -69,36 +69,10 @@ fun PremiumBalanceHeader(
                     .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Surface(
-                    shape = RoundedCornerShape(100.dp),
-                    color = colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Security,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = colorScheme.secondary
-                        )
-                        Text(
-                            text = "SECURE VAULT",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp
-                            ),
-                            color = colorScheme.secondary
-                        )
-                    }
-                }
-
                 Text(
                     text = if (isPrivacyMode) "₹ ••••••" else currencyFormatter.format(totalBalance),
                     style = MaterialTheme.typography.displayLarge.copy(
+                        fontFamily = com.example.cipherspend.ui.theme.GoogleSansFontFamily,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1.5).sp,
                         fontSize = 42.sp

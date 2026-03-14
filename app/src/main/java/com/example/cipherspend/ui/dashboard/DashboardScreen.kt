@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.*
-import com.example.cipherspend.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +38,7 @@ fun DashboardScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Vault",
+                        text = "CipherSpend",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
