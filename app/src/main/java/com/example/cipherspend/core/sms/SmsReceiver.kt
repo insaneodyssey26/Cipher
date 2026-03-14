@@ -39,7 +39,7 @@ class SmsReceiver : BroadcastReceiver() {
                                 merchant = parsed.merchant,
                                 currency = parsed.currency,
                                 timestamp = System.currentTimeMillis(),
-                                category = "Uncategorized",
+                                category = "", // Let repository auto-categorize
                                 rawSms = body,
                                 isIncome = parsed.isIncome
                             )

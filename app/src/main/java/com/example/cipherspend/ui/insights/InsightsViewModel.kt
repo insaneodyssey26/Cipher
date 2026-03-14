@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
+import com.example.cipherspend.core.domain.model.TransactionCategory
 import com.example.cipherspend.ui.dashboard.DashboardContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +42,6 @@ class InsightsViewModel @Inject constructor(
 
             repository.getAllTransactions()
                 .combine(repository.getExpensesSince(startOfLastWeek)) { transactions, recentExpenses ->
-                    // Perform all heavy calculations on a background thread
                     val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
                     val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
@@ -62,7 +62,7 @@ class InsightsViewModel @Inject constructor(
                         allTransactions = transactions
                     )
                 }
-                .flowOn(Dispatchers.Default) // Crucial: moves the calculations off the Main thread
+                .flowOn(Dispatchers.Default)
                 .collect { newState ->
                     _state.value = newState.copy(selectedDayTimestamp = _state.value.selectedDayTimestamp)
                 }
@@ -108,22 +108,20 @@ class InsightsViewModel @Inject constructor(
         return expenses.groupBy { it.category }
             .map { entry ->
                 val amount = entry.value.sumOf { it.amount }
+                val categoryModel = TransactionCategory.fromString(entry.key)
                 DashboardContract.CategoryData(
-                    category = entry.key,
+                    category = categoryModel.displayName,
                     amount = amount,
                     percentage = (amount / total).toFloat(),
-                    color = getCategoryColor(entry.key)
+                    color = categoryModel.color.toArgb().toLong()
                 )
             }.sortedByDescending { it.amount }
     }
-
-    private fun getCategoryColor(category: String): Long {
-        return when(category.lowercase()) {
-            "food" -> 0xFFFF7043
-            "rent" -> 0xFF42A5F5
-            "shopping" -> 0xFFAB47BC
-            "transport" -> 0xFF26A69A
-            else -> 0xFF78909C
-        }
+    
+    private fun androidx.compose.ui.graphics.Color.toArgb(): Int {
+        return (alpha * 255.0f + 0.5f).toInt() shl 24 or
+                (red * 255.0f + 0.5f).toInt() shl 16 or
+                (green * 255.0f + 0.5f).toInt() shl 8 or
+                (blue * 255.0f + 0.5f).toInt()
     }
 }

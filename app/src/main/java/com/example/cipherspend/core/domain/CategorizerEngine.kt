@@ -7,63 +7,63 @@ import javax.inject.Singleton
 @Singleton
 class CategorizerEngine @Inject constructor() {
 
-    private val exactMerchantMatches = mapOf(
-        "Amazon" to TransactionCategory.SHOPPING,
-        "Flipkart" to TransactionCategory.SHOPPING,
-        "Myntra" to TransactionCategory.SHOPPING,
-        "Ajio" to TransactionCategory.SHOPPING,
-        "Meesho" to TransactionCategory.SHOPPING,
-        "Nykaa" to TransactionCategory.SHOPPING,
-        "Reliance Digital" to TransactionCategory.SHOPPING,
-        "Croma" to TransactionCategory.SHOPPING,
-        "Blinkit" to TransactionCategory.SHOPPING,
-        "BigBasket" to TransactionCategory.SHOPPING,
-        "Zepto" to TransactionCategory.SHOPPING,
-        "Instamart" to TransactionCategory.SHOPPING,
-        "JioMart" to TransactionCategory.SHOPPING,
-        "Zomato" to TransactionCategory.FOOD,
-        "Swiggy" to TransactionCategory.FOOD,
-        "Eatfit" to TransactionCategory.FOOD,
-        "Dominos" to TransactionCategory.FOOD,
+    private val brandMappings = mapOf(
+        "AMAZON" to TransactionCategory.SHOPPING,
+        "FLIPKART" to TransactionCategory.SHOPPING,
+        "MYNTRA" to TransactionCategory.SHOPPING,
+        "AJIO" to TransactionCategory.SHOPPING,
+        "MEESHO" to TransactionCategory.SHOPPING,
+        "NYKAA" to TransactionCategory.SHOPPING,
+        "RELIANCE" to TransactionCategory.SHOPPING,
+        "CROMA" to TransactionCategory.SHOPPING,
+        "BLINKIT" to TransactionCategory.SHOPPING,
+        "BIGBASKET" to TransactionCategory.SHOPPING,
+        "ZEPTO" to TransactionCategory.SHOPPING,
+        "INSTAMART" to TransactionCategory.SHOPPING,
+        "JIOMART" to TransactionCategory.SHOPPING,
+        "ZOMATO" to TransactionCategory.FOOD,
+        "SWIGGY" to TransactionCategory.FOOD,
+        "EATFIT" to TransactionCategory.FOOD,
+        "DOMINOS" to TransactionCategory.FOOD,
         "KFC" to TransactionCategory.FOOD,
-        "Pizza Hut" to TransactionCategory.FOOD,
-        "Starbucks" to TransactionCategory.FOOD,
-        "McDonalds" to TransactionCategory.FOOD,
-        "Burger King" to TransactionCategory.FOOD,
-        "Uber" to TransactionCategory.TRANSPORT,
-        "Ola" to TransactionCategory.TRANSPORT,
-        "Rapido" to TransactionCategory.TRANSPORT,
-        "Indigo" to TransactionCategory.TRANSPORT,
-        "Air India" to TransactionCategory.TRANSPORT,
-        "Spicejet" to TransactionCategory.TRANSPORT,
+        "PIZZA HUT" to TransactionCategory.FOOD,
+        "STARBUCKS" to TransactionCategory.FOOD,
+        "MCDONALDS" to TransactionCategory.FOOD,
+        "BURGER KING" to TransactionCategory.FOOD,
+        "UBER" to TransactionCategory.TRANSPORT,
+        "OLA" to TransactionCategory.TRANSPORT,
+        "RAPIDO" to TransactionCategory.TRANSPORT,
+        "INDIGO" to TransactionCategory.TRANSPORT,
+        "AIR INDIA" to TransactionCategory.TRANSPORT,
+        "SPICEJET" to TransactionCategory.TRANSPORT,
         "IRCTC" to TransactionCategory.TRANSPORT,
-        "Redbus" to TransactionCategory.TRANSPORT,
-        "MakeMyTrip" to TransactionCategory.TRANSPORT,
-        "Goibibo" to TransactionCategory.TRANSPORT,
-        "BookMyShow" to TransactionCategory.ENTERTAINMENT,
-        "Netflix" to TransactionCategory.ENTERTAINMENT,
-        "Spotify" to TransactionCategory.ENTERTAINMENT,
-        "Hotstar" to TransactionCategory.ENTERTAINMENT,
-        "Prime Video" to TransactionCategory.ENTERTAINMENT,
+        "REDBUS" to TransactionCategory.TRANSPORT,
+        "MAKEMYTRIP" to TransactionCategory.TRANSPORT,
+        "GOIBIBO" to TransactionCategory.TRANSPORT,
+        "BOOKMYSHOW" to TransactionCategory.ENTERTAINMENT,
+        "NETFLIX" to TransactionCategory.ENTERTAINMENT,
+        "SPOTIFY" to TransactionCategory.ENTERTAINMENT,
+        "HOTSTAR" to TransactionCategory.ENTERTAINMENT,
+        "PRIME VIDEO" to TransactionCategory.ENTERTAINMENT,
         "PVR" to TransactionCategory.ENTERTAINMENT,
         "INOX" to TransactionCategory.ENTERTAINMENT,
-        "Steam" to TransactionCategory.ENTERTAINMENT,
-        "Apollo" to TransactionCategory.HEALTH,
-        "Tata 1mg" to TransactionCategory.HEALTH,
-        "Pharmeasy" to TransactionCategory.HEALTH,
-        "Netmeds" to TransactionCategory.HEALTH,
-        "Practo" to TransactionCategory.HEALTH,
-        "Airtel" to TransactionCategory.BILLS,
-        "Jio" to TransactionCategory.BILLS,
-        "Vodafone Idea" to TransactionCategory.BILLS,
+        "STEAM" to TransactionCategory.ENTERTAINMENT,
+        "APOLLO" to TransactionCategory.HEALTH,
+        "TATA 1MG" to TransactionCategory.HEALTH,
+        "PHARMEASY" to TransactionCategory.HEALTH,
+        "NETMEDS" to TransactionCategory.HEALTH,
+        "PRACTO" to TransactionCategory.HEALTH,
+        "AIRTEL" to TransactionCategory.BILLS,
+        "JIO" to TransactionCategory.BILLS,
+        "VODAFONE" to TransactionCategory.BILLS,
         "VI" to TransactionCategory.BILLS,
-        "Tata Play" to TransactionCategory.BILLS,
-        "Google" to TransactionCategory.BILLS,
-        "Paytm" to TransactionCategory.BILLS,
-        "PhonePe" to TransactionCategory.BILLS
+        "TATA PLAY" to TransactionCategory.BILLS,
+        "GOOGLE" to TransactionCategory.BILLS,
+        "PAYTM" to TransactionCategory.BILLS,
+        "PHONEPE" to TransactionCategory.BILLS
     )
 
-    private val categoryKeywordAnchors = mapOf(
+    private val keywordAnchors = mapOf(
         listOf("CAFE", "RESTAURANT", "DINER", "KITCHEN", "FOOD", "BAKERY", "PIZZA", "BURGER", "SWEETS", "DHABA") to TransactionCategory.FOOD,
         listOf("STORE", "MARKET", "MART", "SHOP", "MALL", "FASHION", "CLOTHING", "GROCERY", "RETAIL", "SUPERMARKET") to TransactionCategory.SHOPPING,
         listOf("CAB", "TAXI", "METRO", "TRAIN", "FLIGHT", "AIRLINE", "PARKING", "FUEL", "PETROL", "DIESEL", "AUTO", "TOLL") to TransactionCategory.TRANSPORT,
@@ -74,18 +74,12 @@ class CategorizerEngine @Inject constructor() {
     )
 
     fun categorize(merchantName: String): TransactionCategory {
-        val normalizedName = merchantName.uppercase()
+        val normalized = merchantName.uppercase().trim()
 
-        for ((brand, category) in exactMerchantMatches) {
-            if (normalizedName == brand.uppercase()) {
-                return category
-            }
-        }
+        brandMappings[normalized]?.let { return it }
 
-        for ((anchors, category) in categoryKeywordAnchors) {
-            if (anchors.any { normalizedName.contains(it) }) {
-                return category
-            }
+        for ((keywords, category) in keywordAnchors) {
+            if (keywords.any { normalized.contains(it) }) return category
         }
 
         return TransactionCategory.OTHERS
