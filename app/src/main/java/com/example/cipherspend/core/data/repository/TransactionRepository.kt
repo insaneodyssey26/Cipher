@@ -4,6 +4,8 @@ import com.example.cipherspend.core.data.local.dao.TransactionDao
 import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.local.entity.MerchantAliasEntity
+import com.example.cipherspend.core.domain.CategorizerEngine
+import com.example.cipherspend.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -12,26 +14,31 @@ import javax.inject.Singleton
 @Singleton
 class TransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
-    private val merchantAliasDao: MerchantAliasDao
+    private val merchantAliasDao: MerchantAliasDao,
+    private val categorizerEngine: CategorizerEngine
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> {
         return transactionDao.getAllTransactions().map { transactions ->
-            transactions.map { it.withCleanName() }
+            transactions.map { it.withCleanData() }
         }
     }
 
-    private suspend fun TransactionEntity.withCleanName(): TransactionEntity {
+    private suspend fun TransactionEntity.withCleanData(): TransactionEntity {
         val alias = merchantAliasDao.getAliasForRawName(this.merchant)
         return if (alias != null) {
-            this.copy(merchant = alias.cleanName)
+            this.copy(
+                merchant = alias.cleanName,
+                category = this.category.ifBlank { categorizerEngine.categorize(alias.cleanName).name }
+            )
         } else {
-            // Check for common patterns and auto-generate if not exists
             val cleanName = autoCleanMerchantName(this.merchant)
+            val category = categorizerEngine.categorize(cleanName)
+            
             if (cleanName != this.merchant) {
                 merchantAliasDao.insertAlias(MerchantAliasEntity(this.merchant, cleanName))
-                this.copy(merchant = cleanName)
+                this.copy(merchant = cleanName, category = category.name)
             } else {
-                this
+                this.copy(category = category.name)
             }
         }
     }
@@ -45,7 +52,13 @@ class TransactionRepository @Inject constructor(
             ?: raw
     }
 
-    suspend fun insertTransaction(transaction: TransactionEntity) = transactionDao.insertTransaction(transaction)
+    suspend fun insertTransaction(transaction: TransactionEntity) {
+        val category = if (transaction.category.isBlank()) {
+            categorizerEngine.categorize(transaction.merchant).name
+        } else transaction.category
+        
+        transactionDao.insertTransaction(transaction.copy(category = category))
+    }
 
     suspend fun deleteTransaction(transaction: TransactionEntity) = transactionDao.deleteTransaction(transaction)
 
@@ -55,7 +68,7 @@ class TransactionRepository @Inject constructor(
 
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>> {
         return transactionDao.getExpensesSince(startTime).map { transactions ->
-            transactions.map { it.withCleanName() }
+            transactions.map { it.withCleanData() }
         }
     }
 }

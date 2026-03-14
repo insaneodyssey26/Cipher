@@ -6,11 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountBalanceWallet
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ArrowUpward
-import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.example.cipherspend.core.domain.model.TransactionCategory
 import com.example.cipherspend.ui.theme.IncomeGreen
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -163,6 +160,10 @@ fun TransactionCard(
     isPrivacyMode: Boolean = false,
     onDelete: (TransactionEntity) -> Unit
 ) {
+    val category = remember(transaction.category) {
+        TransactionCategory.fromString(transaction.category)
+    }
+
     val currencyFormatter = remember {
         NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
             maximumFractionDigits = 2
@@ -195,18 +196,18 @@ fun TransactionCard(
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                color = category.color.copy(alpha = 0.1f),
                 border = androidx.compose.foundation.BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                    color = category.color.copy(alpha = 0.2f)
                 )
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = if (transaction.isIncome) Icons.Rounded.AccountBalanceWallet else Icons.Rounded.History,
+                        imageVector = category.icon,
                         contentDescription = null,
                         modifier = Modifier.size(22.dp),
-                        tint = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = category.color
                     )
                 }
             }

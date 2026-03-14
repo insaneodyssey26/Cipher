@@ -9,46 +9,52 @@ import javax.inject.Singleton
 class SmsParser @Inject constructor() {
 
     private val amountPatterns = listOf(
-        // Standard: Rs. 500.00, INR 500, Rs500
         Pattern.compile("(?i)(?:rs|inr|amt|amount)\\.?\\s*([\\d,]+\\.?\\d{0,2})"),
-        // Transactional: Debited by 500, Spent 500
-        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn)\\s*(?:by|with|of)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
-        // Bank specific: "a/c... debited for 500"
-        Pattern.compile("(?i)debited\\s+for\\s+([\\d,]+\\.?\\d{0,2})")
+        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent)\\s*(?:by|with|of)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
+        Pattern.compile("(?i)debited\\s+for\\s+([\\d,]+\\.?\\d{0,2})"),
+        // Catch-all for any number that looks like an amount in a short message
+        Pattern.compile("(?<!\\d)([\\d,]+\\.\\d{2})(?!\\d)"),
+        Pattern.compile("(?<!\\d)([\\d,]{3,})(?!\\d)")
     )
 
-    private val merchantPatterns = listOf(
-        // UPI/VPA: "at ZOMATO", "to amazon@paytm", "info: SWIGGY"
-        Pattern.compile("(?i)(?:at|to|towards|info|vpa|into)\\s+([^\\d\\s][^;.]+?)(?:\\s+on|\\s+using|\\s+at|\\s+via|\\.)"),
-        // Specific: "Sent to [Merchant]"
-        Pattern.compile("(?i)sent\\s+to\\s+([^\\d\\s][^;.]+?)(?:\\s+on|\\.)"),
-        // Card: "used at [Merchant]"
-        Pattern.compile("(?i)used\\s+at\\s+([^\\d\\s][^;.]+?)(?:\\s+on|\\.)")
+    private val structuralMerchantPatterns = listOf(
+        Pattern.compile("(?i)(?:at|to|towards|info|vpa|into|merchant|payee)\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\s+at|\\s+via|\\s+ref|\\.|$)"),
+        Pattern.compile("(?i)sent\\s+to\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\.|$)"),
+        Pattern.compile("(?i)used\\s+at\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\.|$)")
+    )
+
+    private val brandDictionary = listOf(
+        "AMAZON", "FLIPKART", "MYNTRA", "AJIO", "MEESHO", "NYKAA", "RELIANCE", "CROMA",
+        "BLINKIT", "BIGBASKET", "ZEPTO", "INSTAMART", "JIOMART", "ZOMATO", "SWIGGY", 
+        "EATFIT", "DOMINOS", "KFC", "PIZZA HUT", "STARBUCKS", "MCDONALDS", "BURGER KING",
+        "UBER", "OLA", "RAPIDO", "INDIGO", "AIR INDIA", "SPICEJET", "IRCTC", "REDBUS", 
+        "MAKEMYTRIP", "GOIBIBO", "BOOKMYSHOW", "NETFLIX", "SPOTIFY", "HOTSTAR", "PRIME VIDEO", 
+        "PVR", "INOX", "STEAM", "APOLLO", "TATA 1MG", "PHARMEASY", "NETMEDS", "PRACTO", 
+        "AIRTEL", "JIO", "VODAFONE", "VI", "TATA PLAY", "GOOGLE", "PAYTM", "PHONEPE"
     )
 
     private val incomeKeywords = listOf(
-        "credited", "received", "deposited", "added", "refunded", "incoming", "cashback"
-    )
-
-    private val currencyMap = mapOf(
-        "$" to "USD",
-        "INR" to "INR",
-        "Rs" to "INR",
-        "€" to "EUR",
-        "£" to "GBP"
+        "credited", "received", "deposited", "added", "refunded", "incoming", "cashback", "salary"
     )
 
     fun parse(message: String): ParsedTransaction? {
         val cleanMessage = message.replace("\\s+".toRegex(), " ")
         val amount = extractAmount(cleanMessage) ?: return null
-        val merchant = extractMerchant(cleanMessage) ?: "Miscellaneous"
-        val isIncome = incomeKeywords.any { cleanMessage.contains(it, ignoreCase = true) }
-        val currency = extractCurrency(cleanMessage)
+        
+        // Strategy 1: Look for known brands anywhere in the text (Highest Accuracy)
+        var merchant = findBrandInText(cleanMessage)
+        
+        // Strategy 2: If no brand found, use structural regex patterns
+        if (merchant == null) {
+            merchant = extractMerchantStructural(cleanMessage)
+        }
 
+        val isIncome = incomeKeywords.any { cleanMessage.contains(it, ignoreCase = true) }
+        
         return ParsedTransaction(
             amount = amount,
-            merchant = sanitizeMerchant(merchant),
-            currency = currency,
+            merchant = sanitizeMerchant(merchant ?: "Miscellaneous"),
+            currency = "INR",
             isIncome = isIncome
         )
     }
@@ -58,19 +64,25 @@ class SmsParser @Inject constructor() {
             val matcher = pattern.matcher(message)
             if (matcher.find()) {
                 val match = matcher.group(1) ?: matcher.group(0)
-                // Filter out currency symbols if the whole group was matched
-                val numericOnly = match?.replace(Regex("[^\\d.]"), "")
-                return numericOnly?.toDoubleOrNull()
+                val numericOnly = match.replace(",", "").replace(Regex("[^\\d.]"), "")
+                val value = numericOnly.toDoubleOrNull()
+                if (value != null && value > 0) return value
             }
         }
         return null
     }
 
-    private fun extractMerchant(message: String): String? {
-        for (pattern in merchantPatterns) {
+    private fun findBrandInText(message: String): String? {
+        val upperMessage = message.uppercase()
+        return brandDictionary.find { upperMessage.contains(it) }
+    }
+
+    private fun extractMerchantStructural(message: String): String? {
+        for (pattern in structuralMerchantPatterns) {
             val matcher = pattern.matcher(message)
             if (matcher.find()) {
-                return matcher.group(1)
+                val result = matcher.group(1)?.trim()
+                if (!result.isNullOrBlank()) return result
             }
         }
         return null
@@ -78,18 +90,11 @@ class SmsParser @Inject constructor() {
 
     private fun sanitizeMerchant(merchant: String): String {
         return merchant
-            .replace(Regex("(?i)using.*|via.*|on.*"), "") // Remove tails
+            .replace(Regex("(?i)using.*|via.*|on.*|ref.*|VPA.*|UPI.*"), "")
             .trim()
             .split(" ")
-            .take(3) // Take first 3 words max
+            .take(2)
             .joinToString(" ")
             .uppercase()
-    }
-
-    private fun extractCurrency(message: String): String {
-        for ((symbol, code) in currencyMap) {
-            if (message.contains(symbol, ignoreCase = true)) return code
-        }
-        return "INR"
     }
 }

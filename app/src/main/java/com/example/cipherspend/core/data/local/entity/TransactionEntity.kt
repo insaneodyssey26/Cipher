@@ -17,7 +17,7 @@ data class TransactionEntity(
     val merchant: String,
     val currency: String,
     val timestamp: Long,
-    val category: String,
+    val category: String, // Stored as Enum name
     val rawSms: String?,
     val isIncome: Boolean
 )
