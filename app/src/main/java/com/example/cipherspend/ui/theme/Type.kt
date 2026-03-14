@@ -2,27 +2,18 @@ package com.example.cipherspend.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.example.cipherspend.R
 
-val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
-)
-
-val GoogleSansFont = GoogleFont("Google Sans")
-
+// Use bundled font files from res/font for deterministic rendering across devices.
 val GoogleSansFontFamily = FontFamily(
-    Font(googleFont = GoogleSansFont, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = GoogleSansFont, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = GoogleSansFont, fontProvider = provider, weight = FontWeight.SemiBold),
-    Font(googleFont = GoogleSansFont, fontProvider = provider, weight = FontWeight.Bold),
-    Font(googleFont = GoogleSansFont, fontProvider = provider, weight = FontWeight.Black),
+    Font(R.font.google_sans_regular, weight = FontWeight.Normal),
+    Font(R.font.google_sans_medium, weight = FontWeight.Medium),
+    Font(R.font.google_sans_semibold, weight = FontWeight.SemiBold),
+    Font(R.font.google_sans_bold, weight = FontWeight.Bold),
 )
 
 val Typography = Typography(
