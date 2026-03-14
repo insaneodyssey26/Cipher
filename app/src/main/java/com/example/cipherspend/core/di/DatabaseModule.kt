@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.cipherspend.core.data.local.AppDatabase
 import com.example.cipherspend.core.data.local.dao.TransactionDao
 import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
+import com.example.cipherspend.core.data.repository.BackupRepository
 import com.example.cipherspend.core.security.SecurityManager
 import dagger.Module
 import dagger.Provides
@@ -45,5 +46,15 @@ object DatabaseModule {
     @Provides
     fun provideMerchantAliasDao(database: AppDatabase): MerchantAliasDao {
         return database.merchantAliasDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideBackupRepository(
+        @ApplicationContext context: Context,
+        transactionDao: TransactionDao,
+        merchantAliasDao: MerchantAliasDao
+    ): BackupRepository {
+        return BackupRepository(context, transactionDao, merchantAliasDao)
     }
 }

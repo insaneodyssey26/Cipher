@@ -1,6 +1,8 @@
 package com.example.cipherspend.ui.settings
 
+import android.net.Uri
 import com.example.cipherspend.core.data.local.pref.AppTheme
+import com.example.cipherspend.core.mvi.UiEffect
 import com.example.cipherspend.core.mvi.UiIntent
 import com.example.cipherspend.core.mvi.UiState
 
@@ -8,18 +10,24 @@ class SettingsContract {
     sealed class Intent : UiIntent {
         data class UpdateTheme(val theme: AppTheme) : Intent()
         data class SetBiometricEnabled(val enabled: Boolean) : Intent()
+        data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
-        data class SetAutoLockTimeout(val timeoutMillis: Long) : Intent()
-        data class SetCurrency(val currency: String) : Intent()
         object ClearAllData : Intent()
+        data class ExportData(val uri: Uri) : Intent()
+        data class ImportData(val uri: Uri) : Intent()
     }
 
     data class State(
         val theme: AppTheme = AppTheme.SYSTEM,
-        val isBiometricEnabled: Boolean = true,
+        val isBiometricEnabled: Boolean = false,
+        val autoLockTimeout: Long = 0,
         val isPrivacyModeEnabled: Boolean = false,
-        val autoLockTimeout: Long = 0L,
-        val currency: String = "INR",
-        val isDataCleared: Boolean = false
+        val isExporting: Boolean = false,
+        val isImporting: Boolean = false,
+        val message: String? = null
     ) : UiState
+
+    sealed class Effect : UiEffect {
+        data class ShowToast(val message: String) : Effect()
+    }
 }

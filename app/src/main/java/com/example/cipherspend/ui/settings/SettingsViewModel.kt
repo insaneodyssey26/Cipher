@@ -5,23 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.dao.TransactionDao
 import com.example.cipherspend.core.data.local.pref.AppTheme
 import com.example.cipherspend.core.data.local.pref.UserPreferences
+import com.example.cipherspend.core.data.repository.BackupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val backupRepository: BackupRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsContract.State())
     val state: StateFlow<SettingsContract.State> = _state.asStateFlow()
+
+    private val _effect = Channel<SettingsContract.Effect>()
+    val effect: Flow<SettingsContract.Effect> = _effect.receiveAsFlow()
 
     init {
         observeSettings()
@@ -32,9 +35,10 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
-            is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeoutMillis)
-            is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.currency)
+            is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
+            is SettingsContract.Intent.ExportData -> exportData(intent.uri)
+            is SettingsContract.Intent.ImportData -> importData(intent.uri)
         }
     }
 
@@ -46,8 +50,7 @@ class SettingsViewModel @Inject constructor(
                         theme = settings.theme,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
-                        autoLockTimeout = settings.autoLockTimeout,
-                        currency = settings.currency
+                        autoLockTimeout = settings.autoLockTimeout
                     )
                 }
             }
@@ -70,14 +73,46 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { userPreferences.setAutoLockTimeout(timeout) }
     }
 
-    private fun updateCurrency(currency: String) {
-        viewModelScope.launch { userPreferences.setCurrency(currency) }
-    }
-
     private fun clearAllData() {
         viewModelScope.launch(Dispatchers.IO) {
             transactionDao.deleteAllTransactions()
-            _state.update { it.copy(isDataCleared = true) }
+            _effect.send(SettingsContract.Effect.ShowToast("All data cleared successfully"))
+        }
+    }
+
+    private fun exportData(uri: android.net.Uri) {
+        viewModelScope.launch {
+            _state.update { it.copy(isExporting = true) }
+            val outputStream = backupRepository.provideOutputStream(uri)
+            if (outputStream == null) {
+                _state.update { it.copy(isExporting = false) }
+                _effect.send(SettingsContract.Effect.ShowToast("Could not open file for writing"))
+                return@launch
+            }
+            // Using a temporary hardcoded password for now - in production, ask the user
+            val result = backupRepository.exportData(outputStream, "CipherSpend123".toCharArray())
+            _state.update { it.copy(isExporting = false) }
+            
+            val message = if (result.isSuccess) "Data exported successfully" else "Export failed: ${result.exceptionOrNull()?.message}"
+            _effect.send(SettingsContract.Effect.ShowToast(message))
+        }
+    }
+
+    private fun importData(uri: android.net.Uri) {
+        viewModelScope.launch {
+            _state.update { it.copy(isImporting = true) }
+            val inputStream = backupRepository.provideInputStream(uri)
+            if (inputStream == null) {
+                _state.update { it.copy(isImporting = false) }
+                _effect.send(SettingsContract.Effect.ShowToast("Could not open file for reading"))
+                return@launch
+            }
+            // Using the same hardcoded password - in production, ask the user
+            val result = backupRepository.importData(inputStream, "CipherSpend123".toCharArray())
+            _state.update { it.copy(isImporting = false) }
+            
+            val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"
+            _effect.send(SettingsContract.Effect.ShowToast(message))
         }
     }
 }

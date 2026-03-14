@@ -1,5 +1,8 @@
 package com.example.cipherspend.ui.settings
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,28 @@ fun SettingsScreen(
         "5 Minutes" to 300_000L,
         "Never" to Long.MAX_VALUE
     )
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportData(it)) }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ImportData(it)) }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is SettingsContract.Effect.ShowToast -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -184,6 +208,34 @@ fun SettingsScreen(
                         checked = state.isPrivacyModeEnabled,
                         onCheckedChange = { viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) }
                     )
+                }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+
+            SettingsSectionHeader(title = "Backup & Restore")
+
+            ListItem(
+                headlineContent = { Text("Export Encrypted Backup") },
+                supportingContent = { Text("Save your data to a secure file") },
+                leadingContent = { Icon(Icons.Default.CloudUpload, null) },
+                modifier = Modifier.clickable { 
+                    exportLauncher.launch("CipherSpend_Backup_${System.currentTimeMillis()}.cipher")
+                },
+                trailingContent = {
+                    if (state.isExporting) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+            )
+
+            ListItem(
+                headlineContent = { Text("Import Encrypted Backup") },
+                supportingContent = { Text("Restore data from a previously exported file") },
+                leadingContent = { Icon(Icons.Default.CloudDownload, null) },
+                modifier = Modifier.clickable { 
+                    importLauncher.launch(arrayOf("application/octet-stream"))
+                },
+                trailingContent = {
+                    if (state.isImporting) CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 }
             )
 
