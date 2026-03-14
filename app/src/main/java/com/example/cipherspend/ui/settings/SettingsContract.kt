@@ -13,8 +13,8 @@ class SettingsContract {
         data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
         object ClearAllData : Intent()
-        data class ExportData(val uri: Uri) : Intent()
-        data class ImportData(val uri: Uri) : Intent()
+        data class ExportData(val uri: Uri, val password: CharArray) : Intent()
+        data class ImportData(val uri: Uri, val password: CharArray) : Intent()
     }
 
     data class State(

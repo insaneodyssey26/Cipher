@@ -37,8 +37,8 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
-            is SettingsContract.Intent.ExportData -> exportData(intent.uri)
-            is SettingsContract.Intent.ImportData -> importData(intent.uri)
+            is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
+            is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
         }
     }
 
@@ -80,7 +80,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun exportData(uri: android.net.Uri) {
+    private fun exportData(uri: android.net.Uri, password: CharArray) {
         viewModelScope.launch {
             _state.update { it.copy(isExporting = true) }
             val outputStream = backupRepository.provideOutputStream(uri)
@@ -89,8 +89,7 @@ class SettingsViewModel @Inject constructor(
                 _effect.send(SettingsContract.Effect.ShowToast("Could not open file for writing"))
                 return@launch
             }
-            // Using a temporary hardcoded password for now - in production, ask the user
-            val result = backupRepository.exportData(outputStream, "CipherSpend123".toCharArray())
+            val result = backupRepository.exportData(outputStream, password)
             _state.update { it.copy(isExporting = false) }
             
             val message = if (result.isSuccess) "Data exported successfully" else "Export failed: ${result.exceptionOrNull()?.message}"
@@ -98,7 +97,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun importData(uri: android.net.Uri) {
+    private fun importData(uri: android.net.Uri, password: CharArray) {
         viewModelScope.launch {
             _state.update { it.copy(isImporting = true) }
             val inputStream = backupRepository.provideInputStream(uri)
@@ -107,8 +106,7 @@ class SettingsViewModel @Inject constructor(
                 _effect.send(SettingsContract.Effect.ShowToast("Could not open file for reading"))
                 return@launch
             }
-            // Using the same hardcoded password - in production, ask the user
-            val result = backupRepository.importData(inputStream, "CipherSpend123".toCharArray())
+            val result = backupRepository.importData(inputStream, password)
             _state.update { it.copy(isImporting = false) }
             
             val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"

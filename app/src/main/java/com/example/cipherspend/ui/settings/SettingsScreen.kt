@@ -1,5 +1,6 @@
 package com.example.cipherspend.ui.settings
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.example.cipherspend.core.data.local.pref.AppTheme
@@ -35,6 +39,12 @@ fun SettingsScreen(
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
+    
+    // Backup Dialog State
+    var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
+    var backupPassword by remember { mutableStateOf("") }
+    var pendingUri by remember { mutableStateOf<Uri?>(null) }
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val timeoutOptions = listOf(
@@ -48,13 +58,19 @@ fun SettingsScreen(
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri ->
-        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportData(it)) }
+        uri?.let { 
+            pendingUri = it
+            showBackupPasswordDialog = BackupAction.EXPORT
+        }
     }
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
-        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ImportData(it)) }
+        uri?.let { 
+            pendingUri = it
+            showBackupPasswordDialog = BackupAction.IMPORT
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -263,6 +279,66 @@ fun SettingsScreen(
         }
     }
 
+    // Backup Password Dialog
+    if (showBackupPasswordDialog != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                showBackupPasswordDialog = null
+                backupPassword = ""
+            },
+            title = { 
+                Text(if (showBackupPasswordDialog == BackupAction.EXPORT) "Set Backup Password" else "Enter Backup Password")
+            },
+            text = {
+                Column {
+                    Text(
+                        text = if (showBackupPasswordDialog == BackupAction.EXPORT) 
+                            "This password will be used to encrypt your backup. You will need it to restore your data." 
+                            else "Enter the password used to encrypt this backup file.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    OutlinedTextField(
+                        value = backupPassword,
+                        onValueChange = { backupPassword = it },
+                        label = { Text("Password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val uri = pendingUri
+                        if (uri != null && backupPassword.isNotBlank()) {
+                            if (showBackupPasswordDialog == BackupAction.EXPORT) {
+                                viewModel.handleIntent(SettingsContract.Intent.ExportData(uri, backupPassword.toCharArray()))
+                            } else {
+                                viewModel.handleIntent(SettingsContract.Intent.ImportData(uri, backupPassword.toCharArray()))
+                            }
+                        }
+                        showBackupPasswordDialog = null
+                        backupPassword = ""
+                    },
+                    enabled = backupPassword.isNotBlank()
+                ) {
+                    Text(if (showBackupPasswordDialog == BackupAction.EXPORT) "Export" else "Import")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showBackupPasswordDialog = null
+                    backupPassword = ""
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     if (showTimeoutDialog) {
         AlertDialog(
             onDismissRequest = { showTimeoutDialog = false },
@@ -322,6 +398,8 @@ fun SettingsScreen(
         )
     }
 }
+
+private enum class BackupAction { EXPORT, IMPORT }
 
 @Composable
 private fun SettingsSectionHeader(title: String) {
