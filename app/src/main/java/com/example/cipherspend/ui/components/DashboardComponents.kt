@@ -7,7 +7,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -45,92 +46,62 @@ fun BalanceOverviewCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .height(220.dp),
+            .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(32.dp),
-        color = colorScheme.primaryContainer.copy(alpha = 0.95f),
-        shadowElevation = 8.dp
+        color = colorScheme.primaryContainer,
+        tonalElevation = 2.dp
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(24.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Column {
                     Text(
-                        text = "TOTAL BALANCE",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 1.5.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        text = "Current Balance",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = if (isPrivacyMode) "₹ •••••" else currencyFormatter.format(totalBalance),
+                        text = if (isPrivacyMode) "₹••••" else currencyFormatter.format(totalBalance),
                         style = MaterialTheme.typography.displayMedium.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 32.sp
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-1).sp
                         ),
                         color = colorScheme.onPrimaryContainer
                     )
                 }
                 
-                Surface(
-                    modifier = Modifier.size(44.dp),
-                    shape = CircleShape,
-                    color = colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.AccountBalanceWallet,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Default.CreditCard,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = colorScheme.onPrimaryContainer.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = colorScheme.onPrimaryContainer.copy(alpha = 0.05f),
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                StatPill(
+                StatItem(
                     label = "Income",
                     amount = income,
                     color = IncomeGreen,
                     isPrivacyMode = isPrivacyMode,
                     modifier = Modifier.weight(1f)
                 )
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(24.dp)
-                        .background(colorScheme.onPrimaryContainer.copy(alpha = 0.15f))
-                        .align(Alignment.CenterVertically)
-                )
-                StatPill(
-                    label = "Spent",
+                StatItem(
+                    label = "Expenses",
                     amount = expenses,
-                    color = ExpenseRed,
+                    color = colorScheme.onPrimaryContainer,
                     isPrivacyMode = isPrivacyMode,
                     modifier = Modifier.weight(1f)
                 )
@@ -140,7 +111,7 @@ fun BalanceOverviewCard(
 }
 
 @Composable
-fun StatPill(
+fun StatItem(
     label: String,
     amount: Double,
     color: Color,
@@ -156,18 +127,15 @@ fun StatPill(
     Column(modifier = modifier) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.5.sp
-            ),
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
         )
         Text(
-            text = if (isPrivacyMode) "₹ •••" else currencyFormatter.format(amount),
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            text = if (isPrivacyMode) "₹•••" else currencyFormatter.format(amount),
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
         )
     }
 }
@@ -185,103 +153,64 @@ fun TransactionCard(
     }
 
     val timeFormatter = remember {
-        SimpleDateFormat("hh:mm a", Locale.getDefault())
+        SimpleDateFormat("HH:mm", Locale.getDefault())
     }
 
     val dayFormatter = remember {
-        SimpleDateFormat("dd MMM", Locale.getDefault())
+        SimpleDateFormat("MMM dd", Locale.getDefault())
     }
 
-    Surface(
+    ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        color = Color.Transparent
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.width(50.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = dayFormatter.format(Date(transaction.timestamp)).split(" ")[0],
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp,
-                        letterSpacing = (-0.5).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = dayFormatter.format(Date(transaction.timestamp)).split(" ")[1].uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = transaction.merchant,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.2.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = timeFormatter.format(Date(transaction.timestamp)),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = if (isPrivacyMode) {
-                        "${if (transaction.isIncome) "+" else "-"} ₹ •••"
-                    } else {
-                        "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
-                    },
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 18.sp
-                    ),
+            .padding(horizontal = 4.dp),
+        headlineContent = {
+            Text(
+                text = transaction.merchant,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        supportingContent = {
+            Text(
+                text = "${dayFormatter.format(Date(transaction.timestamp))} • ${timeFormatter.format(Date(transaction.timestamp))}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        trailingContent = {
+            Text(
+                text = if (isPrivacyMode) {
+                    "${if (transaction.isIncome) "+" else "-"} ₹••"
+                } else {
+                    "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
+                },
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
                     color = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurface
                 )
-                Box(
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .background(
-                            color = (if (transaction.isIncome) IncomeGreen else ExpenseRed).copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = if (transaction.isIncome) "CREDIT" else "DEBIT",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 8.sp,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = if (transaction.isIncome) IncomeGreen else ExpenseRed
+            )
+        },
+        leadingContent = {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 1.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = if (transaction.isIncome) Icons.Default.AccountBalanceWallet else Icons.Default.History,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        }
-    }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+    )
 }
 
 @Composable
@@ -289,43 +218,30 @@ fun EmptyTransactionsState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 80.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Surface(
-            modifier = Modifier.size(120.dp),
-            shape = RoundedCornerShape(40.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Text(
-            text = "Digital Void",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Black,
-                letterSpacing = (-0.5).sp
-            ),
-            color = MaterialTheme.colorScheme.onBackground
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.outlineVariant
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Your encrypted transaction stream is currently silent.",
+            text = "No transactions yet",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Text(
+            text = "Your transactions will appear here as they are received via SMS.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }
