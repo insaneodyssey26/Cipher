@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.cipherspend.core.data.local.AppDatabase
 import com.example.cipherspend.core.data.local.dao.TransactionDao
+import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
 import com.example.cipherspend.core.security.SecurityManager
 import dagger.Module
 import dagger.Provides
@@ -39,5 +40,10 @@ object DatabaseModule {
     @Provides
     fun provideTransactionDao(database: AppDatabase): TransactionDao {
         return database.transactionDao()
+    }
+
+    @Provides
+    fun provideMerchantAliasDao(database: AppDatabase): MerchantAliasDao {
+        return database.merchantAliasDao()
     }
 }

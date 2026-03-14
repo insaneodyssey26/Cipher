@@ -6,6 +6,7 @@ import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
 import com.example.cipherspend.ui.dashboard.DashboardContract
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -38,33 +39,33 @@ class InsightsViewModel @Inject constructor(
             val startOfCurrentWeek = getStartOfCurrentWeek()
             val startOfLastWeek = startOfCurrentWeek - TimeUnit.DAYS.toMillis(7)
 
-            combine(
-                repository.getAllTransactions(),
-                repository.getExpensesSince(startOfLastWeek)
-            ) { transactions, recentExpenses ->
-                
-                val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
-                val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
+            repository.getAllTransactions()
+                .combine(repository.getExpensesSince(startOfLastWeek)) { transactions, recentExpenses ->
+                    // Perform all heavy calculations on a background thread
+                    val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
+                    val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
-                val currentWeekAvg = if (currentWeekExpenses.isNotEmpty()) currentWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
-                val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
-                val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
+                    val currentWeekAvg = if (currentWeekExpenses.isNotEmpty()) currentWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
+                    val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
+                    val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
 
-                InsightsContract.State(
-                    isLoading = false,
-                    spendingVelocity = DashboardContract.VelocityData(
-                        currentWeekAvg = currentWeekAvg,
-                        lastWeekAvg = lastWeekAvg,
-                        trendPercentage = trend
-                    ),
-                    netWorthHistory = calculateNetWorthHistory(transactions),
-                    calendarHeatmap = calculateHeatmap(transactions),
-                    categoryBreakdown = calculateCategories(transactions),
-                    allTransactions = transactions
-                )
-            }.collect { newState ->
-                _state.value = newState.copy(selectedDayTimestamp = _state.value.selectedDayTimestamp)
-            }
+                    InsightsContract.State(
+                        isLoading = false,
+                        spendingVelocity = DashboardContract.VelocityData(
+                            currentWeekAvg = currentWeekAvg,
+                            lastWeekAvg = lastWeekAvg,
+                            trendPercentage = trend
+                        ),
+                        netWorthHistory = calculateNetWorthHistory(transactions),
+                        calendarHeatmap = calculateHeatmap(transactions),
+                        categoryBreakdown = calculateCategories(transactions),
+                        allTransactions = transactions
+                    )
+                }
+                .flowOn(Dispatchers.Default) // Crucial: moves the calculations off the Main thread
+                .collect { newState ->
+                    _state.value = newState.copy(selectedDayTimestamp = _state.value.selectedDayTimestamp)
+                }
         }
     }
 

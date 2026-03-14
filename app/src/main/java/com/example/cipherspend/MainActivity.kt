@@ -8,10 +8,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -103,32 +104,42 @@ class MainActivity : AppCompatActivity() {
                     if (isAuthenticated) {
                         val navController = rememberNavController()
 
+                        // Physics-based spring specs for high-quality motion
+                        val springSpec = spring<IntOffset>(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                        val fadeSpringSpec = spring<Float>(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
                             enterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { it },
-                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
-                                ) + fadeIn(animationSpec = tween(400))
+                                    animationSpec = springSpec
+                                ) + fadeIn(animationSpec = fadeSpringSpec)
                             },
                             exitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { -it / 3 },
-                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(400))
+                                    animationSpec = springSpec
+                                ) + fadeOut(animationSpec = fadeSpringSpec)
                             },
                             popEnterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { -it / 3 },
-                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
-                                ) + fadeIn(animationSpec = tween(400))
+                                    animationSpec = springSpec
+                                ) + fadeIn(animationSpec = fadeSpringSpec)
                             },
                             popExitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { it },
-                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(400))
+                                    animationSpec = springSpec
+                                ) + fadeOut(animationSpec = fadeSpringSpec)
                             }
                         ) {
                             composable("dashboard") {
