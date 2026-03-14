@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.rounded.TrendingDown
+import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,16 +34,15 @@ import java.util.concurrent.TimeUnit
 fun VelocityMetric(data: DashboardContract.VelocityData) {
     val isIncreased = data.trendPercentage > 0
     val trendColor = if (isIncreased) ExpenseRed else IncomeGreen
-    val icon = if (isIncreased) Icons.Default.TrendingUp else Icons.Default.TrendingDown
+    val icon = if (isIncreased) Icons.Rounded.TrendingUp else Icons.Rounded.TrendingDown
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -84,7 +83,7 @@ fun VelocityMetric(data: DashboardContract.VelocityData) {
             ) {
                 Text(
                     text = "${if (isIncreased) "+" else ""}${"%.1f".format(data.trendPercentage)}%",
-                    modifier = Modifier.padding(4.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                 )
             }
