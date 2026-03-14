@@ -1,8 +1,11 @@
 package com.example.cipherspend.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -160,7 +163,11 @@ fun NetWorthChart(points: List<DashboardContract.Point>) {
 }
 
 @Composable
-fun CalendarHeatmap(data: Map<Long, Double>) {
+fun CalendarHeatmap(
+    data: Map<Long, Double>,
+    selectedTimestamp: Long?,
+    onDayClick: (Long) -> Unit
+) {
     val days = 28 
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -191,11 +198,29 @@ fun CalendarHeatmap(data: Map<Long, Double>) {
                             val spend = data[time] ?: 0.0
                             val alpha = if (spend > 0) (0.2f + (spend / maxSpend).toFloat() * 0.8f).coerceAtMost(1f) else 0.05f
                             
+                            val isSelected = selectedTimestamp?.let { sel ->
+                                val selCal = Calendar.getInstance().apply { timeInMillis = sel }
+                                val dayCal = Calendar.getInstance().apply { timeInMillis = time }
+                                selCal.get(Calendar.YEAR) == dayCal.get(Calendar.YEAR) &&
+                                selCal.get(Calendar.DAY_OF_YEAR) == dayCal.get(Calendar.DAY_OF_YEAR)
+                            } ?: false
+
+                            val borderColor by animateColorAsState(
+                                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                label = "border"
+                            )
+
                             Box(
                                 modifier = Modifier
                                     .size(itemSize)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+                                    .border(
+                                        width = 2.dp,
+                                        color = borderColor,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { onDayClick(time) }
                             )
                         }
                     }

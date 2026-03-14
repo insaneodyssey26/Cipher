@@ -6,10 +6,7 @@ import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
 import com.example.cipherspend.ui.dashboard.DashboardContract
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -25,6 +22,15 @@ class InsightsViewModel @Inject constructor(
 
     init {
         loadInsights()
+    }
+
+    fun handleIntent(intent: InsightsContract.Intent) {
+        when (intent) {
+            is InsightsContract.Intent.LoadInsights -> loadInsights()
+            is InsightsContract.Intent.SelectDay -> {
+                _state.update { it.copy(selectedDayTimestamp = intent.timestamp) }
+            }
+        }
     }
 
     private fun loadInsights() {
@@ -53,10 +59,11 @@ class InsightsViewModel @Inject constructor(
                     ),
                     netWorthHistory = calculateNetWorthHistory(transactions),
                     calendarHeatmap = calculateHeatmap(transactions),
-                    categoryBreakdown = calculateCategories(transactions)
+                    categoryBreakdown = calculateCategories(transactions),
+                    allTransactions = transactions
                 )
             }.collect { newState ->
-                _state.value = newState
+                _state.value = newState.copy(selectedDayTimestamp = _state.value.selectedDayTimestamp)
             }
         }
     }

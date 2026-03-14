@@ -19,7 +19,8 @@ import com.example.cipherspend.ui.components.*
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDayDetail: (Long) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -59,14 +60,19 @@ fun InsightsScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // These components should also be updated to M3 Expressive style in their respective files
             VelocityMetric(data = state.spendingVelocity)
 
             NetWorthChart(points = state.netWorthHistory)
 
             CategoryDoughnutChart(categories = state.categoryBreakdown)
 
-            CalendarHeatmap(data = state.calendarHeatmap)
+            CalendarHeatmap(
+                data = state.calendarHeatmap,
+                selectedTimestamp = state.selectedDayTimestamp,
+                onDayClick = { timestamp ->
+                    onNavigateToDayDetail(timestamp)
+                }
+            )
         }
     }
 }

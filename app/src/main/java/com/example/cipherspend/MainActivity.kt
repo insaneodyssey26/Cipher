@@ -16,14 +16,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.cipherspend.core.data.local.pref.AppTheme
 import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.core.security.BiometricAuthenticator
 import com.example.cipherspend.ui.dashboard.DashboardScreen
 import com.example.cipherspend.ui.dashboard.DashboardViewModel
+import com.example.cipherspend.ui.insights.DayDetailScreen
 import com.example.cipherspend.ui.insights.InsightsScreen
 import com.example.cipherspend.ui.insights.InsightsViewModel
 import com.example.cipherspend.ui.settings.SettingsScreen
@@ -106,26 +109,26 @@ class MainActivity : AppCompatActivity() {
                             enterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { it },
-                                    animationSpec = tween(500, easing = FastOutSlowInEasing)
-                                ) + fadeIn(animationSpec = tween(500))
+                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                ) + fadeIn(animationSpec = tween(400))
                             },
                             exitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { -it / 3 },
-                                    animationSpec = tween(500, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(500))
+                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                ) + fadeOut(animationSpec = tween(400))
                             },
                             popEnterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { -it / 3 },
-                                    animationSpec = tween(500, easing = FastOutSlowInEasing)
-                                ) + fadeIn(animationSpec = tween(500))
+                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                ) + fadeIn(animationSpec = tween(400))
                             },
                             popExitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { it },
-                                    animationSpec = tween(500, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(500))
+                                    animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                ) + fadeOut(animationSpec = tween(400))
                             }
                         ) {
                             composable("dashboard") {
@@ -145,6 +148,24 @@ class MainActivity : AppCompatActivity() {
                             composable("insights") {
                                 val viewModel: InsightsViewModel = hiltViewModel()
                                 InsightsScreen(
+                                    viewModel = viewModel,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    },
+                                    onNavigateToDayDetail = { timestamp ->
+                                        navController.navigate("day_detail/$timestamp")
+                                    }
+                                )
+                            }
+
+                            composable(
+                                route = "day_detail/{timestamp}",
+                                arguments = listOf(navArgument("timestamp") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val timestamp = backStackEntry.arguments?.getLong("timestamp") ?: 0L
+                                val viewModel: InsightsViewModel = hiltViewModel()
+                                DayDetailScreen(
+                                    timestamp = timestamp,
                                     viewModel = viewModel,
                                     onNavigateBack = {
                                         navController.popBackStack()
