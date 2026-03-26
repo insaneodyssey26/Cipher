@@ -1,4 +1,4 @@
-# CipherSpend: Development Roadmap
+# Cipher: Development Roadmap
 
 A local-first, hardware-encrypted financial management system built with modern Android standards.
 

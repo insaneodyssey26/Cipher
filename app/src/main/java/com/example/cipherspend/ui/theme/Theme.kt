@@ -62,7 +62,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun CipherSpendTheme(
+fun CipherTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

@@ -38,7 +38,7 @@ fun DashboardScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "CipherSpend",
+                        text = "Cipher",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )

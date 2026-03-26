@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.CipherSpend" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="Theme.Cipher" parent="Theme.AppCompat.DayNight.NoActionBar" />
 </resources>

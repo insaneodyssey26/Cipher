@@ -236,7 +236,7 @@ fun SettingsScreen(
                 supportingContent = { Text("Save your data to a secure file") },
                 leadingContent = { Icon(Icons.Default.CloudUpload, null) },
                 modifier = Modifier.clickable { 
-                    exportLauncher.launch("CipherSpend_Backup_${System.currentTimeMillis()}.cipher")
+                    exportLauncher.launch("Cipher_Backup_${System.currentTimeMillis()}.cipher")
                 },
                 trailingContent = {
                     if (state.isExporting) CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -270,7 +270,7 @@ fun SettingsScreen(
             
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "CipherSpend Version 1.0.0",
+                    text = "Cipher Version 1.0.0",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )

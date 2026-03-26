@@ -32,7 +32,7 @@ import com.example.cipherspend.ui.insights.InsightsScreen
 import com.example.cipherspend.ui.insights.InsightsViewModel
 import com.example.cipherspend.ui.settings.SettingsScreen
 import com.example.cipherspend.ui.settings.SettingsViewModel
-import com.example.cipherspend.ui.theme.CipherSpendTheme
+import com.example.cipherspend.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemDark
                 }
 
-                CipherSpendTheme(darkTheme = darkTheme) {
+                CipherTheme(darkTheme = darkTheme) {
                     var isAuthenticated by remember { 
                         val shouldLock = userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()
                         val timeDiff = System.currentTimeMillis() - userSettings.lastStopTime
