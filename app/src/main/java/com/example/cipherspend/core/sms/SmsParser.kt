@@ -10,12 +10,12 @@ class SmsParser @Inject constructor() {
 
     private val amountPatterns = listOf(
         Pattern.compile("(?i)(?:rs|inr|amt|amount)\\.?\\s*([\\d,]+\\.?\\d{0,2})"),
-        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent)\\s*(?:by|with|of)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
-        Pattern.compile("(?i)debited\\s+for\\s+([\\d,]+\\.?\\d{0,2})"),
-        // Catch-all for any number that looks like an amount in a short message
-        Pattern.compile("(?<!\\d)([\\d,]+\\.\\d{2})(?!\\d)"),
-        Pattern.compile("(?<!\\d)([\\d,]{3,})(?!\\d)")
+        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded|transfer(?:red)?|txn|transaction)\\s*(?:by|with|of|for|to)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
+        Pattern.compile("(?i)(?<!a/c|acc|account|ending|ref|id|no|#)\\s*([\\d,]+\\.\\d{2})(?!\\d)"),
+        Pattern.compile("(?i)(?<!a/c|acc|account|ending|ref|id|no|#)\\s*([\\d,]{3,})(?!\\d)")
     )
+
+    private val accountExclusionPattern = Pattern.compile("(?i)(?:a/c|acc|account|ending|no|id|ref)\\s*(?:no\\.?)?\\s*[:#-]?\\s*\\d+")
 
     private val structuralMerchantPatterns = listOf(
         Pattern.compile("(?i)(?:at|to|towards|info|vpa|into|merchant|payee)\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\s+at|\\s+via|\\s+ref|\\.|$)"),
@@ -41,10 +41,8 @@ class SmsParser @Inject constructor() {
         val cleanMessage = message.replace("\\s+".toRegex(), " ")
         val amount = extractAmount(cleanMessage) ?: return null
         
-        // Strategy 1: Look for known brands anywhere in the text (Highest Accuracy)
         var merchant = findBrandInText(cleanMessage)
         
-        // Strategy 2: If no brand found, use structural regex patterns
         if (merchant == null) {
             merchant = extractMerchantStructural(cleanMessage)
         }
@@ -62,14 +60,36 @@ class SmsParser @Inject constructor() {
     private fun extractAmount(message: String): Double? {
         for (pattern in amountPatterns) {
             val matcher = pattern.matcher(message)
-            if (matcher.find()) {
+            while (matcher.find()) {
                 val match = matcher.group(1) ?: matcher.group(0)
+                
+                if (isPartOfAccountNumber(message, matcher.start())) {
+                    continue
+                }
+
                 val numericOnly = match.replace(",", "").replace(Regex("[^\\d.]"), "")
                 val value = numericOnly.toDoubleOrNull()
-                if (value != null && value > 0) return value
+                
+                if (value != null && value > 0) {
+                    if (value > 1000000 && !match.contains(".")) {
+                        continue
+                    }
+                    
+                    return value
+                }
             }
         }
         return null
+    }
+
+    private fun isPartOfAccountNumber(message: String, matchStart: Int): Boolean {
+        val accountMatcher = accountExclusionPattern.matcher(message)
+        while (accountMatcher.find()) {
+            if (matchStart >= accountMatcher.start() && matchStart < accountMatcher.end()) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun findBrandInText(message: String): String? {
