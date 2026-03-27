@@ -10,6 +10,8 @@ class InsightsContract {
     sealed class Intent : UiIntent {
         object LoadInsights : Intent()
         data class SelectDay(val timestamp: Long?) : Intent()
+        data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
+        data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
     }
 
     data class State(

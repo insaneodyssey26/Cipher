@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +28,7 @@ class DashboardViewModel @Inject constructor(
         when (intent) {
             is DashboardContract.Intent.LoadDashboard -> observeDashboardData()
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
+            is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
         }
     }
 
@@ -47,7 +47,7 @@ class DashboardViewModel @Inject constructor(
 
                 DashboardContract.State(
                     isLoading = false,
-                    transactions = transactions.take(10), // Only show recent 10 on home
+                    transactions = transactions.take(10),
                     totalIncome = totalIncome,
                     totalExpenses = totalExpenses,
                     totalBalance = totalIncome - totalExpenses
@@ -61,6 +61,12 @@ class DashboardViewModel @Inject constructor(
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
+        }
+    }
+
+    private fun updateTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.updateTransaction(transaction)
         }
     }
 }

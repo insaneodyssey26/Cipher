@@ -8,14 +8,13 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.*
 
@@ -30,6 +29,8 @@ fun DashboardScreen(
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    
+    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -170,10 +171,24 @@ fun DashboardScreen(
                         isPrivacyMode = privacyMode,
                         onDelete = { 
                             viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) 
+                        },
+                        onEdit = {
+                            editingTransaction = transaction
                         }
                     )
                 }
             }
         }
+    }
+
+    editingTransaction?.let { transaction ->
+        EditTransactionDialog(
+            transaction = transaction,
+            onDismiss = { editingTransaction = null },
+            onConfirm = { updated ->
+                viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
+                editingTransaction = null
+            }
+        )
     }
 }

@@ -6,16 +6,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.example.cipherspend.ui.components.EditTransactionDialog
 import com.example.cipherspend.ui.components.TransactionCard
 import com.example.cipherspend.ui.theme.IncomeGreen
 import java.text.NumberFormat
@@ -31,6 +30,8 @@ fun DayDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    
+    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     
     val date = remember(timestamp) { Date(timestamp) }
     val dayName = remember(date) { SimpleDateFormat("EEEE", Locale.getDefault()).format(date) }
@@ -139,11 +140,27 @@ fun DayDetailScreen(
                     TransactionCard(
                         transaction = transaction,
                         isPrivacyMode = false,
-                        onDelete = {}
+                        onDelete = {
+                            viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
+                        },
+                        onEdit = {
+                            editingTransaction = transaction
+                        }
                     )
                 }
             }
         }
+    }
+
+    editingTransaction?.let { transaction ->
+        EditTransactionDialog(
+            transaction = transaction,
+            onDismiss = { editingTransaction = null },
+            onConfirm = { updated ->
+                viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
+                editingTransaction = null
+            }
+        )
     }
 }
 

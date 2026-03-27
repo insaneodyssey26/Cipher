@@ -9,10 +9,18 @@ import javax.inject.Singleton
 class SmsParser @Inject constructor() {
 
     private val amountPatterns = listOf(
-        Pattern.compile("(?i)(?:rs|inr|amt|amount)\\.?\\s*([\\d,]+\\.?\\d{0,2})"),
+        Pattern.compile("(?i)(?:rs\\.?|inr|amt|amount)\\s*([\\d,]+\\.?\\d{0,2})"),
         Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded|transfer(?:red)?|txn|transaction)\\s*(?:by|with|of|for|to)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
-        Pattern.compile("(?i)(?<!a/c|acc|account|ending|ref|id|no|#)\\s*([\\d,]+\\.\\d{2})(?!\\d)"),
-        Pattern.compile("(?i)(?<!a/c|acc|account|ending|ref|id|no|#)\\s*([\\d,]{3,})(?!\\d)")
+        Pattern.compile("(?i)([\\d,]+\\.?\\d{0,2})\\s*(?:rs\\.?|inr)?\\s*(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded)"),
+        Pattern.compile("(?i)(?<!a/c|acc|account|ending|ref|id|no|#)\\s*([\\d,]+\\.\\d{2})(?!\\d)")
+    )
+
+    private val exclusionKeywords = listOf(
+        "otp", "verification code", "secret code", "tollfree", "helpline", "call", "report", "dial", "win", "offered", "validity", "service", "government"
+    )
+
+    private val transactionIntentKeywords = listOf(
+        "rs.", "inr", "debited", "spent", "paid", "credited", "received", "txn", "transaction", "spent", "amount", "amt"
     )
 
     private val accountExclusionPattern = Pattern.compile("(?i)(?:a/c|acc|account|ending|no|id|ref)\\s*(?:no\\.?)?\\s*[:#-]?\\s*\\d+")
@@ -39,6 +47,10 @@ class SmsParser @Inject constructor() {
 
     fun parse(message: String): ParsedTransaction? {
         val cleanMessage = message.replace("\\s+".toRegex(), " ")
+        
+        if (hasExclusionKeywords(cleanMessage)) return null
+        if (!hasTransactionIntent(cleanMessage)) return null
+        
         val amount = extractAmount(cleanMessage) ?: return null
         
         var merchant = findBrandInText(cleanMessage)
@@ -55,6 +67,16 @@ class SmsParser @Inject constructor() {
             currency = "INR",
             isIncome = isIncome
         )
+    }
+
+    private fun hasExclusionKeywords(message: String): Boolean {
+        val lowerMessage = message.lowercase()
+        return exclusionKeywords.any { lowerMessage.contains(it) }
+    }
+
+    private fun hasTransactionIntent(message: String): Boolean {
+        val lowerMessage = message.lowercase()
+        return transactionIntentKeywords.any { lowerMessage.contains(it) }
     }
 
     private fun extractAmount(message: String): Double? {

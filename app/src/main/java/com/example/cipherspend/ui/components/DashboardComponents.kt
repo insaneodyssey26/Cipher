@@ -158,7 +158,8 @@ fun SimplifiedStat(
 fun TransactionCard(
     transaction: TransactionEntity,
     isPrivacyMode: Boolean = false,
-    onDelete: (TransactionEntity) -> Unit
+    onDelete: (TransactionEntity) -> Unit,
+    onEdit: (TransactionEntity) -> Unit
 ) {
     val category = remember(transaction.category) {
         TransactionCategory.fromString(transaction.category)
@@ -186,7 +187,7 @@ fun TransactionCard(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+        onClick = { onEdit(transaction) }
     ) {
         Row(
             modifier = Modifier
@@ -228,17 +229,35 @@ fun TransactionCard(
                 )
             }
 
-            Text(
-                text = if (isPrivacyMode) {
-                    "${if (transaction.isIncome) "+" else "-"} ₹••"
-                } else {
-                    "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
-                },
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurface
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = if (isPrivacyMode) {
+                        "${if (transaction.isIncome) "+" else "-"} ₹••"
+                    } else {
+                        "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
+                    },
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurface
+                    )
                 )
-            )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                IconButton(
+                    onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDelete(transaction) 
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.DeleteOutline,
+                        contentDescription = "Delete",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                }
+            }
         }
     }
 }

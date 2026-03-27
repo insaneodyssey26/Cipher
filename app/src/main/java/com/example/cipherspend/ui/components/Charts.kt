@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.TrendingDown
-import androidx.compose.material.icons.rounded.TrendingUp
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.cipherspend.ui.dashboard.DashboardContract
 import com.example.cipherspend.ui.theme.ExpenseRed
 import com.example.cipherspend.ui.theme.IncomeGreen
@@ -34,7 +33,7 @@ import java.util.concurrent.TimeUnit
 fun VelocityMetric(data: DashboardContract.VelocityData) {
     val isIncreased = data.trendPercentage > 0
     val trendColor = if (isIncreased) ExpenseRed else IncomeGreen
-    val icon = if (isIncreased) Icons.Rounded.TrendingUp else Icons.Rounded.TrendingDown
+    val icon = if (isIncreased) Icons.AutoMirrored.Rounded.TrendingUp else Icons.AutoMirrored.Rounded.TrendingDown
 
     Surface(
         modifier = Modifier
@@ -184,7 +183,8 @@ fun CalendarHeatmap(
         Spacer(modifier = Modifier.height(16.dp))
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val itemSize = (maxWidth - (6 * 6).dp) / 7
+            val availableWidth = maxWidth
+            val itemSize = (availableWidth - (6 * 6).dp) / 7
             
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 val maxSpend = data.values.maxOfOrNull { it } ?: 1.0

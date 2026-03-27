@@ -10,6 +10,7 @@ class DashboardContract {
     sealed class Intent : UiIntent {
         object LoadDashboard : Intent()
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
+        data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
     }
 
     data class State(
@@ -17,7 +18,10 @@ class DashboardContract {
         val transactions: List<TransactionEntity> = emptyList(),
         val totalBalance: Double = 0.0,
         val totalIncome: Double = 0.0,
-        val totalExpenses: Double = 0.0
+        val totalExpenses: Double = 0.0,
+        val velocity: VelocityData = VelocityData(),
+        val trendPoints: List<Point> = emptyList(),
+        val categories: List<CategoryData> = emptyList()
     ) : UiState
 
     data class VelocityData(
@@ -32,8 +36,7 @@ class DashboardContract {
         val category: String,
         val amount: Double,
         val percentage: Float,
-        val color: Long,
-        val subCategories: List<CategoryData> = emptyList()
+        val color: Long
     )
 
     sealed class Effect : UiEffect {

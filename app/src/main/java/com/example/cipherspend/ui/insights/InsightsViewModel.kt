@@ -32,6 +32,8 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.SelectDay -> {
                 _state.update { it.copy(selectedDayTimestamp = intent.timestamp) }
             }
+            is InsightsContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
+            is InsightsContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
         }
     }
 
@@ -66,6 +68,18 @@ class InsightsViewModel @Inject constructor(
                 .collect { newState ->
                     _state.value = newState.copy(selectedDayTimestamp = _state.value.selectedDayTimestamp)
                 }
+        }
+    }
+
+    private fun deleteTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.deleteTransaction(transaction)
+        }
+    }
+
+    private fun updateTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.updateTransaction(transaction)
         }
     }
 

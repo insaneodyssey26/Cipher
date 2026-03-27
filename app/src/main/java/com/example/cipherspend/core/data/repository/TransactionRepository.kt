@@ -53,6 +53,10 @@ class TransactionRepository @Inject constructor(
         )
     }
 
+    suspend fun updateTransaction(transaction: TransactionEntity) {
+        transactionDao.insertTransaction(transaction)
+    }
+
     private fun autoCleanMerchantName(raw: String): String {
         return raw.split("*", "-", "  ")
             .filter { it.isNotBlank() && it.length > 2 }
