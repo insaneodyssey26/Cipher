@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.*
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,12 +30,32 @@ fun DashboardScreen(
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is DashboardContract.Effect.ShowUndoDelete -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Transaction deleted",
+                        actionLabel = "UNDO",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {

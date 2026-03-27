@@ -12,6 +12,7 @@ class InsightsContract {
         data class SelectDay(val timestamp: Long?) : Intent()
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
+        data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
     }
 
     data class State(
@@ -34,5 +35,7 @@ class InsightsContract {
             } ?: emptyList()
     }
 
-    sealed class Effect : UiEffect
+    sealed class Effect : UiEffect {
+        data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()
+    }
 }

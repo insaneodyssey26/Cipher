@@ -5,10 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +17,9 @@ class DashboardViewModel @Inject constructor(
     private val _state = MutableStateFlow(DashboardContract.State())
     val state: StateFlow<DashboardContract.State> = _state.asStateFlow()
 
+    private val _effect = MutableSharedFlow<DashboardContract.Effect>()
+    val effect: SharedFlow<DashboardContract.Effect> = _effect.asSharedFlow()
+
     init {
         handleIntent(DashboardContract.Intent.LoadDashboard)
     }
@@ -29,6 +29,7 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.LoadDashboard -> observeDashboardData()
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
+            is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
         }
     }
 
@@ -61,10 +62,17 @@ class DashboardViewModel @Inject constructor(
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
+            _effect.emit(DashboardContract.Effect.ShowUndoDelete(transaction))
         }
     }
 
     private fun updateTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.updateTransaction(transaction)
+        }
+    }
+
+    private fun restoreTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.updateTransaction(transaction)
         }

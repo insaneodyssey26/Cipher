@@ -22,6 +22,9 @@ class InsightsViewModel @Inject constructor(
     private val _state = MutableStateFlow(InsightsContract.State())
     val state: StateFlow<InsightsContract.State> = _state.asStateFlow()
 
+    private val _effect = MutableSharedFlow<InsightsContract.Effect>()
+    val effect: SharedFlow<InsightsContract.Effect> = _effect.asSharedFlow()
+
     init {
         loadInsights()
     }
@@ -34,6 +37,7 @@ class InsightsViewModel @Inject constructor(
             }
             is InsightsContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is InsightsContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
+            is InsightsContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
         }
     }
 
@@ -74,10 +78,17 @@ class InsightsViewModel @Inject constructor(
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
+            _effect.emit(InsightsContract.Effect.ShowUndoDelete(transaction))
         }
     }
 
     private fun updateTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.updateTransaction(transaction)
+        }
+    }
+
+    private fun restoreTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.updateTransaction(transaction)
         }

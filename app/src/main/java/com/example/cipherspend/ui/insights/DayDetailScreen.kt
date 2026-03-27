@@ -17,6 +17,7 @@ import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.ui.components.EditTransactionDialog
 import com.example.cipherspend.ui.components.TransactionCard
 import com.example.cipherspend.ui.theme.IncomeGreen
+import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,6 +31,7 @@ fun DayDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     
@@ -58,8 +60,26 @@ fun DayDetailScreen(
         NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is InsightsContract.Effect.ShowUndoDelete -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Transaction deleted",
+                        actionLabel = "UNDO",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.handleIntent(InsightsContract.Intent.RestoreTransaction(effect.transaction))
+                    }
+                }
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             LargeTopAppBar(
                 title = {

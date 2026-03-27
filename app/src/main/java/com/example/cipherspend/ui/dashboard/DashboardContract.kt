@@ -11,6 +11,7 @@ class DashboardContract {
         object LoadDashboard : Intent()
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
+        data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
     }
 
     data class State(
@@ -41,5 +42,6 @@ class DashboardContract {
 
     sealed class Effect : UiEffect {
         data class ShowError(val message: String) : Effect()
+        data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()
     }
 }
