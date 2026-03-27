@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +34,7 @@ fun DashboardScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
@@ -67,6 +69,13 @@ fun DashboardScreen(
                     )
                 },
                 actions = {
+                    IconButton(onClick = { showAddDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "Add Transaction",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Rounded.Settings,
@@ -161,7 +170,7 @@ fun DashboardScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Timeline",
@@ -170,11 +179,19 @@ fun DashboardScreen(
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    Text(
-                        text = "History",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    TextButton(onClick = { showAddDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "Add",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 
@@ -200,6 +217,25 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+
+    if (showAddDialog) {
+        EditTransactionDialog(
+            transaction = TransactionEntity(
+                amount = 0.0,
+                merchant = "",
+                currency = "INR",
+                timestamp = System.currentTimeMillis(),
+                category = "MISC",
+                rawSms = null,
+                isIncome = false
+            ),
+            onDismiss = { showAddDialog = false },
+            onConfirm = { newTransaction ->
+                viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
+                showAddDialog = false
+            }
+        )
     }
 
     editingTransaction?.let { transaction ->

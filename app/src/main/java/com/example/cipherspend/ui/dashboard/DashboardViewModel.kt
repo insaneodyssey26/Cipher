@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +18,10 @@ class DashboardViewModel @Inject constructor(
     private val _state = MutableStateFlow(DashboardContract.State())
     val state: StateFlow<DashboardContract.State> = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<DashboardContract.Effect>()
+    private val _effect = MutableSharedFlow<DashboardContract.Effect>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val effect: SharedFlow<DashboardContract.Effect> = _effect.asSharedFlow()
 
     init {
@@ -30,6 +34,7 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
+            is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
         }
     }
 
@@ -75,6 +80,12 @@ class DashboardViewModel @Inject constructor(
     private fun restoreTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.updateTransaction(transaction)
+        }
+    }
+
+    private fun addTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.insertTransaction(transaction)
         }
     }
 }

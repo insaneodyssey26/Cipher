@@ -12,6 +12,7 @@ class DashboardContract {
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
+        data class AddTransaction(val transaction: TransactionEntity) : Intent()
     }
 
     data class State(
