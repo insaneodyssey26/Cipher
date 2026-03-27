@@ -23,9 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.domain.model.TransactionCategory
+import com.example.cipherspend.core.util.AppFormatters
 import com.example.cipherspend.ui.theme.IncomeGreen
-import java.text.NumberFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
@@ -35,12 +34,6 @@ fun PremiumBalanceHeader(
     expenses: Double,
     isPrivacyMode: Boolean = false
 ) {
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
-            maximumFractionDigits = 0
-        }
-    }
-
     val colorScheme = MaterialTheme.colorScheme
     val haptic = LocalHapticFeedback.current
 
@@ -67,7 +60,7 @@ fun PremiumBalanceHeader(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = if (isPrivacyMode) "₹ ••••••" else currencyFormatter.format(totalBalance),
+                    text = if (isPrivacyMode) "₹ ••••••" else AppFormatters.getCurrencyNoDecimals().format(totalBalance),
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontFamily = com.example.cipherspend.ui.theme.GoogleSansFontFamily,
                         fontWeight = FontWeight.Bold,
@@ -126,12 +119,6 @@ fun SimplifiedStat(
     isPrivacyMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
-            maximumFractionDigits = 0
-        }
-    }
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -145,7 +132,7 @@ fun SimplifiedStat(
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
         Text(
-            text = if (isPrivacyMode) "₹•••" else currencyFormatter.format(amount),
+            text = if (isPrivacyMode) "₹•••" else AppFormatters.getCurrencyNoDecimals().format(amount),
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 color = color
@@ -163,20 +150,6 @@ fun TransactionCard(
 ) {
     val category = remember(transaction.category) {
         TransactionCategory.fromString(transaction.category)
-    }
-
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
-            maximumFractionDigits = 2
-        }
-    }
-
-    val timeFormatter = remember {
-        SimpleDateFormat("HH:mm", Locale.getDefault())
-    }
-
-    val dayFormatter = remember {
-        SimpleDateFormat("MMM dd", Locale.getDefault())
     }
     
     val haptic = LocalHapticFeedback.current
@@ -222,8 +195,9 @@ fun TransactionCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                val date = remember(transaction.timestamp) { Date(transaction.timestamp) }
                 Text(
-                    text = "${dayFormatter.format(Date(transaction.timestamp))} • ${timeFormatter.format(Date(transaction.timestamp))}",
+                    text = "${AppFormatters.getDay().format(date)} • ${AppFormatters.getTime().format(date)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
@@ -234,7 +208,7 @@ fun TransactionCard(
                     text = if (isPrivacyMode) {
                         "${if (transaction.isIncome) "+" else "-"} ₹••"
                     } else {
-                        "${if (transaction.isIncome) "+" else "-"} ${currencyFormatter.format(transaction.amount).replace("₹", "")}"
+                        "${if (transaction.isIncome) "+" else "-"} ${AppFormatters.getCurrency().format(transaction.amount).replace("₹", "")}"
                     },
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,

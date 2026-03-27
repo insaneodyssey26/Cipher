@@ -41,24 +41,22 @@ class DashboardViewModel @Inject constructor(
     private fun observeDashboardData() {
         viewModelScope.launch {
             combine(
-                repository.getAllTransactions(),
+                repository.getRecentTransactions(10),
                 repository.getTotalIncome(),
                 repository.getTotalExpenses()
-            ) { transactions: List<TransactionEntity>, 
-                income: Double?, 
-                expenses: Double? ->
+            ) { transactions, income, expenses ->
                 
                 val totalIncome = income ?: 0.0
                 val totalExpenses = expenses ?: 0.0
 
                 DashboardContract.State(
                     isLoading = false,
-                    transactions = transactions.take(10),
+                    transactions = transactions,
                     totalIncome = totalIncome,
                     totalExpenses = totalExpenses,
                     totalBalance = totalIncome - totalExpenses
                 )
-            }.collect { newState: DashboardContract.State ->
+            }.collect { newState ->
                 _state.value = newState
             }
         }

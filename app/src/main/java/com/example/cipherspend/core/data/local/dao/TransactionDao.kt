@@ -14,6 +14,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions ORDER BY timestamp DESC LIMIT :limit")
+    fun getRecentTransactions(limit: Int): Flow<List<TransactionEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
 

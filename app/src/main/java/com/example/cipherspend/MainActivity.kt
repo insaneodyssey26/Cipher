@@ -1,7 +1,9 @@
 package com.example.cipherspend
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -48,6 +50,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.attributes.preferredDisplayModeId = 0 
+        }
+
         enableEdgeToEdge()
         setContent {
             val settings by userPreferences.settingsFlow.collectAsState(initial = null)
@@ -55,10 +62,12 @@ class MainActivity : AppCompatActivity() {
             
             settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()
-                val darkTheme = when (userSettings.theme) {
-                    AppTheme.LIGHT -> false
-                    AppTheme.DARK -> true
-                    AppTheme.SYSTEM -> isSystemDark
+                val darkTheme = remember(userSettings.theme, isSystemDark) {
+                    when (userSettings.theme) {
+                        AppTheme.LIGHT -> false
+                        AppTheme.DARK -> true
+                        AppTheme.SYSTEM -> isSystemDark
+                    }
                 }
 
                 CipherTheme(darkTheme = darkTheme) {
@@ -74,12 +83,13 @@ class MainActivity : AppCompatActivity() {
                             when (event) {
                                 Lifecycle.Event.ON_START -> {
                                     resumeTrigger++
-                                    val shouldLock = currentSettings.isBiometricEnabled && 
+                                    val settingsSnapshot = currentSettings
+                                    val shouldLock = settingsSnapshot.isBiometricEnabled && 
                                                      biometricAuthenticator.isBiometricAvailable()
                                     
                                     if (shouldLock) {
-                                        val timeDiff = System.currentTimeMillis() - currentSettings.lastStopTime
-                                        val isGracePeriodOver = timeDiff >= currentSettings.autoLockTimeout
+                                        val timeDiff = System.currentTimeMillis() - settingsSnapshot.lastStopTime
+                                        val isGracePeriodOver = timeDiff >= settingsSnapshot.autoLockTimeout
                                         
                                         if (isAuthenticated && isGracePeriodOver) {
                                             isAuthenticated = false
@@ -133,14 +143,18 @@ class MainActivity : AppCompatActivity() {
                     if (isAuthenticated) {
                         val navController = rememberNavController()
 
-                        val springSpec = spring<IntOffset>(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                        val fadeSpringSpec = spring<Float>(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
+                        val springSpec = remember {
+                            spring<IntOffset>(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        }
+                        val fadeSpringSpec = remember {
+                            spring<Float>(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        }
 
                         NavHost(
                             navController = navController,

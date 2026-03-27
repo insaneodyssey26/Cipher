@@ -20,6 +20,8 @@ class TransactionRepository @Inject constructor(
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
 
+    fun getRecentTransactions(limit: Int): Flow<List<TransactionEntity>> = transactionDao.getRecentTransactions(limit)
+
     suspend fun insertTransaction(transaction: TransactionEntity) {
         val rawMerchant = transaction.merchant.uppercase().trim()
         
