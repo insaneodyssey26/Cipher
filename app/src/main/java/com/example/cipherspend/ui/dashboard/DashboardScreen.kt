@@ -12,7 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
@@ -32,6 +34,7 @@ fun DashboardScreen(
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
+    val haptic = LocalHapticFeedback.current
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -46,6 +49,7 @@ fun DashboardScreen(
                         duration = SnackbarDuration.Short
                     )
                     if (result == SnackbarResult.ActionPerformed) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
                     }
                 }
@@ -69,14 +73,20 @@ fun DashboardScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
+                    IconButton(onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showAddDialog = true 
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
                             contentDescription = "Add Transaction",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(onClick = onNavigateToSettings) {
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateToSettings()
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.Settings,
                             contentDescription = "Settings",
@@ -117,7 +127,10 @@ fun DashboardScreen(
                         .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
                     Surface(
-                        onClick = onNavigateToInsights,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToInsights()
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
@@ -179,7 +192,10 @@ fun DashboardScreen(
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    TextButton(onClick = { showAddDialog = true }) {
+                    TextButton(onClick = { 
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showAddDialog = true 
+                    }) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
                             contentDescription = null,
@@ -211,6 +227,7 @@ fun DashboardScreen(
                             viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) 
                         },
                         onEdit = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             editingTransaction = transaction
                         }
                     )
@@ -232,6 +249,7 @@ fun DashboardScreen(
             ),
             onDismiss = { showAddDialog = false },
             onConfirm = { newTransaction ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
                 showAddDialog = false
             }
@@ -243,6 +261,7 @@ fun DashboardScreen(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             }

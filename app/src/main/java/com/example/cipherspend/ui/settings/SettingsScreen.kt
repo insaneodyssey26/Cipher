@@ -18,8 +18,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,10 +39,11 @@ fun SettingsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
     
-    // Backup Dialog State
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
@@ -138,7 +141,10 @@ fun SettingsScreen(
                 trailingContent = {
                     var expanded by remember { mutableStateOf(false) }
                     Box {
-                        IconButton(onClick = { expanded = true }) {
+                        IconButton(onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            expanded = true 
+                        }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "Select Theme")
                         }
                         DropdownMenu(
@@ -148,6 +154,7 @@ fun SettingsScreen(
                             DropdownMenuItem(
                                 text = { Text("Light") },
                                 onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.LIGHT))
                                     expanded = false
                                 },
@@ -156,6 +163,7 @@ fun SettingsScreen(
                             DropdownMenuItem(
                                 text = { Text("Dark") },
                                 onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.DARK))
                                     expanded = false
                                 },
@@ -164,6 +172,7 @@ fun SettingsScreen(
                             DropdownMenuItem(
                                 text = { Text("System default") },
                                 onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.SYSTEM))
                                     expanded = false
                                 },
@@ -186,6 +195,7 @@ fun SettingsScreen(
                     Switch(
                         checked = state.isBiometricEnabled,
                         onCheckedChange = { isEnabling ->
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (isEnabling && biometricAuthenticator.isBiometricAvailable()) {
                                 biometricAuthenticator.authenticate(
                                     activity = context as FragmentActivity,
@@ -212,7 +222,10 @@ fun SettingsScreen(
                     })
                 },
                 leadingContent = { Icon(Icons.Default.Timer, null) },
-                modifier = Modifier.clickable { showTimeoutDialog = true }
+                modifier = Modifier.clickable { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showTimeoutDialog = true 
+                }
             )
 
             ListItem(
@@ -222,7 +235,10 @@ fun SettingsScreen(
                 trailingContent = {
                     Switch(
                         checked = state.isPrivacyModeEnabled,
-                        onCheckedChange = { viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) }
+                        onCheckedChange = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) 
+                        }
                     )
                 }
             )
@@ -236,6 +252,7 @@ fun SettingsScreen(
                 supportingContent = { Text("Save your data to a secure file") },
                 leadingContent = { Icon(Icons.Default.CloudUpload, null) },
                 modifier = Modifier.clickable { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     exportLauncher.launch("Cipher_Backup_${System.currentTimeMillis()}.cipher")
                 },
                 trailingContent = {
@@ -248,6 +265,7 @@ fun SettingsScreen(
                 supportingContent = { Text("Restore data from a previously exported file") },
                 leadingContent = { Icon(Icons.Default.CloudDownload, null) },
                 modifier = Modifier.clickable { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     importLauncher.launch(arrayOf("application/octet-stream"))
                 },
                 trailingContent = {
@@ -263,7 +281,10 @@ fun SettingsScreen(
                 headlineContent = { Text("Clear All Data", color = MaterialTheme.colorScheme.error) },
                 supportingContent = { Text("Permanently delete all transaction records") },
                 leadingContent = { Icon(Icons.Default.DeleteSweep, null, tint = MaterialTheme.colorScheme.error) },
-                modifier = Modifier.clickable { showDeleteDialog = true }
+                modifier = Modifier.clickable { 
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showDeleteDialog = true 
+                }
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -279,7 +300,6 @@ fun SettingsScreen(
         }
     }
 
-    // Backup Password Dialog
     if (showBackupPasswordDialog != null) {
         AlertDialog(
             onDismissRequest = { 
@@ -312,6 +332,7 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         val uri = pendingUri
                         if (uri != null && backupPassword.isNotBlank()) {
                             if (showBackupPasswordDialog == BackupAction.EXPORT) {
@@ -350,6 +371,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.handleIntent(SettingsContract.Intent.SetAutoLockTimeout(value))
                                     showTimeoutDialog = false
                                 }
@@ -382,6 +404,7 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.handleIntent(SettingsContract.Intent.ClearAllData)
                         showDeleteDialog = false
                     },
