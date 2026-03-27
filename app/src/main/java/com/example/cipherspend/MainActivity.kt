@@ -62,21 +62,38 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 CipherTheme(darkTheme = darkTheme) {
+                    val currentSettings by rememberUpdatedState(userSettings)
                     var isAuthenticated by remember { 
-                        val shouldLock = userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()
-                        val timeDiff = System.currentTimeMillis() - userSettings.lastStopTime
-                        val isGracePeriodOver = timeDiff > userSettings.autoLockTimeout
-                        
-                        mutableStateOf(!shouldLock || !isGracePeriodOver)
+                        mutableStateOf(!userSettings.isBiometricEnabled || !biometricAuthenticator.isBiometricAvailable()) 
                     }
+                    var resumeTrigger by remember { mutableIntStateOf(0) }
 
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
-                            if (event == Lifecycle.Event.ON_STOP) {
-                                scope.launch {
-                                    userPreferences.setLastStopTime(System.currentTimeMillis())
+                            when (event) {
+                                Lifecycle.Event.ON_START -> {
+                                    resumeTrigger++
+                                    val shouldLock = currentSettings.isBiometricEnabled && 
+                                                     biometricAuthenticator.isBiometricAvailable()
+                                    
+                                    if (shouldLock) {
+                                        val timeDiff = System.currentTimeMillis() - currentSettings.lastStopTime
+                                        val isGracePeriodOver = timeDiff >= currentSettings.autoLockTimeout
+                                        
+                                        if (isAuthenticated && isGracePeriodOver) {
+                                            isAuthenticated = false
+                                        }
+                                    } else {
+                                        isAuthenticated = true
+                                    }
                                 }
+                                Lifecycle.Event.ON_STOP -> {
+                                    scope.launch {
+                                        userPreferences.setLastStopTime(System.currentTimeMillis())
+                                    }
+                                }
+                                else -> {}
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -89,22 +106,33 @@ class MainActivity : AppCompatActivity() {
                         ActivityResultContracts.RequestPermission()
                     ) { }
 
-                    LaunchedEffect(isAuthenticated) {
-                        permissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
-                        
-                        if (userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable() && !isAuthenticated) {
-                            biometricAuthenticator.authenticate(
-                                activity = this@MainActivity,
-                                onSuccess = { isAuthenticated = true },
-                                onError = { }
-                            )
+                    LaunchedEffect(isAuthenticated, resumeTrigger) {
+                        if (!isAuthenticated) {
+                            if (userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()) {
+                                biometricAuthenticator.authenticate(
+                                    activity = this@MainActivity,
+                                    onSuccess = { isAuthenticated = true },
+                                    onError = { }
+                                )
+                            } else {
+                                isAuthenticated = true
+                            }
                         }
+                    }
+
+                    LaunchedEffect(userSettings.isBiometricEnabled) {
+                        if (!userSettings.isBiometricEnabled) {
+                            isAuthenticated = true
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        permissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
                     }
 
                     if (isAuthenticated) {
                         val navController = rememberNavController()
 
-                        // Physics-based spring specs for high-quality motion
                         val springSpec = spring<IntOffset>(
                             dampingRatio = Spring.DampingRatioNoBouncy,
                             stiffness = Spring.StiffnessLow
@@ -195,6 +223,12 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
                         }
+                    } else {
+                        com.example.cipherspend.ui.components.LockScreen(
+                            onUnlockClick = {
+                                resumeTrigger++
+                            }
+                        )
                     }
                 }
             }
