@@ -1,5 +1,7 @@
 package com.example.cipherspend.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.domain.model.TransactionCategory
 import com.example.cipherspend.core.util.AppFormatters
+import com.example.cipherspend.ui.theme.ExpenseRed
 import com.example.cipherspend.ui.theme.IncomeGreen
 import java.util.*
 
@@ -107,6 +111,104 @@ fun PremiumBalanceHeader(
                         color = colorScheme.onSurface,
                         isPrivacyMode = isPrivacyMode,
                         modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BudgetCard(
+    spent: Double,
+    budget: Double,
+    onSetBudgetClick: () -> Unit,
+    isHapticsEnabled: Boolean = true
+) {
+    val haptic = LocalHapticFeedback.current
+    
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable { 
+                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onSetBudgetClick() 
+                }
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Monthly Budget",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (budget > 0) {
+                    val remaining = (budget - spent).coerceAtLeast(0.0)
+                    Text(
+                        text = "₹${AppFormatters.getCurrencyNoDecimals().format(remaining).replace("₹", "")} left",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (spent > budget) ExpenseRed else IncomeGreen
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (budget <= 0) {
+                Text(
+                    text = "Set a monthly limit to track your spending goals",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                val progress = (spent / budget).toFloat().coerceIn(0f, 1.1f)
+                val animatedProgress by animateFloatAsState(targetValue = progress.coerceAtMost(1f), label = "progress")
+                
+                val color by animateColorAsState(
+                    targetValue = when {
+                        progress > 1f -> ExpenseRed
+                        progress > 0.8f -> Color(0xFFFFB300) // Amber
+                        else -> MaterialTheme.colorScheme.primary
+                    },
+                    label = "color"
+                )
+
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(5.dp)),
+                    color = color,
+                    trackColor = color.copy(alpha = 0.1f)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(
+                        text = AppFormatters.getCurrencyNoDecimals().format(spent),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        text = "of ${AppFormatters.getCurrencyNoDecimals().format(budget)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

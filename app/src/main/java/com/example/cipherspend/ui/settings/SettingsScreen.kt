@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -76,6 +77,12 @@ fun SettingsScreen(
             pendingUri = it
             showBackupPasswordDialog = BackupAction.IMPORT
         }
+    }
+
+    val csvExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportCsv(it)) }
     }
 
     LaunchedEffect(Unit) {
@@ -270,19 +277,32 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text("Monthly Spending Limit") },
                 supportingContent = { 
-                    Text(if (state.autoLockTimeout > 0) "Currently: ₹${state.autoLockTimeout}" else "No limit set")
+                    Text(if (state.monthlyBudget > 0) "Currently: ₹${state.monthlyBudget.toInt()}" else "No limit set")
                 },
                 leadingContent = { Icon(Icons.Default.AccountBalanceWallet, null) },
                 modifier = Modifier.clickable { 
                     if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    budgetInput = if (state.autoLockTimeout > 0) state.autoLockTimeout.toString() else ""
+                    budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
                     showBudgetDialog = true 
                 }
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
 
-            SettingsSectionHeader(title = "Backup & Restore")
+            SettingsSectionHeader(title = "Data Management")
+
+            ListItem(
+                headlineContent = { Text("Export CSV Report") },
+                supportingContent = { Text("Download a spreadsheet of all transactions") },
+                leadingContent = { Icon(Icons.Rounded.FileDownload, null) },
+                modifier = Modifier.clickable { 
+                    if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    csvExportLauncher.launch("Cipher_Report_${System.currentTimeMillis()}.csv")
+                },
+                trailingContent = {
+                    if (state.isExportingCsv) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+            )
 
             ListItem(
                 headlineContent = { Text("Export Encrypted Backup") },
@@ -312,8 +332,6 @@ fun SettingsScreen(
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
 
-            SettingsSectionHeader(title = "Data Management")
-            
             ListItem(
                 headlineContent = { Text("Clear All Data", color = MaterialTheme.colorScheme.error) },
                 supportingContent = { Text("Permanently delete all transaction records") },
@@ -361,8 +379,9 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     onClick = {
+                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         val amount = budgetInput.toDoubleOrNull() ?: 0.0
-                        viewModel.handleIntent(SettingsContract.Intent.SetAutoLockTimeout(amount.toLong())) // Reusing existing field logic temporarily
+                        viewModel.handleIntent(SettingsContract.Intent.SetMonthlyBudget(amount))
                         showBudgetDialog = false
                     }
                 ) {

@@ -6,11 +6,13 @@ import com.example.cipherspend.core.data.local.dao.TransactionDao
 import com.example.cipherspend.core.data.local.pref.AppTheme
 import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.core.data.repository.BackupRepository
+import com.example.cipherspend.core.util.AppFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,9 +39,11 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
+            is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
             is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
+            is SettingsContract.Intent.ExportCsv -> exportCsv(intent.uri)
         }
     }
 
@@ -52,7 +56,8 @@ class SettingsViewModel @Inject constructor(
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
                         isHapticsEnabled = settings.isHapticsEnabled,
-                        autoLockTimeout = settings.autoLockTimeout
+                        autoLockTimeout = settings.autoLockTimeout,
+                        monthlyBudget = settings.monthlyBudget
                     )
                 }
             }
@@ -79,10 +84,38 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { userPreferences.setAutoLockTimeout(timeout) }
     }
 
+    private fun updateMonthlyBudget(amount: Double) {
+        viewModelScope.launch { userPreferences.setMonthlyBudget(amount) }
+    }
+
     private fun clearAllData() {
         viewModelScope.launch(Dispatchers.IO) {
             transactionDao.deleteAllTransactions()
             _effect.send(SettingsContract.Effect.ShowToast("All data cleared successfully"))
+        }
+    }
+
+    private fun exportCsv(uri: android.net.Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(isExportingCsv = true) }
+            try {
+                val transactions = transactionDao.getAllTransactions().first()
+                val csvHeader = "ID,Date,Merchant,Amount,Category,Type\n"
+                val csvData = transactions.joinToString("\n") { tx ->
+                    val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
+                    val type = if (tx.isIncome) "Income" else "Expense"
+                    "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\""
+                }
+                
+                backupRepository.provideOutputStream(uri)?.use { outputStream ->
+                    outputStream.write((csvHeader + csvData).toByteArray())
+                }
+                _effect.send(SettingsContract.Effect.ShowToast("CSV Report generated successfully"))
+            } catch (e: Exception) {
+                _effect.send(SettingsContract.Effect.ShowToast("Failed to export CSV: ${e.message}"))
+            } finally {
+                _state.update { it.copy(isExportingCsv = false) }
+            }
         }
     }
 

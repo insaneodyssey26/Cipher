@@ -13,9 +13,11 @@ class SettingsContract {
         data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
+        data class SetMonthlyBudget(val amount: Double) : Intent()
         object ClearAllData : Intent()
         data class ExportData(val uri: Uri, val password: CharArray) : Intent()
         data class ImportData(val uri: Uri, val password: CharArray) : Intent()
+        data class ExportCsv(val uri: Uri) : Intent()
     }
 
     data class State(
@@ -24,8 +26,10 @@ class SettingsContract {
         val autoLockTimeout: Long = 0,
         val isPrivacyModeEnabled: Boolean = false,
         val isHapticsEnabled: Boolean = true,
+        val monthlyBudget: Double = 0.0,
         val isExporting: Boolean = false,
         val isImporting: Boolean = false,
+        val isExportingCsv: Boolean = false,
         val message: String? = null
     ) : UiState
 
