@@ -5,15 +5,20 @@ import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
+
+    private val _searchQuery = MutableStateFlow("")
+    private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
 
     private val _state = MutableStateFlow(DashboardContract.State())
     val state: StateFlow<DashboardContract.State> = _state.asStateFlow()
@@ -25,37 +30,59 @@ class DashboardViewModel @Inject constructor(
     val effect: SharedFlow<DashboardContract.Effect> = _effect.asSharedFlow()
 
     init {
-        handleIntent(DashboardContract.Intent.LoadDashboard)
+        observeDashboardData()
     }
 
     fun handleIntent(intent: DashboardContract.Intent) {
         when (intent) {
-            is DashboardContract.Intent.LoadDashboard -> observeDashboardData()
+            is DashboardContract.Intent.LoadDashboard -> { /* Data is already observed in init */ }
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
+            is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
+            is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
         }
     }
 
     private fun observeDashboardData() {
         viewModelScope.launch {
             combine(
-                repository.getRecentTransactions(10),
+                _searchQuery,
+                _activeFilter,
                 repository.getTotalIncome(),
                 repository.getTotalExpenses()
-            ) { transactions, income, expenses ->
-                
-                val totalIncome = income ?: 0.0
-                val totalExpenses = expenses ?: 0.0
+            ) { query, filter, income, expenses ->
+                Triple(query, filter, Pair(income ?: 0.0, expenses ?: 0.0))
+            }.flatMapLatest { (query, filter, money) ->
+                val transactionsFlow = if (query.isBlank()) {
+                    repository.getRecentTransactions(20)
+                } else {
+                    repository.getAllTransactions().map { list ->
+                        list.filter { 
+                            it.merchant.contains(query, ignoreCase = true) || 
+                            it.category.contains(query, ignoreCase = true) 
+                        }
+                    }
+                }
 
-                DashboardContract.State(
-                    isLoading = false,
-                    transactions = transactions,
-                    totalIncome = totalIncome,
-                    totalExpenses = totalExpenses,
-                    totalBalance = totalIncome - totalExpenses
-                )
+                transactionsFlow.map { transactions ->
+                    val filteredList = when (filter) {
+                        DashboardContract.FilterType.ALL -> transactions
+                        DashboardContract.FilterType.INCOME -> transactions.filter { it.isIncome }
+                        DashboardContract.FilterType.EXPENSE -> transactions.filter { !it.isIncome }
+                    }
+                    
+                    DashboardContract.State(
+                        isLoading = false,
+                        transactions = filteredList,
+                        searchQuery = query,
+                        activeFilter = filter,
+                        totalIncome = money.first,
+                        totalExpenses = money.second,
+                        totalBalance = money.first - money.second
+                    )
+                }
             }.collect { newState ->
                 _state.value = newState
             }

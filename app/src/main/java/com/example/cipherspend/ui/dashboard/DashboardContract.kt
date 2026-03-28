@@ -13,11 +13,17 @@ class DashboardContract {
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
         data class AddTransaction(val transaction: TransactionEntity) : Intent()
+        data class SearchTransactions(val query: String) : Intent()
+        data class FilterTransactions(val filter: FilterType) : Intent()
     }
+
+    enum class FilterType { ALL, INCOME, EXPENSE }
 
     data class State(
         val isLoading: Boolean = true,
         val transactions: List<TransactionEntity> = emptyList(),
+        val searchQuery: String = "",
+        val activeFilter: FilterType = FilterType.ALL,
         val totalBalance: Double = 0.0,
         val totalIncome: Double = 0.0,
         val totalExpenses: Double = 0.0,
