@@ -35,6 +35,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
+            is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
@@ -50,6 +51,7 @@ class SettingsViewModel @Inject constructor(
                         theme = settings.theme,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
+                        isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout
                     )
                 }
@@ -67,6 +69,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun updatePrivacyMode(enabled: Boolean) {
         viewModelScope.launch { userPreferences.setPrivacyModeEnabled(enabled) }
+    }
+
+    private fun updateHaptics(enabled: Boolean) {
+        viewModelScope.launch { userPreferences.setHapticsEnabled(enabled) }
     }
 
     private fun updateAutoLockTimeout(timeout: Long) {

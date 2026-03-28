@@ -32,7 +32,8 @@ fun PremiumBalanceHeader(
     totalBalance: Double,
     income: Double,
     expenses: Double,
-    isPrivacyMode: Boolean = false
+    isPrivacyMode: Boolean = false,
+    isHapticsEnabled: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val haptic = LocalHapticFeedback.current
@@ -55,7 +56,9 @@ fun PremiumBalanceHeader(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+                    .clickable { 
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress) 
+                    }
                     .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -146,7 +149,8 @@ fun TransactionCard(
     transaction: TransactionEntity,
     isPrivacyMode: Boolean = false,
     onDelete: (TransactionEntity) -> Unit,
-    onEdit: (TransactionEntity) -> Unit
+    onEdit: (TransactionEntity) -> Unit,
+    isHapticsEnabled: Boolean = true
 ) {
     val category = remember(transaction.category) {
         TransactionCategory.fromString(transaction.category)
@@ -220,7 +224,7 @@ fun TransactionCard(
                 
                 IconButton(
                     onClick = { 
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onDelete(transaction) 
                     }
                 ) {

@@ -15,18 +15,23 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
+    userPreferences: UserPreferences,
     onNavigateBack: () -> Unit,
     onNavigateToDayDetail: (Long) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val haptic = LocalHapticFeedback.current
+    
+    val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -42,7 +47,7 @@ fun InsightsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onNavigateBack()
                     }) {
                         Icon(
@@ -76,7 +81,7 @@ fun InsightsScreen(
                 data = state.calendarHeatmap,
                 selectedTimestamp = state.selectedDayTimestamp,
                 onDayClick = { timestamp ->
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onNavigateToDayDetail(timestamp)
                 }
             )

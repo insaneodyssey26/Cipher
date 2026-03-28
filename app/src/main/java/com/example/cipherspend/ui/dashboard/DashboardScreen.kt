@@ -42,10 +42,12 @@ fun DashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
+    
+    val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -62,7 +64,7 @@ fun DashboardScreen(
                     duration = SnackbarDuration.Short
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
                 }
             }
@@ -128,13 +130,13 @@ fun DashboardScreen(
                         actions = {
                             if (!isSearchActive) {
                                 IconButton(onClick = { 
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isSearchActive = true 
                                 }) {
                                     Icon(Icons.Rounded.Search, "Search")
                                 }
                                 IconButton(onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     onNavigateToSettings()
                                 }) {
                                     Icon(Icons.Rounded.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -162,7 +164,7 @@ fun DashboardScreen(
                                 SegmentedButton(
                                     selected = state.activeFilter == filter,
                                     onClick = { 
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         viewModel.handleIntent(DashboardContract.Intent.FilterTransactions(filter)) 
                                     },
                                     shape = SegmentedButtonDefaults.itemShape(index = index, count = DashboardContract.FilterType.entries.size),
@@ -202,7 +204,7 @@ fun DashboardScreen(
                     ) {
                         Surface(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onNavigateToInsights()
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -269,7 +271,7 @@ fun DashboardScreen(
                     )
                     if (!isSearchActive && localSearchQuery.isEmpty()) {
                         TextButton(onClick = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             showAddDialog = true 
                         }) {
                             Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
@@ -300,9 +302,10 @@ fun DashboardScreen(
                         isPrivacyMode = privacyMode,
                         onDelete = { viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) },
                         onEdit = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             editingTransaction = transaction
-                        }
+                        },
+                        isHapticsEnabled = isHapticsEnabled
                     )
                 }
             }
@@ -322,7 +325,7 @@ fun DashboardScreen(
             ),
             onDismiss = { showAddDialog = false },
             onConfirm = { newTransaction ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
                 showAddDialog = false
             }
@@ -334,7 +337,7 @@ fun DashboardScreen(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             }

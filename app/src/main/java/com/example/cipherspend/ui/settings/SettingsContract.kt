@@ -12,6 +12,7 @@ class SettingsContract {
         data class SetBiometricEnabled(val enabled: Boolean) : Intent()
         data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
+        data class SetHapticsEnabled(val enabled: Boolean) : Intent()
         object ClearAllData : Intent()
         data class ExportData(val uri: Uri, val password: CharArray) : Intent()
         data class ImportData(val uri: Uri, val password: CharArray) : Intent()
@@ -22,6 +23,7 @@ class SettingsContract {
         val isBiometricEnabled: Boolean = false,
         val autoLockTimeout: Long = 0,
         val isPrivacyModeEnabled: Boolean = false,
+        val isHapticsEnabled: Boolean = true,
         val isExporting: Boolean = false,
         val isImporting: Boolean = false,
         val message: String? = null

@@ -202,6 +202,7 @@ class MainActivity : AppCompatActivity() {
                                 val viewModel: InsightsViewModel = hiltViewModel()
                                 InsightsScreen(
                                     viewModel = viewModel,
+                                    userPreferences = userPreferences,
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     },
