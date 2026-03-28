@@ -10,10 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.example.cipherspend.core.data.local.pref.UserPreferences
 import com.example.cipherspend.ui.components.EditTransactionDialog
 import com.example.cipherspend.ui.components.TransactionCard
 import com.example.cipherspend.ui.theme.IncomeGreen
@@ -27,11 +30,16 @@ import java.util.*
 fun DayDetailScreen(
     timestamp: Long,
     viewModel: InsightsViewModel,
+    userPreferences: UserPreferences,
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
+    val haptic = LocalHapticFeedback.current
+    
+    val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     
@@ -70,6 +78,7 @@ fun DayDetailScreen(
                         duration = SnackbarDuration.Short
                     )
                     if (result == SnackbarResult.ActionPerformed) {
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.handleIntent(InsightsContract.Intent.RestoreTransaction(effect.transaction))
                     }
                 }
@@ -96,7 +105,10 @@ fun DayDetailScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateBack()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -164,8 +176,10 @@ fun DayDetailScreen(
                             viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
                         },
                         onEdit = {
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             editingTransaction = transaction
-                        }
+                        },
+                        isHapticsEnabled = isHapticsEnabled
                     )
                 }
             }
@@ -177,6 +191,7 @@ fun DayDetailScreen(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
+                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             }

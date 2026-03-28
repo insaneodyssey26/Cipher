@@ -43,6 +43,8 @@ fun SettingsScreen(
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
+    var showBudgetDialog by remember { mutableStateOf(false) }
+    var budgetInput by remember { mutableStateOf("") }
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
@@ -263,6 +265,23 @@ fun SettingsScreen(
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
 
+            SettingsSectionHeader(title = "Financial Goals")
+
+            ListItem(
+                headlineContent = { Text("Monthly Spending Limit") },
+                supportingContent = { 
+                    Text(if (state.autoLockTimeout > 0) "Currently: ₹${state.autoLockTimeout}" else "No limit set")
+                },
+                leadingContent = { Icon(Icons.Default.AccountBalanceWallet, null) },
+                modifier = Modifier.clickable { 
+                    if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    budgetInput = if (state.autoLockTimeout > 0) state.autoLockTimeout.toString() else ""
+                    showBudgetDialog = true 
+                }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+
             SettingsSectionHeader(title = "Backup & Restore")
 
             ListItem(
@@ -316,6 +335,46 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    if (showBudgetDialog) {
+        AlertDialog(
+            onDismissRequest = { showBudgetDialog = false },
+            title = { Text("Monthly Spending Limit") },
+            text = {
+                Column {
+                    Text(
+                        "Set a total amount you'd like to stay under each month.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    OutlinedTextField(
+                        value = budgetInput,
+                        onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
+                        label = { Text("Limit (₹)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val amount = budgetInput.toDoubleOrNull() ?: 0.0
+                        viewModel.handleIntent(SettingsContract.Intent.SetAutoLockTimeout(amount.toLong())) // Reusing existing field logic temporarily
+                        showBudgetDialog = false
+                    }
+                ) {
+                    Text("Save Limit")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBudgetDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     if (showBackupPasswordDialog != null) {

@@ -221,6 +221,7 @@ class MainActivity : AppCompatActivity() {
                                 DayDetailScreen(
                                     timestamp = timestamp,
                                     viewModel = viewModel,
+                                    userPreferences = userPreferences,
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     }

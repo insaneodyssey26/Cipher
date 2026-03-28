@@ -24,6 +24,7 @@ class UserPreferences @Inject constructor(
         val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
         val AUTO_LOCK_TIMEOUT = longPreferencesKey("auto_lock_timeout")
         val LAST_STOP_TIME = longPreferencesKey("last_stop_time")
+        val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -33,8 +34,9 @@ class UserPreferences @Inject constructor(
             isPrivacyModeEnabled = preferences[Keys.PRIVACY_MODE] ?: false,
             isHapticsEnabled = preferences[Keys.HAPTICS_ENABLED] ?: true,
             currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR",
-            autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L, // 0 = Immediately
-            lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L
+            autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
+            lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
+            monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0
         )
     }
 
@@ -65,6 +67,10 @@ class UserPreferences @Inject constructor(
     suspend fun setLastStopTime(timestamp: Long) {
         context.dataStore.edit { it[Keys.LAST_STOP_TIME] = timestamp }
     }
+
+    suspend fun setMonthlyBudget(amount: Double) {
+        context.dataStore.edit { it[Keys.MONTHLY_BUDGET] = amount }
+    }
 }
 
 data class UserSettings(
@@ -74,5 +80,6 @@ data class UserSettings(
     val isHapticsEnabled: Boolean,
     val currency: String,
     val autoLockTimeout: Long,
-    val lastStopTime: Long
+    val lastStopTime: Long,
+    val monthlyBudget: Double
 )

@@ -1,0 +1,388 @@
+package com.example.cipherspend.ui.components
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.example.cipherspend.core.domain.model.TransactionCategory
+import com.example.cipherspend.core.util.AppFormatters
+import com.example.cipherspend.ui.theme.ExpenseRed
+import com.example.cipherspend.ui.theme.IncomeGreen
+import java.util.*
+
+@Composable
+fun PremiumBalanceHeader(
+    totalBalance: Double,
+    income: Double,
+    expenses: Double,
+    isPrivacyMode: Boolean = false,
+    isHapticsEnabled: Boolean = true
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val haptic = LocalHapticFeedback.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            color = colorScheme.surface,
+            tonalElevation = 1.dp,
+            border = androidx.compose.foundation.BorderStroke(
+                width = 1.dp,
+                color = colorScheme.outlineVariant.copy(alpha = 0.3f)
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress) 
+                    }
+                    .padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = if (isPrivacyMode) "₹ ••••••" else AppFormatters.getCurrencyNoDecimals().format(totalBalance),
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontFamily = com.example.cipherspend.ui.theme.GoogleSansFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1.5).sp,
+                        fontSize = 42.sp
+                    ),
+                    color = colorScheme.onSurface
+                )
+
+                Text(
+                    text = "Total Liquidity",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    SimplifiedStat(
+                        label = "Inflow",
+                        amount = income,
+                        color = IncomeGreen,
+                        isPrivacyMode = isPrivacyMode,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(40.dp)
+                            .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            .align(Alignment.CenterVertically)
+                    )
+
+                    SimplifiedStat(
+                        label = "Outflow",
+                        amount = expenses,
+                        color = colorScheme.onSurface,
+                        isPrivacyMode = isPrivacyMode,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BudgetCard(
+    spent: Double,
+    budget: Double,
+    onSetBudgetClick: () -> Unit,
+    isHapticsEnabled: Boolean = true
+) {
+    val haptic = LocalHapticFeedback.current
+    
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable { 
+                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onSetBudgetClick() 
+                }
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Monthly Budget",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (budget > 0) {
+                    val remaining = (budget - spent).coerceAtLeast(0.0)
+                    Text(
+                        text = "₹${AppFormatters.getCurrencyNoDecimals().format(remaining).replace("₹", "")} left",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (spent > budget) ExpenseRed else IncomeGreen
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (budget <= 0) {
+                Text(
+                    text = "Set a monthly limit to track your spending goals",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                val progress = (spent / budget).toFloat().coerceIn(0f, 1f)
+                val animatedProgress by animateFloatAsState(targetValue = progress, label = "progress")
+                
+                val color by animateColorAsState(
+                    targetValue = when {
+                        progress > 1f -> ExpenseRed
+                        progress > 0.8f -> Color(0xFFFFB300) // Amber
+                        else -> MaterialTheme.colorScheme.primary
+                    },
+                    label = "color"
+                )
+
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(5.dp)),
+                    color = color,
+                    trackColor = color.copy(alpha = 0.1f)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(
+                        text = AppFormatters.getCurrencyNoDecimals().format(spent),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        text = "of ${AppFormatters.getCurrencyNoDecimals().format(budget)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SimplifiedStat(
+    label: String,
+    amount: Double,
+    color: Color,
+    isPrivacyMode: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+        Text(
+            text = if (isPrivacyMode) "₹•••" else AppFormatters.getCurrencyNoDecimals().format(amount),
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        )
+    }
+}
+
+@Composable
+fun TransactionCard(
+    transaction: TransactionEntity,
+    isPrivacyMode: Boolean = false,
+    onDelete: (TransactionEntity) -> Unit,
+    onEdit: (TransactionEntity) -> Unit,
+    isHapticsEnabled: Boolean = true
+) {
+    val category = remember(transaction.category) {
+        TransactionCategory.fromString(transaction.category)
+    }
+    
+    val haptic = LocalHapticFeedback.current
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.Transparent,
+        onClick = { onEdit(transaction) }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = category.color.copy(alpha = 0.1f),
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = category.color.copy(alpha = 0.2f)
+                )
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = category.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = category.color
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.merchant,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val date = remember(transaction.timestamp) { Date(transaction.timestamp) }
+                Text(
+                    text = "${AppFormatters.getDay().format(date)} • ${AppFormatters.getTime().format(date)}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = if (isPrivacyMode) {
+                        "${if (transaction.isIncome) "+" else "-"} ₹••"
+                    } else {
+                        "${if (transaction.isIncome) "+" else "-"} ${AppFormatters.getCurrency().format(transaction.amount).replace("₹", "")}"
+                    },
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = if (transaction.isIncome) IncomeGreen else MaterialTheme.colorScheme.onSurface
+                    )
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                IconButton(
+                    onClick = { 
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDelete(transaction) 
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.DeleteOutline,
+                        contentDescription = "Delete",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyTransactionsState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(64.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            modifier = Modifier.size(80.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Rounded.History,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.outlineVariant
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Your vault is empty",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Transactions parsed from your SMS will appear here with military-grade encryption.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+    }
+}

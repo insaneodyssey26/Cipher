@@ -27,6 +27,7 @@ class DashboardContract {
         val totalBalance: Double = 0.0,
         val totalIncome: Double = 0.0,
         val totalExpenses: Double = 0.0,
+        val monthlyBudget: Double = 0.0,
         val velocity: VelocityData = VelocityData(),
         val trendPoints: List<Point> = emptyList(),
         val categories: List<CategoryData> = emptyList()
