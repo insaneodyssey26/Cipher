@@ -1,5 +1,13 @@
 # Release Notes
 
+## [2.1.0]
+
+### Fixed
+- **Encrypted Backups**: Resolved a critical issue where the app's auto-lock would prevent the password dialog from appearing during import/export.
+- **Biometric Persistence**: Improved UI architecture to preserve app state and pending actions across biometric unlock cycles.
+
+---
+
 ## [2.0.1]
 
 ### Fixed

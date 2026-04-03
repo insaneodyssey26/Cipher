@@ -12,7 +12,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -139,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                         permissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
                     }
 
-                    if (isAuthenticated) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         val navController = rememberNavController()
 
                         val slideSpec = remember { tween<IntOffset>(durationMillis = 280, easing = FastOutSlowInEasing) }
@@ -228,12 +231,14 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
                         }
-                    } else {
-                        com.example.cipherspend.ui.components.LockScreen(
-                            onUnlockClick = {
-                                resumeTrigger++
-                            }
-                        )
+
+                        if (!isAuthenticated) {
+                            com.example.cipherspend.ui.components.LockScreen(
+                                onUnlockClick = {
+                                    resumeTrigger++
+                                }
+                            )
+                        }
                     }
                 }
             }

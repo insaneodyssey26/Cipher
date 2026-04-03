@@ -346,7 +346,7 @@ fun SettingsScreen(
             
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Cipher Version 2.0.1",
+                    text = "Cipher Version 2.1.0",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
