@@ -1,6 +1,7 @@
 package com.example.cipherspend.ui.insights
 
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.example.cipherspend.core.domain.SubscriptionDetector
 import com.example.cipherspend.core.mvi.UiEffect
 import com.example.cipherspend.core.mvi.UiIntent
 import com.example.cipherspend.core.mvi.UiState
@@ -21,6 +22,7 @@ class InsightsContract {
         val netWorthHistory: List<DashboardContract.Point> = emptyList(),
         val calendarHeatmap: Map<Long, Double> = emptyMap(),
         val categoryBreakdown: List<DashboardContract.CategoryData> = emptyList(),
+        val detectedSubscriptions: List<SubscriptionDetector.Subscription> = emptyList(),
         val allTransactions: List<TransactionEntity> = emptyList(),
         val selectedDayTimestamp: Long? = null
     ) : UiState {

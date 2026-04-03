@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -96,6 +97,7 @@ fun NetWorthChart(points: List<DashboardContract.Point>) {
 
     val animationProgress = remember { Animatable(0f) }
     LaunchedEffect(points) {
+        animationProgress.snapTo(0f)
         animationProgress.animateTo(1f, tween(1500, easing = FastOutSlowInEasing))
     }
 
@@ -109,54 +111,56 @@ fun NetWorthChart(points: List<DashboardContract.Point>) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Canvas(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
-        ) {
-            val width = size.width
-            val height = size.height
-            val maxNetWorth = points.maxOf { it.y }.coerceAtLeast(1f)
-            val minNetWorth = points.minOf { it.y }.coerceAtMost(0f)
-            val range = (maxNetWorth - minNetWorth).coerceAtLeast(1f)
+                .drawWithCache {
+                    val width = size.width
+                    val height = size.height
+                    val maxNetWorth = points.maxOf { it.y }.coerceAtLeast(1f)
+                    val minNetWorth = points.minOf { it.y }.coerceAtMost(0f)
+                    val range = (maxNetWorth - minNetWorth).coerceAtLeast(1f)
 
-            val path = Path()
-            val fillPath = Path()
+                    val path = Path()
+                    val fillPath = Path()
 
-            points.forEachIndexed { index, point ->
-                val x = (index.toFloat() / (points.size - 1).coerceAtLeast(1)) * width
-                val y = height - ((point.y - minNetWorth) / range) * height
+                    points.forEachIndexed { index, point ->
+                        val x = (index.toFloat() / (points.size - 1).coerceAtLeast(1)) * width
+                        val y = height - ((point.y - minNetWorth) / range) * height
 
-                if (index == 0) {
-                    path.moveTo(x, y)
-                    fillPath.moveTo(x, height)
-                    fillPath.lineTo(x, y)
-                } else {
-                    val prevX = ((index - 1).toFloat() / (points.size - 1)) * width
-                    val prevY = height - ((points[index - 1].y - minNetWorth) / range) * height
-                    val controlX = (prevX + x) / 2
-                    path.cubicTo(controlX, prevY, controlX, y, x, y)
-                    fillPath.cubicTo(controlX, prevY, controlX, y, x, y)
+                        if (index == 0) {
+                            path.moveTo(x, y)
+                            fillPath.moveTo(x, height)
+                            fillPath.lineTo(x, y)
+                        } else {
+                            val prevX = ((index - 1).toFloat() / (points.size - 1)) * width
+                            val prevY = height - ((points[index - 1].y - minNetWorth) / range) * height
+                            val controlX = (prevX + x) / 2
+                            path.cubicTo(controlX, prevY, controlX, y, x, y)
+                            fillPath.cubicTo(controlX, prevY, controlX, y, x, y)
+                        }
+                    }
+
+                    fillPath.lineTo(width, height)
+                    fillPath.close()
+
+                    val brush = Brush.verticalGradient(
+                        colors = listOf(primaryColor.copy(alpha = 0.1f), Color.Transparent)
+                    )
+                    val strokeWidth = 3.dp.toPx()
+
+                    onDrawBehind {
+                        drawPath(path = fillPath, brush = brush)
+                        drawPath(
+                            path = path,
+                            color = primaryColor,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                            alpha = animationProgress.value
+                        )
+                    }
                 }
-            }
-
-            fillPath.lineTo(width, height)
-            fillPath.close()
-
-            drawPath(
-                path = fillPath,
-                brush = Brush.verticalGradient(
-                    colors = listOf(primaryColor.copy(alpha = 0.1f), Color.Transparent)
-                )
-            )
-
-            drawPath(
-                path = path,
-                color = primaryColor,
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
-                alpha = animationProgress.value
-            )
-        }
+        )
     }
 }
 

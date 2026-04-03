@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cipherspend.core.data.local.entity.TransactionEntity
 import com.example.cipherspend.core.data.repository.TransactionRepository
+import com.example.cipherspend.core.domain.SubscriptionDetector
 import com.example.cipherspend.core.domain.model.TransactionCategory
 import com.example.cipherspend.ui.dashboard.DashboardContract
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,13 +17,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InsightsViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val subscriptionDetector: SubscriptionDetector
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(InsightsContract.State())
     val state: StateFlow<InsightsContract.State> = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<InsightsContract.Effect>()
+    private val _effect = MutableSharedFlow<InsightsContract.Effect>(
+        replay = 1
+    )
     val effect: SharedFlow<InsightsContract.Effect> = _effect.asSharedFlow()
 
     init {
@@ -65,6 +69,7 @@ class InsightsViewModel @Inject constructor(
                         netWorthHistory = calculateNetWorthHistory(transactions),
                         calendarHeatmap = calculateHeatmap(transactions),
                         categoryBreakdown = calculateCategories(transactions),
+                        detectedSubscriptions = subscriptionDetector.detect(transactions),
                         allTransactions = transactions
                     )
                 }

@@ -47,13 +47,20 @@ fun DayDetailScreen(
     val dayName = remember(date) { SimpleDateFormat("EEEE", Locale.getDefault()).format(date) }
     val fullDate = remember(date) { SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(date) }
     
-    val dayTransactions = remember(state.allTransactions, timestamp) {
-        state.allTransactions.filter { tx ->
-            val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-            val targetCal = Calendar.getInstance().apply { timeInMillis = timestamp }
-            txCal.get(Calendar.YEAR) == targetCal.get(Calendar.YEAR) &&
-            txCal.get(Calendar.DAY_OF_YEAR) == targetCal.get(Calendar.DAY_OF_YEAR)
-        }
+    val dayRange = remember(timestamp) {
+        val start = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        start to (start + 24L * 60L * 60L * 1000L)
+    }
+
+    val dayTransactions = remember(state.allTransactions, dayRange) {
+        val (dayStart, dayEnd) = dayRange
+        state.allTransactions.filter { tx -> tx.timestamp in dayStart until dayEnd }
     }
 
     val totalSpent = remember(dayTransactions) {
@@ -168,7 +175,7 @@ fun DayDetailScreen(
                     }
                 }
             } else {
-                items(dayTransactions) { transaction ->
+                items(items = dayTransactions, key = { it.id }) { transaction ->
                     TransactionCard(
                         transaction = transaction,
                         isPrivacyMode = false,

@@ -3,15 +3,14 @@ package com.example.cipherspend
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.IntOffset
@@ -143,18 +142,8 @@ class MainActivity : AppCompatActivity() {
                     if (isAuthenticated) {
                         val navController = rememberNavController()
 
-                        val springSpec = remember {
-                            spring<IntOffset>(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        }
-                        val fadeSpringSpec = remember {
-                            spring<Float>(
-                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                stiffness = Spring.StiffnessLow
-                            )
-                        }
+                        val slideSpec = remember { tween<IntOffset>(durationMillis = 280, easing = FastOutSlowInEasing) }
+                        val fadeSpec = remember { tween<Float>(durationMillis = 220, easing = FastOutSlowInEasing) }
 
                         NavHost(
                             navController = navController,
@@ -162,26 +151,26 @@ class MainActivity : AppCompatActivity() {
                             enterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { it },
-                                    animationSpec = springSpec
-                                ) + fadeIn(animationSpec = fadeSpringSpec)
+                                    animationSpec = slideSpec
+                                ) + fadeIn(animationSpec = fadeSpec)
                             },
                             exitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { -it / 3 },
-                                    animationSpec = springSpec
-                                ) + fadeOut(animationSpec = fadeSpringSpec)
+                                    animationSpec = slideSpec
+                                ) + fadeOut(animationSpec = fadeSpec)
                             },
                             popEnterTransition = {
                                 slideInHorizontally(
                                     initialOffsetX = { -it / 3 },
-                                    animationSpec = springSpec
-                                ) + fadeIn(animationSpec = fadeSpringSpec)
+                                    animationSpec = slideSpec
+                                ) + fadeIn(animationSpec = fadeSpec)
                             },
                             popExitTransition = {
                                 slideOutHorizontally(
                                     targetOffsetX = { it },
-                                    animationSpec = springSpec
-                                ) + fadeOut(animationSpec = fadeSpringSpec)
+                                    animationSpec = slideSpec
+                                ) + fadeOut(animationSpec = fadeSpec)
                             }
                         ) {
                             composable("dashboard") {
