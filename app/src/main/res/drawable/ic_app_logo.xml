@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Outer Vault Ring -->
+    <path
+        android:fillColor="#0061A4"
+        android:pathData="M512,128C291.1,128 112,309.1 112,530s179.1,402 400,402s400,-181.1 400,-402S732.9,128 512,128zM512,842c-172.3,0 -312,-139.7 -312,-312s139.7,-312 312,-312s312,139.7 312,312S684.3,842 512,842z"/>
+
+    <!-- Central Stylized C / Security Notch -->
+    <path
+        android:fillColor="#0061A4"
+        android:pathData="M640,400c-32.1,-32.1 -76.4,-52 -128,-52c-99.4,0 -180,80.6 -180,180s80.6,180 180,180c51.6,0 95.9,-19.9 128,-52l60,60c-48.2,48.2 -114.7,78 -188,78c-146.9,0 -266,-119.1 -266,-266s119.1,-266 266,-266c73.3,0 139.8,29.8 188,78L640,400z"/>
+
+    <!-- Vault Dial Pin -->
+    <path
+        android:fillColor="#0061A4"
+        android:pathData="M512,128l0,100l40,0l0,-100z"/>
+</vector>

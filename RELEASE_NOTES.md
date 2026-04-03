@@ -1,5 +1,12 @@
 # Release Notes
 
+## [2.0.1]
+
+### Fixed
+- **App Launcher**: Fixed an issue where the icon appeared as a white mascot on some devices; updated to a custom blue vault logo.
+
+---
+
 ## [2.0.0]
 
 ### Added

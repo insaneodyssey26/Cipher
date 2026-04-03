@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="18"
+        android:translateY="18">
+        <!-- Circular Vault Frame -->
+        <path
+            android:fillColor="#0061A4"
+            android:pathData="M36,4C18.3,4 4,18.3 4,36s14.3,32 32,32s32,-14.3 32,-32S53.7,4 36,4zM36,62c-15.5,0 -28,-12.5 -28,-28s12.5,-28 28,-28s28,12.5 28,28S51.5,62 36,62z"/>
+        <!-- Stylized 'C' inside -->
+        <path
+            android:fillColor="#0061A4"
+            android:pathData="M48,24c-2.9,-2.9 -6.9,-4.7 -11.3,-4.7c-8.8,0 -16,7.2 -16,16s7.2,16 16,16c4.4,0 8.4,-1.8 11.3,-4.7l5.3,5.3c-4.3,4.3 -10.2,7 -16.6,7c-13,0 -23.6,-10.6 -23.6,-23.6s10.6,-23.6 23.6,-23.6c6.4,0 12.3,2.7 16.6,7L48,24z"/>
+        <!-- Vault Lock Pin -->
+        <path
+            android:fillColor="#0061A4"
+            android:pathData="M34,4h4v8h-4z"/>
+    </group>
+</vector>
