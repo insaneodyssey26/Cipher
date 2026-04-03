@@ -1,32 +1,29 @@
-# Cipher — Release (v1.0)
+# Release Notes
 
-Cipher v1.0 — first public release (initial APK).
+## [2.0.0]
 
-Short summary
----------------
-Cipher is a privacy-first, local-only personal finance app that extracts transaction data from SMS alerts and stores everything encrypted on-device. This release delivers the initial, production-ready foundation: automated SMS parsing, encrypted storage, biometric options, and a polished Compose UI.
+### Added
+- **Subscription Intelligence**: Offline engine for detecting recurring payments and predicting billing cycles.
+- **Monthly Budgeting**: Spending limit configuration with real-time tracking on the dashboard.
+- **Manual Ledger Management**: Full CRUD support for adding, editing, and deleting transactions.
+- **Undo System**: Recovery mechanism for accidental transaction deletions.
+- **Data Portability**: CSV export functionality for external financial analysis.
+- **Tactile Feedback**: Haptic feedback with a dedicated toggle in settings.
 
-Highlights
-----------
-- Automatic on-device SMS parsing (merchant, amount, currency)
-- Encrypted local storage (Room + SQLCipher)
-- Optional biometric gating for sensitive screens
-- Material 3 Compose UI with bundled Google Sans typography
-- No network permissions — data stays on your device
+### Changed
+- **Header Redesign**: Shifted to a bolder, left-aligned title for improved readability.
+- **Enhanced Search**: Reactive filtering system for merchants and categories.
+- **Parsing Logic**: Heuristic improvements to reduce false positives from non-transactional messages.
+- **Performance**: Optimized animation specs and list rendering to reduce frame drops.
 
-Important notes for users
--------------------------
-- Minimum Android: 7.0 (API 24). Target/compile SDK: 35.
-- Runtime permissions: grant RECEIVE_SMS and READ_SMS for automatic parsing.
-- This is the first APK release — if you encounter install or runtime issues, please check the full technical notes in the repo (link below) before filing an issue.
+### Fixed
+- **Biometric Handling**: Resolved blank screen issues during app resume; implemented dedicated lock screen UI.
+- **Lifecycle Logic**: Fixed auto-lock timer inconsistencies during rapid app switching.
+---
 
-Where to find more
--------------------
-For installation steps, full troubleshooting, developer notes, and detailed security/privacy information see: `docs/RELEASE_NOTES_FULL.md` (long-form release notes and developer guidance).
-
-Copy-paste for GitHub Releases
-------------------------------
-Use this short release body when creating the GitHub release page. Keep the release description focused — link to `docs/RELEASE_NOTES_FULL.md` for details.
-
-
-
+## [1.0.0]
+- Initial release.
+- Automated SMS parsing.
+- Encrypted local storage (SQLCipher).
+- Biometric authentication.
+- Core Dashboard and Insights.

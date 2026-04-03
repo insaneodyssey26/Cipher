@@ -1,26 +1,27 @@
-# Cipher
+# Cipher Spend
 
-Cipher is a local-first, privacy-first personal finance companion for Android. It securely extracts transaction information from SMS alerts, stores data encrypted on-device, and presents a modern Compose-based dashboard and insights UI.
+Cipher Spend is a local-first, privacy-focused personal finance application for Android. It automates expense tracking by extracting transaction data from SMS alerts, ensuring all sensitive information remains encrypted on-device.
 
-See the full technical release notes and developer guidance in `docs/RELEASE_NOTES_FULL.md`.
+## Core Principles
+- **Data Privacy**: No external servers or cloud synchronization.
+- **Security**: Full database encryption using SQLCipher and biometric authentication.
+- **Offline Operation**: No network permissions required.
 
-Quick start
------------
+## Key Features
+- **Automated Parsing**: Heuristic engine for merchant and amount extraction from SMS.
+- **Insights**: Subscription detection and spending trend analysis.
+- **Budgeting**: Monthly spending limit configuration with visual health tracking.
+- **Management**: Full manual control over the transaction ledger with undo support.
+- **Portability**: Encrypted backups and standard CSV export.
 
-- Open the project in Android Studio (compileSdk 35, minSdk 24).
-- Build and run on a device or emulator (API 24+).
+## Technical Specifications
+- **Platform**: Android 7.0+ (API 24)
+- **UI**: Jetpack Compose / Material 3
+- **Architecture**: MVI (Model-View-Intent)
+- **Persistence**: Room with SQLCipher
+- **Dependency Injection**: Hilt
 
-Command-line (fish / Linux / WSL):
+## Build Instructions
+Open the project in Android Studio (Compile SDK 35). Run `./gradlew :app:assembleDebug` to build the debug APK.
 
-```bash
-./gradlew :app:assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-```
-
-Notes
------
-- The package id remains `com.example.cipherspend` (internal project/package names not renamed).
-- User-facing strings and theme styling use "Cipher" as the display name.
-
-For full technical details, known issues and developer notes, see `docs/RELEASE_NOTES_FULL.md`.
-
+For version history, see [RELEASE_NOTES.md](RELEASE_NOTES.md).
