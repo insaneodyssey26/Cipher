@@ -3,6 +3,7 @@ package com.masum.cipher.ui.components
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -281,18 +282,13 @@ fun BudgetCard(
             .padding(horizontal = 20.dp, vertical = 6.dp)
             .scale(scale)
             .background(surface, RoundedCornerShape(18.dp))
+            .border(1.dp, outlineVariant, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
             .clickable(interactionSource = interactionSource, indication = null) {
                 if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSetBudgetClick()
             }
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(outlineVariant, RoundedCornerShape(18.dp))
-        )
-
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -430,42 +426,3 @@ fun EmptyTransactionsState() {
     }
 }
 
-@Composable
-fun PremiumBalanceHeader(
-    totalBalance: Double,
-    income: Double,
-    expenses: Double,
-    isPrivacyMode: Boolean = false,
-    isHapticsEnabled: Boolean = true
-) = BalanceHeader(totalBalance, income, expenses, isPrivacyMode, isHapticsEnabled)
-
-@Composable
-fun TransactionCard(
-    transaction: TransactionEntity,
-    isPrivacyMode: Boolean = false,
-    onDelete: (TransactionEntity) -> Unit,
-    onEdit: (TransactionEntity) -> Unit,
-    isHapticsEnabled: Boolean = true
-) = TransactionRow(transaction, isPrivacyMode, onDelete, onEdit, isHapticsEnabled)
-
-@Composable
-fun SimplifiedStat(
-    label: String,
-    amount: Double,
-    color: Color,
-    isPrivacyMode: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = if (isPrivacyMode) "₹•••" else AppFormatters.getCurrencyNoDecimals().format(amount),
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = color
-        )
-    }
-}

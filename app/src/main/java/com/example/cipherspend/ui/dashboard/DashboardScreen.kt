@@ -97,7 +97,7 @@ fun DashboardScreen(
                         title = {
                             if (!isSearchActive) {
                                 Text(
-                                    text = "Cipher",
+                                    text = "cipher",
                                     style = MaterialTheme.typography.headlineMedium.copy(
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = (-1).sp
