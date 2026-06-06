@@ -25,6 +25,7 @@ class UserPreferences @Inject constructor(
         val AUTO_LOCK_TIMEOUT = longPreferencesKey("auto_lock_timeout")
         val LAST_STOP_TIME = longPreferencesKey("last_stop_time")
         val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -36,7 +37,8 @@ class UserPreferences @Inject constructor(
             currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR",
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
-            monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0
+            monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
+            hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false
         )
     }
 
@@ -71,6 +73,10 @@ class UserPreferences @Inject constructor(
     suspend fun setMonthlyBudget(amount: Double) {
         context.dataStore.edit { it[Keys.MONTHLY_BUDGET] = amount }
     }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
+    }
 }
 
 data class UserSettings(
@@ -81,5 +87,6 @@ data class UserSettings(
     val currency: String,
     val autoLockTimeout: Long,
     val lastStopTime: Long,
-    val monthlyBudget: Double
+    val monthlyBudget: Double,
+    val hasCompletedOnboarding: Boolean = false
 )

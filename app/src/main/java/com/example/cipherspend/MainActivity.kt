@@ -1,12 +1,9 @@
 package com.masum.cipher
 
-import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -34,6 +31,7 @@ import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.insights.DayDetailScreen
 import com.masum.cipher.ui.insights.InsightsScreen
 import com.masum.cipher.ui.insights.InsightsViewModel
+import com.masum.cipher.ui.onboarding.OnboardingScreen
 import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
@@ -75,8 +73,9 @@ class MainActivity : AppCompatActivity() {
 
                 CipherTheme(darkTheme = darkTheme) {
                     val currentSettings by rememberUpdatedState(userSettings)
-                    var isAuthenticated by remember { 
-                        mutableStateOf(!userSettings.isBiometricEnabled || !biometricAuthenticator.isBiometricAvailable()) 
+                    val onboardingCompleted = userSettings.hasCompletedOnboarding
+                    var isAuthenticated by remember {
+                        mutableStateOf(!userSettings.isBiometricEnabled || !biometricAuthenticator.isBiometricAvailable())
                     }
                     var resumeTrigger by remember { mutableIntStateOf(0) }
 
@@ -115,12 +114,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    val permissionLauncher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.RequestPermission()
-                    ) { }
-
-                    LaunchedEffect(isAuthenticated, resumeTrigger) {
-                        if (!isAuthenticated) {
+                    LaunchedEffect(isAuthenticated, resumeTrigger, onboardingCompleted) {
+                        if (!isAuthenticated && onboardingCompleted) {
                             if (userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()) {
                                 biometricAuthenticator.authenticate(
                                     activity = this@MainActivity,
@@ -137,10 +132,6 @@ class MainActivity : AppCompatActivity() {
                         if (!userSettings.isBiometricEnabled) {
                             isAuthenticated = true
                         }
-                    }
-
-                    LaunchedEffect(Unit) {
-                        permissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
                     }
 
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -225,10 +216,20 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        if (!isAuthenticated) {
+                        if (!isAuthenticated && onboardingCompleted) {
                             com.masum.cipher.ui.components.LockScreen(
                                 onUnlockClick = {
                                     resumeTrigger++
+                                }
+                            )
+                        }
+
+                        if (!onboardingCompleted) {
+                            OnboardingScreen(
+                                onComplete = {
+                                    scope.launch {
+                                        userPreferences.setOnboardingCompleted(true)
+                                    }
                                 }
                             )
                         }
