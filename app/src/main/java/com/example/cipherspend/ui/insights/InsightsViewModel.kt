@@ -24,9 +24,7 @@ class InsightsViewModel @Inject constructor(
     private val _state = MutableStateFlow(InsightsContract.State())
     val state: StateFlow<InsightsContract.State> = _state.asStateFlow()
 
-    private val _effect = MutableSharedFlow<InsightsContract.Effect>(
-        replay = 1
-    )
+    private val _effect = MutableSharedFlow<InsightsContract.Effect>(replay = 1)
     val effect: SharedFlow<InsightsContract.Effect> = _effect.asSharedFlow()
 
     init {
@@ -70,7 +68,13 @@ class InsightsViewModel @Inject constructor(
                         calendarHeatmap = calculateHeatmap(transactions),
                         categoryBreakdown = calculateCategories(transactions),
                         detectedSubscriptions = subscriptionDetector.detect(transactions),
-                        allTransactions = transactions
+                        allTransactions = transactions,
+                        topMerchants = calculateTopMerchants(transactions),
+                        monthlySummary = calculateMonthlySummary(transactions),
+                        weekdayBreakdown = calculateWeekdayBreakdown(transactions),
+                        peakHours = calculatePeakHours(transactions),
+                        noSpendStreak = calculateNoSpendStreak(transactions),
+                        avgTransactionSize = calculateAvgTransactionSize(transactions)
                     )
                 }
                 .flowOn(Dispatchers.Default)
@@ -88,15 +92,11 @@ class InsightsViewModel @Inject constructor(
     }
 
     private fun updateTransaction(transaction: TransactionEntity) {
-        viewModelScope.launch {
-            repository.updateTransaction(transaction)
-        }
+        viewModelScope.launch { repository.updateTransaction(transaction) }
     }
 
     private fun restoreTransaction(transaction: TransactionEntity) {
-        viewModelScope.launch {
-            repository.updateTransaction(transaction)
-        }
+        viewModelScope.launch { repository.updateTransaction(transaction) }
     }
 
     private fun getStartOfCurrentWeek(): Long {
@@ -147,7 +147,116 @@ class InsightsViewModel @Inject constructor(
                 )
             }.sortedByDescending { it.amount }
     }
-    
+
+    private fun calculateTopMerchants(transactions: List<TransactionEntity>): List<InsightsContract.MerchantData> {
+        return transactions.filter { !it.isIncome }
+            .groupBy { it.merchant.trim() }
+            .map { (merchant, txs) ->
+                InsightsContract.MerchantData(
+                    merchant = merchant,
+                    amount = txs.sumOf { it.amount },
+                    count = txs.size
+                )
+            }
+            .sortedByDescending { it.amount }
+            .take(5)
+    }
+
+    private fun calculateMonthlySummary(transactions: List<TransactionEntity>): InsightsContract.MonthlySummary {
+        val cal = Calendar.getInstance()
+        val currentMonth = cal.get(Calendar.MONTH)
+        val currentYear = cal.get(Calendar.YEAR)
+
+        val monthTxs = transactions.filter { tx ->
+            val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
+            txCal.get(Calendar.MONTH) == currentMonth && txCal.get(Calendar.YEAR) == currentYear
+        }
+
+        val income = monthTxs.filter { it.isIncome }.sumOf { it.amount }
+        val expense = monthTxs.filter { !it.isIncome }.sumOf { it.amount }
+        val savingsRate = if (income > 0) ((income - expense) / income).toFloat().coerceIn(-1f, 1f) else 0f
+
+        return InsightsContract.MonthlySummary(income, expense, savingsRate)
+    }
+
+    private fun calculateWeekdayBreakdown(transactions: List<TransactionEntity>): List<InsightsContract.DayOfWeekData> {
+        val dayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        val amounts = DoubleArray(7)
+
+        transactions.filter { !it.isIncome }.forEach { tx ->
+            val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
+            val dayIndex = (txCal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+            amounts[dayIndex] += tx.amount
+        }
+
+        val maxAmount = amounts.maxOrNull() ?: 0.0
+
+        return dayNames.mapIndexed { index, name ->
+            InsightsContract.DayOfWeekData(
+                dayName = name,
+                amount = amounts[index],
+                isMax = maxAmount > 0 && amounts[index] == maxAmount
+            )
+        }
+    }
+
+    private fun calculatePeakHours(transactions: List<TransactionEntity>): List<InsightsContract.PeakHourData> {
+        val buckets = mutableMapOf("Morning" to 0.0, "Afternoon" to 0.0, "Evening" to 0.0, "Night" to 0.0)
+
+        transactions.filter { !it.isIncome }.forEach { tx ->
+            val hour = Calendar.getInstance().apply { timeInMillis = tx.timestamp }.get(Calendar.HOUR_OF_DAY)
+            val label = when {
+                hour in 6..11 -> "Morning"
+                hour in 12..16 -> "Afternoon"
+                hour in 17..21 -> "Evening"
+                else -> "Night"
+            }
+            buckets[label] = (buckets[label] ?: 0.0) + tx.amount
+        }
+
+        val total = buckets.values.sum().coerceAtLeast(1.0)
+
+        return listOf("Morning", "Afternoon", "Evening", "Night").map { label ->
+            val amount = buckets[label] ?: 0.0
+            InsightsContract.PeakHourData(
+                label = label,
+                amount = amount,
+                percentage = (amount / total).toFloat()
+            )
+        }
+    }
+
+    private fun calculateNoSpendStreak(transactions: List<TransactionEntity>): Int {
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        val spendDays = transactions.filter { !it.isIncome }.map { tx ->
+            Calendar.getInstance().apply {
+                timeInMillis = tx.timestamp
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        }.toSet()
+
+        var streak = 0
+        var day = today
+        val oneDayMs = TimeUnit.DAYS.toMillis(1)
+
+        while (!spendDays.contains(day) && streak <= 365) {
+            streak++
+            day -= oneDayMs
+        }
+
+        return streak
+    }
+
+    private fun calculateAvgTransactionSize(transactions: List<TransactionEntity>): Double {
+        val expenses = transactions.filter { !it.isIncome }
+        return if (expenses.isNotEmpty()) expenses.sumOf { it.amount } / expenses.size else 0.0
+    }
+
     private fun androidx.compose.ui.graphics.Color.toArgb(): Int {
         return (alpha * 255.0f + 0.5f).toInt() shl 24 or
                 (red * 255.0f + 0.5f).toInt() shl 16 or

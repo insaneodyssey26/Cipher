@@ -16,6 +16,11 @@ class InsightsContract {
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
     }
 
+    data class MerchantData(val merchant: String, val amount: Double, val count: Int)
+    data class MonthlySummary(val income: Double, val expense: Double, val savingsRate: Float)
+    data class DayOfWeekData(val dayName: String, val amount: Double, val isMax: Boolean)
+    data class PeakHourData(val label: String, val amount: Double, val percentage: Float)
+
     data class State(
         val isLoading: Boolean = true,
         val spendingVelocity: DashboardContract.VelocityData = DashboardContract.VelocityData(),
@@ -24,7 +29,13 @@ class InsightsContract {
         val categoryBreakdown: List<DashboardContract.CategoryData> = emptyList(),
         val detectedSubscriptions: List<SubscriptionDetector.Subscription> = emptyList(),
         val allTransactions: List<TransactionEntity> = emptyList(),
-        val selectedDayTimestamp: Long? = null
+        val selectedDayTimestamp: Long? = null,
+        val topMerchants: List<MerchantData> = emptyList(),
+        val monthlySummary: MonthlySummary = MonthlySummary(0.0, 0.0, 0f),
+        val weekdayBreakdown: List<DayOfWeekData> = emptyList(),
+        val peakHours: List<PeakHourData> = emptyList(),
+        val noSpendStreak: Int = 0,
+        val avgTransactionSize: Double = 0.0
     ) : UiState {
         val selectedDayTransactions: List<TransactionEntity>
             get() = selectedDayTimestamp?.let { timestamp ->

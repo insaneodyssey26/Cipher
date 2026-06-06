@@ -45,7 +45,7 @@ fun InsightsScreen(
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val haptic = LocalHapticFeedback.current
-    
+
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
     Scaffold(
@@ -55,9 +55,7 @@ fun InsightsScreen(
                 title = {
                     Text(
                         text = "Intelligence",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        )
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
@@ -65,10 +63,7 @@ fun InsightsScreen(
                         if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onNavigateBack()
                     }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -80,12 +75,32 @@ fun InsightsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            contentPadding = PaddingValues(bottom = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item { Spacer(Modifier.height(4.dp)) }
+
+            item { MonthlySummaryCard(summary = state.monthlySummary) }
 
             item { VelocityMetric(data = state.spendingVelocity) }
+
+            item { QuickStatsRow(streak = state.noSpendStreak, avgSize = state.avgTransactionSize) }
+
+            if (state.topMerchants.isNotEmpty()) {
+                item { TopMerchantsCard(merchants = state.topMerchants) }
+            }
+
+            if (state.weekdayBreakdown.isNotEmpty()) {
+                item { WeekdayBreakdownCard(days = state.weekdayBreakdown) }
+            }
+
+            if (state.peakHours.any { it.amount > 0.0 }) {
+                item { PeakHoursCard(hours = state.peakHours) }
+            }
+
+            item { NetWorthChart(points = state.netWorthHistory) }
+
+            item { CategoryDoughnutChart(categories = state.categoryBreakdown) }
 
             if (state.detectedSubscriptions.isNotEmpty()) {
                 item {
@@ -95,10 +110,6 @@ fun InsightsScreen(
                     )
                 }
             }
-
-            item { NetWorthChart(points = state.netWorthHistory) }
-
-            item { CategoryDoughnutChart(categories = state.categoryBreakdown) }
 
             item {
                 CalendarHeatmap(
@@ -130,9 +141,9 @@ fun SubscriptionSection(
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             subscriptions.forEach { sub ->
                 SubscriptionItem(sub = sub, isHapticsEnabled = isHapticsEnabled)
@@ -147,7 +158,7 @@ fun SubscriptionItem(
     isHapticsEnabled: Boolean
 ) {
     val haptic = LocalHapticFeedback.current
-    
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
