@@ -275,6 +275,59 @@ class SmsParserTest {
         assertTrue(!result!!.isIncome)
     }
 
+    // ─── RUPEE SYMBOL AND Rs/- FORMAT ────────────────────────────────────────
+
+    @Test
+    fun `rupee symbol prefix is parsed correctly`() {
+        val result = parser.parse("₹500.00 debited from your HDFC a/c XX1234 at ZOMATO on 01-Jun-26.")
+        assertNotNull(result)
+        assertEquals(500.0, result!!.amount, 0.001)
+    }
+
+    @Test
+    fun `rupee symbol without space is parsed correctly`() {
+        val result = parser.parse("Your a/c debited ₹1,250.00 at AMAZON. Avl Bal ₹8,750.00.")
+        assertNotNull(result)
+        assertEquals(1250.0, result!!.amount, 0.001)
+    }
+
+    @Test
+    fun `Rs slash minus prefix format is parsed correctly`() {
+        val result = parser.parse("Rs/-500.00 debited from SBI a/c XX1234 at SWIGGY on 01-Jun-26.")
+        assertNotNull(result)
+        assertEquals(500.0, result!!.amount, 0.001)
+    }
+
+    @Test
+    fun `amount with slash minus suffix is parsed correctly`() {
+        val result = parser.parse("INR 1,500/- debited from Axis Bank a/c XX1234 at FLIPKART.")
+        assertNotNull(result)
+        assertEquals(1500.0, result!!.amount, 0.001)
+    }
+
+    @Test
+    fun `avl bal rupee symbol is not picked as amount`() {
+        val result = parser.parse("₹350.00 debited from a/c XX1234 at ZOMATO. Avl Bal ₹9,650.00.")
+        assertNotNull(result)
+        assertEquals(350.0, result!!.amount, 0.001)
+    }
+
+    // ─── FROM KEYWORD MERCHANT EXTRACTION ────────────────────────────────────
+
+    @Test
+    fun `merchant extracted via from keyword for salary`() {
+        val result = parser.parse("Rs.55000.00 credited to your a/c XX1234 from EMPLOYER INDIA on 01-Jun-26.")
+        assertNotNull(result)
+        assertEquals("EMPLOYER INDIA", result!!.merchant)
+    }
+
+    @Test
+    fun `from a slash c is not captured as merchant`() {
+        val result = parser.parse("Rs.500.00 debited from a/c XX1234 at ZOMATO on 01-Jun-26.")
+        assertNotNull(result)
+        assertTrue(result!!.merchant != "A/C XX1234")
+    }
+
     // ─── FULL PARSE — REAL BANK SMS ───────────────────────────────────────────
 
     @Test

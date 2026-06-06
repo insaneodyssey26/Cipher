@@ -9,9 +9,9 @@ import javax.inject.Singleton
 class SmsParser @Inject constructor() {
 
     private val amountPatterns = listOf(
-        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded|transfer(?:red)?|txn|transaction)\\s*(?:by|with|of|for|to)?\\s*(?:rs\\.?|inr)?\\s*([\\d,]+\\.?\\d{0,2})"),
-        Pattern.compile("(?i)([\\d,]+\\.?\\d{0,2})\\s*(?:rs\\.?|inr)?\\s*(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded)"),
-        Pattern.compile("(?i)(?:rs\\.?|inr|amt|amount)\\s*([\\d,]+\\.?\\d{0,2})"),
+        Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded|transfer(?:red)?|txn|transaction)\\s*(?:by|with|of|for|to)?\\s*(?:₹|rs\\.?|inr)?\\s*(?:/-\\s*)?([\\d,]+\\.?\\d{0,2})"),
+        Pattern.compile("(?i)([\\d,]+\\.?\\d{0,2})\\s*(?:rs\\.?|inr|₹)?\\s*(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded)"),
+        Pattern.compile("(?i)(?:₹|rs\\.?|inr|amt|amount)\\s*(?:/-\\s*)?([\\d,]+\\.?\\d{0,2})"),
         Pattern.compile("(?i)(?<!a/c |acc |account |ending |ref |no |id )([\\d,]+\\.\\d{2})(?!\\d)")
     )
 
@@ -30,6 +30,7 @@ class SmsParser @Inject constructor() {
     private val structuralMerchantPatterns = listOf(
         Pattern.compile("(?i)\\b([A-Za-z][A-Za-z0-9.]{2,})@(?:okaxis|okicici|okhdfcbank|oksbi|ybl|ibl|axl|paytm|upi|waicici|wahdfc|indus|fbl|aubank|kotak|hsbc|sbi|icici|hdfc|axis|airtel|jio|oksbi)\\b"),
         Pattern.compile("(?i)/\\d{5,}/([^/\\d\\s][^/]{1,})(?:/|$)"),
+        Pattern.compile("(?i)\\bfrom\\s+([A-Za-z][A-Za-z0-9\\s&.]{2,}?)(?=\\s+on|\\s+using|\\s+via|\\s+ref|\\s+to|\\.|$)"),
         Pattern.compile("(?i)(?:at|to|towards|info|vpa|into|merchant|payee)\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\s+at|\\s+via|\\s+ref|\\.|$)"),
         Pattern.compile("(?i)sent\\s+to\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\.|$)"),
         Pattern.compile("(?i)used\\s+at\\s+([^\\d\\s][^;.]+?)(?=\\s+on|\\s+using|\\.|$)")
@@ -121,19 +122,19 @@ class SmsParser @Inject constructor() {
     private fun extractMerchantStructural(message: String): String? {
         for (pattern in structuralMerchantPatterns) {
             val matcher = pattern.matcher(message)
-            if (!matcher.find()) continue
+            while (matcher.find()) {
+                val raw = matcher.group(1)?.trim() ?: continue
+                if (raw.isBlank()) continue
 
-            val raw = matcher.group(1)?.trim() ?: continue
-            if (raw.isBlank()) continue
+                val lower = raw.lowercase()
+                if (merchantFalsePositivePrefixes.any { lower.startsWith(it) }) continue
 
-            val lower = raw.lowercase()
-            if (merchantFalsePositivePrefixes.any { lower.startsWith(it) }) continue
+                val cleaned = raw.replace(
+                    Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE), ""
+                ).trim()
 
-            val cleaned = raw.replace(
-                Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE), ""
-            ).trim()
-
-            if (cleaned.isNotBlank()) return cleaned
+                if (cleaned.isNotBlank()) return cleaned
+            }
         }
         return null
     }
