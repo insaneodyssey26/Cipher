@@ -25,3 +25,5 @@ keystore.properties
 
 *.log
 /.idea/
+
+.claude/
