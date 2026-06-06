@@ -44,6 +44,9 @@ interface TransactionDao {
     @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 0 AND timestamp >= :startTime")
     suspend fun sumExpensesSince(startTime: Long): Double
 
+    @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 1 AND timestamp >= :startTime")
+    suspend fun sumIncomeSince(startTime: Long): Double
+
     @Query("DELETE FROM transactions")
     suspend fun deleteAllTransactions()
 }

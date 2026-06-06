@@ -9,6 +9,7 @@ import com.masum.cipher.core.data.local.pref.WidgetDataStore
 import com.masum.cipher.core.domain.CategorizerEngine
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.widget.BudgetWidget
+import com.masum.cipher.ui.widget.StatsWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -101,12 +102,16 @@ class TransactionRepository @Inject constructor(
 
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>> = transactionDao.getExpensesSince(startTime)
 
+    suspend fun refreshWidgets() = syncWidget()
+
     private suspend fun syncWidget() {
-        val spent = transactionDao.sumExpensesSince(monthStart())
-        WidgetDataStore.update(context, spent)
+        val start = monthStart()
+        val spent = transactionDao.sumExpensesSince(start)
+        val income = transactionDao.sumIncomeSince(start)
+        WidgetDataStore.update(context, spent, income)
         val manager = GlanceAppWidgetManager(context)
-        val ids = manager.getGlanceIds(BudgetWidget::class.java)
-        ids.forEach { BudgetWidget().update(context, it) }
+        manager.getGlanceIds(BudgetWidget::class.java).forEach { BudgetWidget().update(context, it) }
+        manager.getGlanceIds(StatsWidget::class.java).forEach { StatsWidget().update(context, it) }
     }
 
     private fun monthStart(): Long {
