@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.cipherspend",
+  "applicationId": "com.masum.cipher",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 3,
-      "versionName": "2.1.0",
+      "versionCode": 4,
+      "versionName": "2.2.0",
       "outputFile": "app-release.apk"
     }
   ],
