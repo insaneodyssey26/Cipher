@@ -34,6 +34,7 @@ import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.insights.DayDetailScreen
 import com.masum.cipher.ui.insights.InsightsScreen
 import com.masum.cipher.ui.insights.InsightsViewModel
+import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
 import com.masum.cipher.ui.theme.CipherTheme
@@ -225,9 +226,14 @@ class MainActivity : AppCompatActivity() {
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     biometricAuthenticator = biometricAuthenticator,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToPrivacy = { navController.navigate("privacy_policy") }
+                                )
+                            }
+
+                            composable("privacy_policy") {
+                                PrivacyPolicyScreen(
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                         }

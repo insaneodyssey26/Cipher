@@ -37,7 +37,8 @@ import com.masum.cipher.ui.theme.*
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     biometricAuthenticator: BiometricAuthenticator,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPrivacy: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -343,8 +344,20 @@ fun SettingsScreen(
                 }
             )
 
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
+
+            ListItem(
+                headlineContent = { Text("Privacy Policy") },
+                supportingContent = { Text("How Cipher handles your data") },
+                leadingContent = { Icon(Icons.Default.PrivacyTip, null) },
+                modifier = Modifier.clickable {
+                    if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNavigateToPrivacy()
+                }
+            )
+
             Spacer(modifier = Modifier.height(48.dp))
-            
+
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "Cipher Version 2.1.0",
