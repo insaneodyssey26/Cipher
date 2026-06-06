@@ -146,35 +146,22 @@ class MainActivity : AppCompatActivity() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         val navController = rememberNavController()
 
-                        val slideSpec = remember { tween<IntOffset>(durationMillis = 280, easing = FastOutSlowInEasing) }
-                        val fadeSpec = remember { tween<Float>(durationMillis = 220, easing = FastOutSlowInEasing) }
+                        val navSpec = remember { tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing) }
 
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
                             enterTransition = {
-                                slideInHorizontally(
-                                    initialOffsetX = { it },
-                                    animationSpec = slideSpec
-                                ) + fadeIn(animationSpec = fadeSpec)
+                                slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec)
                             },
                             exitTransition = {
-                                slideOutHorizontally(
-                                    targetOffsetX = { -it / 3 },
-                                    animationSpec = slideSpec
-                                ) + fadeOut(animationSpec = fadeSpec)
+                                slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec)
                             },
                             popEnterTransition = {
-                                slideInHorizontally(
-                                    initialOffsetX = { -it / 3 },
-                                    animationSpec = slideSpec
-                                ) + fadeIn(animationSpec = fadeSpec)
+                                slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec)
                             },
                             popExitTransition = {
-                                slideOutHorizontally(
-                                    targetOffsetX = { it },
-                                    animationSpec = slideSpec
-                                ) + fadeOut(animationSpec = fadeSpec)
+                                slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec)
                             }
                         ) {
                             composable("dashboard") {
