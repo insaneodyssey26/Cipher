@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.components
+package com.masum.cipher.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.domain.model.TransactionCategory
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.TransactionCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

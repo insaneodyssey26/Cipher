@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.mvi
+package com.masum.cipher.core.mvi
 
 interface UiState
 interface UiIntent

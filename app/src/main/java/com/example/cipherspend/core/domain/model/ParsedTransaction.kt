@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.domain.model
+package com.masum.cipher.core.domain.model
 
 data class ParsedTransaction(
     val amount: Double,

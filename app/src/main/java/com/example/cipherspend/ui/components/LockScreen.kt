@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.components
+package com.masum.cipher.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

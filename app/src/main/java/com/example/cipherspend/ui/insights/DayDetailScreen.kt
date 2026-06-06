@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.insights
+package com.masum.cipher.ui.insights
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,11 +15,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.data.local.pref.UserPreferences
-import com.example.cipherspend.ui.components.EditTransactionDialog
-import com.example.cipherspend.ui.components.TransactionCard
-import com.example.cipherspend.ui.theme.IncomeGreen
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.ui.components.EditTransactionDialog
+import com.masum.cipher.ui.components.TransactionCard
+import com.masum.cipher.ui.theme.IncomeGreen
 import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.text.SimpleDateFormat

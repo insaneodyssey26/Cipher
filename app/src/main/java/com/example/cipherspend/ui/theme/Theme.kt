@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.theme
+package com.masum.cipher.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

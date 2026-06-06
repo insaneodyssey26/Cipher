@@ -1,11 +1,11 @@
-package com.example.cipherspend.core.data.local
+package com.masum.cipher.core.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.cipherspend.core.data.local.dao.TransactionDao
-import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 
 @Database(
     entities = [TransactionEntity::class, MerchantAliasEntity::class],

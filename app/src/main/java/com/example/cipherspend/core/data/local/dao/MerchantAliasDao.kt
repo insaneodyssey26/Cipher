@@ -1,10 +1,10 @@
-package com.example.cipherspend.core.data.local.dao
+package com.masum.cipher.core.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.cipherspend.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cipherspend"
+    namespace = "com.masum.cipher"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.cipherspend"
+        applicationId = "com.masum.cipher"
         minSdk = 24
         targetSdk = 35
         versionCode = 3
@@ -55,7 +55,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.appcompat:appcompat:1.7.0")
 

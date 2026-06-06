@@ -1,12 +1,12 @@
-package com.example.cipherspend.core.di
+package com.masum.cipher.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.cipherspend.core.data.local.AppDatabase
-import com.example.cipherspend.core.data.local.dao.TransactionDao
-import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
-import com.example.cipherspend.core.data.repository.BackupRepository
-import com.example.cipherspend.core.security.SecurityManager
+import com.masum.cipher.core.data.local.AppDatabase
+import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.repository.BackupRepository
+import com.masum.cipher.core.security.SecurityManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

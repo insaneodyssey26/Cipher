@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.preferences
+package com.masum.cipher.core.preferences
 
 import android.content.Context
 import androidx.datastore.core.DataStore

@@ -1,10 +1,10 @@
-package com.example.cipherspend.ui.settings
+package com.masum.cipher.ui.settings
 
 import android.net.Uri
-import com.example.cipherspend.core.data.local.pref.AppTheme
-import com.example.cipherspend.core.mvi.UiEffect
-import com.example.cipherspend.core.mvi.UiIntent
-import com.example.cipherspend.core.mvi.UiState
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.mvi.UiEffect
+import com.masum.cipher.core.mvi.UiIntent
+import com.masum.cipher.core.mvi.UiState
 
 class SettingsContract {
     sealed class Intent : UiIntent {

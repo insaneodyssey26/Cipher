@@ -1,11 +1,11 @@
-package com.example.cipherspend.ui.insights
+package com.masum.cipher.ui.insights
 
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.domain.SubscriptionDetector
-import com.example.cipherspend.core.mvi.UiEffect
-import com.example.cipherspend.core.mvi.UiIntent
-import com.example.cipherspend.core.mvi.UiState
-import com.example.cipherspend.ui.dashboard.DashboardContract
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.mvi.UiEffect
+import com.masum.cipher.core.mvi.UiIntent
+import com.masum.cipher.core.mvi.UiState
+import com.masum.cipher.ui.dashboard.DashboardContract
 
 class InsightsContract {
     sealed class Intent : UiIntent {

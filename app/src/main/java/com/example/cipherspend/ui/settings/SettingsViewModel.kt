@@ -1,12 +1,12 @@
-package com.example.cipherspend.ui.settings
+package com.masum.cipher.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cipherspend.core.data.local.dao.TransactionDao
-import com.example.cipherspend.core.data.local.pref.AppTheme
-import com.example.cipherspend.core.data.local.pref.UserPreferences
-import com.example.cipherspend.core.data.repository.BackupRepository
-import com.example.cipherspend.core.util.AppFormatters
+import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.BackupRepository
+import com.masum.cipher.core.util.AppFormatters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel

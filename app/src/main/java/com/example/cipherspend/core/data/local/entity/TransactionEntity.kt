@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.data.local.entity
+package com.masum.cipher.core.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.Index

@@ -1,4 +1,4 @@
-package com.example.cipherspend
+package com.masum.cipher
 
 import org.junit.Test
 

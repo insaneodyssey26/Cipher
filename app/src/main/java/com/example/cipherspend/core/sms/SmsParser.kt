@@ -1,6 +1,6 @@
-package com.example.cipherspend.core.sms
+package com.masum.cipher.core.sms
 
-import com.example.cipherspend.core.domain.model.ParsedTransaction
+import com.masum.cipher.core.domain.model.ParsedTransaction
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Singleton

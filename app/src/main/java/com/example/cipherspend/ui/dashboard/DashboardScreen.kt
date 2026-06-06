@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.dashboard
+package com.masum.cipher.ui.dashboard
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -27,9 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.data.local.pref.UserPreferences
-import com.example.cipherspend.ui.components.*
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.ui.components.*
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.domain.model
+package com.masum.cipher.core.domain.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong

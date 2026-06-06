@@ -1,11 +1,11 @@
-package com.example.cipherspend.core.data.repository
+package com.masum.cipher.core.data.repository
 
-import com.example.cipherspend.core.data.local.dao.TransactionDao
-import com.example.cipherspend.core.data.local.dao.MerchantAliasDao
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.data.local.entity.MerchantAliasEntity
-import com.example.cipherspend.core.domain.CategorizerEngine
-import com.example.cipherspend.core.domain.model.TransactionCategory
+import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.domain.CategorizerEngine
+import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -56,6 +56,19 @@ class TransactionRepository @Inject constructor(
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
+        val existing = transactionDao.getTransactionById(transaction.id)
+        if (existing != null && existing.merchant != transaction.merchant) {
+            val rawKey = existing.merchant.uppercase().trim()
+            if (rawKey != "MISCELLANEOUS") {
+                merchantAliasDao.insertAlias(
+                    MerchantAliasEntity(
+                        rawName = rawKey,
+                        cleanName = transaction.merchant,
+                        isUserDefined = true
+                    )
+                )
+            }
+        }
         transactionDao.insertTransaction(transaction)
     }
 

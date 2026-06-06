@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.components
+package com.masum.cipher.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
@@ -24,9 +24,9 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.cipherspend.ui.dashboard.DashboardContract
-import com.example.cipherspend.ui.theme.ExpenseRed
-import com.example.cipherspend.ui.theme.IncomeGreen
+import com.masum.cipher.ui.dashboard.DashboardContract
+import com.masum.cipher.ui.theme.ExpenseRed
+import com.masum.cipher.ui.theme.IncomeGreen
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 

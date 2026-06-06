@@ -1,6 +1,6 @@
-package com.example.cipherspend.core.domain
+package com.masum.cipher.core.domain
 
-import com.example.cipherspend.core.domain.model.TransactionCategory
+import com.masum.cipher.core.domain.model.TransactionCategory
 import javax.inject.Inject
 import javax.inject.Singleton
 

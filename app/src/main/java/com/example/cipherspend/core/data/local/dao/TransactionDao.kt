@@ -1,11 +1,11 @@
-package com.example.cipherspend.core.data.local.dao
+package com.masum.cipher.core.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -37,6 +37,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE timestamp >= :startTime")
     fun getTransactionsSince(startTime: Long): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
+    suspend fun getTransactionById(id: Long): TransactionEntity?
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAllTransactions()

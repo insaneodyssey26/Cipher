@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.components
+package com.masum.cipher.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -24,11 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.domain.model.TransactionCategory
-import com.example.cipherspend.core.util.AppFormatters
-import com.example.cipherspend.ui.theme.ExpenseRed
-import com.example.cipherspend.ui.theme.IncomeGreen
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.TransactionCategory
+import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.ui.theme.ExpenseRed
+import com.masum.cipher.ui.theme.IncomeGreen
 import java.util.*
 
 @Composable
@@ -69,7 +69,7 @@ fun PremiumBalanceHeader(
                 Text(
                     text = if (isPrivacyMode) "₹ ••••••" else AppFormatters.getCurrencyNoDecimals().format(totalBalance),
                     style = MaterialTheme.typography.displayLarge.copy(
-                        fontFamily = com.example.cipherspend.ui.theme.GoogleSansFontFamily,
+                        fontFamily = com.masum.cipher.ui.theme.GoogleSansFontFamily,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1.5).sp,
                         fontSize = 42.sp

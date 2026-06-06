@@ -1,12 +1,12 @@
-package com.example.cipherspend.ui.insights
+package com.masum.cipher.ui.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.data.repository.TransactionRepository
-import com.example.cipherspend.core.domain.SubscriptionDetector
-import com.example.cipherspend.core.domain.model.TransactionCategory
-import com.example.cipherspend.ui.dashboard.DashboardContract
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.domain.model.TransactionCategory
+import com.masum.cipher.ui.dashboard.DashboardContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*

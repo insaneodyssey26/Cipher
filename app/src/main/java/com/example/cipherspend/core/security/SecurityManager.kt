@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.security
+package com.masum.cipher.core.security
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences

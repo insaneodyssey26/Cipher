@@ -1,9 +1,9 @@
-package com.example.cipherspend.ui.dashboard
+package com.masum.cipher.ui.dashboard
 
-import com.example.cipherspend.core.data.local.entity.TransactionEntity
-import com.example.cipherspend.core.mvi.UiEffect
-import com.example.cipherspend.core.mvi.UiIntent
-import com.example.cipherspend.core.mvi.UiState
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.mvi.UiEffect
+import com.masum.cipher.core.mvi.UiIntent
+import com.masum.cipher.core.mvi.UiState
 
 class DashboardContract {
 

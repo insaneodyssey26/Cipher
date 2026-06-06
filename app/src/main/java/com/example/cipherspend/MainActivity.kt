@@ -1,4 +1,4 @@
-package com.example.cipherspend
+package com.masum.cipher
 
 import android.Manifest
 import android.os.Build
@@ -26,17 +26,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.cipherspend.core.data.local.pref.AppTheme
-import com.example.cipherspend.core.data.local.pref.UserPreferences
-import com.example.cipherspend.core.security.BiometricAuthenticator
-import com.example.cipherspend.ui.dashboard.DashboardScreen
-import com.example.cipherspend.ui.dashboard.DashboardViewModel
-import com.example.cipherspend.ui.insights.DayDetailScreen
-import com.example.cipherspend.ui.insights.InsightsScreen
-import com.example.cipherspend.ui.insights.InsightsViewModel
-import com.example.cipherspend.ui.settings.SettingsScreen
-import com.example.cipherspend.ui.settings.SettingsViewModel
-import com.example.cipherspend.ui.theme.CipherTheme
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.ui.dashboard.DashboardScreen
+import com.masum.cipher.ui.dashboard.DashboardViewModel
+import com.masum.cipher.ui.insights.DayDetailScreen
+import com.masum.cipher.ui.insights.InsightsScreen
+import com.masum.cipher.ui.insights.InsightsViewModel
+import com.masum.cipher.ui.settings.SettingsScreen
+import com.masum.cipher.ui.settings.SettingsViewModel
+import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         if (!isAuthenticated) {
-                            com.example.cipherspend.ui.components.LockScreen(
+                            com.masum.cipher.ui.components.LockScreen(
                                 onUnlockClick = {
                                     resumeTrigger++
                                 }

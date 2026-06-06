@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.util
+package com.masum.cipher.core.util
 
 import java.text.NumberFormat
 import java.text.SimpleDateFormat

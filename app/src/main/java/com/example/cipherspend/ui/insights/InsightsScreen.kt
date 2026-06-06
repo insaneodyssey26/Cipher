@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.insights
+package com.masum.cipher.ui.insights
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -26,11 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cipherspend.core.data.local.pref.UserPreferences
-import com.example.cipherspend.core.domain.SubscriptionDetector
-import com.example.cipherspend.core.util.AppFormatters
-import com.example.cipherspend.ui.components.*
-import com.example.cipherspend.ui.theme.IncomeGreen
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.ui.components.*
+import com.masum.cipher.ui.theme.IncomeGreen
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)

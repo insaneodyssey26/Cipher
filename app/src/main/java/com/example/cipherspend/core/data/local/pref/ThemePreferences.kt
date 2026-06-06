@@ -1,4 +1,4 @@
-package com.example.cipherspend.core.data.local.pref
+package com.masum.cipher.core.data.local.pref
 
 import android.content.Context
 import androidx.datastore.core.DataStore

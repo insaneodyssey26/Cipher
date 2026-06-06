@@ -1,4 +1,4 @@
-package com.example.cipherspend.ui.settings
+package com.masum.cipher.ui.settings
 
 import android.net.Uri
 import android.widget.Toast
@@ -28,8 +28,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
-import com.example.cipherspend.core.data.local.pref.AppTheme
-import com.example.cipherspend.core.security.BiometricAuthenticator
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.security.BiometricAuthenticator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
