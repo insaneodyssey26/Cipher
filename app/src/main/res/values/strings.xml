@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cipher</string>
+    <string name="widget_budget_description">Shows your monthly spending progress against your budget</string>
 </resources>

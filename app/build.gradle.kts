@@ -74,6 +74,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
