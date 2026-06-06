@@ -58,13 +58,18 @@ class StatsWidget : GlanceAppWidget() {
     @Composable
     private fun Content(spent: Double, income: Double) {
         val net = income - spent
-        val netColor = if (net >= 0) ColorProvider(Color(0xFF4CAF50)) else ColorProvider(Color(0xFFE53935))
+        val netPositive = net >= 0
+        val netColor = ColorProvider(if (netPositive) Color(0xFF4CAF50) else Color(0xFFE53935))
+        val incomeColor = ColorProvider(Color(0xFF4CAF50))
+        val expenseColor = ColorProvider(Color(0xFFE53935))
+        val cipherBlue = ColorProvider(Color(0xFF4E6CF7))
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
-                .padding(12.dp),
+                .clickable(actionStartActivity<MainActivity>())
+                .padding(16.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -73,93 +78,80 @@ class StatsWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Text(
-                        text = "This Month",
-                        modifier = GlanceModifier.defaultWeight().clickable(actionStartActivity<MainActivity>()),
+                        text = "cipher",
+                        modifier = GlanceModifier.defaultWeight(),
                         style = TextStyle(
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = GlanceTheme.colors.onSurface
+                            color = cipherBlue
                         )
                     )
                     Text(
                         text = "↻",
                         modifier = GlanceModifier.clickable(actionRunCallback<StatsRefreshAction>()),
-                        style = TextStyle(fontSize = 16.sp, color = GlanceTheme.colors.onSurfaceVariant)
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        )
                     )
                 }
 
-                Spacer(GlanceModifier.height(10.dp))
+                Spacer(GlanceModifier.height(12.dp))
 
-                Box(modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())) {
-                    Column {
-                        Row(
-                            modifier = GlanceModifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Vertical.CenterVertically
-                        ) {
-                            Text(
-                                text = "↑",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = ColorProvider(Color(0xFF4CAF50))
-                                )
-                            )
-                            Spacer(GlanceModifier.width(4.dp))
-                            Column {
-                                Text(
-                                    text = "₹${fmt(income)}",
-                                    style = TextStyle(
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ColorProvider(Color(0xFF4CAF50))
-                                    )
-                                )
-                                Text(
-                                    text = "earned",
-                                    style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.onSurfaceVariant)
-                                )
-                            }
-                        }
+                Text(
+                    text = "${if (netPositive) "+" else "−"}₹${fmt(net)}",
+                    style = TextStyle(
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = netColor
+                    )
+                )
+                Spacer(GlanceModifier.height(2.dp))
+                Text(
+                    text = "net this month",
+                    style = TextStyle(
+                        fontSize = 11.sp,
+                        color = GlanceTheme.colors.onSurfaceVariant
+                    )
+                )
 
-                        Spacer(GlanceModifier.height(6.dp))
+                Spacer(GlanceModifier.height(14.dp))
 
-                        Row(
-                            modifier = GlanceModifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Vertical.CenterVertically
-                        ) {
-                            Text(
-                                text = "↓",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = ColorProvider(Color(0xFFE53935))
-                                )
-                            )
-                            Spacer(GlanceModifier.width(4.dp))
-                            Column {
-                                Text(
-                                    text = "₹${fmt(spent)}",
-                                    style = TextStyle(
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ColorProvider(Color(0xFFE53935))
-                                    )
-                                )
-                                Text(
-                                    text = "spent",
-                                    style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.onSurfaceVariant)
-                                )
-                            }
-                        }
-
-                        Spacer(GlanceModifier.height(8.dp))
-
+                Row(modifier = GlanceModifier.fillMaxWidth()) {
+                    Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "${if (net >= 0) "+" else ""}₹${fmt(net)} net",
+                            text = "↑ ₹${fmt(income)}",
                             style = TextStyle(
-                                fontSize = 11.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = netColor
+                                color = incomeColor
+                            )
+                        )
+                        Spacer(GlanceModifier.height(2.dp))
+                        Text(
+                            text = "income",
+                            style = TextStyle(
+                                fontSize = 10.sp,
+                                color = GlanceTheme.colors.onSurfaceVariant
+                            )
+                        )
+                    }
+                    Spacer(GlanceModifier.width(8.dp))
+                    Column(modifier = GlanceModifier.defaultWeight()) {
+                        Text(
+                            text = "↓ ₹${fmt(spent)}",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = expenseColor
+                            )
+                        )
+                        Spacer(GlanceModifier.height(2.dp))
+                        Text(
+                            text = "spent",
+                            style = TextStyle(
+                                fontSize = 10.sp,
+                                color = GlanceTheme.colors.onSurfaceVariant
                             )
                         )
                     }
@@ -169,7 +161,7 @@ class StatsWidget : GlanceAppWidget() {
     }
 
     private fun fmt(amount: Double): String {
-        val abs = Math.abs(amount)
+        val abs = kotlin.math.abs(amount)
         return when {
             abs >= 1_00_000 -> "%.1fL".format(abs / 1_00_000)
             abs >= 1_000 -> "%.1fK".format(abs / 1_000)

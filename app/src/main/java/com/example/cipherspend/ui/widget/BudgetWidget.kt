@@ -61,18 +61,20 @@ class BudgetWidget : GlanceAppWidget() {
     private fun Content(spent: Double, budget: Double) {
         val progress = if (budget > 0) (spent / budget).toFloat().coerceIn(0f, 1f) else 0f
         val overBudget = spent > budget && budget > 0
+        val remaining = budget - spent
 
-        val indicatorColor = when {
+        val accentColor = when {
             overBudget -> ColorProvider(Color(0xFFE53935))
             progress >= 0.8f -> ColorProvider(Color(0xFFFFB300))
-            else -> ColorProvider(Color(0xFF4CAF50))
+            else -> ColorProvider(Color(0xFF4E6CF7))
         }
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
-                .padding(12.dp),
+                .clickable(actionStartActivity<MainActivity>())
+                .padding(16.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -81,70 +83,88 @@ class BudgetWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Text(
-                        text = "Budget",
-                        modifier = GlanceModifier.defaultWeight().clickable(actionStartActivity<MainActivity>()),
+                        text = "cipher",
+                        modifier = GlanceModifier.defaultWeight(),
                         style = TextStyle(
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = GlanceTheme.colors.onSurface
+                            color = accentColor
                         )
                     )
                     Text(
                         text = "↻",
                         modifier = GlanceModifier.clickable(actionRunCallback<BudgetRefreshAction>()),
                         style = TextStyle(
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             color = GlanceTheme.colors.onSurfaceVariant
                         )
                     )
                 }
 
-                Spacer(GlanceModifier.height(8.dp))
+                Spacer(GlanceModifier.height(12.dp))
 
                 if (budget <= 0.0) {
                     Text(
-                        text = "No budget set.\nTap to configure.",
-                        modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>()),
-                        style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurface)
+                        text = "No budget set",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GlanceTheme.colors.onSurface
+                        )
+                    )
+                    Spacer(GlanceModifier.height(4.dp))
+                    Text(
+                        text = "Tap to configure in settings",
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        )
                     )
                 } else {
-                    Box(modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())) {
-                        Column {
-                            LinearProgressIndicator(
-                                progress = progress,
-                                modifier = GlanceModifier.fillMaxWidth().height(8.dp),
-                                color = indicatorColor,
-                                backgroundColor = ColorProvider(Color(0x224CAF50))
-                            )
-                            Spacer(GlanceModifier.height(8.dp))
-                            Text(
-                                text = "₹${fmt(spent)} spent",
-                                style = TextStyle(
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = GlanceTheme.colors.onSurface
-                                )
-                            )
-                            Text(
-                                text = "of ₹${fmt(budget)}",
-                                style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurfaceVariant)
-                            )
-                            Spacer(GlanceModifier.height(4.dp))
-                            Text(
-                                text = if (overBudget) "Over budget!" else "₹${fmt(budget - spent)} left",
-                                style = TextStyle(fontSize = 11.sp, color = indicatorColor)
-                            )
-                        }
-                    }
+                    Text(
+                        text = "₹${fmt(spent)}",
+                        style = TextStyle(
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GlanceTheme.colors.onSurface
+                        )
+                    )
+                    Spacer(GlanceModifier.height(2.dp))
+                    Text(
+                        text = "spent of ₹${fmt(budget)}",
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        )
+                    )
+                    Spacer(GlanceModifier.height(12.dp))
+                    LinearProgressIndicator(
+                        progress = progress,
+                        modifier = GlanceModifier.fillMaxWidth().height(5.dp),
+                        color = accentColor,
+                        backgroundColor = ColorProvider(Color(0x1AFFFFFF))
+                    )
+                    Spacer(GlanceModifier.height(10.dp))
+                    Text(
+                        text = if (overBudget) "Over by ₹${fmt(-remaining)}" else "₹${fmt(remaining)} remaining",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = accentColor
+                        )
+                    )
                 }
             }
         }
     }
 
-    private fun fmt(amount: Double): String = when {
-        amount >= 1_00_000 -> "%.1fL".format(amount / 1_00_000)
-        amount >= 1_000 -> "%.1fK".format(amount / 1_000)
-        else -> "%.0f".format(amount)
+    private fun fmt(amount: Double): String {
+        val abs = kotlin.math.abs(amount)
+        return when {
+            abs >= 1_00_000 -> "%.1fL".format(abs / 1_00_000)
+            abs >= 1_000 -> "%.1fK".format(abs / 1_000)
+            else -> "%.0f".format(abs)
+        }
     }
 }
 
