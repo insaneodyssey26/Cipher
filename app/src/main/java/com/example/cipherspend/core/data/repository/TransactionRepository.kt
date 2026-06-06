@@ -5,12 +5,14 @@ import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
-import com.masum.cipher.core.data.local.pref.WidgetDataStore
+import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.domain.CategorizerEngine
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.widget.BudgetWidget
 import com.masum.cipher.ui.widget.StatsWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -108,10 +110,24 @@ class TransactionRepository @Inject constructor(
         val start = monthStart()
         val spent = transactionDao.sumExpensesSince(start)
         val income = transactionDao.sumIncomeSince(start)
-        WidgetDataStore.update(context, spent, income)
         val manager = GlanceAppWidgetManager(context)
-        manager.getGlanceIds(BudgetWidget::class.java).forEach { BudgetWidget().update(context, it) }
-        manager.getGlanceIds(StatsWidget::class.java).forEach { StatsWidget().update(context, it) }
+
+        manager.getGlanceIds(BudgetWidget::class.java).forEach { id ->
+            updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+                prefs.toMutablePreferences().apply { this[WidgetKeys.BUDGET_SPENT] = spent }
+            }
+            BudgetWidget().update(context, id)
+        }
+
+        manager.getGlanceIds(StatsWidget::class.java).forEach { id ->
+            updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+                prefs.toMutablePreferences().apply {
+                    this[WidgetKeys.STATS_SPENT] = spent
+                    this[WidgetKeys.STATS_INCOME] = income
+                }
+            }
+            StatsWidget().update(context, id)
+        }
     }
 
     private fun monthStart(): Long {
