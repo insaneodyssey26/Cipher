@@ -1,5 +1,6 @@
 package com.masum.cipher.ui.settings
 
+import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -345,6 +346,17 @@ fun SettingsScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
+
+            ListItem(
+                headlineContent = { Text("Feedback & Feature Requests") },
+                supportingContent = { Text("Report a bug or suggest something new") },
+                leadingContent = { Icon(Icons.Default.Feedback, null) },
+                modifier = Modifier.clickable {
+                    if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tally.so/r/gDz7NK"))
+                    context.startActivity(intent)
+                }
+            )
 
             ListItem(
                 headlineContent = { Text("Privacy Policy") },
