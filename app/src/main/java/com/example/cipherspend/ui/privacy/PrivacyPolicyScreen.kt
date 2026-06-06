@@ -97,8 +97,8 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
 
             Text(
                 text = "Last updated: June 2026",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(Modifier.height(8.dp))
@@ -120,7 +120,7 @@ private fun PolicyMeta() {
         Text(
             text = "A privacy-first finance tracker. No accounts. No cloud. No tracking.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -136,7 +136,7 @@ private fun PolicySection(title: String, body: String) {
         Text(
             text = body,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onBackground,
             lineHeight = 22.sp
         )
     }

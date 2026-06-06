@@ -372,6 +372,8 @@ fun SettingsScreen(
     if (showBudgetDialog) {
         AlertDialog(
             onDismissRequest = { showBudgetDialog = false },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 0.dp,
             title = { Text("Monthly Spending Limit") },
             text = {
                 Column {
@@ -412,10 +414,12 @@ fun SettingsScreen(
 
     if (showBackupPasswordDialog != null) {
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
                 showBackupPasswordDialog = null
                 backupPassword = ""
             },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 0.dp,
             title = { 
                 Text(if (showBackupPasswordDialog == BackupAction.EXPORT) "Set Backup Password" else "Enter Backup Password")
             },
@@ -473,6 +477,8 @@ fun SettingsScreen(
     if (showTimeoutDialog) {
         AlertDialog(
             onDismissRequest = { showTimeoutDialog = false },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 0.dp,
             title = { Text("Auto-Lock Timeout") },
             text = {
                 Column {
@@ -509,6 +515,8 @@ fun SettingsScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 0.dp,
             title = { Text("Delete all data?") },
             text = { Text("This action will permanently erase your entire transaction history. It cannot be undone.") },
             confirmButton = {

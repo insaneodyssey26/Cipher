@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,13 +23,13 @@ import com.masum.cipher.ui.theme.*
 @Composable
 fun LockScreen(onUnlockClick: () -> Unit) {
     val breathe by rememberInfiniteTransition(label = "breathe").animateFloat(
-        initialValue = 0.85f,
+        initialValue = 0.93f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = FastOutSlowInEasing),
+            animation = tween(2600, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "ring"
+        label = "icon"
     )
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -41,78 +40,47 @@ fun LockScreen(onUnlockClick: () -> Unit) {
         label = "btn"
     )
 
-    val bg = MaterialTheme.colorScheme.background
-    val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bg),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(108.dp)
-                        .scale(breathe)
-                        .background(CipherBlueDim.copy(alpha = 0.08f), CircleShape)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .border(1.dp, CipherBlue.copy(alpha = 0.25f), CircleShape)
-                        .background(CipherBlueDim.copy(alpha = 0.12f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "C",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-1).sp,
-                            fontSize = 32.sp
-                        ),
-                        color = CipherBlue
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(40.dp))
-
             Text(
-                text = "CIPHER",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    letterSpacing = 8.sp,
-                    fontWeight = FontWeight.Bold
+                text = "cipher",
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-1.5).sp
                 ),
-                color = onSurfaceVar
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.scale(breathe)
             )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
 
             Text(
                 text = "Your financial vault",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(64.dp))
+            Spacer(Modifier.height(72.dp))
 
             Box(
                 modifier = Modifier
                     .scale(btnScale)
-                    .background(CipherBlueDim, RoundedCornerShape(14.dp))
-                    .border(1.dp, CipherBlue.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = onUnlockClick
                     )
-                    .padding(horizontal = 40.dp, vertical = 14.dp)
+                    .padding(horizontal = 48.dp, vertical = 14.dp)
             ) {
                 Text(
                     text = "Unlock",
@@ -120,7 +88,7 @@ fun LockScreen(onUnlockClick: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
                     ),
-                    color = CipherBlue
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
