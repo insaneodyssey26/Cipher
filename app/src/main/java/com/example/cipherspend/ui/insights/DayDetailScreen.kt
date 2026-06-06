@@ -15,11 +15,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
-import com.masum.cipher.ui.components.EditTransactionDialog
-import com.masum.cipher.ui.components.TransactionCard
-import com.masum.cipher.ui.theme.IncomeGreen
+import com.masum.cipher.ui.components.*
+import com.masum.cipher.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -95,19 +95,34 @@ fun DayDetailScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    actionColor = CipherBlue,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                )
+            }
+        },
         topBar = {
             LargeTopAppBar(
                 title = {
                     Column {
                         Text(
                             text = dayName,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = (-0.5).sp
+                            ),
+                            color = TextPrimary
                         )
                         Text(
                             text = fullDate,
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = TextSecondary
                         )
                     }
                 },
@@ -153,8 +168,12 @@ fun DayDetailScreen(
 
             item {
                 Text(
-                    text = "Transactions",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    text = "TRANSACTIONS",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.5.sp
+                    ),
+                    color = TextSecondary,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
                 )
             }
@@ -169,14 +188,14 @@ fun DayDetailScreen(
                     ) {
                         Text(
                             text = "No transactions for this day",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextTertiary
                         )
                     }
                 }
             } else {
                 items(items = dayTransactions, key = { it.id }) { transaction ->
-                    TransactionCard(
+                    TransactionRow(
                         transaction = transaction,
                         isPrivacyMode = false,
                         onDelete = {
@@ -215,17 +234,20 @@ private fun DetailStatCard(
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.05f)
-        ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = color.copy(alpha = 0.8f)
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 1.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = color.copy(alpha = 0.7f)
             )
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = amount,
                 style = MaterialTheme.typography.titleLarge.copy(

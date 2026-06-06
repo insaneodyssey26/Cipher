@@ -7,58 +7,80 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary = primaryLight,
-    onPrimary = onPrimaryLight,
-    primaryContainer = primaryContainerLight,
-    onPrimaryContainer = onPrimaryContainerLight,
-    secondary = secondaryLight,
-    onSecondary = onSecondaryLight,
-    secondaryContainer = secondaryContainerLight,
-    onSecondaryContainer = onSecondaryContainerLight,
-    tertiary = tertiaryLight,
-    onTertiary = onTertiaryLight,
-    tertiaryContainer = tertiaryContainerLight,
-    onTertiaryContainer = onTertiaryContainerLight,
-    error = errorLight,
-    onError = onErrorLight,
-    errorContainer = errorContainerLight,
-    onErrorContainer = onErrorContainerLight,
-    background = backgroundLight,
-    onBackground = onBackgroundLight,
-    surface = surfaceLight,
-    onSurface = onSurfaceLight,
-    surfaceVariant = surfaceVariantLight,
-    onSurfaceVariant = onSurfaceVariantLight
+private val DarkColorScheme = darkColorScheme(
+    primary             = CipherBlue,
+    onPrimary           = Color.White,
+    primaryContainer    = CipherBlueContainer,
+    onPrimaryContainer  = CipherBlue,
+
+    secondary           = TextSecondary,
+    onSecondary         = VoidBlack,
+    secondaryContainer  = VoidSurfaceHigh,
+    onSecondaryContainer= TextPrimary,
+
+    tertiary            = CipherIncome,
+    onTertiary          = VoidBlack,
+    tertiaryContainer   = CipherIncomeContainer,
+    onTertiaryContainer = CipherIncome,
+
+    error               = CipherExpense,
+    onError             = Color.White,
+    errorContainer      = CipherExpenseContainer,
+    onErrorContainer    = CipherExpense,
+
+    background          = VoidBlack,
+    onBackground        = TextPrimary,
+
+    surface             = VoidSurface,
+    onSurface           = TextPrimary,
+    surfaceVariant      = VoidSurfaceHigh,
+    onSurfaceVariant    = TextSecondary,
+
+    outline             = TextTertiary,
+    outlineVariant      = Color(0x1AFFFFFF),
+
+    inverseSurface      = TextPrimary,
+    inverseOnSurface    = VoidBlack,
+    inversePrimary      = CipherBlue,
+    scrim               = Color(0xCC000000)
 )
 
-private val DarkColorScheme = darkColorScheme(
-    primary = primaryDark,
-    onPrimary = onPrimaryDark,
-    primaryContainer = primaryContainerDark,
-    onPrimaryContainer = onPrimaryContainerDark,
-    secondary = secondaryDark,
-    onSecondary = onSecondaryDark,
-    secondaryContainer = secondaryContainerDark,
-    onSecondaryContainer = onSecondaryContainerDark,
-    tertiary = tertiaryDark,
-    onTertiary = onTertiaryDark,
-    tertiaryContainer = tertiaryContainerDark,
-    onTertiaryContainer = onTertiaryContainerDark,
-    error = errorDark,
-    onError = onErrorDark,
-    errorContainer = errorContainerDark,
-    onErrorContainer = onErrorContainerDark,
-    background = backgroundDark,
-    onBackground = onBackgroundDark,
-    surface = surfaceDark,
-    onSurface = onSurfaceDark,
-    surfaceVariant = surfaceVariantDark,
-    onSurfaceVariant = onSurfaceVariantDark
+private val LightColorScheme = lightColorScheme(
+    primary             = LightPrimary,
+    onPrimary           = LightOnPrimary,
+    primaryContainer    = Color(0xFFDDE3FF),
+    onPrimaryContainer  = Color(0xFF001258),
+
+    secondary           = LightTextSecondary,
+    onSecondary         = Color.White,
+    secondaryContainer  = LightSurfaceHigh,
+    onSecondaryContainer= LightTextPrimary,
+
+    tertiary            = Color(0xFF0D9B62),
+    onTertiary          = Color.White,
+    tertiaryContainer   = Color(0xFFB8F5D8),
+    onTertiaryContainer = Color(0xFF002116),
+
+    error               = Color(0xFFBA1A1A),
+    onError             = Color.White,
+    errorContainer      = Color(0xFFFFDAD6),
+    onErrorContainer    = Color(0xFF410002),
+
+    background          = LightBackground,
+    onBackground        = LightTextPrimary,
+
+    surface             = LightSurface,
+    onSurface           = LightTextPrimary,
+    surfaceVariant      = LightSurfaceHigh,
+    onSurfaceVariant    = LightTextSecondary,
+
+    outline             = Color(0xFF9090A0),
+    outlineVariant      = LightBorder
 )
 
 @Composable

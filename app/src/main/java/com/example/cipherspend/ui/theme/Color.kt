@@ -2,63 +2,43 @@ package com.masum.cipher.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Palette - Sophisticated & High-Contrast
-val primaryLight = Color(0xFF0061A4)
-val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFFD1E4FF)
-val onPrimaryContainerLight = Color(0xFF001D36)
+// ─── Void Design System ───────────────────────────────────────────────────────
+// Near-black with the faintest indigo warmth. Not pure black — that's too harsh.
+// Not grey — that's too generic. Cipher has its own darkness.
 
-val secondaryLight = Color(0xFF535F70)
-val onSecondaryLight = Color(0xFFFFFFFF)
-val secondaryContainerLight = Color(0xFFD7E3F7)
-val onSecondaryContainerLight = Color(0xFF101C2B)
+val VoidBlack       = Color(0xFF000000)  // Pure AMOLED black
+val VoidSurface     = Color(0xFF0A0A0F)  // Card surfaces
+val VoidSurfaceHigh = Color(0xFF141420)  // Elevated — modals, bottom sheets
+val VoidBorder      = Color(0x14FFFFFF)  // 8% white — barely-there card edges
+val VoidBorderBright= Color(0x1FFFFFFF)  // 12% white — interactive borders
 
-val tertiaryLight = Color(0xFF6B5778)
-val onTertiaryLight = Color(0xFFFFFFFF)
-val tertiaryContainerLight = Color(0xFFF2DAFF)
-val onTertiaryContainerLight = Color(0xFF251431)
+// Primary — Cipher Blue
+val CipherBlue          = Color(0xFF4E6CF7)
+val CipherBlueContainer = Color(0xFF18224E)
+val CipherBlueDim       = Color(0x334E6CF7)  // 20% blue for tinted backgrounds
 
-val errorLight = Color(0xFFBA1A1A)
-val onErrorLight = Color(0xFFFFFFFF)
-val errorContainerLight = Color(0xFFFFDAD6)
-val onErrorContainerLight = Color(0xFF410002)
+// Semantic colors
+val CipherExpense          = Color(0xFFE8453C)
+val CipherExpenseContainer = Color(0xFF2E1210)
+val CipherIncome           = Color(0xFF1AC47D)
+val CipherIncomeContainer  = Color(0xFF0B2E1F)
 
-val backgroundLight = Color(0xFFF8F9FF)
-val onBackgroundLight = Color(0xFF191C20)
-val surfaceLight = Color(0xFFF8F9FF)
-val onSurfaceLight = Color(0xFF191C20)
-val surfaceVariantLight = Color(0xFFDFE2EB)
-val onSurfaceVariantLight = Color(0xFF43474E)
+// Text scale
+val TextPrimary   = Color(0xFFEEEEF5)  // High-emphasis
+val TextSecondary = Color(0xFF8585A0)  // Mid — labels, subtitles
+val TextTertiary  = Color(0xFF3A3A50)  // Low — disabled, hints, dividers
 
-// Dark Palette - Pitch Black AMOLED
-val primaryDark = Color(0xFFD0E4FF)
-val onPrimaryDark = Color(0xFF003258)
-val primaryContainerDark = Color(0xFF00497D)
-val onPrimaryContainerDark = Color(0xFFD1E4FF)
+// Light theme — kept minimal, not the focus of this app
+val LightBackground    = Color(0xFFF6F6FA)
+val LightSurface       = Color(0xFFFFFFFF)
+val LightSurfaceHigh   = Color(0xFFF0F0F6)
+val LightPrimary       = Color(0xFF3A57E8)
+val LightOnPrimary     = Color(0xFFFFFFFF)
+val LightTextPrimary   = Color(0xFF12121A)
+val LightTextSecondary = Color(0xFF6B6B85)
+val LightBorder        = Color(0x14000000)
 
-val secondaryDark = Color(0xFFBBC7DB)
-val onSecondaryDark = Color(0xFF253140)
-val secondaryContainerDark = Color(0xFF3B4858)
-val onSecondaryContainerDark = Color(0xFFD7E3F7)
-
-val tertiaryDark = Color(0xFFD7BEE4)
-val onTertiaryDark = Color(0xFF3B2948)
-val tertiaryContainerDark = Color(0xFF523F5F)
-val onTertiaryContainerDark = Color(0xFFF2DAFF)
-
-val errorDark = Color(0xFFFFB4AB)
-val onErrorDark = Color(0xFF690005)
-val errorContainerDark = Color(0xFF93000A)
-val onErrorContainerDark = Color(0xFFFFDAD6)
-
-val backgroundDark = Color(0xFF000000) // Pitch Black
-val onBackgroundDark = Color(0xFFE2E2E6)
-val surfaceDark = Color(0xFF000000) // Pitch Black
-val onSurfaceDark = Color(0xFFE2E2E6)
-val surfaceVariantDark = Color(0xFF1A1C1E) // Darker variant for cards
-val onSurfaceVariantDark = Color(0xFFC3C7CF)
-
-// Accent Colors for Transactions
-val IncomeGreen = Color(0xFF2DDA93)
-val ExpenseRed = Color(0xFFFF5252)
-val BalanceBlue = Color(0xFF47A1FF)
+// Aliases — used in component files for direct import
+val IncomeGreen = CipherIncome
+val ExpenseRed  = CipherExpense
+val BalanceBlue = CipherBlue

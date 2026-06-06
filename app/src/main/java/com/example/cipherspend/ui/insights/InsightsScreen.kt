@@ -30,7 +30,7 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.components.*
-import com.masum.cipher.ui.theme.IncomeGreen
+import com.masum.cipher.ui.theme.*
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,9 +123,12 @@ fun SubscriptionSection(
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         Text(
-            text = "Detected Subscriptions",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground
+            text = "DETECTED SUBSCRIPTIONS",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.5.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -147,9 +150,9 @@ fun SubscriptionItem(
     
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier
@@ -178,13 +181,14 @@ fun SubscriptionItem(
                 Text(
                     text = sub.merchant,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = "Next expected: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = TextSecondary
                 )
             }
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -195,7 +196,7 @@ fun SettingsScreen(
                 }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
 
             SettingsSectionHeader(title = "Security & Privacy")
             
@@ -270,7 +271,7 @@ fun SettingsScreen(
                 }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
 
             SettingsSectionHeader(title = "Financial Goals")
 
@@ -287,7 +288,7 @@ fun SettingsScreen(
                 }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
 
             SettingsSectionHeader(title = "Data Management")
 
@@ -330,7 +331,7 @@ fun SettingsScreen(
                 }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = TextTertiary.copy(alpha = 0.3f))
 
             ListItem(
                 headlineContent = { Text("Clear All Data", color = MaterialTheme.colorScheme.error) },
@@ -348,7 +349,7 @@ fun SettingsScreen(
                 Text(
                     text = "Cipher Version 2.1.0",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    color = TextTertiary
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -523,11 +524,12 @@ private enum class BackupAction { EXPORT, IMPORT }
 @Composable
 private fun SettingsSectionHeader(title: String) {
     Text(
-        text = title,
-        style = MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+        text = title.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = androidx.compose.ui.unit.TextUnit(1.5f, androidx.compose.ui.unit.TextUnitType.Sp)
         ),
-        modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 20.dp, top = 28.dp, bottom = 8.dp)
     )
 }

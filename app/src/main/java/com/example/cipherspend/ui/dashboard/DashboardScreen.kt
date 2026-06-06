@@ -1,7 +1,12 @@
 package com.masum.cipher.ui.dashboard
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,8 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -30,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.ui.components.*
+import com.masum.cipher.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,13 +51,13 @@ fun DashboardScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
-    
+
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
-    
+    val privacyMode = settings?.isPrivacyModeEnabled ?: false
+
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
-    val searchFocusRequester = remember { FocusRequester() }
     var localSearchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -74,66 +79,77 @@ fun DashboardScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    actionColor = CipherBlue,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+        },
         topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.background,
-                tonalElevation = if (scrollBehavior.state.contentOffset < -1f) 3.dp else 0.dp
-            ) {
+            Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 Column {
                     TopAppBar(
                         title = {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                if (!isSearchActive) {
-                                    Text(
-                                        text = "Cipher",
-                                        style = MaterialTheme.typography.headlineMedium.copy(
-                                            fontWeight = FontWeight.Black,
-                                            letterSpacing = (-1).sp
-                                        ),
-                                        modifier = Modifier.align(Alignment.CenterStart)
-                                    )
-                                } else {
-                                    TextField(
-                                        value = localSearchQuery,
-                                        onValueChange = { 
-                                            localSearchQuery = it
-                                            viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it)) 
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .focusRequester(searchFocusRequester),
-                                        placeholder = { Text("Search vault...") },
-                                        singleLine = true,
-                                        colors = TextFieldDefaults.colors(
-                                            focusedContainerColor = Color.Transparent,
-                                            unfocusedContainerColor = Color.Transparent,
-                                            focusedIndicatorColor = Color.Transparent,
-                                            unfocusedIndicatorColor = Color.Transparent,
-                                        ),
-                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
-                                        trailingIcon = {
-                                            IconButton(onClick = { 
-                                                localSearchQuery = ""
-                                                viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(""))
-                                                isSearchActive = false 
-                                            }) {
-                                                Icon(Icons.Rounded.Close, null)
-                                            }
+                            if (!isSearchActive) {
+                                Text(
+                                    text = "Cipher",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = (-1).sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            } else {
+                                TextField(
+                                    value = localSearchQuery,
+                                    onValueChange = {
+                                        localSearchQuery = it
+                                        viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it))
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    placeholder = {
+                                        Text(
+                                            "Search vault...",
+                                            color = MaterialTheme.colorScheme.outline,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    singleLine = true,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                        cursorColor = CipherBlue
+                                    ),
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            localSearchQuery = ""
+                                            viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(""))
+                                            isSearchActive = false
+                                        }) {
+                                            Icon(Icons.Rounded.Close, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
-                                    )
-                                    LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
-                                }
+                                    }
+                                )
                             }
                         },
                         actions = {
                             if (!isSearchActive) {
-                                IconButton(onClick = { 
+                                IconButton(onClick = {
                                     if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isSearchActive = true 
+                                    isSearchActive = true
                                 }) {
-                                    Icon(Icons.Rounded.Search, "Search")
+                                    Icon(Icons.Rounded.Search, "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 IconButton(onClick = {
                                     if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -149,26 +165,45 @@ fun DashboardScreen(
                             scrolledContainerColor = Color.Transparent
                         )
                     )
-                    
+
                     AnimatedVisibility(
-                        visible = isSearchActive || localSearchQuery.isNotEmpty(),
-                        enter = expandVertically(animationSpec = tween(300)) + fadeIn(),
-                        exit = shrinkVertically(animationSpec = tween(300)) + fadeOut()
+                        visible = isSearchActive,
+                        enter = expandVertically(animationSpec = tween(220)) + fadeIn(),
+                        exit = shrinkVertically(animationSpec = tween(180)) + fadeOut()
                     ) {
-                        SingleChoiceSegmentedButtonRow(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 12.dp)
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            DashboardContract.FilterType.entries.forEachIndexed { index, filter ->
-                                SegmentedButton(
+                            DashboardContract.FilterType.entries.forEach { filter ->
+                                FilterChip(
                                     selected = state.activeFilter == filter,
-                                    onClick = { 
+                                    onClick = {
                                         if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        viewModel.handleIntent(DashboardContract.Intent.FilterTransactions(filter)) 
+                                        viewModel.handleIntent(DashboardContract.Intent.FilterTransactions(filter))
                                     },
-                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = DashboardContract.FilterType.entries.size),
-                                    label = { Text(filter.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                                    label = {
+                                        Text(
+                                            text = filter.name.lowercase().replaceFirstChar { it.uppercase() },
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = CipherBlueDim,
+                                        selectedLabelColor = CipherBlue,
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        enabled = true,
+                                        selected = state.activeFilter == filter,
+                                        selectedBorderColor = CipherBlue.copy(alpha = 0.3f),
+                                        borderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        borderWidth = 1.dp,
+                                        selectedBorderWidth = 1.dp
+                                    )
                                 )
                             }
                         }
@@ -177,107 +212,65 @@ fun DashboardScreen(
             }
         }
     ) { padding ->
-        val privacyMode = settings?.isPrivacyModeEnabled ?: false
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(bottom = 48.dp)
         ) {
             if (!isSearchActive && localSearchQuery.isEmpty()) {
                 item {
-                    PremiumBalanceHeader(
+                    BalanceHeader(
                         totalBalance = state.totalBalance,
                         income = state.totalIncome,
                         expenses = state.totalExpenses,
-                        isPrivacyMode = privacyMode
+                        isPrivacyMode = privacyMode,
+                        isHapticsEnabled = isHapticsEnabled
                     )
                 }
 
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 12.dp)
-                    ) {
-                        Surface(
-                            onClick = {
-                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onNavigateToInsights()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Surface(
-                                    modifier = Modifier.size(40.dp),
-                                    shape = androidx.compose.foundation.shape.CircleShape,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Intelligence",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = "Analyze your spending patterns",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                )
-                            }
-                        }
-                    }
+                    BudgetCard(
+                        spent = state.totalExpenses,
+                        budget = state.monthlyBudget,
+                        onSetBudgetClick = onNavigateToSettings,
+                        isHapticsEnabled = isHapticsEnabled
+                    )
                 }
+
+                item { Spacer(Modifier.height(8.dp)) }
+
+                item {
+                    IntelligenceRow(
+                        isHapticsEnabled = isHapticsEnabled,
+                        onClick = onNavigateToInsights
+                    )
+                }
+
+                item { Spacer(Modifier.height(16.dp)) }
             }
 
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                        .padding(horizontal = 24.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isSearchActive || localSearchQuery.isNotEmpty()) "Search Results" else "Timeline",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
+                        text = if (isSearchActive || localSearchQuery.isNotEmpty()) "RESULTS" else "TIMELINE",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 2.sp,
+                            fontWeight = FontWeight.SemiBold
                         ),
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (!isSearchActive && localSearchQuery.isEmpty()) {
-                        TextButton(onClick = { 
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            showAddDialog = true 
-                        }) {
-                            Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Add", style = MaterialTheme.typography.labelLarge)
-                        }
+                        AddButton(
+                            isHapticsEnabled = isHapticsEnabled,
+                            onClick = { showAddDialog = true }
+                        )
                     }
                 }
             }
@@ -285,8 +278,17 @@ fun DashboardScreen(
             if (state.transactions.isEmpty()) {
                 item {
                     if (isSearchActive || localSearchQuery.isNotEmpty()) {
-                        Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
-                            Text("No matching records found", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 64.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No matching records",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
                         }
                     } else {
                         EmptyTransactionsState()
@@ -297,7 +299,7 @@ fun DashboardScreen(
                     items = state.transactions,
                     key = { it.id }
                 ) { transaction ->
-                    TransactionCard(
+                    TransactionRow(
                         transaction = transaction,
                         isPrivacyMode = privacyMode,
                         onDelete = { viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) },
@@ -307,6 +309,7 @@ fun DashboardScreen(
                         },
                         isHapticsEnabled = isHapticsEnabled
                     )
+                    RowDivider()
                 }
             }
         }
@@ -344,3 +347,115 @@ fun DashboardScreen(
         )
     }
 }
+
+@Composable
+private fun IntelligenceRow(
+    isHapticsEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 600f),
+        label = "scale"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .scale(scale)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            }
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(CipherBlueDim, RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = CipherBlue
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Intelligence",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Patterns · Subscriptions · Trends",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
+    }
+}
+
+@Composable
+private fun AddButton(isHapticsEnabled: Boolean, onClick: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 700f),
+        label = "add"
+    )
+
+    Box(
+        modifier = Modifier
+            .scale(scale)
+            .background(CipherBlueDim, RoundedCornerShape(8.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Add,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = CipherBlue
+            )
+            Text(
+                text = "Add",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = CipherBlue
+            )
+        }
+    }
+}
+
