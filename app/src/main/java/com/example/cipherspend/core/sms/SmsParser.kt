@@ -16,7 +16,7 @@ class SmsParser @Inject constructor() {
     )
 
     private val exclusionKeywords = listOf(
-        "otp", "verification code", "secret code", "tollfree", "helpline", "dial", "win", "offered", "validity"
+        "otp", "verification code", "secret code", "tollfree", "helpline", "dial", "win", "won", "offered", "validity"
     )
 
     private val transactionIntentKeywords = listOf(
@@ -113,7 +113,9 @@ class SmsParser @Inject constructor() {
 
     private fun findBrandInText(message: String): String? {
         val upper = message.uppercase()
-        return brandDictionary.find { upper.contains(it) }
+        return brandDictionary.find { brand ->
+            upper.contains(Regex("\\b${Regex.escape(brand)}\\b"))
+        }
     }
 
     private fun extractMerchantStructural(message: String): String? {
