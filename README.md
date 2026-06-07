@@ -284,14 +284,11 @@ Open in Android Studio (Ladybug or newer). Compile SDK 35 required.
 
 ---
 
-## Installing & granting SMS access
+## Installing
 
-1. **Disable Play Protect** (temporary): Play Store → Profile → Play Protect → Settings → turn off *Scan apps with Play Protect*.
-2. **Allow unknown sources** for your installer app: Settings → Apps → Special app access → Install unknown apps → select installer → Allow from this source.
-3. **Install** the APK via file manager or `adb install path/to/app.apk`.
-4. **Grant SMS permission** when prompted on first launch.
-   - If the permission appears restricted: Settings → Apps → Special app access → look for *Allow access to restricted settings* → select cipher → enable → return and grant.
-5. Re-enable Play Protect.
+Download the APK from the [Releases page](https://github.com/insaneodyssey26/Cipher/releases).
+
+For step-by-step install instructions including the Android 13+ SMS permission setup, see **[INSTALL.md](INSTALL.md)**.
 
 ---
 

@@ -10,6 +10,7 @@
 - **Investment category**: New transaction category with dedicated icon for tracking investments and SIPs.
 - **More metrics in Insights**: Additional spending patterns and trend data on the intelligence screen.
 - **49 unit tests**: 42 core SMS parsing tests + 7 additional tests covering rupee symbol variants — all passing.
+- **Install guide**: Dedicated [INSTALL.md](INSTALL.md) with step-by-step sideload instructions including the Android 13+ restricted SMS permission setup.
 
 ### Changed
 - **SMS parsing accuracy**: Edited exclusion keyword list to reduce false positives; fixed edge cases in debit/credit classification; added 8 new brands to the merchant dictionary.
