@@ -380,19 +380,12 @@ private fun IntelligenceRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .background(CipherBlueDim, RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = CipherBlue
-            )
-        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -430,7 +423,7 @@ private fun AddButton(isHapticsEnabled: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .scale(scale)
-            .background(CipherBlueDim, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -448,12 +441,12 @@ private fun AddButton(isHapticsEnabled: Boolean, onClick: () -> Unit) {
                 imageVector = Icons.Rounded.Add,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
-                tint = CipherBlue
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "Add",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = CipherBlue
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

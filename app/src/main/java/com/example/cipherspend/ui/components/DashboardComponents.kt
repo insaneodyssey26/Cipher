@@ -113,19 +113,18 @@ private fun StatPill(
 ) {
     Row(
         modifier = Modifier
-            .background(containerColor, RoundedCornerShape(10.dp))
-            .padding(horizontal = 12.dp, vertical = 7.dp),
+            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.07f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Box(modifier = Modifier.size(5.dp).background(color, CircleShape))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 1.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             ),
-            color = color.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = if (isPrivacyMode) "₹•••" else AppFormatters.getCurrencyNoDecimals().format(amount),
@@ -154,7 +153,6 @@ fun TransactionRow(
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 600f),
         label = "scale"
     )
-    val initial = transaction.merchant.firstOrNull()?.uppercaseChar() ?: '?'
     val dateLabel = remember(transaction.timestamp) {
         SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(transaction.timestamp))
     }
@@ -180,13 +178,11 @@ fun TransactionRow(
                 .background(category.color.copy(alpha = 0.14f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = initial.toString(),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                ),
-                color = category.color
+            Icon(
+                imageVector = category.icon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = category.color
             )
         }
 

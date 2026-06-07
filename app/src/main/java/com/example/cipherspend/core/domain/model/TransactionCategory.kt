@@ -17,6 +17,7 @@ enum class TransactionCategory(
     ENTERTAINMENT("Entertainment", Icons.Rounded.Movie, Color(0xFF42A5F5)),
     HEALTH("Health", Icons.Rounded.MedicalServices, Color(0xFFEF5350)),
     BILLS("Bills & Utilities", Icons.AutoMirrored.Rounded.ReceiptLong, Color(0xFFFFCA28)),
+    INVESTMENT("Investment", Icons.Rounded.ShowChart, Color(0xFF5C6BC0)),
     INCOME("Income", Icons.Rounded.AddCard, Color(0xFF66BB6A)),
     OTHERS("General", Icons.Rounded.Category, Color(0xFF78909C));
 
