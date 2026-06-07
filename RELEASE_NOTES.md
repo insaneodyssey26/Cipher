@@ -1,5 +1,35 @@
 # Release Notes
 
+## [3.0.0]
+
+### Added
+- **First-run onboarding**: Two-screen welcome flow with SMS permission gate — new users no longer land cold on the dashboard.
+- **Home screen widgets**: BudgetWidget shows monthly spend vs. budget at a glance; StatsWidget shows monthly income and expense summary.
+- **Privacy Policy screen**: Dedicated in-app screen explaining data handling and permissions.
+- **Feedback form**: In-app feedback submission.
+- **Investment category**: New transaction category with dedicated icon for tracking investments and SIPs.
+- **More metrics in Insights**: Additional spending patterns and trend data on the intelligence screen.
+- **49 unit tests**: 42 core SMS parsing tests + 7 additional tests covering rupee symbol variants — all passing.
+
+### Changed
+- **SMS parsing accuracy**: Edited exclusion keyword list to reduce false positives; fixed edge cases in debit/credit classification; added 8 new brands to the merchant dictionary.
+- **Transaction icons**: Category icons replace merchant initials in the transaction list for faster visual scanning.
+- **Dashboard UI**: Removed blue accent patterns from stat pills, the intelligence row, and the add button — color only appears where it carries meaning (income green, expense red).
+- **New app icon**: Replaced previous icon with updated design.
+- **Smoother animations**: Refined animation specs across the app to reduce jank.
+- **Brand casing**: App name rendered as lowercase "cipher" consistently across all screens.
+
+### Fixed
+- **Widget race condition**: Fixed a race condition in widget state updates that could cause stale data to appear.
+- **Merchant alias bug**: Fixed incorrect alias resolution for certain merchants.
+- **Font fallback**: Fixed a crash/rendering issue caused by missing font fallback configuration.
+- **Package name**: Corrected package name inconsistency introduced in an earlier build.
+- **BudgetCard rendering**: Removed double-background bug causing a visible overlay artifact on the card border.
+- **Biometric gate**: Lock screen no longer triggers during first-run onboarding.
+- **Onboarding click-through**: Dashboard buttons no longer respond to taps while onboarding is visible.
+
+---
+
 ## [2.1.0]
 
 ### Fixed
