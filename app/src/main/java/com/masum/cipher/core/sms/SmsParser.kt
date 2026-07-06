@@ -13,6 +13,7 @@ class SmsParser @Inject constructor() {
 
         if (hasExclusionKeywords(cleanMessage)) return null
         if (!hasTransactionIntent(cleanMessage)) return null
+        if (!hasTransactionEvidence(cleanMessage)) return null
 
         val amount = extractAmount(cleanMessage) ?: return null
 
@@ -39,6 +40,12 @@ class SmsParser @Inject constructor() {
     private fun hasTransactionIntent(message: String): Boolean {
         val lower = message.lowercase()
         return SmsPatterns.INTENT_KEYWORDS.any { lower.contains(it) }
+    }
+
+    private fun hasTransactionEvidence(message: String): Boolean {
+        return SmsPatterns.TRANSACTION_EVIDENCE_PATTERNS.any { pattern ->
+            pattern.matcher(message).find()
+        }
     }
 
     private fun extractAmount(message: String): Double? {

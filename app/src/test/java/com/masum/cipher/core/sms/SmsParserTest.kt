@@ -39,6 +39,43 @@ class SmsParserTest {
     }
 
     @Test
+    fun `Jio promotional plan sms is rejected`() {
+        assertNull(parser.parse("Recharge with Rs.349 monthly plan for 2GB data per day. Exclusive offer for you!"))
+    }
+
+    @Test
+    fun `Airtel pack expiry sms is rejected`() {
+        assertNull(parser.parse("Your unlimited pack of Rs.299 expires tomorrow. Recharge now to stay active."))
+    }
+
+    @Test
+    fun `HDFC loan offer sms is rejected`() {
+        assertNull(parser.parse("Dear Customer, you are eligible for a pre-approved loan of Rs.5,00,000. Claim now!"))
+    }
+
+    @Test
+    fun `sms without transaction evidence is rejected even with amount and merchant`() {
+        assertNull(parser.parse("Rs.500 found at AMAZON. Great deals every day!"))
+    }
+
+    @Test
+    fun `sms with card evidence is NOT rejected`() {
+        assertNotNull(parser.parse("Rs.1,500 spent on Card ending 1234 at AMAZON. Avl limit: Rs.48,500."))
+    }
+
+    @Test
+    fun `sms with txn id evidence is NOT rejected`() {
+        val result = parser.parse("Rs.100.00 paid to Jio via UPI. Txn ID: 123456789.")
+        assertNotNull(result)
+        assertEquals(100.0, result!!.amount, 0.001)
+    }
+
+    @Test
+    fun `sms with vpa evidence is NOT rejected`() {
+        assertNotNull(parser.parse("Rs.50.00 sent to merchant@upi. Ref: 987654."))
+    }
+
+    @Test
     fun `sms with call in footer is NOT rejected`() {
         assertNotNull(parser.parse("Rs.500.00 debited from a/c XX1234. Avl Bal Rs.15000. Call 18001080 if not done by you."))
     }
@@ -136,7 +173,7 @@ class SmsParserTest {
 
     @Test
     fun `VODAFONE is not corrupted to VODAF`() {
-        val result = parser.parse("Rs.399.00 paid to VODAFONE for prepaid recharge. Txn ID 987654321.")
+        val result = parser.parse("Rs.399.00 paid to VODAFONE. Txn ID: 987654321.")
         assertNotNull(result)
         assertEquals("VODAFONE", result!!.merchant)
     }

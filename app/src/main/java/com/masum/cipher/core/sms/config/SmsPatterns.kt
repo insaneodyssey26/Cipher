@@ -11,7 +11,24 @@ object SmsPatterns {
     )
 
     val EXCLUSION_KEYWORDS = listOf(
-        "otp", "verification code", "secret code", "tollfree", "helpline", "dial", "win", "won", "offered", "validity"
+        "otp", "verification code", "secret code", "tollfree", "helpline", "dial", "win", "won", "offered", "validity",
+        "plan", "recharge", "expires", "pack", "unlimited", "data", "exclusive", "discount", "reward", "points",
+        "eligible", "pre-approved", "credit limit", "claim", "offer", "limited period", "active"
+    )
+
+    val TRANSACTION_EVIDENCE_PATTERNS = listOf(
+        Pattern.compile("(?i)(?:a/c|acc|account|ending|card|vpa|acct)\\s*(?:no\\.?)?\\s*[:#-]?\\s*[x*]*\\d{2,4}"),
+        Pattern.compile("(?i)\\b(?:txn|ref|rrn|id|vpa)\\b"),
+        Pattern.compile("(?i)[a-z0-9.]+@[a-z]{3,}"),
+        Pattern.compile("(?i)linked to"),
+        Pattern.compile("(?i)avl bal"),
+        Pattern.compile("(?i)paid to"),
+        Pattern.compile("(?i)spent at"),
+        Pattern.compile("(?i)debited from"),
+        Pattern.compile("(?i)credited to"),
+        Pattern.compile("(?i)sent to"),
+        Pattern.compile("(?i)paid Rs"),
+        Pattern.compile("(?i)transferred to")
     )
 
     val INTENT_KEYWORDS = listOf(
