@@ -1,15 +1,14 @@
 package com.masum.cipher.ui.dashboard
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
 import com.masum.cipher.core.domain.usecase.GetDashboardDataUseCase
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
+import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,25 +20,18 @@ class DashboardViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase
-) : ViewModel() {
+) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
+    initialState = DashboardContract.State()
+) {
 
     private val _searchQuery = MutableStateFlow("")
     private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
-
-    private val _state = MutableStateFlow(DashboardContract.State())
-    val state: StateFlow<DashboardContract.State> = _state.asStateFlow()
-
-    private val _effect = MutableSharedFlow<DashboardContract.Effect>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val effect: SharedFlow<DashboardContract.Effect> = _effect.asSharedFlow()
 
     init {
         observeDashboardData()
     }
 
-    fun handleIntent(intent: DashboardContract.Intent) {
+    override fun handleIntent(intent: DashboardContract.Intent) {
         when (intent) {
             is DashboardContract.Intent.LoadDashboard -> { }
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
@@ -58,7 +50,7 @@ class DashboardViewModel @Inject constructor(
             }.flatMapLatest { (query, filter) ->
                 getDashboardDataUseCase(query, filter)
             }.collect { newState ->
-                _state.value = newState
+                updateState { newState }
             }
         }
     }
@@ -66,7 +58,7 @@ class DashboardViewModel @Inject constructor(
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             deleteTransactionUseCase(transaction)
-            _effect.emit(DashboardContract.Effect.ShowUndoDelete(transaction))
+            emitEffect(DashboardContract.Effect.ShowUndoDelete(transaction))
         }
     }
 

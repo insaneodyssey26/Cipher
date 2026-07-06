@@ -1,38 +1,31 @@
 package com.masum.cipher.ui.settings
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
-import com.masum.cipher.core.data.repository.BackupRepository
-import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.core.domain.usecase.*
+import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
-    private val transactionDao: TransactionDao,
-    private val backupRepository: BackupRepository
-) : ViewModel() {
-
-    private val _state = MutableStateFlow(SettingsContract.State())
-    val state: StateFlow<SettingsContract.State> = _state.asStateFlow()
-
-    private val _effect = Channel<SettingsContract.Effect>()
-    val effect: Flow<SettingsContract.Effect> = _effect.receiveAsFlow()
+    private val updateSettingsUseCase: UpdateSettingsUseCase,
+    private val clearAllDataUseCase: ClearAllDataUseCase,
+    private val exportCsvUseCase: ExportCsvUseCase,
+    private val exportDataUseCase: ExportDataUseCase,
+    private val importDataUseCase: ImportDataUseCase
+) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
+    initialState = SettingsContract.State()
+) {
 
     init {
         observeSettings()
     }
 
-    fun handleIntent(intent: SettingsContract.Intent) {
+    override fun handleIntent(intent: SettingsContract.Intent) {
         when (intent) {
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
@@ -50,8 +43,8 @@ class SettingsViewModel @Inject constructor(
     private fun observeSettings() {
         viewModelScope.launch {
             userPreferences.settingsFlow.collect { settings ->
-                _state.update { 
-                    it.copy(
+                updateState {
+                    copy(
                         theme = settings.theme,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
@@ -65,91 +58,66 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun updateTheme(theme: AppTheme) {
-        viewModelScope.launch { userPreferences.setTheme(theme) }
+        viewModelScope.launch { updateSettingsUseCase.theme(theme) }
     }
 
     private fun updateBiometric(enabled: Boolean) {
-        viewModelScope.launch { userPreferences.setBiometricEnabled(enabled) }
+        viewModelScope.launch { updateSettingsUseCase.biometric(enabled) }
     }
 
     private fun updatePrivacyMode(enabled: Boolean) {
-        viewModelScope.launch { userPreferences.setPrivacyModeEnabled(enabled) }
+        viewModelScope.launch { updateSettingsUseCase.privacyMode(enabled) }
     }
 
     private fun updateHaptics(enabled: Boolean) {
-        viewModelScope.launch { userPreferences.setHapticsEnabled(enabled) }
+        viewModelScope.launch { updateSettingsUseCase.haptics(enabled) }
     }
 
     private fun updateAutoLockTimeout(timeout: Long) {
-        viewModelScope.launch { userPreferences.setAutoLockTimeout(timeout) }
+        viewModelScope.launch { updateSettingsUseCase.autoLockTimeout(timeout) }
     }
 
     private fun updateMonthlyBudget(amount: Double) {
-        viewModelScope.launch { userPreferences.setMonthlyBudget(amount) }
+        viewModelScope.launch { updateSettingsUseCase.monthlyBudget(amount) }
     }
 
     private fun clearAllData() {
-        viewModelScope.launch(Dispatchers.IO) {
-            transactionDao.deleteAllTransactions()
-            _effect.send(SettingsContract.Effect.ShowToast("All data cleared successfully"))
+        viewModelScope.launch {
+            clearAllDataUseCase()
+            emitEffect(SettingsContract.Effect.ShowToast("All data cleared successfully"))
         }
     }
 
     private fun exportCsv(uri: android.net.Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _state.update { it.copy(isExportingCsv = true) }
-            try {
-                val transactions = transactionDao.getAllTransactions().first()
-                val csvHeader = "ID,Date,Merchant,Amount,Category,Type\n"
-                val csvData = transactions.joinToString("\n") { tx ->
-                    val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
-                    val type = if (tx.isIncome) "Income" else "Expense"
-                    "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\""
-                }
-                
-                backupRepository.provideOutputStream(uri)?.use { outputStream ->
-                    outputStream.write((csvHeader + csvData).toByteArray())
-                }
-                _effect.send(SettingsContract.Effect.ShowToast("CSV Report generated successfully"))
-            } catch (e: Exception) {
-                _effect.send(SettingsContract.Effect.ShowToast("Failed to export CSV: ${e.message}"))
-            } finally {
-                _state.update { it.copy(isExportingCsv = false) }
-            }
+        viewModelScope.launch {
+            updateState { copy(isExportingCsv = true) }
+            val result = exportCsvUseCase(uri)
+            updateState { copy(isExportingCsv = false) }
+            
+            val message = if (result.isSuccess) "CSV Report generated successfully" else "Failed to export CSV: ${result.exceptionOrNull()?.message}"
+            emitEffect(SettingsContract.Effect.ShowToast(message))
         }
     }
 
     private fun exportData(uri: android.net.Uri, password: CharArray) {
         viewModelScope.launch {
-            _state.update { it.copy(isExporting = true) }
-            val outputStream = backupRepository.provideOutputStream(uri)
-            if (outputStream == null) {
-                _state.update { it.copy(isExporting = false) }
-                _effect.send(SettingsContract.Effect.ShowToast("Could not open file for writing"))
-                return@launch
-            }
-            val result = backupRepository.exportData(outputStream, password)
-            _state.update { it.copy(isExporting = false) }
+            updateState { copy(isExporting = true) }
+            val result = exportDataUseCase(uri, password)
+            updateState { copy(isExporting = false) }
             
             val message = if (result.isSuccess) "Data exported successfully" else "Export failed: ${result.exceptionOrNull()?.message}"
-            _effect.send(SettingsContract.Effect.ShowToast(message))
+            emitEffect(SettingsContract.Effect.ShowToast(message))
         }
     }
 
     private fun importData(uri: android.net.Uri, password: CharArray) {
         viewModelScope.launch {
-            _state.update { it.copy(isImporting = true) }
-            val inputStream = backupRepository.provideInputStream(uri)
-            if (inputStream == null) {
-                _state.update { it.copy(isImporting = false) }
-                _effect.send(SettingsContract.Effect.ShowToast("Could not open file for reading"))
-                return@launch
-            }
-            val result = backupRepository.importData(inputStream, password)
-            _state.update { it.copy(isImporting = false) }
+            updateState { copy(isImporting = true) }
+            val result = importDataUseCase(uri, password)
+            updateState { copy(isImporting = false) }
             
             val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"
-            _effect.send(SettingsContract.Effect.ShowToast(message))
+            emitEffect(SettingsContract.Effect.ShowToast(message))
         }
     }
 }

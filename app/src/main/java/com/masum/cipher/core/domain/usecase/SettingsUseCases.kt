@@ -1,0 +1,75 @@
+package com.masum.cipher.core.domain.usecase
+
+import android.net.Uri
+import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.BackupRepository
+import com.masum.cipher.core.util.AppFormatters
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import java.util.Date
+import javax.inject.Inject
+
+class UpdateSettingsUseCase @Inject constructor(
+    private val userPreferences: UserPreferences
+) {
+    suspend fun theme(theme: AppTheme) = userPreferences.setTheme(theme)
+    suspend fun biometric(enabled: Boolean) = userPreferences.setBiometricEnabled(enabled)
+    suspend fun privacyMode(enabled: Boolean) = userPreferences.setPrivacyModeEnabled(enabled)
+    suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)
+    suspend fun autoLockTimeout(timeout: Long) = userPreferences.setAutoLockTimeout(timeout)
+    suspend fun monthlyBudget(amount: Double) = userPreferences.setMonthlyBudget(amount)
+}
+
+class ClearAllDataUseCase @Inject constructor(
+    private val transactionDao: TransactionDao
+) {
+    suspend operator fun invoke() = withContext(Dispatchers.IO) {
+        transactionDao.deleteAllTransactions()
+    }
+}
+
+class ExportCsvUseCase @Inject constructor(
+    private val transactionDao: TransactionDao,
+    private val backupRepository: BackupRepository
+) {
+    suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val transactions = transactionDao.getAllTransactions().first()
+            val csvHeader = "ID,Date,Merchant,Amount,Category,Type\n"
+            val csvData = transactions.joinToString("\n") { tx ->
+                val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
+                val type = if (tx.isIncome) "Income" else "Expense"
+                "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\""
+            }
+            
+            backupRepository.provideOutputStream(uri)?.use { outputStream ->
+                outputStream.write((csvHeader + csvData).toByteArray())
+            } ?: throw Exception("Could not open file for writing")
+        }
+    }
+}
+
+class ExportDataUseCase @Inject constructor(
+    private val backupRepository: BackupRepository
+) {
+    suspend operator fun invoke(uri: Uri, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
+        val outputStream = backupRepository.provideOutputStream(uri)
+            ?: return@withContext Result.failure(Exception("Could not open file for writing"))
+        
+        backupRepository.exportData(outputStream, password)
+    }
+}
+
+class ImportDataUseCase @Inject constructor(
+    private val backupRepository: BackupRepository
+) {
+    suspend operator fun invoke(uri: Uri, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
+        val inputStream = backupRepository.provideInputStream(uri)
+            ?: return@withContext Result.failure(Exception("Could not open file for reading"))
+        
+        backupRepository.importData(inputStream, password)
+    }
+}
