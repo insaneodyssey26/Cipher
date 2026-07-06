@@ -2,6 +2,7 @@ package com.masum.cipher.core.domain
 
 import com.masum.cipher.core.domain.config.CategorizerConfig
 import com.masum.cipher.core.domain.model.TransactionCategory
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,12 +14,14 @@ class CategorizerEngine @Inject constructor() {
             .filter { it.isNotBlank() && it.length > 2 }
             .firstOrNull { it.any { char -> char.isLetter() } }
             ?.lowercase()
-            ?.replaceFirstChar { it.uppercase() }
+            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             ?: raw
     }
 
     fun categorize(merchantName: String): TransactionCategory {
         val normalized = merchantName.uppercase().trim()
+
+        if (normalized.isBlank()) return TransactionCategory.OTHERS
 
         CategorizerConfig.BRAND_MAPPINGS[normalized]?.let { return it }
 

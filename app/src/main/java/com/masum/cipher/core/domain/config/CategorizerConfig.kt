@@ -61,7 +61,7 @@ object CategorizerConfig {
 
     val KEYWORD_ANCHORS = mapOf(
         listOf("CAFE", "RESTAURANT", "DINER", "KITCHEN", "FOOD", "BAKERY", "PIZZA", "BURGER", "SWEETS", "DHABA") to TransactionCategory.FOOD,
-        listOf("STORE", "MARKET", "MART", "SHOP", "MALL", "FASHION", "CLOTHING", "GROCERY", "RETAIL", "SUPERMARKET") to TransactionCategory.SHOPPING,
+        listOf("MART", "SHOP", "MALL", "FASHION", "CLOTHING", "GROCERY", "RETAIL", "SUPERMARKET") to TransactionCategory.SHOPPING,
         listOf("CAB", "TAXI", "METRO", "TRAIN", "FLIGHT", "AIRLINE", "PARKING", "FUEL", "PETROL", "DIESEL", "AUTO", "TOLL") to TransactionCategory.TRANSPORT,
         listOf("CINEMA", "MOVIES", "THEATRE", "GAME", "GAMING", "CLUB", "OTT", "MUSIC") to TransactionCategory.ENTERTAINMENT,
         listOf("MEDICAL", "HEALTH", "CLINIC", "DENTAL", "CARE", "DRUG", "HOSPITAL", "LAB", "DIAGNOSTIC") to TransactionCategory.HEALTH,
