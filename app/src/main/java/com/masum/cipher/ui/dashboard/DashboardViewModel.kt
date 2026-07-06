@@ -3,8 +3,10 @@ package com.masum.cipher.ui.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.entity.TransactionEntity
-import com.masum.cipher.core.data.local.pref.UserPreferences
-import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
+import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
+import com.masum.cipher.core.domain.usecase.GetDashboardDataUseCase
+import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -15,8 +17,10 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val repository: TransactionRepository,
-    private val userPreferences: UserPreferences
+    private val getDashboardDataUseCase: GetDashboardDataUseCase,
+    private val addTransactionUseCase: AddTransactionUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
+    private val updateTransactionUseCase: UpdateTransactionUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -49,44 +53,10 @@ class DashboardViewModel @Inject constructor(
 
     private fun observeDashboardData() {
         viewModelScope.launch {
-            combine(
-                _searchQuery,
-                _activeFilter,
-                repository.getTotalIncome(),
-                repository.getTotalExpenses(),
-                userPreferences.settingsFlow
-            ) { query, filter, income, expenses, settings ->
-                DataParams(query, filter, income ?: 0.0, expenses ?: 0.0, settings.monthlyBudget)
-            }.flatMapLatest { params ->
-                val transactionsFlow = if (params.query.isBlank()) {
-                    repository.getRecentTransactions(20)
-                } else {
-                    repository.getAllTransactions().map { list ->
-                        list.filter { 
-                            it.merchant.contains(params.query, ignoreCase = true) || 
-                            it.category.contains(params.query, ignoreCase = true) 
-                        }
-                    }
-                }
-
-                transactionsFlow.map { transactions ->
-                    val filteredList = when (params.filter) {
-                        DashboardContract.FilterType.ALL -> transactions
-                        DashboardContract.FilterType.INCOME -> transactions.filter { it.isIncome }
-                        DashboardContract.FilterType.EXPENSE -> transactions.filter { !it.isIncome }
-                    }
-                    
-                    DashboardContract.State(
-                        isLoading = false,
-                        transactions = filteredList,
-                        searchQuery = params.query,
-                        activeFilter = params.filter,
-                        totalIncome = params.income,
-                        totalExpenses = params.expenses,
-                        totalBalance = params.income - params.expenses,
-                        monthlyBudget = params.budget
-                    )
-                }
+            combine(_searchQuery, _activeFilter) { query, filter ->
+                query to filter
+            }.flatMapLatest { (query, filter) ->
+                getDashboardDataUseCase(query, filter)
             }.collect { newState ->
                 _state.value = newState
             }
@@ -95,34 +65,26 @@ class DashboardViewModel @Inject constructor(
 
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            repository.deleteTransaction(transaction)
+            deleteTransactionUseCase(transaction)
             _effect.emit(DashboardContract.Effect.ShowUndoDelete(transaction))
         }
     }
 
     private fun updateTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            repository.updateTransaction(transaction)
+            updateTransactionUseCase(transaction)
         }
     }
 
     private fun restoreTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            repository.updateTransaction(transaction)
+            addTransactionUseCase(transaction)
         }
     }
 
     private fun addTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            repository.insertTransaction(transaction)
+            addTransactionUseCase(transaction)
         }
     }
-
-    private data class DataParams(
-        val query: String,
-        val filter: DashboardContract.FilterType,
-        val income: Double,
-        val expenses: Double,
-        val budget: Double
-    )
 }
