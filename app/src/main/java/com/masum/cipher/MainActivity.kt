@@ -26,6 +26,8 @@ import androidx.navigation.navArgument
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.ui.MainContract
+import com.masum.cipher.ui.MainViewModel
 import com.masum.cipher.ui.dashboard.DashboardScreen
 import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.insights.DayDetailScreen
@@ -37,7 +39,6 @@ import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
 import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -58,10 +59,10 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-            val scope = rememberCoroutineScope()
+            val mainViewModel: MainViewModel = hiltViewModel()
+            val state by mainViewModel.state.collectAsState()
             
-            settings?.let { userSettings ->
+            state.settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()
                 val darkTheme = remember(userSettings.theme, isSystemDark) {
                     when (userSettings.theme) {
@@ -72,117 +73,61 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 CipherTheme(darkTheme = darkTheme) {
-                    val currentSettings by rememberUpdatedState(userSettings)
-                    val onboardingCompleted = userSettings.hasCompletedOnboarding
-                    var isAuthenticated by remember {
-                        mutableStateOf(!userSettings.isBiometricEnabled || !biometricAuthenticator.isBiometricAvailable())
-                    }
-                    var resumeTrigger by remember { mutableIntStateOf(0) }
-
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
                             when (event) {
-                                Lifecycle.Event.ON_START -> {
-                                    resumeTrigger++
-                                    val settingsSnapshot = currentSettings
-                                    val shouldLock = settingsSnapshot.isBiometricEnabled && 
-                                                     biometricAuthenticator.isBiometricAvailable()
-                                    
-                                    if (shouldLock) {
-                                        val timeDiff = System.currentTimeMillis() - settingsSnapshot.lastStopTime
-                                        val isGracePeriodOver = timeDiff >= settingsSnapshot.autoLockTimeout
-                                        
-                                        if (isAuthenticated && isGracePeriodOver) {
-                                            isAuthenticated = false
-                                        }
-                                    } else {
-                                        isAuthenticated = true
-                                    }
-                                }
-                                Lifecycle.Event.ON_STOP -> {
-                                    scope.launch {
-                                        userPreferences.setLastStopTime(System.currentTimeMillis())
-                                    }
-                                }
+                                Lifecycle.Event.ON_START -> mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication)
+                                Lifecycle.Event.ON_STOP -> mainViewModel.handleIntent(MainContract.Intent.OnAppStop)
                                 else -> {}
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
-                        onDispose {
-                            lifecycleOwner.lifecycle.removeObserver(observer)
-                        }
+                        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                     }
 
-                    LaunchedEffect(isAuthenticated, resumeTrigger, onboardingCompleted) {
-                        if (!isAuthenticated && onboardingCompleted) {
-                            if (userSettings.isBiometricEnabled && biometricAuthenticator.isBiometricAvailable()) {
+                    LaunchedEffect(Unit) {
+                        mainViewModel.effect.collect { effect ->
+                            if (effect is MainContract.Effect.TriggerBiometricPrompt) {
                                 biometricAuthenticator.authenticate(
                                     activity = this@MainActivity,
-                                    onSuccess = { isAuthenticated = true },
+                                    onSuccess = { mainViewModel.handleIntent(MainContract.Intent.Authenticate) },
                                     onError = { }
                                 )
-                            } else {
-                                isAuthenticated = true
                             }
-                        }
-                    }
-
-                    LaunchedEffect(userSettings.isBiometricEnabled) {
-                        if (!userSettings.isBiometricEnabled) {
-                            isAuthenticated = true
                         }
                     }
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         val navController = rememberNavController()
-
                         val navSpec = remember { tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing) }
 
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
-                            enterTransition = {
-                                slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec)
-                            },
-                            exitTransition = {
-                                slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec)
-                            },
-                            popEnterTransition = {
-                                slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec)
-                            },
-                            popExitTransition = {
-                                slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec)
-                            }
+                            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec) },
+                            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec) },
+                            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec) },
+                            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec) }
                         ) {
                             composable("dashboard") {
                                 val viewModel: DashboardViewModel = hiltViewModel()
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToSettings = {
-                                        navController.navigate("settings")
-                                    },
-                                    onNavigateToInsights = {
-                                        navController.navigate("insights")
-                                    }
+                                    onNavigateToSettings = { navController.navigate("settings") },
+                                    onNavigateToInsights = { navController.navigate("insights") }
                                 )
                             }
-
                             composable("insights") {
                                 val viewModel: InsightsViewModel = hiltViewModel()
                                 InsightsScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    },
-                                    onNavigateToDayDetail = { timestamp ->
-                                        navController.navigate("day_detail/$timestamp")
-                                    }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToDayDetail = { timestamp -> navController.navigate("day_detail/$timestamp") }
                                 )
                             }
-
                             composable(
                                 route = "day_detail/{timestamp}",
                                 arguments = listOf(navArgument("timestamp") { type = NavType.LongType })
@@ -193,12 +138,9 @@ class MainActivity : AppCompatActivity() {
                                     timestamp = timestamp,
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateBack = {
-                                        navController.popBackStack()
-                                    }
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
-
                             composable("settings") {
                                 val viewModel: SettingsViewModel = hiltViewModel()
                                 SettingsScreen(
@@ -208,29 +150,20 @@ class MainActivity : AppCompatActivity() {
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") }
                                 )
                             }
-
                             composable("privacy_policy") {
-                                PrivacyPolicyScreen(
-                                    onNavigateBack = { navController.popBackStack() }
-                                )
+                                PrivacyPolicyScreen(onNavigateBack = { navController.popBackStack() })
                             }
                         }
 
-                        if (!isAuthenticated && onboardingCompleted) {
+                        if (!state.isAuthenticated && !state.isOnboardingRequired) {
                             com.masum.cipher.ui.components.LockScreen(
-                                onUnlockClick = {
-                                    resumeTrigger++
-                                }
+                                onUnlockClick = { mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication) }
                             )
                         }
 
-                        if (!onboardingCompleted) {
+                        if (state.isOnboardingRequired) {
                             OnboardingScreen(
-                                onComplete = {
-                                    scope.launch {
-                                        userPreferences.setOnboardingCompleted(true)
-                                    }
-                                }
+                                onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) }
                             )
                         }
                     }
