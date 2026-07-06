@@ -26,25 +26,31 @@ class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
+            val pendingResult = goAsync()
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
-            for (sms in messages) {
-                val body = sms.displayMessageBody
-                val parsed = smsParser.parse(body)
 
-                if (parsed != null) {
-                    scope.launch {
-                        repository.insertTransaction(
-                            TransactionEntity(
-                                amount = parsed.amount,
-                                merchant = parsed.merchant,
-                                currency = parsed.currency,
-                                timestamp = System.currentTimeMillis(),
-                                category = "", // Let repository auto-categorize
-                                rawSms = body,
-                                isIncome = parsed.isIncome
+            scope.launch {
+                try {
+                    for (sms in messages) {
+                        val body = sms.displayMessageBody
+                        val parsed = smsParser.parse(body)
+
+                        if (parsed != null) {
+                            repository.insertTransaction(
+                                TransactionEntity(
+                                    amount = parsed.amount,
+                                    merchant = parsed.merchant,
+                                    currency = parsed.currency,
+                                    timestamp = System.currentTimeMillis(),
+                                    category = "",
+                                    rawSms = body,
+                                    isIncome = parsed.isIncome
+                                )
                             )
-                        )
+                        }
                     }
+                } finally {
+                    pendingResult.finish()
                 }
             }
         }
