@@ -7,7 +7,6 @@ import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.domain.CategorizerEngine
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.widget.BudgetWidget
 import com.masum.cipher.ui.widget.StatsWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -15,8 +14,6 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +44,7 @@ class TransactionRepository @Inject constructor(
                 transaction.category
             }
         } else {
-            val cleanName = autoCleanMerchantName(transaction.merchant)
+            val cleanName = categorizerEngine.cleanMerchantName(transaction.merchant)
             val autoCategory = categorizerEngine.categorize(cleanName)
 
             if (cleanName != transaction.merchant) {
@@ -87,15 +84,6 @@ class TransactionRepository @Inject constructor(
     suspend fun deleteTransaction(transaction: TransactionEntity) {
         transactionDao.deleteTransaction(transaction)
         syncWidget()
-    }
-
-    private fun autoCleanMerchantName(raw: String): String {
-        return raw.split("*", "-", "  ")
-            .filter { it.isNotBlank() && it.length > 2 }
-            .firstOrNull { it.any { char -> char.isLetter() } }
-            ?.lowercase()
-            ?.replaceFirstChar { it.uppercase() }
-            ?: raw
     }
 
     fun getTotalExpenses(): Flow<Double?> = transactionDao.getTotalExpenses()

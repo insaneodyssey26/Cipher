@@ -73,6 +73,15 @@ class CategorizerEngine @Inject constructor() {
         listOf("SALARY", "CASHBACK", "REFUND", "INTEREST", "DIVIDEND") to TransactionCategory.INCOME
     )
 
+    fun cleanMerchantName(raw: String): String {
+        return raw.split("*", "-", "  ")
+            .filter { it.isNotBlank() && it.length > 2 }
+            .firstOrNull { it.any { char -> char.isLetter() } }
+            ?.lowercase()
+            ?.replaceFirstChar { it.uppercase() }
+            ?: raw
+    }
+
     fun categorize(merchantName: String): TransactionCategory {
         val normalized = merchantName.uppercase().trim()
 
