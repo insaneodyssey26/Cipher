@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.theme.*
@@ -118,12 +119,10 @@ fun TransactionDetailsSheet(
             }
 
             // Amount field
-            VaultSheetTextField(
+            MassiveAmountInput(
                 value = amount,
                 onValueChange = { amount = it },
-                label = "AMOUNT",
-                prefix = "₹",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                color = if (isIncome) EmeraldIncome else RoseExpense
             )
 
             // Merchant field
@@ -319,5 +318,60 @@ private fun VaultSheetTextField(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun MassiveAmountInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    color: Color
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = Typography.displayLarge.copy(
+                color = color,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                fontSize = 56.sp,
+                letterSpacing = (-2).sp
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            cursorBrush = SolidColor(color),
+            modifier = Modifier.fillMaxWidth(),
+            decorationBox = { inner ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "₹",
+                        style = Typography.displayLarge.copy(
+                            color = color.copy(alpha = 0.5f),
+                            fontSize = 48.sp
+                        ),
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    if (value.isEmpty()) {
+                        Text(
+                            text = "0",
+                            style = Typography.displayLarge.copy(
+                                color = color.copy(alpha = 0.3f),
+                                fontSize = 56.sp,
+                                letterSpacing = (-2).sp
+                            )
+                        )
+                    } else {
+                        inner()
+                    }
+                }
+            }
+        )
     }
 }

@@ -58,6 +58,11 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.appcompat:appcompat:1.7.0")
 
+    // Vico Charting Library
+    implementation("com.patrykandpatrick.vico:compose:1.15.0")
+    implementation("com.patrykandpatrick.vico:compose-m3:1.15.0")
+    implementation("com.patrykandpatrick.vico:core:1.15.0")
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.navigation.compose)

@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
@@ -72,18 +74,19 @@ fun DashboardScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { 
                     if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showAddSheet = true 
                 },
                 containerColor = ElectricIndigo,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Icon(LucideIcons.Plus, contentDescription = "Add Transaction")
-            }
+                shape = RoundedCornerShape(32.dp),
+                icon = { Icon(LucideIcons.Plus, contentDescription = "Add Transaction") },
+                text = { Text("New Transaction", style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)) }
+            )
         }
     ) { padding ->
         LazyColumn(
@@ -197,15 +200,14 @@ private fun DashboardHero(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(320.dp)
+            .height(380.dp)
             .background(
-                brush = Brush.radialGradient(
-                    colors = if (MaterialTheme.colorScheme.surface == LightSurface) {
-                        listOf(ElectricIndigo.copy(alpha = 0.04f), Transparent)
-                    } else {
-                        listOf(ElectricIndigo.copy(alpha = 0.08f), Transparent)
-                    },
-                    radius = 800f
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        ElectricIndigo.copy(alpha = 0.15f),
+                        EmeraldIncome.copy(alpha = 0.05f),
+                        MaterialTheme.colorScheme.background
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
@@ -213,75 +215,93 @@ private fun DashboardHero(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(top = 48.dp)
+            modifier = Modifier.padding(top = 40.dp)
         ) {
             Text(
                 text = "TOTAL BALANCE",
-                style = Typography.labelSmall,
+                style = Typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.Top) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "₹",
-                    style = Typography.titleLarge,
+                    style = Typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp)
                 )
                 if (privacyMode) {
                     Text(
                         text = "••••••",
-                        style = Typography.displayLarge,
+                        style = Typography.displayLarge.copy(fontSize = 64.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 } else {
                     AnimatedNumberTicker(
                         value = totalBalance,
-                        textStyle = Typography.displayLarge,
+                        textStyle = Typography.displayLarge.copy(
+                            fontSize = 64.sp,
+                            letterSpacing = (-2).sp
+                        ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
+            // Glassmorphism stats card
             Row(
-                modifier = Modifier.fillMaxWidth(0.8f),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        RoundedCornerShape(24.dp)
+                    )
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+                    .padding(vertical = 20.dp, horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 StatItem(label = "INCOME", amount = income, color = EmeraldIncome, privacyMode = privacyMode)
-                Box(modifier = Modifier.width(1.dp).height(40.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                Box(modifier = Modifier.width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
                 StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
             }
         }
         
-        // Top Bar (App Name + Settings/Insights)
+        // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
                 .align(Alignment.TopCenter),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "cipher",
-                style = Typography.titleMedium.copy(
+                text = "cipher.",
+                style = Typography.titleLarge.copy(
                     fontFamily = SpaceGrotesk,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = (-0.5).sp
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-1).sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Row {
-                IconButton(onClick = onNavigateToInsights) {
-                    Icon(LucideIcons.ChartBar, "Insights", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = onNavigateToInsights,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(LucideIcons.ChartBar, "Insights", tint = MaterialTheme.colorScheme.onSurface)
                 }
-                IconButton(onClick = onNavigateToSettings) {
-                    Icon(LucideIcons.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                IconButton(
+                    onClick = onNavigateToSettings,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(LucideIcons.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

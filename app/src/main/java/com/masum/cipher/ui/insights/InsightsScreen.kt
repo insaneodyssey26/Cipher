@@ -90,8 +90,9 @@ fun InsightsScreen(
             item {
                 SectionLabel("SPENDING TREND")
                 VaultCard(
-                    modifier = Modifier.padding(horizontal = 24.dp).height(240.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(280.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentPadding = 0.dp
                 ) {
                     SpendingTrendChart(points = state.netWorthHistory)
                 }
@@ -112,10 +113,11 @@ fun InsightsScreen(
             item {
                 SectionLabel("PEAK SPENDING HOURS")
                 VaultCard(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(220.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentPadding = 0.dp
                 ) {
-                    SpendingHeatmap(hours = state.peakHours)
+                    PeakHoursChart(hours = state.peakHours)
                 }
             }
 
@@ -138,8 +140,9 @@ fun InsightsScreen(
             item {
                 SectionLabel("ACTIVITY CALENDAR")
                 VaultCard(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentPadding = 16.dp
                 ) {
                     CalendarHeatmap(
                         data = state.calendarHeatmap,
@@ -162,12 +165,22 @@ private fun InsightHero(state: InsightsContract.State) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        ElectricIndigo.copy(alpha = 0.1f),
+                        MaterialTheme.colorScheme.background
+                    )
+                ),
+                shape = RoundedCornerShape(32.dp)
+            )
+            .padding(vertical = 32.dp, horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(72.dp)
                 .background(ElectricIndigoSubtle, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -202,8 +215,8 @@ private fun InsightHero(state: InsightsContract.State) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            InsightMetric(label = "STREAK", value = "${state.noSpendStreak} Days", icon = LucideIcons.Calendar)
-            InsightMetric(label = "AVG TXN", value = "₹${state.avgTransactionSize.toInt()}", icon = LucideIcons.Clock)
+            InsightMetric(label = "NO-SPEND STREAK", value = "${state.noSpendStreak} Days", icon = LucideIcons.Calendar)
+            InsightMetric(label = "AVG SPEND / TXN", value = "₹${state.avgTransactionSize.toInt()}", icon = LucideIcons.Clock)
         }
     }
 }

@@ -23,6 +23,20 @@ import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.theme.*
 import java.util.Calendar
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.core.entry.FloatEntry
+import com.patrykandpatrick.vico.core.entry.entryModelOf
+import com.patrykandpatrick.vico.compose.component.shape.shader.fromBrush
+import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
+import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
+import com.patrykandpatrick.vico.compose.chart.column.columnChart
+import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
+import com.patrykandpatrick.vico.core.component.shape.LineComponent
+import com.patrykandpatrick.vico.core.component.shape.Shapes
 
 /**
  * Premium Spending Trend Chart
@@ -35,72 +49,48 @@ import java.util.Calendar
 fun SpendingTrendChart(points: List<DashboardContract.Point>) {
     if (points.isEmpty()) return
 
-    val animationProgress = remember { Animatable(0f) }
-    LaunchedEffect(points) {
-        animationProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing)
-        )
-    }
+    val chartEntryModel = entryModelOf(
+        points.mapIndexed { index, point -> 
+            FloatEntry(x = index.toFloat(), y = point.y)
+        }
+    )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .drawWithCache {
-                val path = Path()
-                val fillPath = Path()
-                
-                val maxVal = points.maxOf { it.y }.coerceAtLeast(1f)
-                val minVal = points.minOf { it.y }.coerceAtMost(0f)
-                val range = (maxVal - minVal).coerceAtLeast(1f)
-
-                onDrawBehind {
-                    val width = size.width
-                    val height = size.height
-
-                    points.forEachIndexed { index, point ->
-                        val x = (index.toFloat() / (points.size - 1)) * width
-                        val y = height - ((point.y - minVal) / range) * height
-
-                        if (index == 0) {
-                            path.moveTo(x, y)
-                            fillPath.moveTo(x, height)
-                            fillPath.lineTo(x, y)
-                        } else {
-                            val prevX = ((index - 1).toFloat() / (points.size - 1)) * width
-                            val prevY = height - ((points[index - 1].y - minVal) / range) * height
-                            
-                            // Cubic Bezier for smooth curves
-                            val controlX = (prevX + x) / 2
-                            path.cubicTo(controlX, prevY, controlX, y, x, y)
-                            fillPath.cubicTo(controlX, prevY, controlX, y, x, y)
-                        }
-                    }
-                    
-                    fillPath.lineTo(width, height)
-                    fillPath.close()
-
-                    // Draw Gradient Fill
-                    drawPath(
-                        path = fillPath,
+    Chart(
+        chart = lineChart(
+            lines = listOf(
+                com.patrykandpatrick.vico.compose.chart.line.lineSpec(
+                    lineColor = ElectricIndigo,
+                    lineBackgroundShader = DynamicShaders.fromBrush(
                         brush = Brush.verticalGradient(
-                            colors = listOf(ElectricIndigo.copy(alpha = 0.35f), Transparent)
+                            colors = listOf(ElectricIndigo.copy(alpha = 0.4f), Transparent)
                         )
                     )
-
-                    // Draw Main Stroke with Animated Progress
-                    drawPath(
-                        path = path,
-                        color = ElectricIndigo,
-                        style = Stroke(
-                            width = 3.dp.toPx(),
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        ),
-                        alpha = animationProgress.value
-                    )
-                }
-            }
+                )
+            )
+        ),
+        model = chartEntryModel,
+        startAxis = rememberStartAxis(
+            valueFormatter = AxisValueFormatter { value, _ -> "₹${value.toInt()}" },
+            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            axis = null,
+            tick = null,
+            guideline = com.patrykandpatrick.vico.compose.axis.axisGuidelineComponent(
+                color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = 1.dp
+            )
+        ),
+        bottomAxis = rememberBottomAxis(
+            label = null,
+            axis = null,
+            tick = null,
+            guideline = null
+        ),
+        chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = false),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
     )
 }
 
@@ -165,34 +155,54 @@ fun CategoryAllocationDonut(categories: List<DashboardContract.CategoryData>) {
  * Spending Heatmap for Peak Hours
  */
 @Composable
-fun SpendingHeatmap(hours: List<InsightsContract.PeakHourData>) {
-    val maxSpend = hours.maxOfOrNull { it.amount } ?: 1.0
-    
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        hours.chunked(6).forEach { rowHours ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                rowHours.forEach { hour ->
-                    val intensity = if (maxSpend > 0) (hour.amount / maxSpend).toFloat() else 0f
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp)
-                            .background(
-                                color = ElectricIndigo.copy(alpha = 0.05f + intensity * 0.8f),
-                                shape = RoundedCornerShape(8.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = hour.label.take(2),
-                            style = Typography.labelSmall,
-                            color = if (intensity > 0.5f) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
+fun PeakHoursChart(hours: List<InsightsContract.PeakHourData>) {
+    if (hours.isEmpty()) return
+
+    val chartEntryModel = entryModelOf(
+        hours.mapIndexed { index, hour ->
+            FloatEntry(x = index.toFloat(), y = hour.amount.toFloat())
         }
-    }
+    )
+
+    Chart(
+        chart = columnChart(
+            columns = listOf(
+                com.patrykandpatrick.vico.compose.component.lineComponent(
+                    color = ElectricIndigo,
+                    thickness = 16.dp,
+                    shape = Shapes.roundedCornerShape(topLeftPercent = 50, topRightPercent = 50)
+                )
+            )
+        ),
+        model = chartEntryModel,
+        startAxis = rememberStartAxis(
+            valueFormatter = AxisValueFormatter { value, _ -> "₹${value.toInt()}" },
+            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            axis = null,
+            tick = null,
+            guideline = com.patrykandpatrick.vico.compose.axis.axisGuidelineComponent(
+                color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = 1.dp
+            )
+        ),
+        bottomAxis = rememberBottomAxis(
+            valueFormatter = AxisValueFormatter { value, _ ->
+                hours.getOrNull(value.toInt())?.label?.take(2) ?: ""
+            },
+            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            axis = null,
+            tick = null,
+            guideline = null
+        ),
+        chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = false),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
+    )
 }
 
 @Composable
