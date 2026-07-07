@@ -272,7 +272,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 35 (Android 15) |
-| Version | 3.0.0 (build 5) |
+| Version | 4.0.0 |
 
 ---
 

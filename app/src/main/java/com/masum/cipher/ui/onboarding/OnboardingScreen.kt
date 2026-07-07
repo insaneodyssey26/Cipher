@@ -72,8 +72,10 @@ private fun WelcomePage(onNext: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .systemBarsPadding()
                 .padding(horizontal = 32.dp)
-                .padding(bottom = 64.dp)
+                .padding(top = 32.dp)
+                .padding(bottom = 32.dp)
                 .graphicsLayer {
                     this.alpha = alpha
                     this.translationY = offsetY
@@ -135,6 +137,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .padding(32.dp),
         horizontalAlignment = Alignment.Start
     ) {

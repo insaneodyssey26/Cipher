@@ -1,5 +1,29 @@
 # Release Notes
 
+## [4.0.0]
+
+### Added
+- **Major Redesign**: Complete visual overhaul with premium colors, typography, and component styling.
+- **Floating Navigation Bar**: A sleek, pill-shaped centered navigation bar for main app routing.
+- **Advanced Insights Charts**: Integrated the high-performance Vico library for fluid spending velocity charts and enhanced data visualization.
+- **Scrollable Activity Calendar**: Upgraded the calendar heatmap to support horizontal scrolling with clear month headers and today-highlighting.
+- **Promotional SMS Detection**: Intelligent filtering to automatically identify and drop promotional texts and spam.
+- **Transaction Sorting**: Added capability to sort transactions by spend amount directly on the dashboard.
+- **Informal SMS Support**: Updated parsing rules to detect manual test messages (e.g. "sent 1000 rs") for easier manual testing.
+- **Sponsors Page**: Added a section to recognize project sponsors.
+
+### Changed
+- **Architecture Upgrade**: Decoupled `MainActivity` into `MainViewModel` & `MainContract`, and moved business logic into a dedicated `UseCase` layer.
+- **Pattern Externalization**: Extracted hardcoded regex, keywords, and brand mappings from `SmsParser` and `CategorizerEngine` into centralized configuration objects.
+- **Robust SMS Processing**: Upgraded `SmsReceiver` to utilize `goAsync()` for highly reliable background database writes.
+- **Empty State UX**: Implemented a smooth loading indicator on app launch to prevent jarring flashes of the empty state screen.
+
+### Fixed
+- **Status Bar Overlap**: Corrected system window insets padding on the onboarding screens so content no longer clips under the device status bar.
+- **Categorizer Edge Cases**: Resolved edge cases in the categorization engine and expanded test coverage.
+
+---
+
 ## [3.0.0]
 
 ### Added
