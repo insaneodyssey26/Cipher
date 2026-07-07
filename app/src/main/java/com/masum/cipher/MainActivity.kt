@@ -12,6 +12,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,11 +24,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.ui.MainContract
 import com.masum.cipher.ui.MainViewModel
+import com.masum.cipher.ui.components.FloatingNavBar
+import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.dashboard.DashboardScreen
 import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.insights.DayDetailScreen
@@ -101,22 +105,51 @@ class MainActivity : AppCompatActivity() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         val navController = rememberNavController()
                         val navSpec = remember { tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing) }
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = navBackStackEntry?.destination?.route
+
+                        // Use crossfade for top-level routes to avoid sliding out the navbar
+                        val isTopLevel = currentRoute in listOf("dashboard", "insights", "settings")
 
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
-                            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec) },
-                            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec) },
-                            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec) },
-                            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec) }
+                            enterTransition = { 
+                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                    fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else {
+                                    slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec)
+                                }
+                            },
+                            exitTransition = { 
+                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                    fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else {
+                                    slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec)
+                                }
+                            },
+                            popEnterTransition = { 
+                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                    fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else {
+                                    slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec)
+                                }
+                            },
+                            popExitTransition = { 
+                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                    fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else {
+                                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec)
+                                }
+                            }
                         ) {
                             composable("dashboard") {
                                 val viewModel: DashboardViewModel = hiltViewModel()
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToSettings = { navController.navigate("settings") },
-                                    onNavigateToInsights = { navController.navigate("insights") }
+                                    onNavigateToSettings = { navController.navigate("settings") { launchSingleTop = true; restoreState = true } },
+                                    onNavigateToInsights = { navController.navigate("insights") { launchSingleTop = true; restoreState = true } }
                                 )
                             }
                             composable("insights") {
@@ -153,6 +186,42 @@ class MainActivity : AppCompatActivity() {
                             composable("privacy_policy") {
                                 PrivacyPolicyScreen(onNavigateBack = { navController.popBackStack() })
                             }
+                        }
+
+                        var showAddSheet by remember { mutableStateOf(false) }
+
+                        if (isTopLevel) {
+                            FloatingNavBar(
+                                currentRoute = currentRoute,
+                                onNavigate = { route ->
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                onAddClick = { showAddSheet = true },
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
+                        }
+
+                        if (showAddSheet) {
+                            TransactionDetailsSheet(
+                                transaction = com.masum.cipher.core.data.local.entity.TransactionEntity(
+                                    amount = 0.0,
+                                    merchant = "",
+                                    currency = "INR",
+                                    timestamp = System.currentTimeMillis(),
+                                    category = "OTHERS",
+                                    rawSms = null,
+                                    isIncome = false
+                                ),
+                                onDismiss = { showAddSheet = false },
+                                onConfirm = { newTx ->
+                                    mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx))
+                                    showAddSheet = false
+                                }
+                            )
                         }
 
                         if (!state.isAuthenticated && !state.isOnboardingRequired) {

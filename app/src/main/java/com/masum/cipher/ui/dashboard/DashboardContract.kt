@@ -15,6 +15,7 @@ class DashboardContract {
         data class AddTransaction(val transaction: TransactionEntity) : Intent()
         data class SearchTransactions(val query: String) : Intent()
         data class FilterTransactions(val filter: FilterType) : Intent()
+        data class SetTimePeriod(val period: com.masum.cipher.core.domain.model.TimePeriod) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
@@ -24,9 +25,11 @@ class DashboardContract {
         val transactions: List<TransactionEntity> = emptyList(),
         val searchQuery: String = "",
         val activeFilter: FilterType = FilterType.ALL,
+        val selectedTimePeriod: com.masum.cipher.core.domain.model.TimePeriod = com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH,
         val totalBalance: Double = 0.0,
         val totalIncome: Double = 0.0,
         val totalExpenses: Double = 0.0,
+        val thisMonthExpenses: Double = 0.0,
         val monthlyBudget: Double = 0.0,
         val velocity: VelocityData = VelocityData(),
         val trendPoints: List<Point> = emptyList(),

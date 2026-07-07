@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
@@ -55,6 +57,11 @@ fun DashboardScreen(
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
 
+    // Budget Edit State
+    var showBudgetDialog by remember { mutableStateOf(false) }
+    var budgetInput by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             if (effect is DashboardContract.Effect.ShowUndoDelete) {
@@ -73,27 +80,13 @@ fun DashboardScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { 
-                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showAddSheet = true 
-                },
-                containerColor = ElectricIndigo,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(32.dp),
-                icon = { Icon(LucideIcons.Plus, contentDescription = "Add Transaction") },
-                text = { Text("New Transaction", style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)) }
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 80.dp)
+            contentPadding = PaddingValues(bottom = 140.dp)
         ) {
             // 1. Hero Section (Balance + In/Out)
             item {
@@ -101,22 +94,28 @@ fun DashboardScreen(
                     totalBalance = state.totalBalance,
                     income = state.totalIncome,
                     expense = state.totalExpenses,
-                    privacyMode = privacyMode,
-                    onNavigateToInsights = onNavigateToInsights,
-                    onNavigateToSettings = onNavigateToSettings
+                    selectedPeriod = state.selectedTimePeriod,
+                    onPeriodSelected = { period ->
+                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
+                    },
+                    privacyMode = privacyMode
                 )
             }
 
-            // 2. Budget Pulse Card
+            // 3. Budget Pulse Card
             item {
                 BudgetPulseCard(
-                    spent = state.totalExpenses,
+                    spent = state.thisMonthExpenses,
                     budget = state.monthlyBudget,
-                    onSetBudgetClick = onNavigateToSettings
+                    onSetBudgetClick = {
+                        budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
+                        showBudgetDialog = true
+                    }
                 )
             }
 
-            // 3. Timeline Label
+            // 4. Timeline Label
             item {
                 Text(
                     text = "RECENT ACTIVITY",
@@ -186,6 +185,47 @@ fun DashboardScreen(
             }
         )
     }
+
+    if (showBudgetDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showBudgetDialog = false },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = { Text("Monthly Budget", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = budgetInput,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
+                    label = { Text("Limit (₹)") },
+                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        val amount = budgetInput.toDoubleOrNull() ?: 0.0
+                        coroutineScope.launch {
+                            userPreferences.setMonthlyBudget(amount)
+                        }
+                        showBudgetDialog = false
+                    },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = com.masum.cipher.ui.theme.ElectricIndigo)
+                ) {
+                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showBudgetDialog = false }) { 
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) 
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -193,9 +233,9 @@ private fun DashboardHero(
     totalBalance: Double,
     income: Double,
     expense: Double,
-    privacyMode: Boolean,
-    onNavigateToInsights: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
+    onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod) -> Unit,
+    privacyMode: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -272,13 +312,11 @@ private fun DashboardHero(
         }
         
         // Top Bar
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp)
-                .align(Alignment.TopCenter),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .align(Alignment.TopCenter)
         ) {
             Text(
                 text = "cipher.",
@@ -287,23 +325,15 @@ private fun DashboardHero(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-1).sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.align(Alignment.CenterStart)
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(
-                    onClick = onNavigateToInsights,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
-                ) {
-                    Icon(LucideIcons.ChartBar, "Insights", tint = MaterialTheme.colorScheme.onSurface)
-                }
-                IconButton(
-                    onClick = onNavigateToSettings,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
-                ) {
-                    Icon(LucideIcons.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurface)
-                }
-            }
+            TimeSelectorDropdown(
+                selectedPeriod = selectedPeriod,
+                onPeriodSelected = onPeriodSelected,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
         }
     }
 }
@@ -352,11 +382,18 @@ private fun BudgetPulseCard(
             if (budget > 0) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Premium Gradient Progress Bar
                 val progress = (spent / budget).toFloat().coerceIn(0f, 1f)
-                val progressBrush = Brush.horizontalGradient(
-                    colors = listOf(EmeraldIncome, ElectricIndigo, RoseExpense)
+                val animatedProgress by animateFloatAsState(
+                    targetValue = progress,
+                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                    label = "budgetProgress"
                 )
+                
+                val barColor = when {
+                    progress >= 0.9f -> RoseExpense
+                    progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B) // Amber warning
+                    else -> ElectricIndigo
+                }
 
                 Box(
                     modifier = Modifier
@@ -364,12 +401,14 @@ private fun BudgetPulseCard(
                         .height(8.dp)
                         .background(White10, RoundedCornerShape(4.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(progress)
-                            .fillMaxHeight()
-                            .background(progressBrush, RoundedCornerShape(4.dp))
-                    )
+                    if (animatedProgress > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(animatedProgress)
+                                .fillMaxHeight()
+                                .background(barColor, RoundedCornerShape(4.dp))
+                        )
+                    }
                 }
             }
         }

@@ -189,7 +189,7 @@ fun PeakHoursChart(hours: List<InsightsContract.PeakHourData>) {
         ),
         bottomAxis = rememberBottomAxis(
             valueFormatter = AxisValueFormatter { value, _ ->
-                hours.getOrNull(value.toInt())?.label?.take(2) ?: ""
+                hours.getOrNull(value.toInt())?.label ?: ""
             },
             label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant

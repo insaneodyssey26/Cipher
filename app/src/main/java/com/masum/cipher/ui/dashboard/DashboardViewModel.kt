@@ -26,6 +26,7 @@ class DashboardViewModel @Inject constructor(
 
     private val _searchQuery = MutableStateFlow("")
     private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
+    private val _selectedTimePeriod = MutableStateFlow(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
 
     init {
         observeDashboardData()
@@ -40,15 +41,17 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
+            is DashboardContract.Intent.SetTimePeriod -> _selectedTimePeriod.value = intent.period
         }
     }
 
     private fun observeDashboardData() {
         viewModelScope.launch {
-            combine(_searchQuery, _activeFilter) { query, filter ->
-                query to filter
-            }.flatMapLatest { (query, filter) ->
-                getDashboardDataUseCase(query, filter)
+            combine(_searchQuery, _activeFilter, _selectedTimePeriod) { query, filter, period ->
+                Triple(query, filter, period)
+            }.flatMapLatest { (query, filter, period) ->
+                val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)
+                getDashboardDataUseCase(query, filter, timeRange)
             }.collect { newState ->
                 updateState { newState }
             }

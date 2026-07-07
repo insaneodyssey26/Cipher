@@ -15,18 +15,36 @@ class GetDashboardDataUseCase @Inject constructor(
     private val repository: TransactionRepository,
     private val userPreferences: UserPreferences
 ) {
-    operator fun invoke(query: String, filter: DashboardContract.FilterType): Flow<DashboardContract.State> {
+    operator fun invoke(
+        query: String, 
+        filter: DashboardContract.FilterType, 
+        timeRange: com.masum.cipher.core.domain.model.TimeRange
+    ): Flow<DashboardContract.State> {
+        val thisMonthRange = com.masum.cipher.core.domain.model.TimeRange.from(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
         return combine(
+            combine(
+                repository.getTotalIncomeBetween(timeRange.startTime, timeRange.endTime),
+                repository.getTotalExpensesBetween(timeRange.startTime, timeRange.endTime),
+                repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime)
+            ) { inc, exp, monthExp -> Triple(inc, exp, monthExp) },
             repository.getTotalIncome(),
             repository.getTotalExpenses(),
             userPreferences.settingsFlow
-        ) { income, expenses, settings ->
-            Triple(income ?: 0.0, expenses ?: 0.0, settings.monthlyBudget)
-        }.flatMapLatest { (income, expenses, budget) ->
+        ) { rangeStats, incomeAllTime, expensesAllTime, settings ->
+            val (incomeRange, expensesRange, thisMonthExp) = rangeStats
+            val rangeInc = incomeRange ?: 0.0
+            val rangeExp = expensesRange ?: 0.0
+            val monthExp = thisMonthExp ?: 0.0
+            val allTimeInc = incomeAllTime ?: 0.0
+            val allTimeExp = expensesAllTime ?: 0.0
+            
+            Triple(Triple(rangeInc, rangeExp, monthExp), allTimeInc - allTimeExp, settings.monthlyBudget)
+        }.flatMapLatest { (rangeStats, totalBalance, budget) ->
+            val (income, expenses, thisMonthExpenses) = rangeStats
             val transactionsFlow = if (query.isBlank()) {
-                repository.getRecentTransactions(20)
+                repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
             } else {
-                repository.getAllTransactions().map { list ->
+                repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime).map { list ->
                     list.filter { 
                         it.merchant.contains(query, ignoreCase = true) || 
                         it.category.contains(query, ignoreCase = true) 
@@ -46,9 +64,11 @@ class GetDashboardDataUseCase @Inject constructor(
                     transactions = filteredList,
                     searchQuery = query,
                     activeFilter = filter,
+                    selectedTimePeriod = timeRange.period,
                     totalIncome = income,
                     totalExpenses = expenses,
-                    totalBalance = income - expenses,
+                    thisMonthExpenses = thisMonthExpenses,
+                    totalBalance = totalBalance,
                     monthlyBudget = budget
                 )
             }

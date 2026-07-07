@@ -19,11 +19,11 @@ class GetInsightsUseCase @Inject constructor(
     private val repository: TransactionRepository,
     private val subscriptionDetector: SubscriptionDetector
 ) {
-    operator fun invoke(): Flow<InsightsContract.State> {
+    operator fun invoke(timeRange: com.masum.cipher.core.domain.model.TimeRange): Flow<InsightsContract.State> {
         val startOfCurrentWeek = getStartOfCurrentWeek()
         val startOfLastWeek = startOfCurrentWeek - TimeUnit.DAYS.toMillis(7)
 
-        return repository.getAllTransactions()
+        return repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
             .combine(repository.getExpensesSince(startOfLastWeek)) { transactions, recentExpenses ->
                 val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
                 val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }

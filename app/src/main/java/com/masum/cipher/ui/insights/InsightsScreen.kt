@@ -54,19 +54,13 @@ fun InsightsScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "INSIGHTS",
-                        style = Typography.labelSmall.copy(letterSpacing = 2.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    TimeSelectorDropdown(
+                        selectedPeriod = state.selectedTimePeriod,
+                        onPeriodSelected = { period ->
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.handleIntent(InsightsContract.Intent.SetTimePeriod(period))
+                        }
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateBack()
-                    }) {
-                        Icon(LucideIcons.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
-                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -79,7 +73,7 @@ fun InsightsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 48.dp)
+            contentPadding = PaddingValues(bottom = 140.dp)
         ) {
             // 1. Narrative Hero
             item {

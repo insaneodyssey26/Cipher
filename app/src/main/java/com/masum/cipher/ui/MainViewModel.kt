@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.mvi.BaseViewModel
 import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -13,7 +14,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
-    private val biometricAuthenticator: BiometricAuthenticator
+    private val biometricAuthenticator: BiometricAuthenticator,
+    private val addTransactionUseCase: AddTransactionUseCase
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State()
 ) {
@@ -37,6 +39,13 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.OnAppStop -> onStop()
             is MainContract.Intent.SetOnboardingCompleted -> setOnboardingCompleted(intent.completed)
             is MainContract.Intent.Authenticate -> updateState { copy(isAuthenticated = true) }
+            is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
+        }
+    }
+
+    private fun addTransaction(transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) {
+        viewModelScope.launch {
+            addTransactionUseCase(transaction)
         }
     }
 

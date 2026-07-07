@@ -87,8 +87,16 @@ class TransactionRepository @Inject constructor(
     }
 
     fun getTotalExpenses(): Flow<Double?> = transactionDao.getTotalExpenses()
-
     fun getTotalIncome(): Flow<Double?> = transactionDao.getTotalIncome()
+
+    fun getTransactionsBetween(startTime: Long, endTime: Long): Flow<List<TransactionEntity>> =
+        transactionDao.getTransactionsBetween(startTime, endTime)
+
+    fun getTotalExpensesBetween(startTime: Long, endTime: Long): Flow<Double?> =
+        transactionDao.getTotalExpensesBetween(startTime, endTime)
+
+    fun getTotalIncomeBetween(startTime: Long, endTime: Long): Flow<Double?> =
+        transactionDao.getTotalIncomeBetween(startTime, endTime)
 
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>> = transactionDao.getExpensesSince(startTime)
 

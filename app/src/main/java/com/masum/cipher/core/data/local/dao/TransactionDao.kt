@@ -32,6 +32,15 @@ interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 1")
     fun getTotalIncome(): Flow<Double?>
 
+    @Query("SELECT * FROM transactions WHERE timestamp BETWEEN :startTime AND :endTime ORDER BY timestamp DESC")
+    fun getTransactionsBetween(startTime: Long, endTime: Long): Flow<List<TransactionEntity>>
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 0 AND timestamp BETWEEN :startTime AND :endTime")
+    fun getTotalExpensesBetween(startTime: Long, endTime: Long): Flow<Double?>
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 1 AND timestamp BETWEEN :startTime AND :endTime")
+    fun getTotalIncomeBetween(startTime: Long, endTime: Long): Flow<Double?>
+
     @Query("SELECT * FROM transactions WHERE isIncome = 0 AND timestamp >= :startTime")
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>>
 
