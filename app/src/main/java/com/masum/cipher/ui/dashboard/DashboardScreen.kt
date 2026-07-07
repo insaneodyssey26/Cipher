@@ -126,7 +126,13 @@ fun DashboardScreen(
             }
 
             // 4. Transaction List
-            if (state.transactions.isEmpty()) {
+            if (state.isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.CircularProgressIndicator(color = com.masum.cipher.ui.theme.ElectricIndigo)
+                    }
+                }
+            } else if (state.transactions.isEmpty()) {
                 item {
                     GenesisEmptyState(onAddManual = { showAddSheet = true })
                 }

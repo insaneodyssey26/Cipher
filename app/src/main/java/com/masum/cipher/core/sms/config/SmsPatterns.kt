@@ -28,11 +28,13 @@ object SmsPatterns {
         Pattern.compile("(?i)credited to"),
         Pattern.compile("(?i)sent to"),
         Pattern.compile("(?i)paid Rs"),
-        Pattern.compile("(?i)transferred to")
+        Pattern.compile("(?i)transferred to"),
+        Pattern.compile("(?i)(?:sent|paid|spent|received)\\s*(?:rs\\.?|inr|₹)?\\s*\\d+"),
+        Pattern.compile("(?i)\\d+\\s*(?:rs\\.?|inr|₹)?\\s*(?:sent|paid|spent|received)")
     )
 
     val INTENT_KEYWORDS = listOf(
-        "rs.", "inr", "debited", "spent", "paid", "credited", "received", "txn", "transaction", "amount", "amt"
+        "rs", "rs.", "inr", "debited", "spent", "paid", "credited", "received", "txn", "transaction", "amount", "amt", "sent"
     )
 
     val ACCOUNT_EXCLUSION_PATTERN = Pattern.compile(
