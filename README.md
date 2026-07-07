@@ -46,7 +46,7 @@ Bank sends SMS alert
   DashboardViewModel ──► UI (Jetpack Compose)
 ```
 
-No network call is made at any point. The SMS is read, parsed, and written to the encrypted database — all within the `SmsReceiver.onReceive` scope running on `Dispatchers.IO`.
+No network call is made at any point. The SMS is read, parsed, and written to the encrypted database — all within the `SmsReceiver.onReceive` scope using `goAsync()` running on `Dispatchers.IO` for reliable background execution.
 
 ---
 
@@ -54,12 +54,15 @@ No network call is made at any point. The SMS is read, parsed, and written to th
 
 cipher uses **MVI (Model-View-Intent)** across all screens, backed by Hilt DI.
 
-Each screen follows the same contract pattern:
+Each screen follows the same contract pattern, now utilizing a dedicated UseCase layer:
 
-```
+```text
 Screen.kt  ──intent──►  ViewModel  ──state──►  Screen.kt
                 │                        ▲
-                └──► Repository ──────────┘
+                └──► UseCase ────────────┘
+                        │
+                        ▼
+                    Repository
 ```
 
 ### SMS pipeline
@@ -94,6 +97,7 @@ flowchart LR
     MA --> IS[InsightsScreen]
     MA --> SS[SettingsScreen]
 
+    MA  --> MVM[MainViewModel]
     SCR --> DVM[DashboardViewModel]
     IS  --> IVM[InsightsViewModel]
     SS  --> SVM[SettingsViewModel]
@@ -118,7 +122,7 @@ flowchart LR
 
     class MA entry
     class OS,LS,SCR,IS,SS screen
-    class DVM,IVM,SVM vm
+    class DVM,IVM,SVM,MVM vm
     class TR,UP,SD logic
     class DB,PDS store
     class BW,SW widget
@@ -130,22 +134,24 @@ flowchart LR
 
 ### Automatic SMS parsing
 - Listens for `SMS_RECEIVED` broadcasts from bank sender IDs
-- Regex pipeline extracts: transaction amount, direction (debit/credit), merchant name, currency
+- Externalized Regex patterns and dictionaries via `SmsPatterns` for easier maintenance
+- Detects promotional SMS and filters them out reliably
 - India-focused brand dictionary covers major UPI, credit card, and bank alert formats
 - False-positive filtering rejects OTPs, promotional, and non-transactional messages
 
 ### Dashboard
+- Global Pill-shaped floating Navigation Bar
 - Running balance with income/expense split
-- Transaction timeline with date grouping
+- Transaction timeline with spend-based sorting capabilities
 - Live search by merchant or category
 - Add, edit, delete with snackbar undo
 - Monthly budget ring with health color coding
 - Privacy mode — blurs all amounts with one tap
 
 ### Insights
-- Spending velocity chart
+- High-performance spending velocity charts built on `Vico`
 - Category breakdown doughnut
-- Calendar heatmap
+- Advanced scrollable Calendar heatmap
 - Day-detail drill-down
 - Subscription detector — finds recurring payments and predicted next billing dates
 
