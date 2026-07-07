@@ -12,75 +12,80 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary             = CipherBlue,
-    onPrimary           = Color.White,
-    primaryContainer    = CipherBlueContainer,
-    onPrimaryContainer  = CipherBlue,
+/**
+ * Vault Dark Color Scheme
+ * 
+ * Optimized for OLED displays with #0A0A0F base to maintain depth.
+ */
+private val VaultDarkColorScheme = darkColorScheme(
+    primary = ElectricIndigo,
+    onPrimary = Slate50,
+    primaryContainer = ElectricIndigoSubtle,
+    onPrimaryContainer = ElectricIndigo,
 
-    secondary           = TextSecondary,
-    onSecondary         = VoidBlack,
-    secondaryContainer  = VoidSurfaceHigh,
-    onSecondaryContainer= TextPrimary,
+    secondary = Slate400,
+    onSecondary = MidnightDeep,
+    secondaryContainer = VaultSurface,
+    onSecondaryContainer = Slate50,
 
-    tertiary            = CipherIncome,
-    onTertiary          = VoidBlack,
-    tertiaryContainer   = CipherIncomeContainer,
-    onTertiaryContainer = CipherIncome,
+    tertiary = EmeraldIncome,
+    onTertiary = MidnightDeep,
+    tertiaryContainer = EmeraldIncomeSubtle,
+    onTertiaryContainer = EmeraldIncome,
 
-    error               = CipherExpense,
-    onError             = Color.White,
-    errorContainer      = CipherExpenseContainer,
-    onErrorContainer    = CipherExpense,
+    error = RoseExpense,
+    onError = Slate50,
+    errorContainer = RoseExpenseSubtle,
+    onErrorContainer = RoseExpense,
 
-    background          = VoidBlack,
-    onBackground        = TextPrimary,
+    background = MidnightDeep,
+    onBackground = Slate50,
 
-    surface             = VoidSurface,
-    onSurface           = TextPrimary,
-    surfaceVariant      = VoidSurfaceHigh,
-    onSurfaceVariant    = TextSecondary,
+    surface = VaultSurface,
+    onSurface = Slate50,
+    surfaceVariant = VaultElevated,
+    onSurfaceVariant = Slate400,
 
-    outline             = TextTertiary,
-    outlineVariant      = Color(0x1AFFFFFF),
-
-    inverseSurface      = TextPrimary,
-    inverseOnSurface    = VoidBlack,
-    inversePrimary      = CipherBlue,
-    scrim               = Color(0xCC000000)
+    outline = Slate600,
+    outlineVariant = White10
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary             = LightPrimary,
-    onPrimary           = LightOnPrimary,
-    primaryContainer    = Color(0xFFDDE3FF),
-    onPrimaryContainer  = Color(0xFF001258),
+/**
+ * Vault Light Color Scheme
+ * 
+ * Reverses the depth system using Slate-based backgrounds.
+ */
+private val VaultLightColorScheme = lightColorScheme(
+    primary = ElectricIndigo,
+    onPrimary = Slate50,
+    primaryContainer = ElectricIndigoSubtle,
+    onPrimaryContainer = ElectricIndigo,
 
-    secondary           = LightTextSecondary,
-    onSecondary         = Color.White,
-    secondaryContainer  = LightSurfaceHigh,
-    onSecondaryContainer= LightTextPrimary,
+    secondary = Slate600,
+    onSecondary = Slate50,
+    secondaryContainer = LightSurface,
+    onSecondaryContainer = Slate900,
 
-    tertiary            = Color(0xFF0D9B62),
-    onTertiary          = Color.White,
-    tertiaryContainer   = Color(0xFFB8F5D8),
-    onTertiaryContainer = Color(0xFF002116),
+    tertiary = EmeraldIncome,
+    onTertiary = Slate50,
+    tertiaryContainer = EmeraldIncomeSubtle,
+    onTertiaryContainer = EmeraldIncome,
 
-    error               = Color(0xFFBA1A1A),
-    onError             = Color.White,
-    errorContainer      = Color(0xFFFFDAD6),
-    onErrorContainer    = Color(0xFF410002),
+    error = RoseExpense,
+    onError = Slate50,
+    errorContainer = RoseExpenseSubtle,
+    onErrorContainer = RoseExpense,
 
-    background          = LightBackground,
-    onBackground        = LightTextPrimary,
+    background = LightBase,
+    onBackground = Slate900,
 
-    surface             = LightSurface,
-    onSurface           = LightTextPrimary,
-    surfaceVariant      = LightSurfaceHigh,
-    onSurfaceVariant    = LightTextSecondary,
+    surface = LightSurface,
+    onSurface = Slate900,
+    surfaceVariant = LightElevated,
+    onSurfaceVariant = Slate600,
 
-    outline             = Color(0xFF9090A0),
-    outlineVariant      = LightBorder
+    outline = Slate400,
+    outlineVariant = LightBorder
 )
 
 @Composable
@@ -88,7 +93,7 @@ fun CipherTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = if (darkTheme) VaultDarkColorScheme else VaultLightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -96,8 +101,10 @@ fun CipherTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
             window.navigationBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

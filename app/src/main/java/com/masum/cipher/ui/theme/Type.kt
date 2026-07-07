@@ -10,130 +10,149 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 
+/**
+ * Space Grotesk - Primary Typeface (Headings, Hero Numbers)
+ */
 @OptIn(ExperimentalTextApi::class)
-private fun geist(weight: Int, fontWeight: FontWeight) = Font(
-    resId = R.font.geist_variablefont_weight,
-    weight = fontWeight,
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight))
+val SpaceGrotesk = FontFamily(
+    Font(
+        resId = R.font.spacegrotesk_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(400)),
+        weight = FontWeight.Normal
+    ),
+    Font(
+        resId = R.font.spacegrotesk_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(500)),
+        weight = FontWeight.Medium
+    ),
+    Font(
+        resId = R.font.spacegrotesk_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(600)),
+        weight = FontWeight.SemiBold
+    ),
+    Font(
+        resId = R.font.spacegrotesk_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(700)),
+        weight = FontWeight.Bold
+    )
 )
 
+/**
+ * DM Sans - Secondary Typeface (Body, UI Controls)
+ */
 @OptIn(ExperimentalTextApi::class)
-val GeistFontFamily = FontFamily(
-    geist(100, FontWeight.Thin),
-    geist(200, FontWeight.ExtraLight),
-    geist(300, FontWeight.Light),
-    geist(400, FontWeight.Normal),
-    geist(500, FontWeight.Medium),
-    geist(600, FontWeight.SemiBold),
-    geist(700, FontWeight.Bold),
-    geist(800, FontWeight.ExtraBold),
-    geist(900, FontWeight.Black),
+val DMSans = FontFamily(
+    Font(
+        resId = R.font.dmsans_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(400)),
+        weight = FontWeight.Normal
+    ),
+    Font(
+        resId = R.font.dmsans_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(500)),
+        weight = FontWeight.Medium
+    ),
+    Font(
+        resId = R.font.dmsans_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(700)),
+        weight = FontWeight.Bold
+    )
 )
 
 val Typography = Typography(
+    // Hero Balance / Numbers
     displayLarge = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.Bold,
-        fontSize = 57.sp,
-        lineHeight = 64.sp,
-        letterSpacing = (-0.5).sp
+        fontSize = 52.sp,
+        letterSpacing = (-1).sp
     ),
     displayMedium = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.Bold,
-        fontSize = 45.sp,
-        lineHeight = 52.sp,
-        letterSpacing = (-0.25).sp
+        fontSize = 44.sp,
+        letterSpacing = (-1).sp
     ),
     displaySmall = TextStyle(
-        fontFamily = GeistFontFamily,
-        fontWeight = FontWeight.Bold,
+        fontFamily = SpaceGrotesk,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 36.sp,
-        lineHeight = 44.sp,
-        letterSpacing = (-0.25).sp
+        letterSpacing = (-0.5).sp
     ),
+    // Section Headings
     headlineLarge = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.25).sp
+        letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = (-0.25).sp
+        letterSpacing = (-0.5).sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = (-0.15).sp
+        letterSpacing = (-0.5).sp
     ),
+    // Card Titles / Subheadings
     titleLarge = TextStyle(
-        fontFamily = GeistFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = (-0.15).sp
+        fontFamily = DMSans,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        letterSpacing = 0.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = GeistFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontFamily = DMSans,
+        fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = (-0.1).sp
+        letterSpacing = 0.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = DMSans,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = (-0.05).sp
+        letterSpacing = 0.sp
     ),
+    // Body Text
     bodyLarge = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = DMSans,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = GeistFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontFamily = DMSans,
+        fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
-        lineHeight = 20.sp,
         letterSpacing = 0.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = DMSans,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
         letterSpacing = 0.sp
     ),
+    // Labels / Metadata
     labelLarge = TextStyle(
-        fontFamily = GeistFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.sp
+        fontFamily = DMSans,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        letterSpacing = 0.5.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = DMSans,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.5.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = GeistFontFamily,
+        fontFamily = DMSans,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.sp
+        fontSize = 10.sp,
+        letterSpacing = 1.sp
     )
 )

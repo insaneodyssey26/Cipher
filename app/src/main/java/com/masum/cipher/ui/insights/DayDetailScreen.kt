@@ -1,11 +1,11 @@
 package com.masum.cipher.ui.insights
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +19,10 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.ui.components.*
+import com.masum.cipher.ui.dashboard.TransactionItem
 import com.masum.cipher.ui.theme.*
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.ArrowLeft
 import kotlinx.coroutines.flow.collectLatest
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -35,8 +38,6 @@ fun DayDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val snackbarHostState = remember { SnackbarHostState() }
     val haptic = LocalHapticFeedback.current
     
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
@@ -77,52 +78,27 @@ fun DayDetailScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
-            when (effect) {
-                is InsightsContract.Effect.ShowUndoDelete -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = "Transaction deleted",
-                        actionLabel = "UNDO",
-                        duration = SnackbarDuration.Short
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.handleIntent(InsightsContract.Intent.RestoreTransaction(effect.transaction))
-                    }
-                }
+            if (effect is InsightsContract.Effect.ShowUndoDelete) {
+                // Handle Undo if needed
             }
         }
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
-                    actionColor = CipherBlue,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                )
-            }
-        },
         topBar = {
-            LargeTopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Column {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = dayName,
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = (-0.5).sp
-                            ),
-                            color = TextPrimary
+                            text = dayName.uppercase(),
+                            style = Typography.labelSmall.copy(letterSpacing = 2.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = fullDate,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = TextSecondary
+                            style = Typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 },
@@ -131,10 +107,10 @@ fun DayDetailScreen(
                         if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onNavigateBack()
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(LucideIcons.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                scrollBehavior = scrollBehavior
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { padding ->
@@ -152,15 +128,15 @@ fun DayDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     DetailStatCard(
-                        label = "Total Spent",
-                        amount = currencyFormatter.format(totalSpent),
-                        color = MaterialTheme.colorScheme.error,
+                        label = "SPENT",
+                        amount = "₹${totalSpent.toInt()}",
+                        color = RoseExpense,
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatCard(
-                        label = "Total Income",
-                        amount = currencyFormatter.format(totalIncome),
-                        color = IncomeGreen,
+                        label = "INCOME",
+                        amount = "₹${totalIncome.toInt()}",
+                        color = EmeraldIncome,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -169,12 +145,9 @@ fun DayDetailScreen(
             item {
                 Text(
                     text = "TRANSACTIONS",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = TextSecondary,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+                    style = Typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
                 )
             }
 
@@ -187,38 +160,40 @@ fun DayDetailScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No transactions for this day",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextTertiary
+                            text = "No records for this day",
+                            style = Typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }
             } else {
-                items(items = dayTransactions, key = { it.id }) { transaction ->
-                    TransactionRow(
-                        transaction = transaction,
-                        isPrivacyMode = false,
-                        onDelete = {
-                            viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
-                        },
-                        onEdit = {
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            editingTransaction = transaction
-                        },
-                        isHapticsEnabled = isHapticsEnabled
-                    )
+                itemsIndexed(items = dayTransactions, key = { _, it -> it.id }) { index, transaction ->
+                    StaggeredEntranceItem(index = index) {
+                        TransactionItem(
+                            transaction = transaction,
+                            privacyMode = false,
+                            onClick = {
+                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editingTransaction = transaction
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 
     editingTransaction?.let { transaction ->
-        EditTransactionDialog(
+        TransactionDetailsSheet(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
+                editingTransaction = null
+            },
+            onDelete = {
+                viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
             }
         )
@@ -232,28 +207,21 @@ private fun DetailStatCard(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    VaultCard(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        backgroundColor = MaterialTheme.colorScheme.surface
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column {
             Text(
-                text = label.uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    letterSpacing = 1.sp,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = color.copy(alpha = 0.7f)
+                text = label,
+                style = Typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = amount,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = color
-                )
+                style = Typography.headlineSmall,
+                color = color
             )
         }
     }

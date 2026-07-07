@@ -3,39 +3,35 @@ package com.masum.cipher.ui.dashboard
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.rounded.TrendingUp
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.Plus
+import compose.icons.lucideicons.ChartBar
+import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.Lock
+import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,18 +43,15 @@ fun DashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     val haptic = LocalHapticFeedback.current
-    val focusManager = LocalFocusManager.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
 
+    // State for Bottom Sheet
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
-    var showAddDialog by remember { mutableStateOf(false) }
-    var isSearchActive by remember { mutableStateOf(false) }
-    var localSearchQuery by remember { mutableStateOf("") }
+    var showAddSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
@@ -77,138 +70,19 @@ fun DashboardScreen(
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
-                    actionColor = CipherBlue,
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-        },
-        topBar = {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-                Column {
-                    TopAppBar(
-                        title = {
-                            if (!isSearchActive) {
-                                Text(
-                                    text = "cipher",
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = (-1).sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                            } else {
-                                TextField(
-                                    value = localSearchQuery,
-                                    onValueChange = {
-                                        localSearchQuery = it
-                                        viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it))
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    placeholder = {
-                                        Text(
-                                            "Search vault...",
-                                            color = MaterialTheme.colorScheme.outline,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    },
-                                    singleLine = true,
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                                        cursorColor = CipherBlue
-                                    ),
-                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
-                                    trailingIcon = {
-                                        IconButton(onClick = {
-                                            localSearchQuery = ""
-                                            viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(""))
-                                            isSearchActive = false
-                                        }) {
-                                            Icon(Icons.Rounded.Close, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-                                )
-                            }
-                        },
-                        actions = {
-                            if (!isSearchActive) {
-                                IconButton(onClick = {
-                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isSearchActive = true
-                                }) {
-                                    Icon(Icons.Rounded.Search, "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                                IconButton(onClick = {
-                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onNavigateToSettings()
-                                }) {
-                                    Icon(Icons.Rounded.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        },
-                        scrollBehavior = scrollBehavior,
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent,
-                            scrolledContainerColor = Color.Transparent
-                        )
-                    )
-
-                    AnimatedVisibility(
-                        visible = isSearchActive,
-                        enter = expandVertically(animationSpec = tween(220)) + fadeIn(),
-                        exit = shrinkVertically(animationSpec = tween(180)) + fadeOut()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            DashboardContract.FilterType.entries.forEach { filter ->
-                                FilterChip(
-                                    selected = state.activeFilter == filter,
-                                    onClick = {
-                                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        viewModel.handleIntent(DashboardContract.Intent.FilterTransactions(filter))
-                                    },
-                                    label = {
-                                        Text(
-                                            text = filter.name.lowercase().replaceFirstChar { it.uppercase() },
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold)
-                                        )
-                                    },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = CipherBlueDim,
-                                        selectedLabelColor = CipherBlue,
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
-                                    border = FilterChipDefaults.filterChipBorder(
-                                        enabled = true,
-                                        selected = state.activeFilter == filter,
-                                        selectedBorderColor = CipherBlue.copy(alpha = 0.3f),
-                                        borderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        borderWidth = 1.dp,
-                                        selectedBorderWidth = 1.dp
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { 
+                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showAddSheet = true 
+                },
+                containerColor = ElectricIndigo,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(LucideIcons.Plus, contentDescription = "Add Transaction")
             }
         }
     ) { padding ->
@@ -216,132 +90,95 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 48.dp)
+            contentPadding = PaddingValues(bottom = 80.dp)
         ) {
-            if (!isSearchActive && localSearchQuery.isEmpty()) {
-                item {
-                    BalanceHeader(
-                        totalBalance = state.totalBalance,
-                        income = state.totalIncome,
-                        expenses = state.totalExpenses,
-                        isPrivacyMode = privacyMode,
-                        isHapticsEnabled = isHapticsEnabled
-                    )
-                }
-
-                item {
-                    BudgetCard(
-                        spent = state.totalExpenses,
-                        budget = state.monthlyBudget,
-                        onSetBudgetClick = onNavigateToSettings,
-                        isHapticsEnabled = isHapticsEnabled
-                    )
-                }
-
-                item { Spacer(Modifier.height(8.dp)) }
-
-                item {
-                    IntelligenceRow(
-                        isHapticsEnabled = isHapticsEnabled,
-                        onClick = onNavigateToInsights
-                    )
-                }
-
-                item { Spacer(Modifier.height(16.dp)) }
-            }
-
+            // 1. Hero Section (Balance + In/Out)
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isSearchActive || localSearchQuery.isNotEmpty()) "RESULTS" else "TIMELINE",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 2.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (!isSearchActive && localSearchQuery.isEmpty()) {
-                        AddButton(
-                            isHapticsEnabled = isHapticsEnabled,
-                            onClick = { showAddDialog = true }
-                        )
-                    }
-                }
+                DashboardHero(
+                    totalBalance = state.totalBalance,
+                    income = state.totalIncome,
+                    expense = state.totalExpenses,
+                    privacyMode = privacyMode,
+                    onNavigateToInsights = onNavigateToInsights,
+                    onNavigateToSettings = onNavigateToSettings
+                )
             }
 
+            // 2. Budget Pulse Card
+            item {
+                BudgetPulseCard(
+                    spent = state.totalExpenses,
+                    budget = state.monthlyBudget,
+                    onSetBudgetClick = onNavigateToSettings
+                )
+            }
+
+            // 3. Timeline Label
+            item {
+                Text(
+                    text = "RECENT ACTIVITY",
+                    style = Typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
+                )
+            }
+
+            // 4. Transaction List
             if (state.transactions.isEmpty()) {
                 item {
-                    if (isSearchActive || localSearchQuery.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 64.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No matching records",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                        }
-                    } else {
-                        EmptyTransactionsState()
-                    }
+                    GenesisEmptyState(onAddManual = { showAddSheet = true })
                 }
             } else {
-                items(
+                itemsIndexed(
                     items = state.transactions,
-                    key = { it.id }
-                ) { transaction ->
-                    TransactionRow(
-                        transaction = transaction,
-                        isPrivacyMode = privacyMode,
-                        onDelete = { viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction)) },
-                        onEdit = {
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            editingTransaction = transaction
-                        },
-                        isHapticsEnabled = isHapticsEnabled
-                    )
-                    RowDivider()
+                    key = { _, t -> t.id }
+                ) { index, transaction ->
+                    StaggeredEntranceItem(index = index) {
+                        TransactionItem(
+                            transaction = transaction,
+                            privacyMode = privacyMode,
+                            onClick = {
+                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editingTransaction = transaction
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 
-    if (showAddDialog) {
-        EditTransactionDialog(
+    if (showAddSheet) {
+        TransactionDetailsSheet(
             transaction = TransactionEntity(
                 amount = 0.0,
                 merchant = "",
                 currency = "INR",
                 timestamp = System.currentTimeMillis(),
-                category = "MISC",
+                category = "OTHERS",
                 rawSms = null,
                 isIncome = false
             ),
-            onDismiss = { showAddDialog = false },
+            onDismiss = { showAddSheet = false },
             onConfirm = { newTransaction ->
                 if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
-                showAddDialog = false
+                showAddSheet = false
             }
         )
     }
 
     editingTransaction?.let { transaction ->
-        EditTransactionDialog(
+        TransactionDetailsSheet(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
+                editingTransaction = null
+            },
+            onDelete = {
+                viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
             }
         )
@@ -349,106 +186,266 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun IntelligenceRow(
-    isHapticsEnabled: Boolean,
-    onClick: () -> Unit
+private fun DashboardHero(
+    totalBalance: Double,
+    income: Double,
+    expense: Double,
+    privacyMode: Boolean,
+    onNavigateToInsights: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 600f),
-        label = "scale"
-    )
-
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .scale(scale)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick()
-            }
-            .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            .height(320.dp)
+            .background(
+                brush = Brush.radialGradient(
+                    colors = if (MaterialTheme.colorScheme.surface == LightSurface) {
+                        listOf(ElectricIndigo.copy(alpha = 0.04f), Transparent)
+                    } else {
+                        listOf(ElectricIndigo.copy(alpha = 0.08f), Transparent)
+                    },
+                    radius = 800f
+                )
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Rounded.TrendingUp,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(top = 48.dp)
+        ) {
             Text(
-                text = "Intelligence",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Patterns · Subscriptions · Trends",
-                style = MaterialTheme.typography.labelSmall,
+                text = "TOTAL BALANCE",
+                style = Typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
+            
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Icon(
-            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.outline
+            Row(verticalAlignment = Alignment.Top) {
+                Text(
+                    text = "₹",
+                    style = Typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                if (privacyMode) {
+                    Text(
+                        text = "••••••",
+                        style = Typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    AnimatedNumberTicker(
+                        value = totalBalance,
+                        textStyle = Typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(0.8f),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatItem(label = "INCOME", amount = income, color = EmeraldIncome, privacyMode = privacyMode)
+                Box(modifier = Modifier.width(1.dp).height(40.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
+            }
+        }
+        
+        // Top Bar (App Name + Settings/Insights)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .align(Alignment.TopCenter),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "cipher",
+                style = Typography.titleMedium.copy(
+                    fontFamily = SpaceGrotesk,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = (-0.5).sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+
+            Row {
+                IconButton(onClick = onNavigateToInsights) {
+                    Icon(LucideIcons.ChartBar, "Insights", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(LucideIcons.Settings, "Settings", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatItem(label: String, amount: Double, color: Color, privacyMode: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = if (privacyMode) "••••" else "₹${String.format("%.0f", amount)}",
+            style = Typography.titleMedium,
+            color = color
         )
     }
 }
 
 @Composable
-private fun AddButton(isHapticsEnabled: Boolean, onClick: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 700f),
-        label = "add"
-    )
-
-    Box(
-        modifier = Modifier
-            .scale(scale)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
+private fun BudgetPulseCard(
+    spent: Double,
+    budget: Double,
+    onSetBudgetClick: () -> Unit
+) {
+    VaultCard(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        onClick = onSetBudgetClick,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onClick()
+                Text(
+                    text = "Monthly Budget",
+                    style = Typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (budget > 0) "₹${String.format("%.0f", spent)} / ₹${String.format("%.0f", budget)}" else "Tap to set a budget",
+                    style = Typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            
+            if (budget > 0) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Premium Gradient Progress Bar
+                val progress = (spent / budget).toFloat().coerceIn(0f, 1f)
+                val progressBrush = Brush.horizontalGradient(
+                    colors = listOf(EmeraldIncome, ElectricIndigo, RoseExpense)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(White10, RoundedCornerShape(4.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .fillMaxHeight()
+                            .background(progressBrush, RoundedCornerShape(4.dp))
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TransactionItem(
+    transaction: TransactionEntity,
+    privacyMode: Boolean,
+    onClick: () -> Unit
+) {
+    VaultCard(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+        onClick = onClick,
+        contentPadding = 12.dp,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // Category Icon
+            val category = TransactionCategory.fromString(transaction.category)
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(category.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = category.icon,
+                    contentDescription = null,
+                    tint = category.color,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.merchant,
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
+                )
+                Text(
+                    text = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(transaction.timestamp)),
+                    style = Typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Text(
-                text = "Add",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format("%.0f", transaction.amount)}",
+                style = Typography.titleMedium,
+                color = if (transaction.isIncome) EmeraldIncome else RoseExpense
             )
         }
     }
 }
 
+@Composable
+private fun GenesisEmptyState(onAddManual: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            LucideIcons.Lock,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Your financial vault is ready.",
+            style = Typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Incoming transaction SMS will be automatically parsed and secured here.",
+            style = Typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onAddManual,
+            colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+        }
+    }
+}

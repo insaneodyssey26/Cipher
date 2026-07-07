@@ -6,25 +6,26 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.*
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.ShieldCheck
+import compose.icons.lucideicons.Smartphone
+import compose.icons.lucideicons.WifiOff
 import kotlinx.coroutines.delay
 
 @Composable
@@ -35,22 +36,13 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false).also { it.consume() }
-                    do {
-                        val event = awaitPointerEvent()
-                        event.changes.forEach { it.consume() }
-                    } while (event.changes.any { it.pressed })
-                }
-            }
     ) {
         AnimatedContent(
             targetState = page,
             transitionSpec = {
-                fadeIn(tween(320)) togetherWith fadeOut(tween(220))
+                fadeIn(tween(400)) togetherWith fadeOut(tween(300))
             },
-            label = "page"
+            label = "onboarding_page"
         ) { currentPage ->
             when (currentPage) {
                 0 -> WelcomePage(onNext = { page = 1 })
@@ -63,66 +55,73 @@ fun OnboardingScreen(onComplete: () -> Unit) {
 @Composable
 private fun WelcomePage(onNext: () -> Unit) {
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(80); visible = true }
+    LaunchedEffect(Unit) { delay(100); visible = true }
 
-    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(500), label = "a")
-    val sc by animateFloatAsState(if (visible) 1f else 0.91f, tween(500, easing = FastOutSlowInEasing), label = "s")
-
-    val breathe by rememberInfiniteTransition(label = "b").animateFloat(
-        initialValue = 1f, targetValue = 1.025f,
-        animationSpec = infiniteRepeatable(tween(3000, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "bs"
-    )
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(600), label = "alpha")
+    val offsetY by animateFloatAsState(if (visible) 0f else 40f, spring(stiffness = 200f), label = "offset")
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(ElectricIndigo.copy(alpha = 0.05f), Transparent)
+                )
+            )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 36.dp)
-                .padding(bottom = 52.dp)
-                .graphicsLayer(alpha = alpha, scaleX = sc, scaleY = sc),
-            horizontalAlignment = Alignment.Start
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 64.dp)
+                .graphicsLayer {
+                    this.alpha = alpha
+                    this.translationY = offsetY
+                },
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(Modifier.weight(1f))
-
             Text(
                 text = "cipher",
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = (-3).sp
-                ),
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.scale(breathe)
+                style = Typography.displayLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Every rupee tracked.\nNothing leaves your phone.",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Normal,
-                    lineHeight = 32.sp,
-                    letterSpacing = (-0.3).sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Your financial vault.",
+                style = Typography.headlineMedium,
+                color = ElectricIndigo
             )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Local · Encrypted · Private",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    letterSpacing = 1.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Secure, offline-first transaction tracking that puts your privacy above everything else.",
+                style = Typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 28.sp
             )
 
-            Spacer(Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            InvertedButton(text = "Get Started", onClick = onNext)
+            FeatureItem(LucideIcons.ShieldCheck, "AES-256 Encrypted")
+            FeatureItem(LucideIcons.Smartphone, "Local SMS Parsing")
+            FeatureItem(LucideIcons.WifiOff, "Zero Network Access")
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = onNext,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo)
+            ) {
+                Text(text = "Get Started", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            }
         }
     }
 }
@@ -133,123 +132,82 @@ private fun PermissionPage(onComplete: () -> Unit) {
         ActivityResultContracts.RequestPermission()
     ) { onComplete() }
 
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(80); visible = true }
-
-    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(500), label = "a")
-    val sc by animateFloatAsState(if (visible) 1f else 0.91f, tween(500, easing = FastOutSlowInEasing), label = "s")
-
-    Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.Start
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 36.dp)
-                .padding(bottom = 52.dp)
-                .graphicsLayer(alpha = alpha, scaleX = sc, scaleY = sc),
-            horizontalAlignment = Alignment.Start
+        Spacer(modifier = Modifier.height(64.dp))
+        
+        Text(
+            text = "Data Access",
+            style = Typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Cipher needs permission to read banking SMS alerts to automatically secure your transaction history.",
+            style = Typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 28.sp
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        VaultCard(
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            contentPadding = 20.dp
         ) {
-            Spacer(Modifier.weight(1f))
-
-            Text(
-                text = "One permission.\nThat's all it needs.",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 42.sp,
-                    letterSpacing = (-1.5).sp
-                ),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            Text(
-                text = "Cipher reads bank SMS alerts to log your transactions automatically. It runs entirely on-device — no servers, no accounts, no sync.",
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(40.dp))
-
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                listOf(
-                    "Parsed on your device only",
-                    "No account or sign-in needed",
-                    "Works fully offline"
-                ).forEach { line ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = line,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            InvertedButton(
-                text = "Allow SMS Access",
-                onClick = { permissionLauncher.launch(Manifest.permission.RECEIVE_SMS) }
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onComplete
-                    )
-                    .padding(vertical = 15.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
-                    text = "Skip for now",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "WHY THIS MATTERS",
+                    style = Typography.labelSmall,
+                    color = ElectricIndigo
+                )
+                Text(
+                    text = "By parsing SMS locally, we can provide real-time insights without ever asking for your bank credentials or syncing data to the cloud.",
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 22.sp
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = { permissionLauncher.launch(Manifest.permission.RECEIVE_SMS) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo)
+        ) {
+            Text(text = "Allow Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(
+            onClick = onComplete,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Skip for now", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 @Composable
-private fun InvertedButton(text: String, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 700f),
-        label = "btn"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .background(MaterialTheme.colorScheme.onBackground, RoundedCornerShape(14.dp))
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(vertical = 17.dp),
-        contentAlignment = Alignment.Center
+private fun FeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 12.dp)
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.background
-        )
+        Icon(icon, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = text, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }

@@ -1,28 +1,25 @@
 package com.masum.cipher.ui.insights
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +28,11 @@ import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.ArrowLeft
+import compose.icons.lucideicons.TrendingUp
+import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Clock
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,19 +45,19 @@ fun InsightsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val haptic = LocalHapticFeedback.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Intelligence",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        text = "INSIGHTS",
+                        style = Typography.labelSmall.copy(letterSpacing = 2.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 navigationIcon = {
@@ -63,93 +65,167 @@ fun InsightsScreen(
                         if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onNavigateBack()
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(LucideIcons.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                scrollBehavior = scrollBehavior
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 48.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            contentPadding = PaddingValues(bottom = 48.dp)
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
-
-            item { MonthlySummaryCard(summary = state.monthlySummary) }
-
-            item { VelocityMetric(data = state.spendingVelocity) }
-
-            item { QuickStatsRow(streak = state.noSpendStreak, avgSize = state.avgTransactionSize) }
-
-            if (state.topMerchants.isNotEmpty()) {
-                item { TopMerchantsCard(merchants = state.topMerchants) }
+            // 1. Narrative Hero
+            item {
+                InsightHero(state = state)
             }
 
-            if (state.weekdayBreakdown.isNotEmpty()) {
-                item { WeekdayBreakdownCard(days = state.weekdayBreakdown) }
-            }
-
-            if (state.peakHours.any { it.amount > 0.0 }) {
-                item { PeakHoursCard(hours = state.peakHours) }
-            }
-
-            item { NetWorthChart(points = state.netWorthHistory) }
-
-            item { CategoryDoughnutChart(categories = state.categoryBreakdown) }
-
-            if (state.detectedSubscriptions.isNotEmpty()) {
-                item {
-                    SubscriptionSection(
-                        subscriptions = state.detectedSubscriptions,
-                        isHapticsEnabled = isHapticsEnabled
-                    )
+            // 2. Spending Trend Chart
+            item {
+                SectionLabel("SPENDING TREND")
+                VaultCard(
+                    modifier = Modifier.padding(horizontal = 24.dp).height(240.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    SpendingTrendChart(points = state.netWorthHistory)
                 }
             }
 
+            // 3. Category Allocation
             item {
-                CalendarHeatmap(
-                    data = state.calendarHeatmap,
-                    selectedTimestamp = state.selectedDayTimestamp,
-                    onDayClick = { timestamp ->
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateToDayDetail(timestamp)
+                SectionLabel("CATEGORY ALLOCATION")
+                VaultCard(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    CategoryAllocationDonut(categories = state.categoryBreakdown)
+                }
+            }
+
+            // 4. Heatmap/Peak Hours
+            item {
+                SectionLabel("PEAK SPENDING HOURS")
+                VaultCard(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    SpendingHeatmap(hours = state.peakHours)
+                }
+            }
+
+            // 5. Subscriptions
+            if (state.detectedSubscriptions.isNotEmpty()) {
+                item {
+                    SectionLabel("SUBSCRIPTIONS")
+                    Column(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        state.detectedSubscriptions.forEach { sub ->
+                            SubscriptionItem(sub = sub, isHapticsEnabled = isHapticsEnabled)
+                        }
                     }
-                )
+                }
+            }
+
+            // 6. Calendar History
+            item {
+                SectionLabel("ACTIVITY CALENDAR")
+                VaultCard(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    CalendarHeatmap(
+                        data = state.calendarHeatmap,
+                        selectedTimestamp = state.selectedDayTimestamp,
+                        onDayClick = { timestamp ->
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToDayDetail(timestamp)
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun SubscriptionSection(
-    subscriptions: List<SubscriptionDetector.Subscription>,
-    isHapticsEnabled: Boolean
-) {
-    val haptic = LocalHapticFeedback.current
+private fun InsightHero(state: InsightsContract.State) {
+    val mostExpensiveCategory = state.categoryBreakdown.maxByOrNull { it.amount }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .background(ElectricIndigoSubtle, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(LucideIcons.TrendingUp, null, tint = ElectricIndigo, modifier = Modifier.size(32.dp))
+        }
 
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Spacer(modifier = Modifier.height(24.dp))
+
         Text(
-            text = "DETECTED SUBSCRIPTIONS",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.5.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = if (mostExpensiveCategory != null) {
+                "You've spent the most on ${mostExpensiveCategory.category.toString().lowercase().replaceFirstChar { it.uppercase() }} this month."
+            } else {
+                "Your financial story is just beginning."
+            },
+            style = Typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Keep track of your spending to see patterns emerge.",
+            style = Typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            subscriptions.forEach { sub ->
-                SubscriptionItem(sub = sub, isHapticsEnabled = isHapticsEnabled)
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            InsightMetric(label = "STREAK", value = "${state.noSpendStreak} Days", icon = LucideIcons.Calendar)
+            InsightMetric(label = "AVG TXN", value = "₹${state.avgTransactionSize.toInt()}", icon = LucideIcons.Clock)
         }
     }
+}
+
+@Composable
+private fun InsightMetric(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(icon, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = value, style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = label, style = Typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = Typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
+    )
 }
 
 @Composable
@@ -159,31 +235,26 @@ fun SubscriptionItem(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    VaultCard(
+        onClick = { if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+        contentPadding = 12.dp,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
-            modifier = Modifier
-                .clickable { if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
-                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = CircleShape,
-                color = sub.category.color.copy(alpha = 0.1f)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(sub.category.color.copy(alpha = 0.1f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = sub.category.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = sub.category.color
-                    )
-                }
+                Icon(
+                    imageVector = sub.category.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = sub.category.color
+                )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -191,33 +262,29 @@ fun SubscriptionItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = sub.merchant,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    color = TextPrimary,
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Next expected: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary
+                    text = "Expected: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
+                    style = Typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = AppFormatters.getCurrencyNoDecimals().format(sub.amount),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black)
+                    text = "₹${sub.amount.toInt()}",
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Badge(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    contentColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        text = "Monthly",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
+                Text(
+                    text = "Monthly",
+                    style = Typography.labelSmall,
+                    color = ElectricIndigo
+                )
             }
         }
     }

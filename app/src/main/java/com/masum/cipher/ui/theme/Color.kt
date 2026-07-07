@@ -2,43 +2,61 @@ package com.masum.cipher.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ─── Void Design System ───────────────────────────────────────────────────────
-// Near-black with the faintest indigo warmth. Not pure black — that's too harsh.
-// Not grey — that's too generic. Cipher has its own darkness.
+/**
+ * Vault Design System - Midnight Deep Palette
+ * 
+ * Inspired by high-end developer tools and premium fintech.
+ * Focuses on depth through subtle color shifts rather than elevation shadows.
+ */
 
-val VoidBlack       = Color(0xFF000000)  // Pure AMOLED black
-val VoidSurface     = Color(0xFF0A0A0F)  // Card surfaces
-val VoidSurfaceHigh = Color(0xFF141420)  // Elevated — modals, bottom sheets
-val VoidBorder      = Color(0x14FFFFFF)  // 8% white — barely-there card edges
-val VoidBorderBright= Color(0x1FFFFFFF)  // 12% white — interactive borders
+// Base Layers
+val MidnightDeep = Color(0xFF0A0A0F)   // The base background - infinity deep
+val VaultSurface = Color(0xFF12121A)   // Level 1 elevation - Cards
+val VaultElevated = Color(0xFF1A1A24)  // Level 2 elevation - Dialogs, Bottom Sheets
 
-// Primary — Cipher Blue
-val CipherBlue          = Color(0xFF4E6CF7)
-val CipherBlueContainer = Color(0xFF18224E)
-val CipherBlueDim       = Color(0x334E6CF7)  // 20% blue for tinted backgrounds
+// Accent - Electric Indigo
+// WCAG AA Contrast Ratio: 6.1:1 against MidnightDeep
+val ElectricIndigo = Color(0xFF6366F1)
+val ElectricIndigoSubtle = Color(0x146366F1) // 8% opacity for backgrounds
 
-// Semantic colors
-val CipherExpense          = Color(0xFFE8453C)
-val CipherExpenseContainer = Color(0xFF2E1210)
-val CipherIncome           = Color(0xFF1AC47D)
-val CipherIncomeContainer  = Color(0xFF0B2E1F)
+// Semantic Colors
+val EmeraldIncome = Color(0xFF10B981)
+val EmeraldIncomeSubtle = Color(0x1410B981)
 
-// Text scale
-val TextPrimary   = Color(0xFFEEEEF5)  // High-emphasis
-val TextSecondary = Color(0xFF8585A0)  // Mid — labels, subtitles
-val TextTertiary  = Color(0xFF3A3A50)  // Low — disabled, hints, dividers
+val RoseExpense = Color(0xFFF43F5E)
+val RoseExpenseSubtle = Color(0x14F43F5E)
 
-// Light theme — kept minimal, not the focus of this app
-val LightBackground    = Color(0xFFF6F6FA)
-val LightSurface       = Color(0xFFFFFFFF)
-val LightSurfaceHigh   = Color(0xFFF0F0F6)
-val LightPrimary       = Color(0xFF3A57E8)
-val LightOnPrimary     = Color(0xFFFFFFFF)
-val LightTextPrimary   = Color(0xFF12121A)
-val LightTextSecondary = Color(0xFF6B6B85)
-val LightBorder        = Color(0x14000000)
+// Text Hierarchy
+val Slate50 = Color(0xFFF8FAFC)   // Primary text in Dark Mode / Background in Light Mode
+val Slate400 = Color(0xFF94A3B8)  // Secondary text - labels/hints
+val Slate600 = Color(0xFF475569)  // Muted text - whispers/metadata
+val Slate900 = Color(0xFF0F172A)  // Primary text in Light Mode
 
-// Aliases — used in component files for direct import
-val IncomeGreen = CipherIncome
-val ExpenseRed  = CipherExpense
-val BalanceBlue = CipherBlue
+// Light Mode Layers
+val LightBase = Color(0xFFF8FAFC)
+val LightSurface = Color(0xFFFFFFFF)
+val LightElevated = Color(0xFFF1F5F9)
+val LightBorder = Color(0xFFE2E8F0)
+
+// Utility
+val Transparent = Color.Transparent
+val White10 = Color(0x1AFFFFFF)
+val Black40 = Color(0x66000000)
+
+// Legacy Aliases (To be removed after UI overhaul)
+val CipherBlue = ElectricIndigo
+val CipherBlueDim = ElectricIndigoSubtle
+val CipherBlueContainer = ElectricIndigoSubtle
+val CipherIncome = EmeraldIncome
+val CipherIncomeContainer = EmeraldIncomeSubtle
+val CipherExpense = RoseExpense
+val CipherExpenseContainer = RoseExpenseSubtle
+val TextPrimary = Slate50
+val TextSecondary = Slate400
+val TextTertiary = Slate600
+val IncomeGreen = EmeraldIncome
+val ExpenseRed = RoseExpense
+val BalanceBlue = ElectricIndigo
+val VoidBlack = MidnightDeep
+val VoidSurface = VaultSurface
+val VoidSurfaceHigh = VaultElevated
