@@ -3,7 +3,9 @@ package com.masum.cipher.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -218,27 +220,87 @@ fun CalendarHeatmap(
         set(Calendar.MILLISECOND, 0)
     }
     val today = calendar.timeInMillis
+    val todayDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1 // 0 (Sun) to 6 (Sat)
     val maxSpend = data.values.maxOfOrNull { it } ?: 1.0
+    val weeks = 12
+    val monthFormat = java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault())
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        for (row in 0 until 4) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (col in 0 until 7) {
-                    val index = row * 7 + col
-                    val time = today - (27 - index) * 24 * 60 * 60 * 1000L
-                    val spend = data[time] ?: 0.0
-                    val intensity = if (maxSpend > 0) (spend / maxSpend).toFloat() else 0f
+    Row(modifier = Modifier.fillMaxWidth()) {
+        // Y-axis for days of the week
+        Column(
+            modifier = Modifier.padding(end = 8.dp, top = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+            for (i in 0 until 7) {
+                Text(
+                    text = if (i % 2 == 1) days[i] else "", // Show Mon, Wed, Fri
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.height(36.dp).wrapContentHeight(Alignment.CenterVertically)
+                )
+            }
+        }
+
+        // Scrollable Grid
+        Row(
+            modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            for (col in 0 until weeks) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val firstDayOffset = (weeks - 1 - col) * 7 + todayDayOfWeek
+                    val firstDayTime = today - firstDayOffset * 24 * 60 * 60 * 1000L
+                    val cal = Calendar.getInstance().apply { timeInMillis = firstDayTime }
+                    val dayOfMon = cal.get(Calendar.DAY_OF_MONTH)
                     
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .background(
-                                color = if (spend > 0) ElectricIndigo.copy(alpha = 0.1f + intensity * 0.9f) else White10,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .clickable { onDayClick(time) }
+                    val showMonth = dayOfMon <= 7 || col == 0
+                    
+                    Text(
+                        text = if (showMonth) monthFormat.format(cal.time) else "",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.height(20.dp)
                     )
+                    
+                    for (row in 0 until 7) {
+                        val dayOffset = (weeks - 1 - col) * 7 + (todayDayOfWeek - row)
+                        if (dayOffset < 0) {
+                            Spacer(modifier = Modifier.size(36.dp))
+                        } else {
+                            val time = today - dayOffset * 24 * 60 * 60 * 1000L
+                            val spend = data[time] ?: 0.0
+                            val intensity = if (maxSpend > 0) (spend / maxSpend).toFloat() else 0f
+                            
+                            val dayCal = Calendar.getInstance().apply { timeInMillis = time }
+                            val dayOfMonth = dayCal.get(Calendar.DAY_OF_MONTH).toString()
+                            val isSelected = selectedTimestamp == time
+                            val isToday = time == today
+                            
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(
+                                        color = if (spend > 0) ElectricIndigo.copy(alpha = 0.3f + intensity * 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .border(
+                                        width = if (isSelected || isToday) 2.dp else 1.dp,
+                                        color = if (isSelected) ElectricIndigo else if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { onDayClick(time) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = dayOfMonth,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (spend > 0) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected || isToday) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

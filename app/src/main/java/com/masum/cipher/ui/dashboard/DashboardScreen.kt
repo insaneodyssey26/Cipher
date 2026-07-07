@@ -391,7 +391,7 @@ private fun BudgetPulseCard(
                 
                 val barColor = when {
                     progress >= 0.9f -> RoseExpense
-                    progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B) // Amber warning
+                    progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B)
                     else -> ElectricIndigo
                 }
 
