@@ -82,6 +82,10 @@ fun SettingsScreen(
     val csvExportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
         uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportCsv(it)) }
     }
+    
+    val pdfExportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
+        uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportPdf(it)) }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -361,6 +365,15 @@ fun SettingsScreen(
                         csvExportLauncher.launch("Cipher_Report_${System.currentTimeMillis()}.csv")
                     },
                     loading = state.isExportingCsv
+                )
+                VaultSettingsItem(
+                    icon = LucideIcons.FileText,
+                    title = "Export PDF Statement",
+                    onClick = {
+                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        pdfExportLauncher.launch("Cipher_Statement_${System.currentTimeMillis()}.pdf")
+                    },
+                    loading = state.isExportingPdf
                 )
                 VaultSettingsItem(
                     icon = LucideIcons.CloudUpload,

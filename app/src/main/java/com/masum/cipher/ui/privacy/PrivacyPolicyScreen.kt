@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.masum.cipher.ui.theme.CipherBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +130,7 @@ private fun PolicySection(title: String, body: String) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = CipherBlue
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = body,

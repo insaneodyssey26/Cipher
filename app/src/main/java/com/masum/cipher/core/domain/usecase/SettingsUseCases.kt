@@ -53,6 +53,22 @@ class ExportCsvUseCase @Inject constructor(
     }
 }
 
+class ExportPdfUseCase @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
+    private val transactionDao: TransactionDao,
+    private val backupRepository: BackupRepository
+) {
+    suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val transactions = transactionDao.getAllTransactions().first()
+            
+            backupRepository.provideOutputStream(uri)?.use { outputStream ->
+                com.masum.cipher.core.util.PdfGenerator.generateStatement(context, transactions, outputStream)
+            } ?: throw Exception("Could not open file for writing")
+        }
+    }
+}
+
 class ExportDataUseCase @Inject constructor(
     private val backupRepository: BackupRepository
 ) {

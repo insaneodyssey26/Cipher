@@ -19,6 +19,7 @@ class SettingsContract {
         data class ExportData(val uri: Uri, val password: CharArray) : Intent()
         data class ImportData(val uri: Uri, val password: CharArray) : Intent()
         data class ExportCsv(val uri: Uri) : Intent()
+        data class ExportPdf(val uri: Uri) : Intent()
     }
 
     data class State(
@@ -32,6 +33,7 @@ class SettingsContract {
         val isExporting: Boolean = false,
         val isImporting: Boolean = false,
         val isExportingCsv: Boolean = false,
+        val isExportingPdf: Boolean = false,
         val message: String? = null
     ) : UiState
 

@@ -15,6 +15,7 @@ class SettingsViewModel @Inject constructor(
     private val updateSettingsUseCase: UpdateSettingsUseCase,
     private val clearAllDataUseCase: ClearAllDataUseCase,
     private val exportCsvUseCase: ExportCsvUseCase,
+    private val exportPdfUseCase: ExportPdfUseCase,
     private val exportDataUseCase: ExportDataUseCase,
     private val importDataUseCase: ImportDataUseCase
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
@@ -38,6 +39,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
             is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
             is SettingsContract.Intent.ExportCsv -> exportCsv(intent.uri)
+            is SettingsContract.Intent.ExportPdf -> exportPdf(intent.uri)
         }
     }
 
@@ -101,6 +103,17 @@ class SettingsViewModel @Inject constructor(
             updateState { copy(isExportingCsv = false) }
             
             val message = if (result.isSuccess) "CSV Report generated successfully" else "Failed to export CSV: ${result.exceptionOrNull()?.message}"
+            emitEffect(SettingsContract.Effect.ShowToast(message))
+        }
+    }
+
+    private fun exportPdf(uri: android.net.Uri) {
+        viewModelScope.launch {
+            updateState { copy(isExportingPdf = true) }
+            val result = exportPdfUseCase(uri)
+            updateState { copy(isExportingPdf = false) }
+            
+            val message = if (result.isSuccess) "PDF Statement generated successfully" else "Failed to export PDF: ${result.exceptionOrNull()?.message}"
             emitEffect(SettingsContract.Effect.ShowToast(message))
         }
     }
