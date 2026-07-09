@@ -60,8 +60,8 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             )
 
             PolicySection(
-                title = "SMS Access",
-                body = "Cipher requests permission to read SMS messages solely to detect and parse bank transaction alerts. SMS content is processed in memory and immediately discarded — it is never stored in raw form, logged, or transmitted anywhere."
+                title = "SMS & Notification Access",
+                body = "Cipher requests permission to read SMS messages and (optionally) app notifications solely to detect and parse financial transactions. Message content is processed in memory and immediately discarded — it is never stored in raw form, logged, or transmitted anywhere."
             )
 
             PolicySection(
@@ -76,7 +76,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
 
             PolicySection(
                 title = "Exports & Backups",
-                body = "When you export a backup, the file is encrypted with a password you choose and saved to a location you pick. Cipher does not retain a copy and has no access to where you store it."
+                body = "When you export a backup, CSV, or PDF statement, the file is saved directly to your device storage. Backups are encrypted with a password you choose. Cipher does not retain a copy and has no access to where you store these files."
             )
 
             PolicySection(
@@ -95,7 +95,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             )
 
             Text(
-                text = "Last updated: June 2026",
+                text = "Last updated: July 2026",
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

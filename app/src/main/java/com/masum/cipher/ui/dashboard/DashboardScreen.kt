@@ -237,6 +237,10 @@ fun DashboardScreen(
                     value = budgetInput,
                     onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
                     label = { Text("Limit (₹)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                    ),
                     colors = androidx.compose.material3.TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,

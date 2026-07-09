@@ -1,6 +1,6 @@
 # cipher
 
-A local-first, privacy-focused personal finance app for Android. cipher reads your bank SMS alerts and turns them into a clean, searchable transaction ledger — entirely on-device, with zero cloud dependency.
+A local-first, privacy-focused personal finance app for Android. cipher reads your bank SMS alerts and app notifications, turning them into a clean, searchable transaction ledger — entirely on-device, with zero cloud dependency.
 
 ---
 
@@ -19,10 +19,10 @@ A local-first, privacy-focused personal finance app for Android. cipher reads yo
 ## How it works
 
 ```
-Bank sends SMS alert
-        │
-        ▼
-  SmsReceiver (BroadcastReceiver)
+Bank sends SMS alert           App sends Notification
+        │                                │
+        ▼                                ▼
+  SmsReceiver                 TransactionNotificationService
         │  raw message body
         ▼
     SmsParser
@@ -46,7 +46,7 @@ Bank sends SMS alert
   DashboardViewModel ──► UI (Jetpack Compose)
 ```
 
-No network call is made at any point. The SMS is read, parsed, and written to the encrypted database — all within the `SmsReceiver.onReceive` scope using `goAsync()` running on `Dispatchers.IO` for reliable background execution.
+No network call is made at any point. The SMS or Notification is read, parsed, and written to the encrypted database — all within background scope for reliable execution.
 
 ---
 
@@ -65,12 +65,14 @@ Screen.kt  ──intent──►  ViewModel  ──state──►  Screen.kt
                     Repository
 ```
 
-### SMS pipeline
+### Transaction pipeline
 
 ```mermaid
 flowchart TD
     A([Bank SMS]) --> B[SmsReceiver]
+    A2([App Notification]) --> B2[TransactionNotificationService]
     B --> C[SmsParser]
+    B2 --> C
     C -->|not a transaction| D([dropped])
     C -->|ParsedTransaction| E[CategorizerEngine]
     E --> F[TransactionRepository]
@@ -81,7 +83,7 @@ flowchart TD
     classDef store fill:#141420,stroke:#1AC47D,color:#EEEEF5
     classDef dead  fill:#0D0D1A,stroke:#E8453C,color:#8585A0
 
-    class A,B sys
+    class A,A2,B,B2 sys
     class C,E,F logic
     class G store
     class D dead
@@ -132,10 +134,11 @@ flowchart LR
 
 ## Features
 
-### Automatic SMS parsing
-- Listens for `SMS_RECEIVED` broadcasts from bank sender IDs
+### Automatic Transaction parsing
+- **SMS Parsing**: Listens for `SMS_RECEIVED` broadcasts from bank sender IDs
+- **Notification Parsing**: Uses `NotificationListenerService` to capture and parse transaction alerts from explicitly tracked finance/UPI apps
 - Externalized Regex patterns and dictionaries via `SmsPatterns` for easier maintenance
-- Detects promotional SMS and filters them out reliably
+- Detects promotional SMS and notifications and filters them out reliably
 - India-focused brand dictionary covers major UPI, credit card, and bank alert formats
 - False-positive filtering rejects OTPs, promotional, and non-transactional messages
 
@@ -167,17 +170,22 @@ flowchart LR
 
 ### Data portability
 - **CSV export** — standard format, opens in any spreadsheet app
+- **PDF statement** — export elegant transaction history reports natively generated on-device
 - **Encrypted backup / restore** — password-protected binary backup of the full database
 
 ---
 
 ## Data flow in detail
 
-### SMS → Transaction
+### SMS & Notification → Transaction
 
 ```
 android.provider.Telephony.Sms.Intents.SMS_RECEIVED
     └─► SmsReceiver.onReceive()
+            └─► SmsParser.parse(body: String): ParsedTransaction?
+
+android.service.notification.NotificationListenerService
+    └─► TransactionNotificationService.onNotificationPosted()
             └─► SmsParser.parse(body: String): ParsedTransaction?
                     ├── amount regex        (e.g. "Rs. 450.00", "INR 1,200")
                     ├── direction keywords  (debited/credited/spent/received)
@@ -300,7 +308,7 @@ For step-by-step install instructions including the Android 13+ SMS permission s
 
 ## Privacy
 
-cipher requests exactly one permission: `RECEIVE_SMS`. It has **no INTERNET permission**. There is no telemetry, no analytics SDK, no crash reporter, and no account system. All data — transactions, preferences, backups — stays on your device.
+cipher requests exactly two sensitive permissions: `RECEIVE_SMS` and `BIND_NOTIFICATION_LISTENER_SERVICE` (optional). It has **no INTERNET permission**. There is no telemetry, no analytics SDK, no crash reporter, and no account system. All data — transactions, preferences, backups, and generated PDFs — stays natively on your device.
 
 ---
 

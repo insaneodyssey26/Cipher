@@ -8,16 +8,17 @@ Cipher ("we", "our", or "us") is committed to protecting your privacy. This Priv
 
 ## 1. Information We Access
 
-Cipher requests specific permissions to function as an automated financial vault. The primary permission requested is:
+Cipher requests specific permissions to function as an automated financial vault. The primary permissions requested are:
 
-*   **SMS Permission (`RECEIVE_SMS`)**: We request this permission solely to read incoming text messages from your bank or financial institutions. 
+*   **SMS Permission (`RECEIVE_SMS`)**: We request this permission solely to read incoming text messages from your bank or financial institutions.
+*   **Notification Listener Service (`BIND_NOTIFICATION_LISTENER_SERVICE`)**: This optional permission allows Cipher to read notifications from specific financial and UPI apps that you explicitly select. We use this to capture transactions that are sent via app notifications instead of SMS.
 
 ## 2. How We Use Your Information
 
-The SMS messages accessed by Cipher are processed **strictly locally on your device**:
-*   **Local Parsing**: Incoming SMS messages are read by the app's internal engine to extract transaction details (e.g., amount, merchant, and date).
-*   **Zero Network Transmission**: We do not transmit, upload, sync, or back up your SMS data, transaction data, or any personal information to the cloud, our servers, or any third-party services. Cipher does not even request the Android `INTERNET` permission.
-*   **Encrypted Storage**: Once parsed, your transaction data is stored locally on your device in a securely encrypted database (AES-256 via SQLCipher). 
+The SMS messages and notifications accessed by Cipher are processed **strictly locally on your device**:
+*   **Local Parsing**: Incoming SMS messages and selected app notifications are read by the app's internal engine to extract transaction details (e.g., amount, merchant, and date).
+*   **Zero Network Transmission**: We do not transmit, upload, sync, or back up your SMS data, notification data, transaction data, or any personal information to the cloud, our servers, or any third-party services. Cipher does not even request the Android `INTERNET` permission.
+*   **Encrypted Storage**: Once parsed, your transaction data is stored locally on your device in a securely encrypted database (AES-256 via SQLCipher).
 
 ## 3. Third-Party Access
 

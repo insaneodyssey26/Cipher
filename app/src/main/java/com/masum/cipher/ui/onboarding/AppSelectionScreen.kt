@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.masum.cipher.ui.theme.Typography
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Circle
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +49,15 @@ fun AppSelectionScreen(
     var installedApps by remember { mutableStateOf<List<InstalledApp>>(emptyList()) }
     var selectedApps by remember { mutableStateOf(initialSelectedApps) }
     var isLoading by remember { mutableStateOf(true) }
+    var searchQuery by remember { mutableStateOf("") }
+    
+    val filteredApps = remember(installedApps, searchQuery) {
+        if (searchQuery.isBlank()) {
+            installedApps
+        } else {
+            installedApps.filter { it.appName.contains(searchQuery, ignoreCase = true) }
+        }
+    }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
@@ -96,7 +107,31 @@ fun AppSelectionScreen(
             lineHeight = 22.sp
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Search apps...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            leadingIcon = {
+                Icon(
+                    imageVector = LucideIcons.Search,
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            ),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (isLoading) {
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -110,7 +145,7 @@ fun AppSelectionScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                items(installedApps) { app ->
+                items(filteredApps) { app ->
                     val isSelected = selectedApps.contains(app.packageName)
                     AppItem(
                         app = app,
@@ -146,11 +181,15 @@ private fun AppItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
+            .clickable {
+                view.performVibrate(true)
+                onClick()
+            }
             .padding(8.dp)
     ) {
         Box(
@@ -190,9 +229,9 @@ private fun AppItem(
 
         Text(
             text = app.appName,
-            style = Typography.labelSmall,
+            style = Typography.labelMedium,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
