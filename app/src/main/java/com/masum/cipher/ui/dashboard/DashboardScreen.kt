@@ -159,7 +159,7 @@ fun DashboardScreen(
                 if (state.isLoading) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            androidx.compose.material3.CircularProgressIndicator(color = com.masum.cipher.ui.theme.ElectricIndigo)
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 } else if (state.transactions.isEmpty()) {
@@ -251,7 +251,7 @@ fun DashboardScreen(
                         }
                         showBudgetDialog = false
                     },
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = com.masum.cipher.ui.theme.ElectricIndigo)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text("Save", color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -281,7 +281,7 @@ private fun DashboardHero(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        ElectricIndigo.copy(alpha = 0.15f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                         EmeraldIncome.copy(alpha = 0.05f),
                         MaterialTheme.colorScheme.background
                     )
@@ -429,7 +429,7 @@ private fun BudgetPulseCard(
                 val barColor = when {
                     progress >= 0.9f -> RoseExpense
                     progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B)
-                    else -> ElectricIndigo
+                    else -> MaterialTheme.colorScheme.primary
                 }
 
                 Box(
@@ -539,7 +539,7 @@ private fun GenesisEmptyState(onAddManual: () -> Unit) {
         Button(
             onClick = {},
             modifier = Modifier.bounceClick { onAddManual() },
-            colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)

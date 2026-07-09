@@ -61,10 +61,10 @@ fun SpendingTrendChart(points: List<DashboardContract.Point>) {
         chart = lineChart(
             lines = listOf(
                 com.patrykandpatrick.vico.compose.chart.line.lineSpec(
-                    lineColor = ElectricIndigo,
+                    lineColor = MaterialTheme.colorScheme.primary,
                     lineBackgroundShader = DynamicShaders.fromBrush(
                         brush = Brush.verticalGradient(
-                            colors = listOf(ElectricIndigo.copy(alpha = 0.4f), Transparent)
+                            colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), Transparent)
                         )
                     )
                 )
@@ -170,7 +170,7 @@ fun PeakHoursChart(hours: List<InsightsContract.PeakHourData>) {
         chart = columnChart(
             columns = listOf(
                 com.patrykandpatrick.vico.compose.component.lineComponent(
-                    color = ElectricIndigo,
+                    color = MaterialTheme.colorScheme.primary,
                     thickness = 16.dp,
                     shape = Shapes.roundedCornerShape(topLeftPercent = 50, topRightPercent = 50)
                 )
@@ -281,12 +281,12 @@ fun CalendarHeatmap(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .background(
-                                        color = if (spend > 0) ElectricIndigo.copy(alpha = 0.3f + intensity * 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                        color = if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f + intensity * 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .border(
                                         width = if (isSelected || isToday) 2.dp else 1.dp,
-                                        color = if (isSelected) ElectricIndigo else if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .clickable { onDayClick(time) },

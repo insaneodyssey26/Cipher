@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import com.masum.cipher.ui.theme.ElectricIndigo
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.ChartBar
@@ -102,9 +101,9 @@ fun FloatingNavBar(
             Box(
                 modifier = Modifier
                     .size(48.dp) // Make FAB slightly larger than tabs
-                    .shadow(elevation = 12.dp, shape = CircleShape, spotColor = ElectricIndigo)
+                    .shadow(elevation = 12.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary)
                     .clip(CircleShape)
-                    .background(ElectricIndigo)
+                    .background(MaterialTheme.colorScheme.primary)
                     .clickable {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onAddClick()
@@ -143,12 +142,12 @@ private fun NavItem(
         label = "scale"
     )
     val color by animateColorAsState(
-        targetValue = if (isSelected) ElectricIndigo else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
         animationSpec = tween(300),
         label = "color"
     )
     val bgColor by animateColorAsState(
-        targetValue = if (isSelected) ElectricIndigo.copy(alpha = 0.15f) else Color.Transparent,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
         animationSpec = tween(300),
         label = "bgColor"
     )

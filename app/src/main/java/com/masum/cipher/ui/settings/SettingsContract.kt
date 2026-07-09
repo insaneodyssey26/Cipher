@@ -9,6 +9,7 @@ import com.masum.cipher.core.mvi.UiState
 class SettingsContract {
     sealed class Intent : UiIntent {
         data class UpdateTheme(val theme: AppTheme) : Intent()
+        data class UpdateAccentColor(val color: com.masum.cipher.core.data.local.pref.AccentColor) : Intent()
         data class SetBiometricEnabled(val enabled: Boolean) : Intent()
         data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
@@ -22,6 +23,7 @@ class SettingsContract {
 
     data class State(
         val theme: AppTheme = AppTheme.SYSTEM,
+        val accentColor: com.masum.cipher.core.data.local.pref.AccentColor = com.masum.cipher.core.data.local.pref.AccentColor.INDIGO,
         val isBiometricEnabled: Boolean = false,
         val autoLockTimeout: Long = 0,
         val isPrivacyModeEnabled: Boolean = false,

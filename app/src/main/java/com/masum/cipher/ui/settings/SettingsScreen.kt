@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -20,11 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.rotate
+import androidx.compose.animation.animateContentSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
@@ -56,6 +61,7 @@ fun SettingsScreen(
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
+    var isColorPickerExpanded by remember { mutableStateOf(false) }
 
     val timeoutOptions = listOf(
         "Immediately" to 0L,
@@ -138,6 +144,133 @@ fun SettingsScreen(
                             viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.SYSTEM))
                         }
                     )
+                }
+                
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                isColorPickerExpanded = !isColorPickerExpanded
+                            }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = LucideIcons.Palette,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = "Accent Color",
+                                    style = Typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = state.accentColor.colorName,
+                                    style = Typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        
+                        val chevronRotation by androidx.compose.animation.core.animateFloatAsState(
+                            targetValue = if (isColorPickerExpanded) 180f else 0f,
+                            label = "chevron_rotation"
+                        )
+                        Icon(
+                            imageVector = LucideIcons.ChevronDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .rotate(chevronRotation)
+                        )
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isColorPickerExpanded,
+                        enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+                        exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            com.masum.cipher.core.data.local.pref.AccentColor.values().toList().chunked(5).forEach { rowColors ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    rowColors.forEach { color ->
+                                        val isSelected = state.accentColor == color
+                                        val scale by androidx.compose.animation.core.animateFloatAsState(
+                                            targetValue = if (isSelected) 1.1f else 1f,
+                                            animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = 300f),
+                                            label = "color_scale"
+                                        )
+                                        val borderColor by androidx.compose.animation.animateColorAsState(
+                                            targetValue = if (isSelected) Color(color.colorValue) else Color.Transparent,
+                                            animationSpec = androidx.compose.animation.core.tween(300),
+                                            label = "border_color"
+                                        )
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .clickable(
+                                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    if (!isSelected) {
+                                                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        viewModel.handleIntent(SettingsContract.Intent.UpdateAccentColor(color))
+                                                    }
+                                                }
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(48.dp)
+                                                    .scale(scale)
+                                                    .border(2.dp, borderColor, androidx.compose.foundation.shape.CircleShape)
+                                                    .padding(4.dp)
+                                                    .background(Color(color.colorValue), androidx.compose.foundation.shape.CircleShape),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = LucideIcons.Check,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.surface,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
+                                            }
+                                            Text(
+                                                text = color.colorName.substringAfter(" "),
+                                                style = Typography.labelSmall.copy(fontSize = 10.sp),
+                                                color = if (isSelected) Color(color.colorValue) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                modifier = Modifier.height(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -448,7 +581,7 @@ private fun VaultSettingsItem(
             }
         }
         if (loading) {
-            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = ElectricIndigo)
+            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
         } else if (value != null) {
             Text(text = value, style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Icon(LucideIcons.ChevronRight, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp).padding(start = 4.dp))
@@ -479,7 +612,7 @@ private fun VaultSettingsSwitch(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onSurface,
-                checkedTrackColor = ElectricIndigo,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
                 uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 uncheckedTrackColor = MaterialTheme.colorScheme.surface
             )
@@ -492,7 +625,7 @@ private fun VaultSettingsDialog(
     title: String,
     onDismiss: () -> Unit,
     confirmText: String,
-    confirmColor: Color = ElectricIndigo,
+    confirmColor: Color = MaterialTheme.colorScheme.primary,
     onConfirm: () -> Unit,
     content: @Composable () -> Unit
 ) {

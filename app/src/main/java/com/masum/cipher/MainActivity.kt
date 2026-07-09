@@ -77,7 +77,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                CipherTheme(darkTheme = darkTheme) {
+                CipherTheme(
+                    darkTheme = darkTheme,
+                    accentColor = androidx.compose.ui.graphics.Color(userSettings.accentColor.colorValue)
+                ) {
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->

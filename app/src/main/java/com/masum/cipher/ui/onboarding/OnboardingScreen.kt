@@ -76,7 +76,7 @@ private fun WelcomePage(onNext: () -> Unit) {
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(ElectricIndigo.copy(alpha = 0.05f), Transparent)
+                    colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f), Transparent)
                 )
             )
     ) {
@@ -105,7 +105,7 @@ private fun WelcomePage(onNext: () -> Unit) {
             Text(
                 text = "Your financial vault.",
                 style = Typography.headlineMedium,
-                color = ElectricIndigo
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -131,7 +131,7 @@ private fun WelcomePage(onNext: () -> Unit) {
                     .fillMaxWidth()
                     .height(64.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = "Get Started", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             }
@@ -190,7 +190,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
         VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(LucideIcons.Smartphone, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+                    Icon(LucideIcons.Smartphone, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("SMS Alerts", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -205,7 +205,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                     },
                     enabled = !hasSmsPermission,
                     modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo, disabledContainerColor = ElectricIndigo.copy(alpha=0.3f))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
                 ) {
                     Text(if (hasSmsPermission) "Granted" else "Grant SMS Access", color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -218,7 +218,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
         VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(LucideIcons.Check, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+                    Icon(LucideIcons.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Notification Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -231,7 +231,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                     },
                     enabled = !hasNotificationAccess,
                     modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo, disabledContainerColor = ElectricIndigo.copy(alpha=0.3f))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
                 ) {
                     Text(if (hasNotificationAccess) "Granted" else "Grant Notification Access", color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -258,7 +258,7 @@ private fun FeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, t
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 12.dp)
     ) {
-        Icon(icon, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+        Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = text, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }

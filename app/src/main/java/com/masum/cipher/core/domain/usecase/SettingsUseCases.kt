@@ -16,6 +16,7 @@ class UpdateSettingsUseCase @Inject constructor(
     private val userPreferences: UserPreferences
 ) {
     suspend fun theme(theme: AppTheme) = userPreferences.setTheme(theme)
+    suspend fun accentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) = userPreferences.setAccentColor(color)
     suspend fun biometric(enabled: Boolean) = userPreferences.setBiometricEnabled(enabled)
     suspend fun privacyMode(enabled: Boolean) = userPreferences.setPrivacyModeEnabled(enabled)
     suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)

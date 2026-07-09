@@ -28,6 +28,7 @@ class SettingsViewModel @Inject constructor(
     override fun handleIntent(intent: SettingsContract.Intent) {
         when (intent) {
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
+            is SettingsContract.Intent.UpdateAccentColor -> updateAccentColor(intent.color)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
@@ -46,6 +47,7 @@ class SettingsViewModel @Inject constructor(
                 updateState {
                     copy(
                         theme = settings.theme,
+                        accentColor = settings.accentColor,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
                         isHapticsEnabled = settings.isHapticsEnabled,
@@ -59,6 +61,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateTheme(theme: AppTheme) {
         viewModelScope.launch { updateSettingsUseCase.theme(theme) }
+    }
+
+    private fun updateAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
+        viewModelScope.launch { updateSettingsUseCase.accentColor(color) }
     }
 
     private fun updateBiometric(enabled: Boolean) {

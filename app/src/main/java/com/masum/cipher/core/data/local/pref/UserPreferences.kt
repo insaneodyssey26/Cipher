@@ -27,6 +27,7 @@ class UserPreferences @Inject constructor(
         val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val TRACKED_APPS = stringSetPreferencesKey("tracked_apps")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -40,7 +41,12 @@ class UserPreferences @Inject constructor(
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
             monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
             hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false,
-            trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet()
+            trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
+            accentColor = try {
+                AccentColor.valueOf(preferences[Keys.ACCENT_COLOR] ?: AccentColor.INDIGO.name)
+            } catch (e: Exception) {
+                AccentColor.INDIGO
+            }
         )
     }
 
@@ -83,6 +89,22 @@ class UserPreferences @Inject constructor(
     suspend fun setTrackedApps(apps: Set<String>) {
         context.dataStore.edit { it[Keys.TRACKED_APPS] = apps }
     }
+    suspend fun setAccentColor(accentColor: AccentColor) {
+        context.dataStore.edit { it[Keys.ACCENT_COLOR] = accentColor.name }
+    }
+}
+
+enum class AccentColor(val colorValue: Long, val colorName: String) {
+    INDIGO(0xFF6366F1, "Electric Indigo"),
+    MINT(0xFF10B981, "Midnight Mint"),
+    CHERRY(0xFFF43F5E, "Cherry Blossom"),
+    AMBER(0xFFF59E0B, "Amber Vault"),
+    CYAN(0xFF06B6D4, "Ocean Cyan"),
+    VIOLET(0xFF8B5CF6, "Royal Violet"),
+    ROSE(0xFFE11D48, "Crimson Rose"),
+    OCEAN(0xFF0EA5E9, "Pacific Blue"),
+    SAGE(0xFF84CC16, "Spring Sage"),
+    CORAL(0xFFF97316, "Sunset Coral")
 }
 
 data class UserSettings(
@@ -95,5 +117,6 @@ data class UserSettings(
     val lastStopTime: Long,
     val monthlyBudget: Double,
     val hasCompletedOnboarding: Boolean = false,
-    val trackedApps: Set<String> = emptySet()
+    val trackedApps: Set<String> = emptySet(),
+    val accentColor: AccentColor = AccentColor.INDIGO
 )

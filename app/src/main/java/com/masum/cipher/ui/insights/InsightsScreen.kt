@@ -163,7 +163,7 @@ private fun InsightHero(state: InsightsContract.State) {
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        ElectricIndigo.copy(alpha = 0.1f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         MaterialTheme.colorScheme.background
                     )
                 ),
@@ -175,10 +175,10 @@ private fun InsightHero(state: InsightsContract.State) {
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .background(ElectricIndigoSubtle, CircleShape),
+                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(LucideIcons.TrendingUp, null, tint = ElectricIndigo, modifier = Modifier.size(32.dp))
+            Icon(LucideIcons.TrendingUp, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -290,7 +290,7 @@ fun SubscriptionItem(
                 Text(
                     text = "Monthly",
                     style = Typography.labelSmall,
-                    color = ElectricIndigo
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

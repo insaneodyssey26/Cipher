@@ -224,7 +224,7 @@ fun TransactionDetailsSheet(
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ElectricIndigo,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
@@ -304,7 +304,7 @@ private fun VaultSheetTextField(
                 textStyle = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 singleLine = true,
                 keyboardOptions = keyboardOptions,
-                cursorBrush = SolidColor(ElectricIndigo),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { inner ->
                     if (value.isEmpty()) {
