@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -23,7 +24,8 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.BellRing
+import compose.icons.lucideicons.MessageSquare
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.WifiOff
@@ -146,6 +148,13 @@ private fun PermissionPage(onComplete: () -> Unit) {
     var hasSmsPermission by remember { 
         mutableStateOf(androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED) 
     }
+    var hasPostNotificationPermission by remember { 
+        mutableStateOf(
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) 
+                androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            else true
+        ) 
+    }
     var hasNotificationAccess by remember { 
         mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
     }
@@ -155,6 +164,9 @@ private fun PermissionPage(onComplete: () -> Unit) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
                 hasSmsPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    hasPostNotificationPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                }
                 hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
             }
         }
@@ -165,13 +177,19 @@ private fun PermissionPage(onComplete: () -> Unit) {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { result ->
-        hasSmsPermission = result[Manifest.permission.RECEIVE_SMS] == true
+        if (result.containsKey(Manifest.permission.RECEIVE_SMS)) {
+            hasSmsPermission = result[Manifest.permission.RECEIVE_SMS] == true
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU && result.containsKey(Manifest.permission.POST_NOTIFICATIONS)) {
+            hasPostNotificationPermission = result[Manifest.permission.POST_NOTIFICATIONS] == true
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
+            .verticalScroll(androidx.compose.foundation.rememberScrollState())
             .padding(32.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -199,9 +217,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = { 
-                        val perms = mutableListOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS)
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) perms.add(Manifest.permission.POST_NOTIFICATIONS)
-                        permissionLauncher.launch(perms.toTypedArray())
+                        permissionLauncher.launch(arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS))
                     },
                     enabled = !hasSmsPermission,
                     modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -212,13 +228,41 @@ private fun PermissionPage(onComplete: () -> Unit) {
             }
         }
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Post Notifications Card
+            VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(LucideIcons.MessageSquare, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("App Notifications", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Required to send you budget alerts and goal updates.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { 
+                            permissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                        },
+                        enabled = !hasPostNotificationPermission,
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
+                    ) {
+                        Text(if (hasPostNotificationPermission) "Granted" else "Grant App Notifications", color = MaterialTheme.colorScheme.onPrimary)
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Notification Permission Card
         VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(LucideIcons.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                    Icon(LucideIcons.BellRing, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Notification Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 }
@@ -238,7 +282,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onComplete,

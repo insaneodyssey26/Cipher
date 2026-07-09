@@ -33,7 +33,7 @@ class UserPreferences @Inject constructor(
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
         UserSettings(
             theme = AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name),
-            isBiometricEnabled = preferences[Keys.BIOMETRIC_ENABLED] ?: true,
+            isBiometricEnabled = preferences[Keys.BIOMETRIC_ENABLED] ?: false,
             isPrivacyModeEnabled = preferences[Keys.PRIVACY_MODE] ?: false,
             isHapticsEnabled = preferences[Keys.HAPTICS_ENABLED] ?: true,
             currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR",
