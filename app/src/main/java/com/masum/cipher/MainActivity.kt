@@ -109,6 +109,13 @@ class MainActivity : AppCompatActivity() {
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentRoute = navBackStackEntry?.destination?.route
 
+                        LaunchedEffect(intent) {
+                            if (intent.getStringExtra("navigate_to") == "manage_apps") {
+                                navController.navigate("manage_apps")
+                                intent.removeExtra("navigate_to")
+                            }
+                        }
+
                         // Use crossfade for top-level routes to avoid sliding out the navbar
                         val isTopLevel = currentRoute in listOf("dashboard", "insights", "settings")
 
