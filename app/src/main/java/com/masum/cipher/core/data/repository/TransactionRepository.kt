@@ -30,6 +30,15 @@ class TransactionRepository @Inject constructor(
     fun getRecentTransactions(limit: Int): Flow<List<TransactionEntity>> = transactionDao.getRecentTransactions(limit)
 
     suspend fun insertTransaction(transaction: TransactionEntity) {
+        val timeWindow = 60_000L
+        val startTime = transaction.timestamp - timeWindow
+        val endTime = transaction.timestamp + timeWindow
+        
+        val duplicate = transactionDao.findDuplicate(transaction.amount, startTime, endTime)
+        if (duplicate != null) {
+            return
+        }
+
         val rawMerchant = transaction.merchant.uppercase().trim()
 
         val alias = merchantAliasDao.getAliasForRawName(rawMerchant)

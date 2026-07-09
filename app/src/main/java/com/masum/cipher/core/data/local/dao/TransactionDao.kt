@@ -50,6 +50,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
     suspend fun getTransactionById(id: Long): TransactionEntity?
 
+    @Query("SELECT * FROM transactions WHERE amount = :amount AND timestamp BETWEEN :startTime AND :endTime LIMIT 1")
+    suspend fun findDuplicate(amount: Double, startTime: Long, endTime: Long): TransactionEntity?
+
     @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 0 AND timestamp >= :startTime")
     suspend fun sumExpensesSince(startTime: Long): Double
 
