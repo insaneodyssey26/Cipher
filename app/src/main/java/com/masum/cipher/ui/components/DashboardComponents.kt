@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -145,7 +146,7 @@ fun TransactionRow(
     val category = remember(transaction.category) {
         TransactionCategory.fromString(transaction.category)
     }
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -165,7 +166,7 @@ fun TransactionRow(
             .fillMaxWidth()
             .scale(scale)
             .clickable(interactionSource = interactionSource, indication = null) {
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                view.performVibrate(isHapticsEnabled)
                 onEdit(transaction)
             }
             .padding(horizontal = 20.dp, vertical = 11.dp),
@@ -231,7 +232,7 @@ fun TransactionRow(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(isHapticsEnabled, isLongPress = true)
                         onDelete(transaction)
                     },
                 tint = outline
@@ -258,7 +259,7 @@ fun BudgetCard(
     onSetBudgetClick: () -> Unit,
     isHapticsEnabled: Boolean = true
 ) {
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -281,7 +282,7 @@ fun BudgetCard(
             .border(1.dp, outlineVariant, RoundedCornerShape(18.dp))
             .clip(RoundedCornerShape(18.dp))
             .clickable(interactionSource = interactionSource, indication = null) {
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                view.performVibrate(isHapticsEnabled)
                 onSetBudgetClick()
             }
     ) {

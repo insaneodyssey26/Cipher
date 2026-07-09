@@ -37,6 +37,7 @@ import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.*
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.*
 
@@ -51,7 +52,7 @@ fun SettingsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
@@ -124,7 +125,7 @@ fun SettingsScreen(
                         icon = LucideIcons.Sun,
                         isSelected = state.theme == AppTheme.LIGHT,
                         onClick = {
-                            if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.LIGHT))
                         }
                     )
@@ -134,7 +135,7 @@ fun SettingsScreen(
                         icon = LucideIcons.Moon,
                         isSelected = state.theme == AppTheme.DARK,
                         onClick = {
-                            if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.DARK))
                         }
                     )
@@ -144,7 +145,7 @@ fun SettingsScreen(
                         icon = LucideIcons.Laptop,
                         isSelected = state.theme == AppTheme.SYSTEM,
                         onClick = {
-                            if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(SettingsContract.Intent.UpdateTheme(AppTheme.SYSTEM))
                         }
                     )
@@ -153,11 +154,12 @@ fun SettingsScreen(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
                 Column(modifier = Modifier.fillMaxWidth()) {
+                    val view = androidx.compose.ui.platform.LocalView.current
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                view.performVibrate(state.isHapticsEnabled)
                                 isColorPickerExpanded = !isColorPickerExpanded
                             }
                             .padding(16.dp),
@@ -228,6 +230,7 @@ fun SettingsScreen(
                                             animationSpec = androidx.compose.animation.core.tween(300),
                                             label = "border_color"
                                         )
+                                        val view = androidx.compose.ui.platform.LocalView.current
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -238,7 +241,7 @@ fun SettingsScreen(
                                                     indication = null
                                                 ) {
                                                     if (!isSelected) {
-                                                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                                                         viewModel.handleIntent(SettingsContract.Intent.UpdateAccentColor(color))
                                                     }
                                                 }
@@ -280,12 +283,13 @@ fun SettingsScreen(
 
             SettingsSection("SECURITY & PRIVACY") {
                 VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.ShieldCheck,
                     title = "Biometric Lock",
                     description = "Require authentication to open the app",
                     checked = state.isBiometricEnabled,
                     onCheckedChange = { isEnabling ->
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         if (isEnabling && biometricAuthenticator.isBiometricAvailable()) {
                             biometricAuthenticator.authenticate(
                                 activity = context as FragmentActivity,
@@ -298,6 +302,7 @@ fun SettingsScreen(
                     }
                 )
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Timer,
                     title = "Auto-Lock Timer",
                     value = when (state.autoLockTimeout) {
@@ -308,27 +313,29 @@ fun SettingsScreen(
                         else -> "Never"
                     },
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showTimeoutDialog = true
                     }
                 )
                 VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Zap,
                     title = "Haptic Feedback",
                     description = "Physical response to touch",
                     checked = state.isHapticsEnabled,
                     onCheckedChange = { 
-                        if (it) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(it, isLongPress = true)
                         viewModel.handleIntent(SettingsContract.Intent.SetHapticsEnabled(it)) 
                     }
                 )
                 VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.EyeOff,
                     title = "Privacy Mode",
                     description = "Hide balances on dashboard",
                     checked = state.isPrivacyModeEnabled,
                     onCheckedChange = { 
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) 
                     }
                 )
@@ -336,6 +343,7 @@ fun SettingsScreen(
 
             SettingsSection("TRACKING & INTEGRATIONS") {
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Smartphone,
                     title = "Manage Tracked Apps",
                     subtitle = "Select which apps to monitor for transactions",
@@ -345,11 +353,12 @@ fun SettingsScreen(
 
             SettingsSection("FINANCIAL GOALS") {
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
                     title = "Monthly Budget",
                     value = if (state.monthlyBudget > 0) "₹${state.monthlyBudget.toInt()}" else "No limit set",
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
                         showBudgetDialog = true
                     }
@@ -358,47 +367,52 @@ fun SettingsScreen(
 
             SettingsSection("DATA MANAGEMENT") {
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileSpreadsheet,
                     title = "Export CSV Report",
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         csvExportLauncher.launch("Cipher_Report_${System.currentTimeMillis()}.csv")
                     },
                     loading = state.isExportingCsv
                 )
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileText,
                     title = "Export PDF Statement",
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         pdfExportLauncher.launch("Cipher_Statement_${System.currentTimeMillis()}.pdf")
                     },
                     loading = state.isExportingPdf
                 )
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudUpload,
                     title = "Backup Vault",
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         exportLauncher.launch("Cipher_Backup_${System.currentTimeMillis()}.cipher")
                     },
                     loading = state.isExporting
                 )
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudDownload,
                     title = "Restore Vault",
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         importLauncher.launch(arrayOf("application/octet-stream"))
                     },
                     loading = state.isImporting
                 )
                 VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Trash2,
                     title = "Clear All Data",
                     titleColor = RoseExpense,
                     onClick = {
-                        if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showDeleteDialog = true
                     }
                 )
@@ -579,10 +593,15 @@ private fun VaultSettingsItem(
     value: String? = null,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
-    loading: Boolean = false
+    loading: Boolean = false,
+    isHapticsEnabled: Boolean = true
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp),
+        modifier = Modifier.fillMaxWidth().clickable {
+            view.performVibrate(isHapticsEnabled)
+            onClick()
+        }.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, null, tint = titleColor.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
@@ -608,8 +627,10 @@ private fun VaultSettingsSwitch(
     title: String,
     description: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    isHapticsEnabled: Boolean = true
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -622,7 +643,10 @@ private fun VaultSettingsSwitch(
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = {
+                view.performVibrate(isHapticsEnabled)
+                onCheckedChange(it)
+            },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onSurface,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,

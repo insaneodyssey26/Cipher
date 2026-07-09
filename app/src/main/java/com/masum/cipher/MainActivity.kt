@@ -222,7 +222,8 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 },
                                 onAddClick = { showAddSheet = true },
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
                             )
                         }
 
@@ -241,7 +242,8 @@ class MainActivity : AppCompatActivity() {
                                 onConfirm = { newTx ->
                                     mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx))
                                     showAddSheet = false
-                                }
+                                },
+                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
                             )
                         }
 

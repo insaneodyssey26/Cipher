@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.ChartBar
@@ -50,7 +51,7 @@ fun DashboardScreen(
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val snackbarHostState = remember { SnackbarHostState() }
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
@@ -73,7 +74,7 @@ fun DashboardScreen(
                     duration = SnackbarDuration.Short
                 )
                 if (result == SnackbarResult.ActionPerformed) {
-                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    view.performVibrate(isHapticsEnabled, isLongPress = true)
                     viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
                 }
             }
@@ -126,10 +127,11 @@ fun DashboardScreen(
                         expense = state.totalExpenses,
                         selectedPeriod = state.selectedTimePeriod,
                         onPeriodSelected = { period ->
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
                         },
-                        privacyMode = privacyMode
+                        privacyMode = privacyMode,
+                        isHapticsEnabled = isHapticsEnabled
                     )
                 }
 
@@ -176,7 +178,7 @@ fun DashboardScreen(
                                 transaction = transaction,
                                 privacyMode = privacyMode,
                                 onClick = {
-                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    view.performVibrate(isHapticsEnabled)
                                     editingTransaction = transaction
                                 }
                             )
@@ -200,10 +202,11 @@ fun DashboardScreen(
             ),
             onDismiss = { showAddSheet = false },
             onConfirm = { newTransaction ->
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
                 showAddSheet = false
-            }
+            },
+            isHapticsEnabled = isHapticsEnabled
         )
     }
 
@@ -212,14 +215,15 @@ fun DashboardScreen(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             },
             onDelete = {
                 viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
-            }
+            },
+            isHapticsEnabled = isHapticsEnabled
         )
     }
 
@@ -272,7 +276,8 @@ private fun DashboardHero(
     expense: Double,
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
     onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod) -> Unit,
-    privacyMode: Boolean
+    privacyMode: Boolean,
+    isHapticsEnabled: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -369,6 +374,7 @@ private fun DashboardHero(
             TimeSelectorDropdown(
                 selectedPeriod = selectedPeriod,
                 onPeriodSelected = onPeriodSelected,
+                isHapticsEnabled = isHapticsEnabled,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }

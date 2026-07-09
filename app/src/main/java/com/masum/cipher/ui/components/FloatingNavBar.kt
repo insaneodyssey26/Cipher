@@ -1,5 +1,6 @@
 package com.masum.cipher.ui.components
 
+import com.masum.cipher.core.util.performVibrate
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -41,9 +42,10 @@ fun FloatingNavBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit,
     onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isHapticsEnabled: Boolean = true
 ) {
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
     val backgroundColor = MaterialTheme.colorScheme.background
 
     Box(
@@ -83,7 +85,7 @@ fun FloatingNavBar(
                 item = BottomNavItem.Dashboard,
                 isSelected = currentRoute == BottomNavItem.Dashboard.route,
                 onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    view.performVibrate(isHapticsEnabled)
                     onNavigate(BottomNavItem.Dashboard.route) 
                 }
             )
@@ -92,7 +94,7 @@ fun FloatingNavBar(
                 item = BottomNavItem.Insights,
                 isSelected = currentRoute == BottomNavItem.Insights.route,
                 onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    view.performVibrate(isHapticsEnabled)
                     onNavigate(BottomNavItem.Insights.route) 
                 }
             )
@@ -105,7 +107,7 @@ fun FloatingNavBar(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
                     .clickable {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(isHapticsEnabled, isLongPress = true)
                         onAddClick()
                     },
                 contentAlignment = Alignment.Center
@@ -122,7 +124,7 @@ fun FloatingNavBar(
                 item = BottomNavItem.Settings,
                 isSelected = currentRoute == BottomNavItem.Settings.route,
                 onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    view.performVibrate(isHapticsEnabled)
                     onNavigate(BottomNavItem.Settings.route) 
                 }
             )

@@ -19,16 +19,19 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.Check
+import com.masum.cipher.core.util.performVibrate
 
 @Composable
 fun TimeSelectorDropdown(
     selectedPeriod: TimePeriod,
     onPeriodSelected: (TimePeriod) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isHapticsEnabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
     
     val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
+    val view = androidx.compose.ui.platform.LocalView.current
 
     Box(modifier = modifier) {
         // The Dropdown Trigger (Chip)
@@ -36,7 +39,10 @@ fun TimeSelectorDropdown(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .clickable { expanded = true }
+                .clickable {
+                    view.performVibrate(isHapticsEnabled)
+                    expanded = true
+                }
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -81,6 +87,7 @@ fun TimeSelectorDropdown(
                         { Icon(LucideIcons.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp)) }
                     } else null,
                     onClick = {
+                        view.performVibrate(isHapticsEnabled)
                         onPeriodSelected(period)
                         expanded = false
                     }

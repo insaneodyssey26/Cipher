@@ -28,6 +28,7 @@ import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.TrendingUp
@@ -45,7 +46,7 @@ fun InsightsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
@@ -57,9 +58,10 @@ fun InsightsScreen(
                     TimeSelectorDropdown(
                         selectedPeriod = state.selectedTimePeriod,
                         onPeriodSelected = { period ->
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(InsightsContract.Intent.SetTimePeriod(period))
-                        }
+                        },
+                        isHapticsEnabled = isHapticsEnabled
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -142,7 +144,7 @@ fun InsightsScreen(
                         data = state.calendarHeatmap,
                         selectedTimestamp = state.selectedDayTimestamp,
                         onDayClick = { timestamp ->
-                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
                             onNavigateToDayDetail(timestamp)
                         }
                     )
@@ -240,10 +242,10 @@ fun SubscriptionItem(
     sub: SubscriptionDetector.Subscription,
     isHapticsEnabled: Boolean
 ) {
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
 
     VaultCard(
-        onClick = { if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+        onClick = { view.performVibrate(isHapticsEnabled, isLongPress = true) },
         contentPadding = 12.dp,
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {

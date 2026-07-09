@@ -21,6 +21,7 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.dashboard.TransactionItem
 import com.masum.cipher.ui.theme.*
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import kotlinx.coroutines.flow.collectLatest
@@ -38,7 +39,7 @@ fun DayDetailScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
-    val haptic = LocalHapticFeedback.current
+    val view = androidx.compose.ui.platform.LocalView.current
     
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     
@@ -104,7 +105,7 @@ fun DayDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        view.performVibrate(isHapticsEnabled, isLongPress = true)
                         onNavigateBack()
                     }) {
                         Icon(LucideIcons.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
@@ -173,7 +174,7 @@ fun DayDetailScreen(
                             transaction = transaction,
                             privacyMode = false,
                             onClick = {
-                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                view.performVibrate(isHapticsEnabled)
                                 editingTransaction = transaction
                             }
                         )
@@ -188,14 +189,15 @@ fun DayDetailScreen(
             transaction = transaction,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
-                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             },
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
-            }
+            },
+            isHapticsEnabled = isHapticsEnabled
         )
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
+import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronDown
@@ -41,7 +42,8 @@ fun TransactionDetailsSheet(
     transaction: TransactionEntity,
     onDismiss: () -> Unit,
     onConfirm: (TransactionEntity) -> Unit,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    isHapticsEnabled: Boolean = true
 ) {
     var merchant by remember { mutableStateOf(transaction.merchant) }
     var amount by remember { mutableStateOf(if (transaction.amount == 0.0) "" else String.format(Locale.US, "%.2f", transaction.amount)) }
@@ -50,6 +52,8 @@ fun TransactionDetailsSheet(
     var categoryExpanded by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val view = androidx.compose.ui.platform.LocalView.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -88,7 +92,10 @@ fun TransactionDetailsSheet(
                 )
                 
                 if (isEditing && onDelete != null) {
-                    IconButton(onClick = onDelete) {
+                    IconButton(onClick = {
+                        view.performVibrate(isHapticsEnabled, isLongPress = true)
+                        onDelete()
+                    }) {
                         Icon(LucideIcons.Trash2, "Delete", tint = RoseExpense, modifier = Modifier.size(20.dp))
                     }
                 }
@@ -107,14 +114,20 @@ fun TransactionDetailsSheet(
                     selected = !isIncome,
                     activeColor = RoseExpense,
                     modifier = Modifier.weight(1f),
-                    onClick = { isIncome = false }
+                    onClick = {
+                        if (isIncome) view.performVibrate(isHapticsEnabled)
+                        isIncome = false
+                    }
                 )
                 TypeToggleButton(
                     label = "INCOME",
                     selected = isIncome,
                     activeColor = EmeraldIncome,
                     modifier = Modifier.weight(1f),
-                    onClick = { isIncome = true }
+                    onClick = {
+                        if (!isIncome) view.performVibrate(isHapticsEnabled)
+                        isIncome = true
+                    }
                 )
             }
 
@@ -135,7 +148,10 @@ fun TransactionDetailsSheet(
             // Category picker
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
+                onExpandedChange = {
+                    view.performVibrate(isHapticsEnabled)
+                    categoryExpanded = !categoryExpanded
+                }
             ) {
                 Box(
                     modifier = Modifier
@@ -187,6 +203,7 @@ fun TransactionDetailsSheet(
                                 )
                             },
                             onClick = {
+                                view.performVibrate(isHapticsEnabled)
                                 selectedCategory = category
                                 categoryExpanded = false
                             },
@@ -207,6 +224,7 @@ fun TransactionDetailsSheet(
             // Save button
             Button(
                 onClick = {
+                    view.performVibrate(isHapticsEnabled, isLongPress = true)
                     val finalAmount = amount.toDoubleOrNull() ?: 0.0
                     if (finalAmount > 0) {
                         onConfirm(

@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import com.masum.cipher.ui.theme.ElectricIndigo
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
@@ -101,7 +100,7 @@ fun AppSelectionScreen(
 
         if (isLoading) {
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = ElectricIndigo)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             LazyVerticalGrid(
@@ -134,7 +133,7 @@ fun AppSelectionScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         }
@@ -173,12 +172,12 @@ private fun AppItem(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .background(ElectricIndigo.copy(alpha = 0.3f), CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
                 )
                 Icon(
                     imageVector = LucideIcons.Check,
                     contentDescription = "Selected",
-                    tint = ElectricIndigo,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .offset(x = 4.dp, y = (-4).dp)
@@ -192,7 +191,7 @@ private fun AppItem(
         Text(
             text = app.appName,
             style = Typography.labelSmall,
-            color = if (isSelected) ElectricIndigo else MaterialTheme.colorScheme.onSurface,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
