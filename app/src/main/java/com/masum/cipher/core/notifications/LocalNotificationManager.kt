@@ -77,4 +77,37 @@ class LocalNotificationManager @Inject constructor(
             notify(NOTIFICATION_ID_NEW_APP, builder.build())
         }
     }
+
+    fun showPdfGeneratedNotification(uri: android.net.Uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "application/pdf")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            context,
+            1, // Unique request code
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#4F46E5"))
+            .setContentTitle("Statement Generated")
+            .setContentText("Your PDF statement is ready. Tap to view.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) {
+            notify(1002, builder.build())
+        }
+    }
 }

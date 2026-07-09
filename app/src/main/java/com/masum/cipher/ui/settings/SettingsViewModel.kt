@@ -17,7 +17,8 @@ class SettingsViewModel @Inject constructor(
     private val exportCsvUseCase: ExportCsvUseCase,
     private val exportPdfUseCase: ExportPdfUseCase,
     private val exportDataUseCase: ExportDataUseCase,
-    private val importDataUseCase: ImportDataUseCase
+    private val importDataUseCase: ImportDataUseCase,
+    private val localNotificationManager: com.masum.cipher.core.notifications.LocalNotificationManager
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
     initialState = SettingsContract.State()
 ) {
@@ -113,8 +114,12 @@ class SettingsViewModel @Inject constructor(
             val result = exportPdfUseCase(uri)
             updateState { copy(isExportingPdf = false) }
             
-            val message = if (result.isSuccess) "PDF Statement generated successfully" else "Failed to export PDF: ${result.exceptionOrNull()?.message}"
-            emitEffect(SettingsContract.Effect.ShowToast(message))
+            if (result.isSuccess) {
+                emitEffect(SettingsContract.Effect.ShowToast("PDF Statement generated successfully"))
+                localNotificationManager.showPdfGeneratedNotification(uri)
+            } else {
+                emitEffect(SettingsContract.Effect.ShowToast("Failed to export PDF: ${result.exceptionOrNull()?.message}"))
+            }
         }
     }
 
