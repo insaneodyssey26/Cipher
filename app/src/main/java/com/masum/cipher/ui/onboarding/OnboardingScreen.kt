@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.WifiOff
@@ -119,7 +120,7 @@ private fun WelcomePage(onNext: () -> Unit) {
             Spacer(modifier = Modifier.height(48.dp))
 
             FeatureItem(LucideIcons.ShieldCheck, "AES-256 Encrypted")
-            FeatureItem(LucideIcons.Smartphone, "Local SMS Parsing")
+            FeatureItem(LucideIcons.Smartphone, "Universal SMS & Notification Parsing")
             FeatureItem(LucideIcons.WifiOff, "Zero Network Access")
 
             Spacer(modifier = Modifier.weight(1f))
@@ -140,9 +141,32 @@ private fun WelcomePage(onNext: () -> Unit) {
 
 @Composable
 private fun PermissionPage(onComplete: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
+    var hasSmsPermission by remember { 
+        mutableStateOf(androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED) 
+    }
+    var hasNotificationAccess by remember { 
+        mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasSmsPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { onComplete() }
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { result ->
+        hasSmsPermission = result[Manifest.permission.RECEIVE_SMS] == true
+    }
 
     Column(
         modifier = Modifier
@@ -151,65 +175,80 @@ private fun PermissionPage(onComplete: () -> Unit) {
             .padding(32.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(32.dp))
         
+        Text(text = "Final Setup", style = Typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Data Access",
-            style = Typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            text = "Cipher needs these permissions to automatically secure your transaction history locally.",
+            style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 28.sp
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // SMS Permission Card
+        VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(LucideIcons.Smartphone, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("SMS Alerts", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Required to parse bank SMS.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { 
+                        val perms = mutableListOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS)
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) perms.add(Manifest.permission.POST_NOTIFICATIONS)
+                        permissionLauncher.launch(perms.toTypedArray())
+                    },
+                    enabled = !hasSmsPermission,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo, disabledContainerColor = ElectricIndigo.copy(alpha=0.3f))
+                ) {
+                    Text(if (hasSmsPermission) "Granted" else "Grant SMS Access", color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Cipher needs permission to read banking SMS alerts to automatically secure your transaction history.",
-            style = Typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = 28.sp
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        VaultCard(
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            contentPadding = 20.dp
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "WHY THIS MATTERS",
-                    style = Typography.labelSmall,
-                    color = ElectricIndigo
-                )
-                Text(
-                    text = "By parsing SMS locally, we can provide real-time insights without ever asking for your bank credentials or syncing data to the cloud.",
-                    style = Typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 22.sp
-                )
+        // Notification Permission Card
+        VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(LucideIcons.Check, null, tint = ElectricIndigo, modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Notification Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Required to read push notifications from your selected payment apps.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { 
+                        context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    },
+                    enabled = !hasNotificationAccess,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo, disabledContainerColor = ElectricIndigo.copy(alpha=0.3f))
+                ) {
+                    Text(if (hasNotificationAccess) "Granted" else "Grant Notification Access", color = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { permissionLauncher.launch(Manifest.permission.RECEIVE_SMS) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo)
-        ) {
-            Text(text = "Allow Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(
             onClick = onComplete,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(64.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Text(text = "Skip for now", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+            Text(text = if (hasSmsPermission && hasNotificationAccess) "Finish Setup" else "Skip for now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
