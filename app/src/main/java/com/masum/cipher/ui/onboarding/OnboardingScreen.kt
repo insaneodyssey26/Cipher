@@ -29,7 +29,10 @@ import compose.icons.lucideicons.WifiOff
 import kotlinx.coroutines.delay
 
 @Composable
-fun OnboardingScreen(onComplete: () -> Unit) {
+fun OnboardingScreen(
+    onComplete: () -> Unit,
+    onSaveApps: (Set<String>) -> Unit
+) {
     var page by remember { mutableIntStateOf(0) }
 
     Box(
@@ -46,6 +49,13 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         ) { currentPage ->
             when (currentPage) {
                 0 -> WelcomePage(onNext = { page = 1 })
+                1 -> AppSelectionScreen(
+                    initialSelectedApps = emptySet(),
+                    onComplete = { apps ->
+                        onSaveApps(apps)
+                        page = 2
+                    }
+                )
                 else -> PermissionPage(onComplete = onComplete)
             }
         }

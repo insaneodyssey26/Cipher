@@ -41,7 +41,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     biometricAuthenticator: BiometricAuthenticator,
     onNavigateBack: () -> Unit,
-    onNavigateToPrivacy: () -> Unit
+    onNavigateToPrivacy: () -> Unit,
+    onNavigateToManageApps: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -193,6 +194,15 @@ fun SettingsScreen(
                         if (state.isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.handleIntent(SettingsContract.Intent.SetPrivacyModeEnabled(it)) 
                     }
+                )
+            }
+
+            SettingsSection("TRACKING & INTEGRATIONS") {
+                VaultSettingsItem(
+                    icon = LucideIcons.Smartphone,
+                    title = "Manage Tracked Apps",
+                    subtitle = "Select which apps to monitor for transactions",
+                    onClick = onNavigateToManageApps
                 )
             }
 

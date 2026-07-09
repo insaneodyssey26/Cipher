@@ -40,6 +40,13 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.SetOnboardingCompleted -> setOnboardingCompleted(intent.completed)
             is MainContract.Intent.Authenticate -> updateState { copy(isAuthenticated = true) }
             is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
+            is MainContract.Intent.SaveTrackedApps -> saveTrackedApps(intent.apps)
+        }
+    }
+
+    private fun saveTrackedApps(apps: Set<String>) {
+        viewModelScope.launch {
+            userPreferences.setTrackedApps(apps)
         }
     }
 

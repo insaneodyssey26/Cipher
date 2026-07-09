@@ -38,6 +38,7 @@ import com.masum.cipher.ui.insights.DayDetailScreen
 import com.masum.cipher.ui.insights.InsightsScreen
 import com.masum.cipher.ui.insights.InsightsViewModel
 import com.masum.cipher.ui.onboarding.OnboardingScreen
+import com.masum.cipher.ui.onboarding.AppSelectionScreen
 import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
@@ -180,7 +181,17 @@ class MainActivity : AppCompatActivity() {
                                     viewModel = viewModel,
                                     biometricAuthenticator = biometricAuthenticator,
                                     onNavigateBack = { navController.popBackStack() },
-                                    onNavigateToPrivacy = { navController.navigate("privacy_policy") }
+                                    onNavigateToPrivacy = { navController.navigate("privacy_policy") },
+                                    onNavigateToManageApps = { navController.navigate("manage_apps") }
+                                )
+                            }
+                            composable("manage_apps") {
+                                AppSelectionScreen(
+                                    initialSelectedApps = state.settings?.trackedApps ?: emptySet(),
+                                    onComplete = { apps ->
+                                        mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps))
+                                        navController.popBackStack()
+                                    }
                                 )
                             }
                             composable("privacy_policy") {
@@ -232,7 +243,8 @@ class MainActivity : AppCompatActivity() {
 
                         if (state.isOnboardingRequired) {
                             OnboardingScreen(
-                                onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) }
+                                onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
+                                onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
                             )
                         }
                     }
