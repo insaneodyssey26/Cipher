@@ -170,7 +170,7 @@ fun AppSelectionScreen(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

@@ -133,7 +133,7 @@ private fun WelcomePage(onNext: () -> Unit) {
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text(text = "Get Started", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = "Get Started", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
@@ -207,7 +207,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
                 ) {
-                    Text(if (hasSmsPermission) "Granted" else "Grant SMS Access", color = MaterialTheme.colorScheme.onSurface)
+                    Text(if (hasSmsPermission) "Granted" else "Grant SMS Access", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -233,7 +233,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
                 ) {
-                    Text(if (hasNotificationAccess) "Granted" else "Grant Notification Access", color = MaterialTheme.colorScheme.onSurface)
+                    Text(if (hasNotificationAccess) "Granted" else "Grant Notification Access", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
