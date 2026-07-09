@@ -65,7 +65,8 @@ class LocalNotificationManager @Inject constructor(
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: Use actual app icon
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#4F46E5"))
             .setContentTitle("New Payment App Detected")
             .setContentText("Would you like Cipher to track transactions from $appName?")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

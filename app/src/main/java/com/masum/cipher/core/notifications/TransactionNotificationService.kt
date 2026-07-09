@@ -23,8 +23,19 @@ class TransactionNotificationService : NotificationListenerService() {
     @Inject
     lateinit var transactionRepository: TransactionRepository
 
+    @Inject
+    lateinit var packageInstallReceiver: PackageInstallReceiver
+
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
+    override fun onCreate() {
+        super.onCreate()
+        val filter = android.content.IntentFilter(android.content.Intent.ACTION_PACKAGE_ADDED).apply {
+            addDataScheme("package")
+        }
+        registerReceiver(packageInstallReceiver, filter)
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val packageName = sbn.packageName
@@ -48,9 +59,9 @@ class TransactionNotificationService : NotificationListenerService() {
                     merchant = parsedTx.merchant,
                     amount = parsedTx.amount,
                     currency = parsedTx.currency,
-                    category = "", // Categorization engine will handle this in repo
+                    category = "",
                     isIncome = parsedTx.isIncome,
-                    rawSms = fullMessage, // Save notification text here
+                    rawSms = fullMessage,
                     timestamp = System.currentTimeMillis()
                 )
                 transactionRepository.insertTransaction(transactionEntity)
@@ -60,6 +71,7 @@ class TransactionNotificationService : NotificationListenerService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(packageInstallReceiver)
         serviceJob.cancel()
     }
 }

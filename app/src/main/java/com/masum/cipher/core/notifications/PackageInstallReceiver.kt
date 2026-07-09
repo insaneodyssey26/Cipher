@@ -6,12 +6,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@AndroidEntryPoint
-class PackageInstallReceiver : BroadcastReceiver() {
-
-    @Inject
-    lateinit var localNotificationManager: LocalNotificationManager
+@Singleton
+class PackageInstallReceiver @Inject constructor(
+    private val localNotificationManager: LocalNotificationManager
+) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_PACKAGE_ADDED) {
