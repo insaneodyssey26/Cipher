@@ -2,7 +2,7 @@ package com.masum.cipher.core.sms.config
 
 import java.util.regex.Pattern
 
-object SmsPatterns {
+object TransactionPatterns {
     val AMOUNT_PATTERNS = listOf(
         Pattern.compile("(?i)(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded|transfer(?:red)?|txn|transaction)\\s*(?:by|with|of|for|to)?\\s*(?:₹|rs\\.?|inr)?\\s*(?:/-\\s*)?([\\d,]+\\.?\\d{0,2})"),
         Pattern.compile("(?i)([\\d,]+\\.?\\d{0,2})\\s*(?:rs\\.?|inr|₹)?\\s*(?:debited|spent|charged|paid|withdrawn|sent|credited|received|deposited|added|refunded)"),

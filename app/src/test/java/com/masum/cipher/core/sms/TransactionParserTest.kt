@@ -7,13 +7,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class SmsParserTest {
+class TransactionParserTest {
 
-    private lateinit var parser: SmsParser
+    private lateinit var parser: TransactionParser
 
     @Before
     fun setup() {
-        parser = SmsParser()
+        parser = TransactionParser()
     }
 
     // ─── REJECTION ────────────────────────────────────────────────────────────

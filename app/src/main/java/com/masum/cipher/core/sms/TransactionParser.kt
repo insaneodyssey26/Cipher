@@ -1,12 +1,12 @@
 package com.masum.cipher.core.sms
 
 import com.masum.cipher.core.domain.model.ParsedTransaction
-import com.masum.cipher.core.sms.config.SmsPatterns
+import com.masum.cipher.core.sms.config.TransactionPatterns
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SmsParser @Inject constructor() {
+class TransactionParser @Inject constructor() {
 
     fun parse(message: String): ParsedTransaction? {
         val cleanMessage = message.replace("\\s+".toRegex(), " ")
@@ -20,8 +20,8 @@ class SmsParser @Inject constructor() {
         var merchant = findBrandInText(cleanMessage)
         if (merchant == null) merchant = extractMerchantStructural(cleanMessage)
 
-        val isDebit = SmsPatterns.DEBIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
-        val isCredit = SmsPatterns.CREDIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
+        val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
+        val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
         val isIncome = isCredit && !isDebit
 
         return ParsedTransaction(
@@ -34,22 +34,22 @@ class SmsParser @Inject constructor() {
 
     private fun hasExclusionKeywords(message: String): Boolean {
         val lower = message.lowercase()
-        return SmsPatterns.EXCLUSION_KEYWORDS.any { lower.contains(it) }
+        return TransactionPatterns.EXCLUSION_KEYWORDS.any { lower.contains(it) }
     }
 
     private fun hasTransactionIntent(message: String): Boolean {
         val lower = message.lowercase()
-        return SmsPatterns.INTENT_KEYWORDS.any { lower.contains(it) }
+        return TransactionPatterns.INTENT_KEYWORDS.any { lower.contains(it) }
     }
 
     private fun hasTransactionEvidence(message: String): Boolean {
-        return SmsPatterns.TRANSACTION_EVIDENCE_PATTERNS.any { pattern ->
+        return TransactionPatterns.TRANSACTION_EVIDENCE_PATTERNS.any { pattern ->
             pattern.matcher(message).find()
         }
     }
 
     private fun extractAmount(message: String): Double? {
-        for (pattern in SmsPatterns.AMOUNT_PATTERNS) {
+        for (pattern in TransactionPatterns.AMOUNT_PATTERNS) {
             val matcher = pattern.matcher(message)
             while (matcher.find()) {
                 val match = matcher.group(1) ?: matcher.group(0)
@@ -68,7 +68,7 @@ class SmsParser @Inject constructor() {
     }
 
     private fun isPartOfAccountNumber(message: String, matchStart: Int): Boolean {
-        val matcher = SmsPatterns.ACCOUNT_EXCLUSION_PATTERN.matcher(message)
+        val matcher = TransactionPatterns.ACCOUNT_EXCLUSION_PATTERN.matcher(message)
         while (matcher.find()) {
             if (matchStart >= matcher.start() && matchStart < matcher.end()) return true
         }
@@ -77,20 +77,20 @@ class SmsParser @Inject constructor() {
 
     private fun findBrandInText(message: String): String? {
         val upper = message.uppercase()
-        return SmsPatterns.BRAND_DICTIONARY.find { brand ->
+        return TransactionPatterns.BRAND_DICTIONARY.find { brand ->
             upper.contains(Regex("\\b${Regex.escape(brand)}\\b"))
         }
     }
 
     private fun extractMerchantStructural(message: String): String? {
-        for (pattern in SmsPatterns.STRUCTURAL_MERCHANT_PATTERNS) {
+        for (pattern in TransactionPatterns.STRUCTURAL_MERCHANT_PATTERNS) {
             val matcher = pattern.matcher(message)
             while (matcher.find()) {
                 val raw = matcher.group(1)?.trim() ?: continue
                 if (raw.isBlank()) continue
 
                 val lower = raw.lowercase()
-                if (SmsPatterns.MERCHANT_FALSE_POSITIVE_PREFIXES.any { lower.startsWith(it) }) continue
+                if (TransactionPatterns.MERCHANT_FALSE_POSITIVE_PREFIXES.any { lower.startsWith(it) }) continue
 
                 val cleaned = raw.replace(
                     Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE), ""

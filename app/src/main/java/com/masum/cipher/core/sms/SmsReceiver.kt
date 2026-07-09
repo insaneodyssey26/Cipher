@@ -17,7 +17,7 @@ import javax.inject.Inject
 class SmsReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var smsParser: SmsParser
+    lateinit var smsParser: TransactionParser
 
     @Inject
     lateinit var repository: TransactionRepository
