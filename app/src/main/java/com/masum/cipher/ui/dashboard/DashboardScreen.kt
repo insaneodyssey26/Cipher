@@ -14,8 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -53,11 +55,11 @@ fun DashboardScreen(
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
 
-    // State for Bottom Sheet
+
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
 
-    // Budget Edit State
+
     var showBudgetDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -78,83 +80,107 @@ fun DashboardScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { 
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 100.dp)
-            ) 
-        }
-    ) { padding ->
-        LazyColumn(
+    val mainScale by animateFloatAsState(
+        targetValue = if (showAddSheet || editingTransaction != null) 0.93f else 1f,
+        animationSpec = VaultMotion.LayoutSpring,
+        label = "MainScale"
+    )
+    val mainCorner by animateDpAsState(
+        targetValue = if (showAddSheet || editingTransaction != null) 32.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.85f, stiffness = 300f),
+        label = "MainCorner"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            snackbarHost = { 
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.padding(bottom = 100.dp)
+                ) 
+            },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(bottom = 140.dp)
-        ) {
-            // 1. Hero Section (Balance + In/Out)
-            item {
-                DashboardHero(
-                    totalBalance = state.totalBalance,
-                    income = state.totalIncome,
-                    expense = state.totalExpenses,
-                    selectedPeriod = state.selectedTimePeriod,
-                    onPeriodSelected = { period ->
-                        if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
-                    },
-                    privacyMode = privacyMode
-                )
-            }
-
-            // 3. Budget Pulse Card
-            item {
-                BudgetPulseCard(
-                    spent = state.thisMonthExpenses,
-                    budget = state.monthlyBudget,
-                    onSetBudgetClick = {
-                        budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
-                        showBudgetDialog = true
-                    }
-                )
-            }
-
-            // 4. Timeline Label
-            item {
-                Text(
-                    text = "RECENT ACTIVITY",
-                    style = Typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
-                )
-            }
-
-            // 4. Transaction List
-            if (state.isLoading) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.CircularProgressIndicator(color = com.masum.cipher.ui.theme.ElectricIndigo)
-                    }
+                .clip(RoundedCornerShape(mainCorner.coerceAtLeast(0.dp)))
+                .graphicsLayer {
+                    this.scaleX = mainScale
+                    this.scaleY = mainScale
                 }
-            } else if (state.transactions.isEmpty()) {
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(bottom = 140.dp)
+            ) {
+
                 item {
-                    GenesisEmptyState(onAddManual = { showAddSheet = true })
+                    DashboardHero(
+                        totalBalance = state.totalBalance,
+                        income = state.totalIncome,
+                        expense = state.totalExpenses,
+                        selectedPeriod = state.selectedTimePeriod,
+                        onPeriodSelected = { period ->
+                            if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
+                        },
+                        privacyMode = privacyMode
+                    )
                 }
-            } else {
-                itemsIndexed(
-                    items = state.transactions,
-                    key = { _, t -> t.id }
-                ) { index, transaction ->
-                    StaggeredEntranceItem(index = index) {
-                        TransactionItem(
-                            transaction = transaction,
-                            privacyMode = privacyMode,
-                            onClick = {
-                                if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                editingTransaction = transaction
-                            }
-                        )
+
+
+                item {
+                    BudgetPulseCard(
+                        spent = state.thisMonthExpenses,
+                        budget = state.monthlyBudget,
+                        onSetBudgetClick = {
+                            budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
+                            showBudgetDialog = true
+                        }
+                    )
+                }
+
+
+                item {
+                    Text(
+                        text = "RECENT ACTIVITY",
+                        style = Typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
+                    )
+                }
+
+
+                if (state.isLoading) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            androidx.compose.material3.CircularProgressIndicator(color = com.masum.cipher.ui.theme.ElectricIndigo)
+                        }
+                    }
+                } else if (state.transactions.isEmpty()) {
+                    item {
+                        GenesisEmptyState(onAddManual = { showAddSheet = true })
+                    }
+                } else {
+                    itemsIndexed(
+                        items = state.transactions,
+                        key = { _, t -> t.id }
+                    ) { index, transaction ->
+                        StaggeredEntranceItem(index = index) {
+                            TransactionItem(
+                                transaction = transaction,
+                                privacyMode = privacyMode,
+                                onClick = {
+                                    if (isHapticsEnabled) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    editingTransaction = transaction
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -303,7 +329,7 @@ private fun DashboardHero(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Glassmorphism stats card
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
@@ -322,7 +348,7 @@ private fun DashboardHero(
             }
         }
         
-        // Top Bar
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -442,7 +468,7 @@ fun TransactionItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Category Icon
+
             val category = TransactionCategory.fromString(transaction.category)
             Box(
                 modifier = Modifier
@@ -511,7 +537,8 @@ private fun GenesisEmptyState(onAddManual: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = onAddManual,
+            onClick = {},
+            modifier = Modifier.bounceClick { onAddManual() },
             colors = ButtonDefaults.buttonColors(containerColor = ElectricIndigo),
             shape = RoundedCornerShape(12.dp)
         ) {

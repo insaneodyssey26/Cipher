@@ -5,35 +5,29 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.composed
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.scale
 
-/**
- * Vault Motion System - Spring Primitives
- * 
- * We avoid linear movement. Everything is organic and responsive.
- */
 object VaultMotion {
-    // Snappy and bouncy for interactive elements (press/scale)
     val InteractiveSpring = spring<Float>(
         dampingRatio = 0.7f,
         stiffness = 400f
     )
 
-    // Smooth and controlled for layout transitions (entering screens)
     val LayoutSpring = spring<Float>(
         dampingRatio = 0.85f,
         stiffness = 300f
     )
 
-    // Fluid for data visualizations (charts)
     val DataSpring = spring<Float>(
         dampingRatio = 1.0f,
         stiffness = 100f
     )
 }
 
-/**
- * Animates a number from its current value to a new value using a rolling/counting effect.
- */
 @Composable
 fun AnimatedNumberTicker(
     value: Double,
@@ -56,10 +50,6 @@ fun AnimatedNumberTicker(
     )
 }
 
-/**
- * Container that applies a staggered entrance animation to its content.
- * Uses rememberSaveable to ensure the animation only plays once per item life-cycle.
- */
 @Composable
 fun StaggeredEntranceItem(
     index: Int,
@@ -83,7 +73,7 @@ fun StaggeredEntranceItem(
     )
 
     val offsetY by animateFloatAsState(
-        targetValue = if (visible) 0f else 20f,
+        targetValue = if (visible) 0f else 50f,
         animationSpec = VaultMotion.LayoutSpring,
         label = "OffsetY"
     )
@@ -98,7 +88,27 @@ fun StaggeredEntranceItem(
     }
 }
 
-// Inline helper for Box usage in Motion.kt
+fun Modifier.bounceClick(
+    onClick: () -> Unit
+): Modifier = composed {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.90f else 1f,
+        animationSpec = VaultMotion.InteractiveSpring,
+        label = "BounceClick"
+    )
+
+    this
+        .scale(scale)
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onClick
+        )
+}
+
 @Composable
 private fun Box(modifier: Modifier, content: @Composable () -> Unit) {
     androidx.compose.foundation.layout.Box(modifier = modifier) {
