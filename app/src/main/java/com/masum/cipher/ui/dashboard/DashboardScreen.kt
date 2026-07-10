@@ -626,23 +626,25 @@ private fun GenesisEmptyState(onAddManual: () -> Unit) {
         Text(
             text = "Your financial vault is ready.",
             style = Typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Incoming transaction SMS will be automatically parsed and secured here.",
+            text = "Cipher securely monitors your tracked apps and automatically adds your transactions here whenever you get a payment notification.\n\nMake a digital payment, or tap below to record one manually!",
             style = Typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            lineHeight = 22.sp
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = {},
-            modifier = Modifier.bounceClick { onAddManual() },
+            onClick = onAddManual,
+            modifier = Modifier,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+            Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }
