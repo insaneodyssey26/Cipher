@@ -305,8 +305,16 @@ fun DashboardScreen(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val versionName = remember {
+                    try {
+                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                    } catch (e: Exception) {
+                        "4.1.0"
+                    }
+                }
                 Text(
-                    text = "New Feature: Notification Tracking!",
+                    text = "Version $versionName is here! \uD83C\uDF89\nNew Feature: Notification Tracking",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,

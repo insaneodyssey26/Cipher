@@ -28,6 +28,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.MessageSquare
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Check
@@ -64,11 +65,28 @@ fun AppSelectionScreen(
         mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
     }
 
+    var hasPostNotificationPermission by remember { 
+        mutableStateOf(
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) 
+                androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            else true
+        ) 
+    }
+
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasPostNotificationPermission = isGranted
+    }
+
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
                 hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    hasPostNotificationPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -146,6 +164,32 @@ fun AppSelectionScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
                         Text("Enable", color = MaterialTheme.colorScheme.onError)
+                    }
+                }
+            }
+        } else if (!hasPostNotificationPermission && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            Spacer(modifier = Modifier.height(16.dp))
+            com.masum.cipher.ui.components.VaultCard(backgroundColor = MaterialTheme.colorScheme.secondaryContainer) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.MessageSquare,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("App Notifications", style = Typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Allow Cipher to send you budget alerts and updates.", style = Typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = { permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Allow", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }

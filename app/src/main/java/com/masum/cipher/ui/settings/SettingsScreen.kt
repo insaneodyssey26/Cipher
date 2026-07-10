@@ -453,8 +453,13 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(48.dp))
+            val versionName = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                "4.1.0"
+            }
             Text(
-                text = "Cipher 4.0.0",
+                text = "Cipher $versionName",
                 style = Typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
