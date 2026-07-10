@@ -67,8 +67,9 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    var showNotificationFeatureSheet by remember(settings?.hasSeenNotificationFeature) {
-        mutableStateOf(settings != null && settings?.hasSeenNotificationFeature == false)
+    val shouldShowPopup = settings != null && settings?.hasCompletedOnboarding == true && settings?.hasSeenNotificationFeature == false
+    var showNotificationFeatureSheet by remember(shouldShowPopup) {
+        mutableStateOf(shouldShowPopup)
     }
 
     LaunchedEffect(Unit) {
