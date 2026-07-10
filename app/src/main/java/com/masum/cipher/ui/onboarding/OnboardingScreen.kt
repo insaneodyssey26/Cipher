@@ -29,6 +29,10 @@ import compose.icons.lucideicons.MessageSquare
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.WifiOff
+import compose.icons.lucideicons.Wallet
+import compose.icons.lucideicons.ChartBar
+import compose.icons.lucideicons.Plus
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
 @Composable
@@ -158,6 +162,8 @@ private fun PermissionPage(onComplete: () -> Unit) {
     var hasNotificationAccess by remember { 
         mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
     }
+    
+    var showTour by remember { mutableStateOf(false) }
 
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -285,14 +291,27 @@ private fun PermissionPage(onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
+            onClick = { showTour = true },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text(text = "Take a Quick Tour", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(
             onClick = onComplete,
-            modifier = Modifier.fillMaxWidth().height(64.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Text(text = if (hasSmsPermission && hasNotificationAccess) "Finish Setup" else "Skip for now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = if (hasSmsPermission && hasNotificationAccess) "Start Using Cipher" else "Skip for now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+    
+    if (showTour) {
+        AppTourDialog(onDismiss = { showTour = false; onComplete() })
     }
 }
 
@@ -305,5 +324,98 @@ private fun FeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, t
         Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = text, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+private fun AppTourDialog(onDismiss: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        val pagerState = androidx.compose.foundation.pager.rememberPagerState(pageCount = { 3 })
+        
+        VaultCard(
+            modifier = Modifier.fillMaxWidth(0.9f).padding(16.dp),
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            contentPadding = 24.dp
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                androidx.compose.foundation.pager.HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth().height(260.dp)
+                ) { page ->
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        when (page) {
+                            0 -> {
+                                Icon(LucideIcons.Wallet, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Text("The Dashboard", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Your financial command center. Watch your incoming digital transactions appear here automatically.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            }
+                            1 -> {
+                                Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.primaryContainer, androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
+                                    Icon(LucideIcons.Plus, null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Text("Add Manual Expenses", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Paid in cash? Tap the floating + button on the navigation bar anytime to log manual expenses.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            }
+                            2 -> {
+                                Icon(LucideIcons.ChartBar, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Text("Deep Insights", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Tap the pie-chart icon to explore your Insights. See where your money goes with deep category breakdowns.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Page Indicators
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    repeat(3) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(if (isSelected) 10.dp else 8.dp)
+                                .background(color, androidx.compose.foundation.shape.CircleShape)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Button(
+                    onClick = {
+                        if (pagerState.currentPage < 2) {
+                            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                        } else {
+                            onDismiss()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(if (pagerState.currentPage == 2) "Get Started" else "Next", color = MaterialTheme.colorScheme.onPrimary)
+                }
+            }
+        }
     }
 }
