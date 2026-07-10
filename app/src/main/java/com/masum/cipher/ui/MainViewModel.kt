@@ -83,6 +83,9 @@ class MainViewModel @Inject constructor(
     private fun setOnboardingCompleted(completed: Boolean) {
         viewModelScope.launch {
             userPreferences.setOnboardingCompleted(completed)
+            if (completed) {
+                userPreferences.setHasSeenNotificationFeature(true)
+            }
         }
     }
 }

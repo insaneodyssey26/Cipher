@@ -28,6 +28,7 @@ class UserPreferences @Inject constructor(
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val TRACKED_APPS = stringSetPreferencesKey("tracked_apps")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val HAS_SEEN_NOTIFICATION_FEATURE = booleanPreferencesKey("has_seen_notification_feature")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -46,7 +47,8 @@ class UserPreferences @Inject constructor(
                 AccentColor.valueOf(preferences[Keys.ACCENT_COLOR] ?: AccentColor.INDIGO.name)
             } catch (e: Exception) {
                 AccentColor.INDIGO
-            }
+            },
+            hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false
         )
     }
 
@@ -92,6 +94,10 @@ class UserPreferences @Inject constructor(
     suspend fun setAccentColor(accentColor: AccentColor) {
         context.dataStore.edit { it[Keys.ACCENT_COLOR] = accentColor.name }
     }
+
+    suspend fun setHasSeenNotificationFeature(seen: Boolean) {
+        context.dataStore.edit { it[Keys.HAS_SEEN_NOTIFICATION_FEATURE] = seen }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -118,5 +124,6 @@ data class UserSettings(
     val monthlyBudget: Double,
     val hasCompletedOnboarding: Boolean = false,
     val trackedApps: Set<String> = emptySet(),
-    val accentColor: AccentColor = AccentColor.INDIGO
+    val accentColor: AccentColor = AccentColor.INDIGO,
+    val hasSeenNotificationFeature: Boolean = false
 )

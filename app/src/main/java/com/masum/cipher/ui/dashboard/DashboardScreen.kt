@@ -31,6 +31,7 @@ import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Settings
@@ -46,7 +47,8 @@ fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
     onNavigateToSettings: () -> Unit,
-    onNavigateToInsights: () -> Unit
+    onNavigateToInsights: () -> Unit,
+    onNavigateToManageApps: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
@@ -64,6 +66,10 @@ fun DashboardScreen(
     var showBudgetDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+    
+    var showNotificationFeatureSheet by remember(settings?.hasSeenNotificationFeature) {
+        mutableStateOf(settings != null && settings?.hasSeenNotificationFeature == false)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
@@ -270,6 +276,81 @@ fun DashboardScreen(
                 }
             }
         )
+    }
+
+    if (showNotificationFeatureSheet) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = {
+                coroutineScope.launch {
+                    userPreferences.setHasSeenNotificationFeature(true)
+                }
+                showNotificationFeatureSheet = false
+            },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = LucideIcons.BellRing,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "New Feature: Notification Tracking!",
+                    style = Typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
+                    style = Typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            userPreferences.setHasSeenNotificationFeature(true)
+                            showNotificationFeatureSheet = false
+                            onNavigateToManageApps()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(text = "Setup Now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                TextButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            userPreferences.setHasSeenNotificationFeature(true)
+                        }
+                        showNotificationFeatureSheet = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Maybe Later", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
     }
 }
 

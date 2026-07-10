@@ -28,6 +28,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Circle
@@ -57,6 +58,21 @@ fun AppSelectionScreen(
         } else {
             installedApps.filter { it.appName.contains(searchQuery, ignoreCase = true) }
         }
+    }
+
+    var hasNotificationAccess by remember { 
+        mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(Unit) {
@@ -106,6 +122,34 @@ fun AppSelectionScreen(
             textAlign = TextAlign.Center,
             lineHeight = 22.sp
         )
+
+        if (!hasNotificationAccess) {
+            Spacer(modifier = Modifier.height(16.dp))
+            com.masum.cipher.ui.components.VaultCard(backgroundColor = MaterialTheme.colorScheme.errorContainer) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.BellRing,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Action Required", style = Typography.titleSmall, color = MaterialTheme.colorScheme.error)
+                        Text("Cipher needs Notification Access to read transactions.", style = Typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Enable", color = MaterialTheme.colorScheme.onError)
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
