@@ -58,6 +58,7 @@ fun SettingsScreen(
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showBudgetDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
+    var showPermissionsHealthSheet by remember { mutableStateOf(false) }
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
@@ -349,6 +350,16 @@ fun SettingsScreen(
                     subtitle = "Select which apps to monitor for transactions",
                     onClick = onNavigateToManageApps
                 )
+                VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    icon = LucideIcons.Activity,
+                    title = "Permissions Health",
+                    subtitle = "Check if Cipher is working at its best",
+                    onClick = {
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                        showPermissionsHealthSheet = true
+                    }
+                )
             }
 
             SettingsSection("FINANCIAL GOALS") {
@@ -582,6 +593,13 @@ fun SettingsScreen(
             Text("This action is permanent and cannot be undone.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+
+    if (showPermissionsHealthSheet) {
+        PermissionsHealthSheet(
+            onDismiss = { showPermissionsHealthSheet = false },
+            isHapticsEnabled = state.isHapticsEnabled
+        )
+    }
 }
 
 @Composable
@@ -729,6 +747,189 @@ private fun ThemeOptionCard(
                 color = contentColor,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PermissionsHealthSheet(
+    onDismiss: () -> Unit,
+    isHapticsEnabled: Boolean
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val view = androidx.compose.ui.platform.LocalView.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    var hasNotificationAccess by remember { 
+        mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
+    }
+    var hasPostNotifications by remember { 
+        mutableStateOf(
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) 
+                androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            else true
+        ) 
+    }
+    var hasSmsPermission by remember {
+        mutableStateOf(androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+    }
+
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasPostNotifications = isGranted
+    }
+    
+    val smsLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasSmsPermission = permissions[android.Manifest.permission.RECEIVE_SMS] == true
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+                hasSmsPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    hasPostNotifications = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                text = "Permissions Health",
+                style = Typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Ensure Cipher has the necessary permissions to provide the best experience.",
+                style = Typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            HealthItemCard(
+                title = "Notification Access",
+                description = "Required to automatically parse transactions from your tracked apps.",
+                isGranted = hasNotificationAccess,
+                icon = LucideIcons.BellRing,
+                onFixClick = {
+                    view.performVibrate(isHapticsEnabled)
+                    context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            HealthItemCard(
+                title = "Read SMS",
+                description = "Required to securely capture transactions from banking SMS messages.",
+                isGranted = hasSmsPermission,
+                icon = LucideIcons.MessageSquare,
+                onFixClick = {
+                    view.performVibrate(isHapticsEnabled)
+                    smsLauncher.launch(arrayOf(android.Manifest.permission.RECEIVE_SMS, android.Manifest.permission.READ_SMS))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                HealthItemCard(
+                    title = "App Notifications",
+                    description = "Required to send you budget alerts and important updates.",
+                    isGranted = hasPostNotifications,
+                    icon = LucideIcons.MessageSquare,
+                    onFixClick = {
+                        view.performVibrate(isHapticsEnabled)
+                        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Done", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HealthItemCard(
+    title: String,
+    description: String,
+    isGranted: Boolean,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onFixClick: () -> Unit
+) {
+    val backgroundColor = if (isGranted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.errorContainer
+    val iconTint = if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    
+    com.masum.cipher.ui.components.VaultCard(backgroundColor = backgroundColor) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(if (isGranted) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.error.copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = Typography.titleSmall, color = if (isGranted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error)
+                Text(description, style = Typography.bodySmall, color = if (isGranted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            if (isGranted) {
+                Icon(
+                    imageVector = LucideIcons.Check,
+                    contentDescription = "Granted",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Button(
+                    onClick = onFixClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("Fix", color = MaterialTheme.colorScheme.onError, style = Typography.labelMedium)
+                }
+            }
         }
     }
 }
