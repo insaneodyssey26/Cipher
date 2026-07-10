@@ -60,8 +60,8 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             )
 
             PolicySection(
-                title = "SMS & Notification Access",
-                body = "Cipher requests permission to read SMS messages and (optionally) app notifications solely to detect and parse financial transactions. Message content is processed in memory and immediately discarded — it is never stored in raw form, logged, or transmitted anywhere."
+                title = "SMS & App Permissions",
+                body = "Cipher requests permission to read SMS messages and (optionally) read app notifications solely to detect and parse financial transactions. Message content is processed in memory and immediately discarded — it is never stored in raw form, logged, or transmitted anywhere. Cipher may also request permission to send you notifications (for budget alerts), all processed locally."
             )
 
             PolicySection(

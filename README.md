@@ -280,7 +280,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 35 (Android 15) |
-| Version | 4.0.0 |
+| Version | 4.1.0 |
 
 ---
 
@@ -308,7 +308,7 @@ For step-by-step install instructions including the Android 13+ SMS permission s
 
 ## Privacy
 
-cipher requests exactly two sensitive permissions: `RECEIVE_SMS` and `BIND_NOTIFICATION_LISTENER_SERVICE` (optional). It has **no INTERNET permission**. There is no telemetry, no analytics SDK, no crash reporter, and no account system. All data — transactions, preferences, backups, and generated PDFs — stays natively on your device.
+cipher requests exactly three permissions: `RECEIVE_SMS`, `BIND_NOTIFICATION_LISTENER_SERVICE` (optional, to read bank app alerts), and `POST_NOTIFICATIONS` (optional, for budget alerts). It has **no INTERNET permission**. There is no telemetry, no analytics SDK, no crash reporter, and no account system. All data — transactions, preferences, backups, and generated PDFs — stays natively on your device.
 
 ---
 

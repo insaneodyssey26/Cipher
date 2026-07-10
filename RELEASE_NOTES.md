@@ -1,5 +1,22 @@
 # Release Notes
 
+## [4.1.0]
+
+### Added
+- **App Notification Parsing**: Cipher now uses `NotificationListenerService` to intelligently capture and parse transaction alerts directly from explicitly tracked finance and UPI apps (PhonePe, GPay, Paytm, etc.). This acts as a powerful alternative/fallback for banks that send app alerts instead of SMS!
+- **Permissions Health Dashboard**: New diagnostic tool in Settings to check SMS, Notification Listener, and App Notification permissions with 1-click fixes to open Android system settings.
+- **Interactive App Tour**: A polished, swipeable 3-page carousel added to the end of Onboarding to guide new users through core features (Dashboard, Manual Adding, and Insights).
+- **Play Store Rating**: Added a "Rate on Google Play" button that natively launches the Play Store.
+- **Contact Developer**: Added a one-tap email intent button for direct support requests.
+
+### Changed
+- **Unified Parsing Engine**: Upgraded `SmsParser` to handle both raw SMS messages and Android push notification payloads seamlessly.
+- **Settings Reorganization**: Split the massive "About" block into structured "Support & Feedback" and "About Cipher" groups for easier scanning.
+- **Dark Mode Legibility**: Upgraded typography weights and boosted contrast (using `onSurfaceVariant`) for subtitles across the entire Settings screen to ensure they look crisp in Dark Mode.
+- **Updated Privacy Policy**: Explicitly updated in-app and README documentation to detail the new `POST_NOTIFICATIONS` permission requirement for Android 13+ budget alerts.
+
+---
+
 ## [4.0.0]
 
 ### Added
