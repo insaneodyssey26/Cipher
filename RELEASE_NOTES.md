@@ -3,17 +3,19 @@
 ## [4.1.0]
 
 ### Added
-- **App Notification Parsing**: Cipher now uses `NotificationListenerService` to intelligently capture and parse transaction alerts directly from explicitly tracked finance and UPI apps (PhonePe, GPay, Paytm, etc.). This acts as a powerful alternative/fallback for banks that send app alerts instead of SMS!
-- **Permissions Health Dashboard**: New diagnostic tool in Settings to check SMS, Notification Listener, and App Notification permissions with 1-click fixes to open Android system settings.
-- **Interactive App Tour**: A polished, swipeable 3-page carousel added to the end of Onboarding to guide new users through core features (Dashboard, Manual Adding, and Insights).
-- **Play Store Rating**: Added a "Rate on Google Play" button that natively launches the Play Store.
-- **Contact Developer**: Added a one-tap email intent button for direct support requests.
+- **App Notification Parsing**: Utilizes `NotificationListenerService` to capture and parse transaction alerts from finance and UPI applications.
+- **Target App Management**: Users can explicitly select which applications Cipher should monitor for transaction notifications.
+- **Custom Accent Colors**: Introduced dynamic theming options allowing users to personalize the app's primary accent color.
+- **Permissions Health Dashboard**: Diagnostic interface in Settings to verify and resolve missing permissions (SMS, Notification Access).
+- **Interactive App Tour**: A swipeable guide integrated into the onboarding flow to educate new users on core functionality.
+- **Play Store Link**: Added direct intent to review the application on Google Play.
+- **Developer Contact**: Added email intent for direct support requests.
 
 ### Changed
-- **Unified Parsing Engine**: Upgraded `SmsParser` to handle both raw SMS messages and Android push notification payloads seamlessly.
-- **Settings Reorganization**: Split the massive "About" block into structured "Support & Feedback" and "About Cipher" groups for easier scanning.
-- **Dark Mode Legibility**: Upgraded typography weights and boosted contrast (using `onSurfaceVariant`) for subtitles across the entire Settings screen to ensure they look crisp in Dark Mode.
-- **Updated Privacy Policy**: Explicitly updated in-app and README documentation to detail the new `POST_NOTIFICATIONS` permission requirement for Android 13+ budget alerts.
+- **Unified Parsing Engine**: Expanded `SmsParser` to process both SMS and push notification payloads seamlessly.
+- **Settings Reorganization**: Restructured the About section into distinct Support and Application information groups.
+- **Dark Mode Legibility**: Adjusted typography weights and updated secondary text colors to `onSurfaceVariant` to improve contrast in dark themes.
+- **Privacy Policy**: Updated in-app and documentation text to reflect the usage of `POST_NOTIFICATIONS` for local budget alerts.
 
 ---
 
