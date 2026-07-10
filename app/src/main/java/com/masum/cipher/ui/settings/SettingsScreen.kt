@@ -453,6 +453,18 @@ fun SettingsScreen(
                     }
                 )
                 VaultSettingsItem(
+                    icon = LucideIcons.Mail,
+                    title = "Contact Developer",
+                    subtitle = "masumali262006@gmail.com",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:masumali262006@gmail.com")
+                            putExtra(Intent.EXTRA_SUBJECT, "Hello from Cipher App!")
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Send Email"))
+                    }
+                )
+                VaultSettingsItem(
                     icon = LucideIcons.Coffee,
                     title = "Support Development",
                     subtitle = "ko-fi.com/insane_odyssey",
@@ -636,7 +648,7 @@ private fun VaultSettingsItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(text = title, style = Typography.titleSmall, color = titleColor)
             if (subtitle != null) {
-                Text(text = subtitle, style = Typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                Text(text = subtitle, style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         if (loading) {
@@ -666,7 +678,7 @@ private fun VaultSettingsSwitch(
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(text = title, style = Typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-            Text(text = description, style = Typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+            Text(text = description, style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(
             checked = checked,
