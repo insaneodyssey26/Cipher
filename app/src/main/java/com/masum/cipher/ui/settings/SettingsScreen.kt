@@ -429,26 +429,24 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("ABOUT") {
+            SettingsSection("SUPPORT & FEEDBACK") {
                 VaultSettingsItem(
-                    icon = LucideIcons.Info,
-                    title = "Privacy Policy",
-                    onClick = onNavigateToPrivacy
+                    icon = LucideIcons.Star,
+                    title = "Rate on Google Play",
+                    subtitle = "Enjoying Cipher? Leave a review!",
+                    onClick = {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")))
+                        } catch (e: android.content.ActivityNotFoundException) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")))
+                        }
+                    }
                 )
                 VaultSettingsItem(
                     icon = LucideIcons.MessagesSquare,
                     title = "Feedback & Feature Requests",
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tally.so/r/gDz7NK"))
-                        context.startActivity(intent)
-                    }
-                )
-                VaultSettingsItem(
-                    icon = LucideIcons.Github,
-                    title = "Open Source",
-                    subtitle = "github.com/insaneodyssey26/cipher",
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/insaneodyssey26/cipher"))
                         context.startActivity(intent)
                     }
                 )
@@ -463,6 +461,23 @@ fun SettingsScreen(
                         }
                         context.startActivity(Intent.createChooser(intent, "Send Email"))
                     }
+                )
+            }
+
+            SettingsSection("ABOUT CIPHER") {
+                VaultSettingsItem(
+                    icon = LucideIcons.Github,
+                    title = "Open Source",
+                    subtitle = "github.com/insaneodyssey26/cipher",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/insaneodyssey26/cipher"))
+                        context.startActivity(intent)
+                    }
+                )
+                VaultSettingsItem(
+                    icon = LucideIcons.Info,
+                    title = "Privacy Policy",
+                    onClick = onNavigateToPrivacy
                 )
                 VaultSettingsItem(
                     icon = LucideIcons.Coffee,
