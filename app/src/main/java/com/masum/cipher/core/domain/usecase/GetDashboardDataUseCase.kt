@@ -16,38 +16,31 @@ class GetDashboardDataUseCase @Inject constructor(
     private val userPreferences: UserPreferences
 ) {
     operator fun invoke(
-        query: String, 
-        filter: DashboardContract.FilterType, 
+        query: String,
+        filter: DashboardContract.FilterType,
         timeRange: com.masum.cipher.core.domain.model.TimeRange
     ): Flow<DashboardContract.State> {
         val thisMonthRange = com.masum.cipher.core.domain.model.TimeRange.from(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
         return combine(
-            combine(
-                repository.getTotalIncomeBetween(timeRange.startTime, timeRange.endTime),
-                repository.getTotalExpensesBetween(timeRange.startTime, timeRange.endTime),
-                repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime)
-            ) { inc, exp, monthExp -> Triple(inc, exp, monthExp) },
-            repository.getTotalIncome(),
-            repository.getTotalExpenses(),
+            repository.getTotalIncomeBetween(timeRange.startTime, timeRange.endTime),
+            repository.getTotalExpensesBetween(timeRange.startTime, timeRange.endTime),
+            repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime),
             userPreferences.settingsFlow
-        ) { rangeStats, incomeAllTime, expensesAllTime, settings ->
-            val (incomeRange, expensesRange, thisMonthExp) = rangeStats
+        ) { incomeRange, expensesRange, thisMonthExp, settings ->
             val rangeInc = incomeRange ?: 0.0
             val rangeExp = expensesRange ?: 0.0
             val monthExp = thisMonthExp ?: 0.0
-            val allTimeInc = incomeAllTime ?: 0.0
-            val allTimeExp = expensesAllTime ?: 0.0
-            
-            Triple(Triple(rangeInc, rangeExp, monthExp), allTimeInc - allTimeExp, settings.monthlyBudget)
+            val rangeBalance = rangeInc - rangeExp
+            Triple(Triple(rangeInc, rangeExp, monthExp), rangeBalance, settings.monthlyBudget)
         }.flatMapLatest { (rangeStats, totalBalance, budget) ->
             val (income, expenses, thisMonthExpenses) = rangeStats
             val transactionsFlow = if (query.isBlank()) {
                 repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
             } else {
                 repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime).map { list ->
-                    list.filter { 
-                        it.merchant.contains(query, ignoreCase = true) || 
-                        it.category.contains(query, ignoreCase = true) 
+                    list.filter {
+                        it.merchant.contains(query, ignoreCase = true) ||
+                        it.category.contains(query, ignoreCase = true)
                     }
                 }
             }
@@ -58,7 +51,7 @@ class GetDashboardDataUseCase @Inject constructor(
                     DashboardContract.FilterType.INCOME -> transactions.filter { it.isIncome }
                     DashboardContract.FilterType.EXPENSE -> transactions.filter { !it.isIncome }
                 }
-                
+
                 DashboardContract.State(
                     isLoading = false,
                     transactions = filteredList,

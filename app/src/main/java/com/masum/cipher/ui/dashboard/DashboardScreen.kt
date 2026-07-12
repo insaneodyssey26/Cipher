@@ -394,7 +394,12 @@ private fun DashboardHero(
             modifier = Modifier.padding(top = 40.dp)
         ) {
             Text(
-                text = "TOTAL BALANCE",
+                text = when (selectedPeriod) {
+                    com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "THIS MONTH'S BALANCE"
+                    com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "LAST MONTH'S BALANCE"
+                    com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "THIS YEAR'S BALANCE"
+                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> "TOTAL BALANCE"
+                },
                 style = Typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -592,7 +597,7 @@ fun TransactionItem(
                     maxLines = 1
                 )
                 Text(
-                    text = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(transaction.timestamp)),
+                    text = SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(transaction.timestamp)),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
