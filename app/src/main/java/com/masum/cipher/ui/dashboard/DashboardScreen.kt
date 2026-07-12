@@ -70,10 +70,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val shouldShowPopup = settings != null && settings?.hasCompletedOnboarding == true && settings?.hasSeenNotificationFeature == false
-    var showNotificationFeatureSheet by remember(shouldShowPopup) {
-        mutableStateOf(shouldShowPopup)
-    }
+    var showNotificationFeatureSheet by remember { mutableStateOf(false) }
     
     val versionName: String = remember {
         try {
@@ -83,9 +80,17 @@ fun DashboardScreen(
         }
     }
     
-    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && settings?.lastSeenWhatsNewVersion != versionName
-    var showWhatsNewSheet by remember(shouldShowWhatsNew) {
-        mutableStateOf(shouldShowWhatsNew)
+    var showWhatsNewSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(settings) {
+        val currentSettings = settings
+        if (currentSettings != null && currentSettings.hasCompletedOnboarding) {
+            if (!currentSettings.hasSeenNotificationFeature) {
+                showNotificationFeatureSheet = true
+            } else if (currentSettings.lastSeenWhatsNewVersion != versionName) {
+                showWhatsNewSheet = true
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
