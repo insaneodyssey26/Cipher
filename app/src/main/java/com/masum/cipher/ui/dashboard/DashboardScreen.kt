@@ -125,7 +125,7 @@ fun DashboardScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(bottom = padding.calculateBottomPadding()),
                 contentPadding = PaddingValues(bottom = 140.dp)
             ) {
 
@@ -379,7 +379,6 @@ private fun DashboardHero(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(380.dp)
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -388,7 +387,9 @@ private fun DashboardHero(
                         MaterialTheme.colorScheme.background
                     )
                 )
-            ),
+            )
+            .statusBarsPadding()
+            .height(380.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
