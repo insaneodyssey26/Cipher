@@ -172,6 +172,14 @@ flowchart LR
 - **CSV export** — standard format, opens in any spreadsheet app
 - **PDF statement** — export elegant transaction history reports natively generated on-device
 - **Encrypted backup / restore** — password-protected binary backup of the full database
+- **Auto backup** — automated scheduled database backups to a local or synced folder
+
+### Storage Footprint
+Because cipher stores data in a local SQLite database, it is incredibly lightweight and infinitely scalable.
+- **1 Transaction** = ~160 Bytes
+- **1,000 Transactions** = ~160 KB
+- **10,000 Transactions** = ~1.6 MB
+You could log 5 transactions a day for over 5 years and the database would barely cross 1.5 megabytes.
 
 ---
 
@@ -280,7 +288,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 35 (Android 15) |
-| Version | 4.1.0 |
+| Version | 4.2.0 |
 
 ---
 

@@ -1,5 +1,18 @@
 # Release Notes
 
+## [4.2.0]
+
+### Added
+- **Automated Backups**: You can now configure Cipher to automatically backup your encrypted database to a local folder or cloud-synced directory on a regular schedule.
+- **Inline Calculator**: Need to split a bill? You can now perform math directly inside the amount field when adding or editing transactions.
+- **Onboarding Personalization**: New users can now select their preferred Accent Color directly during the first-run onboarding flow.
+
+### Changed
+- **Fluid Keyboard Padding**: Bottom sheets now dynamically slide up when the system keyboard appears, preventing input fields from ever being hidden.
+- **Massive Balance Handling**: Enhanced the dashboard UI to gracefully handle and truncate astronomically large balances without breaking the layout.
+
+---
+
 ## [4.1.0]
 
 ### Added

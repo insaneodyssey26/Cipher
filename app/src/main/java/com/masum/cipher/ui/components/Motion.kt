@@ -43,10 +43,12 @@ fun AnimatedNumberTicker(
     )
 
     androidx.compose.material3.Text(
-        text = prefix + String.format(java.util.Locale.getDefault(), "%.2f", animatedValue),
+        text = prefix + String.format(java.util.Locale.getDefault(), "%,.2f", animatedValue),
         style = textStyle,
         color = color,
-        modifier = modifier
+        modifier = modifier,
+        maxLines = 1,
+        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
     )
 }
 

@@ -29,6 +29,7 @@ class UserPreferences @Inject constructor(
         val TRACKED_APPS = stringSetPreferencesKey("tracked_apps")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val HAS_SEEN_NOTIFICATION_FEATURE = booleanPreferencesKey("has_seen_notification_feature")
+        val LAST_SEEN_WHATS_NEW_VERSION = stringPreferencesKey("last_seen_whats_new_version")
         
         // Auto-Backup Keys
         val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
@@ -55,6 +56,7 @@ class UserPreferences @Inject constructor(
                 AccentColor.INDIGO
             },
             hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
+            lastSeenWhatsNewVersion = preferences[Keys.LAST_SEEN_WHATS_NEW_VERSION] ?: "",
             autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
             autoBackupFrequency = try {
                 AutoBackupFrequency.valueOf(preferences[Keys.AUTO_BACKUP_FREQUENCY] ?: AutoBackupFrequency.NEVER.name)
@@ -111,6 +113,10 @@ class UserPreferences @Inject constructor(
 
     suspend fun setHasSeenNotificationFeature(seen: Boolean) {
         context.dataStore.edit { it[Keys.HAS_SEEN_NOTIFICATION_FEATURE] = seen }
+    }
+
+    suspend fun setLastSeenWhatsNewVersion(version: String) {
+        context.dataStore.edit { it[Keys.LAST_SEEN_WHATS_NEW_VERSION] = version }
     }
 
     suspend fun setAutoBackupEnabled(enabled: Boolean) {
@@ -175,6 +181,7 @@ data class UserSettings(
     val trackedApps: Set<String> = emptySet(),
     val accentColor: AccentColor = AccentColor.INDIGO,
     val hasSeenNotificationFeature: Boolean = false,
+    val lastSeenWhatsNewVersion: String = "",
     val autoBackupEnabled: Boolean = false,
     val autoBackupFrequency: AutoBackupFrequency = AutoBackupFrequency.NEVER,
     val autoBackupUri: String? = null,

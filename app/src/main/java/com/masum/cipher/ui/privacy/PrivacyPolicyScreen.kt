@@ -75,8 +75,8 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             )
 
             PolicySection(
-                title = "Exports & Backups",
-                body = "When you export a backup, CSV, or PDF statement, the file is saved directly to your device storage. Backups are encrypted with a password you choose. Cipher does not retain a copy and has no access to where you store these files."
+                title = "Exports & Auto Backups",
+                body = "When you export a CSV, PDF statement, or configure Auto Backup, the files are saved directly to your selected device storage or cloud-synced folder via Android's native Storage Framework. Database backups are encrypted with a password you choose. Cipher does not transmit this data anywhere and has no remote access to where you store these files beyond the folder permissions you explicitly grant."
             )
 
             PolicySection(

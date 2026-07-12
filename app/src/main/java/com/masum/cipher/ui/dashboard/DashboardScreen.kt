@@ -56,6 +56,7 @@ fun DashboardScreen(
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val view = androidx.compose.ui.platform.LocalView.current
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
@@ -72,6 +73,19 @@ fun DashboardScreen(
     val shouldShowPopup = settings != null && settings?.hasCompletedOnboarding == true && settings?.hasSeenNotificationFeature == false
     var showNotificationFeatureSheet by remember(shouldShowPopup) {
         mutableStateOf(shouldShowPopup)
+    }
+    
+    val versionName: String = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "4.2.0"
+        } catch (e: Exception) {
+            "4.2.0"
+        }
+    }
+    
+    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && settings?.lastSeenWhatsNewVersion != versionName
+    var showWhatsNewSheet by remember(shouldShowWhatsNew) {
+        mutableStateOf(shouldShowWhatsNew)
     }
 
     LaunchedEffect(Unit) {
@@ -308,16 +322,15 @@ fun DashboardScreen(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                val context = androidx.compose.ui.platform.LocalContext.current
-                val versionName = remember {
+                val versionNameInternal: String = remember {
                     try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "4.2.0"
                     } catch (e: Exception) {
-                        "4.1.0"
+                        "4.2.0"
                     }
                 }
                 Text(
-                    text = "Version $versionName is here! \uD83C\uDF89\nNew Feature: Notification Tracking",
+                    text = "Version $versionNameInternal is here! \uD83C\uDF89\nNew Feature: Notification Tracking",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -361,6 +374,18 @@ fun DashboardScreen(
                     Text("Maybe Later", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+        }
+
+        if (showWhatsNewSheet && !showNotificationFeatureSheet) {
+            WhatsNewSheet(
+                versionName = versionName,
+                onDismiss = {
+                    coroutineScope.launch {
+                        userPreferences.setLastSeenWhatsNewVersion(versionName)
+                        showWhatsNewSheet = false
+                    }
+                }
+            )
         }
     }
 }

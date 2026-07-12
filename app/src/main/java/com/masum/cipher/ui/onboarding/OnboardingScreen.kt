@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
@@ -32,11 +33,17 @@ import compose.icons.lucideicons.WifiOff
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Plus
+import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.Palette
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
 @Composable
 fun OnboardingScreen(
+    currentAccentColor: com.masum.cipher.core.data.local.pref.AccentColor,
+    onAccentColorSelected: (com.masum.cipher.core.data.local.pref.AccentColor) -> Unit,
     onComplete: () -> Unit,
     onSaveApps: (Set<String>) -> Unit
 ) {
@@ -56,11 +63,16 @@ fun OnboardingScreen(
         ) { currentPage ->
             when (currentPage) {
                 0 -> WelcomePage(onNext = { page = 1 })
-                1 -> AppSelectionScreen(
+                1 -> ThemeSelectionPage(
+                    currentAccentColor = currentAccentColor,
+                    onAccentColorSelected = onAccentColorSelected,
+                    onNext = { page = 2 }
+                )
+                2 -> AppSelectionScreen(
                     initialSelectedApps = emptySet(),
                     onComplete = { apps ->
                         onSaveApps(apps)
-                        page = 2
+                        page = 3
                     }
                 )
                 else -> PermissionPage(onComplete = onComplete)
@@ -140,6 +152,150 @@ private fun WelcomePage(onNext: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = "Get Started", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeSelectionPage(
+    currentAccentColor: com.masum.cipher.core.data.local.pref.AccentColor,
+    onAccentColorSelected: (com.masum.cipher.core.data.local.pref.AccentColor) -> Unit,
+    onNext: () -> Unit
+) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(100); visible = true }
+
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(600), label = "alpha")
+    val offsetY by animateFloatAsState(if (visible) 0f else 40f, spring(stiffness = 200f), label = "offset")
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(horizontal = 24.dp)
+                .padding(top = 32.dp, bottom = 32.dp)
+                .graphicsLayer {
+                    this.alpha = alpha
+                    this.translationY = offsetY
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = LucideIcons.Palette,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Choose Your Style",
+                style = Typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Personalize Cipher with your favorite accent color. You can always change this later in settings.",
+                style = Typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                com.masum.cipher.core.data.local.pref.AccentColor.values().toList().chunked(5).forEach { rowColors ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        rowColors.forEach { color ->
+                            val isSelected = currentAccentColor == color
+                            val scale by animateFloatAsState(
+                                targetValue = if (isSelected) 1.1f else 1f,
+                                animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+                                label = "color_scale"
+                            )
+                            val borderColor by androidx.compose.animation.animateColorAsState(
+                                targetValue = if (isSelected) androidx.compose.ui.graphics.Color(color.colorValue) else androidx.compose.ui.graphics.Color.Transparent,
+                                animationSpec = tween(300),
+                                label = "border_color"
+                            )
+                            val view = androidx.compose.ui.platform.LocalView.current
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        if (!isSelected) {
+                                            view.performVibrate(true, isLongPress = true)
+                                            onAccentColorSelected(color)
+                                        }
+                                    }
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .scale(scale)
+                                        .border(2.dp, borderColor, androidx.compose.foundation.shape.CircleShape)
+                                        .padding(4.dp)
+                                        .background(androidx.compose.ui.graphics.Color(color.colorValue), androidx.compose.foundation.shape.CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.surface,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = color.colorName.substringAfter(" "),
+                                    style = Typography.labelSmall,
+                                    color = if (isSelected) androidx.compose.ui.graphics.Color(color.colorValue) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    modifier = Modifier.height(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = onNext,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

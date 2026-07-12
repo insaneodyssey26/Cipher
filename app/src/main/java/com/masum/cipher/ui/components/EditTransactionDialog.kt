@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -57,6 +59,9 @@ fun EditTransactionDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -96,13 +101,34 @@ fun EditTransactionDialog(
             }
 
             // Amount field
-            SheetTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = "Amount",
-                prefix = "₹",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
+            Column {
+                SheetTextField(
+                    value = amount,
+                    onValueChange = { newValue -> 
+                        if (newValue.all { it.isDigit() || it in "+-*/. " }) amount = newValue 
+                    },
+                    label = "Amount",
+                    prefix = "₹",
+                    readOnly = true
+                )
+                
+                val computed = com.masum.cipher.core.util.MathEvaluator.evaluate(amount)
+                if (computed != null && amount.any { it in "+-*/" }) {
+                    Text(
+                        text = "= ₹${String.format(java.util.Locale.getDefault(), "%,.2f", computed)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, start = 4.dp, bottom = 8.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                
+                CalculatorNumpad(
+                    input = amount,
+                    onInputChange = { amount = it }
+                )
+            }
 
             // Merchant field
             SheetTextField(
@@ -190,7 +216,7 @@ fun EditTransactionDialog(
             // Save button
             Button(
                 onClick = {
-                    val finalAmount = amount.toDoubleOrNull() ?: transaction.amount
+                    val finalAmount = com.masum.cipher.core.util.MathEvaluator.evaluate(amount) ?: transaction.amount
                     if (finalAmount > 0) {
                         onConfirm(
                             transaction.copy(
@@ -257,7 +283,8 @@ private fun SheetTextField(
     onValueChange: (String) -> Unit,
     label: String,
     prefix: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    readOnly: Boolean = false
 ) {
     val surface = MaterialTheme.colorScheme.surface
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
@@ -298,6 +325,7 @@ private fun SheetTextField(
                     color = onBg
                 ),
                 singleLine = true,
+                readOnly = readOnly,
                 keyboardOptions = keyboardOptions,
                 cursorBrush = SolidColor(CipherBlue),
                 modifier = Modifier.fillMaxWidth(),

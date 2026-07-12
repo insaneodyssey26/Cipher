@@ -19,6 +19,7 @@ The SMS messages and notifications accessed by Cipher are processed **strictly l
 *   **Local Parsing**: Incoming SMS messages and selected app notifications are read by the app's internal engine to extract transaction details (e.g., amount, merchant, and date).
 *   **Zero Network Transmission**: We do not transmit, upload, sync, or back up your SMS data, notification data, transaction data, or any personal information to the cloud, our servers, or any third-party services. Cipher does not even request the Android `INTERNET` permission.
 *   **Encrypted Storage**: Once parsed, your transaction data is stored locally on your device in a securely encrypted database (AES-256 via SQLCipher).
+*   **Auto Backups & Exports**: If you configure the auto-backup feature or manually export your data, Cipher saves encrypted backup files or statements strictly to a local directory or a cloud-synced folder you choose via Android's native Storage Framework. Cipher has no remote access to these files.
 
 ## 3. Third-Party Access
 
@@ -29,7 +30,7 @@ Because Cipher is entirely offline and has no internet access, it is technically
 All data is stored locally on your device. You have complete control over your data:
 *   You can delete individual transactions within the app.
 *   You can wipe all data by clearing the app's storage via Android Settings.
-*   Uninstalling the app will permanently delete all your transaction history (unless you have manually created a local, encrypted backup file).
+*   Uninstalling the app will permanently delete all your transaction history (unless you have manually exported or configured an encrypted auto-backup file).
 
 ## 5. Security
 

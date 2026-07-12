@@ -13,6 +13,7 @@ class MainContract {
         object Authenticate : Intent()
         data class AddTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) : Intent()
         data class SaveTrackedApps(val apps: Set<String>) : Intent()
+        data class SaveAccentColor(val color: com.masum.cipher.core.data.local.pref.AccentColor) : Intent()
     }
 
     data class State(

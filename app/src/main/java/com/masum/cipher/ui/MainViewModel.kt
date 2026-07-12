@@ -41,12 +41,19 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.Authenticate -> updateState { copy(isAuthenticated = true) }
             is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is MainContract.Intent.SaveTrackedApps -> saveTrackedApps(intent.apps)
+            is MainContract.Intent.SaveAccentColor -> saveAccentColor(intent.color)
         }
     }
 
     private fun saveTrackedApps(apps: Set<String>) {
         viewModelScope.launch {
             userPreferences.setTrackedApps(apps)
+        }
+    }
+
+    private fun saveAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
+        viewModelScope.launch {
+            userPreferences.setAccentColor(color)
         }
     }
 
@@ -85,6 +92,7 @@ class MainViewModel @Inject constructor(
             userPreferences.setOnboardingCompleted(completed)
             if (completed) {
                 userPreferences.setHasSeenNotificationFeature(true)
+                userPreferences.setLastSeenWhatsNewVersion("4.2.0")
             }
         }
     }

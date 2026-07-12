@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -28,6 +30,7 @@ import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.Trash2
+import com.masum.cipher.core.util.MathEvaluator
 import java.util.Locale
 
 /**
@@ -74,6 +77,7 @@ fun TransactionDetailsSheet(
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -225,7 +229,7 @@ fun TransactionDetailsSheet(
             Button(
                 onClick = {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
-                    val finalAmount = amount.toDoubleOrNull() ?: 0.0
+                    val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
                     if (finalAmount > 0) {
                         onConfirm(
                             transaction.copy(
@@ -351,7 +355,11 @@ private fun MassiveAmountInput(
     ) {
         BasicTextField(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { newValue -> 
+                if (newValue.all { it.isDigit() || it in "+-*/. " }) {
+                    onValueChange(newValue)
+                }
+            },
             textStyle = Typography.displayLarge.copy(
                 color = color,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -359,7 +367,7 @@ private fun MassiveAmountInput(
                 letterSpacing = (-2).sp
             ),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            readOnly = true,
             cursorBrush = SolidColor(color),
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { inner ->
@@ -390,6 +398,24 @@ private fun MassiveAmountInput(
                     }
                 }
             }
+        )
+        
+        val computed = MathEvaluator.evaluate(value)
+        if (computed != null && value.any { it in "+-*/" }) {
+            Text(
+                text = "= ₹${String.format(Locale.getDefault(), "%,.2f", computed)}",
+                style = Typography.titleMedium,
+                color = color.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        
+        CalculatorNumpad(
+            input = value,
+            onInputChange = onValueChange,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
     }
 }
