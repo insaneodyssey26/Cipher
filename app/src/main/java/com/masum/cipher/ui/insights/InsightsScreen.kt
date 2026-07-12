@@ -58,7 +58,6 @@ fun InsightsScreen(
                     TimeSelectorDropdown(
                         selectedPeriod = state.selectedTimePeriod,
                         onPeriodSelected = { period ->
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(InsightsContract.Intent.SetTimePeriod(period))
                         },
                         isHapticsEnabled = isHapticsEnabled
@@ -187,7 +186,13 @@ private fun InsightHero(state: InsightsContract.State) {
 
         Text(
             text = if (mostExpensiveCategory != null) {
-                "You've spent the most on ${mostExpensiveCategory.category.toString().lowercase().replaceFirstChar { it.uppercase() }} this month."
+                val periodSuffix = when (state.selectedTimePeriod) {
+                    com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "this month"
+                    com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "last month"
+                    com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "this year"
+                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> "overall"
+                }
+                "You've spent the most on ${mostExpensiveCategory.category.toString().lowercase().replaceFirstChar { it.uppercase() }} $periodSuffix."
             } else {
                 "Your financial story is just beginning."
             },
@@ -199,7 +204,17 @@ private fun InsightHero(state: InsightsContract.State) {
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Keep track of your spending to see patterns emerge.",
+            text = when (state.selectedTimePeriod) {
+                com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> {
+                    val rangeLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
+                    if (rangeLabel != "All Time") {
+                        "All-time financial activity overview ($rangeLabel)."
+                    } else {
+                        "All-time financial activity overview."
+                    }
+                }
+                else -> "Activity overview for ${AppFormatters.getPeriodLabel(state.selectedTimePeriod)}."
+            },
             style = Typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

@@ -20,6 +20,8 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.Check
 import com.masum.cipher.core.util.performVibrate
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @Composable
 fun TimeSelectorDropdown(
@@ -32,6 +34,7 @@ fun TimeSelectorDropdown(
     
     val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
     val view = androidx.compose.ui.platform.LocalView.current
+    val coroutineScope = rememberCoroutineScope()
 
     Box(modifier = modifier) {
         // The Dropdown Trigger (Chip)
@@ -88,8 +91,13 @@ fun TimeSelectorDropdown(
                     } else null,
                     onClick = {
                         view.performVibrate(isHapticsEnabled)
-                        onPeriodSelected(period)
                         expanded = false
+                        if (!isSelected) {
+                            coroutineScope.launch {
+                                delay(150)
+                                onPeriodSelected(period)
+                            }
+                        }
                     }
                 )
             }

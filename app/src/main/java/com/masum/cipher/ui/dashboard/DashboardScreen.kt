@@ -30,12 +30,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.core.util.AppFormatters
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Lock
+import compose.icons.lucideicons.Calendar
 import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
@@ -133,8 +135,8 @@ fun DashboardScreen(
                         income = state.totalIncome,
                         expense = state.totalExpenses,
                         selectedPeriod = state.selectedTimePeriod,
+                        transactions = state.transactions,
                         onPeriodSelected = { period ->
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
                         },
                         privacyMode = privacyMode,
@@ -369,6 +371,7 @@ private fun DashboardHero(
     income: Double,
     expense: Double,
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
+    transactions: List<TransactionEntity>,
     onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod) -> Unit,
     privacyMode: Boolean,
     isHapticsEnabled: Boolean
@@ -403,6 +406,39 @@ private fun DashboardHero(
                 style = Typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Row(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Calendar,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(12.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = AppFormatters.getPeriodLabel(selectedPeriod, transactions).uppercase(),
+                    style = Typography.labelSmall.copy(
+                        fontSize = 10.sp, 
+                        fontWeight = FontWeight.Bold, 
+                        letterSpacing = 1.sp
+                    ),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
 
