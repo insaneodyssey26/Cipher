@@ -92,7 +92,7 @@ class MainViewModel @Inject constructor(
             userPreferences.setOnboardingCompleted(completed)
             if (completed) {
                 userPreferences.setHasSeenNotificationFeature(true)
-                userPreferences.setLastSeenWhatsNewVersion("4.2.0")
+                userPreferences.setLastSeenWhatsNewVersionCode(10)
             }
         }
     }

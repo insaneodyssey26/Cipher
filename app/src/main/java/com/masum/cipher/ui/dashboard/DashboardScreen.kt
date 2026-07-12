@@ -56,7 +56,6 @@ fun DashboardScreen(
     val settings by userPreferences.settingsFlow.collectAsState(initial = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val view = androidx.compose.ui.platform.LocalView.current
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
@@ -70,27 +69,11 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    var showNotificationFeatureSheet by remember { mutableStateOf(false) }
-    
-    val versionName: String = remember {
-        try {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "4.2.0"
-        } catch (e: Exception) {
-            "4.2.0"
-        }
-    }
-    
-    var showWhatsNewSheet by remember { mutableStateOf(false) }
-
-    LaunchedEffect(settings) {
-        val currentSettings = settings
-        if (currentSettings != null && currentSettings.hasCompletedOnboarding) {
-            if (!currentSettings.hasSeenNotificationFeature) {
-                showNotificationFeatureSheet = true
-            } else if (currentSettings.lastSeenWhatsNewVersion != versionName) {
-                showWhatsNewSheet = true
-            }
-        }
+    val currentVersionCode = 10
+    val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
+    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
+    var showWhatsNewSheet by remember(shouldShowWhatsNew) {
+        mutableStateOf(shouldShowWhatsNew)
     }
 
     LaunchedEffect(Unit) {
@@ -300,24 +283,33 @@ fun DashboardScreen(
         )
     }
 
-    if (showNotificationFeatureSheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (showWhatsNewSheet) {
+        val hasSeen4_1 = lastSeenWhatsNewVersionCode >= 9
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val versionName = remember {
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                "4.2.0"
+            }
+        }
         ModalBottomSheet(
             onDismissRequest = {
                 coroutineScope.launch {
                     userPreferences.setHasSeenNotificationFeature(true)
+                    userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
+                    showWhatsNewSheet = false
                 }
-                showNotificationFeatureSheet = false
             },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
-                    .padding(bottom = 32.dp),
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 48.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -327,35 +319,47 @@ fun DashboardScreen(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                val versionNameInternal: String = remember {
-                    try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "4.2.0"
-                    } catch (e: Exception) {
-                        "4.2.0"
-                    }
-                }
                 Text(
-                    text = "Version $versionNameInternal is here! \uD83C\uDF89\nNew Feature: Notification Tracking",
+                    text = "Version $versionName is here! \uD83C\uDF89",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
-                    style = Typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    lineHeight = 24.sp
-                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (!hasSeen4_1) {
+                        WhatsNewFeatureItem(
+                            title = "Notification Tracking",
+                            description = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
+                            icon = LucideIcons.BellRing
+                        )
+                    }
+                    WhatsNewFeatureItem(
+                        title = "Inline Calculator",
+                        description = "Crunch numbers directly in the transaction amount field to easily split bills or combine expenses.",
+                        icon = LucideIcons.Plus
+                    )
+                    WhatsNewFeatureItem(
+                        title = "Auto Backups",
+                        description = "Never lose data. Automatically encrypt and backup your vault to your local or cloud folder on a schedule.",
+                        icon = LucideIcons.Lock
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            userPreferences.setHasSeenNotificationFeature(true)
-                            showNotificationFeatureSheet = false
-                            onNavigateToManageApps()
+                            userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
+                            showWhatsNewSheet = false
+                            if (!hasSeen4_1) {
+                                onNavigateToManageApps()
+                            }
                         }
                     },
                     modifier = Modifier
@@ -364,33 +368,13 @@ fun DashboardScreen(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(text = "Setup Now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                TextButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            userPreferences.setHasSeenNotificationFeature(true)
-                        }
-                        showNotificationFeatureSheet = false
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Maybe Later", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = if (!hasSeen4_1) "Setup Tracking & Continue" else "Awesome",
+                        style = Typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
-        }
-
-        if (showWhatsNewSheet && !showNotificationFeatureSheet) {
-            WhatsNewSheet(
-                versionName = versionName,
-                onDismiss = {
-                    coroutineScope.launch {
-                        userPreferences.setLastSeenWhatsNewVersion(versionName)
-                        showWhatsNewSheet = false
-                    }
-                }
-            )
         }
     }
 }
@@ -717,6 +701,38 @@ private fun GenesisEmptyState(onAddManual: () -> Unit) {
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary)
+        }
+    }
+}
+
+@Composable
+fun WhatsNewFeatureItem(
+    title: String,
+    description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 2.dp).size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = title,
+                style = Typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = Typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
         }
     }
 }
