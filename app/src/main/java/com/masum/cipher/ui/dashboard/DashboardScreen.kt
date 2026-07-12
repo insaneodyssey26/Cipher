@@ -382,8 +382,8 @@ private fun DashboardHero(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        EmeraldIncome.copy(alpha = 0.05f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
                         MaterialTheme.colorScheme.background
                     )
                 )
