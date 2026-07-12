@@ -75,7 +75,7 @@ dependencies {
     implementation(libs.sqlcipher)
     implementation(libs.sqlite.ktx)
 
-    implementation(libs.androidx.security.crypto)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.datastore.preferences)
     

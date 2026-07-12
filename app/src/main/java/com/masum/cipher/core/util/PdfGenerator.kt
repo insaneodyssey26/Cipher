@@ -128,7 +128,7 @@ object PdfGenerator {
         val dateFormatter = AppFormatters.getFullDate()
         val rowDateFormatter = AppFormatters.getDay()
         
-        fun formatMoney(amount: Double): String = String.format("Rs. %,.2f", amount)
+        fun formatMoney(amount: Double): String = String.format(java.util.Locale.getDefault(), "Rs. %,.2f", amount)
 
         if (transactions.isEmpty()) {
             val page = document.startPage(pageInfo)

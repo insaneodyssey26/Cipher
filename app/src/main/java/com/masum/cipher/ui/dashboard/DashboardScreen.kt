@@ -522,7 +522,7 @@ private fun StatItem(label: String, amount: Double, color: Color, privacyMode: B
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
-            text = if (privacyMode) "••••" else "₹${String.format("%.0f", amount)}",
+            text = if (privacyMode) "••••" else "₹${String.format(java.util.Locale.getDefault(), "%.0f", amount)}",
             style = Typography.titleMedium,
             color = color
         )
@@ -552,7 +552,7 @@ private fun BudgetPulseCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (budget > 0) "₹${String.format("%.0f", spent)} / ₹${String.format("%.0f", budget)}" else "Tap to set a budget",
+                    text = if (budget > 0) "₹${String.format(java.util.Locale.getDefault(), "%.0f", spent)} / ₹${String.format(java.util.Locale.getDefault(), "%.0f", budget)}" else "Tap to set a budget",
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -641,7 +641,7 @@ fun TransactionItem(
             }
 
             Text(
-                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format("%.0f", transaction.amount)}",
+                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}",
                 style = Typography.titleMedium,
                 color = if (transaction.isIncome) EmeraldIncome else RoseExpense
             )

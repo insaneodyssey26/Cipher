@@ -1,6 +1,8 @@
 package com.masum.cipher.core.security
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,37 +12,72 @@ import javax.inject.Singleton
 
 @Singleton
 class SecurityManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val keystoreManager: KeystoreManager
 ) {
 
-    private fun createMasterKey(): MasterKey {
-        return MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+    private fun getStandardSharedPreferences(): SharedPreferences {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
-
-    private fun createSharedPreferences(): EncryptedSharedPreferences {
-        return EncryptedSharedPreferences.create(
-            context,
-            ENCRYPTED_PREFS_NAME,
-            createMasterKey(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        ) as EncryptedSharedPreferences
+    
+    private fun getLegacyEncryptedSharedPreferences(): SharedPreferences? {
+        return try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+                
+            EncryptedSharedPreferences.create(
+                context,
+                LEGACY_ENCRYPTED_PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     fun getDatabasePassphrase(): ByteArray {
-        val sharedPrefs = createSharedPreferences()
-        val existingPassphrase = sharedPrefs.getString(KEY_DB_PASSPHRASE, null)
-        return if (existingPassphrase != null) {
-            decodePassphrase(existingPassphrase)
-        } else {
-            val newPassphrase = generateRandomPassphrase()
-            sharedPrefs.edit()
-                .putString(KEY_DB_PASSPHRASE, encodePassphrase(newPassphrase))
-                .apply()
-            newPassphrase
+        val sharedPrefs = getStandardSharedPreferences()
+        val encryptedPassphraseHex = sharedPrefs.getString(KEY_DB_PASSPHRASE_V2, null)
+
+        if (encryptedPassphraseHex != null) {
+            val decryptedBase64 = keystoreManager.decrypt(encryptedPassphraseHex)
+            if (decryptedBase64 != null) {
+                return decodePassphrase(decryptedBase64)
+            }
         }
+        
+        val legacyPrefs = getLegacyEncryptedSharedPreferences()
+        val legacyPassphrase = legacyPrefs?.getString(LEGACY_KEY_DB_PASSPHRASE, null)
+        
+        if (legacyPassphrase != null) {
+            val encryptedHex = keystoreManager.encrypt(legacyPassphrase)
+            sharedPrefs.edit()
+                .putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
+                .apply()
+                
+            legacyPrefs.edit().clear().apply()
+            
+            return decodePassphrase(legacyPassphrase)
+        }
+
+        return generateAndSaveNewPassphrase(sharedPrefs)
+    }
+
+    private fun generateAndSaveNewPassphrase(sharedPrefs: SharedPreferences): ByteArray {
+        val newPassphrase = generateRandomPassphrase()
+        val base64Passphrase = encodePassphrase(newPassphrase)
+        
+        val encryptedHex = keystoreManager.encrypt(base64Passphrase)
+        
+        sharedPrefs.edit()
+            .putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
+            .apply()
+            
+        return newPassphrase
     }
 
     private fun generateRandomPassphrase(): ByteArray {
@@ -51,15 +88,18 @@ class SecurityManager @Inject constructor(
     }
 
     private fun encodePassphrase(passphrase: ByteArray): String {
-        return android.util.Base64.encodeToString(passphrase, android.util.Base64.DEFAULT)
+        return Base64.encodeToString(passphrase, Base64.DEFAULT)
     }
 
     private fun decodePassphrase(encoded: String): ByteArray {
-        return android.util.Base64.decode(encoded, android.util.Base64.DEFAULT)
+        return Base64.decode(encoded, Base64.DEFAULT)
     }
 
     companion object {
-        private const val ENCRYPTED_PREFS_NAME = "cipher_spend_secure_prefs"
-        private const val KEY_DB_PASSPHRASE = "db_passphrase"
+        private const val PREFS_NAME = "cipher_spend_standard_prefs"
+        private const val KEY_DB_PASSPHRASE_V2 = "db_passphrase_keystore_v2"
+        
+        private const val LEGACY_ENCRYPTED_PREFS_NAME = "cipher_spend_secure_prefs"
+        private const val LEGACY_KEY_DB_PASSPHRASE = "db_passphrase"
     }
 }

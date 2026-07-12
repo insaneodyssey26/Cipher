@@ -14,7 +14,6 @@ sqlcipher = "4.6.1"
 ksp = "2.1.10-1.0.29"
 navigation = "2.8.5"
 hiltNavigation = "1.2.0"
-security = "1.1.0-alpha06"
 biometric = "1.2.0-alpha05"
 datastore = "1.1.1"
 kotlinxSerialization = "1.7.3"
@@ -46,7 +45,6 @@ sqlcipher = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "
 sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version = "2.4.0" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }

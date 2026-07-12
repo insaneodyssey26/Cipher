@@ -11,9 +11,6 @@ fun View.performVibrate(isHapticsEnabled: Boolean, isLongPress: Boolean = false)
             HapticFeedbackConstants.VIRTUAL_KEY
         }
         
-        this.performHapticFeedback(
-            feedbackConstant,
-            HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
-        )
+        this.performHapticFeedback(feedbackConstant)
     }
 }
