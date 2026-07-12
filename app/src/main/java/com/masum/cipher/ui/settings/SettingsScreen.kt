@@ -59,11 +59,14 @@ fun SettingsScreen(
     var showBudgetDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
+    var showFrequencyDialog by remember { mutableStateOf(false) }
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var isColorPickerExpanded by remember { mutableStateOf(false) }
+    var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
+    var autoBackupSetupPassword by remember { mutableStateOf("") }
 
     val timeoutOptions = listOf(
         "Immediately" to 0L,
@@ -87,6 +90,14 @@ fun SettingsScreen(
     
     val pdfExportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
         uri?.let { viewModel.handleIntent(SettingsContract.Intent.ExportPdf(it)) }
+    }
+
+    val autoBackupFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        uri?.let {
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            context.contentResolver.takePersistableUriPermission(it, takeFlags)
+            viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupUri(it.toString()))
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -429,6 +440,54 @@ fun SettingsScreen(
                 )
             }
 
+            SettingsSection("AUTO-BACKUP") {
+                VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    icon = LucideIcons.FolderSync,
+                    title = "Enable Auto-Backup",
+                    description = "Silently backup your vault locally",
+                    checked = state.autoBackupEnabled,
+                    onCheckedChange = { 
+                        if (it) {
+                            showAutoBackupPasswordSetupDialog = true
+                        } else {
+                            viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(false))
+                        }
+                    }
+                )
+                if (state.autoBackupEnabled) {
+                    VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.CalendarClock,
+                        title = "Backup Frequency",
+                        value = state.autoBackupFrequency.label,
+                        onClick = {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            showFrequencyDialog = true
+                        }
+                    )
+                    VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.FolderDown,
+                        title = "Backup Location",
+                        subtitle = if (state.autoBackupUri != null) {
+                            try {
+                                val decodedPath = android.net.Uri.decode(state.autoBackupUri)
+                                val readablePath = decodedPath.substringAfter("tree/", decodedPath)
+                                    .replace("primary:", "Internal Storage/")
+                                "Selected: $readablePath"
+                            } catch (e: Exception) {
+                                "Folder Selected"
+                            }
+                        } else "Tap to select folder",
+                        onClick = {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            autoBackupFolderLauncher.launch(null)
+                        }
+                    )
+                }
+            }
+
             SettingsSection("SUPPORT & FEEDBACK") {
                 VaultSettingsItem(
                     icon = LucideIcons.Star,
@@ -534,6 +593,37 @@ fun SettingsScreen(
             )
         }
     }
+    if (showFrequencyDialog) {
+        VaultSettingsDialog(
+            title = "Auto-Backup Frequency",
+            onDismiss = { showFrequencyDialog = false },
+            confirmText = "Close",
+            showDismissButton = false,
+            onConfirm = { showFrequencyDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                com.masum.cipher.core.data.local.pref.AutoBackupFrequency.values().forEach { freq ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                view.performVibrate(state.isHapticsEnabled)
+                                viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupFrequency(freq))
+                                showFrequencyDialog = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = freq.label, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                        if (state.autoBackupFrequency == freq) {
+                            Icon(LucideIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     if (showBackupPasswordDialog != null) {
         VaultSettingsDialog(
@@ -586,6 +676,7 @@ fun SettingsScreen(
             title = "Auto-Lock",
             onDismiss = { showTimeoutDialog = false },
             confirmText = "Close",
+            showDismissButton = false,
             onConfirm = { showTimeoutDialog = false }
         ) {
             Column {
@@ -618,6 +709,46 @@ fun SettingsScreen(
             }
         ) {
             Text("This action is permanent and cannot be undone.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+
+    if (showAutoBackupPasswordSetupDialog) {
+        VaultSettingsDialog(
+            title = "Auto-Backup Password",
+            onDismiss = { 
+                showAutoBackupPasswordSetupDialog = false 
+                autoBackupSetupPassword = ""
+            },
+            confirmText = "Enable",
+            onConfirm = {
+                if (autoBackupSetupPassword.length >= 4) {
+                    viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(autoBackupSetupPassword))
+                    viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(true))
+                    showAutoBackupPasswordSetupDialog = false
+                    autoBackupSetupPassword = ""
+                }
+            }
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Enter a password to encrypt your automatic backups. You will need this to restore your data on a new device.",
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                OutlinedTextField(
+                    value = autoBackupSetupPassword,
+                    onValueChange = { autoBackupSetupPassword = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Backup Password") },
+                    singleLine = true,
+                    textStyle = Typography.bodyLarge,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+            }
         }
     }
 
@@ -717,6 +848,7 @@ private fun VaultSettingsDialog(
     onDismiss: () -> Unit,
     confirmText: String,
     confirmColor: Color = MaterialTheme.colorScheme.primary,
+    showDismissButton: Boolean = true,
     onConfirm: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -730,9 +862,9 @@ private fun VaultSettingsDialog(
                 Text(confirmText, color = MaterialTheme.colorScheme.onSurface)
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        }
+        dismissButton = if (showDismissButton) {
+            { TextButton(onClick = onDismiss) { Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+        } else null
     )
 }
 

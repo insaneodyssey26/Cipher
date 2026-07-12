@@ -85,6 +85,10 @@ dependencies {
 
     // Premium Iconography
     implementation("io.github.ardasoyturk.compose.icons:lucide:2.0.7")
+    
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

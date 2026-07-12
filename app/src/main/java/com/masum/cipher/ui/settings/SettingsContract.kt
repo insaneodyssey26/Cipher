@@ -20,6 +20,10 @@ class SettingsContract {
         data class ImportData(val uri: Uri, val password: CharArray) : Intent()
         data class ExportCsv(val uri: Uri) : Intent()
         data class ExportPdf(val uri: Uri) : Intent()
+        data class SetAutoBackupEnabled(val enabled: Boolean) : Intent()
+        data class SetAutoBackupFrequency(val frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) : Intent()
+        data class SetAutoBackupUri(val uri: String?) : Intent()
+        data class SetAutoBackupEncryptedPassword(val password: String?) : Intent()
     }
 
     data class State(
@@ -30,6 +34,10 @@ class SettingsContract {
         val isPrivacyModeEnabled: Boolean = false,
         val isHapticsEnabled: Boolean = true,
         val monthlyBudget: Double = 0.0,
+        val autoBackupEnabled: Boolean = false,
+        val autoBackupFrequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency = com.masum.cipher.core.data.local.pref.AutoBackupFrequency.NEVER,
+        val autoBackupUri: String? = null,
+        val autoBackupEncryptedPassword: String? = null,
         val isExporting: Boolean = false,
         val isImporting: Boolean = false,
         val isExportingCsv: Boolean = false,

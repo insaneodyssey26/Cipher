@@ -7,6 +7,8 @@ import com.masum.cipher.core.domain.usecase.*
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import com.masum.cipher.core.security.KeystoreManager
+import com.masum.cipher.core.worker.AutoBackupScheduler
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,7 +20,9 @@ class SettingsViewModel @Inject constructor(
     private val exportPdfUseCase: ExportPdfUseCase,
     private val exportDataUseCase: ExportDataUseCase,
     private val importDataUseCase: ImportDataUseCase,
-    private val localNotificationManager: com.masum.cipher.core.notifications.LocalNotificationManager
+    private val localNotificationManager: com.masum.cipher.core.notifications.LocalNotificationManager,
+    private val keystoreManager: KeystoreManager,
+    private val autoBackupScheduler: AutoBackupScheduler
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
     initialState = SettingsContract.State()
 ) {
@@ -41,6 +45,10 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
             is SettingsContract.Intent.ExportCsv -> exportCsv(intent.uri)
             is SettingsContract.Intent.ExportPdf -> exportPdf(intent.uri)
+            is SettingsContract.Intent.SetAutoBackupEnabled -> updateAutoBackupEnabled(intent.enabled)
+            is SettingsContract.Intent.SetAutoBackupFrequency -> updateAutoBackupFrequency(intent.frequency)
+            is SettingsContract.Intent.SetAutoBackupUri -> updateAutoBackupUri(intent.uri)
+            is SettingsContract.Intent.SetAutoBackupEncryptedPassword -> updateAutoBackupPassword(intent.password)
         }
     }
 
@@ -55,7 +63,10 @@ class SettingsViewModel @Inject constructor(
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
                         isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout,
-                        monthlyBudget = settings.monthlyBudget
+                        monthlyBudget = settings.monthlyBudget,
+                        autoBackupEnabled = settings.autoBackupEnabled,
+                        autoBackupFrequency = settings.autoBackupFrequency,
+                        autoBackupUri = settings.autoBackupUri
                     )
                 }
             }
@@ -88,6 +99,41 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateMonthlyBudget(amount: Double) {
         viewModelScope.launch { updateSettingsUseCase.monthlyBudget(amount) }
+    }
+
+    private fun updateAutoBackupEnabled(enabled: Boolean) {
+        viewModelScope.launch { 
+            updateSettingsUseCase.autoBackupEnabled(enabled) 
+            if (!enabled) {
+                autoBackupScheduler.cancelBackup()
+            } else {
+                autoBackupScheduler.scheduleBackup(currentState.autoBackupFrequency)
+            }
+        }
+    }
+
+    private fun updateAutoBackupFrequency(frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) {
+        viewModelScope.launch { 
+            updateSettingsUseCase.autoBackupFrequency(frequency) 
+            if (currentState.autoBackupEnabled) {
+                autoBackupScheduler.scheduleBackup(frequency)
+            }
+        }
+    }
+
+    private fun updateAutoBackupUri(uri: String?) {
+        viewModelScope.launch { updateSettingsUseCase.autoBackupUri(uri) }
+    }
+
+    private fun updateAutoBackupPassword(password: String?) {
+        viewModelScope.launch {
+            if (password == null) {
+                updateSettingsUseCase.autoBackupEncryptedPassword(null)
+            } else {
+                val encrypted = keystoreManager.encrypt(password)
+                updateSettingsUseCase.autoBackupEncryptedPassword(encrypted)
+            }
+        }
     }
 
     private fun clearAllData() {

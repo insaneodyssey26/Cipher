@@ -22,6 +22,10 @@ class UpdateSettingsUseCase @Inject constructor(
     suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)
     suspend fun autoLockTimeout(timeout: Long) = userPreferences.setAutoLockTimeout(timeout)
     suspend fun monthlyBudget(amount: Double) = userPreferences.setMonthlyBudget(amount)
+    suspend fun autoBackupEnabled(enabled: Boolean) = userPreferences.setAutoBackupEnabled(enabled)
+    suspend fun autoBackupFrequency(frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) = userPreferences.setAutoBackupFrequency(frequency)
+    suspend fun autoBackupUri(uri: String?) = userPreferences.setAutoBackupUri(uri)
+    suspend fun autoBackupEncryptedPassword(password: String?) = userPreferences.setAutoBackupEncryptedPassword(password)
 }
 
 class ClearAllDataUseCase @Inject constructor(

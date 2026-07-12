@@ -29,6 +29,12 @@ class UserPreferences @Inject constructor(
         val TRACKED_APPS = stringSetPreferencesKey("tracked_apps")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val HAS_SEEN_NOTIFICATION_FEATURE = booleanPreferencesKey("has_seen_notification_feature")
+        
+        // Auto-Backup Keys
+        val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
+        val AUTO_BACKUP_FREQUENCY = stringPreferencesKey("auto_backup_frequency")
+        val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
+        val AUTO_BACKUP_ENCRYPTED_PASSWORD = stringPreferencesKey("auto_backup_encrypted_password")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -48,7 +54,15 @@ class UserPreferences @Inject constructor(
             } catch (e: Exception) {
                 AccentColor.INDIGO
             },
-            hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false
+            hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
+            autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
+            autoBackupFrequency = try {
+                AutoBackupFrequency.valueOf(preferences[Keys.AUTO_BACKUP_FREQUENCY] ?: AutoBackupFrequency.NEVER.name)
+            } catch (e: Exception) {
+                AutoBackupFrequency.NEVER
+            },
+            autoBackupUri = preferences[Keys.AUTO_BACKUP_URI],
+            autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD]
         )
     }
 
@@ -98,6 +112,34 @@ class UserPreferences @Inject constructor(
     suspend fun setHasSeenNotificationFeature(seen: Boolean) {
         context.dataStore.edit { it[Keys.HAS_SEEN_NOTIFICATION_FEATURE] = seen }
     }
+
+    suspend fun setAutoBackupEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_ENABLED] = enabled }
+    }
+
+    suspend fun setAutoBackupFrequency(frequency: AutoBackupFrequency) {
+        context.dataStore.edit { it[Keys.AUTO_BACKUP_FREQUENCY] = frequency.name }
+    }
+
+    suspend fun setAutoBackupUri(uri: String?) {
+        context.dataStore.edit { preferences ->
+            if (uri != null) {
+                preferences[Keys.AUTO_BACKUP_URI] = uri
+            } else {
+                preferences.remove(Keys.AUTO_BACKUP_URI)
+            }
+        }
+    }
+
+    suspend fun setAutoBackupEncryptedPassword(password: String?) {
+        context.dataStore.edit { preferences ->
+            if (password != null) {
+                preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD] = password
+            } else {
+                preferences.remove(Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD)
+            }
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -113,6 +155,13 @@ enum class AccentColor(val colorValue: Long, val colorName: String) {
     CORAL(0xFFF97316, "Sunset Coral")
 }
 
+enum class AutoBackupFrequency(val label: String) {
+    NEVER("Never"),
+    EVERY_CHANGE("After every change"),
+    DAILY("Daily"),
+    WEEKLY("Weekly")
+}
+
 data class UserSettings(
     val theme: AppTheme,
     val isBiometricEnabled: Boolean,
@@ -125,5 +174,9 @@ data class UserSettings(
     val hasCompletedOnboarding: Boolean = false,
     val trackedApps: Set<String> = emptySet(),
     val accentColor: AccentColor = AccentColor.INDIGO,
-    val hasSeenNotificationFeature: Boolean = false
+    val hasSeenNotificationFeature: Boolean = false,
+    val autoBackupEnabled: Boolean = false,
+    val autoBackupFrequency: AutoBackupFrequency = AutoBackupFrequency.NEVER,
+    val autoBackupUri: String? = null,
+    val autoBackupEncryptedPassword: String? = null
 )
