@@ -470,7 +470,7 @@ private fun DashboardHero(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 120.dp)
+                .padding(top = 90.dp)
                 .graphicsLayer {
                     alpha = contentAlpha
                     scaleX = contentScale
