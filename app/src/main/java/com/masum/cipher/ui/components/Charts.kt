@@ -25,6 +25,10 @@ import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.theme.*
 import java.util.Calendar
+import kotlinx.coroutines.launch
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.ChevronLeft
+import compose.icons.lucideicons.ChevronRight
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
@@ -213,90 +217,174 @@ fun CalendarHeatmap(
     selectedTimestamp: Long?,
     onDayClick: (Long) -> Unit
 ) {
-    val calendar = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }
-    val today = calendar.timeInMillis
-    val todayDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1 // 0 (Sun) to 6 (Sat)
-    val maxSpend = data.values.maxOfOrNull { it } ?: 1.0
-    val weeks = 12
-    val monthFormat = java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault())
+    val todayCal = remember { Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }}
+    val currentMonthIndex = 11
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState(
+        initialPage = currentMonthIndex,
+        pageCount = { 12 }
+    )
+    val coroutineScope = rememberCoroutineScope()
+    val maxSpend = remember(data) { data.values.maxOfOrNull { it } ?: 1.0 }
 
-    Row(modifier = Modifier.fillMaxWidth()) {
-        // Y-axis for days of the week
-        Column(
-            modifier = Modifier.padding(end = 8.dp, top = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-            for (i in 0 until 7) {
-                Text(
-                    text = if (i % 2 == 1) days[i] else "", // Show Mon, Wed, Fri
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.height(36.dp).wrapContentHeight(Alignment.CenterVertically)
+            val visibleMonthCal = remember(pagerState.currentPage) {
+                Calendar.getInstance().apply {
+                    add(Calendar.MONTH, pagerState.currentPage - currentMonthIndex)
+                }
+            }
+            Text(
+                text = java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault()).format(visibleMonthCal.time),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Icon(
+                    imageVector = LucideIcons.ChevronLeft,
+                    contentDescription = "Previous Month",
+                    tint = if (pagerState.currentPage > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.size(20.dp).clickable(
+                        enabled = pagerState.currentPage > 0,
+                        indication = null,
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    ) {
+                        coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+                    }
+                )
+                Icon(
+                    imageVector = LucideIcons.ChevronRight,
+                    contentDescription = "Next Month",
+                    tint = if (pagerState.currentPage < 11) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.size(20.dp).clickable(
+                        enabled = pagerState.currentPage < 11,
+                        indication = null,
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                    ) {
+                        coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                    }
                 )
             }
         }
 
-        // Scrollable Grid
         Row(
-            modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-            for (col in 0 until weeks) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    val firstDayOffset = (weeks - 1 - col) * 7 + todayDayOfWeek
-                    val firstDayTime = today - firstDayOffset * 24 * 60 * 60 * 1000L
-                    val cal = Calendar.getInstance().apply { timeInMillis = firstDayTime }
-                    val dayOfMon = cal.get(Calendar.DAY_OF_MONTH)
-                    
-                    val showMonth = dayOfMon <= 7 || col == 0
-                    
-                    Text(
-                        text = if (showMonth) monthFormat.format(cal.time) else "",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.height(20.dp)
-                    )
-                    
-                    for (row in 0 until 7) {
-                        val dayOffset = (weeks - 1 - col) * 7 + (todayDayOfWeek - row)
-                        if (dayOffset < 0) {
-                            Spacer(modifier = Modifier.size(36.dp))
-                        } else {
-                            val time = today - dayOffset * 24 * 60 * 60 * 1000L
+            listOf("S", "M", "T", "W", "T", "F", "S").forEach { day ->
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        androidx.compose.foundation.pager.HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            val monthOffset = page - currentMonthIndex
+            val pageCal = Calendar.getInstance().apply {
+                add(Calendar.MONTH, monthOffset)
+                set(Calendar.DAY_OF_MONTH, 1)
+            }
+            
+            val daysInMonth = pageCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val firstDayOfWeek = pageCal.get(Calendar.DAY_OF_WEEK) - 1 
+            val rows = 6 // Force exactly 6 rows to prevent height jumping
+            
+            val prevMonthCal = Calendar.getInstance().apply {
+                timeInMillis = pageCal.timeInMillis
+                add(Calendar.MONTH, -1)
+            }
+            val daysInPrevMonth = prevMonthCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                for (row in 0 until rows) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        for (col in 0 until 7) {
+                            val dayNum = row * 7 + col - firstDayOfWeek + 1
+                            
+                            val (displayDayNum, isCurrentMonth, cellCal) = when {
+                                dayNum < 1 -> {
+                                    val d = daysInPrevMonth + dayNum
+                                    val c = Calendar.getInstance().apply {
+                                        timeInMillis = prevMonthCal.timeInMillis
+                                        set(Calendar.DAY_OF_MONTH, d)
+                                        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                                    }
+                                    Triple(d, false, c)
+                                }
+                                dayNum > daysInMonth -> {
+                                    val d = dayNum - daysInMonth
+                                    val c = Calendar.getInstance().apply {
+                                        timeInMillis = pageCal.timeInMillis
+                                        add(Calendar.MONTH, 1)
+                                        set(Calendar.DAY_OF_MONTH, d)
+                                        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                                    }
+                                    Triple(d, false, c)
+                                }
+                                else -> {
+                                    val c = Calendar.getInstance().apply {
+                                        timeInMillis = pageCal.timeInMillis
+                                        set(Calendar.DAY_OF_MONTH, dayNum)
+                                        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                                    }
+                                    Triple(dayNum, true, c)
+                                }
+                            }
+                            
+                            val time = cellCal.timeInMillis
                             val spend = data[time] ?: 0.0
                             val intensity = if (maxSpend > 0) (spend / maxSpend).toFloat() else 0f
                             
-                            val dayCal = Calendar.getInstance().apply { timeInMillis = time }
-                            val dayOfMonth = dayCal.get(Calendar.DAY_OF_MONTH).toString()
                             val isSelected = selectedTimestamp == time
-                            val isToday = time == today
-                            
+                            val isToday = time == todayCal.timeInMillis
+
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .padding(2.dp)
                                     .background(
-                                        color = if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f + intensity * 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                                        shape = RoundedCornerShape(8.dp)
+                                        color = if (!isCurrentMonth) Color.Transparent 
+                                                else if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f + intensity * 0.8f) 
+                                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                        shape = RoundedCornerShape(10.dp)
                                     )
                                     .border(
-                                        width = if (isSelected || isToday) 2.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(8.dp)
+                                        width = if (isSelected || isToday) 2.dp else 0.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) MaterialTheme.colorScheme.outline else Color.Transparent,
+                                        shape = RoundedCornerShape(10.dp)
                                     )
-                                    .clickable { onDayClick(time) },
+                                    .clickable(
+                                        enabled = isCurrentMonth,
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) { onDayClick(time) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = dayOfMonth,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (spend > 0) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = if (isSelected || isToday) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                                    text = displayDayNum.toString(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (!isCurrentMonth) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                            else if (spend > 0) Color(0xFF0D0D1A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected || isToday || spend > 0) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
                                 )
                             }
                         }
@@ -306,3 +394,4 @@ fun CalendarHeatmap(
         }
     }
 }
+
