@@ -232,6 +232,12 @@ fun DashboardScreen(
                 label = "SearchTransition"
             )
 
+            val groupedTransactions = remember(state.transactions) {
+                state.transactions.groupBy {
+                    java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(it.timestamp))
+                }
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,
@@ -328,19 +334,29 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    itemsIndexed(
-                        items = state.transactions,
-                        key = { _, t -> t.id }
-                    ) { index, transaction ->
-                        StaggeredEntranceItem(index = index) {
-                            TransactionItem(
-                                transaction = transaction,
-                                privacyMode = privacyMode,
-                                onClick = {
-                                    view.performVibrate(isHapticsEnabled)
-                                    editingTransaction = transaction
-                                }
+                    groupedTransactions.forEach { (monthYear, transactions) ->
+                        item(key = "header_$monthYear") {
+                            Text(
+                                text = monthYear.uppercase(),
+                                style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp)
                             )
+                        }
+                        itemsIndexed(
+                            items = transactions,
+                            key = { _, t -> t.id }
+                        ) { index, transaction ->
+                            StaggeredEntranceItem(index = index) {
+                                TransactionItem(
+                                    transaction = transaction,
+                                    privacyMode = privacyMode,
+                                    onClick = {
+                                        view.performVibrate(isHapticsEnabled)
+                                        editingTransaction = transaction
+                                    }
+                                )
+                            }
                         }
                     }
                 }
