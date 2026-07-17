@@ -15,10 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,12 +25,13 @@ import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
+
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Clock
 import java.util.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,11 +41,12 @@ fun InsightsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDayDetail: (Long) -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val settings by userPreferences.settingsFlow.collectAsState(initial = null)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = androidx.compose.ui.platform.LocalView.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
+
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -84,13 +82,7 @@ fun InsightsScreen(
             // 2. Spending Trend Chart
             item {
                 SectionLabel("SPENDING TREND")
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(280.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentPadding = 0.dp
-                ) {
-                    SpendingTrendChart(points = state.netWorthHistory)
-                }
+                SpendingTrendChart(points = state.netWorthHistory)
             }
 
             // 3. Category Allocation
@@ -100,20 +92,16 @@ fun InsightsScreen(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant
                 ) {
-                    CategoryAllocationDonut(categories = state.categoryBreakdown)
+                    CategoryAllocationDonut(
+                        categories = state.categoryBreakdown
+                    )
                 }
             }
 
             // 4. Heatmap/Peak Hours
             item {
                 SectionLabel("PEAK SPENDING HOURS")
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(220.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentPadding = 0.dp
-                ) {
-                    PeakHoursChart(hours = state.peakHours)
-                }
+                PeakHoursChart(hours = state.peakHours)
             }
 
             // 5. Subscriptions
@@ -187,6 +175,8 @@ private fun InsightHero(state: InsightsContract.State) {
         Text(
             text = if (mostExpensiveCategory != null) {
                 val periodSuffix = when (state.selectedTimePeriod) {
+                    com.masum.cipher.core.domain.model.TimePeriod.THIS_WEEK -> "this week"
+                    com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK -> "last week"
                     com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "this month"
                     com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "last month"
                     com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "this year"

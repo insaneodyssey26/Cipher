@@ -152,7 +152,7 @@ flowchart LR
 - Privacy mode — blurs all amounts with one tap
 
 ### Insights
-- High-performance spending velocity charts built on `Vico`
+- High-performance spending velocity charts built on custom `Canvas` Compose
 - Category breakdown doughnut
 - Advanced scrollable Calendar heatmap
 - Day-detail drill-down

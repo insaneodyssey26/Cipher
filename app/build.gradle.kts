@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.masum.cipher"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.masum.cipher"
@@ -42,8 +42,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -54,6 +56,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -63,12 +66,9 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.appcompat:appcompat:1.7.0")
 
-    // Vico Charting Library
-    implementation("com.patrykandpatrick.vico:compose:1.15.0")
-    implementation("com.patrykandpatrick.vico:compose-m3:1.15.0")
-    implementation("com.patrykandpatrick.vico:core:1.15.0")
 
     implementation(libs.hilt.android)
+    ksp(libs.kotlin.metadata.jvm)
     ksp(libs.hilt.compiler)
     implementation(libs.navigation.compose)
     implementation(libs.hilt.navigation.compose)

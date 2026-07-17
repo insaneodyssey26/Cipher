@@ -45,6 +45,7 @@ import com.masum.cipher.ui.settings.SettingsViewModel
 import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -66,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val mainViewModel: MainViewModel = hiltViewModel()
-            val state by mainViewModel.state.collectAsState()
+            val state by mainViewModel.state.collectAsStateWithLifecycle()
             
             state.settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()

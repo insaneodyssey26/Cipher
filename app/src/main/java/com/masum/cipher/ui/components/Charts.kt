@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -29,128 +30,454 @@ import kotlinx.coroutines.launch
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.core.entry.FloatEntry
-import com.patrykandpatrick.vico.core.entry.entryModelOf
-import com.patrykandpatrick.vico.compose.component.shape.shader.fromBrush
-import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
-import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
-import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
-import com.patrykandpatrick.vico.compose.chart.column.columnChart
-import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatrick.vico.core.component.shape.LineComponent
-import com.patrykandpatrick.vico.core.component.shape.Shapes
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 /**
- * Premium Spending Trend Chart
- * 
- * - Animated line draw (Cubic Bezier)
- * - Gradient fill below the line
- * - Glow effect on the primary stroke
+ * Catmull-Rom helper: given 4 control points, build a smooth bezier path segment through p1→p2
  */
-@Composable
-fun SpendingTrendChart(points: List<DashboardContract.Point>) {
-    if (points.isEmpty()) return
-
-    val chartEntryModel = entryModelOf(
-        points.mapIndexed { index, point -> 
-            FloatEntry(x = index.toFloat(), y = point.y)
-        }
+private fun androidx.compose.ui.graphics.Path.catmullRomTo(
+    p0: Offset, p1: Offset, p2: Offset, p3: Offset, alpha: Float = 0.5f
+) {
+    val cp1 = Offset(
+        x = p1.x + (p2.x - p0.x) / 6f * alpha * 6f / alpha.coerceAtLeast(0.01f) * 0.5f,
+        y = p1.y + (p2.y - p0.y) / 6f * alpha * 6f / alpha.coerceAtLeast(0.01f) * 0.5f
     )
-
-    Chart(
-        chart = lineChart(
-            lines = listOf(
-                com.patrykandpatrick.vico.compose.chart.line.lineSpec(
-                    lineColor = MaterialTheme.colorScheme.primary,
-                    lineBackgroundShader = DynamicShaders.fromBrush(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), Transparent)
-                        )
-                    )
-                )
-            )
-        ),
-        model = chartEntryModel,
-        startAxis = rememberStartAxis(
-            valueFormatter = AxisValueFormatter { value, _ -> "₹${value.toInt()}" },
-            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            axis = null,
-            tick = null,
-            guideline = com.patrykandpatrick.vico.compose.axis.axisGuidelineComponent(
-                color = MaterialTheme.colorScheme.outlineVariant,
-                thickness = 1.dp
-            )
-        ),
-        bottomAxis = rememberBottomAxis(
-            label = null,
-            axis = null,
-            tick = null,
-            guideline = null
-        ),
-        chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = false),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 16.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
+    val cp2 = Offset(
+        x = p2.x - (p3.x - p1.x) / 6f * alpha * 6f / alpha.coerceAtLeast(0.01f) * 0.5f,
+        y = p2.y - (p3.y - p1.y) / 6f * alpha * 6f / alpha.coerceAtLeast(0.01f) * 0.5f
     )
+    cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y)
 }
 
 /**
- * Thick Donut Chart for Category Allocation
+ * Builds a smooth Catmull-Rom path through all given points.
+ * Returns the line path separately so we can also build the filled area path.
+ */
+private fun buildSmoothLinePath(pts: List<Offset>): Path {
+    val path = Path()
+    if (pts.size < 2) return path
+    path.moveTo(pts[0].x, pts[0].y)
+    if (pts.size == 2) {
+        path.lineTo(pts[1].x, pts[1].y)
+        return path
+    }
+    for (i in 0 until pts.size - 1) {
+        val p0 = pts.getOrNull(i - 1) ?: pts[0]
+        val p1 = pts[i]
+        val p2 = pts[i + 1]
+        val p3 = pts.getOrNull(i + 2) ?: pts.last()
+        val cx1 = p1.x + (p2.x - p0.x) / 6f
+        val cy1 = p1.y + (p2.y - p0.y) / 6f
+        val cx2 = p2.x - (p3.x - p1.x) / 6f
+        val cy2 = p2.y - (p3.y - p1.y) / 6f
+        path.cubicTo(cx1, cy1, cx2, cy2, p2.x, p2.y)
+    }
+    return path
+}
+
+/**
+ * Premium custom Stock-Market style Spending Trend Chart.
+ *
+ * Features:
+ * - Smooth Catmull-Rom line curve
+ * - Gradient area fill beneath the line
+ * - Subtle horizontal grid lines with Y-axis labels
+ * - Animated draw-in from left to right on first composition
+ * - Touch & drag crosshair: vertical line + pulsing dot + floating tooltip
+ *   showing exact date and amount for the nearest data point
+ * - Start / end date range labels below the chart
  */
 @Composable
-fun CategoryAllocationDonut(categories: List<DashboardContract.CategoryData>) {
-    val animationProgress = remember { Animatable(0f) }
+fun SpendingTrendChart(
+    points: List<DashboardContract.Point>
+) {
+    if (points.isEmpty()) return
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+
+    val drawProgress = remember { Animatable(0f) }
+    val hasAnimated = rememberSaveable(points) { mutableStateOf(false) }
+    LaunchedEffect(points) {
+        if (!hasAnimated.value) {
+            drawProgress.snapTo(0f)
+            drawProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+            )
+            hasAnimated.value = true
+        } else {
+            drawProgress.snapTo(1f)
+        }
+    }
+
+    var scrubX by remember { mutableStateOf<Float?>(null) }
+    val pulseAnim = rememberInfiniteTransition(label = "pulse")
+    val pulseScale by pulseAnim.animateFloat(
+        initialValue = 1f, targetValue = 1.4f,
+        animationSpec = infiniteRepeatable(tween(600), RepeatMode.Reverse),
+        label = "pulse_scale"
+    )
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 2.dp
+        ) {
+            Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp, start = 0.dp, end = 0.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .pointerInput(points) {
+                    detectDragGestures(
+                        onDragStart = { offset -> scrubX = offset.x },
+                        onDrag = { change, _ -> scrubX = change.position.x },
+                        onDragEnd = { scrubX = null },
+                        onDragCancel = { scrubX = null }
+                    )
+                }
+                .pointerInput(points) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            scrubX = offset.x
+                            tryAwaitRelease()
+                            scrubX = null
+                        }
+                    )
+                }
+        ) {
+                val chartPadLeft = with(density) { 52.dp.toPx() }
+                val chartPadRight = with(density) { 16.dp.toPx() }
+                val chartPadTop = with(density) { 24.dp.toPx() }
+                val chartPadBottom = with(density) { 28.dp.toPx() }
+
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                val plotW = w - chartPadLeft - chartPadRight
+                val plotH = h - chartPadTop - chartPadBottom
+
+                val yValues = points.map { it.y }
+                val yMin = (yValues.minOrNull()!! * 0.85f).coerceAtLeast(0f)
+                val yMax = yValues.maxOrNull()!! * 1.20f
+                val yRange = (yMax - yMin).coerceAtLeast(1f)
+
+                fun xForIndex(i: Int): Float =
+                    chartPadLeft + i.toFloat() / (points.size - 1).coerceAtLeast(1) * plotW
+
+                fun yForValue(v: Float): Float =
+                    chartPadTop + plotH - ((v - yMin) / yRange * plotH)
+
+                val offsets = points.mapIndexed { i, pt -> Offset(xForIndex(i), yForValue(pt.y)) }
+
+                val gridCount = 4
+                repeat(gridCount + 1) { step ->
+                    val frac = step.toFloat() / gridCount
+                    val yVal = yMin + frac * yRange
+                    val yPx = yForValue(yVal)
+
+                    drawLine(
+                        color = onSurfaceVariant.copy(alpha = 0.10f),
+                        start = Offset(chartPadLeft, yPx),
+                        end = Offset(w - chartPadRight, yPx),
+                        strokeWidth = 1f
+                    )
+
+                    val labelText = if (yVal >= 100f) {
+                        if (yVal >= 1000f) {
+                            val formatted = String.format(java.util.Locale.US, "%.1f", yVal / 1000f)
+                            "₹${formatted.removeSuffix(".0")}k"
+                        } else {
+                            "₹${yVal.toInt()}"
+                        }
+                    } else "₹${yVal.toInt()}"
+                    val measured = textMeasurer.measure(
+                        text = labelText,
+                        style = TextStyle(
+                            color = onSurfaceVariant.copy(alpha = 0.7f),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                    drawText(
+                        textLayoutResult = measured,
+                        topLeft = Offset(
+                            x = chartPadLeft - measured.size.width - with(density) { 6.dp.toPx() },
+                            y = yPx - measured.size.height / 2f
+                        )
+                    )
+                }
+
+                val clipRight = chartPadLeft + plotW * drawProgress.value
+
+                val areaPath = buildSmoothLinePath(offsets).apply {
+                    lineTo(offsets.last().x, chartPadTop + plotH)
+                    lineTo(offsets.first().x, chartPadTop + plotH)
+                    close()
+                }
+                clipRect(left = 0f, top = 0f, right = clipRight, bottom = h) {
+                    drawPath(
+                        path = areaPath,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                primaryColor.copy(alpha = 0.25f),
+                                primaryColor.copy(alpha = 0.0f)
+                            ),
+                            startY = chartPadTop,
+                            endY = chartPadTop + plotH
+                        )
+                    )
+
+                    drawPath(
+                        path = buildSmoothLinePath(offsets),
+                        color = primaryColor,
+                        style = Stroke(
+                            width = with(density) { 2.5.dp.toPx() },
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
+                    )
+
+                    drawPath(
+                        path = buildSmoothLinePath(offsets),
+                        color = primaryColor.copy(alpha = 0.18f),
+                        style = Stroke(
+                            width = with(density) { 8.dp.toPx() },
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
+                    )
+                }
+
+                val scrub = scrubX
+                if (scrub != null && drawProgress.value >= 1f) {
+                    val clampedX = scrub.coerceIn(chartPadLeft, chartPadLeft + plotW)
+
+                    val nearestIdx = offsets.indices.minByOrNull { i ->
+                        kotlin.math.abs(offsets[i].x - clampedX)
+                    } ?: 0
+                    val nearestOffset = offsets[nearestIdx]
+                    val nearestPoint = points[nearestIdx]
+
+                    drawLine(
+                        color = onSurface.copy(alpha = 0.25f),
+                        start = Offset(nearestOffset.x, chartPadTop),
+                        end = Offset(nearestOffset.x, chartPadTop + plotH),
+                        strokeWidth = with(density) { 1.dp.toPx() },
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f))
+                    )
+
+                    drawCircle(
+                        color = primaryColor.copy(alpha = 0.2f),
+                        radius = with(density) { 6.dp.toPx() } * pulseScale,
+                        center = nearestOffset
+                    )
+                    drawCircle(
+                        color = primaryColor,
+                        radius = with(density) { 5.dp.toPx() },
+                        center = nearestOffset
+                    )
+                    drawCircle(
+                        color = surface,
+                        radius = with(density) { 2.5.dp.toPx() },
+                        center = nearestOffset
+                    )
+
+                    val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+                    val amountText = "₹${nearestPoint.y.toInt()}"
+                    val dateText = sdf.format(java.util.Date(nearestPoint.timestamp))
+
+                    val amountMeasured = textMeasurer.measure(
+                        amountText,
+                        TextStyle(color = onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    )
+                    val dateMeasured = textMeasurer.measure(
+                        dateText,
+                        TextStyle(color = onSurfaceVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
+                    )
+
+                    val tooltipPadH = with(density) { 10.dp.toPx() }
+                    val tooltipPadV = with(density) { 8.dp.toPx() }
+                    val tooltipW = maxOf(amountMeasured.size.width, dateMeasured.size.width) + tooltipPadH * 2
+                    val tooltipH = amountMeasured.size.height + dateMeasured.size.height + tooltipPadV * 2 + with(density) { 4.dp.toPx() }
+                    val tooltipRadius = with(density) { 8.dp.toPx() }
+
+                    var tooltipLeft = nearestOffset.x - tooltipW / 2
+                    tooltipLeft = tooltipLeft.coerceIn(chartPadLeft, w - chartPadRight - tooltipW)
+                    val tooltipTop = (nearestOffset.y - tooltipH - with(density) { 14.dp.toPx() }).coerceAtLeast(chartPadTop)
+
+                    drawIntoCanvas { canvas ->
+                        val paint = android.graphics.Paint().apply {
+                            isAntiAlias = true
+                            color = android.graphics.Color.TRANSPARENT
+                            setShadowLayer(with(density) { 8.dp.toPx() }, 0f, with(density) { 2.dp.toPx() }, android.graphics.Color.argb(60, 0, 0, 0))
+                        }
+                        canvas.nativeCanvas.drawRoundRect(
+                            tooltipLeft, tooltipTop,
+                            tooltipLeft + tooltipW, tooltipTop + tooltipH,
+                            tooltipRadius, tooltipRadius, paint
+                        )
+                    }
+
+                    drawRoundRect(
+                        color = surfaceVariant,
+                        topLeft = Offset(tooltipLeft, tooltipTop),
+                        size = Size(tooltipW, tooltipH),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius)
+                    )
+                    drawRoundRect(
+                        color = primaryColor.copy(alpha = 0.6f),
+                        topLeft = Offset(tooltipLeft, tooltipTop),
+                        size = Size(tooltipW, tooltipH),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius),
+                        style = Stroke(width = with(density) { 1.dp.toPx() })
+                    )
+
+                    drawText(
+                        textLayoutResult = amountMeasured,
+                        topLeft = Offset(
+                            tooltipLeft + (tooltipW - amountMeasured.size.width) / 2f,
+                            tooltipTop + tooltipPadV
+                        )
+                    )
+                    drawText(
+                        textLayoutResult = dateMeasured,
+                        topLeft = Offset(
+                            tooltipLeft + (tooltipW - dateMeasured.size.width) / 2f,
+                            tooltipTop + tooltipPadV + amountMeasured.size.height + with(density) { 4.dp.toPx() }
+                        )
+                    )
+                }
+                val sdfX = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
+                val maxLabels = minOf(points.size, 5)
+                val step = (points.size - 1).toFloat() / (maxLabels - 1).coerceAtLeast(1)
+                for (labelIdx in 0 until maxLabels) {
+                    val ptIdx = (labelIdx * step).toInt().coerceIn(0, points.lastIndex)
+                    val xPx = xForIndex(ptIdx)
+                    val label = sdfX.format(java.util.Date(points[ptIdx].timestamp))
+                    val measured = textMeasurer.measure(
+                        label,
+                        TextStyle(
+                            color = onSurfaceVariant.copy(alpha = 0.7f),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                    drawText(
+                        textLayoutResult = measured,
+                        topLeft = Offset(
+                            x = (xPx - measured.size.width / 2f).coerceIn(
+                                chartPadLeft,
+                                w - chartPadRight - measured.size.width
+                            ),
+                            y = chartPadTop + plotH + with(density) { 8.dp.toPx() }
+                        )
+                    )
+                }
+            }
+        }
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+    }
+}
+
+/**
+ * Premium Thick Donut Chart for Category Allocation
+ */
+@Composable
+fun CategoryAllocationDonut(
+    categories: List<DashboardContract.CategoryData>
+) {
+    if (categories.isEmpty()) return
+    
+    val animationProgress = remember { androidx.compose.animation.core.Animatable(0f) }
     LaunchedEffect(categories) {
-        animationProgress.animateTo(1f, tween(1000, easing = FastOutSlowInEasing))
+        animationProgress.animateTo(1f, animationSpec = tween(1200, easing = FastOutSlowInEasing))
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp)
+        horizontalArrangement = Arrangement.spacedBy(32.dp)
     ) {
         Box(
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier.size(160.dp),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                val strokeWidth = 24.dp.toPx()
                 var startAngle = -90f
+                val totalPercent = categories.map { it.percentage }.sum()
+                
                 categories.forEach { category ->
-                    val sweepAngle = category.percentage * 360f * animationProgress.value
+                    val sweepAngle = (category.percentage / totalPercent) * 360f * animationProgress.value
                     drawArc(
                         color = Color(category.color),
                         startAngle = startAngle,
-                        sweepAngle = sweepAngle,
+                        sweepAngle = sweepAngle.toFloat(),
                         useCenter = false,
-                        style = Stroke(width = 16.dp.toPx(), cap = StrokeCap.Round),
-                        size = Size(size.width - 24.dp.toPx(), size.height - 24.dp.toPx()),
-                        topLeft = Offset(12.dp.toPx(), 12.dp.toPx())
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                     )
-                    startAngle += sweepAngle
+                    startAngle += sweepAngle.toFloat()
                 }
             }
-            Text(
-                text = "${categories.size}\nCATEGORIES",
-                style = Typography.labelSmall.copy(textAlign = TextAlign.Center),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${categories.size}",
+                    style = Typography.headlineMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "CATEGORIES",
+                    style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        // Legend
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             categories.take(4).forEach { category ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.size(8.dp).background(Color(category.color), CircleShape))
-                    Text(text = category.category, style = Typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
-                    Text(text = "${(category.percentage * 100).toInt()}%", style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(12.dp).background(Color(category.color), CircleShape))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = category.category,
+                            style = Typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "${(category.percentage * 100).toInt()}%",
+                            style = Typography.labelSmall.copy(fontSize = 10.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -158,57 +485,215 @@ fun CategoryAllocationDonut(categories: List<DashboardContract.CategoryData>) {
 }
 
 /**
- * Spending Heatmap for Peak Hours
+ * Premium Custom Peak Spending Hours Chart
+ *
+ * Heatmap-style intensity gradient bars — dim for low spend, glowing primary for peak.
+ * Rounded pill bars, dot-grid texture, animate-in, tap tooltip.
  */
 @Composable
-fun PeakHoursChart(hours: List<InsightsContract.PeakHourData>) {
+fun PeakHoursChart(
+    hours: List<InsightsContract.PeakHourData>
+) {
     if (hours.isEmpty()) return
 
-    val chartEntryModel = entryModelOf(
-        hours.mapIndexed { index, hour ->
-            FloatEntry(x = index.toFloat(), y = hour.amount.toFloat())
-        }
-    )
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
 
-    Chart(
-        chart = columnChart(
-            columns = listOf(
-                com.patrykandpatrick.vico.compose.component.lineComponent(
-                    color = MaterialTheme.colorScheme.primary,
-                    thickness = 16.dp,
-                    shape = Shapes.roundedCornerShape(topLeftPercent = 50, topRightPercent = 50)
-                )
-            )
-        ),
-        model = chartEntryModel,
-        startAxis = rememberStartAxis(
-            valueFormatter = AxisValueFormatter { value, _ -> "₹${value.toInt()}" },
-            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            axis = null,
-            tick = null,
-            guideline = com.patrykandpatrick.vico.compose.axis.axisGuidelineComponent(
-                color = MaterialTheme.colorScheme.outlineVariant,
-                thickness = 1.dp
-            )
-        ),
-        bottomAxis = rememberBottomAxis(
-            valueFormatter = AxisValueFormatter { value, _ ->
-                hours.getOrNull(value.toInt())?.label ?: ""
-            },
-            label = com.patrykandpatrick.vico.compose.axis.axisLabelComponent(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            axis = null,
-            tick = null,
-            guideline = null
-        ),
-        chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = false),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 16.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
-    )
+    val animProgress = remember { Animatable(0f) }
+    val hasAnimated = rememberSaveable(hours) { mutableStateOf(false) }
+    LaunchedEffect(hours) {
+        if (!hasAnimated.value) {
+            animProgress.snapTo(0f)
+            animProgress.animateTo(1f, tween(900, easing = FastOutSlowInEasing))
+            hasAnimated.value = true
+        } else {
+            animProgress.snapTo(1f)
+        }
+    }
+
+    var tappedIdx by remember { mutableStateOf<Int?>(null) }
+    val barCount = hours.size
+    val maxAmount = hours.maxOfOrNull { it.amount } ?: 1.0
+    val anchorIndices = if (barCount <= 5) hours.indices.toList()
+        else listOf(0, barCount / 4, barCount / 2, 3 * barCount / 4, barCount - 1)
+
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = surfaceVariant,
+        tonalElevation = 2.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(168.dp)
+                .padding(top = 16.dp)
+                .pointerInput(hours) {
+                    detectTapGestures { offset ->
+                        val padH = with(density) { 16.dp.toPx() }
+                        val availW = size.width - padH * 2
+                        val idx = ((offset.x - padH) / (availW / barCount))
+                            .toInt().coerceIn(0, barCount - 1)
+                        tappedIdx = if (tappedIdx == idx) null else idx
+                    }
+                }
+        ) {
+            val chartPadL = with(density) { 48.dp.toPx() }
+            val chartPadR = with(density) { 16.dp.toPx() }
+            val chartPadT = with(density) { 16.dp.toPx() }
+            val chartPadB = with(density) { 26.dp.toPx() }
+
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                val plotW = w - chartPadL - chartPadR
+                val plotH = h - chartPadT - chartPadB
+                val slotW = plotW / barCount
+                val barW = (slotW * 0.55f).coerceAtMost(with(density) { 16.dp.toPx() })
+                val cornerR = barW / 2f
+
+                val gridCount = 4
+                for (step in 0..gridCount) {
+                    val frac = step.toFloat() / gridCount
+                    val yVal = frac * maxAmount
+                    val yPx = chartPadT + plotH - (frac * plotH)
+
+                    drawLine(
+                        color = onSurfaceVariant.copy(alpha = 0.15f),
+                        start = Offset(chartPadL, yPx),
+                        end = Offset(w - chartPadR, yPx),
+                        strokeWidth = with(density) { 1.dp.toPx() },
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
+                    )
+
+                    val labelText = if (yVal >= 100f) {
+                        if (yVal >= 1000f) {
+                            val formatted = String.format(java.util.Locale.US, "%.1f", yVal / 1000f)
+                            "₹${formatted.removeSuffix(".0")}k"
+                        } else {
+                            "₹${yVal.toInt()}"
+                        }
+                    } else "₹${yVal.toInt()}"
+                    val measured = textMeasurer.measure(
+                        text = labelText,
+                        style = TextStyle(
+                            color = onSurfaceVariant.copy(alpha = 0.7f),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                    drawText(
+                        textLayoutResult = measured,
+                        topLeft = Offset(
+                            x = chartPadL - measured.size.width - with(density) { 6.dp.toPx() },
+                            y = yPx - measured.size.height / 2f
+                        )
+                    )
+                }
+
+                hours.forEachIndexed { i, data ->
+                    val intensity = (data.amount / maxAmount).toFloat().coerceIn(0f, 1f)
+                    val animH = plotH * intensity * animProgress.value
+                    val barCx = chartPadL + i * slotW + slotW / 2f
+                    val barLeft = barCx - barW / 2f
+                    val barTop = chartPadT + plotH - animH
+                    val barBottom = chartPadT + plotH
+                    val isTapped = tappedIdx == i
+                    val baseAlpha = if (intensity > 0.1f) 0.3f else 0.15f
+                    val barAlpha = baseAlpha + intensity * 0.7f
+                    val topColor = primaryColor.copy(alpha = if (isTapped) 1f else barAlpha)
+                    val bottomColor = primaryColor.copy(alpha = if (isTapped) 0.6f else barAlpha * 0.3f)
+
+                    val barBrush = Brush.verticalGradient(
+                        colors = listOf(topColor, bottomColor),
+                        startY = barTop,
+                        endY = barBottom
+                    )
+
+                    if (animH > cornerR * 2) {
+                        val path = Path().apply {
+                            moveTo(barLeft, barBottom)
+                            lineTo(barLeft, barTop + cornerR)
+                            quadraticTo(barLeft, barTop, barLeft + cornerR, barTop)
+                            lineTo(barLeft + barW - cornerR, barTop)
+                            quadraticTo(barLeft + barW, barTop, barLeft + barW, barTop + cornerR)
+                            lineTo(barLeft + barW, barBottom)
+                            close()
+                        }
+                        drawPath(path, brush = barBrush)
+                    } else if (animH > 0f) {
+                        drawCircle(topColor, radius = animH / 2f, center = Offset(barCx, barTop + animH / 2f))
+                    }
+
+                    if (isTapped) {
+                        drawRect(
+                            color = primaryColor.copy(alpha = 0.07f),
+                            topLeft = Offset(barLeft - with(density) { 4.dp.toPx() }, chartPadT),
+                            size = Size(barW + with(density) { 8.dp.toPx() }, plotH)
+                        )
+                    }
+                }
+
+                anchorIndices.forEach { idx ->
+                    val data = hours.getOrNull(idx) ?: return@forEach
+                    val xPx = chartPadL + idx * slotW + slotW / 2f
+                    val measured = textMeasurer.measure(
+                        data.label,
+                        TextStyle(color = onSurfaceVariant.copy(alpha = 0.65f), fontSize = 9.sp, fontWeight = FontWeight.Normal)
+                    )
+                    drawText(
+                        measured,
+                        topLeft = Offset(
+                            (xPx - measured.size.width / 2f).coerceIn(chartPadL, w - chartPadR - measured.size.width),
+                            chartPadT + plotH + with(density) { 7.dp.toPx() }
+                        )
+                    )
+                }
+
+                val tapped = tappedIdx
+                if (tapped != null) {
+                    val data = hours.getOrNull(tapped) ?: return@Canvas
+                    val intensity = (data.amount / maxAmount).toFloat()
+                    val barCx = chartPadL + tapped * slotW + slotW / 2f
+                    val barTopY = chartPadT + plotH - plotH * intensity * animProgress.value
+
+                    val amtMeasured = textMeasurer.measure(
+                        "₹${data.amount.toInt()}",
+                        TextStyle(color = onSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    )
+                    val lblMeasured = textMeasurer.measure(
+                        data.label,
+                        TextStyle(color = onSurfaceVariant, fontSize = 9.sp, fontWeight = FontWeight.Normal)
+                    )
+                    val pH = with(density) { 10.dp.toPx() }
+                    val pV = with(density) { 7.dp.toPx() }
+                    val tipW = maxOf(amtMeasured.size.width, lblMeasured.size.width) + pH * 2
+                    val tipH = amtMeasured.size.height + lblMeasured.size.height + pV * 2 + with(density) { 3.dp.toPx() }
+                    val tipR = with(density) { 8.dp.toPx() }
+                    var tipL = barCx - tipW / 2f
+                    tipL = tipL.coerceIn(chartPadL, w - chartPadR - tipW)
+                    val tipT = (barTopY - tipH - with(density) { 10.dp.toPx() }).coerceAtLeast(chartPadT)
+
+                    drawIntoCanvas { canvas ->
+                        val paint = android.graphics.Paint().apply {
+                            isAntiAlias = true; color = android.graphics.Color.TRANSPARENT
+                            setShadowLayer(with(density) { 8.dp.toPx() }, 0f, with(density) { 2.dp.toPx() }, android.graphics.Color.argb(50, 0, 0, 0))
+                        }
+                        canvas.nativeCanvas.drawRoundRect(tipL, tipT, tipL + tipW, tipT + tipH, tipR, tipR, paint)
+                    }
+                    drawRoundRect(color = surface, topLeft = Offset(tipL, tipT), size = Size(tipW, tipH), cornerRadius = androidx.compose.ui.geometry.CornerRadius(tipR))
+                    drawRoundRect(color = primaryColor.copy(alpha = 0.7f), topLeft = Offset(tipL, tipT), size = Size(tipW, tipH), cornerRadius = androidx.compose.ui.geometry.CornerRadius(tipR), style = Stroke(with(density) { 1.dp.toPx() }))
+                    drawText(amtMeasured, topLeft = Offset(tipL + (tipW - amtMeasured.size.width) / 2f, tipT + pV))
+                    drawText(lblMeasured, topLeft = Offset(tipL + (tipW - lblMeasured.size.width) / 2f, tipT + pV + amtMeasured.size.height + with(density) { 3.dp.toPx() }))
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -299,7 +784,7 @@ fun CalendarHeatmap(
             
             val daysInMonth = pageCal.getActualMaximum(Calendar.DAY_OF_MONTH)
             val firstDayOfWeek = pageCal.get(Calendar.DAY_OF_WEEK) - 1 
-            val rows = 6 // Force exactly 6 rows to prevent height jumping
+            val rows = 6
             
             val prevMonthCal = Calendar.getInstance().apply {
                 timeInMillis = pageCal.timeInMillis

@@ -19,8 +19,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,6 +29,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import androidx.compose.ui.text.style.TextOverflow
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,8 +40,6 @@ import com.masum.cipher.core.util.AppFormatters
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.ChartBar
-import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.ArrowDown
@@ -51,9 +48,9 @@ import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.X
-import compose.icons.lucideicons.ArrowLeft
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,8 +61,8 @@ fun DashboardScreen(
     onNavigateToInsights: () -> Unit,
     onNavigateToManageApps: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val settings by userPreferences.settingsFlow.collectAsState(initial = null)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val view = androidx.compose.ui.platform.LocalView.current
 
@@ -301,20 +298,7 @@ fun DashboardScreen(
                         }
                     }
 
-                    item {
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = state.searchQuery.isEmpty(),
-                        enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
-                        exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
-                    ) {
-                        Text(
-                            text = "RECENT ACTIVITY",
-                            style = Typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
-                        )
-                    }
-                }
+
 
 
                 if (state.isLoading) {
@@ -691,6 +675,15 @@ private fun DashboardHero(
                                 }
                                 Spacer(modifier = Modifier.height(12.dp))
                             }
+                            val balanceStringLength = totalBalance.toLong().toString().length
+                            val balanceFontSize = remember(balanceStringLength) {
+                                when {
+                                    balanceStringLength >= 9 -> 36.sp
+                                    balanceStringLength >= 7 -> 44.sp
+                                    balanceStringLength >= 5 -> 54.sp
+                                    else -> 64.sp
+                                }
+                            }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -702,15 +695,37 @@ private fun DashboardHero(
                                 if (privacyMode) {
                                     Text(
                                         text = "••••••",
-                                        style = Typography.displayLarge.copy(fontSize = 64.sp),
+                                        style = Typography.displayLarge.copy(fontSize = balanceFontSize),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 } else {
-                                    AnimatedNumberTicker(
-                                        value = totalBalance,
-                                        textStyle = Typography.displayLarge.copy(fontSize = 64.sp, letterSpacing = (-2).sp),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    AnimatedContent(
+                                        targetState = scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000,
+                                        transitionSpec = {
+                                            fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                                        },
+                                        label = "main_balance_transition"
+                                    ) { isShortened ->
+                                        if (isShortened) {
+                                            val formattedBalance = remember(totalBalance) {
+                                                when {
+                                                    kotlin.math.abs(totalBalance) >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", totalBalance / 1_000_000f).replace(".0M", "M")
+                                                    else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
+                                                }
+                                            }
+                                            Text(
+                                                text = formattedBalance,
+                                                style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-2).sp),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        } else {
+                                            AnimatedNumberTicker(
+                                                value = totalBalance,
+                                                textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-2).sp),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -728,14 +743,23 @@ private fun DashboardHero(
                                     RoundedCornerShape(20.dp)
                                 )
                                 .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
-                                .padding(vertical = 10.dp, horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                                .padding(vertical = 12.dp, horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, icon = LucideIcons.ArrowDown, privacyMode = privacyMode)
-                            Box(modifier = Modifier.padding(horizontal = 16.dp).width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-                            StatItem(label = "SPENT", amount = expense, color = RoseExpense, icon = LucideIcons.ArrowUp, privacyMode = privacyMode)
+                            val isCollapsed = scrollProgress < 0.5f
+                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, icon = LucideIcons.ArrowDown, privacyMode = privacyMode, isCollapsed = isCollapsed, modifier = Modifier.weight(1f))
+                            Box(modifier = Modifier.padding(horizontal = 8.dp).width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                            StatItem(label = "SPENT", amount = expense, color = RoseExpense, icon = LucideIcons.ArrowUp, privacyMode = privacyMode, isCollapsed = isCollapsed, modifier = Modifier.weight(1f))
                         }
+
+
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(32.dp)
+                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f * (1f - scrollProgress)))
+                        )
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { measurables, constraints ->
@@ -743,11 +767,13 @@ private fun DashboardHero(
                     val balancePlaceable = measurables[0].measure(looseConstraints)
                     
                     val statsExpandedWidth = constraints.maxWidth
-                    val statsCollapsedWidth = (constraints.maxWidth * 0.55f).toInt()
+                    val statsCollapsedWidth = (constraints.maxWidth * 0.62f).toInt()
                     val currentStatsWidth = statsCollapsedWidth + ((statsExpandedWidth - statsCollapsedWidth) * scrollProgress).toInt()
                     
                     val statsConstraints = looseConstraints.copy(minWidth = currentStatsWidth, maxWidth = currentStatsWidth)
                     val statsPlaceable = measurables[1].measure(statsConstraints)
+
+                    val dividerPlaceable = measurables[2].measure(looseConstraints)
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         val topPadding = 32.dp.roundToPx()
@@ -777,6 +803,14 @@ private fun DashboardHero(
 
                         balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
                         statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
+
+
+                        if (scrollProgress < 0.8f) {
+                            val balanceRightEdge = currentBalanceX + (balancePlaceable.width * balanceScale)
+                            val dividerX = balanceRightEdge + 12.dp.toPx()
+                            val dividerY = currentBalanceY + (balancePlaceable.height - dividerPlaceable.height) / 2f
+                            dividerPlaceable.placeRelative(dividerX.toInt(), dividerY.toInt())
+                        }
                     }
                 }
             }
@@ -879,28 +913,59 @@ private fun DashboardHero(
 }
 
 @Composable
-private fun StatItem(label: String, amount: Double, color: Color, icon: androidx.compose.ui.graphics.vector.ImageVector, privacyMode: Boolean) {
-    Column(horizontalAlignment = Alignment.Start) {
+private fun StatItem(
+    label: String, 
+    amount: Double, 
+    color: Color, 
+    icon: androidx.compose.ui.graphics.vector.ImageVector, 
+    privacyMode: Boolean, 
+    isCollapsed: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val formattedAmount = remember(amount, isCollapsed) {
+        if (isCollapsed && amount >= 1000) {
+            String.format(java.util.Locale.US, "%.1fk", amount / 1000f).replace(".0k", "k")
+        } else {
+            String.format(java.util.Locale.US, "%.0f", amount)
+        }
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(16.dp).background(color.copy(alpha = 0.15f), shape = androidx.compose.foundation.shape.CircleShape).padding(2.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label, 
-                style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.5.sp, fontWeight = FontWeight.Medium), 
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.sp, fontWeight = FontWeight.Bold), 
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
         }
-        Text(
-            text = if (privacyMode) "••••" else "₹${String.format(java.util.Locale.getDefault(), "%.0f", amount)}",
-            style = Typography.titleMedium.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp),
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 2.dp, start = 18.dp)
-        )
+        Spacer(modifier = Modifier.height(4.dp))
+        AnimatedContent(
+            targetState = if (privacyMode) "••••" else "₹$formattedAmount",
+            transitionSpec = {
+                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+            },
+            label = "stat_amount_transition"
+        ) { targetText ->
+            Text(
+                text = targetText,
+                style = Typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.2).sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

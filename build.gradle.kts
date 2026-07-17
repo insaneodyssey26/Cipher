@@ -5,3 +5,11 @@ plugins {
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
 }
+
+allprojects {
+    configurations.configureEach {
+        resolutionStrategy {
+            force(libs.kotlin.metadata.jvm)
+        }
+    }
+}

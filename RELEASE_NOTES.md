@@ -37,7 +37,7 @@
 ### Added
 - **Major Redesign**: Complete visual overhaul with premium colors, typography, and component styling.
 - **Floating Navigation Bar**: A sleek, pill-shaped centered navigation bar for main app routing.
-- **Advanced Insights Charts**: Integrated the high-performance Vico library for fluid spending velocity charts and enhanced data visualization.
+- **Advanced Insights Charts**: Integrated high-performance custom Canvas-based charts for fluid spending velocity charts and enhanced data visualization.
 - **Scrollable Activity Calendar**: Upgraded the calendar heatmap to support horizontal scrolling with clear month headers and today-highlighting.
 - **Promotional SMS Detection**: Intelligent filtering to automatically identify and drop promotional texts and spam.
 - **Transaction Sorting**: Added capability to sort transactions by spend amount directly on the dashboard.

@@ -44,6 +44,12 @@ object AppFormatters {
         }
         val calendar = Calendar.getInstance()
         return when (period) {
+            com.masum.cipher.core.domain.model.TimePeriod.THIS_WEEK -> {
+                "This Week"
+            }
+            com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK -> {
+                "Last Week"
+            }
             com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> {
                 SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time)
             }
