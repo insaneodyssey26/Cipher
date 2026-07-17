@@ -596,12 +596,14 @@ private fun DashboardHero(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(searchQuery)) }
+                    var textFieldValue by remember { 
+                        mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(searchQuery)) 
+                    }
                     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
-                    
+
                     LaunchedEffect(searchQuery) {
-                        if (searchQuery != textFieldValue.text) {
-                            textFieldValue = textFieldValue.copy(text = searchQuery)
+                        if (searchQuery.isEmpty() && textFieldValue.text.isNotEmpty()) {
+                            textFieldValue = androidx.compose.ui.text.input.TextFieldValue("")
                         }
                     }
 
@@ -625,6 +627,7 @@ private fun DashboardHero(
                             },
                             modifier = Modifier.weight(1f),
                             textStyle = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                             singleLine = true,
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
                             keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { focusManager.clearFocus() }),

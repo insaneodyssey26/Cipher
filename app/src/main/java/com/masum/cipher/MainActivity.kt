@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             window.attributes.preferredDisplayModeId = 0 
         }
 
+        // Initial call, will be overridden by the compose state below
         enableEdgeToEdge()
         setContent {
             val mainViewModel: MainViewModel = hiltViewModel()
@@ -75,6 +76,15 @@ class MainActivity : AppCompatActivity() {
                         AppTheme.DARK -> true
                         AppTheme.SYSTEM -> isSystemDark
                     }
+                }
+
+                LaunchedEffect(darkTheme) {
+                    val style = if (darkTheme) {
+                        androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    } else {
+                        androidx.activity.SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                    }
+                    enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 }
 
                 CipherTheme(
