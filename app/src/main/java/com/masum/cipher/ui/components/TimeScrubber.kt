@@ -19,6 +19,7 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.Calendar
 import com.masum.cipher.core.util.performVibrate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -28,7 +29,8 @@ fun TimeSelectorDropdown(
     selectedPeriod: TimePeriod,
     onPeriodSelected: (TimePeriod) -> Unit,
     modifier: Modifier = Modifier,
-    isHapticsEnabled: Boolean = true
+    isHapticsEnabled: Boolean = true,
+    iconOnly: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     
@@ -46,22 +48,24 @@ fun TimeSelectorDropdown(
                     view.performVibrate(isHapticsEnabled)
                     expanded = true
                 }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = if (iconOnly) 12.dp else 16.dp, vertical = if (iconOnly) 12.dp else 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = selectedPeriod.label.uppercase(),
-                style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.width(6.dp))
+            if (!iconOnly) {
+                Text(
+                    text = selectedPeriod.label.uppercase(),
+                    style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
             Icon(
-                imageVector = LucideIcons.ChevronDown,
+                imageVector = if (iconOnly) LucideIcons.Calendar else LucideIcons.ChevronDown,
                 contentDescription = "Select Time Range",
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(16.dp)
-                    .rotate(rotation)
+                    .size(if (iconOnly) 18.dp else 16.dp)
+                    .rotate(if (!iconOnly) rotation else 0f)
             )
         }
 

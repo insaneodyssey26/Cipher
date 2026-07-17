@@ -23,6 +23,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import kotlinx.coroutines.launch
@@ -40,6 +44,9 @@ import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
 import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
+import compose.icons.lucideicons.Search
+import compose.icons.lucideicons.X
+import compose.icons.lucideicons.ArrowLeft
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -92,6 +99,10 @@ fun DashboardScreen(
         }
     }
 
+    BackHandler(enabled = state.searchQuery.isNotEmpty()) {
+        viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(""))
+    }
+
     val mainScale by animateFloatAsState(
         targetValue = if (showAddSheet || editingTransaction != null) 0.93f else 1f,
         animationSpec = VaultMotion.LayoutSpring,
@@ -103,10 +114,17 @@ fun DashboardScreen(
         label = "MainCorner"
     )
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
     ) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
@@ -141,6 +159,10 @@ fun DashboardScreen(
                         onPeriodSelected = { period ->
                             viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
                         },
+                        searchQuery = state.searchQuery,
+                        onSearchQueryChanged = { query ->
+                            viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(query))
+                        },
                         privacyMode = privacyMode,
                         isHapticsEnabled = isHapticsEnabled
                     )
@@ -148,24 +170,36 @@ fun DashboardScreen(
 
 
                 item {
-                    BudgetPulseCard(
-                        spent = state.thisMonthExpenses,
-                        budget = state.monthlyBudget,
-                        onSetBudgetClick = {
-                            budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
-                            showBudgetDialog = true
-                        }
-                    )
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = state.searchQuery.isEmpty(),
+                        enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
+                        exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
+                    ) {
+                        BudgetPulseCard(
+                            spent = state.thisMonthExpenses,
+                            budget = state.monthlyBudget,
+                            onSetBudgetClick = {
+                                budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
+                                showBudgetDialog = true
+                            }
+                        )
+                    }
                 }
 
 
                 item {
-                    Text(
-                        text = "RECENT ACTIVITY",
-                        style = Typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
-                    )
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = state.searchQuery.isEmpty(),
+                        enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
+                        exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
+                    ) {
+                        Text(
+                            text = "RECENT ACTIVITY",
+                            style = Typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
+                        )
+                    }
                 }
 
 
@@ -176,8 +210,14 @@ fun DashboardScreen(
                         }
                     }
                 } else if (state.transactions.isEmpty()) {
-                    item {
-                        GenesisEmptyState(onAddManual = { showAddSheet = true })
+                    if (state.searchQuery.isNotEmpty()) {
+                        item {
+                            SearchEmptyState(query = state.searchQuery)
+                        }
+                    } else {
+                        item {
+                            GenesisEmptyState(onAddManual = { showAddSheet = true })
+                        }
                     }
                 } else {
                     itemsIndexed(
@@ -387,9 +427,29 @@ private fun DashboardHero(
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
     transactions: List<TransactionEntity>,
     onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod) -> Unit,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     privacyMode: Boolean,
     isHapticsEnabled: Boolean
 ) {
+    val heroHeight by animateDpAsState(
+        targetValue = if (searchQuery.isNotEmpty()) 80.dp else 380.dp,
+        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        label = "HeroHeight"
+    )
+
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (searchQuery.isEmpty()) 1f else 0f,
+        animationSpec = tween(durationMillis = if (searchQuery.isEmpty()) 300 else 150, easing = FastOutSlowInEasing),
+        label = "ContentAlpha"
+    )
+
+    val contentScale by animateFloatAsState(
+        targetValue = if (searchQuery.isEmpty()) 1f else 0.95f,
+        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        label = "ContentScale"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -403,13 +463,19 @@ private fun DashboardHero(
                 )
             )
             .statusBarsPadding()
-            .height(380.dp),
+            .height(heroHeight),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(top = 40.dp)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 120.dp)
+                .graphicsLayer {
+                    alpha = contentAlpha
+                    scaleX = contentScale
+                    scaleY = contentScale
+                }
         ) {
             Text(
                 text = when (selectedPeriod) {
@@ -502,31 +568,96 @@ private fun DashboardHero(
                 StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
             }
         }
-        
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp)
                 .align(Alignment.TopCenter)
+                .height(48.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "cipher.",
-                style = Typography.titleLarge.copy(
-                    fontFamily = SpaceGrotesk,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-1).sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.align(Alignment.CenterStart)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "cipher.",
+                    style = Typography.titleLarge.copy(
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-            TimeSelectorDropdown(
-                selectedPeriod = selectedPeriod,
-                onPeriodSelected = onPeriodSelected,
-                isHapticsEnabled = isHapticsEnabled,
-                modifier = Modifier.align(Alignment.CenterEnd)
-            )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(searchQuery)) }
+                    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+                    
+                    LaunchedEffect(searchQuery) {
+                        if (searchQuery != textFieldValue.text) {
+                            textFieldValue = textFieldValue.copy(text = searchQuery)
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .width(160.dp)
+                            .height(40.dp)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp)
+                    ) {
+                        Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        androidx.compose.foundation.text.BasicTextField(
+                            value = textFieldValue,
+                            onValueChange = { newValue ->
+                                textFieldValue = newValue
+                                onSearchQueryChanged(newValue.text)
+                            },
+                            modifier = Modifier.weight(1f),
+                            textStyle = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                            singleLine = true,
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                            decorationBox = { innerTextField ->
+                                Box(contentAlignment = Alignment.CenterStart) {
+                                    if (textFieldValue.text.isEmpty()) {
+                                        Text("Search...", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    innerTextField()
+                                }
+                            }
+                        )
+                        
+                        if (textFieldValue.text.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            IconButton(onClick = { 
+                                textFieldValue = androidx.compose.ui.text.input.TextFieldValue("")
+                                onSearchQueryChanged("") 
+                                focusManager.clearFocus()
+                            }, modifier = Modifier.size(20.dp)) {
+                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                            }
+                        }
+                    }
+
+                    TimeSelectorDropdown(
+                        selectedPeriod = selectedPeriod,
+                        onPeriodSelected = onPeriodSelected,
+                        isHapticsEnabled = isHapticsEnabled,
+                        iconOnly = true
+                    )
+                }
+            }
         }
     }
 }
@@ -702,6 +833,31 @@ private fun GenesisEmptyState(onAddManual: () -> Unit) {
         ) {
             Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary)
         }
+    }
+}
+
+@Composable
+private fun SearchEmptyState(query: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            LucideIcons.Search,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No transactions found for '$query'",
+            style = Typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }
 
