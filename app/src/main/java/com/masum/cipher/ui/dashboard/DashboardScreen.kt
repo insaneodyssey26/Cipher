@@ -15,11 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import kotlinx.coroutines.launch
@@ -115,11 +118,88 @@ fun DashboardScreen(
     )
 
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    
+    val maxToolbarHeight = 340.dp
+    val toolbarHeightRangePx = with(androidx.compose.ui.platform.LocalDensity.current) { 180.dp.roundToPx().toFloat() }
+    val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0f) }
+
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val wasAtTopAtFlingStart = remember { mutableStateOf(true) }
+
+    val nestedScrollConnection = remember {
+        object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
+            override fun onPreScroll(available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
+                val delta = available.y
+                if (delta < 0) {
+                    val previousOffset = toolbarOffsetHeightPx.value
+                    val newOffset = toolbarOffsetHeightPx.value + delta
+                    toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumed = toolbarOffsetHeightPx.value - previousOffset
+                    return androidx.compose.ui.geometry.Offset(0f, consumed)
+                }
+                return androidx.compose.ui.geometry.Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: androidx.compose.ui.geometry.Offset,
+                available: androidx.compose.ui.geometry.Offset,
+                source: androidx.compose.ui.input.nestedscroll.NestedScrollSource
+            ): androidx.compose.ui.geometry.Offset {
+                if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
+                val delta = available.y
+                val isDrag = source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.Drag || 
+                             source.toString().contains("UserInput")
+                if (delta > 0 && isDrag) {
+                    val previousOffset = toolbarOffsetHeightPx.value
+                    val newOffset = toolbarOffsetHeightPx.value + delta
+                    toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumedOffset = toolbarOffsetHeightPx.value - previousOffset
+                    return androidx.compose.ui.geometry.Offset(0f, consumedOffset)
+                }
+                return androidx.compose.ui.geometry.Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
+                wasAtTopAtFlingStart.value = (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0)
+                return androidx.compose.ui.unit.Velocity.Zero
+            }
+
+            override suspend fun onPostFling(
+                consumed: androidx.compose.ui.unit.Velocity,
+                available: androidx.compose.ui.unit.Velocity
+            ): androidx.compose.ui.unit.Velocity {
+                if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.unit.Velocity.Zero
+                val velocity = available.y
+                if (velocity > 0f && wasAtTopAtFlingStart.value) {
+                    androidx.compose.animation.core.animate(
+                        initialValue = toolbarOffsetHeightPx.value,
+                        targetValue = 0f,
+                        initialVelocity = velocity,
+                        animationSpec = androidx.compose.animation.core.spring(
+                            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                        )
+                    ) { value, _ ->
+                        toolbarOffsetHeightPx.value = value.coerceIn(-toolbarHeightRangePx, 0f)
+                    }
+                    return androidx.compose.ui.unit.Velocity(0f, velocity)
+                }
+                return androidx.compose.ui.unit.Velocity.Zero
+            }
+        }
+    }
+
+    LaunchedEffect(state.searchQuery) {
+        if (state.searchQuery.isNotEmpty()) {
+            toolbarOffsetHeightPx.value = 0f
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .nestedScroll(nestedScrollConnection)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     focusManager.clearFocus()
@@ -142,52 +222,78 @@ fun DashboardScreen(
                     this.scaleY = mainScale
                 }
         ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = padding.calculateBottomPadding()),
-                contentPadding = PaddingValues(bottom = 140.dp)
-            ) {
+            val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            
+            val searchTransition by animateFloatAsState(
+                targetValue = if (state.searchQuery.isEmpty()) 0f else 1f,
+                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+                label = "SearchTransition"
+            )
 
-                item {
-                    DashboardHero(
-                        totalBalance = state.totalBalance,
-                        income = state.totalIncome,
-                        expense = state.totalExpenses,
-                        selectedPeriod = state.selectedTimePeriod,
-                        transactions = state.transactions,
-                        onPeriodSelected = { period ->
-                            viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
-                        },
-                        searchQuery = state.searchQuery,
-                        onSearchQueryChanged = { query ->
-                            viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(query))
-                        },
-                        privacyMode = privacyMode,
-                        isHapticsEnabled = isHapticsEnabled
-                    )
-                }
-
-
-                item {
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = state.searchQuery.isEmpty(),
-                        enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
-                        exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
-                    ) {
-                        BudgetPulseCard(
-                            spent = state.thisMonthExpenses,
-                            budget = state.monthlyBudget,
-                            onSetBudgetClick = {
-                                budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
-                                showBudgetDialog = true
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = padding.calculateBottomPadding())
+                        .layout { measurable, constraints ->
+                            val extraHeight = toolbarHeightRangePx.toInt()
+                            val placeable = measurable.measure(
+                                constraints.copy(
+                                    minHeight = constraints.maxHeight + extraHeight,
+                                    maxHeight = constraints.maxHeight + extraHeight
+                                )
+                            )
+                            layout(placeable.width, constraints.maxHeight) {
+                                placeable.placeRelative(0, 0)
                             }
-                        )
+                        }
+                        .graphicsLayer {
+                            if (searchTransition > 0f) {
+                                val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
+                                translationY = -(offsetPx * searchTransition)
+                            } else {
+                                translationY = toolbarOffsetHeightPx.value
+                            }
+                        },
+                    contentPadding = PaddingValues(
+                        top = maxToolbarHeight + statusBarHeight, 
+                        bottom = 140.dp
+                    )
+                ) {
+                    item {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = state.searchQuery.isEmpty(),
+                            enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
+                            exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
+                        ) {
+                            val progress = if (toolbarHeightRangePx > 0f) {
+                                1f - (kotlin.math.abs(toolbarOffsetHeightPx.value) / toolbarHeightRangePx)
+                            } else 1f
+                            Box(modifier = Modifier
+                                .graphicsLayer { alpha = progress }
+                                .layout { measurable, constraints ->
+                                    val placeable = measurable.measure(constraints)
+                                    val newHeight = (placeable.height * progress).toInt()
+                                    layout(placeable.width, newHeight) {
+                                        placeable.placeRelative(0, 0)
+                                    }
+                                }
+                                .clipToBounds()
+                            ) {
+                                BudgetPulseCard(
+                                    spent = state.thisMonthExpenses,
+                                    budget = state.monthlyBudget,
+                                    onSetBudgetClick = {
+                                        budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
+                                        showBudgetDialog = true
+                                    }
+                                )
+                            }
+                        }
                     }
-                }
 
-
-                item {
+                    item {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = state.searchQuery.isEmpty(),
                         enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
@@ -236,6 +342,54 @@ fun DashboardScreen(
                         }
                     }
                 }
+                }
+                
+                DashboardHero(
+                    totalBalance = state.totalBalance,
+                    income = state.totalIncome,
+                    expense = state.totalExpenses,
+                    selectedPeriod = state.selectedTimePeriod,
+                    transactions = state.transactions,
+                    onPeriodSelected = { period ->
+                        viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
+                    },
+                    searchQuery = state.searchQuery,
+                    onSearchQueryChanged = { viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it)) },
+                    privacyMode = privacyMode,
+                    isHapticsEnabled = isHapticsEnabled,
+                    toolbarOffsetHeightPx = toolbarOffsetHeightPx.value,
+                    toolbarHeightRangePx = toolbarHeightRangePx,
+                    maxToolbarHeight = maxToolbarHeight
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .offset(y = maxToolbarHeight + statusBarHeight)
+                        .graphicsLayer {
+                            if (searchTransition > 0f) {
+                                val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
+                                translationY = -(offsetPx * searchTransition)
+                            } else {
+                                translationY = toolbarOffsetHeightPx.value
+                            }
+                            
+                            val progress = if (toolbarHeightRangePx > 0f) {
+                                (kotlin.math.abs(toolbarOffsetHeightPx.value) / toolbarHeightRangePx).coerceIn(0f, 1f)
+                            } else 0f
+                            
+                            alpha = if (searchTransition > 0f) 1f else progress
+                        }
+                        .background(
+                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.background,
+                                    androidx.compose.ui.graphics.Color.Transparent
+                                )
+                            )
+                        )
+                )
             }
         }
     }
@@ -430,11 +584,20 @@ private fun DashboardHero(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
     privacyMode: Boolean,
-    isHapticsEnabled: Boolean
+    isHapticsEnabled: Boolean,
+    toolbarOffsetHeightPx: Float = 0f,
+    toolbarHeightRangePx: Float = 1f,
+    maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
 ) {
+    val scrollProgress = if (toolbarHeightRangePx > 0f) {
+        1f - (kotlin.math.abs(toolbarOffsetHeightPx) / toolbarHeightRangePx)
+    } else 1f
+
+    val targetHeight = if (searchQuery.isNotEmpty()) 80.dp else maxToolbarHeight + with(androidx.compose.ui.platform.LocalDensity.current) { toolbarOffsetHeightPx.toDp() }
+    
     val heroHeight by animateDpAsState(
-        targetValue = if (searchQuery.isNotEmpty()) 80.dp else 380.dp,
-        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        targetValue = targetHeight,
+        animationSpec = tween(durationMillis = if (searchQuery.isNotEmpty()) 350 else 0),
         label = "HeroHeight"
     )
 
@@ -444,15 +607,13 @@ private fun DashboardHero(
         label = "ContentAlpha"
     )
 
-    val contentScale by animateFloatAsState(
-        targetValue = if (searchQuery.isEmpty()) 1f else 0.95f,
-        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
-        label = "ContentScale"
-    )
+    val balanceScale = 0.6f + (0.4f * scrollProgress)
+    val statsScale = 0.85f + (0.15f * scrollProgress)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -463,109 +624,129 @@ private fun DashboardHero(
                 )
             )
             .statusBarsPadding()
-            .height(heroHeight),
-        contentAlignment = Alignment.Center
+            .height(heroHeight)
+            .clipToBounds()
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 90.dp)
-                .graphicsLayer {
-                    alpha = contentAlpha
-                    scaleX = contentScale
-                    scaleY = contentScale
-                }
-        ) {
-            Text(
-                text = when (selectedPeriod) {
-                    com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "THIS MONTH'S BALANCE"
-                    com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "LAST MONTH'S BALANCE"
-                    com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "THIS YEAR'S BALANCE"
-                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> "TOTAL BALANCE"
-                },
-                style = Typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
+        if (searchQuery.isEmpty()) {
+            Box(
                 modifier = Modifier
-                    .padding(top = 8.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+                    .graphicsLayer { alpha = contentAlpha }
             ) {
-                Icon(
-                    imageVector = LucideIcons.Calendar,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(12.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = AppFormatters.getPeriodLabel(selectedPeriod, transactions).uppercase(),
-                    style = Typography.labelSmall.copy(
-                        fontSize = 10.sp, 
-                        fontWeight = FontWeight.Bold, 
-                        letterSpacing = 1.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
+                androidx.compose.ui.layout.Layout(
+                    content = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = balanceScale
+                                    scaleY = balanceScale
+                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
+                                }
+                        ) {
+                            if (scrollProgress > 0.5f) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.graphicsLayer { alpha = (scrollProgress - 0.5f) * 2f }) {
+                                    Icon(
+                                        imageVector = LucideIcons.Calendar,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
+                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "₹",
-                    style = Typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                if (privacyMode) {
-                    Text(
-                        text = "••••••",
-                        style = Typography.displayLarge.copy(fontSize = 64.sp),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                } else {
-                    AnimatedNumberTicker(
-                        value = totalBalance,
-                        textStyle = Typography.displayLarge.copy(
-                            fontSize = 64.sp,
-                            letterSpacing = (-2).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "₹",
+                                    style = Typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                if (privacyMode) {
+                                    Text(
+                                        text = "••••••",
+                                        style = Typography.displayLarge.copy(fontSize = 64.sp),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                } else {
+                                    AnimatedNumberTicker(
+                                        value = totalBalance,
+                                        textStyle = Typography.displayLarge.copy(fontSize = 64.sp, letterSpacing = (-2).sp),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .graphicsLayer {
+                                    scaleX = statsScale
+                                    scaleY = statsScale
+                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0.5f)
+                                }
+                                .background(
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f + (0.5f * (1f - scrollProgress))),
+                                    RoundedCornerShape(24.dp)
+                                )
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
+                                .padding(vertical = if (scrollProgress > 0.5f) 20.dp else 12.dp, horizontal = if (scrollProgress > 0.5f) 24.dp else 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, privacyMode = privacyMode)
+                            Box(modifier = Modifier.padding(horizontal = 16.dp).width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                            StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) { measurables, constraints ->
+                    val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+                    val balancePlaceable = measurables[0].measure(looseConstraints)
+                    
+                    val statsExpandedWidth = constraints.maxWidth
+                    val statsCollapsedWidth = (constraints.maxWidth * 0.55f).toInt()
+                    val currentStatsWidth = statsCollapsedWidth + ((statsExpandedWidth - statsCollapsedWidth) * scrollProgress).toInt()
+                    
+                    val statsConstraints = looseConstraints.copy(minWidth = currentStatsWidth, maxWidth = currentStatsWidth)
+                    val statsPlaceable = measurables[1].measure(statsConstraints)
+
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        val topPadding = 32.dp.roundToPx()
+                        val expBalanceY = topPadding.toFloat()
+                        
+                        val gap = (constraints.maxHeight - expBalanceY - balancePlaceable.height - statsPlaceable.height) / 2f
+
+                        val expBalanceX = (constraints.maxWidth - balancePlaceable.width) / 2f
+                        
+                        val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
+                        val expStatsY = expBalanceY + balancePlaceable.height + gap
+
+                        val colBalanceX = 0f
+                        val colBalanceY = (constraints.maxHeight - balancePlaceable.height) / 2f
+                        
+                        val colStatsX = (constraints.maxWidth - statsPlaceable.width).toFloat()
+                        val colStatsY = (constraints.maxHeight - statsPlaceable.height) / 2f
+
+                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * scrollProgress
+                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * scrollProgress
+                        
+                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * scrollProgress
+                        val currentStatsY = colStatsY + (expStatsY - colStatsY) * scrollProgress
+
+                        balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
+                        statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
+                    }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .background(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                        RoundedCornerShape(24.dp)
-                    )
-                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
-                    .padding(vertical = 20.dp, horizontal = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatItem(label = "INCOME", amount = income, color = EmeraldIncome, privacyMode = privacyMode)
-                Box(modifier = Modifier.width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
-                StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
             }
         }
 
