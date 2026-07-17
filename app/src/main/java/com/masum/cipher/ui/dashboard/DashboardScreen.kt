@@ -45,6 +45,8 @@ import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.ArrowDown
+import compose.icons.lucideicons.ArrowUp
 import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
 import compose.icons.lucideicons.Search
@@ -645,18 +647,29 @@ private fun DashboardHero(
                                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
                                 }
                         ) {
-                            if (scrollProgress > 0.5f) {
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.graphicsLayer { alpha = (scrollProgress - 0.5f) * 2f }) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .graphicsLayer { alpha = (scrollProgress - 0.5f).coerceAtLeast(0f) * 2f }
+                                    .layout { measurable, constraints ->
+                                        val placeable = measurable.measure(constraints)
+                                        val currentHeight = (placeable.height * scrollProgress).toInt()
+                                        layout(placeable.width, currentHeight) {
+                                            placeable.placeRelative(0, currentHeight - placeable.height)
+                                        }
+                                    }
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = LucideIcons.Calendar,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(12.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
-                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                                        style = Typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
@@ -695,17 +708,17 @@ private fun DashboardHero(
                                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0.5f)
                                 }
                                 .background(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f + (0.5f * (1f - scrollProgress))),
-                                    RoundedCornerShape(24.dp)
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                    RoundedCornerShape(20.dp)
                                 )
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
-                                .padding(vertical = if (scrollProgress > 0.5f) 20.dp else 12.dp, horizontal = if (scrollProgress > 0.5f) 24.dp else 16.dp),
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
+                                .padding(vertical = 10.dp, horizontal = 20.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, privacyMode = privacyMode)
-                            Box(modifier = Modifier.padding(horizontal = 16.dp).width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.outlineVariant))
-                            StatItem(label = "EXPENSES", amount = expense, color = RoseExpense, privacyMode = privacyMode)
+                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, icon = LucideIcons.ArrowDown, privacyMode = privacyMode)
+                            Box(modifier = Modifier.padding(horizontal = 16.dp).width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                            StatItem(label = "SPENT", amount = expense, color = RoseExpense, icon = LucideIcons.ArrowUp, privacyMode = privacyMode)
                         }
                     },
                     modifier = Modifier.fillMaxSize()
@@ -737,11 +750,14 @@ private fun DashboardHero(
                         val colStatsX = (constraints.maxWidth - statsPlaceable.width).toFloat()
                         val colStatsY = (constraints.maxHeight - statsPlaceable.height) / 2f
 
-                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * scrollProgress
-                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * scrollProgress
+                        val horizontalProgress = scrollProgress * scrollProgress
+                        val verticalProgress = 1f - (1f - scrollProgress) * (1f - scrollProgress)
+
+                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * horizontalProgress
+                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * verticalProgress
                         
-                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * scrollProgress
-                        val currentStatsY = colStatsY + (expStatsY - colStatsY) * scrollProgress
+                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * horizontalProgress
+                        val currentStatsY = colStatsY + (expStatsY - colStatsY) * verticalProgress
 
                         balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
                         statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
@@ -847,13 +863,27 @@ private fun DashboardHero(
 }
 
 @Composable
-private fun StatItem(label: String, amount: Double, color: Color, privacyMode: Boolean) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = label, style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun StatItem(label: String, amount: Double, color: Color, icon: androidx.compose.ui.graphics.vector.ImageVector, privacyMode: Boolean) {
+    Column(horizontalAlignment = Alignment.Start) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label, 
+                style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.5.sp, fontWeight = FontWeight.Medium), 
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Text(
             text = if (privacyMode) "••••" else "₹${String.format(java.util.Locale.getDefault(), "%.0f", amount)}",
-            style = Typography.titleMedium,
-            color = color
+            style = Typography.titleMedium.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 2.dp, start = 18.dp)
         )
     }
 }
