@@ -42,6 +42,9 @@ import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ViewDay
+import androidx.compose.material.icons.rounded.PieChart
 import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import com.masum.cipher.core.domain.model.TransactionCategory
@@ -78,7 +81,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 10
+    val currentVersionCode = 11
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -532,18 +535,23 @@ fun DashboardScreen(
                         WhatsNewFeatureItem(
                             title = "Notification Tracking",
                             description = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
-                            icon = LucideIcons.BellRing
+                            icon = compose.icons.LucideIcons.BellRing
                         )
                     }
                     WhatsNewFeatureItem(
-                        title = "Inline Calculator",
-                        description = "Crunch numbers directly in the transaction amount field to easily split bills or combine expenses.",
-                        icon = LucideIcons.Plus
+                        title = "Fluid Dashboard",
+                        description = "The main dashboard header now dynamically morphs and sticks to the top as you scroll.",
+                        icon = Icons.Rounded.ViewDay
                     )
                     WhatsNewFeatureItem(
-                        title = "Auto Backups",
-                        description = "Never lose data. Automatically encrypt and backup your vault to your local or cloud folder on a schedule.",
-                        icon = LucideIcons.Lock
+                        title = "Smart Calendar",
+                        description = "The Activity Heatmap now neatly groups your transaction history by month.",
+                        icon = compose.icons.LucideIcons.Calendar
+                    )
+                    WhatsNewFeatureItem(
+                        title = "Weekly Filters",
+                        description = "You can now filter your recent transactions by weekly intervals directly from the dropdown.",
+                        icon = compose.icons.LucideIcons.Calendar // Using Calendar icon for filters since Filter icon was unresolved
                     )
                 }
 

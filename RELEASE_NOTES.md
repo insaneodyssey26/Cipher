@@ -1,5 +1,26 @@
 # Release Notes
 
+## [4.5.0]
+
+### Added
+- **Dashboard Scrolling**: The main dashboard header now scales and pins to the top as you scroll.
+- **Big Number Formatting**: Balances over 10k dynamically scale their font size to prevent overflow clipping.
+- **Custom Native Charts**: Built native Compose Canvas implementations for the Spending Trend, Peak Hours, and Category Allocation charts.
+- **Calendar Paging**: The Activity Heatmap is now split and paginated by month.
+- **Weekly Filters**: Added a 'This Week' filter option to the transaction dropdown.
+
+### Changed
+- **Dropped Vico**: Removed the `vico` charting dependency entirely to reduce APK size and improve render performance.
+- **State Management**: Switched all UI state collection to `collectAsStateWithLifecycle` to prevent background memory leaks.
+- **Library Updates**:
+  - Kotlin: 2.1.10 → 2.4.10
+  - Compose BOM: 2025.01.01 → 2026.06.01
+  - AGP: 8.8.0 → 8.12.0
+  - Room: 2.6.1 → 2.8.4
+  - Hilt: 2.55 → 2.57.1
+  - KSP: 2.1.10-1.0.29 → 2.3.10
+  - Kotlinx Serialization: 1.7.3 → 1.8.0
+
 ## [4.2.0]
 
 ### Added

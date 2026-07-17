@@ -144,8 +144,8 @@ flowchart LR
 
 ### Dashboard
 - Global Pill-shaped floating Navigation Bar
-- Running balance with income/expense split
-- Transaction timeline with spend-based sorting capabilities
+- Running balance with income/expense split and scrolling header layout
+- Transaction timeline with spend-based sorting capabilities and weekly interval filtering
 - Live search by merchant or category
 - Add, edit, delete with snackbar undo
 - Monthly budget ring with health color coding
@@ -154,7 +154,7 @@ flowchart LR
 ### Insights
 - High-performance spending velocity charts built on custom `Canvas` Compose
 - Category breakdown doughnut
-- Advanced scrollable Calendar heatmap
+- Advanced scrollable Calendar heatmap with monthly paging
 - Day-detail drill-down
 - Subscription detector — finds recurring payments and predicted next billing dates
 
@@ -277,7 +277,7 @@ app/
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Kotlin 2.1.10 |
+| Language | Kotlin 2.4.10 |
 | UI | Jetpack Compose + Material 3 |
 | Architecture | MVI via `MviBase` |
 | DI | Hilt |
@@ -288,7 +288,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 35 (Android 15) |
-| Version | 4.2.0 |
+| Version | 4.5.0 |
 
 ---
 
