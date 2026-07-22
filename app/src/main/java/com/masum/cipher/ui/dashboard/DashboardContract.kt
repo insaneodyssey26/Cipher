@@ -44,6 +44,7 @@ class DashboardContract {
 
     data class Point(val x: Float, val y: Float, val timestamp: Long)
 
+    @androidx.compose.runtime.Immutable
     data class CategoryData(
         val category: String,
         val amount: Double,

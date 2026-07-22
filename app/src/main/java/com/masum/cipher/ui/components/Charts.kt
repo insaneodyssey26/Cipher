@@ -415,10 +415,19 @@ fun CategoryAllocationDonut(
 ) {
     if (categories.isEmpty()) return
     
-    val animationProgress = remember { androidx.compose.animation.core.Animatable(0f) }
+    val animProgress = remember { Animatable(0f) }
+    val hasAnimated = rememberSaveable(categories) { mutableStateOf(false) }
     LaunchedEffect(categories) {
-        animationProgress.animateTo(1f, animationSpec = tween(1200, easing = FastOutSlowInEasing))
+        if (!hasAnimated.value) {
+            animProgress.snapTo(0f)
+            animProgress.animateTo(1f, animationSpec = tween(1200, easing = FastOutSlowInEasing))
+            hasAnimated.value = true
+        } else {
+            animProgress.snapTo(1f)
+        }
     }
+
+    val totalPercent = remember(categories) { categories.sumOf { it.percentage.toDouble() }.toFloat() }
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -432,18 +441,18 @@ fun CategoryAllocationDonut(
             Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 val strokeWidth = 24.dp.toPx()
                 var startAngle = -90f
-                val totalPercent = categories.map { it.percentage }.sum()
+                val safeTotal = if (totalPercent > 0f) totalPercent else 1f
                 
                 categories.forEach { category ->
-                    val sweepAngle = (category.percentage / totalPercent) * 360f * animationProgress.value
+                    val sweepAngle = (category.percentage / safeTotal) * 360f * animProgress.value
                     drawArc(
                         color = Color(category.color),
                         startAngle = startAngle,
-                        sweepAngle = sweepAngle.toFloat(),
+                        sweepAngle = sweepAngle,
                         useCenter = false,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                     )
-                    startAngle += sweepAngle.toFloat()
+                    startAngle += sweepAngle
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
