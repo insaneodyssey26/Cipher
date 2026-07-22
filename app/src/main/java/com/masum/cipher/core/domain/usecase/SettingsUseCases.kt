@@ -13,15 +13,25 @@ import java.util.Date
 import javax.inject.Inject
 
 class UpdateSettingsUseCase @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val transactionRepository: com.masum.cipher.core.data.repository.TransactionRepository
 ) {
-    suspend fun theme(theme: AppTheme) = userPreferences.setTheme(theme)
-    suspend fun accentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) = userPreferences.setAccentColor(color)
+    suspend fun theme(theme: AppTheme) {
+        userPreferences.setTheme(theme)
+        transactionRepository.refreshWidgets()
+    }
+    suspend fun accentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
+        userPreferences.setAccentColor(color)
+        transactionRepository.refreshWidgets()
+    }
     suspend fun biometric(enabled: Boolean) = userPreferences.setBiometricEnabled(enabled)
     suspend fun privacyMode(enabled: Boolean) = userPreferences.setPrivacyModeEnabled(enabled)
     suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)
     suspend fun autoLockTimeout(timeout: Long) = userPreferences.setAutoLockTimeout(timeout)
-    suspend fun monthlyBudget(amount: Double) = userPreferences.setMonthlyBudget(amount)
+    suspend fun monthlyBudget(amount: Double) {
+        userPreferences.setMonthlyBudget(amount)
+        transactionRepository.refreshWidgets()
+    }
     suspend fun autoBackupEnabled(enabled: Boolean) = userPreferences.setAutoBackupEnabled(enabled)
     suspend fun autoBackupFrequency(frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) = userPreferences.setAutoBackupFrequency(frequency)
     suspend fun autoBackupUri(uri: String?) = userPreferences.setAutoBackupUri(uri)

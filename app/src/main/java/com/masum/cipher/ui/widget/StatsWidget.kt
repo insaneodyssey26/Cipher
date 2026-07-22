@@ -12,6 +12,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
@@ -35,9 +36,11 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.masum.cipher.MainActivity
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.di.WidgetEntryPoint
 import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.flow.first
 
 class StatsWidget : GlanceAppWidget() {
 
@@ -45,31 +48,37 @@ class StatsWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val settings = UserPreferences(context).settingsFlow.first()
+        val accentColor = Color(settings.accentColor.colorValue)
         provideContent {
             val prefs = currentState<Preferences>()
             val spent = prefs[WidgetKeys.STATS_SPENT] ?: 0.0
             val income = prefs[WidgetKeys.STATS_INCOME] ?: 0.0
             GlanceTheme {
-                Content(spent = spent, income = income)
+                Content(spent = spent, income = income, brandColor = ColorProvider(accentColor))
             }
         }
     }
 
     @Composable
-    private fun Content(spent: Double, income: Double) {
+    private fun Content(spent: Double, income: Double, brandColor: ColorProvider) {
         val net = income - spent
         val netPositive = net >= 0
-        val netColor = ColorProvider(if (netPositive) Color(0xFF4CAF50) else Color(0xFFE53935))
-        val incomeColor = ColorProvider(Color(0xFF4CAF50))
-        val expenseColor = ColorProvider(Color(0xFFE53935))
-        val cipherBlue = ColorProvider(Color(0xFF4E6CF7))
+
+        val emeraldIncome = ColorProvider(Color(0xFF10B981))
+        val roseExpense = ColorProvider(Color(0xFFF43F5E))
+        val surfaceBg = GlanceTheme.colors.surface
+        val textMuted = GlanceTheme.colors.onSurfaceVariant
+
+        val netColor = if (netPositive) emeraldIncome else roseExpense
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(GlanceTheme.colors.surface)
+                .background(surfaceBg)
+                .cornerRadius(24.dp)
                 .clickable(actionStartActivity<MainActivity>())
-                .padding(16.dp),
+                .padding(12.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -83,25 +92,40 @@ class StatsWidget : GlanceAppWidget() {
                         style = TextStyle(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = cipherBlue
+                            color = brandColor
                         )
                     )
                     Text(
-                        text = "↻",
-                        modifier = GlanceModifier.clickable(actionRunCallback<StatsRefreshAction>()),
+                        text = "OVERVIEW",
                         style = TextStyle(
-                            fontSize = 14.sp,
-                            color = GlanceTheme.colors.onSurfaceVariant
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textMuted
                         )
                     )
+                    Box(
+                        modifier = GlanceModifier
+                            .padding(start = 6.dp)
+                            .clickable(actionRunCallback<StatsRefreshAction>()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "↻",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = brandColor
+                            )
+                        )
+                    }
                 }
 
-                Spacer(GlanceModifier.height(12.dp))
+                Spacer(GlanceModifier.height(10.dp))
 
                 Text(
                     text = "${if (netPositive) "+" else "−"}₹${fmt(net)}",
                     style = TextStyle(
-                        fontSize = 26.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = netColor
                     )
@@ -111,47 +135,47 @@ class StatsWidget : GlanceAppWidget() {
                     text = "net this month",
                     style = TextStyle(
                         fontSize = 11.sp,
-                        color = GlanceTheme.colors.onSurfaceVariant
+                        color = textMuted
                     )
                 )
 
-                Spacer(GlanceModifier.height(14.dp))
+                Spacer(GlanceModifier.height(12.dp))
 
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "↑ ₹${fmt(income)}",
+                            text = "↓ ₹${fmt(income)}",
                             style = TextStyle(
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = incomeColor
+                                color = emeraldIncome
                             )
                         )
                         Spacer(GlanceModifier.height(2.dp))
                         Text(
                             text = "income",
                             style = TextStyle(
-                                fontSize = 10.sp,
-                                color = GlanceTheme.colors.onSurfaceVariant
+                                fontSize = 9.sp,
+                                color = textMuted
                             )
                         )
                     }
-                    Spacer(GlanceModifier.width(8.dp))
+                    Spacer(GlanceModifier.width(4.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "↓ ₹${fmt(spent)}",
+                            text = "↑ ₹${fmt(spent)}",
                             style = TextStyle(
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = expenseColor
+                                color = roseExpense
                             )
                         )
                         Spacer(GlanceModifier.height(2.dp))
                         Text(
                             text = "spent",
                             style = TextStyle(
-                                fontSize = 10.sp,
-                                color = GlanceTheme.colors.onSurfaceVariant
+                                fontSize = 9.sp,
+                                color = textMuted
                             )
                         )
                     }

@@ -2,6 +2,10 @@
 
 ## [4.6.0]
 
+### Added
+- **Modern Home Screen Widgets**: Complete visual overhaul of `Budget Progress` and `Monthly Overview` home screen widgets with 24dp rounded corners, lime brand accents, and rich typography.
+- **Launcher Widget Previews**: Added dedicated launcher picker previews (`widget_preview_budget_layout` & `widget_preview_stats_layout`) so widgets render accurate visual previews when added to the home screen.
+
 ### Changed
 - **Target SDK Upgrade**: Updated `targetSdk` and `compileSdk` to **37 (Android 17)** to meet Google Play's latest target API level requirement.
 - **Gradle Compatibility**: Configured `android.suppressUnsupportedCompileSdk=37.0` for smooth compilation on AGP 8.12+.

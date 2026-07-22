@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Cipher</string>
-    <string name="widget_budget_description">Shows your monthly spending progress against your budget</string>
-    <string name="widget_stats_description">Shows this month\'s income vs spending at a glance</string>
+    <string name="widget_budget_name">Budget Progress</string>
+    <string name="widget_budget_description">Live monthly spending progress, remaining balance, and budget status</string>
+    <string name="widget_stats_name">Monthly Overview</string>
+    <string name="widget_stats_description">Real-time net cash flow, income, and spending summary</string>
 </resources>
