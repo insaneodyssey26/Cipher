@@ -24,30 +24,37 @@ import compose.icons.lucideicons.Delete
 @Composable
 fun CalculatorNumpad(
     input: String,
-    onInputChange: (String) -> Unit,
+    cursorPosition: Int = input.length,
+    onInputChange: (newInput: String, newCursorPosition: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
+    val safeCursor = cursorPosition.coerceIn(0, input.length)
 
     val onKeyClick: (String) -> Unit = { key ->
         view.performVibrate(true)
+        val builder = StringBuilder(input)
         if (input == "0" && key != "." && key !in "+-*/") {
-            onInputChange(key)
+            onInputChange(key, 1)
         } else {
-            onInputChange(input + key)
+            builder.insert(safeCursor, key)
+            val nextCursor = safeCursor + key.length
+            onInputChange(builder.toString(), nextCursor)
         }
     }
 
     val onBackspace: () -> Unit = {
         view.performVibrate(true)
-        if (input.isNotEmpty()) {
-            onInputChange(input.dropLast(1))
+        if (input.isNotEmpty() && safeCursor > 0) {
+            val builder = StringBuilder(input)
+            builder.deleteCharAt(safeCursor - 1)
+            onInputChange(builder.toString(), safeCursor - 1)
         }
     }
 
     val onClear: () -> Unit = {
         view.performVibrate(true, isLongPress = true)
-        onInputChange("")
+        onInputChange("", 0)
     }
 
     Column(

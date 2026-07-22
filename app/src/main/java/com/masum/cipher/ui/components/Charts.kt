@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.theme.*
@@ -738,6 +739,7 @@ fun CalendarHeatmap(
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
+            val view = androidx.compose.ui.platform.LocalView.current
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Icon(
                     imageVector = LucideIcons.ChevronLeft,
@@ -748,6 +750,7 @@ fun CalendarHeatmap(
                         indication = null,
                         interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                     ) {
+                        view.performVibrate(true)
                         coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
                     }
                 )
@@ -760,6 +763,7 @@ fun CalendarHeatmap(
                         indication = null,
                         interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                     ) {
+                        view.performVibrate(true)
                         coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                     }
                 )

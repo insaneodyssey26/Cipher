@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -135,7 +139,7 @@ fun TransactionDetailsSheet(
             }
 
             // Amount field
-            MassiveAmountInput(
+            AmountInputField(
                 value = amount,
                 onValueChange = { amount = it },
                 color = if (isIncome) EmeraldIncome else RoseExpense
@@ -343,21 +347,28 @@ private fun VaultSheetTextField(
 }
 
 @Composable
-private fun MassiveAmountInput(
+private fun AmountInputField(
     value: String,
     onValueChange: (String) -> Unit,
     color: Color
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
         BasicTextField(
-            value = value,
+            value = textFieldValue,
             onValueChange = { newValue -> 
-                if (newValue.all { it.isDigit() || it in "+-*/. " }) {
-                    onValueChange(newValue)
+                if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
+                    textFieldValue = newValue
+                    onValueChange(newValue.text)
                 }
+                keyboardController?.hide()
             },
             textStyle = Typography.displayLarge.copy(
                 color = color,
@@ -366,9 +377,15 @@ private fun MassiveAmountInput(
                 letterSpacing = (-2).sp
             ),
             singleLine = true,
-            readOnly = true,
+            readOnly = false,
             cursorBrush = SolidColor(color),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { state ->
+                    if (state.isFocused) {
+                        keyboardController?.hide()
+                    }
+                },
             decorationBox = { inner ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -383,7 +400,7 @@ private fun MassiveAmountInput(
                         ),
                         modifier = Modifier.padding(end = 8.dp)
                     )
-                    if (value.isEmpty()) {
+                    if (textFieldValue.text.isEmpty()) {
                         Text(
                             text = "0",
                             style = Typography.displayLarge.copy(
@@ -399,8 +416,8 @@ private fun MassiveAmountInput(
             }
         )
         
-        val computed = MathEvaluator.evaluate(value)
-        if (computed != null && value.any { it in "+-*/" }) {
+        val computed = MathEvaluator.evaluate(textFieldValue.text)
+        if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
                 text = "= ₹${String.format(Locale.getDefault(), "%,.2f", computed)}",
                 style = Typography.titleMedium,
@@ -412,8 +429,15 @@ private fun MassiveAmountInput(
         }
         
         CalculatorNumpad(
-            input = value,
-            onInputChange = onValueChange,
+            input = textFieldValue.text,
+            cursorPosition = textFieldValue.selection.start,
+            onInputChange = { newInput, newCursor ->
+                textFieldValue = TextFieldValue(
+                    text = newInput,
+                    selection = TextRange(newCursor.coerceIn(0, newInput.length))
+                )
+                onValueChange(newInput)
+            },
             modifier = Modifier.padding(bottom = 8.dp)
         )
     }

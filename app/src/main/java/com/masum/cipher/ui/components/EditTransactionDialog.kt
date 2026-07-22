@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +38,11 @@ fun EditTransactionDialog(
     onConfirm: (TransactionEntity) -> Unit
 ) {
     var merchant by remember { mutableStateOf(transaction.merchant) }
-    var amount by remember { mutableStateOf(if (transaction.amount == 0.0) "" else transaction.amount.toString()) }
+    var textFieldValue by remember { 
+        val initText = if (transaction.amount == 0.0) "" else transaction.amount.toString()
+        mutableStateOf(TextFieldValue(text = initText, selection = TextRange(initText.length)))
+    }
+    val amount = textFieldValue.text
     var isIncome by remember { mutableStateOf(transaction.isIncome) }
     var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
     var categoryExpanded by remember { mutableStateOf(false) }
@@ -101,14 +109,16 @@ fun EditTransactionDialog(
 
             // Amount field
             Column {
-                SheetTextField(
-                    value = amount,
+                SheetTextFieldValue(
+                    value = textFieldValue,
                     onValueChange = { newValue -> 
-                        if (newValue.all { it.isDigit() || it in "+-*/. " }) amount = newValue 
+                        if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
+                            textFieldValue = newValue
+                        } 
                     },
                     label = "Amount",
                     prefix = "₹",
-                    readOnly = true
+                    readOnly = false
                 )
                 
                 val computed = com.masum.cipher.core.util.MathEvaluator.evaluate(amount)
@@ -125,7 +135,13 @@ fun EditTransactionDialog(
                 
                 CalculatorNumpad(
                     input = amount,
-                    onInputChange = { amount = it }
+                    cursorPosition = textFieldValue.selection.start,
+                    onInputChange = { newInput, newCursor ->
+                        textFieldValue = TextFieldValue(
+                            text = newInput,
+                            selection = TextRange(newCursor.coerceIn(0, newInput.length))
+                        )
+                    }
                 )
             }
 
@@ -330,6 +346,83 @@ private fun SheetTextField(
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { inner ->
                     if (value.isEmpty()) {
+                        Text(
+                            text = "—",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = outline
+                        )
+                    }
+                    inner()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SheetTextFieldValue(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: String,
+    prefix: String? = null,
+    readOnly: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+) {
+    val surface = MaterialTheme.colorScheme.surface
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
+    val onBg = MaterialTheme.colorScheme.onBackground
+    val outline = MaterialTheme.colorScheme.outline
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(surface, RoundedCornerShape(12.dp))
+            .border(1.dp, outlineVariant, RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                letterSpacing = 1.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = onSurfaceVar
+        )
+        Spacer(Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (prefix != null) {
+                Text(
+                    text = prefix,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = onSurfaceVar
+                )
+                Spacer(Modifier.width(4.dp))
+            }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            BasicTextField(
+                value = value,
+                onValueChange = { newValue ->
+                    onValueChange(newValue)
+                    keyboardController?.hide()
+                },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = onBg
+                ),
+                singleLine = true,
+                readOnly = false,
+                keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                cursorBrush = SolidColor(CipherBlue),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { state ->
+                        if (state.isFocused) {
+                            keyboardController?.hide()
+                        }
+                    },
+                decorationBox = { inner ->
+                    if (value.text.isEmpty()) {
                         Text(
                             text = "—",
                             style = MaterialTheme.typography.bodyLarge,
