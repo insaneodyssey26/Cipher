@@ -11,14 +11,14 @@ plugins {
 
 android {
     namespace = "com.masum.cipher"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.masum.cipher"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 11
-        versionName = "4.5.0"
+        targetSdk = 37
+        versionCode = 12
+        versionName = "4.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,10 +31,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-debug"
         }
     }
     compileOptions {

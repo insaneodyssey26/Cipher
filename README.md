@@ -287,8 +287,8 @@ app/
 | Navigation | Navigation Compose |
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
-| Target SDK | 35 (Android 15) |
-| Version | 4.5.0 |
+| Target SDK | 37 (Android 17) |
+| Version | 4.6.0 |
 
 ---
 

@@ -1,5 +1,11 @@
 # Release Notes
 
+## [4.6.0]
+
+### Changed
+- **Target SDK Upgrade**: Updated `targetSdk` and `compileSdk` to **37 (Android 17)** to meet Google Play's latest target API level requirement.
+- **Gradle Compatibility**: Configured `android.suppressUnsupportedCompileSdk=37.0` for smooth compilation on AGP 8.12+.
+
 ## [4.5.0]
 
 ### Added
