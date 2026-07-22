@@ -302,7 +302,7 @@ app/
 ./gradlew :app:assembleRelease
 ```
 
-Open in Android Studio (Ladybug or newer). Compile SDK 35 required.
+Open in Android Studio (Ladybug or newer). Compile SDK 37 required.
 
 ---
 

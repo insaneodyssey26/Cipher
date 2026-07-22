@@ -489,7 +489,7 @@ fun DashboardScreen(
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
             } catch (e: Exception) {
-                "4.2.0"
+                "4.6.0"
             }
         }
         ModalBottomSheet(
@@ -539,19 +539,19 @@ fun DashboardScreen(
                         )
                     }
                     WhatsNewFeatureItem(
-                        title = "Fluid Dashboard",
-                        description = "The main dashboard header now dynamically morphs and sticks to the top as you scroll.",
+                        title = "Modern Home Widgets",
+                        description = "Complete redesign of Budget Progress and Monthly Overview widgets with dynamic theme & accent color sync.",
                         icon = Icons.Rounded.ViewDay
                     )
                     WhatsNewFeatureItem(
-                        title = "Smart Calendar",
-                        description = "The Activity Heatmap now neatly groups your transaction history by month.",
+                        title = "Precision Numpad & Cursor",
+                        description = "Tap anywhere inside amounts to position your cursor, edit numbers mid-text, or perform quick inline calculations.",
                         icon = compose.icons.LucideIcons.Calendar
                     )
                     WhatsNewFeatureItem(
-                        title = "Weekly Filters",
-                        description = "You can now filter your recent transactions by weekly intervals directly from the dropdown.",
-                        icon = compose.icons.LucideIcons.Calendar // Using Calendar icon for filters since Filter icon was unresolved
+                        title = "Android 17 Optimized",
+                        description = "Full target API 37 compatibility with zero-recomposition Insights charts and responsive haptic interactions.",
+                        icon = compose.icons.LucideIcons.BellRing
                     )
                 }
 

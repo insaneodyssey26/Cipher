@@ -3,12 +3,14 @@
 ## [4.6.0]
 
 ### Added
-- **Modern Home Screen Widgets**: Complete visual overhaul of `Budget Progress` and `Monthly Overview` home screen widgets with 24dp rounded corners, lime brand accents, and rich typography.
-- **Launcher Widget Previews**: Added dedicated launcher picker previews (`widget_preview_budget_layout` & `widget_preview_stats_layout`) so widgets render accurate visual previews when added to the home screen.
+- **Modern Home Screen Widgets**: Complete visual overhaul of `Budget Progress` and `Monthly Overview` home screen Glance widgets with dynamic dark/light theme support, user accent color synchronization, and high-precision touch handling for instant manual refresh.
+- **Launcher Widget Previews**: Added dedicated launcher picker preview cards (`widget_preview_budget_layout` & `widget_preview_stats_layout`) so widgets render accurate visual previews when added to the home screen.
+- **Precision Numpad Cursor Control**: Enhanced manual transaction entry and editing sheets to allow tap-to-place cursor positioning anywhere in numbers with soft keyboard suppression and selection-aware insertion/deletion.
 
 ### Changed
-- **Target SDK Upgrade**: Updated `targetSdk` and `compileSdk` to **37 (Android 17)** to meet Google Play's latest target API level requirement.
-- **Gradle Compatibility**: Configured `android.suppressUnsupportedCompileSdk=37.0` for smooth compilation on AGP 8.12+.
+- **Target SDK Upgrade**: Updated `targetSdk` and `compileSdk` to **37 (Android 17)** to meet Google Play's latest target API level requirements.
+- **Insights Render Performance**: Optimized `CategoryAllocationDonut` with `@Immutable` data stability and cached calculations, eliminating unnecessary recompositions and frame drops during scrolling.
+- **Haptic Feedback**: Added responsive tactile haptic vibration to the Activity Calendar month navigation buttons on the Insights screen.
 
 ## [4.5.0]
 
