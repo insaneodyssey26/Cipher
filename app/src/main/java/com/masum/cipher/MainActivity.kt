@@ -30,6 +30,7 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.ui.MainContract
 import com.masum.cipher.ui.MainViewModel
+import com.masum.cipher.core.worker.NotificationScheduler
 import com.masum.cipher.ui.components.FloatingNavBar
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.dashboard.DashboardScreen
@@ -56,8 +57,13 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var notificationScheduler: NotificationScheduler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        notificationScheduler.scheduleDailyNotifications()
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.attributes.preferredDisplayModeId = 0 
