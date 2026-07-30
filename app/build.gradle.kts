@@ -14,11 +14,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.masum.cipher.debug"
+        applicationId = "com.masum.cipher"
         minSdk = 24
         targetSdk = 37
-        versionCode = 12
-        versionName = "4.6.0-DEBUG"
+        versionCode = 13
+        versionName = "4.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -94,6 +94,9 @@ dependencies {
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
+    
+    // Google Play In-App Review
+    implementation(libs.play.review)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

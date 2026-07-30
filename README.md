@@ -142,6 +142,12 @@ flowchart LR
 - India-focused brand dictionary covers major UPI, credit card, and bank alert formats
 - False-positive filtering rejects OTPs, promotional, and non-transactional messages
 
+### Push Notifications
+- **Budget Alerts**: Get notified when your monthly spending crosses 50%, 90%, and 100% of your budget limit.
+- **Daily Summaries**: A quick evening recap of your spending (only triggers on days you actually spend money).
+- **Monthly Wrap-up**: A snapshot of your total income and expenses pushed on the 1st of every month.
+- **Categorization Reminder**: A quick nudge when a transaction defaults to the "Others" category.
+
 ### Dashboard
 - Global Pill-shaped floating Navigation Bar
 - Running balance with income/expense split and scrolling header layout
@@ -258,7 +264,8 @@ app/
     │   ├── mvi/                      # MviBase (shared ViewModel base)
     │   ├── security/                 # BiometricAuthenticator, SecurityManager
     │   ├── sms/                      # SmsReceiver, SmsParser
-    │   └── util/                     # Formatters
+    │   ├── util/                     # Formatters, PdfGenerator
+    │   └── worker/                   # WorkManager (AutoBackup, Notifications)
     │
     └── ui/
         ├── components/               # Shared composables, Charts, LockScreen
@@ -288,7 +295,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 37 (Android 17) |
-| Version | 4.6.0 |
+| Version | 4.7.0 |
 
 ---
 

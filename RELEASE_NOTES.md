@@ -1,11 +1,18 @@
 # Release Notes
 
+## [4.7.0]
+
+### Added
+- **Push Notifications**: Added background notifications to warn you when your spending crosses 50%, 90%, and 100% of your monthly budget. Also added a quick nudge to remind you to categorize any "Others" transactions.
+- **Daily & Monthly Summaries**: The app now pushes a daily spending recap every evening (only on days you actually spent money) and a monthly wrap-up on the 1st of every month.
+- **Transaction Draft Persistence**: Manual transaction entries are now automatically saved as drafts. If you accidentally switch away to another app while adding a transaction, your amounts and text will be waiting for you when you switch back.
+
+---
+
 ## [4.6.0]
 
 ### Added
 - **Modern Home Screen Widgets**: Complete visual overhaul of `Budget Progress` and `Monthly Overview` home screen Glance widgets with dynamic dark/light theme support, user accent color synchronization, and high-precision touch handling for instant manual refresh.
-- **Smart Push Notifications**: Added fully automated background push notifications to warn users when their spending crosses 50%, 90%, and 100% of their monthly budget limit. Also includes a smart nudge to remind users to categorize auto-parsed "General" transactions.
-- **Transaction Draft Persistence**: Manual transaction entries are now automatically saved as drafts. If you accidentally close the app while adding a transaction, your amounts and text will instantly restore when you return.
 - **Launcher Widget Previews**: Added dedicated launcher picker preview cards (`widget_preview_budget_layout` & `widget_preview_stats_layout`) so widgets render accurate visual previews when added to the home screen.
 - **Precision Numpad Cursor Control**: Enhanced manual transaction entry and editing sheets to allow tap-to-place cursor positioning anywhere in numbers with soft keyboard suppression and selection-aware insertion/deletion.
 

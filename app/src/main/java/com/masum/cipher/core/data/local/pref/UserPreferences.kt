@@ -36,6 +36,10 @@ class UserPreferences @Inject constructor(
         val AUTO_BACKUP_FREQUENCY = stringPreferencesKey("auto_backup_frequency")
         val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
         val AUTO_BACKUP_ENCRYPTED_PASSWORD = stringPreferencesKey("auto_backup_encrypted_password")
+        
+        // Review Keys
+        val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
+        val HAS_PROMPTED_REVIEW = booleanPreferencesKey("has_prompted_review")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -64,7 +68,9 @@ class UserPreferences @Inject constructor(
                 AutoBackupFrequency.NEVER
             },
             autoBackupUri = preferences[Keys.AUTO_BACKUP_URI],
-            autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD]
+            autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD],
+            appLaunchCount = preferences[Keys.APP_LAUNCH_COUNT] ?: 0,
+            hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false
         )
     }
 
@@ -146,6 +152,17 @@ class UserPreferences @Inject constructor(
             }
         }
     }
+
+    suspend fun incrementAppLaunchCount() {
+        context.dataStore.edit { preferences ->
+            val current = preferences[Keys.APP_LAUNCH_COUNT] ?: 0
+            preferences[Keys.APP_LAUNCH_COUNT] = current + 1
+        }
+    }
+
+    suspend fun setHasPromptedReview(prompted: Boolean) {
+        context.dataStore.edit { it[Keys.HAS_PROMPTED_REVIEW] = prompted }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -185,5 +202,7 @@ data class UserSettings(
     val autoBackupEnabled: Boolean = false,
     val autoBackupFrequency: AutoBackupFrequency = AutoBackupFrequency.NEVER,
     val autoBackupUri: String? = null,
-    val autoBackupEncryptedPassword: String? = null
+    val autoBackupEncryptedPassword: String? = null,
+    val appLaunchCount: Int = 0,
+    val hasPromptedReview: Boolean = false
 )

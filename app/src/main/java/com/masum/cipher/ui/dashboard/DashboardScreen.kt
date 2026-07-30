@@ -32,7 +32,6 @@ import com.masum.cipher.core.data.local.entity.TransactionEntity
 import androidx.compose.ui.text.style.TextOverflow
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import kotlinx.coroutines.launch
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.masum.cipher.ui.components.*
 import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
@@ -42,9 +41,6 @@ import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ViewDay
-import androidx.compose.material.icons.rounded.PieChart
 import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import com.masum.cipher.core.domain.model.TransactionCategory
@@ -60,8 +56,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToInsights: () -> Unit,
     onNavigateToManageApps: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,7 +75,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 12
+    val currentVersionCode = 13
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -99,6 +93,36 @@ fun DashboardScreen(
                 if (result == SnackbarResult.ActionPerformed) {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
                     viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
+                }
+            }
+        }
+    }
+
+    var hasCheckedReview by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(settings) {
+        if (settings != null && !hasCheckedReview) {
+            hasCheckedReview = true
+            userPreferences.incrementAppLaunchCount()
+            val currentLaunchCount = settings!!.appLaunchCount + 1
+            
+            // Trigger review prompt after 5 app launches
+            if (currentLaunchCount >= 5 && !settings!!.hasPromptedReview) {
+                val reviewManager = com.google.android.play.core.review.ReviewManagerFactory.create(context)
+                val request = reviewManager.requestReviewFlow()
+                request.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val reviewInfo = task.result
+                        val activity = context as? android.app.Activity
+                        if (activity != null) {
+                            val flow = reviewManager.launchReviewFlow(activity, reviewInfo)
+                            flow.addOnCompleteListener { _ ->
+                                coroutineScope.launch {
+                                    userPreferences.setHasPromptedReview(true)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -174,12 +198,12 @@ fun DashboardScreen(
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.unit.Velocity.Zero
                 val velocity = available.y
                 if (velocity > 0f && wasAtTopAtFlingStart.value) {
-                    androidx.compose.animation.core.animate(
+                    animate(
                         initialValue = toolbarOffsetHeightPx.value,
                         targetValue = 0f,
                         initialVelocity = velocity,
-                        animationSpec = androidx.compose.animation.core.spring(
-                            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                        animationSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow
                         )
                     ) { value, _ ->
                         toolbarOffsetHeightPx.value = value.coerceIn(-toolbarHeightRangePx, 0f)
@@ -234,7 +258,7 @@ fun DashboardScreen(
 
             val groupedTransactions = remember(state.transactions) {
                 state.transactions.groupBy {
-                    java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(it.timestamp))
+                    SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(it.timestamp))
                 }
             }
 
@@ -270,7 +294,7 @@ fun DashboardScreen(
                     )
                 ) {
                     item {
-                        androidx.compose.animation.AnimatedVisibility(
+                        AnimatedVisibility(
                             visible = state.searchQuery.isEmpty(),
                             enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
                             exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
@@ -387,10 +411,10 @@ fun DashboardScreen(
                             alpha = if (searchTransition > 0f) 1f else progress
                         }
                         .background(
-                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                            brush = Brush.verticalGradient(
                                 colors = listOf(
                                     MaterialTheme.colorScheme.background,
-                                    androidx.compose.ui.graphics.Color.Transparent
+                                    Color.Transparent
                                 )
                             )
                         )
@@ -442,12 +466,12 @@ fun DashboardScreen(
     }
 
     if (showBudgetDialog) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showBudgetDialog = false },
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             title = { Text("Monthly Budget", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
             text = {
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = budgetInput,
                     onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
                     label = { Text("Limit (₹)") },
@@ -455,7 +479,7 @@ fun DashboardScreen(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
                         imeAction = androidx.compose.ui.text.input.ImeAction.Done
                     ),
-                    colors = androidx.compose.material3.TextFieldDefaults.colors(
+                    colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -465,7 +489,7 @@ fun DashboardScreen(
                 )
             },
             confirmButton = {
-                androidx.compose.material3.Button(
+                Button(
                     onClick = {
                         val amount = budgetInput.toDoubleOrNull() ?: 0.0
                         coroutineScope.launch {
@@ -479,7 +503,7 @@ fun DashboardScreen(
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showBudgetDialog = false }) { 
+                TextButton(onClick = { showBudgetDialog = false }) {
                     Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) 
                 }
             }
@@ -492,8 +516,8 @@ fun DashboardScreen(
         val versionName = remember {
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Exception) {
-                "4.6.0"
+            } catch (_: Exception) {
+                "4.7.0"
             }
         }
         ModalBottomSheet(
@@ -539,23 +563,23 @@ fun DashboardScreen(
                         WhatsNewFeatureItem(
                             title = "Notification Tracking",
                             description = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
-                            icon = compose.icons.LucideIcons.BellRing
+                            icon = LucideIcons.BellRing
                         )
                     }
                     WhatsNewFeatureItem(
-                        title = "Modern Home Widgets",
-                        description = "Complete redesign of Budget Progress and Monthly Overview widgets with dynamic theme & accent color sync.",
-                        icon = Icons.Rounded.ViewDay
+                        title = "Push Notifications",
+                        description = "Get notified when your spending crosses your budget limit, and get nudged to categorize 'Others' transactions.",
+                        icon = LucideIcons.BellRing
                     )
                     WhatsNewFeatureItem(
-                        title = "Precision Numpad & Cursor",
-                        description = "Tap anywhere inside amounts to position your cursor, edit numbers mid-text, or perform quick inline calculations.",
-                        icon = compose.icons.LucideIcons.Calendar
+                        title = "Daily & Monthly Summaries",
+                        description = "A quick evening recap on days you spend money, and a full snapshot on the 1st of every month.",
+                        icon = LucideIcons.Calendar
                     )
                     WhatsNewFeatureItem(
-                        title = "Android 17 Optimized",
-                        description = "Full target API 37 compatibility with zero-recomposition Insights charts and responsive haptic interactions.",
-                        icon = compose.icons.LucideIcons.BellRing
+                        title = "Transaction Drafts",
+                        description = "Accidentally switched apps while adding a transaction? Your amounts and text will be waiting for you.",
+                        icon = LucideIcons.Plus
                     )
                 }
 
@@ -721,8 +745,9 @@ private fun DashboardHero(
                                         if (isShortened) {
                                             val formattedBalance = remember(totalBalance) {
                                                 when {
-                                                    kotlin.math.abs(totalBalance) >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", totalBalance / 1_000_000f).replace(".0M", "M")
-                                                    else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
+                                                    kotlin.math.abs(totalBalance) >= 1_000_000 -> String.format(
+                                                        Locale.US, "%.1fM", totalBalance / 1_000_000f).replace(".0M", "M")
+                                                    else -> String.format(Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
                                                 }
                                             }
                                             Text(
@@ -936,9 +961,9 @@ private fun StatItem(
 ) {
     val formattedAmount = remember(amount, isCollapsed) {
         if (isCollapsed && amount >= 1000) {
-            String.format(java.util.Locale.US, "%.1fk", amount / 1000f).replace(".0k", "k")
+            String.format(Locale.US, "%.1fk", amount / 1000f).replace(".0k", "k")
         } else {
-            String.format(java.util.Locale.US, "%.0f", amount)
+            String.format(Locale.US, "%.0f", amount)
         }
     }
 
@@ -952,7 +977,7 @@ private fun StatItem(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(16.dp).background(color.copy(alpha = 0.15f), shape = androidx.compose.foundation.shape.CircleShape).padding(2.dp)
+                modifier = Modifier.size(16.dp).background(color.copy(alpha = 0.15f), shape = CircleShape).padding(2.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
@@ -1004,7 +1029,8 @@ private fun BudgetPulseCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (budget > 0) "₹${String.format(java.util.Locale.getDefault(), "%.0f", spent)} / ₹${String.format(java.util.Locale.getDefault(), "%.0f", budget)}" else "Tap to set a budget",
+                    text = if (budget > 0) "₹${String.format(Locale.getDefault(), "%.0f", spent)} / ₹${String.format(
+                        Locale.getDefault(), "%.0f", budget)}" else "Tap to set a budget",
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1022,7 +1048,7 @@ private fun BudgetPulseCard(
                 
                 val barColor = when {
                     progress >= 0.9f -> RoseExpense
-                    progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B)
+                    progress >= 0.75f -> Color(0xFFF59E0B)
                     else -> MaterialTheme.colorScheme.primary
                 }
 
@@ -1093,7 +1119,8 @@ fun TransactionItem(
             }
 
             Text(
-                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}",
+                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format(
+                    Locale.getDefault(), "%.0f", transaction.amount)}",
                 style = Typography.titleMedium,
                 color = if (transaction.isIncome) EmeraldIncome else RoseExpense
             )

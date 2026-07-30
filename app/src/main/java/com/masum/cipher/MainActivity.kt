@@ -176,8 +176,6 @@ class MainActivity : AppCompatActivity() {
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToSettings = { navController.navigate("settings") { launchSingleTop = true; restoreState = true } },
-                                    onNavigateToInsights = { navController.navigate("insights") { launchSingleTop = true; restoreState = true } },
                                     onNavigateToManageApps = { navController.navigate("manage_apps") }
                                 )
                             }
