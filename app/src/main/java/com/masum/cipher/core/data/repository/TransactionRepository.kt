@@ -12,8 +12,11 @@ import com.masum.cipher.ui.widget.StatsWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.notifications.LocalNotificationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +26,7 @@ class TransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
     private val merchantAliasDao: MerchantAliasDao,
     private val categorizerEngine: CategorizerEngine,
+    private val notificationManager: LocalNotificationManager,
     @ApplicationContext private val context: Context
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
@@ -63,6 +67,9 @@ class TransactionRepository @Inject constructor(
             finalCategory = if (transaction.category.isBlank()) autoCategory.name else transaction.category
         }
 
+        val start = monthStart()
+        val previousSpent = transactionDao.sumExpensesSince(start) ?: 0.0
+
         transactionDao.insertTransaction(
             transaction.copy(
                 merchant = finalMerchant,
@@ -70,6 +77,14 @@ class TransactionRepository @Inject constructor(
             )
         )
         syncWidget()
+        checkBudgetAlert(previousSpent)
+        
+        if (finalCategory == com.masum.cipher.core.domain.model.TransactionCategory.OTHERS.name) {
+            val count = transactionDao.getUncategorizedCount()
+            if (count > 0) {
+                notificationManager.showUncategorizedReminderNotification(count)
+            }
+        }
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
@@ -93,6 +108,22 @@ class TransactionRepository @Inject constructor(
     suspend fun deleteTransaction(transaction: TransactionEntity) {
         transactionDao.deleteTransaction(transaction)
         syncWidget()
+    }
+
+    private suspend fun checkBudgetAlert(previousSpent: Double) {
+        val budget = UserPreferences(context).settingsFlow.first().monthlyBudget
+        if (budget <= 0) return
+
+        val start = monthStart()
+        val newSpent = transactionDao.sumExpensesSince(start) ?: 0.0
+        
+        if (previousSpent <= budget && newSpent > budget) {
+            notificationManager.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)
+        } else if (previousSpent < budget * 0.9 && newSpent >= budget * 0.9) {
+            notificationManager.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 90)
+        } else if (previousSpent < budget * 0.5 && newSpent >= budget * 0.5) {
+            notificationManager.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 50)
+        }
     }
 
     fun getTotalExpenses(): Flow<Double?> = transactionDao.getTotalExpenses()

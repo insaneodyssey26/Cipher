@@ -61,4 +61,7 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAllTransactions()
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE category = 'OTHERS'")
+    suspend fun getUncategorizedCount(): Int
 }

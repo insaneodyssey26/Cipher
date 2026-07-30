@@ -110,4 +110,97 @@ class LocalNotificationManager @Inject constructor(
             notify(1002, builder.build())
         }
     }
+
+    fun showBudgetAlertNotification(isExceeded: Boolean, amount: Double, threshold: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val title = if (isExceeded) "Budget Exceeded" else "Budget Alert ($threshold%)"
+        val text = if (isExceeded) "You have exceeded your monthly budget by ₹${amount.toInt()}." 
+                   else if (threshold == 90) "You've used 90% of your budget! Only ₹${amount.toInt()} remaining."
+                   else "You've used 50% of your budget. ₹${amount.toInt()} remaining."
+                   
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor(if (isExceeded) "#F43F5E" else "#F59E0B"))
+            .setContentTitle(title)
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) { notify(1003, builder.build()) }
+    }
+
+    fun showDailySummaryNotification(spent: Double, count: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 3, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#10B981"))
+            .setContentTitle("Daily Summary")
+            .setContentText("You spent ₹${spent.toInt()} today across $count transactions. Tap to review.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) { notify(1004, builder.build()) }
+    }
+
+    fun showMonthlyWrappedNotification(monthName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 4, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#4F46E5"))
+            .setContentTitle("Your $monthName Wrap-up")
+            .setContentText("Your spending report for $monthName is ready! See how you did.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) { notify(1005, builder.build()) }
+    }
+
+    fun showUncategorizedReminderNotification(count: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 5, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#F59E0B"))
+            .setContentTitle("Action Needed")
+            .setContentText("You have $count new transactions waiting to be categorized.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) { notify(1006, builder.build()) }
+    }
 }

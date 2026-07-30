@@ -39,6 +39,7 @@ import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.core.notifications.LocalNotificationManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
