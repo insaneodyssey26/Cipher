@@ -108,6 +108,11 @@ object PdfGenerator {
             strokeWidth = 1f
         }
 
+        val rowBackgroundPaint = Paint().apply {
+            color = Color.rgb(251, 251, 253) // Very subtle alternating background
+            style = Paint.Style.FILL
+        }
+
         // Layout constants
         val marginX = 50f
         val rightMargin = pageInfo.pageWidth - marginX
@@ -119,9 +124,8 @@ object PdfGenerator {
         val colCategory = colMerchant + 180f
         val colAmount = rightMargin - 10f
         
-        // Split transactions into pages
-        val itemsFirstPage = 20
-        val itemsNextPages = 28
+        val itemsFirstPage = 11
+        val itemsNextPages = 15
         
         // Formatter
         val dateFormatter = AppFormatters.getFullDate()
@@ -160,9 +164,9 @@ object PdfGenerator {
                 canvas.drawText("ACCOUNT STATEMENT", rightMargin, currentY - 10f, titlePaint)
                 titlePaint.textAlign = Paint.Align.LEFT
                 
-                currentY += 25f
+                currentY += 35f
                 canvas.drawLine(marginX, currentY, rightMargin, currentY, linePaint)
-                currentY += 15f
+                currentY += 25f
                 
                 // --- Meta Info ---
                 val generatedDate = dateFormatter.format(Date())
@@ -170,16 +174,16 @@ object PdfGenerator {
                 val endDate = if (transactions.isNotEmpty()) dateFormatter.format(Date(transactions.first().timestamp)) else generatedDate
                 
                 canvas.drawText("STATEMENT PERIOD", marginX, currentY, labelPaint)
-                canvas.drawText("$startDate — $endDate", marginX, currentY + 15f, valuePaint)
+                canvas.drawText("$startDate — $endDate", marginX, currentY + 20f, valuePaint)
                 
                 labelPaint.textAlign = Paint.Align.RIGHT
                 valuePaint.textAlign = Paint.Align.RIGHT
                 canvas.drawText("GENERATED ON", rightMargin, currentY, labelPaint)
-                canvas.drawText(generatedDate, rightMargin, currentY + 15f, valuePaint)
+                canvas.drawText(generatedDate, rightMargin, currentY + 20f, valuePaint)
                 labelPaint.textAlign = Paint.Align.LEFT
                 valuePaint.textAlign = Paint.Align.LEFT
                 
-                currentY += 35f
+                currentY += 45f
                 
                 // --- Summary Cards ---
                 val totalIncome = transactions.filter { it.isIncome }.sumOf { it.amount }
@@ -222,7 +226,7 @@ object PdfGenerator {
                 netPaint.textAlign = Paint.Align.RIGHT
                 netPaint.textSize = 11f
                 
-                currentY += cardHeight + 30f
+                currentY += cardHeight + 40f
             } else {
                 currentY = 60f
                 canvas.drawText("cipher.", marginX, currentY, logoPaint.apply { textSize = 20f })
@@ -251,25 +255,30 @@ object PdfGenerator {
             currentY += 45f
             
             // --- Table Rows ---
-            chunk.forEach { tx ->
+            val rowHeight = 42f
+            chunk.forEachIndexed { rowIndex, tx ->
+                if (rowIndex % 2 != 0) {
+                    canvas.drawRect(marginX, currentY, rightMargin, currentY + rowHeight, rowBackgroundPaint)
+                }
+                
                 val date = rowDateFormatter.format(Date(tx.timestamp))
                 val merchant = if (tx.merchant.length > 30) tx.merchant.take(27) + "..." else tx.merchant
                 val category = tx.category.uppercase()
+                val textY = currentY + 26f
                 
-                canvas.drawText(date, colDate, currentY, rowTextPaint)
-                canvas.drawText(merchant, colMerchant, currentY, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
+                canvas.drawText(date, colDate, textY, rowTextPaint)
+                canvas.drawText(merchant, colMerchant, textY, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
                 rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL) // reset
                 
                 labelPaint.textAlign = Paint.Align.LEFT
-                canvas.drawText(category, colCategory, currentY, labelPaint)
+                canvas.drawText(category, colCategory, textY, labelPaint)
                 
                 val amountStr = formatMoney(tx.amount)
                 val paint = if (tx.isIncome) incomePaint else expensePaint
-                canvas.drawText(amountStr, colAmount, currentY, paint)
+                canvas.drawText(amountStr, colAmount, textY, paint)
                 
-                currentY += 15f
-                canvas.drawLine(marginX, currentY, rightMargin, currentY, linePaint)
-                currentY += 25f
+                canvas.drawLine(marginX, currentY + rowHeight, rightMargin, currentY + rowHeight, linePaint)
+                currentY += rowHeight
             }
             
             // --- Footer ---
