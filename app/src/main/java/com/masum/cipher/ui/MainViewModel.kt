@@ -42,6 +42,7 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is MainContract.Intent.SaveTrackedApps -> saveTrackedApps(intent.apps)
             is MainContract.Intent.SaveAccentColor -> saveAccentColor(intent.color)
+            is MainContract.Intent.UpdateDraftTransaction -> updateState { copy(draftTransaction = intent.transaction) }
         }
     }
 

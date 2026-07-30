@@ -81,7 +81,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 11
+    val currentVersionCode = 12
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -401,7 +401,7 @@ fun DashboardScreen(
 
     if (showAddSheet) {
         TransactionDetailsSheet(
-            transaction = TransactionEntity(
+            transaction = state.draftTransaction ?: TransactionEntity(
                 amount = 0.0,
                 merchant = "",
                 currency = "INR",
@@ -414,7 +414,11 @@ fun DashboardScreen(
             onConfirm = { newTransaction ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
+                viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
                 showAddSheet = false
+            },
+            onDraftChange = { updatedDraft ->
+                viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
             },
             isHapticsEnabled = isHapticsEnabled
         )

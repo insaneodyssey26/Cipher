@@ -14,12 +14,14 @@ class MainContract {
         data class AddTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) : Intent()
         data class SaveTrackedApps(val apps: Set<String>) : Intent()
         data class SaveAccentColor(val color: com.masum.cipher.core.data.local.pref.AccentColor) : Intent()
+        data class UpdateDraftTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity?) : Intent()
     }
 
     data class State(
         val settings: UserSettings? = null,
         val isAuthenticated: Boolean = false,
-        val isOnboardingRequired: Boolean = false
+        val isOnboardingRequired: Boolean = false,
+        val draftTransaction: com.masum.cipher.core.data.local.entity.TransactionEntity? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

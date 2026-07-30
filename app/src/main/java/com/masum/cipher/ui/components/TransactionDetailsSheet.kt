@@ -49,6 +49,7 @@ fun TransactionDetailsSheet(
     onDismiss: () -> Unit,
     onConfirm: (TransactionEntity) -> Unit,
     onDelete: (() -> Unit)? = null,
+    onDraftChange: ((TransactionEntity) -> Unit)? = null,
     isHapticsEnabled: Boolean = true
 ) {
     var merchant by remember { mutableStateOf(transaction.merchant) }
@@ -56,6 +57,20 @@ fun TransactionDetailsSheet(
     var isIncome by remember { mutableStateOf(transaction.isIncome) }
     var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
     var categoryExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(merchant, amount, isIncome, selectedCategory) {
+        if (onDraftChange != null) {
+            val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
+            onDraftChange.invoke(
+                transaction.copy(
+                    merchant = merchant,
+                    amount = finalAmount,
+                    category = selectedCategory.name,
+                    isIncome = isIncome
+                )
+            )
+        }
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 

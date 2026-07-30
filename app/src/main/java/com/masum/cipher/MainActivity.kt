@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity() {
 
                         if (showAddSheet) {
                             TransactionDetailsSheet(
-                                transaction = com.masum.cipher.core.data.local.entity.TransactionEntity(
+                                transaction = state.draftTransaction ?: com.masum.cipher.core.data.local.entity.TransactionEntity(
                                     amount = 0.0,
                                     merchant = "",
                                     currency = "INR",
@@ -253,7 +253,11 @@ class MainActivity : AppCompatActivity() {
                                 onDismiss = { showAddSheet = false },
                                 onConfirm = { newTx ->
                                     mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx))
+                                    mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(null))
                                     showAddSheet = false
+                                },
+                                onDraftChange = { updatedDraft ->
+                                    mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(updatedDraft))
                                 },
                                 isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
                             )
