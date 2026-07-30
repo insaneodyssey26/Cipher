@@ -30,6 +30,8 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -86,7 +88,7 @@ class BudgetWidget : GlanceAppWidget() {
                 .background(surfaceBg)
                 .cornerRadius(24.dp)
                 .clickable(actionStartActivity<MainActivity>())
-                .padding(12.dp),
+                .padding(10.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -96,41 +98,58 @@ class BudgetWidget : GlanceAppWidget() {
                 ) {
                     Text(
                         text = "cipher",
-                        modifier = GlanceModifier.defaultWeight(),
                         style = TextStyle(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = brandColor
                         )
                     )
+                    Spacer(GlanceModifier.width(4.dp))
                     Text(
-                        text = "BUDGET",
+                        text = "|",
                         style = TextStyle(
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
                             color = textMuted
                         )
                     )
+                    Spacer(GlanceModifier.width(4.dp))
+                    Text(
+                        text = "budget",
+                        style = TextStyle(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = textMuted
+                        ),
+                        maxLines = 1
+                    )
+                    Spacer(GlanceModifier.defaultWeight())
                     Box(
-                        modifier = GlanceModifier
-                            .padding(start = 6.dp)
-                            .clickable(actionRunCallback<BudgetRefreshAction>()),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "↻",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = brandColor
+                        Box(
+                            modifier = GlanceModifier
+                                .size(24.dp)
+                                .cornerRadius(12.dp)
+                                .clickable(actionRunCallback<BudgetRefreshAction>()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "↻",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = brandColor
+                                )
                             )
-                        )
+                        }
                     }
                 }
 
-                Spacer(GlanceModifier.height(6.dp))
-
-                if (budget <= 0.0) {
+                Column(
+                    modifier = GlanceModifier.defaultWeight().fillMaxWidth(),
+                    verticalAlignment = Alignment.Vertical.CenterVertically
+                ) {
+                    if (budget <= 0.0) {
                     Text(
                         text = "No budget set",
                         style = TextStyle(
@@ -184,6 +203,7 @@ class BudgetWidget : GlanceAppWidget() {
             }
         }
     }
+}
 
     private fun fmt(amount: Double): String {
         val abs = kotlin.math.abs(amount)

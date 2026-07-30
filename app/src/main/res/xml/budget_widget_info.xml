@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/widget_budget_name"
-    android:minWidth="130dp"
-    android:minHeight="130dp"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="100dp"
+    android:minResizeHeight="100dp"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
     android:maxResizeWidth="500dp"

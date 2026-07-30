@@ -47,6 +47,7 @@
 
         <receiver
             android:name=".ui.widget.BudgetWidgetReceiver"
+            android:label="@string/widget_budget_name"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -58,6 +59,7 @@
 
         <receiver
             android:name=".ui.widget.StatsWidgetReceiver"
+            android:label="@string/widget_stats_name"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
