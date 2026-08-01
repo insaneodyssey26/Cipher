@@ -24,6 +24,7 @@ class DashboardContract {
     data class State(
         val isLoading: Boolean = true,
         val transactions: List<TransactionEntity> = emptyList(),
+        val hasAnyTransactions: Boolean = false,
         val searchQuery: String = "",
         val activeFilter: FilterType = FilterType.ALL,
         val selectedTimePeriod: com.masum.cipher.core.domain.model.TimePeriod = com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH,

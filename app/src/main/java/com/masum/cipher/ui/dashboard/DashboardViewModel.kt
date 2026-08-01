@@ -19,14 +19,14 @@ class DashboardViewModel @Inject constructor(
     private val getDashboardDataUseCase: GetDashboardDataUseCase,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
-    private val updateTransactionUseCase: UpdateTransactionUseCase
+    private val updateTransactionUseCase: UpdateTransactionUseCase,
+    private val sessionManager: com.masum.cipher.core.domain.SessionManager
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
     initialState = DashboardContract.State()
 ) {
 
     private val _searchQuery = MutableStateFlow("")
     private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
-    private val _selectedTimePeriod = MutableStateFlow(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
 
     init {
@@ -42,14 +42,14 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
-            is DashboardContract.Intent.SetTimePeriod -> _selectedTimePeriod.value = intent.period
+            is DashboardContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
         }
     }
 
     private fun observeDashboardData() {
         viewModelScope.launch {
-            combine(_searchQuery, _activeFilter, _selectedTimePeriod) { query, filter, period ->
+            combine(_searchQuery, _activeFilter, sessionManager.selectedTimePeriod) { query, filter, period ->
                 Triple(query, filter, period)
             }.flatMapLatest { (query, filter, period) ->
                 val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)

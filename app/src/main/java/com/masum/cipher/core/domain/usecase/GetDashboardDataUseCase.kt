@@ -45,7 +45,7 @@ class GetDashboardDataUseCase @Inject constructor(
                 }
             }
 
-            transactionsFlow.map { transactions ->
+            transactionsFlow.combine(repository.getAllTransactions()) { transactions, allTxs ->
                 val filteredList = when (filter) {
                     DashboardContract.FilterType.ALL -> transactions
                     DashboardContract.FilterType.INCOME -> transactions.filter { it.isIncome }
@@ -55,6 +55,7 @@ class GetDashboardDataUseCase @Inject constructor(
                 DashboardContract.State(
                     isLoading = false,
                     transactions = filteredList,
+                    hasAnyTransactions = allTxs.isNotEmpty(),
                     searchQuery = query,
                     activeFilter = filter,
                     selectedTimePeriod = timeRange.period,

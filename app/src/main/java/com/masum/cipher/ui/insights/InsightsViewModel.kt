@@ -18,11 +18,11 @@ class InsightsViewModel @Inject constructor(
     private val getInsightsUseCase: GetInsightsUseCase,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
-    private val updateTransactionUseCase: UpdateTransactionUseCase
+    private val updateTransactionUseCase: UpdateTransactionUseCase,
+    private val sessionManager: com.masum.cipher.core.domain.SessionManager
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State()
 ) {
-    private val _selectedTimePeriod = MutableStateFlow(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
 
     init {
         loadInsights()
@@ -37,21 +37,21 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is InsightsContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is InsightsContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
-            is InsightsContract.Intent.SetTimePeriod -> _selectedTimePeriod.value = intent.period
+            is InsightsContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadInsights() {
         viewModelScope.launch {
-            _selectedTimePeriod.flatMapLatest { period ->
+            sessionManager.selectedTimePeriod.flatMapLatest { period ->
                 val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)
                 getInsightsUseCase(timeRange)
             }.collect { newState ->
                 updateState { 
                     newState.copy(
                         selectedDayTimestamp = this.selectedDayTimestamp,
-                        selectedTimePeriod = _selectedTimePeriod.value
+                        selectedTimePeriod = sessionManager.selectedTimePeriod.value
                     )
                 }
             }

@@ -339,6 +339,10 @@ fun DashboardScreen(
                         item {
                             SearchEmptyState(query = state.searchQuery)
                         }
+                    } else if (state.hasAnyTransactions) {
+                        item {
+                            FilterEmptyState(period = state.selectedTimePeriod)
+                        }
                     } else {
                         item {
                             GenesisEmptyState(onAddManual = { showAddSheet = true })
@@ -1190,6 +1194,38 @@ private fun SearchEmptyState(query: String) {
             text = "No transactions found for '$query'",
             style = Typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun FilterEmptyState(period: com.masum.cipher.core.domain.model.TimePeriod) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            LucideIcons.Calendar,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No transactions found for ${AppFormatters.getPeriodLabel(period, emptyList()).lowercase()}",
+            style = Typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Try changing the time filter above to see your older data.",
+            style = Typography.bodyMedium,
+            color = MaterialTheme.colorScheme.outline,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }

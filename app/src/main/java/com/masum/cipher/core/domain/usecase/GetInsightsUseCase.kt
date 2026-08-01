@@ -23,35 +23,38 @@ class GetInsightsUseCase @Inject constructor(
         val startOfCurrentWeek = getStartOfCurrentWeek()
         val startOfLastWeek = startOfCurrentWeek - TimeUnit.DAYS.toMillis(7)
 
-        return repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
-            .combine(repository.getExpensesSince(startOfLastWeek)) { transactions, recentExpenses ->
-                val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
-                val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
+        return combine(
+            repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime),
+            repository.getExpensesSince(startOfLastWeek),
+            repository.getAllTransactions()
+        ) { transactions, recentExpenses, allTx ->
+            val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
+            val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
-                val currentWeekAvg = if (currentWeekExpenses.isNotEmpty()) currentWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
-                val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
-                val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
+            val currentWeekAvg = if (currentWeekExpenses.isNotEmpty()) currentWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
+            val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
+            val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
 
-                InsightsContract.State(
-                    isLoading = false,
-                    spendingVelocity = DashboardContract.VelocityData(
-                        currentWeekAvg = currentWeekAvg,
-                        lastWeekAvg = lastWeekAvg,
-                        trendPercentage = trend
-                    ),
-                    netWorthHistory = calculateNetWorthHistory(transactions),
-                    calendarHeatmap = calculateHeatmap(transactions),
-                    categoryBreakdown = calculateCategories(transactions),
-                    detectedSubscriptions = subscriptionDetector.detect(transactions),
-                    allTransactions = transactions,
-                    topMerchants = calculateTopMerchants(transactions),
-                    monthlySummary = calculateMonthlySummary(transactions),
-                    weekdayBreakdown = calculateWeekdayBreakdown(transactions),
-                    peakHours = calculatePeakHours(transactions),
-                    noSpendStreak = calculateNoSpendStreak(transactions),
-                    avgTransactionSize = calculateAvgTransactionSize(transactions)
-                )
-            }.flowOn(Dispatchers.Default)
+            InsightsContract.State(
+                isLoading = false,
+                spendingVelocity = DashboardContract.VelocityData(
+                    currentWeekAvg = currentWeekAvg,
+                    lastWeekAvg = lastWeekAvg,
+                    trendPercentage = trend
+                ),
+                netWorthHistory = calculateNetWorthHistory(transactions),
+                calendarHeatmap = calculateHeatmap(allTx),
+                categoryBreakdown = calculateCategories(transactions),
+                detectedSubscriptions = subscriptionDetector.detect(transactions),
+                allTransactions = allTx,
+                topMerchants = calculateTopMerchants(transactions),
+                monthlySummary = calculateMonthlySummary(transactions),
+                weekdayBreakdown = calculateWeekdayBreakdown(transactions),
+                peakHours = calculatePeakHours(transactions),
+                noSpendStreak = calculateNoSpendStreak(transactions),
+                avgTransactionSize = calculateAvgTransactionSize(transactions)
+            )
+        }.flowOn(Dispatchers.Default)
     }
 
     private fun getStartOfCurrentWeek(): Long {
