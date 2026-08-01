@@ -61,7 +61,7 @@ fun InsightsScreen(
                         isHapticsEnabled = isHapticsEnabled
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -182,7 +182,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "this year"
                     com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> "overall"
                 }
-                "You've spent the most on ${mostExpensiveCategory.category.toString().lowercase().replaceFirstChar { it.uppercase() }} $periodSuffix."
+                "You've spent the most on ${mostExpensiveCategory.category.lowercase().replaceFirstChar { it.uppercase() }} $periodSuffix."
             } else {
                 "Your financial story is just beginning."
             },

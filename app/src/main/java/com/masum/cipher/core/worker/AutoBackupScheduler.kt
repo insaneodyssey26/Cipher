@@ -31,7 +31,7 @@ class AutoBackupScheduler @Inject constructor(
             AutoBackupFrequency.DAILY -> 1L to TimeUnit.DAYS
             AutoBackupFrequency.WEEKLY -> 7L to TimeUnit.DAYS
             AutoBackupFrequency.EVERY_CHANGE -> 6L to TimeUnit.HOURS
-            else -> return
+            AutoBackupFrequency.NEVER -> return
         }
 
         val constraints = Constraints.Builder()

@@ -72,7 +72,7 @@ fun DayDetailScreen(
     }
 
     val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("en-IN"))
     }
 
     LaunchedEffect(Unit) {
@@ -109,7 +109,12 @@ fun DayDetailScreen(
                         Icon(LucideIcons.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { padding ->

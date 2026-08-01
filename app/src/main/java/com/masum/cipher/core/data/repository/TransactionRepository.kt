@@ -68,7 +68,7 @@ class TransactionRepository @Inject constructor(
         }
 
         val start = monthStart()
-        val previousSpent = transactionDao.sumExpensesSince(start) ?: 0.0
+        val previousSpent = transactionDao.sumExpensesSince(start)
 
         transactionDao.insertTransaction(
             transaction.copy(
@@ -115,7 +115,7 @@ class TransactionRepository @Inject constructor(
         if (budget <= 0) return
 
         val start = monthStart()
-        val newSpent = transactionDao.sumExpensesSince(start) ?: 0.0
+        val newSpent = transactionDao.sumExpensesSince(start)
         
         if (previousSpent <= budget && newSpent > budget) {
             notificationManager.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)

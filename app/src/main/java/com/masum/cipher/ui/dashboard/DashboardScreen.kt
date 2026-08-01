@@ -174,9 +174,7 @@ fun DashboardScreen(
             ): androidx.compose.ui.geometry.Offset {
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
                 val delta = available.y
-                val isDrag = source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.Drag || 
-                             source.toString().contains("UserInput")
-                if (delta > 0 && isDrag) {
+                if (delta > 0 && source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.UserInput) {
                     val previousOffset = toolbarOffsetHeightPx.value
                     val newOffset = toolbarOffsetHeightPx.value + delta
                     toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightRangePx, 0f)

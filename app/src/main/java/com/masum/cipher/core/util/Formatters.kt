@@ -6,12 +6,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object AppFormatters {
-    fun getCurrency(locale: Locale = Locale("en", "IN")): NumberFormat = 
+    fun getCurrency(locale: Locale = Locale.forLanguageTag("en-IN")): NumberFormat = 
         NumberFormat.getCurrencyInstance(locale).apply {
             maximumFractionDigits = 2
         }
 
-    fun getCurrencyNoDecimals(locale: Locale = Locale("en", "IN")): NumberFormat = 
+    fun getCurrencyNoDecimals(locale: Locale = Locale.forLanguageTag("en-IN")): NumberFormat = 
         NumberFormat.getCurrencyInstance(locale).apply {
             maximumFractionDigits = 0
         }
