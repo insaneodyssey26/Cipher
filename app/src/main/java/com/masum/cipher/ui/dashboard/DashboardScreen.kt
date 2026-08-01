@@ -75,7 +75,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 13
+    val currentVersionCode = 14
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -519,7 +519,7 @@ fun DashboardScreen(
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
             } catch (_: Exception) {
-                "4.7.0"
+                "4.7.1"
             }
         }
         ModalBottomSheet(

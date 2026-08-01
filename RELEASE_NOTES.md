@@ -1,5 +1,14 @@
 # Release Notes
 
+## [4.7.1]
+
+### Fixed
+- Fixed an issue where the Dashboard would display an empty state even if there were historical transactions.
+- Synchronized time filters across the Dashboard and Insights tabs for a seamless experience.
+- Cleaned up several minor compilation warnings and deprecated APIs to maintain code health.
+
+---
+
 ## [4.7.0]
 
 ### Added

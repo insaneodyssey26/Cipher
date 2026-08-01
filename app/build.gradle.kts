@@ -14,11 +14,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.masum.cipher.debug"
+        applicationId = "com.masum.cipher"
         minSdk = 24
         targetSdk = 37
-        versionCode = 13
-        versionName = "4.7.0"
+        versionCode = 14
+        versionName = "4.7.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

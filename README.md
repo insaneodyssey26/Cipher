@@ -295,7 +295,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 37 (Android 17) |
-| Version | 4.7.0 |
+| Version | 4.7.1 |
 
 ---
 
