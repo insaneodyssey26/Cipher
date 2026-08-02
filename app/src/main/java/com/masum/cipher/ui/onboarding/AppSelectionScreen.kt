@@ -94,8 +94,20 @@ fun AppSelectionScreen(
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             val pm = context.packageManager
-            val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            val apps = packages
+            val intent = android.content.Intent(android.content.Intent.ACTION_MAIN, null).apply {
+                addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+            }
+            val resolveInfos = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                pm.queryIntentActivities(
+                    intent,
+                    PackageManager.ResolveInfoFlags.of(0L)
+                )
+            } else {
+                pm.queryIntentActivities(intent, 0)
+            }
+            val apps = resolveInfos
+                .map { it.activityInfo.applicationInfo }
+                .distinctBy { it.packageName }
                 .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 } // Exclude system apps
                 .map { info ->
                     InstalledApp(

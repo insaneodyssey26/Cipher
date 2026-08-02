@@ -1,5 +1,12 @@
 # Release Notes
 
+## [4.7.2]
+
+### Fixed
+- Policy Compliance: Removed `QUERY_ALL_PACKAGES` permission and replaced it with specific intent queries to comply with Google Play's strict policy requirements.
+
+---
+
 ## [4.7.1]
 
 ### Fixed
