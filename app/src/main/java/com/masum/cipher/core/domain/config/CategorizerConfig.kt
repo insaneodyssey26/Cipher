@@ -56,7 +56,30 @@ object CategorizerConfig {
         "TATA PLAY" to TransactionCategory.BILLS,
         "GOOGLE" to TransactionCategory.BILLS,
         "PAYTM" to TransactionCategory.BILLS,
-        "PHONEPE" to TransactionCategory.BILLS
+        "PHONEPE" to TransactionCategory.BILLS,
+        "CRED" to TransactionCategory.BILLS,
+        "GROWW" to TransactionCategory.INVESTMENT,
+        "ZERODHA" to TransactionCategory.INVESTMENT,
+        "UPSTOX" to TransactionCategory.INVESTMENT,
+        "NAVI" to TransactionCategory.INVESTMENT,
+        "FASTTAG" to TransactionCategory.TRANSPORT,
+        "DUNZO" to TransactionCategory.FOOD,
+        "BLINKIT" to TransactionCategory.SHOPPING,
+        "ZEPTO" to TransactionCategory.SHOPPING,
+        "CLEARTRIP" to TransactionCategory.TRANSPORT,
+        "LENSKART" to TransactionCategory.SHOPPING,
+        "FIRSTCRY" to TransactionCategory.SHOPPING,
+        "URBAN COMPANY" to TransactionCategory.BILLS,
+        "MAMAEARTH" to TransactionCategory.SHOPPING,
+        "BOAT" to TransactionCategory.SHOPPING,
+        "INDMONEY" to TransactionCategory.INVESTMENT,
+        "KUVERA" to TransactionCategory.INVESTMENT,
+        "FI MONEY" to TransactionCategory.INVESTMENT,
+        "JUPITER" to TransactionCategory.INVESTMENT,
+        "DECATHLON" to TransactionCategory.SHOPPING,
+        "PAYZAPP" to TransactionCategory.BILLS,
+        "MOBIKWIK" to TransactionCategory.BILLS,
+        "FREECHARGE" to TransactionCategory.BILLS
     )
 
     val KEYWORD_ANCHORS = mapOf(
@@ -66,6 +89,7 @@ object CategorizerConfig {
         listOf("CINEMA", "MOVIES", "THEATRE", "GAME", "GAMING", "CLUB", "OTT", "MUSIC") to TransactionCategory.ENTERTAINMENT,
         listOf("MEDICAL", "HEALTH", "CLINIC", "DENTAL", "CARE", "DRUG", "HOSPITAL", "LAB", "DIAGNOSTIC") to TransactionCategory.HEALTH,
         listOf("ELECTRIC", "WATER", "GAS", "TELECOM", "MOBILE", "INTERNET", "RECHARGE", "BILL", "UTILITY", "BROADBAND", "DTH") to TransactionCategory.BILLS,
+        listOf("BROKING", "STOCKS", "MUTUAL FUND", "MF", "SIP", "INVESTMENT", "SECURITIES", "WEALTH", "CAPITAL", "FUND") to TransactionCategory.INVESTMENT,
         listOf("SALARY", "CASHBACK", "REFUND", "INTEREST", "DIVIDEND") to TransactionCategory.INCOME
     )
 }

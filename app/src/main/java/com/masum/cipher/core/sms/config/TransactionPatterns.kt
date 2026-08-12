@@ -58,7 +58,9 @@ object TransactionPatterns {
         "MAKEMYTRIP", "GOIBIBO", "BOOKMYSHOW", "NETFLIX", "SPOTIFY", "HOTSTAR", "PRIME VIDEO",
         "PVR", "INOX", "STEAM", "APOLLO", "TATA 1MG", "PHARMEASY", "NETMEDS", "PRACTO",
         "AIRTEL", "JIO", "VODAFONE", "VI", "TATA PLAY", "GOOGLE", "PAYTM", "PHONEPE",
-        "CRED", "GROWW", "ZERODHA", "UPSTOX", "NAVI", "SLICE", "DUNZO", "FASTTAG"
+        "CRED", "GROWW", "ZERODHA", "UPSTOX", "NAVI", "SLICE", "DUNZO", "FASTTAG",
+        "CLEARTRIP", "LENSKART", "FIRSTCRY", "URBAN COMPANY", "MAMAEARTH", "BOAT", 
+        "INDMONEY", "KUVERA", "FI MONEY", "JUPITER", "DECATHLON", "PAYZAPP", "MOBIKWIK", "FREECHARGE"
     )
 
     val DEBIT_KEYWORDS = listOf("debited", "spent", "withdrawn", "charged", "deducted")

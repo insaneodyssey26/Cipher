@@ -23,7 +23,11 @@ class CategorizerEngine @Inject constructor() {
 
         if (normalized.isBlank()) return TransactionCategory.OTHERS
 
-        CategorizerConfig.BRAND_MAPPINGS[normalized]?.let { return it }
+        val mappedCategory = CategorizerConfig.BRAND_MAPPINGS.entries.firstOrNull { 
+            normalized.contains(it.key) || normalized.startsWith(it.key + " ")
+        }?.value
+        
+        if (mappedCategory != null) return mappedCategory
 
         for ((keywords, category) in CategorizerConfig.KEYWORD_ANCHORS) {
             if (keywords.any { normalized.contains(it) }) return category
