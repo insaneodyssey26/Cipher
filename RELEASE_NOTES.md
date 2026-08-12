@@ -1,5 +1,17 @@
 # Release Notes
 
+## [4.8.0]
+
+### Added
+- **Smart Rules Engine**: You can now define custom categorization rules! Simply edit any transaction, and Cipher will prompt you to save that merchant-to-category mapping for all future transactions. Manage your rules via the new Smart Rules menu in Settings.
+- **In-App Update Prompts**: Never miss a feature. Cipher will now gently notify you when a new update is available on the Google Play Store so you can stay on the latest version.
+- **Premium UI Overhaul**: Upgraded the manual transaction edit sheet and Smart Rules screen with highly polished, native bottom-sheet styled dropdowns. Fixed keyboard jitter issues during category selection.
+
+### Changed
+- **Smarter Detection Engine**: Refined pattern matching to support a wider array of banking formats and merchant aliases out of the box.
+
+---
+
 ## [4.7.2]
 
 ### Fixed

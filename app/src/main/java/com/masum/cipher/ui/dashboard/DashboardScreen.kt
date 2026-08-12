@@ -43,6 +43,8 @@ import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
+import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.Settings
 import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
 import compose.icons.lucideicons.Search
@@ -75,7 +77,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 15
+    val currentVersionCode = 16
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -573,7 +575,7 @@ fun DashboardScreen(
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
             } catch (_: Exception) {
-                "4.7.2"
+                "4.8.0"
             }
         }
         ModalBottomSheet(
@@ -615,27 +617,20 @@ fun DashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    if (!hasSeen4_1) {
-                        WhatsNewFeatureItem(
-                            title = "Notification Tracking",
-                            description = "Cipher can now automatically track transactions from your favorite UPI and banking apps using notifications.",
-                            icon = LucideIcons.BellRing
-                        )
-                    }
                     WhatsNewFeatureItem(
-                        title = "Push Notifications",
-                        description = "Get notified when your spending crosses your budget limit, and get nudged to categorize 'Others' transactions.",
-                        icon = LucideIcons.BellRing
+                        title = "Smart Rules",
+                        description = "Automatically categorize your transactions based on custom rules. Just edit a transaction to create a rule.",
+                        icon = LucideIcons.Check
                     )
                     WhatsNewFeatureItem(
-                        title = "Daily & Monthly Summaries",
-                        description = "A quick evening recap on days you spend money, and a full snapshot on the 1st of every month.",
-                        icon = LucideIcons.Calendar
+                        title = "Smarter Detection",
+                        description = "Improved pattern matching ensures better out-of-the-box merchant recognition for your transactions.",
+                        icon = LucideIcons.Search
                     )
                     WhatsNewFeatureItem(
-                        title = "Transaction Drafts",
-                        description = "Accidentally switched apps while adding a transaction? Your amounts and text will be waiting for you.",
-                        icon = LucideIcons.Plus
+                        title = "Premium Interface",
+                        description = "Sleeker dropdowns and smoother focus management for a highly polished manual entry experience.",
+                        icon = LucideIcons.Settings
                     )
                 }
 

@@ -137,6 +137,7 @@ flowchart LR
 ### Automatic Transaction parsing
 - **SMS Parsing**: Listens for `SMS_RECEIVED` broadcasts from bank sender IDs
 - **Notification Parsing**: Uses `NotificationListenerService` to capture and parse transaction alerts from explicitly tracked finance/UPI apps
+- **Smart Rules Engine**: Allows users to define persistent custom overrides for merchant-to-category mappings
 - Externalized Regex patterns and dictionaries via `SmsPatterns` for easier maintenance
 - Detects promotional SMS and notifications and filters them out reliably
 - India-focused brand dictionary covers major UPI, credit card, and bank alert formats
