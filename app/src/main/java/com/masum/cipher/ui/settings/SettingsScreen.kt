@@ -38,8 +38,11 @@ import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.*
+import compose.icons.lucideicons.BellRing
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.notifications.LocalNotificationManager
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +62,7 @@ fun SettingsScreen(
     var showBudgetDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
+    var expandedSection by remember { mutableStateOf<String?>(null) }
     var showFrequencyDialog by remember { mutableStateOf(false) }
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
@@ -124,7 +128,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 140.dp)
         ) {
-            SettingsSection("APPEARANCE") {
+            SettingsSection("APPEARANCE", icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE", onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -293,7 +297,7 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection("SECURITY & PRIVACY") {
+            SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY", onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.ShieldCheck,
@@ -353,7 +357,18 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("TRACKING & INTEGRATIONS") {
+            SettingsSection("TRACKING & INTEGRATIONS", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "TRACKING & INTEGRATIONS", onToggle = { expandedSection = if (expandedSection == "TRACKING & INTEGRATIONS") null else "TRACKING & INTEGRATIONS" }) {
+                VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    icon = LucideIcons.BellRing,
+                    title = "Interactive Transaction Alerts",
+                    description = "Alert on every transaction",
+                    checked = state.notifyAllTransactions,
+                    onCheckedChange = { 
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                        viewModel.handleIntent(SettingsContract.Intent.SetNotifyAllTransactions(it)) 
+                    }
+                )
                 VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Smartphone,
@@ -373,7 +388,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("FINANCIAL GOALS") {
+            SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS", onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {
                 VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
@@ -387,7 +402,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("DATA MANAGEMENT") {
+            SettingsSection("DATA MANAGEMENT", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA MANAGEMENT", onToggle = { expandedSection = if (expandedSection == "DATA MANAGEMENT") null else "DATA MANAGEMENT" }) {
                 VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileSpreadsheet,
@@ -440,7 +455,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("AUTO-BACKUP") {
+            SettingsSection("AUTO-BACKUP", icon = LucideIcons.Cloud, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTO-BACKUP", onToggle = { expandedSection = if (expandedSection == "AUTO-BACKUP") null else "AUTO-BACKUP" }) {
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FolderSync,
@@ -488,7 +503,7 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection("SUPPORT & FEEDBACK") {
+            SettingsSection("SUPPORT & FEEDBACK", icon = LucideIcons.MessageSquare, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SUPPORT & FEEDBACK", onToggle = { expandedSection = if (expandedSection == "SUPPORT & FEEDBACK") null else "SUPPORT & FEEDBACK" }) {
                 VaultSettingsItem(
                     icon = LucideIcons.Star,
                     title = "Rate on Google Play",
@@ -523,7 +538,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("ABOUT CIPHER") {
+            SettingsSection("ABOUT CIPHER", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT CIPHER", onToggle = { expandedSection = if (expandedSection == "ABOUT CIPHER") null else "ABOUT CIPHER" }) {
                 VaultSettingsItem(
                     icon = LucideIcons.Github,
                     title = "Open Source",
@@ -761,11 +776,83 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
-        Text(text = title, style = Typography.labelSmall, color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(bottom = 12.dp))
-        VaultCard(contentPadding = 0.dp) {
-            Column(content = content)
+private fun SettingsSection(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    isExpanded: Boolean = true,
+    isHapticsEnabled: Boolean = true,
+    onToggle: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    VaultCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .clickable(enabled = onToggle != null, onClick = { 
+                view.performVibrate(isHapticsEnabled)
+                onToggle?.invoke() 
+            }),
+        contentPadding = 0.dp
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (icon != null) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp).padding(end = 16.dp)
+                        )
+                    }
+                    Text(
+                        text = title.lowercase().replaceFirstChar { it.uppercase() },
+                        style = Typography.titleMedium.copy(
+                            fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                
+                if (onToggle != null) {
+                    val rotation by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = if (isExpanded) 180f else 0f
+                    )
+                    Icon(
+                        imageVector = LucideIcons.ChevronDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer { rotationZ = rotation }
+                    )
+                }
+            }
+            
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isExpanded,
+                enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    content = content
+                )
+            }
         }
     }
 }

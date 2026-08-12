@@ -40,6 +40,9 @@ class UserPreferences @Inject constructor(
         // Review Keys
         val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
         val HAS_PROMPTED_REVIEW = booleanPreferencesKey("has_prompted_review")
+        
+        // Notifications
+        val NOTIFY_ALL_TRANSACTIONS = booleanPreferencesKey("notify_all_transactions")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -70,7 +73,8 @@ class UserPreferences @Inject constructor(
             autoBackupUri = preferences[Keys.AUTO_BACKUP_URI],
             autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD],
             appLaunchCount = preferences[Keys.APP_LAUNCH_COUNT] ?: 0,
-            hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false
+            hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false,
+            notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: false
         )
     }
 
@@ -163,6 +167,10 @@ class UserPreferences @Inject constructor(
     suspend fun setHasPromptedReview(prompted: Boolean) {
         context.dataStore.edit { it[Keys.HAS_PROMPTED_REVIEW] = prompted }
     }
+
+    suspend fun setNotifyAllTransactions(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_ALL_TRANSACTIONS] = enabled }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -204,5 +212,6 @@ data class UserSettings(
     val autoBackupUri: String? = null,
     val autoBackupEncryptedPassword: String? = null,
     val appLaunchCount: Int = 0,
-    val hasPromptedReview: Boolean = false
+    val hasPromptedReview: Boolean = false,
+    val notifyAllTransactions: Boolean = false
 )

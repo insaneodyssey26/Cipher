@@ -27,6 +27,7 @@ class TransactionRepository @Inject constructor(
     private val merchantAliasDao: MerchantAliasDao,
     private val categorizerEngine: CategorizerEngine,
     private val notificationManager: LocalNotificationManager,
+    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
     @ApplicationContext private val context: Context
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
@@ -78,7 +79,10 @@ class TransactionRepository @Inject constructor(
         val savedTx = newTx.copy(id = insertedId)
 
         syncWidget()
-        notificationManager.showNewTransactionNotification(savedTx)
+        val settings = userPreferences.settingsFlow.first()
+        if (settings.notifyAllTransactions) {
+            notificationManager.showNewTransactionNotification(savedTx)
+        }
         checkBudgetAlert(previousSpent)
         
         if (finalCategory == com.masum.cipher.core.domain.model.TransactionCategory.OTHERS.name) {

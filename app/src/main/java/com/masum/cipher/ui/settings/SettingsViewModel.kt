@@ -37,6 +37,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.UpdateAccentColor -> updateAccentColor(intent.color)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
+            is SettingsContract.Intent.SetNotifyAllTransactions -> updateNotifyAllTransactions(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount)
@@ -61,6 +62,7 @@ class SettingsViewModel @Inject constructor(
                         accentColor = settings.accentColor,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
+                        notifyAllTransactions = settings.notifyAllTransactions,
                         isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout,
                         monthlyBudget = settings.monthlyBudget,
@@ -83,6 +85,13 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateBiometric(enabled: Boolean) {
         viewModelScope.launch { updateSettingsUseCase.biometric(enabled) }
+    }
+
+    private fun updateNotifyAllTransactions(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyAllTransactions(enabled)
+            updateState { copy(notifyAllTransactions = enabled) }
+        }
     }
 
     private fun updatePrivacyMode(enabled: Boolean) {
