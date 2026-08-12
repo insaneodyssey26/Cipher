@@ -21,7 +21,7 @@ interface TransactionDao {
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTransaction(transaction: TransactionEntity)
+    suspend fun insertTransaction(transaction: TransactionEntity): Long
 
     @Delete
     suspend fun deleteTransaction(transaction: TransactionEntity)

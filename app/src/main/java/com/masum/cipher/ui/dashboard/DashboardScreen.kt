@@ -100,6 +100,22 @@ fun DashboardScreen(
 
     var hasCheckedReview by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(state.transactions) {
+        val activity = context as? android.app.Activity
+        val intent = activity?.intent
+        if (intent?.getStringExtra("navigate_to") == "transaction_details") {
+            val transactionId = intent.getLongExtra("transaction_id", -1L)
+            if (transactionId != -1L) {
+                val tx = state.transactions.find { it.id == transactionId }
+                if (tx != null) {
+                    editingTransaction = tx
+                    intent.removeExtra("navigate_to")
+                    intent.removeExtra("transaction_id")
+                }
+            }
+        }
+    }
     LaunchedEffect(settings) {
         if (settings != null && !hasCheckedReview) {
             hasCheckedReview = true

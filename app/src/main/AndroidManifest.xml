@@ -51,6 +51,11 @@
         </receiver>
 
         <receiver
+            android:name=".core.notifications.NotificationActionReceiver"
+            android:exported="false" />
+
+
+        <receiver
             android:name=".ui.widget.BudgetWidgetReceiver"
             android:label="@string/widget_budget_name"
             android:exported="true">

@@ -70,13 +70,15 @@ class TransactionRepository @Inject constructor(
         val start = monthStart()
         val previousSpent = transactionDao.sumExpensesSince(start)
 
-        transactionDao.insertTransaction(
-            transaction.copy(
-                merchant = finalMerchant,
-                category = finalCategory
-            )
+        val newTx = transaction.copy(
+            merchant = finalMerchant,
+            category = finalCategory
         )
+        val insertedId = transactionDao.insertTransaction(newTx)
+        val savedTx = newTx.copy(id = insertedId)
+
         syncWidget()
+        notificationManager.showNewTransactionNotification(savedTx)
         checkBudgetAlert(previousSpent)
         
         if (finalCategory == com.masum.cipher.core.domain.model.TransactionCategory.OTHERS.name) {
@@ -85,6 +87,10 @@ class TransactionRepository @Inject constructor(
                 notificationManager.showUncategorizedReminderNotification(count)
             }
         }
+    }
+
+    suspend fun getTransactionById(id: Long): com.masum.cipher.core.data.local.entity.TransactionEntity? {
+        return transactionDao.getTransactionById(id)
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {

@@ -11,7 +11,9 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 import com.masum.cipher.MainActivity
+import com.masum.cipher.core.data.local.entity.TransactionEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -202,5 +204,70 @@ class LocalNotificationManager @Inject constructor(
             .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(context)) { notify(1006, builder.build()) }
+    }
+
+    fun showNewTransactionNotification(transaction: TransactionEntity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val notificationId = transaction.id.toInt()
+
+        // Categorize action (Deep link)
+        val categorizeIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("navigate_to", "transaction_details")
+            putExtra("transaction_id", transaction.id)
+        }
+        val categorizePendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId + 1000,
+            categorizeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Add Note Action (Inline Reply)
+        val remoteInput = RemoteInput.Builder(NotificationActionReceiver.KEY_TEXT_REPLY)
+            .setLabel("Add a note...")
+            .build()
+
+        val replyIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_ADD_NOTE
+            putExtra(NotificationActionReceiver.EXTRA_TRANSACTION_ID, transaction.id)
+            putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+        }
+
+        val replyPendingIntent = PendingIntent.getBroadcast(
+            context,
+            notificationId + 2000,
+            replyIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
+
+        val addNoteAction = NotificationCompat.Action.Builder(
+            com.masum.cipher.R.drawable.ic_notification,
+            "Add Note",
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).build()
+
+        val categorizeAction = NotificationCompat.Action.Builder(
+            com.masum.cipher.R.drawable.ic_notification,
+            "Categorize",
+            categorizePendingIntent
+        ).build()
+
+        val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}"
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor(if (transaction.isIncome) "#10B981" else "#F43F5E"))
+            .setContentTitle("New Transaction")
+            .setContentText("You spent $amountStr at ${transaction.merchant}.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(categorizePendingIntent) // Tapping it opens the details
+            .addAction(addNoteAction)
+            .addAction(categorizeAction)
+            .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }
     }
 }
