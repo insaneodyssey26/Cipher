@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
+import com.masum.cipher.core.data.local.dao.CategoryRuleDao
+import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.usecase.GetDashboardDataUseCase
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
@@ -20,7 +22,9 @@ class DashboardViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase,
-    private val sessionManager: com.masum.cipher.core.domain.SessionManager
+    private val sessionManager: com.masum.cipher.core.domain.SessionManager,
+    private val transactionRepository: TransactionRepository,
+    private val categoryRuleDao: CategoryRuleDao
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
     initialState = DashboardContract.State()
 ) {
@@ -28,6 +32,7 @@ class DashboardViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
+    private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
 
     init {
         observeDashboardData()
@@ -44,6 +49,8 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
             is DashboardContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
+            is DashboardContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
+            is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
         }
     }
 
@@ -56,6 +63,8 @@ class DashboardViewModel @Inject constructor(
                 getDashboardDataUseCase(query, filter, timeRange)
             }.combine(_draftTransaction) { state, draft ->
                 state.copy(draftTransaction = draft)
+            }.combine(_promptCategoryRuleFor) { state, prompt ->
+                state.copy(promptCategoryRuleFor = prompt)
             }.collect { newState ->
                 updateState { newState }
             }
@@ -71,7 +80,26 @@ class DashboardViewModel @Inject constructor(
 
     private fun updateTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
+            val existing = transactionRepository.getTransactionById(transaction.id)
+            val categoryChanged = existing != null && existing.category != transaction.category && existing.merchant == transaction.merchant
+            
             updateTransactionUseCase(transaction)
+            
+            if (categoryChanged) {
+                _promptCategoryRuleFor.value = transaction
+            }
+        }
+    }
+
+    private fun saveCategoryRule(merchantName: String, category: String) {
+        viewModelScope.launch {
+            categoryRuleDao.insertRule(
+                com.masum.cipher.core.data.local.entity.CategoryRuleEntity(
+                    merchantName = merchantName,
+                    customCategory = category
+                )
+            )
+            _promptCategoryRuleFor.value = null
         }
     }
 

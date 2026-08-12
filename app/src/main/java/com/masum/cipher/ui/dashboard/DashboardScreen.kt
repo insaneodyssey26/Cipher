@@ -528,6 +528,44 @@ fun DashboardScreen(
         )
     }
 
+    state.promptCategoryRuleFor?.let { tx ->
+        AlertDialog(
+            onDismissRequest = { viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt) },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = "Save Category Rule?",
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = "Do you want to always categorize future transactions from '${tx.merchant}' as '${tx.category}'?",
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.handleIntent(DashboardContract.Intent.SaveCategoryRule(tx.merchant, tx.category))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Yes, always", color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt)
+                }) {
+                    Text("No, just this once", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
     if (showWhatsNewSheet) {
         val hasSeen4_1 = lastSeenWhatsNewVersionCode >= 9
         val context = androidx.compose.ui.platform.LocalContext.current

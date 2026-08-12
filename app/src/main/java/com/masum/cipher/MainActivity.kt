@@ -43,6 +43,8 @@ import com.masum.cipher.ui.onboarding.AppSelectionScreen
 import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
+import com.masum.cipher.ui.settings.rules.SmartRulesScreen
+import com.masum.cipher.ui.settings.rules.SmartRulesViewModel
 import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -210,7 +212,20 @@ class MainActivity : AppCompatActivity() {
                                     biometricAuthenticator = biometricAuthenticator,
                                     onNavigateBack = { navController.popBackStack() },
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
-                                    onNavigateToManageApps = { navController.navigate("manage_apps") }
+                                    onNavigateToManageApps = { navController.navigate("manage_apps") },
+                                    onNavigateToSmartRules = { navController.navigate("smart_rules") }
+                                )
+                            }
+                            
+                            composable(
+                                route = "smart_rules",
+                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                            ) {
+                                val viewModel: SmartRulesViewModel = hiltViewModel()
+                                SmartRulesScreen(
+                                    viewModel = viewModel,
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                             composable("manage_apps") {

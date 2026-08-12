@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.masum.cipher.core.data.local.AppDatabase
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.repository.BackupRepository
 import com.masum.cipher.core.security.SecurityManager
 import dagger.Module
@@ -34,7 +35,7 @@ object DatabaseModule {
             AppDatabase.DATABASE_NAME
         )
             .openHelperFactory(factory)
-            .addMigrations(AppDatabase.MIGRATION_3_4)
+            .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
     }
@@ -47,6 +48,11 @@ object DatabaseModule {
     @Provides
     fun provideMerchantAliasDao(database: AppDatabase): MerchantAliasDao {
         return database.merchantAliasDao()
+    }
+
+    @Provides
+    fun provideCategoryRuleDao(database: AppDatabase): CategoryRuleDao {
+        return database.categoryRuleDao()
     }
     
     @Provides

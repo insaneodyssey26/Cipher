@@ -1,7 +1,9 @@
 package com.masum.cipher.ui.insights
 
 import androidx.lifecycle.viewModelScope
+import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
 import com.masum.cipher.core.domain.usecase.GetInsightsUseCase
@@ -19,10 +21,15 @@ class InsightsViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase,
-    private val sessionManager: com.masum.cipher.core.domain.SessionManager
+    private val sessionManager: com.masum.cipher.core.domain.SessionManager,
+    private val transactionRepository: TransactionRepository,
+    private val categoryRuleDao: CategoryRuleDao
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State()
 ) {
+
+    private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
+    private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
 
     init {
         loadInsights()
@@ -38,6 +45,9 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is InsightsContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
             is InsightsContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
+            is InsightsContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
+            is InsightsContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
+            is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
         }
     }
 
@@ -47,6 +57,10 @@ class InsightsViewModel @Inject constructor(
             sessionManager.selectedTimePeriod.flatMapLatest { period ->
                 val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)
                 getInsightsUseCase(timeRange)
+            }.combine(_draftTransaction) { state, draft ->
+                state.copy(draftTransaction = draft)
+            }.combine(_promptCategoryRuleFor) { state, prompt ->
+                state.copy(promptCategoryRuleFor = prompt)
             }.collect { newState ->
                 updateState { 
                     newState.copy(
@@ -66,7 +80,28 @@ class InsightsViewModel @Inject constructor(
     }
 
     private fun updateTransaction(transaction: TransactionEntity) {
-        viewModelScope.launch { updateTransactionUseCase(transaction) }
+        viewModelScope.launch {
+            val existing = transactionRepository.getTransactionById(transaction.id)
+            val categoryChanged = existing != null && existing.category != transaction.category && existing.merchant == transaction.merchant
+            
+            updateTransactionUseCase(transaction)
+            
+            if (categoryChanged) {
+                _promptCategoryRuleFor.value = transaction
+            }
+        }
+    }
+
+    private fun saveCategoryRule(merchantName: String, category: String) {
+        viewModelScope.launch {
+            categoryRuleDao.insertRule(
+                com.masum.cipher.core.data.local.entity.CategoryRuleEntity(
+                    merchantName = merchantName,
+                    customCategory = category
+                )
+            )
+            _promptCategoryRuleFor.value = null
+        }
     }
 
     private fun restoreTransaction(transaction: TransactionEntity) {

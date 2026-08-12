@@ -15,6 +15,9 @@ class InsightsContract {
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
         data class SetTimePeriod(val period: com.masum.cipher.core.domain.model.TimePeriod) : Intent()
+        data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
+        data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
+        object DismissCategoryRulePrompt : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)
@@ -37,7 +40,9 @@ class InsightsContract {
         val weekdayBreakdown: List<DayOfWeekData> = emptyList(),
         val peakHours: List<PeakHourData> = emptyList(),
         val noSpendStreak: Int = 0,
-        val avgTransactionSize: Double = 0.0
+        val avgTransactionSize: Double = 0.0,
+        val draftTransaction: TransactionEntity? = null,
+        val promptCategoryRuleFor: TransactionEntity? = null
     ) : UiState {
         val selectedDayTransactions: List<TransactionEntity>
             get() = selectedDayTimestamp?.let { timestamp ->

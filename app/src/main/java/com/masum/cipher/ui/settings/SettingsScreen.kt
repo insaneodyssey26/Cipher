@@ -51,7 +51,8 @@ fun SettingsScreen(
     biometricAuthenticator: BiometricAuthenticator,
     onNavigateBack: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
-    onNavigateToManageApps: () -> Unit
+    onNavigateToManageApps: () -> Unit,
+    onNavigateToSmartRules: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -385,6 +386,16 @@ fun SettingsScreen(
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showPermissionsHealthSheet = true
                     }
+                )
+            }
+
+            SettingsSection("SMART RULES", icon = LucideIcons.Wand, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SMART RULES", onToggle = { expandedSection = if (expandedSection == "SMART RULES") null else "SMART RULES" }) {
+                VaultSettingsItem(
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    icon = LucideIcons.BookOpen,
+                    title = "Manage Category Rules",
+                    subtitle = "View and edit custom merchant categories",
+                    onClick = onNavigateToSmartRules
                 )
             }
 

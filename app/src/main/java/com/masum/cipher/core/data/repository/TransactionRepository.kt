@@ -3,6 +3,7 @@ package com.masum.cipher.core.data.repository
 import android.content.Context
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.pref.WidgetKeys
@@ -25,6 +26,7 @@ import javax.inject.Singleton
 class TransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
     private val merchantAliasDao: MerchantAliasDao,
+    private val categoryRuleDao: CategoryRuleDao,
     private val categorizerEngine: CategorizerEngine,
     private val notificationManager: LocalNotificationManager,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
@@ -52,20 +54,22 @@ class TransactionRepository @Inject constructor(
 
         if (alias != null) {
             finalMerchant = alias.cleanName
+            val savedCategory = categoryRuleDao.getCategoryForMerchant(finalMerchant)
             finalCategory = if (transaction.category.isBlank()) {
-                categorizerEngine.categorize(alias.cleanName).name
+                savedCategory ?: categorizerEngine.categorize(finalMerchant).name
             } else {
                 transaction.category
             }
         } else {
             val cleanName = categorizerEngine.cleanMerchantName(transaction.merchant)
+            val savedCategory = categoryRuleDao.getCategoryForMerchant(cleanName)
             val autoCategory = categorizerEngine.categorize(cleanName)
 
             if (cleanName != transaction.merchant) {
                 merchantAliasDao.insertAlias(MerchantAliasEntity(rawMerchant, cleanName))
             }
             finalMerchant = cleanName
-            finalCategory = if (transaction.category.isBlank()) autoCategory.name else transaction.category
+            finalCategory = if (transaction.category.isBlank()) savedCategory ?: autoCategory.name else transaction.category
         }
 
         val start = monthStart()

@@ -82,6 +82,8 @@ fun TransactionDetailsSheet(
 
     val view = androidx.compose.ui.platform.LocalView.current
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -182,6 +184,7 @@ fun TransactionDetailsSheet(
                         expanded = categoryExpanded,
                         onExpandedChange = {
                             view.performVibrate(isHapticsEnabled)
+                            focusManager.clearFocus()
                             categoryExpanded = !categoryExpanded
                         }
                     ) {
@@ -198,20 +201,29 @@ fun TransactionDetailsSheet(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
-                                    Text(
-                                        text = "CATEGORY",
-                                        style = Typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = selectedCategory.icon,
+                                        contentDescription = null,
+                                        tint = selectedCategory.color,
+                                        modifier = Modifier.size(20.dp)
                                     )
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        text = selectedCategory.toString().lowercase().replaceFirstChar { it.uppercase() },
-                                        style = Typography.titleSmall,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = "CATEGORY",
+                                            style = Typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            text = selectedCategory.name.lowercase().replaceFirstChar { it.uppercase() },
+                                            style = Typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                                 Icon(
                                     imageVector = LucideIcons.ChevronDown,
@@ -222,33 +234,60 @@ fun TransactionDetailsSheet(
                             }
                         }
 
-                        ExposedDropdownMenu(
-                            expanded = categoryExpanded,
-                            onDismissRequest = { categoryExpanded = false },
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        MaterialTheme(
+                            colorScheme = MaterialTheme.colorScheme.copy(
+                                surface = MaterialTheme.colorScheme.surfaceVariant
+                            )
                         ) {
-                            TransactionCategory.entries.forEach { category ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = category.toString().lowercase().replaceFirstChar { it.uppercase() },
-                                            style = Typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    },
-                                    onClick = {
-                                        view.performVibrate(isHapticsEnabled)
-                                        selectedCategory = category
-                                        categoryExpanded = false
-                                    },
-                                    leadingIcon = {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(12.dp)
-                                                .background(category.color, CircleShape)
-                                        )
-                                    }
-                                )
+                            ExposedDropdownMenu(
+                                expanded = categoryExpanded,
+                                onDismissRequest = { categoryExpanded = false },
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(4.dp)
+                            ) {
+                                TransactionCategory.entries.forEach { category ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = category.name.lowercase().replaceFirstChar { it.uppercase() },
+                                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        },
+                                        onClick = {
+                                            view.performVibrate(isHapticsEnabled)
+                                            selectedCategory = category
+                                            categoryExpanded = false
+                                        },
+                                        leadingIcon = {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .background(category.color.copy(alpha = 0.15f), CircleShape),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = category.icon,
+                                                    contentDescription = null,
+                                                    tint = category.color,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                    )
+                                }
                             }
                         }
                     }
