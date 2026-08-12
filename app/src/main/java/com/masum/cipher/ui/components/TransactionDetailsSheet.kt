@@ -13,6 +13,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,8 +60,10 @@ fun TransactionDetailsSheet(
     var isIncome by remember { mutableStateOf(transaction.isIncome) }
     var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
     var categoryExpanded by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf(transaction.note ?: "") }
+    var isNoteExpanded by remember { mutableStateOf(transaction.note?.isNotBlank() == true) }
 
-    LaunchedEffect(merchant, amount, isIncome, selectedCategory) {
+    LaunchedEffect(merchant, amount, isIncome, selectedCategory, note) {
         if (onDraftChange != null) {
             val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
             onDraftChange.invoke(
@@ -66,7 +71,8 @@ fun TransactionDetailsSheet(
                     merchant = merchant,
                     amount = finalAmount,
                     category = selectedCategory.name,
-                    isIncome = isIncome
+                    isIncome = isIncome,
+                    note = note.ifBlank { null }
                 )
             )
         }
@@ -160,85 +166,122 @@ fun TransactionDetailsSheet(
                 color = if (isIncome) EmeraldIncome else RoseExpense
             )
 
-            // Merchant field
-            VaultSheetTextField(
-                value = merchant,
-                onValueChange = { merchant = it },
-                label = "MERCHANT"
-            )
-
-            // Category picker
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = {
-                    view.performVibrate(isHapticsEnabled)
-                    categoryExpanded = !categoryExpanded
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                        .border(1.dp, White10, RoundedCornerShape(12.dp))
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                        .padding(horizontal = 16.dp, vertical = 14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "CATEGORY",
-                                style = Typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = selectedCategory.toString().lowercase().replaceFirstChar { it.uppercase() },
-                                style = Typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Icon(
-                            imageVector = LucideIcons.ChevronDown,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                Box(modifier = Modifier.weight(1f)) {
+                    VaultSheetTextField(
+                        value = merchant,
+                        onValueChange = { merchant = it },
+                        label = "MERCHANT"
+                    )
                 }
-
-                ExposedDropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false },
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    TransactionCategory.entries.forEach { category ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = category.toString().lowercase().replaceFirstChar { it.uppercase() },
-                                    style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            onClick = {
-                                view.performVibrate(isHapticsEnabled)
-                                selectedCategory = category
-                                categoryExpanded = false
-                            },
-                            leadingIcon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(12.dp)
-                                        .background(category.color, CircleShape)
+                Box(modifier = Modifier.weight(1f)) {
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = {
+                            view.performVibrate(isHapticsEnabled)
+                            categoryExpanded = !categoryExpanded
+                        }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                                .border(1.dp, White10, RoundedCornerShape(12.dp))
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .padding(horizontal = 16.dp, vertical = 14.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "CATEGORY",
+                                        style = Typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = selectedCategory.toString().lowercase().replaceFirstChar { it.uppercase() },
+                                        style = Typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                                Icon(
+                                    imageVector = LucideIcons.ChevronDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
-                        )
+                        }
+
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false },
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            TransactionCategory.entries.forEach { category ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = category.toString().lowercase().replaceFirstChar { it.uppercase() },
+                                            style = Typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    onClick = {
+                                        view.performVibrate(isHapticsEnabled)
+                                        selectedCategory = category
+                                        categoryExpanded = false
+                                    },
+                                    leadingIcon = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(12.dp)
+                                                .background(category.color, CircleShape)
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
+            }
+
+            if (!isNoteExpanded) {
+                Text(
+                    text = "+ Add note",
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            view.performVibrate(isHapticsEnabled)
+                            isNoteExpanded = true
+                        }
+                        .padding(vertical = 8.dp, horizontal = 4.dp)
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isNoteExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                VaultSheetTextField(
+                    value = note,
+                    onValueChange = { if (it.length <= 150) note = it },
+                    label = "NOTE (OPTIONAL)"
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -254,7 +297,8 @@ fun TransactionDetailsSheet(
                                 merchant = merchant.trim().ifBlank { "Miscellaneous" },
                                 amount = finalAmount,
                                 category = selectedCategory.name,
-                                isIncome = isIncome
+                                isIncome = isIncome,
+                                note = note.ifBlank { null }
                             )
                         )
                     }
@@ -392,7 +436,7 @@ private fun AmountInputField(
                 letterSpacing = (-2).sp
             ),
             singleLine = true,
-            readOnly = false,
+            readOnly = true,
             cursorBrush = SolidColor(color),
             modifier = Modifier
                 .fillMaxWidth()

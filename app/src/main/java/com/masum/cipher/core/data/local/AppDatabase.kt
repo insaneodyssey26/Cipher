@@ -9,7 +9,7 @@ import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 
 @Database(
     entities = [TransactionEntity::class, MerchantAliasEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -18,5 +18,11 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "cipher_spend_db"
+
+        val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE transactions ADD COLUMN note TEXT")
+            }
+        }
     }
 }

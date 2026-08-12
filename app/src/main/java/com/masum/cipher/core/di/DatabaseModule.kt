@@ -34,6 +34,7 @@ object DatabaseModule {
             AppDatabase.DATABASE_NAME
         )
             .openHelperFactory(factory)
+            .addMigrations(AppDatabase.MIGRATION_3_4)
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
     }

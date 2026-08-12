@@ -53,11 +53,12 @@ class ExportCsvUseCase @Inject constructor(
     suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val transactions = transactionDao.getAllTransactions().first()
-            val csvHeader = "ID,Date,Merchant,Amount,Category,Type\n"
+            val csvHeader = "ID,Date,Merchant,Amount,Category,Type,Note\n"
             val csvData = transactions.joinToString("\n") { tx ->
                 val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
                 val type = if (tx.isIncome) "Income" else "Expense"
-                "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\""
+                val noteStr = tx.note?.replace("\"", "\"\"") ?: ""
+                "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\",\"$noteStr\""
             }
             
             backupRepository.provideOutputStream(uri)?.use { outputStream ->

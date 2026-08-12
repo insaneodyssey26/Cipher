@@ -196,10 +196,13 @@ fun TransactionRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            val notePart = if (!transaction.note.isNullOrBlank()) " • ${transaction.note}" else ""
             Text(
-                text = "${category.displayName} · $dateLabel",
+                text = "${category.displayName}$notePart · $dateLabel",
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                color = onSurfaceVar
+                color = onSurfaceVar,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 

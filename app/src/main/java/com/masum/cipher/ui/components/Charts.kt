@@ -104,7 +104,24 @@ private fun buildSmoothLinePath(pts: List<Offset>): Path {
 fun SpendingTrendChart(
     points: List<DashboardContract.Point>
 ) {
-    if (points.isEmpty()) return
+    if (points.size < 2) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .height(220.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, androidx.compose.foundation.shape.RoundedCornerShape(20.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Not enough data to map a trend.\nKeep logging transactions!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+        return
+    }
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
