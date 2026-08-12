@@ -47,6 +47,7 @@ import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.core.updates.UpdateManager
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         
         notificationScheduler.scheduleDailyNotifications()
+        UpdateManager.checkForUpdates(this)
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.attributes.preferredDisplayModeId = 0 

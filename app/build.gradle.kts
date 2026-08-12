@@ -97,6 +97,7 @@ dependencies {
     
     // Google Play In-App Review
     implementation(libs.play.review)
+    implementation(libs.play.app.update)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
