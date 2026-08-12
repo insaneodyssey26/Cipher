@@ -77,7 +77,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 16
+    val currentVersionCode = 17
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -619,17 +619,17 @@ fun DashboardScreen(
                 ) {
                     WhatsNewFeatureItem(
                         title = "Smart Rules",
-                        description = "Automatically categorize your transactions based on custom rules. Just edit a transaction to create a rule.",
+                        description = "Cipher can now remember your custom categories. Just edit any transaction to create a rule.",
                         icon = LucideIcons.Check
                     )
                     WhatsNewFeatureItem(
-                        title = "Smarter Detection",
-                        description = "Improved pattern matching ensures better out-of-the-box merchant recognition for your transactions.",
-                        icon = LucideIcons.Search
+                        title = "Transaction Notes",
+                        description = "You can now type short notes on your transactions to remember what they were for.",
+                        icon = LucideIcons.Calendar
                     )
                     WhatsNewFeatureItem(
-                        title = "Premium Interface",
-                        description = "Sleeker dropdowns and smoother focus management for a highly polished manual entry experience.",
+                        title = "Settings UI Update",
+                        description = "We completely redesigned the Smart Rules and Category screens to make them look much cleaner.",
                         icon = LucideIcons.Settings
                     )
                 }

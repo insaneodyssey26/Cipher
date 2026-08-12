@@ -155,6 +155,7 @@ flowchart LR
 - Transaction timeline with spend-based sorting capabilities and weekly interval filtering
 - Live search by merchant or category
 - Add, edit, delete with snackbar undo
+- Transaction Notes: Add personal notes to remember what a transaction was for
 - Monthly budget ring with health color coding
 - Privacy mode — blurs all amounts with one tap
 
