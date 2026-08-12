@@ -74,7 +74,7 @@ class UserPreferences @Inject constructor(
             autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD],
             appLaunchCount = preferences[Keys.APP_LAUNCH_COUNT] ?: 0,
             hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false,
-            notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: false
+            notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true
         )
     }
 

@@ -14,7 +14,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.masum.cipher.debug"
+        applicationId = "com.masum.cipher"
         minSdk = 24
         targetSdk = 37
         versionCode = 17
