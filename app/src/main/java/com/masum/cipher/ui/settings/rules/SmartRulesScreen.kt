@@ -276,7 +276,7 @@ private fun RuleEditDialog(
                         label = { Text("Category") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         leadingIcon = {
                             Icon(

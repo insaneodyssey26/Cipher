@@ -20,8 +20,8 @@ object UpdateManager {
                 try {
                     appUpdateManager.startUpdateFlowForResult(
                         appUpdateInfo,
-                        AppUpdateType.FLEXIBLE,
                         activity,
+                        com.google.android.play.core.appupdate.AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE),
                         UPDATE_REQUEST_CODE
                     )
                 } catch (e: Exception) {
