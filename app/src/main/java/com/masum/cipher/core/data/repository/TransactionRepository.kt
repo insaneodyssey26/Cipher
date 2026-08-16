@@ -103,18 +103,6 @@ class TransactionRepository @Inject constructor(
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
         val existing = transactionDao.getTransactionById(transaction.id)
-        if (existing != null && existing.merchant != transaction.merchant) {
-            val rawKey = existing.merchant.uppercase().trim()
-            if (rawKey != "MISCELLANEOUS") {
-                merchantAliasDao.insertAlias(
-                    MerchantAliasEntity(
-                        rawName = rawKey,
-                        cleanName = transaction.merchant,
-                        isUserDefined = true
-                    )
-                )
-            }
-        }
         transactionDao.insertTransaction(transaction)
         syncWidget()
     }

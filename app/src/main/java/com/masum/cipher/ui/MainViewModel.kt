@@ -11,16 +11,22 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val biometricAuthenticator: BiometricAuthenticator,
-    private val addTransactionUseCase: AddTransactionUseCase
+    private val addTransactionUseCase: AddTransactionUseCase,
+    private val merchantAliasDao: MerchantAliasDao
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State()
 ) {
 
     init {
+        viewModelScope.launch {
+            merchantAliasDao.deleteUserDefinedAliases()
+        }
         userPreferences.settingsFlow
             .onEach { settings ->
                 updateState {

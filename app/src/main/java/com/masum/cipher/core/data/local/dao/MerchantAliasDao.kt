@@ -20,4 +20,7 @@ interface MerchantAliasDao {
 
     @Query("DELETE FROM merchant_aliases WHERE rawName = :rawName")
     suspend fun deleteAlias(rawName: String)
+
+    @Query("DELETE FROM merchant_aliases WHERE isUserDefined = 1")
+    suspend fun deleteUserDefinedAliases()
 }
