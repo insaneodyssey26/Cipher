@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.rotate
 import androidx.compose.animation.animateContentSize
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -61,7 +63,9 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     
+    var searchQuery by remember { mutableStateOf("") }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showBudgetDialog by remember { mutableStateOf(false) }
@@ -118,13 +122,92 @@ fun SettingsScreen(
         }
     }
 
+    val query = searchQuery.trim().lowercase()
+
+    val matchTheme = query.isBlank() || "light".contains(query) || "dark".contains(query) || "system".contains(query) || "theme".contains(query)
+    val matchAccent = query.isBlank() || "accent color".contains(query)
+    val matchAppearance = query.isBlank() || "appearance".contains(query) || matchTheme || matchAccent
+
+    val matchBiometric = query.isBlank() || "biometric lock".contains(query) || "require authentication to open the app".contains(query)
+    val matchAutoLock = query.isBlank() || "auto-lock timer".contains(query) || "auto lock".contains(query)
+    val matchHaptic = query.isBlank() || "haptic feedback".contains(query) || "physical response to touch".contains(query)
+    val matchPrivacy = query.isBlank() || "privacy mode".contains(query) || "hide balances on dashboard".contains(query)
+    val matchSecurity = query.isBlank() || "security".contains(query) || "privacy".contains(query) || matchBiometric || matchAutoLock || matchHaptic || matchPrivacy
+
+    val matchAlerts = query.isBlank() || "interactive transaction alerts".contains(query) || "alert on every transaction".contains(query)
+    val matchApps = query.isBlank() || "manage tracked apps".contains(query) || "select which apps to monitor for transactions".contains(query)
+    val matchHealth = query.isBlank() || "permissions health".contains(query) || "check if cipher is working at its best".contains(query)
+    val matchRules = query.isBlank() || "manage category rules".contains(query) || "view and edit custom merchant categories".contains(query)
+    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchAlerts || matchApps || matchHealth || matchRules
+
+    val matchBudget = query.isBlank() || "monthly budget".contains(query)
+    val matchGoals = query.isBlank() || "financial goals".contains(query) || matchBudget
+
+    val matchCsv = query.isBlank() || "export csv report".contains(query)
+    val matchPdf = query.isBlank() || "export pdf statement".contains(query)
+    val matchBackup = query.isBlank() || "backup vault".contains(query)
+    val matchRestore = query.isBlank() || "restore vault".contains(query)
+    val matchClear = query.isBlank() || "clear all data".contains(query)
+    val matchAutoBackup = query.isBlank() || "enable auto-backup".contains(query) || "silently backup your vault locally".contains(query)
+    val matchFreq = query.isBlank() || "backup frequency".contains(query)
+    val matchLoc = query.isBlank() || "backup location".contains(query)
+    val matchData = query.isBlank() || "data".contains(query) || "backup".contains(query) || matchCsv || matchPdf || matchBackup || matchRestore || matchClear || matchAutoBackup || matchFreq || matchLoc
+
+    val matchRate = query.isBlank() || "rate on google play".contains(query) || "enjoying cipher? leave a review!".contains(query)
+    val matchFeedback = query.isBlank() || "feedback & feature requests".contains(query)
+    val matchUpdate = query.isBlank() || "check for updates".contains(query) || "look for the latest version on play store".contains(query)
+    val matchCrash = query.isBlank() || "app diagnostics".contains(query) || "view and copy crash logs".contains(query)
+    val matchContact = query.isBlank() || "contact developer".contains(query)
+    val matchSource = query.isBlank() || "open source".contains(query)
+    val matchPrivacyPol = query.isBlank() || "privacy policy".contains(query)
+    val matchSupportDev = query.isBlank() || "support development".contains(query)
+    val matchAbout = query.isBlank() || "about".contains(query) || "support".contains(query) || matchRate || matchFeedback || matchUpdate || matchCrash || matchContact || matchSource || matchPrivacyPol || matchSupportDev
+
     Scaffold(
+        modifier = Modifier.pointerInput(Unit) {
+            detectTapGestures(onTap = { focusManager.clearFocus() })
+        },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = "SETTINGS", style = Typography.labelSmall.copy(letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-            )
+            Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
+                CenterAlignedTopAppBar(
+                    title = { Text(text = "SETTINGS", style = Typography.labelSmall.copy(letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                )
+                val accentColor = Color(state.accentColor.colorValue)
+                val searchGradient = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    colors = listOf(
+                        accentColor.copy(alpha = 0.15f),
+                        MaterialTheme.colorScheme.surface
+                    )
+                )
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .background(searchGradient, RoundedCornerShape(16.dp)),
+                    placeholder = { Text("Search settings...", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    leadingIcon = { Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = ""; focusManager.clearFocus() }) {
+                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedBorderColor = accentColor.copy(alpha = 0.5f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -134,8 +217,10 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 140.dp)
         ) {
-            SettingsSection("APPEARANCE", icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE", onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
-                Row(
+            if (matchAppearance) {
+SettingsSection("APPEARANCE", icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
+                if (matchTheme) {
+Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -173,9 +258,11 @@ fun SettingsScreen(
                     )
                 }
                 
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
-                Column(modifier = Modifier.fillMaxWidth()) {
+                if (matchAccent) {
+Column(modifier = Modifier.fillMaxWidth()) {
                     val view = androidx.compose.ui.platform.LocalView.current
                     Row(
                         modifier = Modifier
@@ -303,8 +390,11 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY", onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
-                VaultSettingsSwitch(
+            }
+}
+if (matchSecurity) {
+SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
+                if (matchBiometric) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.ShieldCheck,
                     title = "Biometric Lock",
@@ -323,7 +413,7 @@ fun SettingsScreen(
                         }
                     }
                 )
-                VaultSettingsItem(
+                if (matchAutoLock) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Timer,
                     title = "Auto-Lock Timer",
@@ -339,7 +429,7 @@ fun SettingsScreen(
                         showTimeoutDialog = true
                     }
                 )
-                VaultSettingsSwitch(
+                if (matchHaptic) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Zap,
                     title = "Haptic Feedback",
@@ -350,7 +440,7 @@ fun SettingsScreen(
                         viewModel.handleIntent(SettingsContract.Intent.SetHapticsEnabled(it)) 
                     }
                 )
-                VaultSettingsSwitch(
+                if (matchPrivacy) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.EyeOff,
                     title = "Privacy Mode",
@@ -363,8 +453,10 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING", onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
-                VaultSettingsSwitch(
+            }
+if (matchAutomation) {
+SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
+                if (matchAlerts) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.BellRing,
                     title = "Interactive Transaction Alerts",
@@ -375,14 +467,14 @@ fun SettingsScreen(
                         viewModel.handleIntent(SettingsContract.Intent.SetNotifyAllTransactions(it)) 
                     }
                 )
-                VaultSettingsItem(
+                if (matchApps) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Smartphone,
                     title = "Manage Tracked Apps",
                     subtitle = "Select which apps to monitor for transactions",
                     onClick = onNavigateToManageApps
                 )
-                VaultSettingsItem(
+                if (matchHealth) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Activity,
                     title = "Permissions Health",
@@ -393,7 +485,7 @@ fun SettingsScreen(
                     }
                 )
             
-                VaultSettingsItem(
+                if (matchRules) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.BookOpen,
                     title = "Manage Category Rules",
@@ -402,8 +494,10 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS", onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {
-                VaultSettingsItem(
+            }
+if (matchGoals) {
+SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {
+                if (matchBudget) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
                     title = "Monthly Budget",
@@ -416,8 +510,10 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA & BACKUP", onToggle = { expandedSection = if (expandedSection == "DATA & BACKUP") null else "DATA & BACKUP" }) {
-                VaultSettingsItem(
+            }
+if (matchData) {
+SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA & BACKUP" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "DATA & BACKUP") null else "DATA & BACKUP" }) {
+                if (matchCsv) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileSpreadsheet,
                     title = "Export CSV Report",
@@ -427,7 +523,7 @@ fun SettingsScreen(
                     },
                     loading = state.isExportingCsv
                 )
-                VaultSettingsItem(
+                if (matchPdf) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileText,
                     title = "Export PDF Statement",
@@ -437,7 +533,7 @@ fun SettingsScreen(
                     },
                     loading = state.isExportingPdf
                 )
-                VaultSettingsItem(
+                if (matchBackup) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudUpload,
                     title = "Backup Vault",
@@ -447,7 +543,7 @@ fun SettingsScreen(
                     },
                     loading = state.isExporting
                 )
-                VaultSettingsItem(
+                if (matchRestore) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudDownload,
                     title = "Restore Vault",
@@ -457,7 +553,7 @@ fun SettingsScreen(
                     },
                     loading = state.isImporting
                 )
-                VaultSettingsItem(
+                if (matchClear) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Trash2,
                     title = "Clear All Data",
@@ -468,7 +564,7 @@ fun SettingsScreen(
                     }
                 )
             
-                VaultSettingsSwitch(
+                if (matchAutoBackup) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FolderSync,
                     title = "Enable Auto-Backup",
@@ -483,7 +579,7 @@ fun SettingsScreen(
                     }
                 )
                 if (state.autoBackupEnabled) {
-                    VaultSettingsItem(
+                    if (matchFreq) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.CalendarClock,
                         title = "Backup Frequency",
@@ -493,7 +589,7 @@ fun SettingsScreen(
                             showFrequencyDialog = true
                         }
                     )
-                    VaultSettingsItem(
+                    if (matchLoc) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.FolderDown,
                         title = "Backup Location",
@@ -515,8 +611,10 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT & SUPPORT", onToggle = { expandedSection = if (expandedSection == "ABOUT & SUPPORT") null else "ABOUT & SUPPORT" }) {
-                VaultSettingsItem(
+            }
+if (matchAbout) {
+SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT & SUPPORT" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "ABOUT & SUPPORT") null else "ABOUT & SUPPORT" }) {
+                if (matchRate) VaultSettingsItem(
                     icon = LucideIcons.Star,
                     title = "Rate on Google Play",
                     subtitle = "Enjoying Cipher? Leave a review!",
@@ -528,7 +626,7 @@ fun SettingsScreen(
                         }
                     }
                 )
-                VaultSettingsItem(
+                if (matchFeedback) VaultSettingsItem(
                     icon = LucideIcons.MessagesSquare,
                     title = "Feedback & Feature Requests",
                     onClick = {
@@ -536,7 +634,7 @@ fun SettingsScreen(
                         context.startActivity(intent)
                     }
                 )
-                VaultSettingsItem(
+                if (matchUpdate) VaultSettingsItem(
                     icon = LucideIcons.RefreshCw,
                     title = "Check for Updates",
                     subtitle = "Look for the latest version on Play Store",
@@ -548,13 +646,13 @@ fun SettingsScreen(
                         }
                     }
                 )
-                VaultSettingsItem(
+                if (matchCrash) VaultSettingsItem(
                     icon = LucideIcons.Bug,
                     title = "App Diagnostics",
                     subtitle = "View and copy crash logs",
                     onClick = { showCrashLogDialog = true }
                 )
-                VaultSettingsItem(
+                if (matchContact) VaultSettingsItem(
                     icon = LucideIcons.Mail,
                     title = "Contact Developer",
                     subtitle = "masumali262006@gmail.com",
@@ -567,7 +665,7 @@ fun SettingsScreen(
                     }
                 )
             
-                VaultSettingsItem(
+                if (matchSource) VaultSettingsItem(
                     icon = LucideIcons.Github,
                     title = "Open Source",
                     subtitle = "github.com/insaneodyssey26/cipher",
@@ -576,12 +674,12 @@ fun SettingsScreen(
                         context.startActivity(intent)
                     }
                 )
-                VaultSettingsItem(
+                if (matchPrivacyPol) VaultSettingsItem(
                     icon = LucideIcons.Info,
                     title = "Privacy Policy",
                     onClick = onNavigateToPrivacy
                 )
-                VaultSettingsItem(
+                if (matchSupportDev) VaultSettingsItem(
                     icon = LucideIcons.Coffee,
                     title = "Support Development",
                     subtitle = "ko-fi.com/insane_odyssey",
@@ -592,7 +690,8 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            }
+Spacer(modifier = Modifier.weight(1f))
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
