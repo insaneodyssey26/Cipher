@@ -431,7 +431,22 @@ fun SpendingTrendChart(
 fun CategoryAllocationDonut(
     categories: List<DashboardContract.CategoryData>
 ) {
-    if (categories.isEmpty()) return
+    if (categories.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Not enough category data.\nYour spending breakdown will appear here.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+        return
+    }
     
     val animProgress = remember { Animatable(0f) }
     val hasAnimated = rememberSaveable(categories) { mutableStateOf(false) }
@@ -521,7 +536,24 @@ fun CategoryAllocationDonut(
 fun PeakHoursChart(
     hours: List<InsightsContract.PeakHourData>
 ) {
-    if (hours.isEmpty()) return
+    if (hours.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .height(180.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, androidx.compose.foundation.shape.RoundedCornerShape(20.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Not enough hourly data.\nYour spending habits will appear here.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+        return
+    }
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -41,6 +42,10 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.Heart
+import compose.icons.lucideicons.Wallet
+import compose.icons.lucideicons.Smartphone
+import compose.icons.lucideicons.Zap
+import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
@@ -349,7 +354,7 @@ fun DashboardScreen(
                         }
                     } else {
                         item {
-                            GenesisEmptyState(onAddManual = { showAddSheet = true })
+                            GenesisEmptyState()
                         }
                     }
                 } else {
@@ -1322,44 +1327,67 @@ fun TransactionItem(
 }
 
 @Composable
-private fun GenesisEmptyState(onAddManual: () -> Unit) {
+private fun GenesisEmptyState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 24.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            LucideIcons.Lock,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.outline
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Your financial vault is ready.",
-            style = Typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Cipher securely monitors your tracked apps and automatically adds your transactions here whenever you get a payment notification.\n\nMake a digital payment, or tap below to record one manually!",
-            style = Typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            lineHeight = 22.sp
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onAddManual,
-            modifier = Modifier,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(12.dp)
+        VaultCard(
+            modifier = Modifier.fillMaxWidth(),
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ) {
-            Text("Add Manual Transaction", style = Typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        LucideIcons.BellRing,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                Text(
+                    text = "Listening for payments",
+                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = "Go ahead, make a digital payment. Cipher will catch the notification and log it here instantly.",
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
+                )
+            }
         }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Tap + below to add a past transaction manually",
+            style = Typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
