@@ -77,7 +77,7 @@ fun DashboardScreen(
     var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 17
+    val currentVersionCode = 18
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -575,7 +575,7 @@ fun DashboardScreen(
             try {
                 context.packageManager.getPackageInfo(context.packageName, 0).versionName
             } catch (_: Exception) {
-                "4.8.0"
+                "4.8.1"
             }
         }
         ModalBottomSheet(
@@ -617,6 +617,11 @@ fun DashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    WhatsNewFeatureItem(
+                        title = "Hotfix Update",
+                        description = "Fixed a critical bug where editing a merchant's name would incorrectly rename all future transactions from that merchant.",
+                        icon = LucideIcons.Check
+                    )
                     WhatsNewFeatureItem(
                         title = "Smart Rules",
                         description = "Cipher can now remember your custom categories. Just edit any transaction to create a rule.",

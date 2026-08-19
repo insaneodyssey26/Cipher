@@ -1,5 +1,12 @@
 # Release Notes
 
+## [4.8.1]
+
+### Fixed
+- **Merchant Alias Bug**: Fixed a critical bug where manually editing a transaction's merchant name would silently and incorrectly rename all future transactions from that original merchant.
+
+---
+
 ## [4.8.0]
 
 ### Added
