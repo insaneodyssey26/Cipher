@@ -1,17 +1,16 @@
 package com.masum.cipher.ui
 
 import androidx.lifecycle.viewModelScope
+import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
 import com.masum.cipher.core.security.BiometricAuthenticator
-import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 
 @HiltViewModel
 class MainViewModel @Inject constructor(

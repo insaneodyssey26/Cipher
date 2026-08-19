@@ -8,24 +8,65 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.animation.animateContentSize
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,22 +74,52 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.security.BiometricAuthenticator
-import com.masum.cipher.ui.components.VaultCard
-import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.RoseExpense
+import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.*
+import compose.icons.lucideicons.Activity
 import compose.icons.lucideicons.BellRing
+import compose.icons.lucideicons.BookOpen
 import compose.icons.lucideicons.Bug
+import compose.icons.lucideicons.CalendarClock
+import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.ChevronRight
+import compose.icons.lucideicons.CloudDownload
+import compose.icons.lucideicons.CloudUpload
+import compose.icons.lucideicons.Coffee
+import compose.icons.lucideicons.Database
+import compose.icons.lucideicons.EyeOff
+import compose.icons.lucideicons.FileSpreadsheet
+import compose.icons.lucideicons.FileText
+import compose.icons.lucideicons.FolderDown
+import compose.icons.lucideicons.FolderSync
+import compose.icons.lucideicons.Github
+import compose.icons.lucideicons.Info
+import compose.icons.lucideicons.Laptop
+import compose.icons.lucideicons.Lock
+import compose.icons.lucideicons.Mail
+import compose.icons.lucideicons.MessageSquare
+import compose.icons.lucideicons.MessagesSquare
+import compose.icons.lucideicons.Moon
+import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.RefreshCw
 import compose.icons.lucideicons.Search
+import compose.icons.lucideicons.ShieldCheck
+import compose.icons.lucideicons.Smartphone
+import compose.icons.lucideicons.Star
+import compose.icons.lucideicons.Sun
+import compose.icons.lucideicons.Target
+import compose.icons.lucideicons.Timer
+import compose.icons.lucideicons.Trash2
+import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.masum.cipher.core.notifications.LocalNotificationManager
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
+import compose.icons.lucideicons.Zap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1012,10 +1083,20 @@ private fun SettingsSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            kotlinx.coroutines.delay(100)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
+
     VaultCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
+            .bringIntoViewRequester(bringIntoViewRequester)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
             .clickable(enabled = onToggle != null, onClick = { 
                 view.performVibrate(isHapticsEnabled)

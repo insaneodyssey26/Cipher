@@ -2,7 +2,6 @@ package com.masum.cipher.core.domain
 
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
-import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton

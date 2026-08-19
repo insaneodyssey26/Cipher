@@ -7,7 +7,6 @@ import android.graphics.pdf.PdfDocument
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import java.io.OutputStream
 import java.util.Date
-import kotlin.math.max
 
 object PdfGenerator {
     fun generateStatement(context: android.content.Context, transactions: List<TransactionEntity>, outputStream: OutputStream) {

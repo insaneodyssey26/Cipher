@@ -1,9 +1,8 @@
 package com.masum.cipher
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
-
 import com.masum.cipher.core.util.CrashReporter
+import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class CipherSpendApp : Application() {

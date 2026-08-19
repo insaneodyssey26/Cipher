@@ -1,13 +1,20 @@
 package com.masum.cipher.ui.components
 
-import com.masum.cipher.core.util.performVibrate
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,15 +26,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.Wallet
 
 enum class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
     Dashboard("dashboard", LucideIcons.Wallet, "Home"),

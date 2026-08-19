@@ -19,6 +19,7 @@ android {
         targetSdk = 37
         versionCode = 19
         versionName = "4.9.0"
+        resourceConfigurations += setOf("en")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,7 +65,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.material.icons.extended)
     implementation("androidx.appcompat:appcompat:1.7.0")
 
 

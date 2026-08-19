@@ -12,12 +12,12 @@ import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -43,7 +43,6 @@ import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.di.WidgetEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 
 class BudgetWidget : GlanceAppWidget() {
 

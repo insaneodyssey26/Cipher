@@ -2,13 +2,16 @@ package com.masum.cipher.core.notifications
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
-import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.sms.TransactionParser
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint

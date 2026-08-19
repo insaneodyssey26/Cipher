@@ -1,37 +1,53 @@
 package com.masum.cipher.ui.insights
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
-import com.masum.cipher.ui.components.*
-import com.masum.cipher.ui.theme.*
 import com.masum.cipher.core.util.performVibrate
-
+import com.masum.cipher.ui.components.CalendarHeatmap
+import com.masum.cipher.ui.components.CategoryAllocationDonut
+import com.masum.cipher.ui.components.PeakHoursChart
+import com.masum.cipher.ui.components.SpendingTrendChart
+import com.masum.cipher.ui.components.TimeSelectorDropdown
+import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Clock
-import java.util.*
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import compose.icons.lucideicons.TrendingUp
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
