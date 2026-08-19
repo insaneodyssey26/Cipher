@@ -37,7 +37,7 @@ import kotlinx.coroutines.withContext
 data class InstalledApp(
     val packageName: String,
     val appName: String,
-    val icon: android.graphics.drawable.Drawable
+    val icon: androidx.compose.ui.graphics.ImageBitmap
 )
 
 @Composable
@@ -59,37 +59,6 @@ fun AppSelectionScreen(
         }
     }
 
-    var hasNotificationAccess by remember { 
-        mutableStateOf(androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)) 
-    }
-
-    var hasPostNotificationPermission by remember { 
-        mutableStateOf(
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) 
-                androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            else true
-        ) 
-    }
-
-    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasPostNotificationPermission = isGranted
-    }
-
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                hasNotificationAccess = androidx.core.app.NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    hasPostNotificationPermission = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
@@ -108,13 +77,17 @@ fun AppSelectionScreen(
             val apps = resolveInfos
                 .map { it.activityInfo.applicationInfo }
                 .distinctBy { it.packageName }
-                .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 } // Exclude system apps
-                .map { info ->
-                    InstalledApp(
-                        packageName = info.packageName,
-                        appName = pm.getApplicationLabel(info).toString(),
-                        icon = pm.getApplicationIcon(info)
-                    )
+                .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
+                .mapNotNull { info ->
+                    try {
+                        InstalledApp(
+                            packageName = info.packageName,
+                            appName = pm.getApplicationLabel(info).toString(),
+                            icon = pm.getApplicationIcon(info).toBitmap().asImageBitmap()
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
                 .sortedBy { it.appName }
             
@@ -151,59 +124,7 @@ fun AppSelectionScreen(
             lineHeight = 22.sp
         )
 
-        if (!hasNotificationAccess) {
-            Spacer(modifier = Modifier.height(16.dp))
-            com.masum.cipher.ui.components.VaultCard(backgroundColor = MaterialTheme.colorScheme.errorContainer) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.BellRing,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Action Required", style = Typography.titleSmall, color = MaterialTheme.colorScheme.error)
-                        Text("Cipher needs Notification Access to read transactions.", style = Typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Button(
-                        onClick = { context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Text("Enable", color = MaterialTheme.colorScheme.onError)
-                    }
-                }
-            }
-        } else if (!hasPostNotificationPermission && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            Spacer(modifier = Modifier.height(16.dp))
-            com.masum.cipher.ui.components.VaultCard(backgroundColor = MaterialTheme.colorScheme.secondaryContainer) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.MessageSquare,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("App Notifications", style = Typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Allow Cipher to send you budget alerts and updates.", style = Typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Button(
-                        onClick = { permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text("Allow", color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                }
-            }
-        }
+    
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -298,7 +219,7 @@ private fun AppItem(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                bitmap = app.icon.toBitmap().asImageBitmap(),
+                bitmap = app.icon,
                 contentDescription = app.appName,
                 modifier = Modifier
                     .size(48.dp)

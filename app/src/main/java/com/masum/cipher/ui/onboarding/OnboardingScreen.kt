@@ -24,6 +24,7 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.*
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.MessageSquare
 import compose.icons.lucideicons.ShieldCheck
@@ -72,14 +73,33 @@ fun OnboardingScreen(
                     onAccentColorSelected = onAccentColorSelected,
                     onNext = { page = 2 }
                 )
-                2 -> AppSelectionScreen(
+                2 -> PermissionPage(onComplete = { page = 3 })
+                else -> AppSelectionScreen(
                     initialSelectedApps = emptySet(),
                     onComplete = { apps ->
                         onSaveApps(apps)
-                        page = 3
+                        onComplete()
                     }
                 )
-                else -> PermissionPage(onComplete = onComplete)
+            }
+        }
+        
+        androidx.activity.compose.BackHandler(enabled = page > 0) {
+            page -= 1
+        }
+        
+        androidx.compose.animation.AnimatedVisibility(
+            visible = page > 0,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.TopStart).systemBarsPadding().padding(8.dp)
+        ) {
+            IconButton(onClick = { page -= 1 }) {
+                Icon(
+                    imageVector = LucideIcons.ArrowLeft,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
@@ -351,127 +371,190 @@ private fun PermissionPage(onComplete: () -> Unit) {
         }
     }
 
-    Column(
+    var showSkipDialog by remember { mutableStateOf(false) }
+    var showPostNotificationDialog by remember { mutableStateOf(false) }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
-            .verticalScroll(androidx.compose.foundation.rememberScrollState())
-            .padding(32.dp),
-        horizontalAlignment = Alignment.Start
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Text(text = "Final Setup", style = Typography.headlineLarge, color = MaterialTheme.colorScheme.onSurface)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Cipher needs these permissions to automatically secure your transaction history locally.",
-            style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 28.sp
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Permission Request", style = Typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Cipher needs these permissions to automatically secure your transaction history locally.",
+                style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 24.sp,
+                textAlign = TextAlign.Center
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        // SMS Permission Card
-        VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(LucideIcons.Smartphone, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("SMS Alerts", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Required to parse bank SMS.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { 
-                        permissionLauncher.launch(arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS))
-                    },
-                    enabled = !hasSmsPermission,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
+        VaultCard(
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), 
+            contentPadding = 20.dp,
+            onClick = {
+                if (!hasSmsPermission) permissionLauncher.launch(arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS))
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(if (hasSmsPermission) "Granted" else "Grant SMS Access", color = MaterialTheme.colorScheme.onPrimary)
+                    Icon(LucideIcons.Smartphone, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("SMS Permission", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Read & organize transaction SMS.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = hasSmsPermission,
+                    onCheckedChange = { if (it && !hasSmsPermission) permissionLauncher.launch(arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS)) }
+                )
             }
         }
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Post Notifications Card
-            VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(LucideIcons.MessageSquare, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("App Notifications", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Required to send you budget alerts and goal updates.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { 
-                            permissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-                        },
-                        enabled = !hasPostNotificationPermission,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
+            VaultCard(
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), 
+                contentPadding = 20.dp,
+                onClick = {
+                    if (!hasPostNotificationPermission) permissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                }
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(if (hasPostNotificationPermission) "Granted" else "Grant App Notifications", color = MaterialTheme.colorScheme.onPrimary)
+                        Icon(LucideIcons.MessageSquare, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("App Notifications", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Transaction alerts & budget updates.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = hasPostNotificationPermission,
+                        onCheckedChange = { if (it && !hasPostNotificationPermission) permissionLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS)) }
+                    )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Notification Permission Card
-        VaultCard(backgroundColor = MaterialTheme.colorScheme.surface, contentPadding = 20.dp) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(LucideIcons.BellRing, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Notification Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Required to read push notifications from your selected payment apps.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { 
-                        context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    },
-                    enabled = !hasNotificationAccess,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha=0.3f))
+        VaultCard(
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), 
+            contentPadding = 20.dp,
+            onClick = {
+                if (!hasNotificationAccess) context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(if (hasNotificationAccess) "Granted" else "Grant Notification Access", color = MaterialTheme.colorScheme.onPrimary)
+                    Icon(LucideIcons.BellRing, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Notification Access", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Parse push notifications from apps.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = hasNotificationAccess,
+                    onCheckedChange = { if (it && !hasNotificationAccess) context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { showTour = true },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            onClick = {
+                if (!hasSmsPermission || !hasNotificationAccess) {
+                    showSkipDialog = true
+                } else if (!hasPostNotificationPermission && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    showPostNotificationDialog = true
+                } else {
+                    onComplete()
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(60.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(text = "Take a Quick Tour", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+            Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
         }
-        Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            onClick = onComplete,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Text(text = if (hasSmsPermission && hasNotificationAccess) "Start Using Cipher" else "Skip for now", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        }
+        
         Spacer(modifier = Modifier.height(16.dp))
+        
+        TextButton(onClick = { showTour = true }) {
+            Text("Take a Quick Tour", color = MaterialTheme.colorScheme.primary)
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+    }
+    
+    if (showSkipDialog) {
+        AlertDialog(
+            onDismissRequest = { showSkipDialog = false },
+            title = { Text("Missing Automation Capabilities") },
+            text = { Text("Cipher relies on SMS and Notification Access to automatically track your expenses in the background. Without them, you will have to log every transaction manually. Are you sure you want to proceed?") },
+            confirmButton = {
+                Button(onClick = { showSkipDialog = false }) {
+                    Text("Grant Permissions")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSkipDialog = false; onComplete() }) {
+                    Text("Proceed Without Automation")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
+
+    if (showPostNotificationDialog) {
+        AlertDialog(
+            onDismissRequest = { showPostNotificationDialog = false },
+            title = { Text("Missing Budget Alerts") },
+            text = { Text("Without App Notifications, you won't receive daily spending recaps, monthly wrap-ups, budget threshold alerts, or reminders to categorize your transactions. Proceed anyway?") },
+            confirmButton = {
+                Button(onClick = { showPostNotificationDialog = false }) {
+                    Text("Grant Permission")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPostNotificationDialog = false; onComplete() }) {
+                    Text("Proceed Without Alerts")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
     
     if (showTour) {
-        AppTourDialog(onDismiss = { showTour = false; onComplete() })
+        AppTourDialog(onDismiss = { showTour = false })
     }
 }
 
@@ -542,7 +625,6 @@ private fun AppTourDialog(onDismiss: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Page Indicators
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
