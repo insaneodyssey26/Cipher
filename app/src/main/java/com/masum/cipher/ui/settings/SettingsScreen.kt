@@ -39,6 +39,7 @@ import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.*
 import compose.icons.lucideicons.BellRing
+import compose.icons.lucideicons.Bug
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.notifications.LocalNotificationManager
 import androidx.compose.ui.draw.clip
@@ -61,6 +62,7 @@ fun SettingsScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showBudgetDialog by remember { mutableStateOf(false) }
+    var showCrashLogDialog by remember { mutableStateOf(false) }
     var budgetInput by remember { mutableStateOf("") }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
     var expandedSection by remember { mutableStateOf<String?>(null) }
@@ -536,6 +538,12 @@ fun SettingsScreen(
                     }
                 )
                 VaultSettingsItem(
+                    icon = LucideIcons.Bug,
+                    title = "App Diagnostics",
+                    subtitle = "View and copy crash logs",
+                    onClick = { showCrashLogDialog = true }
+                )
+                VaultSettingsItem(
                     icon = LucideIcons.Mail,
                     title = "Contact Developer",
                     subtitle = "masumali262006@gmail.com",
@@ -588,6 +596,78 @@ fun SettingsScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
+    }
+
+    if (showCrashLogDialog) {
+        val crashLog = com.masum.cipher.core.util.CrashReporter.getCrashLog(context)
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showCrashLogDialog = false },
+            title = { 
+                Text(
+                    text = "App Diagnostics",
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                ) 
+            },
+            text = {
+                if (crashLog == null) {
+                    Text(
+                        text = "No crashes have been recorded. Cipher is running smoothly!",
+                        style = Typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Column {
+                        Text(
+                            text = "A crash was recorded. You can copy it below.",
+                            style = Typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                .padding(12.dp)
+                        ) {
+                            androidx.compose.foundation.lazy.LazyColumn {
+                                item {
+                                    Text(
+                                        text = crashLog,
+                                        style = Typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                if (crashLog != null) {
+                    TextButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("Crash Log", crashLog)
+                            clipboard.setPrimaryClip(clip)
+                            android.widget.Toast.makeText(context, "Copied to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
+                            showCrashLogDialog = false
+                        }
+                    ) {
+                        Text("COPY LOG", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCrashLogDialog = false }) {
+                    Text(if (crashLog == null) "OK" else "CLOSE", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(24.dp)
+        )
     }
 
     if (showBudgetDialog) {
