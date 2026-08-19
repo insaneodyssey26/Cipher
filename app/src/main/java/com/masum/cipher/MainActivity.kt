@@ -11,10 +11,18 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -63,11 +71,15 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var notificationScheduler: NotificationScheduler
 
+    private val updateReady = MutableStateFlow(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         notificationScheduler.scheduleDailyNotifications()
-        UpdateManager.checkForUpdates(this)
+        com.masum.cipher.core.updates.UpdateManager.checkForUpdates(this) {
+            updateReady.value = true
+        }
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.attributes.preferredDisplayModeId = 0 
@@ -77,6 +89,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val mainViewModel: MainViewModel = hiltViewModel()
             val state by mainViewModel.state.collectAsStateWithLifecycle()
+            val showUpdateReady by updateReady.collectAsStateWithLifecycle()
             
             state.settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()
@@ -295,6 +308,21 @@ class MainActivity : AppCompatActivity() {
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
                             )
+                        }
+
+                        if (showUpdateReady) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                                Snackbar(
+                                    modifier = Modifier.padding(16.dp).navigationBarsPadding(),
+                                    action = {
+                                        TextButton(onClick = { com.masum.cipher.core.updates.UpdateManager.completeUpdate(this@MainActivity) }) {
+                                            Text("RESTART", color = MaterialTheme.colorScheme.primary)
+                                        }
+                                    }
+                                ) {
+                                    Text("An update is ready to install.")
+                                }
+                            }
                         }
                     }
                 }
