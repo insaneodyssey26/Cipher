@@ -1,5 +1,11 @@
 # Release Notes
 
+## [4.9.0]
+- **Settings Search**: Added a search bar at the top of the Settings screen to easily find options.
+- **Check for Updates**: Added a button to check for app updates (found in Settings > About & Support).
+- **Diagnostics**: Added an option to view crash logs. You can copy and send them to the developer using the "Contact Developer" email option right below it in Settings.
+- **Settings Layout**: Centered footer logo based on screen size dynamically.
+
 ## [4.8.1]
 
 ### Fixed

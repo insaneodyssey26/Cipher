@@ -53,6 +53,9 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.Bug
+import compose.icons.lucideicons.RefreshCw
+import compose.icons.lucideicons.Search
 import com.masum.cipher.core.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.collectLatest
 import compose.icons.lucideicons.Search
@@ -750,23 +753,23 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WhatsNewFeatureItem(
-                        title = "Hotfix Update",
-                        description = "Fixed a critical bug where editing a merchant's name would incorrectly rename all future transactions from that merchant.",
-                        icon = LucideIcons.Check
+                        title = "Settings Search",
+                        description = "Added a search bar at the top of the Settings screen to easily find options.",
+                        icon = LucideIcons.Search
                     )
                     WhatsNewFeatureItem(
-                        title = "Smart Rules",
-                        description = "Cipher can now remember your custom categories. Just edit any transaction to create a rule.",
-                        icon = LucideIcons.Check
+                        title = "Check for Updates",
+                        description = "Added a button to check for app updates (found in Settings > About & Support).",
+                        icon = LucideIcons.RefreshCw
                     )
                     WhatsNewFeatureItem(
-                        title = "Transaction Notes",
-                        description = "You can now type short notes on your transactions to remember what they were for.",
-                        icon = LucideIcons.Calendar
+                        title = "App Diagnostics",
+                        description = "Added an option to view crash logs. You can copy and send them to the developer using the 'Contact Developer' button below it.",
+                        icon = LucideIcons.Bug
                     )
                     WhatsNewFeatureItem(
-                        title = "Settings UI Update",
-                        description = "We completely redesigned the Smart Rules and Category screens to make them look much cleaner.",
+                        title = "Settings Layout",
+                        description = "Minor layout improvements in the Settings screen.",
                         icon = LucideIcons.Settings
                     )
                 }

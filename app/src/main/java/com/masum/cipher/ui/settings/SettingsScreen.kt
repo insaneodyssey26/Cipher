@@ -40,6 +40,9 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.*
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Bug
+import compose.icons.lucideicons.RefreshCw
+import compose.icons.lucideicons.Search
+import compose.icons.lucideicons.X
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.notifications.LocalNotificationManager
 import androidx.compose.ui.draw.clip
@@ -360,7 +363,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("TRACKING & INTEGRATIONS", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "TRACKING & INTEGRATIONS", onToggle = { expandedSection = if (expandedSection == "TRACKING & INTEGRATIONS") null else "TRACKING & INTEGRATIONS" }) {
+            SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING", onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.BellRing,
@@ -389,9 +392,7 @@ fun SettingsScreen(
                         showPermissionsHealthSheet = true
                     }
                 )
-            }
-
-            SettingsSection("SMART RULES", icon = LucideIcons.Wand, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SMART RULES", onToggle = { expandedSection = if (expandedSection == "SMART RULES") null else "SMART RULES" }) {
+            
                 VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.BookOpen,
@@ -415,7 +416,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection("DATA MANAGEMENT", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA MANAGEMENT", onToggle = { expandedSection = if (expandedSection == "DATA MANAGEMENT") null else "DATA MANAGEMENT" }) {
+            SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA & BACKUP", onToggle = { expandedSection = if (expandedSection == "DATA & BACKUP") null else "DATA & BACKUP" }) {
                 VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileSpreadsheet,
@@ -466,9 +467,7 @@ fun SettingsScreen(
                         showDeleteDialog = true
                     }
                 )
-            }
-
-            SettingsSection("AUTO-BACKUP", icon = LucideIcons.Cloud, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTO-BACKUP", onToggle = { expandedSection = if (expandedSection == "AUTO-BACKUP") null else "AUTO-BACKUP" }) {
+            
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FolderSync,
@@ -516,16 +515,16 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection("SUPPORT & FEEDBACK", icon = LucideIcons.MessageSquare, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SUPPORT & FEEDBACK", onToggle = { expandedSection = if (expandedSection == "SUPPORT & FEEDBACK") null else "SUPPORT & FEEDBACK" }) {
+            SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT & SUPPORT", onToggle = { expandedSection = if (expandedSection == "ABOUT & SUPPORT") null else "ABOUT & SUPPORT" }) {
                 VaultSettingsItem(
                     icon = LucideIcons.Star,
                     title = "Rate on Google Play",
                     subtitle = "Enjoying Cipher? Leave a review!",
                     onClick = {
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.masum.cipher")))
                         } catch (e: android.content.ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
                         }
                     }
                 )
@@ -535,6 +534,18 @@ fun SettingsScreen(
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tally.so/r/gDz7NK"))
                         context.startActivity(intent)
+                    }
+                )
+                VaultSettingsItem(
+                    icon = LucideIcons.RefreshCw,
+                    title = "Check for Updates",
+                    subtitle = "Look for the latest version on Play Store",
+                    onClick = {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.masum.cipher")))
+                        } catch (e: android.content.ActivityNotFoundException) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
+                        }
                     }
                 )
                 VaultSettingsItem(
@@ -555,9 +566,7 @@ fun SettingsScreen(
                         context.startActivity(Intent.createChooser(intent, "Send Email"))
                     }
                 )
-            }
-
-            SettingsSection("ABOUT CIPHER", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT CIPHER", onToggle = { expandedSection = if (expandedSection == "ABOUT CIPHER") null else "ABOUT CIPHER" }) {
+            
                 VaultSettingsItem(
                     icon = LucideIcons.Github,
                     title = "Open Source",
@@ -583,18 +592,33 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
-            val versionName = try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Exception) {
-                "4.1.0"
+            Spacer(modifier = Modifier.weight(1f))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+            ) {
+                Text(
+                    text = "cipher.",
+                    style = Typography.headlineLarge.copy(
+                        fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        letterSpacing = (-1).sp
+                    ),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                val versionName = try {
+                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                } catch (e: Exception) {
+                    "4.1.0"
+                }
+                Text(
+                    text = "Version $versionName",
+                    style = Typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
-            Text(
-                text = "Cipher $versionName",
-                style = Typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 
@@ -661,8 +685,21 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCrashLogDialog = false }) {
-                    Text(if (crashLog == null) "OK" else "CLOSE", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row {
+                    if (crashLog != null) {
+                        TextButton(
+                            onClick = {
+                                com.masum.cipher.core.util.CrashReporter.clearCrashLog(context)
+                                android.widget.Toast.makeText(context, "Crash log cleared", android.widget.Toast.LENGTH_SHORT).show()
+                                showCrashLogDialog = false
+                            }
+                        ) {
+                            Text("CLEAR", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                    TextButton(onClick = { showCrashLogDialog = false }) {
+                        Text(if (crashLog == null) "OK" else "CLOSE", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -905,12 +942,15 @@ private fun SettingsSection(
                             modifier = Modifier.size(32.dp).padding(end = 16.dp)
                         )
                     }
+                    val targetFontSize = if (isExpanded) 16.sp else 14.sp
+                    val fontSize by androidx.compose.animation.core.animateFloatAsState(targetValue = targetFontSize.value, label = "fontSize")
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
                             fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                            letterSpacing = 0.5.sp
+                            letterSpacing = 0.5.sp,
+                            fontSize = fontSize.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )

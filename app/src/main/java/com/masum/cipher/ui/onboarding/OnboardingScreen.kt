@@ -379,13 +379,13 @@ private fun PermissionPage(onComplete: () -> Unit) {
             .fillMaxSize()
             .systemBarsPadding()
             .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                .padding(vertical = 24.dp),
+                .padding(vertical = 64.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

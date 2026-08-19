@@ -17,8 +17,8 @@ android {
         applicationId = "com.masum.cipher"
         minSdk = 24
         targetSdk = 37
-        versionCode = 18
-        versionName = "4.8.1"
+        versionCode = 19
+        versionName = "4.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

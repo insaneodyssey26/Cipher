@@ -6,13 +6,21 @@ A local-first, privacy-focused personal finance app for Android. cipher reads yo
 
 ## Screenshots
 
-| Onboarding | Permission | Dashboard |
-|:-----------:|:---------:|:---------:|
-| ![Onboarding](docs/screenshots/onboarding.png) | ![Permission](docs/screenshots/onboarding-permission.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| Onboarding (Get Started) | Onboarding (Styling) | Onboarding (Permissions) | Onboarding (Tracked Apps) |
+|:------------------------:|:--------------------:|:------------------------:|:-------------------------:|
+| ![Get Started](docs/screenshots/onboarding.png) | ![Styling](docs/screenshots/onboarding-styling.png) | ![Permissions](docs/screenshots/onboarding-permission.png) | ![Tracked Apps](docs/screenshots/onboarding-tracked-apps.png) |
 
-| Insights | Insights | Settings | Settings |
-|:--------:|:--------:|:--------:|:--------:|
-| ![Insights](docs/screenshots/insights.png) | ![Insights 2](docs/screenshots/insights-2.png) | ![Settings](docs/screenshots/settings-1.png) | ![Settings 2](docs/screenshots/settings-2.png) |
+| Dashboard | Transaction Editor |
+|:---------:|:------------------:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Transaction Editor](docs/screenshots/transaction-editor.png) |
+
+| Insights | Insights 2 | Insights 3 |
+|:--------:|:----------:|:----------:|
+| ![Insights](docs/screenshots/insights.png) | ![Insights 2](docs/screenshots/insights-2.png) | ![Insights 3](docs/screenshots/insights-3.png) |
+
+| Settings | Settings 2 |
+|:--------:|:----------:|
+| ![Settings](docs/screenshots/settings-1.png) | ![Settings 2](docs/screenshots/settings-2.png) |
 
 ---
 
@@ -184,10 +192,10 @@ flowchart LR
 
 ### Storage Footprint
 Because cipher stores data in a local SQLite database, it is incredibly lightweight and infinitely scalable.
-- **1 Transaction** = ~160 Bytes
-- **1,000 Transactions** = ~160 KB
-- **10,000 Transactions** = ~1.6 MB
-You could log 5 transactions a day for over 5 years and the database would barely cross 1.5 megabytes.
+- **1 Transaction** = ~200 Bytes
+- **1,000 Transactions** = ~200 KB
+- **10,000 Transactions** = ~2.0 MB
+You could log 5 transactions a day for over 5 years and the database would barely cross 2.0 megabytes.
 
 ---
 
@@ -297,7 +305,7 @@ app/
 | Widgets | Glance (AppWidget) |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 37 (Android 17) |
-| Version | 4.7.2 |
+| Version | 4.9.0 |
 
 ---
 
