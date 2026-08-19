@@ -604,7 +604,7 @@ fun SettingsScreen(
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 val versionName = try {

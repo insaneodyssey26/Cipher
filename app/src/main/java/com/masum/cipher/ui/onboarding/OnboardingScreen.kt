@@ -127,7 +127,6 @@ private fun WelcomePage(onNext: () -> Unit) {
                 .fillMaxSize()
                 .systemBarsPadding()
                 .padding(horizontal = 32.dp)
-                .padding(top = 32.dp)
                 .padding(bottom = 32.dp)
                 .graphicsLayer {
                     this.alpha = alpha
@@ -136,6 +135,7 @@ private fun WelcomePage(onNext: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.weight(0.9f))
             Text(
                 text = "cipher",
                 style = Typography.displayLarge,
@@ -165,7 +165,7 @@ private fun WelcomePage(onNext: () -> Unit) {
             FeatureItem(LucideIcons.Smartphone, "Universal SMS & Notification Parsing")
             FeatureItem(LucideIcons.WifiOff, "Zero Network Access")
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1.1f))
 
             Button(
                 onClick = onNext,
@@ -203,7 +203,7 @@ private fun ThemeSelectionPage(
                 .fillMaxSize()
                 .systemBarsPadding()
                 .padding(horizontal = 24.dp)
-                .padding(top = 32.dp, bottom = 32.dp)
+                .padding(bottom = 32.dp)
                 .graphicsLayer {
                     this.alpha = alpha
                     this.translationY = offsetY
@@ -211,6 +211,7 @@ private fun ThemeSelectionPage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = LucideIcons.Palette,
                 contentDescription = null,
@@ -374,21 +375,23 @@ private fun PermissionPage(onComplete: () -> Unit) {
     var showSkipDialog by remember { mutableStateOf(false) }
     var showPostNotificationDialog by remember { mutableStateOf(false) }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                .padding(vertical = 64.dp),
+                .defaultMinSize(minHeight = maxHeight)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.weight(1.2f))
             Text(text = "Permission Request", style = Typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -486,7 +489,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.weight(0.8f))
 
         Button(
             onClick = {

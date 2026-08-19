@@ -34,6 +34,7 @@ import compose.icons.lucideicons.Check
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+@androidx.compose.runtime.Immutable
 data class InstalledApp(
     val packageName: String,
     val appName: String,
@@ -164,7 +165,7 @@ fun AppSelectionScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                items(filteredApps) { app ->
+                items(filteredApps, key = { it.packageName }, contentType = { "app" }) { app ->
                     val isSelected = selectedApps.contains(app.packageName)
                     AppItem(
                         app = app,
