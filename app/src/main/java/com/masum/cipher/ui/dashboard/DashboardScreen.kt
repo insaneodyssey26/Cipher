@@ -30,6 +30,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import kotlinx.coroutines.launch
 import com.masum.cipher.ui.components.*
@@ -38,6 +39,8 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.core.util.AppFormatters
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.BellRing
+import compose.icons.lucideicons.Star
+import compose.icons.lucideicons.Heart
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Calendar
@@ -101,6 +104,7 @@ fun DashboardScreen(
     }
 
     var hasCheckedReview by remember { mutableStateOf(false) }
+    var showRatingDialog by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(state.transactions) {
@@ -124,24 +128,8 @@ fun DashboardScreen(
             userPreferences.incrementAppLaunchCount()
             val currentLaunchCount = settings!!.appLaunchCount + 1
             
-            // Trigger review prompt after 5 app launches
-            if (currentLaunchCount >= 5 && !settings!!.hasPromptedReview) {
-                val reviewManager = com.google.android.play.core.review.ReviewManagerFactory.create(context)
-                val request = reviewManager.requestReviewFlow()
-                request.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val reviewInfo = task.result
-                        val activity = context as? android.app.Activity
-                        if (activity != null) {
-                            val flow = reviewManager.launchReviewFlow(activity, reviewInfo)
-                            flow.addOnCompleteListener { _ ->
-                                coroutineScope.launch {
-                                    userPreferences.setHasPromptedReview(true)
-                                }
-                            }
-                        }
-                    }
-                }
+            if (currentLaunchCount >= settings!!.reviewPromptInterval && !settings!!.hasPromptedReview) {
+                showRatingDialog = true
             }
         }
     }
@@ -483,6 +471,145 @@ fun DashboardScreen(
             },
             isHapticsEnabled = isHapticsEnabled
         )
+    }
+
+    if (showRatingDialog) {
+        var animateIn by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            animateIn = true
+        }
+        
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = {
+                coroutineScope.launch { 
+                    userPreferences.increaseReviewPromptInterval()
+                    userPreferences.resetAppLaunchCount() 
+                }
+                showRatingDialog = false
+            }
+        ) {
+            val scale by animateFloatAsState(
+                targetValue = if (animateIn) 1f else 0.8f,
+                animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+                label = "rating_scale"
+            )
+            val alpha by animateFloatAsState(
+                targetValue = if (animateIn) 1f else 0f,
+                animationSpec = tween(300),
+                label = "rating_alpha"
+            )
+            
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        this.alpha = alpha
+                    }
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(32.dp))
+                    .padding(24.dp)
+            ) {
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
+                        showRatingDialog = false
+                    },
+                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-12).dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = LucideIcons.X,
+                        contentDescription = "Never ask again",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                androidx.compose.foundation.layout.Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = LucideIcons.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(20.dp))
+                    
+                    Text(
+                        "Enjoying Cipher?",
+                        style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        "If Cipher is helping you manage your money, please take a moment to rate it. It really helps!",
+                        style = Typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 22.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        androidx.compose.material3.TextButton(
+                            onClick = {
+                                coroutineScope.launch { 
+                                    userPreferences.increaseReviewPromptInterval()
+                                    userPreferences.resetAppLaunchCount() 
+                                }
+                                showRatingDialog = false
+                            },
+                            modifier = Modifier.weight(1f).height(56.dp)
+                        ) {
+                            Text("Maybe later", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        
+                        androidx.compose.material3.Button(
+                            onClick = {
+                                coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
+                                showRatingDialog = false
+                                try {
+                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.masum.cipher")))
+                                } catch (e: android.content.ActivityNotFoundException) {
+                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
+                                }
+                            },
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text("Rate App", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if (showBudgetDialog) {

@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity() {
             window.attributes.preferredDisplayModeId = 0 
         }
 
-        // Initial call, will be overridden by the compose state below
         enableEdgeToEdge()
         setContent {
             val mainViewModel: MainViewModel = hiltViewModel()
@@ -140,7 +139,6 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        // Use crossfade for top-level routes to avoid sliding out the navbar
                         val isTopLevel = currentRoute in listOf("dashboard", "insights", "settings")
 
                         NavHost(

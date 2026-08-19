@@ -31,17 +31,15 @@ class UserPreferences @Inject constructor(
         val HAS_SEEN_NOTIFICATION_FEATURE = booleanPreferencesKey("has_seen_notification_feature")
         val LAST_SEEN_WHATS_NEW_VERSION_CODE = intPreferencesKey("last_seen_whats_new_version_code")
         
-        // Auto-Backup Keys
         val AUTO_BACKUP_ENABLED = booleanPreferencesKey("auto_backup_enabled")
         val AUTO_BACKUP_FREQUENCY = stringPreferencesKey("auto_backup_frequency")
         val AUTO_BACKUP_URI = stringPreferencesKey("auto_backup_uri")
         val AUTO_BACKUP_ENCRYPTED_PASSWORD = stringPreferencesKey("auto_backup_encrypted_password")
         
-        // Review Keys
-        val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
-        val HAS_PROMPTED_REVIEW = booleanPreferencesKey("has_prompted_review")
+        val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count_v2")
+        val HAS_PROMPTED_REVIEW = booleanPreferencesKey("has_prompted_review_v2")
+        val REVIEW_PROMPT_INTERVAL = intPreferencesKey("review_prompt_interval")
         
-        // Notifications
         val NOTIFY_ALL_TRANSACTIONS = booleanPreferencesKey("notify_all_transactions")
     }
 
@@ -74,6 +72,7 @@ class UserPreferences @Inject constructor(
             autoBackupEncryptedPassword = preferences[Keys.AUTO_BACKUP_ENCRYPTED_PASSWORD],
             appLaunchCount = preferences[Keys.APP_LAUNCH_COUNT] ?: 0,
             hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false,
+            reviewPromptInterval = preferences[Keys.REVIEW_PROMPT_INTERVAL] ?: 10,
             notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true
         )
     }
@@ -164,6 +163,19 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    suspend fun resetAppLaunchCount() {
+        context.dataStore.edit { preferences ->
+            preferences[Keys.APP_LAUNCH_COUNT] = 0
+        }
+    }
+
+    suspend fun increaseReviewPromptInterval() {
+        context.dataStore.edit { preferences ->
+            val current = preferences[Keys.REVIEW_PROMPT_INTERVAL] ?: 10
+            preferences[Keys.REVIEW_PROMPT_INTERVAL] = minOf(20, current + 5)
+        }
+    }
+
     suspend fun setHasPromptedReview(prompted: Boolean) {
         context.dataStore.edit { it[Keys.HAS_PROMPTED_REVIEW] = prompted }
     }
@@ -213,5 +225,6 @@ data class UserSettings(
     val autoBackupEncryptedPassword: String? = null,
     val appLaunchCount: Int = 0,
     val hasPromptedReview: Boolean = false,
+    val reviewPromptInterval: Int = 10,
     val notifyAllTransactions: Boolean = false
 )
