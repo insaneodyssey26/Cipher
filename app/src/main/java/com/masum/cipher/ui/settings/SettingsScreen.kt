@@ -22,12 +22,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -1122,15 +1122,13 @@ private fun SettingsSection(
                             modifier = Modifier.size(32.dp).padding(end = 16.dp)
                         )
                     }
-                    val targetFontSize = if (isExpanded) 16.sp else 14.sp
-                    val fontSize by androidx.compose.animation.core.animateFloatAsState(targetValue = targetFontSize.value, label = "fontSize")
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
                             fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                             letterSpacing = 0.5.sp,
-                            fontSize = fontSize.sp
+                            fontSize = 15.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )

@@ -3,15 +3,15 @@ package com.masum.cipher.core.domain.model
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.UtensilsCrossed
-import compose.icons.lucideicons.ShoppingBag
+import compose.icons.lucideicons.BriefcaseMedical
 import compose.icons.lucideicons.CarFront
 import compose.icons.lucideicons.Clapperboard
-import compose.icons.lucideicons.BriefcaseMedical
-import compose.icons.lucideicons.ReceiptText
-import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.HandCoins
+import compose.icons.lucideicons.ReceiptText
 import compose.icons.lucideicons.Shapes
+import compose.icons.lucideicons.ShoppingBag
+import compose.icons.lucideicons.TrendingUp
+import compose.icons.lucideicons.UtensilsCrossed
 
 enum class TransactionCategory(
     val displayName: String,
