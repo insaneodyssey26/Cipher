@@ -91,8 +91,34 @@ fun InsightsScreen(
         )
     }
 
+    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+
+    androidx.compose.runtime.LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is InsightsContract.Effect.ShowUndoSubscriptionDelete -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Subscription deleted",
+                        actionLabel = "UNDO",
+                        duration = androidx.compose.material3.SnackbarDuration.Short
+                    )
+                    if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                        viewModel.handleIntent(InsightsContract.Intent.RestoreSubscription(effect.subscription))
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { 
+            androidx.compose.material3.SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 100.dp)
+            ) 
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {

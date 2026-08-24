@@ -20,6 +20,7 @@ class InsightsContract {
         object DismissCategoryRulePrompt : Intent()
         data class SaveSubscription(val merchant: String, val amount: Double, val category: String, val frequencyDays: Int, val nextExpectedDate: Long) : Intent()
         data class DeleteSubscription(val merchant: String) : Intent()
+        data class RestoreSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)
@@ -59,5 +60,6 @@ class InsightsContract {
 
     sealed class Effect : UiEffect {
         data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()
+        data class ShowUndoSubscriptionDelete(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Effect()
     }
 }

@@ -56,6 +56,9 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
             is InsightsContract.Intent.SaveSubscription -> saveSubscription(intent)
             is InsightsContract.Intent.DeleteSubscription -> deleteSubscription(intent.merchant)
+            is InsightsContract.Intent.RestoreSubscription -> {
+                viewModelScope.launch { subscriptionDao.insert(intent.subscription) }
+            }
         }
     }
 
@@ -79,6 +82,7 @@ class InsightsViewModel @Inject constructor(
             val existing = subscriptionDao.getAllSubscriptions().firstOrNull()?.find { it.merchant.equals(merchant, ignoreCase = true) }
             if (existing != null) {
                 subscriptionDao.delete(existing)
+                emitEffect(InsightsContract.Effect.ShowUndoSubscriptionDelete(existing))
             }
         }
     }

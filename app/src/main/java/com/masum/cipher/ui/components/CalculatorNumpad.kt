@@ -68,34 +68,35 @@ fun CalculatorNumpad(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)), // Ultra-faint grid lines
+        verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
-        val rowModifier = Modifier.fillMaxWidth().height(48.dp)
+        val rowModifier = Modifier.fillMaxWidth().height(60.dp) // Slightly taller for better touch area
         
         // Row 1
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             NumpadButton("1", modifier = Modifier.weight(1f), onClick = { onKeyClick("1") })
             NumpadButton("2", modifier = Modifier.weight(1f), onClick = { onKeyClick("2") })
             NumpadButton("3", modifier = Modifier.weight(1f), onClick = { onKeyClick("3") })
-            NumpadButton("/", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("/") })
+            NumpadButton("÷", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("/") })
         }
         // Row 2
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             NumpadButton("4", modifier = Modifier.weight(1f), onClick = { onKeyClick("4") })
             NumpadButton("5", modifier = Modifier.weight(1f), onClick = { onKeyClick("5") })
             NumpadButton("6", modifier = Modifier.weight(1f), onClick = { onKeyClick("6") })
-            NumpadButton("*", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("*") })
+            NumpadButton("×", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("*") })
         }
         // Row 3
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             NumpadButton("7", modifier = Modifier.weight(1f), onClick = { onKeyClick("7") })
             NumpadButton("8", modifier = Modifier.weight(1f), onClick = { onKeyClick("8") })
             NumpadButton("9", modifier = Modifier.weight(1f), onClick = { onKeyClick("9") })
             NumpadButton("-", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("-") })
         }
         // Row 4
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
             NumpadButton(".", modifier = Modifier.weight(1f), onClick = { onKeyClick(".") })
             NumpadButton("0", modifier = Modifier.weight(1f), onClick = { onKeyClick("0") })
             
@@ -104,19 +105,18 @@ fun CalculatorNumpad(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface) // Same as other buttons
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = androidx.compose.material3.ripple(color = MaterialTheme.colorScheme.onSurface),
+                        indication = androidx.compose.material3.ripple(color = MaterialTheme.colorScheme.primary), // Operator colored ripple
                         onClick = onBackspace
-                    )
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = LucideIcons.Delete,
                     contentDescription = "Backspace",
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = MaterialTheme.colorScheme.primary, // Primary color for operator action
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -133,14 +133,10 @@ private fun NumpadButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val bgColor = if (isOperator) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
+    val bgColor = MaterialTheme.colorScheme.surface // Solid, uniform background for all buttons
     
     val textColor = if (isOperator) {
-        MaterialTheme.colorScheme.onPrimary
+        MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.onSurface
     }
@@ -148,20 +144,19 @@ private fun NumpadButton(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(RoundedCornerShape(16.dp))
+            .background(bgColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = androidx.compose.material3.ripple(color = textColor),
                 onClick = onClick
-            )
-            .background(bgColor),
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleLarge.copy(
-                fontSize = if (isOperator) 26.sp else 20.sp,
-                fontWeight = if (isOperator) FontWeight.Bold else FontWeight.SemiBold
+                fontSize = if (isOperator) 28.sp else 24.sp,
+                fontWeight = FontWeight.Medium
             ),
             color = textColor
         )
