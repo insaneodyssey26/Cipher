@@ -18,6 +18,8 @@ class InsightsContract {
         data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
         data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
         object DismissCategoryRulePrompt : Intent()
+        data class SaveSubscription(val merchant: String, val amount: Double, val category: String, val frequencyDays: Int, val nextExpectedDate: Long) : Intent()
+        data class DeleteSubscription(val merchant: String) : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)

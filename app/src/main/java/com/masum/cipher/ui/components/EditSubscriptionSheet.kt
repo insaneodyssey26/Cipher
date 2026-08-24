@@ -1,5 +1,7 @@
 package com.masum.cipher.ui.components
 
+import android.app.DatePickerDialog
+import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,41 +44,51 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.domain.model.TransactionCategory
+import com.masum.cipher.core.util.AppFormatters
 
-import com.masum.cipher.ui.theme.CipherExpense
-import com.masum.cipher.ui.theme.CipherIncome
 import compose.icons.lucideicons.ChevronDown
+import java.util.Calendar
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditTransactionDialog(
-    transaction: TransactionEntity,
+fun EditSubscriptionSheet(
+    subscription: SubscriptionDetector.Subscription?, // null for Add
     onDismiss: () -> Unit,
-    onConfirm: (TransactionEntity) -> Unit
+    onConfirm: (merchant: String, amount: Double, category: String, frequencyDays: Int, nextExpectedDate: Long) -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
-    var merchant by remember { mutableStateOf(transaction.merchant) }
-    var textFieldValue by remember { 
-        val initText = if (transaction.amount == 0.0) "" else transaction.amount.toString()
-        mutableStateOf(TextFieldValue(text = initText, selection = TextRange(initText.length)))
-    }
-    val amount = textFieldValue.text
-    var isIncome by remember { mutableStateOf(transaction.isIncome) }
-    var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
+    var merchant by remember { mutableStateOf(subscription?.merchant ?: "") }
+    var amountText by remember { mutableStateOf(if (subscription != null) subscription.amount.toString() else "") }
+    var frequencyDays by remember { mutableStateOf(subscription?.frequencyDays?.toString() ?: "30") }
+    var selectedCategory by remember { mutableStateOf(subscription?.category ?: TransactionCategory.OTHERS) }
     var categoryExpanded by remember { mutableStateOf(false) }
-
+    
+    var nextExpectedDate by remember { mutableStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
+    
+    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            val cal = Calendar.getInstance()
+            cal.set(year, month, dayOfMonth)
+            nextExpectedDate = cal.timeInMillis
+        },
+        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.YEAR),
+        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.MONTH),
+        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.DAY_OF_MONTH)
+    )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -102,84 +114,82 @@ fun EditTransactionDialog(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val isEditing = transaction.amount != 0.0 || transaction.merchant.isNotBlank()
-            Text(
-                text = if (isEditing) "Edit Transaction" else "Add Transaction",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.5).sp
-                ),
-                color = MaterialTheme.colorScheme.onBackground
+            val isEditing = subscription != null
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isEditing) "Edit Subscription" else "Add Subscription",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                
+                if (isEditing && onDelete != null && subscription?.confidence == 1.0f) {
+                    androidx.compose.material3.TextButton(onClick = onDelete) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+
+            // Merchant
+            SheetTextFieldSimple(
+                value = merchant,
+                onValueChange = { merchant = it },
+                label = "Merchant / Name"
             )
 
-            // Type toggle
-            Row(
+            // Amount & Frequency row
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.weight(1f)) {
+                    SheetTextFieldSimple(
+                        value = amountText,
+                        onValueChange = { amountText = it },
+                        label = "Amount",
+                        prefix = "₹",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    SheetTextFieldSimple(
+                        value = frequencyDays,
+                        onValueChange = { frequencyDays = it },
+                        label = "Frequency (Days)",
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+            }
+
+            // Date picker
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                    .clickable { datePickerDialog.show() }
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                TypeToggleButton(
-                    label = "Expense",
-                    selected = !isIncome,
-                    activeColor = CipherExpense,
-                    modifier = Modifier.weight(1f),
-                    onClick = { isIncome = false }
-                )
-                TypeToggleButton(
-                    label = "Income",
-                    selected = isIncome,
-                    activeColor = CipherIncome,
-                    modifier = Modifier.weight(1f),
-                    onClick = { isIncome = true }
-                )
-            }
-
-            // Amount field
-            Column {
-                SheetTextFieldValue(
-                    value = textFieldValue,
-                    onValueChange = { newValue -> 
-                        if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
-                            textFieldValue = newValue
-                        } 
-                    },
-                    label = "Amount",
-                    prefix = "₹",
-                    readOnly = false
-                )
-                
-                val computed = com.masum.cipher.core.util.MathEvaluator.evaluate(amount)
-                if (computed != null && amount.any { it in "+-*/" }) {
+                Column {
                     Text(
-                        text = "= ₹${String.format(LocalLocale.current.platformLocale, "%,.2f", computed)}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 8.dp, start = 4.dp, bottom = 8.dp)
+                        text = "STARTING / NEXT DATE",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = AppFormatters.getDay().format(Date(nextExpectedDate)),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
-                
-                CalculatorNumpad(
-                    input = amount,
-                    cursorPosition = textFieldValue.selection.start,
-                    onInputChange = { newInput, newCursor ->
-                        textFieldValue = TextFieldValue(
-                            text = newInput,
-                            selection = TextRange(newCursor.coerceIn(0, newInput.length))
-                        )
-                    }
-                )
             }
-
-            // Merchant field
-            SheetTextField(
-                value = merchant,
-                onValueChange = { merchant = it },
-                label = "Merchant"
-            )
 
             // Category picker
             ExposedDropdownMenuBox(
@@ -284,16 +294,10 @@ fun EditTransactionDialog(
             // Save button
             Button(
                 onClick = {
-                    val finalAmount = com.masum.cipher.core.util.MathEvaluator.evaluate(amount) ?: transaction.amount
-                    if (finalAmount > 0) {
-                        onConfirm(
-                            transaction.copy(
-                                merchant = merchant.trim().ifBlank { "Miscellaneous" },
-                                amount = finalAmount,
-                                category = selectedCategory.name,
-                                isIncome = isIncome
-                            )
-                        )
+                    val finalAmount = amountText.toDoubleOrNull() ?: 0.0
+                    val freq = frequencyDays.toIntOrNull() ?: 30
+                    if (merchant.isNotBlank() && finalAmount > 0) {
+                        onConfirm(merchant, finalAmount, selectedCategory.name, freq, nextExpectedDate)
                     }
                 },
                 modifier = Modifier
@@ -306,7 +310,7 @@ fun EditTransactionDialog(
                 )
             ) {
                 Text(
-                    text = if (isEditing) "Save Changes" else "Add Transaction",
+                    text = if (isEditing) "Save Changes" else "Add Subscription",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -315,38 +319,7 @@ fun EditTransactionDialog(
 }
 
 @Composable
-private fun TypeToggleButton(
-    label: String,
-    selected: Boolean,
-    activeColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .background(
-                color = if (selected) activeColor.copy(alpha = 0.15f) else Color.Transparent,
-                shape = RoundedCornerShape(9.dp)
-            )
-            .clip(RoundedCornerShape(9.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            )
-            .padding(vertical = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = if (selected) activeColor else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun SheetTextField(
+private fun SheetTextFieldSimple(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -411,81 +384,3 @@ private fun SheetTextField(
         }
     }
 }
-
-@Composable
-private fun SheetTextFieldValue(
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    label: String,
-    prefix: String? = null,
-    readOnly: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
-) {
-    val surface = MaterialTheme.colorScheme.surface
-    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
-    val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
-    val onBg = MaterialTheme.colorScheme.onBackground
-    val outline = MaterialTheme.colorScheme.outline
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(surface, RoundedCornerShape(12.dp))
-            .border(1.dp, outlineVariant, RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                letterSpacing = 1.sp,
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = onSurfaceVar
-        )
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (prefix != null) {
-                Text(
-                    text = prefix,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = onSurfaceVar
-                )
-                Spacer(Modifier.width(4.dp))
-            }
-            val keyboardController = LocalSoftwareKeyboardController.current
-            BasicTextField(
-                value = value,
-                onValueChange = { newValue ->
-                    onValueChange(newValue)
-                    keyboardController?.hide()
-                },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = onBg
-                ),
-                singleLine = true,
-                readOnly = false,
-                keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { state ->
-                        if (state.isFocused) {
-                            keyboardController?.hide()
-                        }
-                    },
-                decorationBox = { inner ->
-                    if (value.text.isEmpty()) {
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = outline
-                        )
-                    }
-                    inner()
-                }
-            )
-        }
-    }
-}
-

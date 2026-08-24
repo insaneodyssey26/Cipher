@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 class GetInsightsUseCase @Inject constructor(
     private val repository: TransactionRepository,
-    private val subscriptionDetector: SubscriptionDetector
+    private val subscriptionDetector: SubscriptionDetector,
+    private val subscriptionDao: SubscriptionDao
 ) {
     operator fun invoke(timeRange: com.masum.cipher.core.domain.model.TimeRange): Flow<InsightsContract.State> {
         val startOfCurrentWeek = getStartOfCurrentWeek()
@@ -26,14 +28,35 @@ class GetInsightsUseCase @Inject constructor(
         return combine(
             repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime),
             repository.getExpensesSince(startOfLastWeek),
-            repository.getAllTransactions()
-        ) { transactions, recentExpenses, allTx ->
+            repository.getAllTransactions(),
+            subscriptionDao.getAllSubscriptions()
+        ) { transactions, recentExpenses, allTx, manualSubscriptions ->
             val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
             val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
             val currentWeekAvg = if (currentWeekExpenses.isNotEmpty()) currentWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
             val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
             val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
+
+            // Merge detected and manual subscriptions
+            val autoDetected = subscriptionDetector.detect(transactions)
+            val manualDomainSubscriptions = manualSubscriptions.map { entity ->
+                SubscriptionDetector.Subscription(
+                    merchant = entity.merchant,
+                    amount = entity.amount,
+                    category = TransactionCategory.fromString(entity.category),
+                    frequencyDays = entity.frequencyDays,
+                    lastDate = 0L, // manual might not have a last date
+                    nextExpectedDate = entity.nextExpectedDate,
+                    confidence = 1.0f // 100% confidence for manual
+                )
+            }
+            
+            // simple merge, removing detected duplicates if merchant matches manual exactly
+            val manualMerchants = manualDomainSubscriptions.map { it.merchant.uppercase() }.toSet()
+            val filteredAutoDetected = autoDetected.filter { !manualMerchants.contains(it.merchant.uppercase()) }
+            
+            val allSubscriptions = (manualDomainSubscriptions + filteredAutoDetected).sortedBy { it.nextExpectedDate }
 
             InsightsContract.State(
                 isLoading = false,
@@ -45,7 +68,7 @@ class GetInsightsUseCase @Inject constructor(
                 netWorthHistory = calculateNetWorthHistory(transactions),
                 calendarHeatmap = calculateHeatmap(allTx),
                 categoryBreakdown = calculateCategories(transactions),
-                detectedSubscriptions = subscriptionDetector.detect(transactions),
+                detectedSubscriptions = allSubscriptions,
                 allTransactions = allTx,
                 topMerchants = calculateTopMerchants(transactions),
                 monthlySummary = calculateMonthlySummary(transactions),

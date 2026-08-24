@@ -35,7 +35,7 @@ object DatabaseModule {
             AppDatabase.DATABASE_NAME
         )
             .openHelperFactory(factory)
-            .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
+            .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
     }
@@ -53,6 +53,11 @@ object DatabaseModule {
     @Provides
     fun provideCategoryRuleDao(database: AppDatabase): CategoryRuleDao {
         return database.categoryRuleDao()
+    }
+    
+    @Provides
+    fun provideSubscriptionDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.SubscriptionDao {
+        return database.subscriptionDao()
     }
     
     @Provides

@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -60,9 +62,34 @@ fun InsightsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = androidx.compose.ui.platform.LocalView.current
+    var showAddSubDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedSubscription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
+    if (showAddSubDialog || selectedSubscription != null) {
+        com.masum.cipher.ui.components.EditSubscriptionSheet(
+            subscription = selectedSubscription,
+            onDismiss = { 
+                showAddSubDialog = false 
+                selectedSubscription = null
+            },
+            onConfirm = { merchant, amount, category, frequencyDays, nextExpectedDate ->
+                viewModel.handleIntent(InsightsContract.Intent.SaveSubscription(merchant, amount, category, frequencyDays, nextExpectedDate))
+                showAddSubDialog = false
+                selectedSubscription = null
+            },
+            onDelete = if (selectedSubscription?.confidence == 1.0f) {
+                {
+                    selectedSubscription?.merchant?.let { 
+                        viewModel.handleIntent(InsightsContract.Intent.DeleteSubscription(it)) 
+                    }
+                    showAddSubDialog = false
+                    selectedSubscription = null
+                }
+            } else null
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -121,17 +148,41 @@ fun InsightsScreen(
             }
 
             // 5. Subscriptions
-            if (state.detectedSubscriptions.isNotEmpty()) {
-                item {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     SectionLabel("SUBSCRIPTIONS")
+                    androidx.compose.material3.TextButton(
+                        onClick = { showAddSubDialog = true },
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text("+ Add")
+                    }
+                }
+                
+                if (state.detectedSubscriptions.isNotEmpty()) {
                     Column(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         state.detectedSubscriptions.forEach { sub ->
-                            SubscriptionItem(sub = sub, isHapticsEnabled = isHapticsEnabled)
+                            SubscriptionItem(
+                                sub = sub, 
+                                isHapticsEnabled = isHapticsEnabled,
+                                onClick = { selectedSubscription = sub }
+                            )
                         }
                     }
+                } else {
+                    Text(
+                        text = "No subscriptions tracked yet.",
+                        style = Typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                    )
                 }
             }
 
@@ -261,12 +312,16 @@ private fun SectionLabel(text: String) {
 @Composable
 fun SubscriptionItem(
     sub: SubscriptionDetector.Subscription,
-    isHapticsEnabled: Boolean
+    isHapticsEnabled: Boolean,
+    onClick: () -> Unit = {}
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
 
     VaultCard(
-        onClick = { view.performVibrate(isHapticsEnabled, isLongPress = true) },
+        onClick = { 
+            view.performVibrate(isHapticsEnabled)
+            onClick() 
+        },
         contentPadding = 12.dp,
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
@@ -287,35 +342,45 @@ fun SubscriptionItem(
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = sub.merchant,
-                    style = Typography.titleMedium,
+                    style = Typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Expected: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
-                    style = Typography.labelMedium,
+                    text = "Every ${sub.frequencyDays} days · Next: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
+                    style = Typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "₹${sub.amount.toInt()}",
+                    text = AppFormatters.getCurrencyNoDecimals().format(sub.amount),
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = "Monthly",
-                    style = Typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                if (sub.confidence == 1.0f) {
+                    Text(
+                        text = "Manual Entry",
+                        style = Typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Text(
+                        text = "Est. ${sub.amount * (30.0 / sub.frequencyDays.coerceAtLeast(1).toDouble()).toInt()}/mo",
+                        style = Typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
         }
     }
 }
+
+

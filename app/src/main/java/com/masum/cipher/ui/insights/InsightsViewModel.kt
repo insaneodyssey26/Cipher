@@ -1,6 +1,8 @@
 package com.masum.cipher.ui.insights
 
 import androidx.lifecycle.viewModelScope
+import com.masum.cipher.core.data.local.dao.SubscriptionDao
+import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.repository.TransactionRepository
@@ -14,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,7 +28,8 @@ class InsightsViewModel @Inject constructor(
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
-    private val categoryRuleDao: CategoryRuleDao
+    private val categoryRuleDao: CategoryRuleDao,
+    private val subscriptionDao: SubscriptionDao
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State()
 ) {
@@ -50,6 +54,32 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is InsightsContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
+            is InsightsContract.Intent.SaveSubscription -> saveSubscription(intent)
+            is InsightsContract.Intent.DeleteSubscription -> deleteSubscription(intent.merchant)
+        }
+    }
+
+    private fun saveSubscription(intent: InsightsContract.Intent.SaveSubscription) {
+        viewModelScope.launch {
+            val existing = subscriptionDao.getAllSubscriptions().firstOrNull()?.find { it.merchant.equals(intent.merchant, ignoreCase = true) }
+            val entity = SubscriptionEntity(
+                id = existing?.id ?: 0,
+                merchant = intent.merchant,
+                amount = intent.amount,
+                category = intent.category,
+                frequencyDays = intent.frequencyDays,
+                nextExpectedDate = intent.nextExpectedDate
+            )
+            subscriptionDao.insert(entity)
+        }
+    }
+
+    private fun deleteSubscription(merchant: String) {
+        viewModelScope.launch {
+            val existing = subscriptionDao.getAllSubscriptions().firstOrNull()?.find { it.merchant.equals(merchant, ignoreCase = true) }
+            if (existing != null) {
+                subscriptionDao.delete(existing)
+            }
         }
     }
 

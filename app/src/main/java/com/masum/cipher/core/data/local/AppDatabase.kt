@@ -8,16 +8,19 @@ import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.dao.SubscriptionDao
+import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 
 @Database(
-    entities = [TransactionEntity::class, MerchantAliasEntity::class, CategoryRuleEntity::class],
-    version = 5,
+    entities = [TransactionEntity::class, MerchantAliasEntity::class, CategoryRuleEntity::class, SubscriptionEntity::class],
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun merchantAliasDao(): MerchantAliasDao
     abstract fun categoryRuleDao(): CategoryRuleDao
+    abstract fun subscriptionDao(): SubscriptionDao
 
     companion object {
         const val DATABASE_NAME = "cipher_spend_db"
@@ -31,6 +34,12 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `category_rules` (`merchantName` TEXT NOT NULL, `customCategory` TEXT NOT NULL, PRIMARY KEY(`merchantName`))")
+            }
+        }
+
+        val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `subscriptions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `merchant` TEXT NOT NULL, `amount` REAL NOT NULL, `category` TEXT NOT NULL, `frequencyDays` INTEGER NOT NULL, `nextExpectedDate` INTEGER NOT NULL)")
             }
         }
     }
