@@ -388,8 +388,73 @@ fun DashboardScreen(
                         }
                     }
 
-
-
+                    if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp)
+                                    .padding(top = 16.dp, bottom = 8.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                                    .padding(20.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.BellRing,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
+                                    )
+                                    Text(
+                                        text = "Action Needed",
+                                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                                
+                                state.pendingSubscriptions.forEach { subscription ->
+                                    val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "${subscription.merchant}",
+                                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                                color = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                            Text(
+                                                text = "Due for $amountStr",
+                                                style = Typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            androidx.compose.material3.TextButton(
+                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(subscription)) },
+                                                contentPadding = PaddingValues(horizontal = 12.dp)
+                                            ) {
+                                                Text("Skip", color = MaterialTheme.colorScheme.error)
+                                            }
+                                            androidx.compose.material3.Button(
+                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
+                                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                                                contentPadding = PaddingValues(horizontal = 16.dp)
+                                            ) {
+                                                Text("Log it", color = MaterialTheme.colorScheme.onError)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                 if (state.isLoading) {
                     item {

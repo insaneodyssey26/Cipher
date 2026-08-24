@@ -62,6 +62,7 @@ fun InsightsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = androidx.compose.ui.platform.LocalView.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     var showAddSubDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var selectedSubscription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
 
@@ -190,6 +191,16 @@ fun InsightsScreen(
                 }
                 
                 if (state.detectedSubscriptions.isNotEmpty()) {
+                    val totalMonthly = state.detectedSubscriptions.sumOf { 
+                        it.amount * (30.0 / it.frequencyDays.coerceAtLeast(1)) 
+                    }
+                    Text(
+                        text = "Approx. monthly burden: ₹${String.format(java.util.Locale.getDefault(), "%,.0f", totalMonthly)}",
+                        style = Typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp).padding(bottom = 8.dp)
+                    )
+                    
                     Column(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)

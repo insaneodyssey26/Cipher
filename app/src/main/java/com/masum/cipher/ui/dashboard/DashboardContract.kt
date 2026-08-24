@@ -19,6 +19,8 @@ class DashboardContract {
         data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
         data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
         object DismissCategoryRulePrompt : Intent()
+        data class ApproveSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
+        data class SkipSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
@@ -26,6 +28,7 @@ class DashboardContract {
     data class State(
         val isLoading: Boolean = true,
         val transactions: List<TransactionEntity> = emptyList(),
+        val pendingSubscriptions: List<com.masum.cipher.core.data.local.entity.SubscriptionEntity> = emptyList(),
         val hasAnyTransactions: Boolean = false,
         val searchQuery: String = "",
         val activeFilter: FilterType = FilterType.ALL,

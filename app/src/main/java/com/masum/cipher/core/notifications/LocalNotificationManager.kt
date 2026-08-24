@@ -270,4 +270,90 @@ class LocalNotificationManager @Inject constructor(
 
         with(NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }
     }
+
+    fun showSubscriptionAutoLoggedNotification(merchant: String, amount: Double) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            androidx.core.app.ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val intent = android.content.Intent(context, com.masum.cipher.MainActivity::class.java).apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(context, 6, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+
+        val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", amount)}"
+        val builder = androidx.core.app.NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#3B82F6"))
+            .setContentTitle("Subscription Renewed")
+            .setContentText("Auto-logged $amountStr for $merchant.")
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        with(androidx.core.app.NotificationManagerCompat.from(context)) { notify(1007, builder.build()) }
+    }
+
+
+    fun showSubscriptionPendingNotification(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            androidx.core.app.ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val notificationId = (subscription.id + 5000).toInt()
+
+        val intent = android.content.Intent(context, com.masum.cipher.MainActivity::class.java).apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(context, notificationId, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+
+        val approveIntent = android.content.Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_APPROVE_SUBSCRIPTION
+            putExtra(NotificationActionReceiver.EXTRA_SUBSCRIPTION_ID, subscription.id)
+            putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+        }
+        val approvePendingIntent = android.app.PendingIntent.getBroadcast(
+            context,
+            notificationId + 100,
+            approveIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
+        )
+        val approveAction = androidx.core.app.NotificationCompat.Action.Builder(
+            com.masum.cipher.R.drawable.ic_notification,
+            "Log it",
+            approvePendingIntent
+        ).build()
+
+        val skipIntent = android.content.Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_SKIP_SUBSCRIPTION
+            putExtra(NotificationActionReceiver.EXTRA_SUBSCRIPTION_ID, subscription.id)
+            putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+        }
+        val skipPendingIntent = android.app.PendingIntent.getBroadcast(
+            context,
+            notificationId + 200,
+            skipIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
+        )
+        val skipAction = androidx.core.app.NotificationCompat.Action.Builder(
+            com.masum.cipher.R.drawable.ic_notification,
+            "Skip",
+            skipPendingIntent
+        ).build()
+
+        val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+        val builder = androidx.core.app.NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+            .setColor(android.graphics.Color.parseColor("#F59E0B"))
+            .setContentTitle("Subscription Due")
+            .setContentText("$amountStr for ${subscription.merchant} is due today.")
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .addAction(approveAction)
+            .addAction(skipAction)
+            .setAutoCancel(true)
+
+        with(androidx.core.app.NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }
+    }
+
 }

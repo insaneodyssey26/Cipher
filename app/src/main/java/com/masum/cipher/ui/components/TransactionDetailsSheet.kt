@@ -64,6 +64,7 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.Trash2
 import java.util.Locale
@@ -482,51 +483,53 @@ private fun AmountInputField(
     var textFieldValue by remember {
         mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
     }
+    var showCalculator by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        BasicTextField(
-            value = textFieldValue,
-            onValueChange = { newValue -> 
-                if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
-                    textFieldValue = newValue
-                    onValueChange(newValue.text)
-                }
-                keyboardController?.hide()
-            },
-            textStyle = Typography.displayLarge.copy(
-                color = color,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                fontSize = 56.sp,
-                letterSpacing = (-2).sp
-            ),
-            singleLine = true,
-            readOnly = true,
-            cursorBrush = SolidColor(color),
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { state ->
-                    if (state.isFocused) {
-                        keyboardController?.hide()
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "₹",
+                style = Typography.displayLarge.copy(
+                    color = color.copy(alpha = 0.5f),
+                    fontSize = 48.sp
+                ),
+                modifier = Modifier.padding(end = 8.dp)
+            )
+
+            BasicTextField(
+                value = textFieldValue,
+                onValueChange = { newValue -> 
+                    if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
+                        textFieldValue = newValue
+                        onValueChange(newValue.text)
                     }
                 },
-            decorationBox = { inner ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "₹",
-                        style = Typography.displayLarge.copy(
-                            color = color.copy(alpha = 0.5f),
-                            fontSize = 48.sp
-                        ),
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
+                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                textStyle = Typography.displayLarge.copy(
+                    color = color,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    fontSize = 56.sp,
+                    letterSpacing = (-2).sp
+                ),
+                singleLine = true,
+                readOnly = showCalculator,
+                cursorBrush = SolidColor(color),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .onFocusChanged { state ->
+                        if (state.isFocused && showCalculator) {
+                            keyboardController?.hide()
+                        }
+                    },
+                decorationBox = { inner ->
                     if (textFieldValue.text.isEmpty()) {
                         Text(
                             text = "0",
@@ -540,8 +543,8 @@ private fun AmountInputField(
                         inner()
                     }
                 }
-            }
-        )
+            )
+        }
         
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
@@ -552,20 +555,60 @@ private fun AmountInputField(
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
             )
         } else {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        // Beautiful pill toggle switch
+        androidx.compose.material3.Surface(
+            onClick = { 
+                showCalculator = !showCalculator
+                if (showCalculator) {
+                    keyboardController?.hide()
+                } else {
+                    keyboardController?.show()
+                }
+            },
+            shape = CircleShape,
+            color = if (showCalculator) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = compose.icons.LucideIcons.Calculator,
+                    contentDescription = "Toggle Input",
+                    tint = if (showCalculator) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (showCalculator) "Use Keyboard" else "Use Calculator",
+                    style = Typography.labelMedium,
+                    color = if (showCalculator) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         
-        CalculatorNumpad(
-            input = textFieldValue.text,
-            cursorPosition = textFieldValue.selection.start,
-            onInputChange = { newInput, newCursor ->
-                textFieldValue = TextFieldValue(
-                    text = newInput,
-                    selection = TextRange(newCursor.coerceIn(0, newInput.length))
-                )
-                onValueChange(newInput)
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showCalculator,
+            enter = androidx.compose.animation.expandVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.shrinkVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeOut()
+        ) {
+            CalculatorNumpad(
+                input = textFieldValue.text,
+                cursorPosition = textFieldValue.selection.start,
+                onInputChange = { newInput, newCursor ->
+                    textFieldValue = TextFieldValue(
+                        text = newInput,
+                        selection = TextRange(newCursor.coerceIn(0, newInput.length))
+                    )
+                    onValueChange(newInput)
+                },
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
     }
 }

@@ -14,6 +14,9 @@ interface SubscriptionDao {
     @Query("SELECT * FROM subscriptions ORDER BY nextExpectedDate ASC")
     fun getAllSubscriptions(): Flow<List<SubscriptionEntity>>
 
+    @Query("SELECT * FROM subscriptions WHERE id = :id")
+    suspend fun getById(id: Long): SubscriptionEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(subscription: SubscriptionEntity): Long
 

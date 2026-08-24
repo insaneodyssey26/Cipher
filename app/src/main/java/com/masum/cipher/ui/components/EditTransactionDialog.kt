@@ -57,6 +57,8 @@ import com.masum.cipher.core.domain.model.TransactionCategory
 
 import com.masum.cipher.ui.theme.CipherExpense
 import com.masum.cipher.ui.theme.CipherIncome
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +77,8 @@ fun EditTransactionDialog(
     var isIncome by remember { mutableStateOf(transaction.isIncome) }
     var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
     var categoryExpanded by remember { mutableStateOf(false) }
+
+    var showCalculator by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -136,8 +140,8 @@ fun EditTransactionDialog(
                 )
             }
 
-            // Amount field
             Column {
+                val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
                 SheetTextFieldValue(
                     value = textFieldValue,
                     onValueChange = { newValue -> 
@@ -147,7 +151,32 @@ fun EditTransactionDialog(
                     },
                     label = "Amount",
                     prefix = "₹",
-                    readOnly = false
+                    readOnly = showCalculator,
+                    onFocusChanged = { focusState ->
+                        if (focusState.isFocused && showCalculator) {
+                            keyboardController?.hide()
+                        }
+                    },
+                    trailingIcon = {
+                        androidx.compose.material3.IconButton(
+                            onClick = { 
+                                showCalculator = !showCalculator 
+                                if (showCalculator) {
+                                    keyboardController?.hide()
+                                } else {
+                                    keyboardController?.show()
+                                }
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = compose.icons.LucideIcons.Calculator, 
+                                contentDescription = "Toggle Calculator", 
+                                tint = if (showCalculator) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 )
                 
                 val computed = com.masum.cipher.core.util.MathEvaluator.evaluate(amount)
@@ -162,16 +191,22 @@ fun EditTransactionDialog(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 
-                CalculatorNumpad(
-                    input = amount,
-                    cursorPosition = textFieldValue.selection.start,
-                    onInputChange = { newInput, newCursor ->
-                        textFieldValue = TextFieldValue(
-                            text = newInput,
-                            selection = TextRange(newCursor.coerceIn(0, newInput.length))
-                        )
-                    }
-                )
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = showCalculator,
+                    enter = androidx.compose.animation.expandVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeIn(),
+                    exit = androidx.compose.animation.shrinkVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeOut()
+                ) {
+                    CalculatorNumpad(
+                        input = amount,
+                        cursorPosition = textFieldValue.selection.start,
+                        onInputChange = { newInput, newCursor ->
+                            textFieldValue = TextFieldValue(
+                                text = newInput,
+                                selection = TextRange(newCursor.coerceIn(0, newInput.length))
+                            )
+                        }
+                    )
+                }
             }
 
             // Merchant field
@@ -419,7 +454,9 @@ private fun SheetTextFieldValue(
     label: String,
     prefix: String? = null,
     readOnly: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    onFocusChanged: (androidx.compose.ui.focus.FocusState) -> Unit = {}
 ) {
     val surface = MaterialTheme.colorScheme.surface
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
@@ -452,39 +489,39 @@ private fun SheetTextFieldValue(
                 )
                 Spacer(Modifier.width(4.dp))
             }
-            val keyboardController = LocalSoftwareKeyboardController.current
-            BasicTextField(
-                value = value,
-                onValueChange = { newValue ->
-                    onValueChange(newValue)
-                    keyboardController?.hide()
-                },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = onBg
-                ),
-                singleLine = true,
-                readOnly = false,
-                keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { state ->
-                        if (state.isFocused) {
-                            keyboardController?.hide()
-                        }
+            Box(modifier = Modifier.weight(1f)) {
+                BasicTextField(
+                    value = value,
+                    onValueChange = { newValue ->
+                        onValueChange(newValue)
                     },
-                decorationBox = { inner ->
-                    if (value.text.isEmpty()) {
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = outline
-                        )
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = onBg
+                    ),
+                    singleLine = true,
+                    readOnly = false,
+                    keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged(onFocusChanged),
+                    decorationBox = { inner ->
+                        if (value.text.isEmpty()) {
+                            Text(
+                                text = "—",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = outline
+                            )
+                        }
+                        inner()
                     }
-                    inner()
-                }
-            )
+                )
+            }
+            if (trailingIcon != null) {
+                Spacer(Modifier.width(8.dp))
+                trailingIcon()
+            }
         }
     }
 }

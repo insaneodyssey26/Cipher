@@ -26,7 +26,8 @@ class DashboardViewModel @Inject constructor(
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
-    private val categoryRuleDao: CategoryRuleDao
+    private val categoryRuleDao: CategoryRuleDao,
+    private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
     initialState = DashboardContract.State()
 ) {
@@ -53,6 +54,33 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is DashboardContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
+            is DashboardContract.Intent.ApproveSubscription -> approveSubscription(intent.subscription)
+            is DashboardContract.Intent.SkipSubscription -> skipSubscription(intent.subscription)
+        }
+    }
+
+    private fun approveSubscription(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
+        viewModelScope.launch {
+            val newTransaction = TransactionEntity(
+                merchant = subscription.merchant,
+                amount = subscription.amount,
+                currency = "INR",
+                rawSms = null,
+                category = subscription.category,
+                timestamp = System.currentTimeMillis(),
+                isIncome = false,
+                note = "Approved subscription"
+            )
+            transactionRepository.insertTransaction(newTransaction)
+            val intervalMs = java.util.concurrent.TimeUnit.DAYS.toMillis(subscription.frequencyDays.toLong())
+            subscriptionDao.update(subscription.copy(nextExpectedDate = subscription.nextExpectedDate + intervalMs))
+        }
+    }
+
+    private fun skipSubscription(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
+        viewModelScope.launch {
+            val intervalMs = java.util.concurrent.TimeUnit.DAYS.toMillis(subscription.frequencyDays.toLong())
+            subscriptionDao.update(subscription.copy(nextExpectedDate = subscription.nextExpectedDate + intervalMs))
         }
     }
 
@@ -67,6 +95,10 @@ class DashboardViewModel @Inject constructor(
                 state.copy(draftTransaction = draft)
             }.combine(_promptCategoryRuleFor) { state, prompt ->
                 state.copy(promptCategoryRuleFor = prompt)
+            }.combine(subscriptionDao.getAllSubscriptions()) { state, subscriptions ->
+                val currentTime = System.currentTimeMillis()
+                val pending = subscriptions.filter { it.nextExpectedDate <= currentTime }
+                state.copy(pendingSubscriptions = pending)
             }.collect { newState ->
                 updateState { newState }
             }

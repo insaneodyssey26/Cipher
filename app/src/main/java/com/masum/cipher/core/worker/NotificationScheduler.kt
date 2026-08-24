@@ -36,5 +36,17 @@ class NotificationScheduler @Inject constructor(
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest
         )
+        
+        val subWorkRequest = PeriodicWorkRequestBuilder<SubscriptionWorker>(
+            24L, TimeUnit.HOURS
+        )
+            .setConstraints(constraints)
+            .build()
+            
+        workManager.enqueueUniquePeriodicWork(
+            "CipherSubscriptionWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            subWorkRequest
+        )
     }
 }
