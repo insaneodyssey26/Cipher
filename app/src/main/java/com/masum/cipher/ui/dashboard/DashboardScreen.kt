@@ -17,6 +17,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -104,12 +106,14 @@ import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Bug
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.RefreshCw
 import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Star
+import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -164,6 +168,7 @@ fun DashboardScreen(
 
     var hasCheckedReview by remember { mutableStateOf(false) }
     var showRatingDialog by remember { mutableStateOf(false) }
+    var showComparisonExplanation by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(state.transactions) {
@@ -518,13 +523,17 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    groupedTransactions.forEach { (monthYear, transactions) ->
+                    groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
                         item(key = "header_$monthYear") {
                             Text(
                                 text = monthYear.uppercase(),
-                                style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(start = 24.dp, top = 24.dp, bottom = 8.dp)
+                                style = Typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 1.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                                modifier = Modifier.padding(start = 24.dp, top = if (groupIndex == 0) 14.dp else 24.dp, bottom = 8.dp)
                             )
                         }
                         itemsIndexed(
@@ -559,6 +568,9 @@ fun DashboardScreen(
                     onSearchQueryChanged = { viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it)) },
                     privacyMode = privacyMode,
                     isHapticsEnabled = isHapticsEnabled,
+                    expenseComparisonPercent = state.expenseComparisonPercent,
+                    expenseComparisonLabel = state.expenseComparisonLabel,
+                    onComparisonBadgeClick = { showComparisonExplanation = true },
                     toolbarOffsetHeightPx = toolbarOffsetHeightPx.value,
                     toolbarHeightRangePx = toolbarHeightRangePx,
                     maxToolbarHeight = maxToolbarHeight
@@ -852,7 +864,7 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Version $versionName is here! \uD83C\uDF89",
+                    text = "Version $versionName is here",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -912,6 +924,246 @@ fun DashboardScreen(
             }
         }
     }
+
+    if (showComparisonExplanation) {
+        val comparisonSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showComparisonExplanation = false },
+            sheetState = comparisonSheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .size(width = 36.dp, height = 4.dp)
+                        .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
+                )
+            },
+            tonalElevation = 0.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val percent = state.expenseComparisonPercent
+                    val isLess = (percent ?: 0.0) < 0.0
+                    val iconTint = if (percent != null) {
+                        if (isLess) EmeraldIncome else RoseExpense
+                    } else MaterialTheme.colorScheme.primary
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(iconTint.copy(alpha = 0.12f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isLess) LucideIcons.ArrowDown else LucideIcons.ArrowUp,
+                            contentDescription = null,
+                            tint = iconTint,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Spending Trend",
+                            style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = state.selectedTimePeriod.label,
+                            style = Typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                VaultCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        val percent = state.expenseComparisonPercent
+                        val prevExp = state.previousPeriodExpenses
+                        val currentExp = state.totalExpenses
+                        val label = state.expenseComparisonLabel ?: "last period"
+
+                        if (percent != null && kotlin.math.abs(percent) >= 0.5 && prevExp != null && prevExp > 0) {
+                            val isLess = percent < 0.0
+                            val diff = kotlin.math.abs(currentExp - prevExp)
+                            val color = if (isLess) EmeraldIncome else RoseExpense
+                            val arrow = if (isLess) "▼" else "▲"
+                            val actionWord = if (isLess) "less" else "more"
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "This period (so far)",
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "₹${String.format(java.util.Locale.US, "%.0f", currentExp)}",
+                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            Spacer(Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Same days $label",
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "₹${String.format(java.util.Locale.US, "%.0f", prevExp)}",
+                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Spacer(Modifier.height(14.dp))
+                            androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                            Spacer(Modifier.height(14.dp))
+
+                            Text(
+                                text = "$arrow ₹${String.format(java.util.Locale.US, "%.0f", diff)} $actionWord (${String.format(java.util.Locale.US, "%.1f", kotlin.math.abs(percent))}%)",
+                                style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = color
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = if (isLess) {
+                                    "You've spent less compared to the exact same days in $label."
+                                } else {
+                                    "You've spent more compared to the exact same days in $label."
+                                },
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Total Spent",
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "₹${String.format(java.util.Locale.US, "%.0f", currentExp)}",
+                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            Spacer(Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Total Income",
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "₹${String.format(java.util.Locale.US, "%.0f", state.totalIncome)}",
+                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = EmeraldIncome
+                                )
+                            }
+
+                            Spacer(Modifier.height(12.dp))
+                            androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                            Spacer(Modifier.height(12.dp))
+
+                            val isPastPeriod = state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH ||
+                                state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
+                                state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
+                            Text(
+                                text = if (isPastPeriod) "${state.selectedTimePeriod.label} Summary" else "Active Period Overview",
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = if (isPastPeriod) {
+                                    "No transactions found in the preceding period to compare against."
+                                } else {
+                                    "No previous records found to compare against yet."
+                                },
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = "Compares the exact same elapsed days (e.g. Day 1 to today) for a fair comparison.",
+                        style = Typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            comparisonSheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!comparisonSheetState.isVisible) {
+                                showComparisonExplanation = false
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Got it", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -926,10 +1178,14 @@ private fun DashboardHero(
     onSearchQueryChanged: (String) -> Unit,
     privacyMode: Boolean,
     isHapticsEnabled: Boolean,
+    expenseComparisonPercent: Double? = null,
+    expenseComparisonLabel: String? = null,
+    onComparisonBadgeClick: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
     maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     val scrollProgress = if (toolbarHeightRangePx > 0f) {
         1f - (kotlin.math.abs(toolbarOffsetHeightPx) / toolbarHeightRangePx)
     } else 1f
@@ -977,99 +1233,144 @@ private fun DashboardHero(
             ) {
                 androidx.compose.ui.layout.Layout(
                     content = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .graphicsLayer {
-                                    scaleX = balanceScale
-                                    scaleY = balanceScale
-                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
-                                }
+                                    alpha = ((scrollProgress - 0.4f) / 0.6f).coerceIn(0f, 1f)
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .graphicsLayer { alpha = (scrollProgress - 0.5f).coerceAtLeast(0f) * 2f }
-                                    .layout { measurable, constraints ->
-                                        val placeable = measurable.measure(constraints)
-                                        val currentHeight = (placeable.height * scrollProgress).toInt()
-                                        val currentWidth = (placeable.width * scrollProgress).toInt()
-                                        layout(currentWidth, currentHeight) {
-                                            placeable.placeRelative((currentWidth - placeable.width) / 2, currentHeight - placeable.height)
-                                        }
-                                    }
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = LucideIcons.Calendar,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
-                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-                            val balanceStringLength = totalBalance.toLong().toString().length
-                            val balanceFontSize = remember(balanceStringLength) {
-                                when {
-                                    balanceStringLength >= 9 -> 36.sp
-                                    balanceStringLength >= 7 -> 44.sp
-                                    balanceStringLength >= 5 -> 54.sp
-                                    else -> 60.sp
-                                }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = LucideIcons.Calendar,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
+                                    style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "₹",
-                                    style = Typography.headlineMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(end = 4.dp)
-                                )
-                                if (privacyMode) {
-                                    Text(
-                                        text = "••••••",
-                                        style = Typography.displayLarge.copy(fontSize = balanceFontSize),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                } else {
-                                    val isHugeAmount = kotlin.math.abs(totalBalance) >= 1_000_000
-                                    val shouldShorten = isHugeAmount || (scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000)
-                                    
-                                    AnimatedContent(
-                                        targetState = shouldShorten,
-                                        transitionSpec = {
-                                            fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-                                        },
-                                        label = "main_balance_transition"
-                                    ) { shortened ->
-                                        if (shortened) {
-                                            val formattedBalance = remember(totalBalance) {
-                                                val absVal = kotlin.math.abs(totalBalance)
-                                                when {
-                                                    absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.2fB", totalBalance / 1_000_000_000f).replace(".00B", "B")
-                                                    absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.2fM", totalBalance / 1_000_000f).replace(".00M", "M")
-                                                    else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
-                                                }
-                                            }
-                                            Text(
-                                                text = formattedBalance,
-                                                style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                        } else {
-                                            AnimatedNumberTicker(
-                                                value = totalBalance,
-                                                textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
+                            if (expenseComparisonPercent != null && kotlin.math.abs(expenseComparisonPercent) >= 0.5) {
+                                val isLess = expenseComparisonPercent < 0.0
+                                val badgeColor = if (isLess) EmeraldIncome else RoseExpense
+                                val arrow = if (isLess) "▼" else "▲"
+                                val labelSuffix = if (isLess) "less" else "more"
+                                val compText = "$arrow ${String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))}% $labelSuffix"
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(badgeColor.copy(alpha = 0.15f))
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled)
+                                            onComparisonBadgeClick()
                                         }
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = compText,
+                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                        color = badgeColor
+                                    )
+                                }
+                            } else {
+                                val netSaved = income - expense
+                                val isPastPeriod = selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH ||
+                                    selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
+                                    selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
+                                val (badgeText, badgeColor) = when {
+                                    netSaved > 0 -> Pair("● Positive Flow", EmeraldIncome)
+                                    expense > 0 && isPastPeriod -> Pair("● Summary", MaterialTheme.colorScheme.primary)
+                                    expense > 0 -> Pair("● Active Flow", MaterialTheme.colorScheme.primary)
+                                    else -> Pair("● No Activity", MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(badgeColor.copy(alpha = 0.15f))
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled)
+                                            onComparisonBadgeClick()
+                                        }
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = badgeText,
+                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                        color = badgeColor
+                                    )
+                                }
+                            }
+                        }
+
+                        val balanceStringLength = totalBalance.toLong().toString().length
+                        val balanceFontSize = remember(balanceStringLength) {
+                            when {
+                                balanceStringLength >= 9 -> 36.sp
+                                balanceStringLength >= 7 -> 44.sp
+                                balanceStringLength >= 5 -> 54.sp
+                                else -> 60.sp
+                            }
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.graphicsLayer {
+                                scaleX = balanceScale
+                                scaleY = balanceScale
+                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
+                            }
+                        ) {
+                            Text(
+                                text = "₹",
+                                style = Typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            if (privacyMode) {
+                                Text(
+                                    text = "••••••",
+                                    style = Typography.displayLarge.copy(fontSize = balanceFontSize),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            } else {
+                                val isHugeAmount = kotlin.math.abs(totalBalance) >= 1_000_000
+                                val shouldShorten = isHugeAmount || (scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000)
+                                
+                                AnimatedContent(
+                                    targetState = shouldShorten,
+                                    transitionSpec = {
+                                        fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
+                                    },
+                                    label = "main_balance_transition"
+                                ) { shortened ->
+                                    if (shortened) {
+                                        val formattedBalance = remember(totalBalance) {
+                                            val absVal = kotlin.math.abs(totalBalance)
+                                            when {
+                                                absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.2fB", totalBalance / 1_000_000_000f).replace(".00B", "B")
+                                                absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.2fM", totalBalance / 1_000_000f).replace(".00M", "M")
+                                                else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
+                                            }
+                                        }
+                                        Text(
+                                            text = formattedBalance,
+                                            style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    } else {
+                                        AnimatedNumberTicker(
+                                            value = totalBalance,
+                                            textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
                                     }
                                 }
                             }
@@ -1097,47 +1398,60 @@ private fun DashboardHero(
                     modifier = Modifier.fillMaxSize()
                 ) { measurables, constraints ->
                     val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-                    val balancePlaceable = measurables[0].measure(looseConstraints)
+                    val headerConstraints = looseConstraints.copy(minWidth = constraints.maxWidth, maxWidth = constraints.maxWidth)
+                    val periodLabelPlaceable = measurables[0].measure(headerConstraints)
+                    val balancePlaceable = measurables[1].measure(looseConstraints)
                     
                     val statsExpandedWidth = constraints.maxWidth
                     val balanceVisualCollapsedWidth = (balancePlaceable.width * 0.6f).toInt()
                     val gapBetween = 16.dp.roundToPx()
                     val dynamicCollapsedWidth = constraints.maxWidth - balanceVisualCollapsedWidth - gapBetween
                     val statsCollapsedWidth = dynamicCollapsedWidth.coerceIn(
-                        (constraints.maxWidth * 0.52f).toInt(),
+                        (constraints.maxWidth * 0.50f).toInt(),
                         (constraints.maxWidth * 0.74f).toInt()
                     )
                     val currentStatsWidth = statsCollapsedWidth + ((statsExpandedWidth - statsCollapsedWidth) * scrollProgress).toInt()
                     
                     val statsConstraints = looseConstraints.copy(minWidth = currentStatsWidth, maxWidth = currentStatsWidth)
-                    val statsPlaceable = measurables[1].measure(statsConstraints)
+                    val statsPlaceable = measurables[2].measure(statsConstraints)
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
-                        val topPadding = 16.dp.roundToPx()
-                        val expBalanceY = topPadding.toFloat()
-                        
-                        val rawGap = (constraints.maxHeight - expBalanceY - balancePlaceable.height - statsPlaceable.height) / 2f
-                        val gap = rawGap.coerceIn(8.dp.toPx(), 24.dp.toPx())
+                        val periodLabelY = 10.dp.roundToPx()
+                        if (scrollProgress > 0.4f) {
+                            periodLabelPlaceable.placeRelative(0, periodLabelY)
+                        }
+
+                        val balanceXProgress = scrollProgress * scrollProgress
+                        val statsXProgress = scrollProgress * scrollProgress
 
                         val expBalanceX = (constraints.maxWidth - balancePlaceable.width) / 2f
-                        
-                        val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
-                        val expStatsY = expBalanceY + balancePlaceable.height + gap
-
                         val colBalanceX = 0f
+                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * balanceXProgress
+
+                        val expBalanceY = (periodLabelY + periodLabelPlaceable.height + 14.dp.roundToPx()).toFloat()
                         val colBalanceY = (constraints.maxHeight - balancePlaceable.height) / 2f
-                        
+                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * scrollProgress
+
+                        val balanceVisualRight = currentBalanceX + balancePlaceable.width * balanceScale
+                        val balanceVisualBottom = currentBalanceY + balancePlaceable.height * (0.5f + 0.5f * balanceScale)
+
+                        val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
                         val colStatsX = (constraints.maxWidth - statsPlaceable.width).toFloat()
+                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * statsXProgress
+
                         val colStatsY = (constraints.maxHeight - statsPlaceable.height) / 2f
+                        val maxAllowedStatsY = (constraints.maxHeight - statsPlaceable.height).toFloat().coerceAtLeast(0f)
+                        val expStatsY = (expBalanceY + balancePlaceable.height + 14.dp.toPx()).coerceAtMost(maxAllowedStatsY)
+                        val nominalStatsY = colStatsY + (expStatsY - colStatsY) * scrollProgress
 
-                        val horizontalProgress = scrollProgress * scrollProgress
-                        val verticalProgress = 1f - (1f - scrollProgress) * (1f - scrollProgress)
-
-                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * horizontalProgress
-                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * verticalProgress
-                        
-                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * horizontalProgress
-                        val currentStatsY = colStatsY + (expStatsY - colStatsY) * verticalProgress
+                        val horizontalOverlap = (balanceVisualRight + 8.dp.toPx()) - currentStatsX
+                        val currentStatsY = if (horizontalOverlap > 0f && scrollProgress > 0.05f) {
+                            val safeSeparatedY = (balanceVisualBottom + 8.dp.toPx()).coerceAtMost(maxAllowedStatsY)
+                            val overlapRatio = (horizontalOverlap / (balancePlaceable.width * balanceScale).coerceAtLeast(1f)).coerceIn(0f, 1f)
+                            (nominalStatsY * (1f - overlapRatio) + safeSeparatedY * overlapRatio).coerceIn(0f, maxAllowedStatsY)
+                        } else {
+                            nominalStatsY.coerceIn(0f, maxAllowedStatsY)
+                        }
 
                         balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
                         statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
@@ -1527,13 +1841,6 @@ private fun CashFlowSegmentBar(
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(10.dp)
-                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
-                        )
                     }
                 }
                 
@@ -1575,13 +1882,6 @@ private fun CashFlowSegmentBar(
                 
                 AnimatedVisibility(visible = !isCollapsed) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Spacer(Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(10.dp)
-                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
-                        )
                         Spacer(Modifier.width(6.dp))
                         Text(
                             text = "EXPENSE",

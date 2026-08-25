@@ -201,9 +201,8 @@ fun InsightsScreen(
                 InsightHero(state = state)
             }
             
-            // 1.5 Monthly Budget
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                SectionLabel("MONTHLY BUDGET")
                 BudgetGaugeCard(
                     spent = state.monthlySummary.expense,
                     budget = monthlyBudget,
@@ -404,10 +403,14 @@ private fun InsightMetric(label: String, value: String, icon: androidx.compose.u
 @Composable
 private fun SectionLabel(text: String) {
     Text(
-        text = text,
-        style = Typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 24.dp, top = 32.dp, bottom = 12.dp)
+        text = text.uppercase(),
+        style = Typography.labelSmall.copy(
+            fontSize = 11.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            letterSpacing = 1.2.sp
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+        modifier = Modifier.padding(start = 24.dp, top = 28.dp, bottom = 10.dp)
     )
 }
 
@@ -522,15 +525,9 @@ fun BudgetGaugeCard(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Monthly Budget",
-                        style = Typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    
                     val statusText = when {
                         progress >= 1f -> "Exceeded"
                         progress >= 0.9f -> "Critical"
@@ -551,7 +548,7 @@ fun BudgetGaugeCard(
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 Box(
                     modifier = Modifier
@@ -581,31 +578,37 @@ fun BudgetGaugeCard(
                                 width = strokeWidth,
                                 cap = androidx.compose.ui.graphics.StrokeCap.Round
                             ),
-                            topLeft = topLeft,
-                            size = arcSize
+                            size = arcSize,
+                            topLeft = topLeft
                         )
                         
-                        drawArc(
-                            color = barColor,
-                            startAngle = 180f,
-                            sweepAngle = 180f * animatedProgress,
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                width = strokeWidth,
-                                cap = androidx.compose.ui.graphics.StrokeCap.Round
-                            ),
-                            topLeft = topLeft,
-                            size = arcSize
-                        )
+                        if (animatedProgress > 0f) {
+                            drawArc(
+                                color = barColor,
+                                startAngle = 180f,
+                                sweepAngle = 180f * animatedProgress,
+                                useCenter = false,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                    width = strokeWidth,
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                                ),
+                                size = arcSize,
+                                topLeft = topLeft
+                            )
+                        }
                     }
                     
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         Text(
                             text = "₹$formattedRemaining",
-                            style = Typography.displaySmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black, letterSpacing = (-1).sp),
+                            style = Typography.headlineMedium.copy(
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                fontSize = 32.sp,
+                                letterSpacing = (-1).sp
+                            ),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -616,13 +619,16 @@ fun BudgetGaugeCard(
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(horizontalAlignment = Alignment.Start) {
                         Text("Spent", style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(
                             "₹${String.format(java.util.Locale.US, "%.0f", spent)}", 
@@ -649,14 +655,9 @@ fun BudgetGaugeCard(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Monthly Budget",
-                        style = Typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
                     Box(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
@@ -669,7 +670,7 @@ fun BudgetGaugeCard(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Box(
                     modifier = Modifier
                         .size(52.dp)
