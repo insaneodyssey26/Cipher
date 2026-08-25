@@ -1145,6 +1145,7 @@ fun DashboardScreen(
 
                 Button(
                     onClick = {
+                        view.performVibrate(isHapticsEnabled)
                         coroutineScope.launch {
                             comparisonSheetState.hide()
                         }.invokeOnCompletion {

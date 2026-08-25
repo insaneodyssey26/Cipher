@@ -48,6 +48,7 @@ class UserPreferences @Inject constructor(
         val REVIEW_PROMPT_INTERVAL = intPreferencesKey("review_prompt_interval")
         
         val NOTIFY_ALL_TRANSACTIONS = booleanPreferencesKey("notify_all_transactions")
+        val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -80,7 +81,8 @@ class UserPreferences @Inject constructor(
             appLaunchCount = preferences[Keys.APP_LAUNCH_COUNT] ?: 0,
             hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false,
             reviewPromptInterval = preferences[Keys.REVIEW_PROMPT_INTERVAL] ?: 10,
-            notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true
+            notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true,
+            ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet()
         )
     }
 
@@ -190,6 +192,13 @@ class UserPreferences @Inject constructor(
     suspend fun setNotifyAllTransactions(enabled: Boolean) {
         context.dataStore.edit { it[Keys.NOTIFY_ALL_TRANSACTIONS] = enabled }
     }
+
+    suspend fun addIgnoredSubscription(merchant: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet()
+            prefs[Keys.IGNORED_SUBSCRIPTIONS] = current + merchant
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -233,5 +242,6 @@ data class UserSettings(
     val appLaunchCount: Int = 0,
     val hasPromptedReview: Boolean = false,
     val reviewPromptInterval: Int = 10,
-    val notifyAllTransactions: Boolean = false
+    val notifyAllTransactions: Boolean = false,
+    val ignoredSubscriptions: Set<String> = emptySet()
 )

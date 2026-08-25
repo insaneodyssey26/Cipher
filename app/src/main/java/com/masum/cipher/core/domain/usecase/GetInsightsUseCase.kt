@@ -19,7 +19,8 @@ import javax.inject.Inject
 class GetInsightsUseCase @Inject constructor(
     private val repository: TransactionRepository,
     private val subscriptionDetector: SubscriptionDetector,
-    private val subscriptionDao: SubscriptionDao
+    private val subscriptionDao: SubscriptionDao,
+    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) {
     operator fun invoke(timeRange: com.masum.cipher.core.domain.model.TimeRange): Flow<InsightsContract.State> {
         val startOfCurrentWeek = getStartOfCurrentWeek()
@@ -29,8 +30,9 @@ class GetInsightsUseCase @Inject constructor(
             repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime),
             repository.getExpensesSince(startOfLastWeek),
             repository.getAllTransactions(),
-            subscriptionDao.getAllSubscriptions()
-        ) { transactions, recentExpenses, allTx, manualSubscriptions ->
+            subscriptionDao.getAllSubscriptions(),
+            userPreferences.settingsFlow
+        ) { transactions, recentExpenses, allTx, manualSubscriptions, settings ->
             val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
             val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
@@ -52,9 +54,11 @@ class GetInsightsUseCase @Inject constructor(
                 )
             }
             
-            // simple merge, removing detected duplicates if merchant matches manual exactly
             val manualMerchants = manualDomainSubscriptions.map { it.merchant.uppercase() }.toSet()
-            val filteredAutoDetected = autoDetected.filter { !manualMerchants.contains(it.merchant.uppercase()) }
+            val ignoredUpper = settings.ignoredSubscriptions.map { it.uppercase() }.toSet()
+            val filteredAutoDetected = autoDetected.filter { 
+                !manualMerchants.contains(it.merchant.uppercase()) && !ignoredUpper.contains(it.merchant.uppercase())
+            }
             
             val allSubscriptions = (manualDomainSubscriptions + filteredAutoDetected).sortedBy { it.nextExpectedDate }
 

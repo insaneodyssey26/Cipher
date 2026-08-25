@@ -667,6 +667,9 @@ private fun AmountInputField(
                     value = textFieldValue,
                     onValueChange = { newValue -> 
                         if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
+                            if (newValue.selection != textFieldValue.selection) {
+                                view.performVibrate(hapticsEnabled)
+                            }
                             textFieldValue = newValue
                             onValueChange(newValue.text)
                         }
@@ -700,57 +703,6 @@ private fun AmountInputField(
             }
         }
         
-        if (showCalculator && textFieldValue.text.length > 1) {
-            val safeCursor = textFieldValue.selection.start.coerceIn(0, textFieldValue.text.length)
-            Row(
-                modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        if (safeCursor > 0) {
-                            view.performVibrate(hapticsEnabled)
-                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor - 1))
-                        }
-                    },
-                    modifier = Modifier.size(28.dp),
-                    enabled = safeCursor > 0
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.ChevronRight,
-                        contentDescription = "Move Cursor Left",
-                        tint = if (safeCursor > 0) color else color.copy(alpha = 0.3f),
-                        modifier = Modifier.size(16.dp).rotate(180f)
-                    )
-                }
-
-                Text(
-                    text = "${safeCursor}/${textFieldValue.text.length}",
-                    style = Typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-
-                IconButton(
-                    onClick = {
-                        if (safeCursor < textFieldValue.text.length) {
-                            view.performVibrate(hapticsEnabled)
-                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor + 1))
-                        }
-                    },
-                    modifier = Modifier.size(28.dp),
-                    enabled = safeCursor < textFieldValue.text.length
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.ChevronRight,
-                        contentDescription = "Move Cursor Right",
-                        tint = if (safeCursor < textFieldValue.text.length) color else color.copy(alpha = 0.3f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(

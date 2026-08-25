@@ -29,7 +29,8 @@ class InsightsViewModel @Inject constructor(
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
     private val categoryRuleDao: CategoryRuleDao,
-    private val subscriptionDao: SubscriptionDao
+    private val subscriptionDao: SubscriptionDao,
+    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State()
 ) {
@@ -56,6 +57,7 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
             is InsightsContract.Intent.SaveSubscription -> saveSubscription(intent)
             is InsightsContract.Intent.DeleteSubscription -> deleteSubscription(intent.merchant)
+            is InsightsContract.Intent.IgnoreSubscription -> ignoreSubscription(intent.merchant)
             is InsightsContract.Intent.RestoreSubscription -> {
                 viewModelScope.launch { subscriptionDao.insert(intent.subscription) }
             }
@@ -84,6 +86,12 @@ class InsightsViewModel @Inject constructor(
                 subscriptionDao.delete(existing)
                 emitEffect(InsightsContract.Effect.ShowUndoSubscriptionDelete(existing))
             }
+        }
+    }
+
+    private fun ignoreSubscription(merchant: String) {
+        viewModelScope.launch {
+            userPreferences.addIgnoredSubscription(merchant)
         }
     }
 

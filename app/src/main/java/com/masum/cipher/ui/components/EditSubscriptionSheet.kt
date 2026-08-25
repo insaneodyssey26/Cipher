@@ -121,7 +121,7 @@ fun EditSubscriptionSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isEditing) "Edit Subscription" else "Add Subscription",
+                    text = if (isEditing) "Subscription Details" else "Add Subscription",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.5).sp
@@ -129,9 +129,33 @@ fun EditSubscriptionSheet(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 
-                if (isEditing && onDelete != null && subscription?.confidence == 1.0f) {
+                if (isEditing && onDelete != null) {
                     androidx.compose.material3.TextButton(onClick = onDelete) {
                         Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+
+            if (isEditing && subscription != null) {
+                val monthlyEst = subscription.amount * (30.0 / subscription.frequencyDays.coerceAtLeast(1).toDouble())
+                val trackType = if (subscription.confidence == 1.0f) "Manual Entry" else "Auto-Detected"
+                
+                VaultCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Monthly Average", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("₹${String.format(java.util.Locale.US, "%.0f", monthlyEst)}/mo", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Tracking Method", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(trackType, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                 }
             }

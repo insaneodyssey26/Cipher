@@ -30,6 +30,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -87,15 +88,19 @@ fun InsightsScreen(
                 showAddSubDialog = false
                 selectedSubscription = null
             },
-            onDelete = if (selectedSubscription?.confidence == 1.0f) {
-                {
+            onDelete = {
+                if (selectedSubscription?.confidence == 1.0f) {
                     selectedSubscription?.merchant?.let { 
                         viewModel.handleIntent(InsightsContract.Intent.DeleteSubscription(it)) 
                     }
-                    showAddSubDialog = false
-                    selectedSubscription = null
+                } else {
+                    selectedSubscription?.merchant?.let {
+                        viewModel.handleIntent(InsightsContract.Intent.IgnoreSubscription(it))
+                    }
                 }
-            } else null
+                showAddSubDialog = false
+                selectedSubscription = null
+            }
         )
     }
 
@@ -470,19 +475,6 @@ fun SubscriptionItem(
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (sub.confidence == 1.0f) {
-                    Text(
-                        text = "Manual Entry",
-                        style = Typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Text(
-                        text = "Est. ${sub.amount * (30.0 / sub.frequencyDays.coerceAtLeast(1).toDouble()).toInt()}/mo",
-                        style = Typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
             }
         }
     }
