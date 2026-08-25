@@ -66,7 +66,23 @@ import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Trash2
+import androidx.compose.ui.draw.rotate
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextLayoutResult
 import java.util.Locale
 
 /**
@@ -484,12 +500,42 @@ private fun AmountInputField(
         mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
     }
     var showCalculator by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+    val hapticsEnabled = true
+
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    // Blinking cursor for calculator mode
+    val infiniteTransition = rememberInfiniteTransition(label = "cursorBlink")
+    val cursorAlpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 1000
+                1f at 0
+                1f at 499
+                0f at 500
+                0f at 999
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "cursorAlpha"
+    )
+
+    // Synchronize if external value changes (e.g. initial load)
+    LaunchedEffect(value) {
+        if (value != textFieldValue.text) {
+            val safeCursor = textFieldValue.selection.start.coerceIn(0, value.length)
+            textFieldValue = TextFieldValue(text = value, selection = TextRange(safeCursor))
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val keyboardController = LocalSoftwareKeyboardController.current
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.Center,
@@ -504,33 +550,75 @@ private fun AmountInputField(
                 modifier = Modifier.padding(end = 8.dp)
             )
 
-            BasicTextField(
-                value = textFieldValue,
-                onValueChange = { newValue -> 
-                    if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
-                        textFieldValue = newValue
-                        onValueChange(newValue.text)
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                textStyle = Typography.displayLarge.copy(
-                    color = color,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    fontSize = 56.sp,
-                    letterSpacing = (-2).sp
-                ),
-                singleLine = true,
-                readOnly = showCalculator,
-                cursorBrush = SolidColor(color),
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .onFocusChanged { state ->
-                        if (state.isFocused && showCalculator) {
-                            keyboardController?.hide()
+            if (showCalculator) {
+                // Interactive Display for Calculator Mode
+                val textScrollState = rememberScrollState()
+                val currentText = textFieldValue.text
+                val safeCursor = textFieldValue.selection.start.coerceIn(0, currentText.length)
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .horizontalScroll(textScrollState)
+                        .pointerInput(currentText) {
+                            detectTapGestures { offset ->
+                                val layout = textLayoutResult ?: return@detectTapGestures
+                                val clickedOffset = layout.getOffsetForPosition(offset).coerceIn(0, currentText.length)
+                                view.performVibrate(hapticsEnabled)
+                                textFieldValue = textFieldValue.copy(selection = TextRange(clickedOffset))
+                            }
                         }
-                    },
-                decorationBox = { inner ->
-                    if (textFieldValue.text.isEmpty()) {
+                        .pointerInput(currentText) {
+                            var accumulatedDrag = 0f
+                            detectHorizontalDragGestures(
+                                onDragStart = { offset ->
+                                    val layout = textLayoutResult ?: return@detectHorizontalDragGestures
+                                    val dragIndex = layout.getOffsetForPosition(offset).coerceIn(0, currentText.length)
+                                    view.performVibrate(hapticsEnabled)
+                                    textFieldValue = textFieldValue.copy(selection = TextRange(dragIndex))
+                                    accumulatedDrag = 0f
+                                },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    accumulatedDrag += dragAmount
+                                    if (kotlin.math.abs(accumulatedDrag) >= 18f) {
+                                        val deltaChars = (accumulatedDrag / 18f).toInt()
+                                        if (deltaChars != 0) {
+                                            val newCursor = (textFieldValue.selection.start + deltaChars).coerceIn(0, currentText.length)
+                                            if (newCursor != textFieldValue.selection.start) {
+                                                view.performVibrate(hapticsEnabled)
+                                                textFieldValue = textFieldValue.copy(selection = TextRange(newCursor))
+                                            }
+                                            accumulatedDrag %= 18f
+                                        }
+                                    }
+                                    change.consume()
+                                }
+                            )
+                        }
+                        .drawWithContent {
+                            drawContent()
+                            val layout = textLayoutResult
+                            if (layout != null && currentText.isNotEmpty()) {
+                                val cursorRect = layout.getCursorRect(safeCursor)
+                                drawLine(
+                                    color = color.copy(alpha = cursorAlpha),
+                                    start = Offset(cursorRect.left, cursorRect.top + 6.dp.toPx()),
+                                    end = Offset(cursorRect.left, cursorRect.bottom - 6.dp.toPx()),
+                                    strokeWidth = 3.dp.toPx(),
+                                    cap = StrokeCap.Round
+                                )
+                            } else if (currentText.isEmpty()) {
+                                drawLine(
+                                    color = color.copy(alpha = cursorAlpha),
+                                    start = Offset(0f, 6.dp.toPx()),
+                                    end = Offset(0f, size.height - 6.dp.toPx()),
+                                    strokeWidth = 3.dp.toPx(),
+                                    cap = StrokeCap.Round
+                                )
+                            }
+                        }
+                ) {
+                    if (currentText.isEmpty()) {
                         Text(
                             text = "0",
                             style = Typography.displayLarge.copy(
@@ -540,12 +628,107 @@ private fun AmountInputField(
                             )
                         )
                     } else {
-                        inner()
+                        Text(
+                            text = currentText,
+                            style = Typography.displayLarge.copy(
+                                color = color,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                fontSize = 56.sp,
+                                letterSpacing = (-2).sp
+                            ),
+                            onTextLayout = { textLayoutResult = it }
+                        )
                     }
                 }
-            )
+            } else {
+                BasicTextField(
+                    value = textFieldValue,
+                    onValueChange = { newValue -> 
+                        if (newValue.text.all { it.isDigit() || it in "+-*/. " }) {
+                            textFieldValue = newValue
+                            onValueChange(newValue.text)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    textStyle = Typography.displayLarge.copy(
+                        color = color,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontSize = 56.sp,
+                        letterSpacing = (-2).sp
+                    ),
+                    singleLine = true,
+                    readOnly = false,
+                    cursorBrush = SolidColor(color),
+                    modifier = Modifier.weight(1f, fill = false),
+                    decorationBox = { inner ->
+                        if (textFieldValue.text.isEmpty()) {
+                            Text(
+                                text = "0",
+                                style = Typography.displayLarge.copy(
+                                    color = color.copy(alpha = 0.3f),
+                                    fontSize = 56.sp,
+                                    letterSpacing = (-2).sp
+                                )
+                            )
+                        } else {
+                            inner()
+                        }
+                    }
+                )
+            }
         }
         
+        if (showCalculator && textFieldValue.text.length > 1) {
+            val safeCursor = textFieldValue.selection.start.coerceIn(0, textFieldValue.text.length)
+            Row(
+                modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        if (safeCursor > 0) {
+                            view.performVibrate(hapticsEnabled)
+                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor - 1))
+                        }
+                    },
+                    modifier = Modifier.size(28.dp),
+                    enabled = safeCursor > 0
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.ChevronRight,
+                        contentDescription = "Move Cursor Left",
+                        tint = if (safeCursor > 0) color else color.copy(alpha = 0.3f),
+                        modifier = Modifier.size(16.dp).rotate(180f)
+                    )
+                }
+
+                Text(
+                    text = "${safeCursor}/${textFieldValue.text.length}",
+                    style = Typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+
+                IconButton(
+                    onClick = {
+                        if (safeCursor < textFieldValue.text.length) {
+                            view.performVibrate(hapticsEnabled)
+                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor + 1))
+                        }
+                    },
+                    modifier = Modifier.size(28.dp),
+                    enabled = safeCursor < textFieldValue.text.length
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.ChevronRight,
+                        contentDescription = "Move Cursor Right",
+                        tint = if (safeCursor < textFieldValue.text.length) color else color.copy(alpha = 0.3f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
@@ -558,7 +741,6 @@ private fun AmountInputField(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Beautiful pill toggle switch
         androidx.compose.material3.Surface(
             onClick = { 
                 showCalculator = !showCalculator

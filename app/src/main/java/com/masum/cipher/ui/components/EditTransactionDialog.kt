@@ -60,6 +60,24 @@ import com.masum.cipher.ui.theme.CipherIncome
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.ChevronRight
+import androidx.compose.ui.draw.rotate
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextLayoutResult
+import com.masum.cipher.core.util.performVibrate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -196,16 +214,73 @@ fun EditTransactionDialog(
                     enter = androidx.compose.animation.expandVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeIn(),
                     exit = androidx.compose.animation.shrinkVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeOut()
                 ) {
-                    CalculatorNumpad(
-                        input = amount,
-                        cursorPosition = textFieldValue.selection.start,
-                        onInputChange = { newInput, newCursor ->
-                            textFieldValue = TextFieldValue(
-                                text = newInput,
-                                selection = TextRange(newCursor.coerceIn(0, newInput.length))
-                            )
+                    Column {
+                        if (amount.length > 1) {
+                            val view = androidx.compose.ui.platform.LocalView.current
+                            val safeCursor = textFieldValue.selection.start.coerceIn(0, amount.length)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 6.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        if (safeCursor > 0) {
+                                            view.performVibrate(true)
+                                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor - 1))
+                                        }
+                                    },
+                                    modifier = Modifier.size(28.dp),
+                                    enabled = safeCursor > 0
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.ChevronRight,
+                                        contentDescription = "Move Cursor Left",
+                                        tint = if (safeCursor > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(16.dp).rotate(180f)
+                                    )
+                                }
+
+                                Text(
+                                    text = "${safeCursor}/${amount.length}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(horizontal = 12.dp)
+                                )
+
+                                IconButton(
+                                    onClick = {
+                                        if (safeCursor < amount.length) {
+                                            view.performVibrate(true)
+                                            textFieldValue = textFieldValue.copy(selection = TextRange(safeCursor + 1))
+                                        }
+                                    },
+                                    modifier = Modifier.size(28.dp),
+                                    enabled = safeCursor < amount.length
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.ChevronRight,
+                                        contentDescription = "Move Cursor Right",
+                                        tint = if (safeCursor < amount.length) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
                         }
-                    )
+
+                        CalculatorNumpad(
+                            input = amount,
+                            cursorPosition = textFieldValue.selection.start,
+                            onInputChange = { newInput, newCursor ->
+                                textFieldValue = TextFieldValue(
+                                    text = newInput,
+                                    selection = TextRange(newCursor.coerceIn(0, newInput.length))
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -463,6 +538,28 @@ private fun SheetTextFieldValue(
     val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
     val onBg = MaterialTheme.colorScheme.onBackground
     val outline = MaterialTheme.colorScheme.outline
+    val view = LocalView.current
+
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "cursorBlinkDialog")
+    val cursorAlpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 1000
+                1f at 0
+                1f at 499
+                0f at 500
+                0f at 999
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "cursorAlpha"
+    )
+
+    val cursorColor = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = Modifier
@@ -490,33 +587,119 @@ private fun SheetTextFieldValue(
                 Spacer(Modifier.width(4.dp))
             }
             Box(modifier = Modifier.weight(1f)) {
-                BasicTextField(
-                    value = value,
-                    onValueChange = { newValue ->
-                        onValueChange(newValue)
-                    },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = onBg
-                    ),
-                    singleLine = true,
-                    readOnly = false,
-                    keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged(onFocusChanged),
-                    decorationBox = { inner ->
-                        if (value.text.isEmpty()) {
+                if (readOnly) {
+                    val scrollState = rememberScrollState()
+                    val currentText = value.text
+                    val safeCursor = value.selection.start.coerceIn(0, currentText.length)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(scrollState)
+                            .pointerInput(currentText) {
+                                detectTapGestures { offset ->
+                                    val layout = textLayoutResult ?: return@detectTapGestures
+                                    val clicked = layout.getOffsetForPosition(offset).coerceIn(0, currentText.length)
+                                    view.performVibrate(true)
+                                    onValueChange(value.copy(selection = TextRange(clicked)))
+                                }
+                            }
+                            .pointerInput(currentText) {
+                                var accumulated = 0f
+                                detectHorizontalDragGestures(
+                                    onDragStart = { offset ->
+                                        val layout = textLayoutResult ?: return@detectHorizontalDragGestures
+                                        val dragIdx = layout.getOffsetForPosition(offset).coerceIn(0, currentText.length)
+                                        view.performVibrate(true)
+                                        onValueChange(value.copy(selection = TextRange(dragIdx)))
+                                        accumulated = 0f
+                                    },
+                                    onHorizontalDrag = { change, dragAmount ->
+                                        accumulated += dragAmount
+                                        if (kotlin.math.abs(accumulated) >= 18f) {
+                                            val delta = (accumulated / 18f).toInt()
+                                            if (delta != 0) {
+                                                val newPos = (value.selection.start + delta).coerceIn(0, currentText.length)
+                                                if (newPos != value.selection.start) {
+                                                    view.performVibrate(true)
+                                                    onValueChange(value.copy(selection = TextRange(newPos)))
+                                                }
+                                                accumulated %= 18f
+                                            }
+                                        }
+                                        change.consume()
+                                    }
+                                )
+                            }
+                            .drawWithContent {
+                                drawContent()
+                                val layout = textLayoutResult
+                                if (layout != null && currentText.isNotEmpty()) {
+                                    val cursorRect = layout.getCursorRect(safeCursor)
+                                    drawLine(
+                                        color = cursorColor.copy(alpha = cursorAlpha),
+                                        start = Offset(cursorRect.left, cursorRect.top + 2.dp.toPx()),
+                                        end = Offset(cursorRect.left, cursorRect.bottom - 2.dp.toPx()),
+                                        strokeWidth = 2.dp.toPx(),
+                                        cap = StrokeCap.Round
+                                    )
+                                } else if (currentText.isEmpty()) {
+                                    drawLine(
+                                        color = cursorColor.copy(alpha = cursorAlpha),
+                                        start = Offset(0f, 2.dp.toPx()),
+                                        end = Offset(0f, size.height - 2.dp.toPx()),
+                                        strokeWidth = 2.dp.toPx(),
+                                        cap = StrokeCap.Round
+                                    )
+                                }
+                            }
+                    ) {
+                        if (currentText.isEmpty()) {
                             Text(
                                 text = "—",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = outline
                             )
+                        } else {
+                            Text(
+                                text = currentText,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = onBg
+                                ),
+                                onTextLayout = { textLayoutResult = it }
+                            )
                         }
-                        inner()
                     }
-                )
+                } else {
+                    BasicTextField(
+                        value = value,
+                        onValueChange = { newValue ->
+                            onValueChange(newValue)
+                        },
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = onBg
+                        ),
+                        singleLine = true,
+                        readOnly = false,
+                        keyboardOptions = keyboardOptions.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged(onFocusChanged),
+                        decorationBox = { inner ->
+                            if (value.text.isEmpty()) {
+                                Text(
+                                    text = "—",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = outline
+                                )
+                            }
+                            inner()
+                        }
+                    )
+                }
             }
             if (trailingIcon != null) {
                 Spacer(Modifier.width(8.dp))

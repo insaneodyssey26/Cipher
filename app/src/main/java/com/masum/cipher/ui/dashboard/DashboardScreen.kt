@@ -104,7 +104,9 @@ import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Bug
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.RefreshCw
+import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Star
@@ -135,8 +137,6 @@ fun DashboardScreen(
     var showAddSheet by remember { mutableStateOf(false) }
 
 
-    var showBudgetDialog by remember { mutableStateOf(false) }
-    var budgetInput by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     
     val currentVersionCode = 18
@@ -210,8 +210,12 @@ fun DashboardScreen(
 
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     
-    val maxToolbarHeight = 340.dp
-    val toolbarHeightRangePx = with(androidx.compose.ui.platform.LocalDensity.current) { 180.dp.roundToPx().toFloat() }
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val maxToolbarHeight = androidx.compose.runtime.remember(configuration.screenHeightDp) {
+        (configuration.screenHeightDp.dp * 0.32f).coerceIn(240.dp, 300.dp)
+    }
+    val minToolbarHeight = 140.dp
+    val toolbarHeightRangePx = with(androidx.compose.ui.platform.LocalDensity.current) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
     val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0f) }
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
@@ -356,37 +360,74 @@ fun DashboardScreen(
                         bottom = 140.dp
                     )
                 ) {
-                    item {
-                        AnimatedVisibility(
-                            visible = state.searchQuery.isEmpty(),
-                            enter = fadeIn(tween(350, easing = FastOutSlowInEasing)) + expandVertically(tween(350, easing = FastOutSlowInEasing)),
-                            exit = fadeOut(tween(250, easing = FastOutSlowInEasing)) + shrinkVertically(tween(250, easing = FastOutSlowInEasing))
-                        ) {
-                            val progress = if (toolbarHeightRangePx > 0f) {
-                                1f - (kotlin.math.abs(toolbarOffsetHeightPx.value) / toolbarHeightRangePx)
-                            } else 1f
-                            Box(modifier = Modifier
-                                .graphicsLayer { alpha = progress }
-                                .layout { measurable, constraints ->
-                                    val placeable = measurable.measure(constraints)
-                                    val newHeight = (placeable.height * progress).toInt()
-                                    layout(placeable.width, newHeight) {
-                                        placeable.placeRelative(0, 0)
+                    if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp)
+                                    .padding(top = 16.dp, bottom = 8.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                                    .padding(20.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 12.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.BellRing,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
+                                    )
+                                    Text(
+                                        text = "Action Needed",
+                                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                                
+                                state.pendingSubscriptions.forEach { subscription ->
+                                    val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "${subscription.merchant}",
+                                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                                color = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                            Text(
+                                                text = "Due for $amountStr",
+                                                style = Typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            androidx.compose.material3.TextButton(
+                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(subscription)) },
+                                                contentPadding = PaddingValues(horizontal = 12.dp)
+                                            ) {
+                                                Text("Skip", color = MaterialTheme.colorScheme.error)
+                                            }
+                                            androidx.compose.material3.Button(
+                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
+                                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                                                contentPadding = PaddingValues(horizontal = 16.dp)
+                                            ) {
+                                                Text("Log it", color = MaterialTheme.colorScheme.onError)
+                                            }
+                                        }
                                     }
                                 }
-                                .clipToBounds()
-                            ) {
-                                BudgetPulseCard(
-                                    spent = state.thisMonthExpenses,
-                                    budget = state.monthlyBudget,
-                                    onSetBudgetClick = {
-                                        budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
-                                        showBudgetDialog = true
-                                    }
-                                )
                             }
                         }
                     }
+
 
                     if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
                         item {
@@ -736,51 +777,6 @@ fun DashboardScreen(
         }
     }
 
-    if (showBudgetDialog) {
-        AlertDialog(
-            onDismissRequest = { showBudgetDialog = false },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            title = { Text("Monthly Budget", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
-            text = {
-                OutlinedTextField(
-                    value = budgetInput,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
-                    label = { Text("Limit (₹)") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val amount = budgetInput.toDoubleOrNull() ?: 0.0
-                        coroutineScope.launch {
-                            userPreferences.setMonthlyBudget(amount)
-                        }
-                        showBudgetDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showBudgetDialog = false }) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) 
-                }
-            }
-        )
-    }
-
     state.promptCategoryRuleFor?.let { tx ->
         AlertDialog(
             onDismissRequest = { viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt) },
@@ -997,8 +993,9 @@ private fun DashboardHero(
                                     .layout { measurable, constraints ->
                                         val placeable = measurable.measure(constraints)
                                         val currentHeight = (placeable.height * scrollProgress).toInt()
-                                        layout(placeable.width, currentHeight) {
-                                            placeable.placeRelative(0, currentHeight - placeable.height)
+                                        val currentWidth = (placeable.width * scrollProgress).toInt()
+                                        layout(currentWidth, currentHeight) {
+                                            placeable.placeRelative((currentWidth - placeable.width) / 2, currentHeight - placeable.height)
                                         }
                                     }
                             ) {
@@ -1007,16 +1004,16 @@ private fun DashboardHero(
                                         imageVector = LucideIcons.Calendar,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
-                                        style = Typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                             val balanceStringLength = totalBalance.toLong().toString().length
                             val balanceFontSize = remember(balanceStringLength) {
@@ -1024,7 +1021,7 @@ private fun DashboardHero(
                                     balanceStringLength >= 9 -> 36.sp
                                     balanceStringLength >= 7 -> 44.sp
                                     balanceStringLength >= 5 -> 54.sp
-                                    else -> 64.sp
+                                    else -> 60.sp
                                 }
                             }
 
@@ -1033,7 +1030,7 @@ private fun DashboardHero(
                                     text = "₹",
                                     style = Typography.headlineMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(end = 8.dp)
+                                    modifier = Modifier.padding(end = 4.dp)
                                 )
                                 if (privacyMode) {
                                     Text(
@@ -1042,30 +1039,34 @@ private fun DashboardHero(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 } else {
+                                    val isHugeAmount = kotlin.math.abs(totalBalance) >= 1_000_000
+                                    val shouldShorten = isHugeAmount || (scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000)
+                                    
                                     AnimatedContent(
-                                        targetState = scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000,
+                                        targetState = shouldShorten,
                                         transitionSpec = {
                                             fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
                                         },
                                         label = "main_balance_transition"
-                                    ) { isShortened ->
-                                        if (isShortened) {
+                                    ) { shortened ->
+                                        if (shortened) {
                                             val formattedBalance = remember(totalBalance) {
+                                                val absVal = kotlin.math.abs(totalBalance)
                                                 when {
-                                                    kotlin.math.abs(totalBalance) >= 1_000_000 -> String.format(
-                                                        Locale.US, "%.1fM", totalBalance / 1_000_000f).replace(".0M", "M")
-                                                    else -> String.format(Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
+                                                    absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.2fB", totalBalance / 1_000_000_000f).replace(".00B", "B")
+                                                    absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.2fM", totalBalance / 1_000_000f).replace(".00M", "M")
+                                                    else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
                                                 }
                                             }
                                             Text(
                                                 text = formattedBalance,
-                                                style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-2).sp),
+                                                style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                         } else {
                                             AnimatedNumberTicker(
                                                 value = totalBalance,
-                                                textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-2).sp),
+                                                textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                         }
@@ -1074,7 +1075,7 @@ private fun DashboardHero(
                             }
                         }
                         
-                        Row(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .graphicsLayer {
@@ -1087,23 +1088,11 @@ private fun DashboardHero(
                                     RoundedCornerShape(20.dp)
                                 )
                                 .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
-                                .padding(vertical = 12.dp, horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(vertical = 12.dp, horizontal = 16.dp)
                         ) {
                             val isCollapsed = scrollProgress < 0.5f
-                            StatItem(label = "INCOME", amount = income, color = EmeraldIncome, icon = LucideIcons.ArrowDown, privacyMode = privacyMode, isCollapsed = isCollapsed, modifier = Modifier.weight(1f))
-                            Box(modifier = Modifier.padding(horizontal = 8.dp).width(1.dp).height(32.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-                            StatItem(label = "SPENT", amount = expense, color = RoseExpense, icon = LucideIcons.ArrowUp, privacyMode = privacyMode, isCollapsed = isCollapsed, modifier = Modifier.weight(1f))
+                            CashFlowSegmentBar(income = income, expense = expense, privacyMode = privacyMode, isCollapsed = isCollapsed)
                         }
-
-
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(32.dp)
-                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f * (1f - scrollProgress)))
-                        )
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { measurables, constraints ->
@@ -1111,25 +1100,33 @@ private fun DashboardHero(
                     val balancePlaceable = measurables[0].measure(looseConstraints)
                     
                     val statsExpandedWidth = constraints.maxWidth
-                    val statsCollapsedWidth = (constraints.maxWidth * 0.62f).toInt()
+                    val balanceVisualCollapsedWidth = (balancePlaceable.width * 0.6f).toInt()
+                    val gapBetween = 16.dp.roundToPx()
+                    val dynamicCollapsedWidth = constraints.maxWidth - balanceVisualCollapsedWidth - gapBetween
+                    val statsCollapsedWidth = dynamicCollapsedWidth.coerceIn(
+                        (constraints.maxWidth * 0.52f).toInt(),
+                        (constraints.maxWidth * 0.74f).toInt()
+                    )
                     val currentStatsWidth = statsCollapsedWidth + ((statsExpandedWidth - statsCollapsedWidth) * scrollProgress).toInt()
                     
                     val statsConstraints = looseConstraints.copy(minWidth = currentStatsWidth, maxWidth = currentStatsWidth)
                     val statsPlaceable = measurables[1].measure(statsConstraints)
 
-                    val dividerPlaceable = measurables[2].measure(looseConstraints)
-
                     layout(constraints.maxWidth, constraints.maxHeight) {
-                        val topPadding = 32.dp.roundToPx()
+                        // Expanded positions: balance near top, stats below with even gap
+                        val topPadding = 16.dp.roundToPx()
                         val expBalanceY = topPadding.toFloat()
                         
-                        val gap = (constraints.maxHeight - expBalanceY - balancePlaceable.height - statsPlaceable.height) / 2f
+                        val rawGap = (constraints.maxHeight - expBalanceY - balancePlaceable.height - statsPlaceable.height) / 2f
+                        val gap = rawGap.coerceIn(8.dp.toPx(), 24.dp.toPx())
 
                         val expBalanceX = (constraints.maxWidth - balancePlaceable.width) / 2f
                         
                         val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
                         val expStatsY = expBalanceY + balancePlaceable.height + gap
 
+                        // Collapsed positions: balance left-centered, stats right-anchored
+                        // The parent Box already has 80dp top padding, so we just center in available height
                         val colBalanceX = 0f
                         val colBalanceY = (constraints.maxHeight - balancePlaceable.height) / 2f
                         
@@ -1147,14 +1144,6 @@ private fun DashboardHero(
 
                         balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
                         statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
-
-
-                        if (scrollProgress < 0.8f) {
-                            val balanceRightEdge = currentBalanceX + (balancePlaceable.width * balanceScale)
-                            val dividerX = balanceRightEdge + 12.dp.toPx()
-                            val dividerY = currentBalanceY + (balancePlaceable.height - dividerPlaceable.height) / 2f
-                            dividerPlaceable.placeRelative(dividerX.toInt(), dividerY.toInt())
-                        }
                     }
                 }
             }
@@ -1256,128 +1245,8 @@ private fun DashboardHero(
     }
 }
 
-@Composable
-private fun StatItem(
-    label: String, 
-    amount: Double, 
-    color: Color, 
-    icon: androidx.compose.ui.graphics.vector.ImageVector, 
-    privacyMode: Boolean, 
-    isCollapsed: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    val formattedAmount = remember(amount, isCollapsed) {
-        if (isCollapsed && amount >= 1000) {
-            String.format(Locale.US, "%.1fk", amount / 1000f).replace(".0k", "k")
-        } else {
-            String.format(Locale.US, "%.0f", amount)
-        }
-    }
 
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(16.dp).background(color.copy(alpha = 0.15f), shape = CircleShape).padding(2.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = label, 
-                style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.sp, fontWeight = FontWeight.Bold), 
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        AnimatedContent(
-            targetState = if (privacyMode) "••••" else "₹$formattedAmount",
-            transitionSpec = {
-                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-            },
-            label = "stat_amount_transition"
-        ) { targetText ->
-            Text(
-                text = targetText,
-                style = Typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.2).sp),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
-@Composable
-private fun BudgetPulseCard(
-    spent: Double,
-    budget: Double,
-    onSetBudgetClick: () -> Unit
-) {
-    VaultCard(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        onClick = onSetBudgetClick,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Monthly Budget",
-                    style = Typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = if (budget > 0) "₹${String.format(Locale.getDefault(), "%.0f", spent)} / ₹${String.format(
-                        Locale.getDefault(), "%.0f", budget)}" else "Tap to set a budget",
-                    style = Typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            if (budget > 0) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                val progress = (spent / budget).toFloat().coerceIn(0f, 1f)
-                val animatedProgress by animateFloatAsState(
-                    targetValue = progress,
-                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-                    label = "budgetProgress"
-                )
-                
-                val barColor = when {
-                    progress >= 0.9f -> RoseExpense
-                    progress >= 0.75f -> Color(0xFFF59E0B)
-                    else -> MaterialTheme.colorScheme.primary
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .background(White10, RoundedCornerShape(4.dp))
-                ) {
-                    if (animatedProgress > 0f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(animatedProgress)
-                                .fillMaxHeight()
-                                .background(barColor, RoundedCornerShape(4.dp))
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun TransactionItem(
@@ -1595,6 +1464,192 @@ fun WhatsNewFeatureItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp
             )
+        }
+    }
+}
+
+
+
+@Composable
+private fun CashFlowSegmentBar(
+    income: Double,
+    expense: Double,
+    privacyMode: Boolean,
+    isCollapsed: Boolean
+) {
+    val total = income + expense
+    val incomeFraction = if (total > 0) (income / total).toFloat() else 0.5f
+    
+    val animatedIncomeRatio by animateFloatAsState(
+        targetValue = incomeFraction,
+        animationSpec = spring(dampingRatio = 0.75f, stiffness = 150f),
+        label = "incomeRatio"
+    )
+    val barHeight by animateDpAsState(
+        targetValue = if (isCollapsed) 4.dp else 8.dp,
+        animationSpec = spring(dampingRatio = 0.8f, stiffness = 200f),
+        label = "barHeight"
+    )
+
+    fun formatAmount(value: Double): String {
+        val absVal = kotlin.math.abs(value)
+        return when {
+            absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.1fB", value / 1_000_000_000).replace(".0B", "B")
+            absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", value / 1_000_000).replace(".0M", "M")
+            absVal >= 100_000 -> String.format(java.util.Locale.US, "%.1fk", value / 1000).replace(".0k", "k")
+            else -> String.format(java.util.Locale.US, "%.0f", value)
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // INCOME side
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .background(EmeraldIncome.copy(alpha = 0.15f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(LucideIcons.ArrowDown, contentDescription = null, tint = EmeraldIncome, modifier = Modifier.size(12.dp))
+                }
+                
+                AnimatedVisibility(visible = !isCollapsed) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "INCOME",
+                            style = Typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(10.dp)
+                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                        )
+                    }
+                }
+                
+                Spacer(Modifier.width(6.dp))
+                val formattedIncome = formatAmount(income)
+                AnimatedContent(
+                    targetState = if (privacyMode) "••••" else "₹$formattedIncome",
+                    transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(400)) },
+                    label = "income_anim"
+                ) { targetText ->
+                    Text(
+                        text = targetText,
+                        style = Typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.5).sp
+                        ),
+                        color = EmeraldIncome
+                    )
+                }
+            }
+
+            // EXPENSE side
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val formattedExpense = formatAmount(expense)
+                AnimatedContent(
+                    targetState = if (privacyMode) "••••" else "₹$formattedExpense",
+                    transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(400)) },
+                    label = "expense_anim"
+                ) { targetText ->
+                    Text(
+                        text = targetText,
+                        style = Typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.5).sp
+                        ),
+                        color = RoseExpense
+                    )
+                }
+                
+                AnimatedVisibility(visible = !isCollapsed) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(10.dp)
+                                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "EXPENSE",
+                            style = Typography.labelSmall.copy(
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                Spacer(Modifier.width(6.dp))
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .background(RoseExpense.copy(alpha = 0.15f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(LucideIcons.ArrowUp, contentDescription = null, tint = RoseExpense, modifier = Modifier.size(12.dp))
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(barHeight)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+        ) {
+            if (total > 0) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(animatedIncomeRatio.coerceAtLeast(0.01f))
+                            .clip(CircleShape)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(EmeraldIncome.copy(alpha = 0.7f), EmeraldIncome)
+                                )
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight((1f - animatedIncomeRatio).coerceAtLeast(0.01f))
+                            .clip(CircleShape)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(RoseExpense, RoseExpense.copy(alpha = 0.7f))
+                                )
+                            )
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                )
+            }
         }
     }
 }
