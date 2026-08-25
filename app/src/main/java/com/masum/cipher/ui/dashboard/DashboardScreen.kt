@@ -1113,7 +1113,6 @@ private fun DashboardHero(
                     val statsPlaceable = measurables[1].measure(statsConstraints)
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
-                        // Expanded positions: balance near top, stats below with even gap
                         val topPadding = 16.dp.roundToPx()
                         val expBalanceY = topPadding.toFloat()
                         
@@ -1125,8 +1124,6 @@ private fun DashboardHero(
                         val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
                         val expStatsY = expBalanceY + balancePlaceable.height + gap
 
-                        // Collapsed positions: balance left-centered, stats right-anchored
-                        // The parent Box already has 80dp top padding, so we just center in available height
                         val colBalanceX = 0f
                         val colBalanceY = (constraints.maxHeight - balancePlaceable.height) / 2f
                         

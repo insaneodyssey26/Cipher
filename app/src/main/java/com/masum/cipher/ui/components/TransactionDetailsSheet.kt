@@ -68,6 +68,7 @@ import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Trash2
+import compose.icons.lucideicons.X
 import androidx.compose.ui.draw.rotate
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -85,12 +86,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
 import java.util.Locale
 
-/**
- * Vault Transaction Details Sheet
- * 
- * A premium bottom sheet for adding or editing transactions.
- * Focuses on thumb reachability and clean ergonomics.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailsSheet(
@@ -177,7 +172,6 @@ fun TransactionDetailsSheet(
                 }
             }
 
-            // Type toggle
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -365,7 +359,8 @@ fun TransactionDetailsSheet(
                 VaultSheetTextField(
                     value = note,
                     onValueChange = { if (it.length <= 150) note = it },
-                    label = "NOTE (OPTIONAL)"
+                    label = "NOTE (OPTIONAL)",
+                    showClearButton = true
                 )
             }
 
@@ -443,49 +438,79 @@ private fun VaultSheetTextField(
     onValueChange: (String) -> Unit,
     label: String,
     prefix: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    showClearButton: Boolean = false
 ) {
-    Column(
+    val view = androidx.compose.ui.platform.LocalView.current
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .border(1.dp, White10, RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = label,
-            style = Typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (prefix != null) {
-                Text(
-                    text = prefix,
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(8.dp))
-            }
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                textStyle = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                singleLine = true,
-                keyboardOptions = keyboardOptions,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (value.isEmpty()) {
-                        Text(
-                            text = "—",
-                            style = Typography.titleMedium,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    }
-                    inner()
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = if (showClearButton && value.isNotEmpty()) 36.dp else 0.dp)
+        ) {
+            Text(
+                text = label,
+                style = Typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (prefix != null) {
+                    Text(
+                        text = prefix,
+                        style = Typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    textStyle = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    singleLine = true,
+                    keyboardOptions = keyboardOptions,
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { inner ->
+                        if (value.isEmpty()) {
+                            Text(
+                                text = "—",
+                                style = Typography.titleMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        inner()
+                    }
+                )
+            }
+        }
+
+        if (showClearButton && value.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                    .clickable {
+                        view.performVibrate(true)
+                        onValueChange("")
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = LucideIcons.X,
+                    contentDescription = "Clear",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
         }
     }
 }
@@ -506,7 +531,6 @@ private fun AmountInputField(
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    // Blinking cursor for calculator mode
     val infiniteTransition = rememberInfiniteTransition(label = "cursorBlink")
     val cursorAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -524,7 +548,6 @@ private fun AmountInputField(
         label = "cursorAlpha"
     )
 
-    // Synchronize if external value changes (e.g. initial load)
     LaunchedEffect(value) {
         if (value != textFieldValue.text) {
             val safeCursor = textFieldValue.selection.start.coerceIn(0, value.length)
@@ -551,7 +574,6 @@ private fun AmountInputField(
             )
 
             if (showCalculator) {
-                // Interactive Display for Calculator Mode
                 val textScrollState = rememberScrollState()
                 val currentText = textFieldValue.text
                 val safeCursor = textFieldValue.selection.start.coerceIn(0, currentText.length)

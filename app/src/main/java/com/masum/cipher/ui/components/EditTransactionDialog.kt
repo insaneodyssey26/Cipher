@@ -284,14 +284,12 @@ fun EditTransactionDialog(
                 }
             }
 
-            // Merchant field
             SheetTextField(
                 value = merchant,
                 onValueChange = { merchant = it },
                 label = "Merchant"
             )
 
-            // Category picker
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
                 onExpandedChange = { categoryExpanded = !categoryExpanded }
@@ -391,7 +389,6 @@ fun EditTransactionDialog(
                 }
             }
 
-            // Save button
             Button(
                 onClick = {
                     val finalAmount = com.masum.cipher.core.util.MathEvaluator.evaluate(amount) ?: transaction.amount
