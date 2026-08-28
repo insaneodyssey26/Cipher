@@ -89,33 +89,53 @@ fun TimeSelectorDropdown(
     }
 
     Box(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                    shape = RoundedCornerShape(20.dp)
+        if (iconOnly) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        shape = CircleShape
+                    )
+                    .clickable {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        showDialog = true
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Calendar,
+                    contentDescription = "Select Time Range",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(15.dp)
                 )
-                .clickable {
-                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                    showDialog = true
-                }
-                .padding(
-                    horizontal = if (iconOnly) 12.dp else 14.dp,
-                    vertical = if (iconOnly) 10.dp else 7.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = LucideIcons.Calendar,
-                contentDescription = "Select Time Range",
-                tint = if (iconOnly) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(15.dp)
-            )
-
-            if (!iconOnly) {
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clickable {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        showDialog = true
+                    }
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Calendar,
+                    contentDescription = "Select Time Range",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(15.dp)
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = triggerLabel,

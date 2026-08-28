@@ -77,4 +77,31 @@ object AppFormatters {
             }
         }
     }
+
+    fun formatCompactCurrency(value: Double, prefix: String = "₹"): String {
+        val absVal = kotlin.math.abs(value)
+        val sign = if (value < 0) "-" else ""
+        return when {
+            absVal >= 1_000_000_000_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000.0).removeSuffix(".0")
+                "$sign$prefix${formatted}T"
+            }
+            absVal >= 1_000_000_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000.0).removeSuffix(".0")
+                "$sign$prefix${formatted}B"
+            }
+            absVal >= 1_000_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000.0).removeSuffix(".0")
+                "$sign$prefix${formatted}M"
+            }
+            absVal >= 1_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000.0).removeSuffix(".0")
+                "$sign$prefix${formatted}k"
+            }
+            else -> {
+                val formatted = String.format(Locale.getDefault(), "%,.0f", absVal)
+                "$sign$prefix$formatted"
+            }
+        }
+    }
 }

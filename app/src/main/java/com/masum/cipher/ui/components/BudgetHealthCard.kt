@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -92,7 +93,14 @@ fun BudgetHealthCard(
                 label = "budgetProgress"
             )
 
-            val percentUsed = ((spent / budget) * 100).toInt()
+            val rawPercent = if (budget > 0) (spent / budget) * 100.0 else 0.0
+            val percentUsed = when {
+                rawPercent.isInfinite() || rawPercent.isNaN() -> 0L
+                rawPercent > 99999.0 -> 99999L
+                else -> rawPercent.toLong()
+            }
+            val percentDisplay = if (percentUsed >= 99999) ">99999%" else "$percentUsed%"
+
             val safeSpendPerDay = if (remainingBudget > 0) remainingBudget / daysRemaining else 0.0
             val currentDailyPace = if (currentDay > 0) spent / currentDay else 0.0
 
@@ -107,7 +115,7 @@ fun BudgetHealthCard(
 
             val statusText = when {
                 isOverBudget -> "Over Budget"
-                isNearLimit -> "$percentUsed% Used"
+                isNearLimit -> "$percentDisplay Used"
                 else -> "On Track"
             }
 
@@ -140,66 +148,76 @@ fun BudgetHealthCard(
                         )
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .size(26.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), CircleShape),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = LucideIcons.Settings,
-                            contentDescription = "Edit Budget",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(13.dp)
+                        Text(
+                            text = "Limit: ₹${String.format(Locale.getDefault(), "%,.0f", budget)}",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 11.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Settings,
+                                contentDescription = "Edit Budget",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                val amountText = if (isOverBudget) {
+                    "₹${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
+                } else {
+                    "₹${String.format(Locale.getDefault(), "%,.0f", remainingBudget)}"
+                }
+                val amountFontSize = when {
+                    amountText.length > 18 -> 17.sp
+                    amountText.length > 14 -> 20.sp
+                    amountText.length > 10 -> 24.sp
+                    else -> 28.sp
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = if (isOverBudget) {
-                                "₹${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
-                            } else {
-                                "₹${String.format(Locale.getDefault(), "%,.0f", remainingBudget)}"
-                            },
-                            style = Typography.headlineLarge.copy(
-                                fontFamily = Manrope,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 28.sp,
-                                letterSpacing = (-0.6).sp
-                            ),
-                            color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = if (isOverBudget) "exceeded" else "remaining",
-                            style = Typography.titleSmall.copy(
-                                fontFamily = Manrope,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 13.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 3.dp)
-                        )
-                    }
-
                     Text(
-                        text = "Limit: ₹${String.format(Locale.getDefault(), "%,.0f", budget)}",
-                        style = Typography.bodySmall.copy(
+                        text = amountText,
+                        style = Typography.headlineLarge.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = amountFontSize,
+                            letterSpacing = (-0.6).sp
+                        ),
+                        color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    Text(
+                        text = if (isOverBudget) "exceeded" else "remaining",
+                        style = Typography.titleSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 11.5.sp
+                            fontSize = 13.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 3.dp)
@@ -235,17 +253,22 @@ fun BudgetHealthCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹${String.format(Locale.getDefault(), "%,.0f", spent)} spent ($percentUsed%)",
+                        text = "₹${String.format(Locale.getDefault(), "%,.0f", spent)} spent ($percentDisplay)",
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "$daysRemaining days left",
                         style = Typography.labelSmall.copy(
@@ -292,7 +315,9 @@ fun BudgetHealthCard(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
-                            color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface
+                            color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
 
@@ -318,7 +343,9 @@ fun BudgetHealthCard(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
                 }

@@ -33,11 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.StaggeredEntranceItem
 import com.masum.cipher.ui.components.TransactionDetailsSheet
@@ -161,13 +163,13 @@ fun DayDetailScreen(
                 ) {
                     DetailStatCard(
                         label = "SPENT",
-                        amount = "₹${totalSpent.toInt()}",
+                        amount = "₹${String.format(Locale.getDefault(), "%,.0f", totalSpent)}",
                         color = RoseExpense,
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatCard(
                         label = "INCOME",
-                        amount = "₹${totalIncome.toInt()}",
+                        amount = "₹${String.format(Locale.getDefault(), "%,.0f", totalIncome)}",
                         color = EmeraldIncome,
                         modifier = Modifier.weight(1f)
                     )
@@ -278,6 +280,12 @@ private fun DetailStatCard(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    val fontSize = when {
+        amount.length > 14 -> 14.sp
+        amount.length > 10 -> 17.sp
+        amount.length > 7 -> 20.sp
+        else -> 24.sp
+    }
     VaultCard(
         modifier = modifier,
         backgroundColor = MaterialTheme.colorScheme.surface
@@ -291,8 +299,14 @@ private fun DetailStatCard(
             Spacer(Modifier.height(8.dp))
             Text(
                 text = amount,
-                style = Typography.headlineSmall,
-                color = color
+                style = Typography.headlineSmall.copy(
+                    fontFamily = Manrope,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = fontSize
+                ),
+                color = color,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }

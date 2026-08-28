@@ -112,6 +112,7 @@ import compose.icons.lucideicons.RefreshCw
 import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
@@ -139,6 +140,7 @@ fun DashboardScreen(
 
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showFilterSheet by remember { mutableStateOf(false) }
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -523,6 +525,62 @@ fun DashboardScreen(
                         }
                     }
                 } else {
+                    if (state.filter.isActive) {
+                        item(key = "active_filter_summary") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 6.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.SlidersHorizontal,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = buildFilterSummary(state.filter),
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 12.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                Text(
+                                    text = "Reset",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Manrope,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            viewModel.handleIntent(DashboardContract.Intent.ResetDashboardFilter)
+                                        }
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+
                     groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
                         item(key = "header_$monthYear") {
                             Text(
@@ -567,6 +625,8 @@ fun DashboardScreen(
                     },
                     searchQuery = state.searchQuery,
                     onSearchQueryChanged = { viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it)) },
+                    filter = state.filter,
+                    onOpenFilter = { showFilterSheet = true },
                     privacyMode = privacyMode,
                     isHapticsEnabled = isHapticsEnabled,
                     expenseComparisonPercent = state.expenseComparisonPercent,
@@ -1166,6 +1226,17 @@ fun DashboardScreen(
             }
         }
     }
+
+    if (showFilterSheet) {
+        DashboardFilterSheet(
+            currentFilter = state.filter,
+            onApplyFilter = { newFilter ->
+                viewModel.handleIntent(DashboardContract.Intent.SetDashboardFilter(newFilter))
+            },
+            onDismiss = { showFilterSheet = false },
+            isHapticsEnabled = isHapticsEnabled
+        )
+    }
 }
 
 @Composable
@@ -1179,6 +1250,8 @@ private fun DashboardHero(
     onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod, Long?, Long?) -> Unit,
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
+    filter: DashboardFilter = DashboardFilter(),
+    onOpenFilter: () -> Unit = {},
     privacyMode: Boolean,
     isHapticsEnabled: Boolean,
     expenseComparisonPercent: Double? = null,
@@ -1276,7 +1349,11 @@ private fun DashboardHero(
                                 val isLess = expenseComparisonPercent < 0.0
                                 val badgeColor = if (isLess) EmeraldIncome else RoseExpense
                                 val labelSuffix = if (isLess) "less" else "more"
-                                val percentFormatted = String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
+                                val percentFormatted = if (kotlin.math.abs(expenseComparisonPercent) > 999) {
+                                    ">999"
+                                } else {
+                                    String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
+                                }
 
                                 Row(
                                     modifier = Modifier
@@ -1358,13 +1435,16 @@ private fun DashboardHero(
                             }
                         }
 
-                        val balanceStringLength = totalBalance.toLong().toString().length
-                        val balanceFontSize = remember(balanceStringLength) {
+                        val balanceFontSize = 52.sp
+                        val formattedBalance = remember(totalBalance) {
+                            val absVal = kotlin.math.abs(totalBalance)
+                            val sign = if (totalBalance < 0) "-" else ""
                             when {
-                                balanceStringLength >= 9 -> 36.sp
-                                balanceStringLength >= 7 -> 44.sp
-                                balanceStringLength >= 5 -> 54.sp
-                                else -> 60.sp
+                                absVal >= 1_000_000_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
+                                absVal >= 1_000_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
+                                absVal >= 1_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
+                                absVal >= 100_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+                                else -> "$sign₹" + String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
                             }
                         }
 
@@ -1376,47 +1456,63 @@ private fun DashboardHero(
                                 transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
                             }
                         ) {
-                            Text(
-                                text = "₹",
-                                style = Typography.headlineMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
                             if (privacyMode) {
                                 Text(
-                                    text = "••••••",
-                                    style = Typography.displayLarge.copy(fontSize = balanceFontSize),
+                                    text = "₹••••••",
+                                    style = Typography.displayLarge.copy(
+                                        fontFamily = Manrope,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = balanceFontSize,
+                                        letterSpacing = (-1).sp
+                                    ),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             } else {
-                                val isHugeAmount = kotlin.math.abs(totalBalance) >= 1_000_000
+                                val isHugeAmount = kotlin.math.abs(totalBalance) >= 100_000
                                 val shouldShorten = isHugeAmount || (scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000)
-                                
-                                AnimatedContent(
-                                    targetState = shouldShorten,
-                                    transitionSpec = {
-                                        fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
-                                    },
-                                    label = "main_balance_transition"
-                                ) { shortened ->
-                                    if (shortened) {
-                                        val formattedBalance = remember(totalBalance) {
-                                            val absVal = kotlin.math.abs(totalBalance)
-                                            when {
-                                                absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.2fB", totalBalance / 1_000_000_000f).replace(".00B", "B")
-                                                absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.2fM", totalBalance / 1_000_000f).replace(".00M", "M")
-                                                else -> String.format(java.util.Locale.US, "%.1fk", totalBalance / 1000f).replace(".0k", "k")
-                                            }
+
+                                if (shouldShorten) {
+                                    Text(
+                                        text = formattedBalance,
+                                        style = Typography.displayLarge.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = balanceFontSize,
+                                            letterSpacing = (-1.2).sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                } else {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (totalBalance < 0) {
+                                            Text(
+                                                text = "-",
+                                                style = Typography.displayLarge.copy(
+                                                    fontFamily = Manrope,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = balanceFontSize,
+                                                    letterSpacing = (-1.2).sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
                                         }
                                         Text(
-                                            text = formattedBalance,
-                                            style = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            text = "₹",
+                                            style = Typography.headlineMedium.copy(
+                                                fontFamily = Manrope,
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(end = 2.dp)
                                         )
-                                    } else {
                                         AnimatedNumberTicker(
-                                            value = totalBalance,
-                                            textStyle = Typography.displayLarge.copy(fontSize = balanceFontSize, letterSpacing = (-1).sp),
+                                            value = kotlin.math.abs(totalBalance),
+                                            textStyle = Typography.displayLarge.copy(
+                                                fontFamily = Manrope,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = balanceFontSize,
+                                                letterSpacing = (-1.2).sp
+                                            ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
@@ -1533,7 +1629,7 @@ private fun DashboardHero(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     var textFieldValue by remember { 
                         mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(searchQuery)) 
@@ -1549,14 +1645,14 @@ private fun DashboardHero(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .width(160.dp)
-                            .height(40.dp)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                            .padding(horizontal = 12.dp)
+                            .width(135.dp)
+                            .height(38.dp)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
+                            .padding(horizontal = 10.dp)
                     ) {
-                        Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         
                         androidx.compose.foundation.text.BasicTextField(
                             value = textFieldValue,
@@ -1573,7 +1669,7 @@ private fun DashboardHero(
                             decorationBox = { innerTextField ->
                                 Box(contentAlignment = Alignment.CenterStart) {
                                     if (textFieldValue.text.isEmpty()) {
-                                        Text("Search...", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("Search...", style = Typography.bodyMedium.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     innerTextField()
                                 }
@@ -1586,9 +1682,53 @@ private fun DashboardHero(
                                 textFieldValue = androidx.compose.ui.text.input.TextFieldValue("")
                                 onSearchQueryChanged("") 
                                 focusManager.clearFocus()
-                            }, modifier = Modifier.size(20.dp)) {
-                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                            }, modifier = Modifier.size(18.dp)) {
+                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
                             }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier.size(38.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(
+                                    if (filter.isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (filter.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    shape = CircleShape
+                                )
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onOpenFilter()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.SlidersHorizontal,
+                                contentDescription = "Filter",
+                                tint = if (filter.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+
+                        if (filter.isActive) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(top = 1.dp, end = 1.dp)
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .border(1.5.dp, MaterialTheme.colorScheme.background, CircleShape)
+                            )
                         }
                     }
 
@@ -1603,6 +1743,30 @@ private fun DashboardHero(
             }
         }
     }
+}
+
+private fun buildFilterSummary(filter: DashboardFilter): String {
+    val parts = mutableListOf<String>()
+    when (filter.type) {
+        DashboardContract.FilterType.EXPENSE -> parts.add("Expenses")
+        DashboardContract.FilterType.INCOME -> parts.add("Income")
+        DashboardContract.FilterType.ALL -> {}
+    }
+    if (filter.selectedCategories.isNotEmpty()) {
+        if (filter.selectedCategories.size == 1) {
+            parts.add(filter.selectedCategories.first())
+        } else {
+            parts.add("${filter.selectedCategories.size} Categories")
+        }
+    }
+    if (filter.minAmount != null && filter.maxAmount != null) {
+        parts.add("₹${filter.minAmount.toInt()} – ₹${filter.maxAmount.toInt()}")
+    } else if (filter.minAmount != null) {
+        parts.add("> ₹${filter.minAmount.toInt()}")
+    } else if (filter.maxAmount != null) {
+        parts.add("< ₹${filter.maxAmount.toInt()}")
+    }
+    return parts.joinToString(" • ")
 }
 
 
@@ -1645,7 +1809,8 @@ fun TransactionItem(
                     text = transaction.merchant,
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Text(
                     text = SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(transaction.timestamp)),
@@ -1664,11 +1829,16 @@ fun TransactionItem(
                 }
             }
 
+            val amountFormatted = String.format(Locale.getDefault(), "%,.0f", transaction.amount)
             Text(
-                text = if (privacyMode) "•••" else (if (transaction.isIncome) "+" else "-") + "₹${String.format(
-                    Locale.getDefault(), "%.0f", transaction.amount)}",
-                style = Typography.titleMedium,
-                color = if (transaction.isIncome) EmeraldIncome else RoseExpense
+                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+" else "-"}₹$amountFormatted",
+                style = Typography.titleMedium.copy(
+                    fontFamily = Manrope,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }
@@ -1854,10 +2024,11 @@ private fun CashFlowSegmentBar(
     fun formatAmount(value: Double): String {
         val absVal = kotlin.math.abs(value)
         return when {
-            absVal >= 1_000_000_000 -> String.format(java.util.Locale.US, "%.1fB", value / 1_000_000_000).replace(".0B", "B")
-            absVal >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", value / 1_000_000).replace(".0M", "M")
-            absVal >= 100_000 -> String.format(java.util.Locale.US, "%.1fk", value / 1000).replace(".0k", "k")
-            else -> String.format(java.util.Locale.US, "%.0f", value)
+            absVal >= 1_000_000_000_000.0 -> String.format(java.util.Locale.US, "%.1fT", absVal / 1_000_000_000_000.0).replace(".0T", "T")
+            absVal >= 1_000_000_000.0 -> String.format(java.util.Locale.US, "%.1fB", absVal / 1_000_000_000.0).replace(".0B", "B")
+            absVal >= 1_000_000.0 -> String.format(java.util.Locale.US, "%.1fM", absVal / 1_000_000.0).replace(".0M", "M")
+            absVal >= 100_000.0 -> String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+            else -> String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
         }
     }
 

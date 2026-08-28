@@ -1,12 +1,21 @@
 package com.masum.cipher.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -224,72 +234,106 @@ fun SpendingTrendChart(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        val (statTitle, statSubtitle) = when (selectedMode) {
-                            FinancialFlowMode.EXPENSE -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Outflow")
-                            FinancialFlowMode.INCOME -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Inflow")
-                            FinancialFlowMode.NET_FLOW -> {
-                                val sign = if (currentTotal > 0f) "+" else if (currentTotal < 0f) "-" else ""
-                                val label = if (currentTotal >= 0f) "Net Surplus" else "Net Deficit"
-                                Pair("${sign}₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", label)
-                            }
+                    val (statTitle, statSubtitle) = when (selectedMode) {
+                        FinancialFlowMode.EXPENSE -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Outflow")
+                        FinancialFlowMode.INCOME -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Inflow")
+                        FinancialFlowMode.NET_FLOW -> {
+                            val sign = if (currentTotal > 0f) "+" else if (currentTotal < 0f) "-" else ""
+                            val label = if (currentTotal >= 0f) "Net Surplus" else "Net Deficit"
+                            Pair("${sign}₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", label)
                         }
+                    }
 
-                        Text(
-                            text = statTitle,
-                            style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = statSubtitle,
-                            style = Typography.labelSmall.copy(fontSize = 11.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    AnimatedContent(
+                        targetState = Pair(statTitle, statSubtitle),
+                        transitionSpec = {
+                            (fadeIn(tween(250)) + slideInVertically { height -> height / 3 }) togetherWith
+                            (fadeOut(tween(200)) + slideOutVertically { height -> -height / 3 })
+                        },
+                        label = "stat_title_anim"
+                    ) { (title, subtitle) ->
+                        Column {
+                            Text(
+                                text = title,
+                                style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = subtitle,
+                                style = Typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
                     if (incomePoints.isNotEmpty() || netFlowPoints.isNotEmpty()) {
-                        Row(
+                        val modes = FinancialFlowMode.values()
+                        val selectedIndex = modes.indexOf(selectedMode).coerceAtLeast(0)
+                        val activeColor = when (selectedMode) {
+                            FinancialFlowMode.EXPENSE -> MaterialTheme.colorScheme.primary
+                            FinancialFlowMode.INCOME -> EmeraldIncome
+                            FinancialFlowMode.NET_FLOW -> if (currentTotal >= 0f) EmeraldIncome else RoseExpense
+                        }
+                        val animatedActiveColor by animateColorAsState(
+                            targetValue = activeColor,
+                            animationSpec = tween(250),
+                            label = "flow_active_color"
+                        )
+
+                        Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                                .padding(3.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                .padding(3.dp)
                         ) {
-                            FinancialFlowMode.values().forEach { mode ->
-                                val isSelected = selectedMode == mode
-                                val bgAlpha by androidx.compose.animation.core.animateFloatAsState(if (isSelected) 1f else 0f, label = "flow_toggle_bg")
-                                val label = when (mode) {
-                                    FinancialFlowMode.EXPENSE -> "Expense"
-                                    FinancialFlowMode.INCOME -> "Income"
-                                    FinancialFlowMode.NET_FLOW -> "Net"
-                                }
-                                val modeActiveColor = when (mode) {
-                                    FinancialFlowMode.EXPENSE -> MaterialTheme.colorScheme.primary
-                                    FinancialFlowMode.INCOME -> EmeraldIncome
-                                    FinancialFlowMode.NET_FLOW -> if (currentTotal >= 0f) EmeraldIncome else RoseExpense
-                                }
+                            val tabWidth = 58.dp
+                            val indicatorOffset by animateDpAsState(
+                                targetValue = tabWidth * selectedIndex,
+                                animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
+                                label = "flow_indicator_offset"
+                            )
 
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(9.dp))
-                                        .background(modeActiveColor.copy(alpha = bgAlpha))
-                                        .clickable {
-                                            if (selectedMode != mode) {
-                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                                selectedMode = mode
-                                            }
-                                        }
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = label,
-                                        style = Typography.labelSmall.copy(
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                            Box(
+                                modifier = Modifier
+                                    .offset(x = indicatorOffset)
+                                    .width(tabWidth)
+                                    .height(28.dp)
+                                    .clip(RoundedCornerShape(9.dp))
+                                    .background(animatedActiveColor)
+                            )
+
+                            Row {
+                                modes.forEach { mode ->
+                                    val isSelected = selectedMode == mode
+                                    val label = when (mode) {
+                                        FinancialFlowMode.EXPENSE -> "Expense"
+                                        FinancialFlowMode.INCOME -> "Income"
+                                        FinancialFlowMode.NET_FLOW -> "Net"
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(tabWidth)
+                                            .height(28.dp)
+                                            .clip(RoundedCornerShape(9.dp))
+                                            .clickable {
+                                                if (selectedMode != mode) {
+                                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                    selectedMode = mode
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Manrope,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                fontSize = 11.sp
+                                            ),
+                                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -360,14 +404,7 @@ fun SpendingTrendChart(
                                 strokeWidth = 1f
                             )
 
-                            val absVal = kotlin.math.abs(yVal)
-                            val prefix = if (yVal < 0f) "-₹" else "₹"
-                            val labelText = if (absVal >= 1000f) {
-                                val formatted = String.format(java.util.Locale.US, "%.1f", absVal / 1000f)
-                                "$prefix${formatted.removeSuffix(".0")}k"
-                            } else {
-                                "$prefix${absVal.toInt()}"
-                            }
+                            val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal.toDouble())
 
                             val measured = textMeasurer.measure(
                                 text = labelText,
@@ -838,14 +875,7 @@ fun PeakHoursChart(
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
                     )
 
-                    val labelText = if (yVal >= 100f) {
-                        if (yVal >= 1000f) {
-                            val formatted = String.format(java.util.Locale.US, "%.1f", yVal / 1000f)
-                            "₹${formatted.removeSuffix(".0")}k"
-                        } else {
-                            "₹${yVal.toInt()}"
-                        }
-                    } else "₹${yVal.toInt()}"
+                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal.toDouble())
                     val measured = textMeasurer.measure(
                         text = labelText,
                         style = TextStyle(

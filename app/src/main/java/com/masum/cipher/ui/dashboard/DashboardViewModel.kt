@@ -34,7 +34,7 @@ class DashboardViewModel @Inject constructor(
 ) {
 
     private val _searchQuery = MutableStateFlow("")
-    private val _activeFilter = MutableStateFlow(DashboardContract.FilterType.ALL)
+    private val _activeFilter = MutableStateFlow(DashboardFilter())
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
     private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
 
@@ -50,7 +50,9 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
-            is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
+            is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = _activeFilter.value.copy(type = intent.filter)
+            is DashboardContract.Intent.SetDashboardFilter -> _activeFilter.value = intent.filter
+            is DashboardContract.Intent.ResetDashboardFilter -> _activeFilter.value = DashboardFilter()
             is DashboardContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period, intent.customStart, intent.customEnd)
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is DashboardContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
@@ -136,7 +138,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             categoryRuleDao.insertRule(
                 com.masum.cipher.core.data.local.entity.CategoryRuleEntity(
-                    merchantName = merchantName,
+                    merchantName = merchantName.trim(),
                     customCategory = category
                 )
             )

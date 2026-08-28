@@ -2,7 +2,9 @@ package com.masum.cipher.core.domain.usecase
 
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
+import com.masum.cipher.ui.dashboard.DashboardFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -17,7 +19,7 @@ class GetDashboardDataUseCase @Inject constructor(
 ) {
     operator fun invoke(
         query: String,
-        filter: DashboardContract.FilterType,
+        filter: DashboardFilter,
         timeRange: com.masum.cipher.core.domain.model.TimeRange
     ): Flow<DashboardContract.State> {
         val thisMonthRange = com.masum.cipher.core.domain.model.TimeRange.from(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH)
@@ -59,10 +61,30 @@ class GetDashboardDataUseCase @Inject constructor(
             }
 
             transactionsFlow.combine(repository.getAllTransactions()) { transactions, allTxs ->
-                val filteredList = when (filter) {
-                    DashboardContract.FilterType.ALL -> transactions
-                    DashboardContract.FilterType.INCOME -> transactions.filter { it.isIncome }
-                    DashboardContract.FilterType.EXPENSE -> transactions.filter { !it.isIncome }
+                val filteredList = transactions.filter { tx ->
+                    val matchesType = when (filter.type) {
+                        DashboardContract.FilterType.ALL -> true
+                        DashboardContract.FilterType.INCOME -> tx.isIncome
+                        DashboardContract.FilterType.EXPENSE -> !tx.isIncome
+                    }
+                    if (!matchesType) return@filter false
+
+                    if (filter.selectedCategories.isNotEmpty()) {
+                        val categoryEnum = TransactionCategory.fromString(tx.category)
+                        val matchesCategory = filter.selectedCategories.contains(tx.category) ||
+                                filter.selectedCategories.contains(categoryEnum.displayName) ||
+                                filter.selectedCategories.contains(categoryEnum.name)
+                        if (!matchesCategory) return@filter false
+                    }
+
+                    if (filter.minAmount != null && tx.amount < filter.minAmount) {
+                        return@filter false
+                    }
+                    if (filter.maxAmount != null && tx.amount > filter.maxAmount) {
+                        return@filter false
+                    }
+
+                    true
                 }
 
                 DashboardContract.State(
@@ -70,7 +92,8 @@ class GetDashboardDataUseCase @Inject constructor(
                     transactions = filteredList,
                     hasAnyTransactions = allTxs.isNotEmpty(),
                     searchQuery = query,
-                    activeFilter = filter,
+                    activeFilter = filter.type,
+                    filter = filter,
                     selectedTimePeriod = timeRange.period,
                     selectedTimeRange = timeRange,
                     totalIncome = stats.income,
