@@ -1242,17 +1242,24 @@ private fun DashboardHero(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
                                 Icon(
                                     imageVector = LucideIcons.Calendar,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(13.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
-                                    style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Manrope,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.8.sp
+                                    ),
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -1260,23 +1267,39 @@ private fun DashboardHero(
                             if (expenseComparisonPercent != null && kotlin.math.abs(expenseComparisonPercent) >= 0.5) {
                                 val isLess = expenseComparisonPercent < 0.0
                                 val badgeColor = if (isLess) EmeraldIncome else RoseExpense
-                                val arrow = if (isLess) "▼" else "▲"
                                 val labelSuffix = if (isLess) "less" else "more"
-                                val compText = "$arrow ${String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))}% $labelSuffix"
+                                val percentFormatted = String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
 
-                                Box(
+                                Row(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(badgeColor.copy(alpha = 0.15f))
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(badgeColor.copy(alpha = 0.12f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = badgeColor.copy(alpha = 0.25f),
+                                            shape = RoundedCornerShape(20.dp)
+                                        )
                                         .clickable {
-                                            view.performVibrate(isHapticsEnabled)
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
                                             onComparisonBadgeClick()
                                         }
-                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
+                                    Icon(
+                                        imageVector = if (isLess) LucideIcons.ArrowDown else LucideIcons.ArrowUp,
+                                        contentDescription = null,
+                                        tint = badgeColor,
+                                        modifier = Modifier.size(12.dp)
+                                    )
                                     Text(
-                                        text = compText,
-                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                        text = "$percentFormatted% $labelSuffix",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        ),
                                         color = badgeColor
                                     )
                                 }
@@ -1286,24 +1309,41 @@ private fun DashboardHero(
                                     selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
                                     selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
                                 val (badgeText, badgeColor) = when {
-                                    netSaved > 0 -> Pair("● Positive Flow", EmeraldIncome)
-                                    expense > 0 && isPastPeriod -> Pair("● Summary", MaterialTheme.colorScheme.primary)
-                                    expense > 0 -> Pair("● Active Flow", MaterialTheme.colorScheme.primary)
-                                    else -> Pair("● No Activity", MaterialTheme.colorScheme.onSurfaceVariant)
+                                    netSaved > 0 -> Pair("Positive Flow", EmeraldIncome)
+                                    expense > 0 && isPastPeriod -> Pair("Summary", MaterialTheme.colorScheme.primary)
+                                    expense > 0 -> Pair("Active Flow", MaterialTheme.colorScheme.primary)
+                                    else -> Pair("No Activity", MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Box(
+                                Row(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(badgeColor.copy(alpha = 0.15f))
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(badgeColor.copy(alpha = 0.10f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = badgeColor.copy(alpha = 0.20f),
+                                            shape = RoundedCornerShape(20.dp)
+                                        )
                                         .clickable {
-                                            view.performVibrate(isHapticsEnabled)
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
                                             onComparisonBadgeClick()
                                         }
-                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .clip(CircleShape)
+                                            .background(badgeColor)
+                                    )
                                     Text(
                                         text = badgeText,
-                                        style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        ),
                                         color = badgeColor
                                     )
                                 }
