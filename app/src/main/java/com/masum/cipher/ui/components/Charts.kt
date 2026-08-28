@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -65,6 +66,9 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
+import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChevronLeft
@@ -127,10 +131,27 @@ private fun buildSmoothLinePath(pts: List<Offset>): Path {
  *   showing exact date and amount for the nearest data point
  * - Start / end date range labels below the chart
  */
+enum class FinancialFlowMode {
+    EXPENSE,
+    INCOME,
+    NET_FLOW
+}
+
 @Composable
 fun SpendingTrendChart(
-    points: List<DashboardContract.Point>
+    expensePoints: List<DashboardContract.Point>,
+    incomePoints: List<DashboardContract.Point> = emptyList(),
+    netFlowPoints: List<DashboardContract.Point> = emptyList(),
+    isHapticsEnabled: Boolean = true
 ) {
+    var selectedMode by rememberSaveable { mutableStateOf(FinancialFlowMode.EXPENSE) }
+    val points = when (selectedMode) {
+        FinancialFlowMode.EXPENSE -> expensePoints
+        FinancialFlowMode.INCOME -> if (incomePoints.isNotEmpty()) incomePoints else expensePoints
+        FinancialFlowMode.NET_FLOW -> if (netFlowPoints.isNotEmpty()) netFlowPoints else expensePoints
+    }
+    val view = androidx.compose.ui.platform.LocalView.current
+
     if (points.size < 2) {
         Box(
             modifier = Modifier
@@ -150,7 +171,13 @@ fun SpendingTrendChart(
         return
     }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val currentTotal = points.lastOrNull()?.y ?: 0f
+    val dynamicThemeColor = when (selectedMode) {
+        FinancialFlowMode.EXPENSE -> MaterialTheme.colorScheme.primary
+        FinancialFlowMode.INCOME -> EmeraldIncome
+        FinancialFlowMode.NET_FLOW -> if (currentTotal >= 0f) EmeraldIncome else RoseExpense
+    }
+
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val onSurface = MaterialTheme.colorScheme.onSurface
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
@@ -159,18 +186,13 @@ fun SpendingTrendChart(
     val textMeasurer = rememberTextMeasurer()
 
     val drawProgress = remember { Animatable(0f) }
-    val hasAnimated = rememberSaveable(points) { mutableStateOf(false) }
-    LaunchedEffect(points) {
-        if (!hasAnimated.value) {
-            drawProgress.snapTo(0f)
-            drawProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
-            )
-            hasAnimated.value = true
-        } else {
-            drawProgress.snapTo(1f)
-        }
+
+    LaunchedEffect(selectedMode, points) {
+        drawProgress.snapTo(0f)
+        drawProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing)
+        )
     }
 
     var scrubX by remember { mutableStateOf<Float?>(null) }
@@ -181,9 +203,10 @@ fun SpendingTrendChart(
         label = "pulse_scale"
     )
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 4.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -191,264 +214,370 @@ fun SpendingTrendChart(
             color = MaterialTheme.colorScheme.surfaceVariant,
             tonalElevation = 2.dp
         ) {
-            Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp, start = 0.dp, end = 0.dp)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .pointerInput(points) {
-                    detectDragGestures(
-                        onDragStart = { offset -> scrubX = offset.x },
-                        onDrag = { change, _ -> scrubX = change.position.x },
-                        onDragEnd = { scrubX = null },
-                        onDragCancel = { scrubX = null }
-                    )
-                }
-                .pointerInput(points) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            scrubX = offset.x
-                            tryAwaitRelease()
-                            scrubX = null
+            Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        val (statTitle, statSubtitle) = when (selectedMode) {
+                            FinancialFlowMode.EXPENSE -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Outflow")
+                            FinancialFlowMode.INCOME -> Pair("₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Inflow")
+                            FinancialFlowMode.NET_FLOW -> {
+                                val sign = if (currentTotal > 0f) "+" else if (currentTotal < 0f) "-" else ""
+                                val label = if (currentTotal >= 0f) "Net Surplus" else "Net Deficit"
+                                Pair("${sign}₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(currentTotal))}", label)
+                            }
                         }
-                    )
-                }
-        ) {
-                val chartPadLeft = with(density) { 52.dp.toPx() }
-                val chartPadRight = with(density) { 16.dp.toPx() }
-                val chartPadTop = with(density) { 24.dp.toPx() }
-                val chartPadBottom = with(density) { 28.dp.toPx() }
 
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val w = size.width
-                val h = size.height
-                val plotW = w - chartPadLeft - chartPadRight
-                val plotH = h - chartPadTop - chartPadBottom
-
-                val yValues = points.map { it.y }
-                val yMin = (yValues.minOrNull()!! * 0.85f).coerceAtLeast(0f)
-                val yMax = yValues.maxOrNull()!! * 1.20f
-                val yRange = (yMax - yMin).coerceAtLeast(1f)
-
-                fun xForIndex(i: Int): Float =
-                    chartPadLeft + i.toFloat() / (points.size - 1).coerceAtLeast(1) * plotW
-
-                fun yForValue(v: Float): Float =
-                    chartPadTop + plotH - ((v - yMin) / yRange * plotH)
-
-                val offsets = points.mapIndexed { i, pt -> Offset(xForIndex(i), yForValue(pt.y)) }
-
-                val gridCount = 4
-                repeat(gridCount + 1) { step ->
-                    val frac = step.toFloat() / gridCount
-                    val yVal = yMin + frac * yRange
-                    val yPx = yForValue(yVal)
-
-                    drawLine(
-                        color = onSurfaceVariant.copy(alpha = 0.10f),
-                        start = Offset(chartPadLeft, yPx),
-                        end = Offset(w - chartPadRight, yPx),
-                        strokeWidth = 1f
-                    )
-
-                    val labelText = if (yVal >= 100f) {
-                        if (yVal >= 1000f) {
-                            val formatted = String.format(java.util.Locale.US, "%.1f", yVal / 1000f)
-                            "₹${formatted.removeSuffix(".0")}k"
-                        } else {
-                            "₹${yVal.toInt()}"
-                        }
-                    } else "₹${yVal.toInt()}"
-                    val measured = textMeasurer.measure(
-                        text = labelText,
-                        style = TextStyle(
-                            color = onSurfaceVariant.copy(alpha = 0.7f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Normal
+                        Text(
+                            text = statTitle,
+                            style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                    )
-                    drawText(
-                        textLayoutResult = measured,
-                        topLeft = Offset(
-                            x = chartPadLeft - measured.size.width - with(density) { 6.dp.toPx() },
-                            y = yPx - measured.size.height / 2f
-                        )
-                    )
-                }
-
-                val clipRight = chartPadLeft + plotW * drawProgress.value
-
-                val areaPath = buildSmoothLinePath(offsets).apply {
-                    lineTo(offsets.last().x, chartPadTop + plotH)
-                    lineTo(offsets.first().x, chartPadTop + plotH)
-                    close()
-                }
-                clipRect(left = 0f, top = 0f, right = clipRight, bottom = h) {
-                    drawPath(
-                        path = areaPath,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                primaryColor.copy(alpha = 0.25f),
-                                primaryColor.copy(alpha = 0.0f)
-                            ),
-                            startY = chartPadTop,
-                            endY = chartPadTop + plotH
-                        )
-                    )
-
-                    drawPath(
-                        path = buildSmoothLinePath(offsets),
-                        color = primaryColor,
-                        style = Stroke(
-                            width = with(density) { 2.5.dp.toPx() },
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
-                    )
-
-                    drawPath(
-                        path = buildSmoothLinePath(offsets),
-                        color = primaryColor.copy(alpha = 0.18f),
-                        style = Stroke(
-                            width = with(density) { 8.dp.toPx() },
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
-                    )
-                }
-
-                val scrub = scrubX
-                if (scrub != null && drawProgress.value >= 1f) {
-                    val clampedX = scrub.coerceIn(chartPadLeft, chartPadLeft + plotW)
-
-                    val nearestIdx = offsets.indices.minByOrNull { i ->
-                        kotlin.math.abs(offsets[i].x - clampedX)
-                    } ?: 0
-                    val nearestOffset = offsets[nearestIdx]
-                    val nearestPoint = points[nearestIdx]
-
-                    drawLine(
-                        color = onSurface.copy(alpha = 0.25f),
-                        start = Offset(nearestOffset.x, chartPadTop),
-                        end = Offset(nearestOffset.x, chartPadTop + plotH),
-                        strokeWidth = with(density) { 1.dp.toPx() },
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f))
-                    )
-
-                    drawCircle(
-                        color = primaryColor.copy(alpha = 0.2f),
-                        radius = with(density) { 6.dp.toPx() } * pulseScale,
-                        center = nearestOffset
-                    )
-                    drawCircle(
-                        color = primaryColor,
-                        radius = with(density) { 5.dp.toPx() },
-                        center = nearestOffset
-                    )
-                    drawCircle(
-                        color = surface,
-                        radius = with(density) { 2.5.dp.toPx() },
-                        center = nearestOffset
-                    )
-
-                    val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
-                    val amountText = "₹${nearestPoint.y.toInt()}"
-                    val dateText = sdf.format(java.util.Date(nearestPoint.timestamp))
-
-                    val amountMeasured = textMeasurer.measure(
-                        amountText,
-                        TextStyle(color = onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    )
-                    val dateMeasured = textMeasurer.measure(
-                        dateText,
-                        TextStyle(color = onSurfaceVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
-                    )
-
-                    val tooltipPadH = with(density) { 10.dp.toPx() }
-                    val tooltipPadV = with(density) { 8.dp.toPx() }
-                    val tooltipW = maxOf(amountMeasured.size.width, dateMeasured.size.width) + tooltipPadH * 2
-                    val tooltipH = amountMeasured.size.height + dateMeasured.size.height + tooltipPadV * 2 + with(density) { 4.dp.toPx() }
-                    val tooltipRadius = with(density) { 8.dp.toPx() }
-
-                    var tooltipLeft = nearestOffset.x - tooltipW / 2
-                    tooltipLeft = tooltipLeft.coerceIn(chartPadLeft, w - chartPadRight - tooltipW)
-                    val tooltipTop = (nearestOffset.y - tooltipH - with(density) { 14.dp.toPx() }).coerceAtLeast(chartPadTop)
-
-                    drawIntoCanvas { canvas ->
-                        val paint = android.graphics.Paint().apply {
-                            isAntiAlias = true
-                            color = android.graphics.Color.TRANSPARENT
-                            setShadowLayer(with(density) { 8.dp.toPx() }, 0f, with(density) { 2.dp.toPx() }, android.graphics.Color.argb(60, 0, 0, 0))
-                        }
-                        canvas.nativeCanvas.drawRoundRect(
-                            tooltipLeft, tooltipTop,
-                            tooltipLeft + tooltipW, tooltipTop + tooltipH,
-                            tooltipRadius, tooltipRadius, paint
+                        Text(
+                            text = statSubtitle,
+                            style = Typography.labelSmall.copy(fontSize = 11.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    drawRoundRect(
-                        color = surfaceVariant,
-                        topLeft = Offset(tooltipLeft, tooltipTop),
-                        size = Size(tooltipW, tooltipH),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius)
-                    )
-                    drawRoundRect(
-                        color = primaryColor.copy(alpha = 0.6f),
-                        topLeft = Offset(tooltipLeft, tooltipTop),
-                        size = Size(tooltipW, tooltipH),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius),
-                        style = Stroke(width = with(density) { 1.dp.toPx() })
-                    )
+                    if (incomePoints.isNotEmpty() || netFlowPoints.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                                .padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            FinancialFlowMode.values().forEach { mode ->
+                                val isSelected = selectedMode == mode
+                                val bgAlpha by androidx.compose.animation.core.animateFloatAsState(if (isSelected) 1f else 0f, label = "flow_toggle_bg")
+                                val label = when (mode) {
+                                    FinancialFlowMode.EXPENSE -> "Expense"
+                                    FinancialFlowMode.INCOME -> "Income"
+                                    FinancialFlowMode.NET_FLOW -> "Net"
+                                }
+                                val modeActiveColor = when (mode) {
+                                    FinancialFlowMode.EXPENSE -> MaterialTheme.colorScheme.primary
+                                    FinancialFlowMode.INCOME -> EmeraldIncome
+                                    FinancialFlowMode.NET_FLOW -> if (currentTotal >= 0f) EmeraldIncome else RoseExpense
+                                }
 
-                    drawText(
-                        textLayoutResult = amountMeasured,
-                        topLeft = Offset(
-                            tooltipLeft + (tooltipW - amountMeasured.size.width) / 2f,
-                            tooltipTop + tooltipPadV
-                        )
-                    )
-                    drawText(
-                        textLayoutResult = dateMeasured,
-                        topLeft = Offset(
-                            tooltipLeft + (tooltipW - dateMeasured.size.width) / 2f,
-                            tooltipTop + tooltipPadV + amountMeasured.size.height + with(density) { 4.dp.toPx() }
-                        )
-                    )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(9.dp))
+                                        .background(modeActiveColor.copy(alpha = bgAlpha))
+                                        .clickable {
+                                            if (selectedMode != mode) {
+                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                selectedMode = mode
+                                            }
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = Typography.labelSmall.copy(
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-                val sdfX = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
-                val maxLabels = minOf(points.size, 5)
-                val step = (points.size - 1).toFloat() / (maxLabels - 1).coerceAtLeast(1)
-                for (labelIdx in 0 until maxLabels) {
-                    val ptIdx = (labelIdx * step).toInt().coerceIn(0, points.lastIndex)
-                    val xPx = xForIndex(ptIdx)
-                    val label = sdfX.format(java.util.Date(points[ptIdx].timestamp))
-                    val measured = textMeasurer.measure(
-                        label,
-                        TextStyle(
-                            color = onSurfaceVariant.copy(alpha = 0.7f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    )
-                    drawText(
-                        textLayoutResult = measured,
-                        topLeft = Offset(
-                            x = (xPx - measured.size.width / 2f).coerceIn(
-                                chartPadLeft,
-                                w - chartPadRight - measured.size.width
-                            ),
-                            y = chartPadTop + plotH + with(density) { 8.dp.toPx() }
-                        )
-                    )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(210.dp)
+                        .pointerInput(points) {
+                            detectDragGestures(
+                                onDragStart = { offset -> scrubX = offset.x },
+                                onDrag = { change, _ -> scrubX = change.position.x },
+                                onDragEnd = { scrubX = null },
+                                onDragCancel = { scrubX = null }
+                            )
+                        }
+                        .pointerInput(points) {
+                            detectTapGestures(
+                                onPress = { offset ->
+                                    scrubX = offset.x
+                                    tryAwaitRelease()
+                                    scrubX = null
+                                }
+                            )
+                        }
+                ) {
+                    val chartPadLeft = with(density) { 52.dp.toPx() }
+                    val chartPadRight = with(density) { 16.dp.toPx() }
+                    val chartPadTop = with(density) { 24.dp.toPx() }
+                    val chartPadBottom = with(density) { 28.dp.toPx() }
+
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val w = size.width
+                        val h = size.height
+                        val plotW = w - chartPadLeft - chartPadRight
+                        val plotH = h - chartPadTop - chartPadBottom
+
+                        val yValues = points.map { it.y }
+                        val rawMin = yValues.minOrNull() ?: 0f
+                        val rawMax = yValues.maxOrNull() ?: 0f
+
+                        val yMin = if (rawMin < 0f) rawMin * 1.15f else (rawMin * 0.85f).coerceAtLeast(0f)
+                        val yMax = if (rawMax > 0f) rawMax * 1.20f else 10f
+                        val yRange = (yMax - yMin).coerceAtLeast(1f)
+
+                        fun xForIndex(i: Int): Float =
+                            chartPadLeft + i.toFloat() / (points.size - 1).coerceAtLeast(1) * plotW
+
+                        fun yForValue(v: Float): Float =
+                            chartPadTop + plotH - ((v - yMin) / yRange * plotH)
+
+                        val offsets = points.mapIndexed { i, pt -> Offset(xForIndex(i), yForValue(pt.y)) }
+
+                        val gridCount = 4
+                        repeat(gridCount + 1) { step ->
+                            val frac = step.toFloat() / gridCount
+                            val yVal = yMin + frac * yRange
+                            val yPx = yForValue(yVal)
+
+                            drawLine(
+                                color = onSurfaceVariant.copy(alpha = 0.10f),
+                                start = Offset(chartPadLeft, yPx),
+                                end = Offset(w - chartPadRight, yPx),
+                                strokeWidth = 1f
+                            )
+
+                            val absVal = kotlin.math.abs(yVal)
+                            val prefix = if (yVal < 0f) "-₹" else "₹"
+                            val labelText = if (absVal >= 1000f) {
+                                val formatted = String.format(java.util.Locale.US, "%.1f", absVal / 1000f)
+                                "$prefix${formatted.removeSuffix(".0")}k"
+                            } else {
+                                "$prefix${absVal.toInt()}"
+                            }
+
+                            val measured = textMeasurer.measure(
+                                text = labelText,
+                                style = TextStyle(
+                                    color = onSurfaceVariant.copy(alpha = 0.7f),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            )
+                            drawText(
+                                textLayoutResult = measured,
+                                topLeft = Offset(
+                                    x = chartPadLeft - measured.size.width - with(density) { 6.dp.toPx() },
+                                    y = yPx - measured.size.height / 2f
+                                )
+                            )
+                        }
+
+                        val clipRight = chartPadLeft + plotW * drawProgress.value
+
+                        val areaPath = buildSmoothLinePath(offsets).apply {
+                            lineTo(offsets.last().x, chartPadTop + plotH)
+                            lineTo(offsets.first().x, chartPadTop + plotH)
+                            close()
+                        }
+                        clipRect(left = 0f, top = 0f, right = clipRight, bottom = h) {
+                            drawPath(
+                                path = areaPath,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        dynamicThemeColor.copy(alpha = 0.25f),
+                                        dynamicThemeColor.copy(alpha = 0.0f)
+                                    ),
+                                    startY = chartPadTop,
+                                    endY = chartPadTop + plotH
+                                )
+                            )
+
+                            drawPath(
+                                path = buildSmoothLinePath(offsets),
+                                color = dynamicThemeColor,
+                                style = Stroke(
+                                    width = with(density) { 2.5.dp.toPx() },
+                                    cap = StrokeCap.Round,
+                                    join = StrokeJoin.Round
+                                )
+                            )
+
+                            drawPath(
+                                path = buildSmoothLinePath(offsets),
+                                color = dynamicThemeColor.copy(alpha = 0.18f),
+                                style = Stroke(
+                                    width = with(density) { 8.dp.toPx() },
+                                    cap = StrokeCap.Round,
+                                    join = StrokeJoin.Round
+                                )
+                            )
+                        }
+
+                        val scrub = scrubX
+                        if (scrub != null && drawProgress.value >= 1f) {
+                            val clampedX = scrub.coerceIn(chartPadLeft, chartPadLeft + plotW)
+
+                            val nearestIdx = offsets.indices.minByOrNull { i ->
+                                kotlin.math.abs(offsets[i].x - clampedX)
+                            } ?: 0
+                            val nearestOffset = offsets[nearestIdx]
+                            val nearestPoint = points[nearestIdx]
+
+                            drawLine(
+                                color = onSurface.copy(alpha = 0.25f),
+                                start = Offset(nearestOffset.x, chartPadTop),
+                                end = Offset(nearestOffset.x, chartPadTop + plotH),
+                                strokeWidth = with(density) { 1.dp.toPx() },
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f))
+                            )
+
+                            drawCircle(
+                                color = dynamicThemeColor.copy(alpha = 0.2f),
+                                radius = with(density) { 6.dp.toPx() } * pulseScale,
+                                center = nearestOffset
+                            )
+                            drawCircle(
+                                color = dynamicThemeColor,
+                                radius = with(density) { 5.dp.toPx() },
+                                center = nearestOffset
+                            )
+                            drawCircle(
+                                color = surface,
+                                radius = with(density) { 2.5.dp.toPx() },
+                                center = nearestOffset
+                            )
+
+                            val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+                            val amountText = when (selectedMode) {
+                                FinancialFlowMode.EXPENSE -> "₹${String.format(java.util.Locale.US, "%,.0f", nearestPoint.y)} spent"
+                                FinancialFlowMode.INCOME -> "₹${String.format(java.util.Locale.US, "%,.0f", nearestPoint.y)} earned"
+                                FinancialFlowMode.NET_FLOW -> {
+                                    val sign = if (nearestPoint.y > 0f) "+" else if (nearestPoint.y < 0f) "-" else ""
+                                    val label = if (nearestPoint.y >= 0f) "surplus" else "deficit"
+                                    "${sign}₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(nearestPoint.y))} $label"
+                                }
+                            }
+                            val dateText = sdf.format(java.util.Date(nearestPoint.timestamp))
+
+                            val amountMeasured = textMeasurer.measure(
+                                amountText,
+                                TextStyle(color = onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            )
+                            val dateMeasured = textMeasurer.measure(
+                                dateText,
+                                TextStyle(color = onSurfaceVariant, fontSize = 10.sp, fontWeight = FontWeight.Normal)
+                            )
+
+                            val tooltipPadH = with(density) { 10.dp.toPx() }
+                            val tooltipPadV = with(density) { 8.dp.toPx() }
+                            val tooltipW = maxOf(amountMeasured.size.width, dateMeasured.size.width) + tooltipPadH * 2
+                            val tooltipH = amountMeasured.size.height + dateMeasured.size.height + tooltipPadV * 2 + with(density) { 4.dp.toPx() }
+                            val tooltipRadius = with(density) { 8.dp.toPx() }
+
+                            var tooltipLeft = nearestOffset.x - tooltipW / 2
+                            tooltipLeft = tooltipLeft.coerceIn(chartPadLeft, w - chartPadRight - tooltipW)
+                            val tooltipTop = (nearestOffset.y - tooltipH - with(density) { 14.dp.toPx() }).coerceAtLeast(chartPadTop)
+
+                            drawIntoCanvas { canvas ->
+                                val paint = android.graphics.Paint().apply {
+                                    isAntiAlias = true
+                                    color = android.graphics.Color.TRANSPARENT
+                                    setShadowLayer(with(density) { 8.dp.toPx() }, 0f, with(density) { 2.dp.toPx() }, android.graphics.Color.argb(60, 0, 0, 0))
+                                }
+                                canvas.nativeCanvas.drawRoundRect(
+                                    tooltipLeft, tooltipTop,
+                                    tooltipLeft + tooltipW, tooltipTop + tooltipH,
+                                    tooltipRadius, tooltipRadius, paint
+                                )
+                            }
+
+                            drawRoundRect(
+                                color = surfaceVariant,
+                                topLeft = Offset(tooltipLeft, tooltipTop),
+                                size = Size(tooltipW, tooltipH),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius)
+                            )
+                            drawRoundRect(
+                                color = dynamicThemeColor.copy(alpha = 0.6f),
+                                topLeft = Offset(tooltipLeft, tooltipTop),
+                                size = Size(tooltipW, tooltipH),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(tooltipRadius),
+                                style = Stroke(width = with(density) { 1.dp.toPx() })
+                            )
+
+                            drawText(
+                                textLayoutResult = amountMeasured,
+                                topLeft = Offset(
+                                    tooltipLeft + (tooltipW - amountMeasured.size.width) / 2f,
+                                    tooltipTop + tooltipPadV
+                                )
+                            )
+                            drawText(
+                                textLayoutResult = dateMeasured,
+                                topLeft = Offset(
+                                    tooltipLeft + (tooltipW - dateMeasured.size.width) / 2f,
+                                    tooltipTop + tooltipPadV + amountMeasured.size.height + with(density) { 4.dp.toPx() }
+                                )
+                            )
+                        }
+
+                        val sdfX = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
+                        val maxLabels = minOf(points.size, 5)
+                        val step = (points.size - 1).toFloat() / (maxLabels - 1).coerceAtLeast(1)
+                        for (labelIdx in 0 until maxLabels) {
+                            val ptIdx = (labelIdx * step).toInt().coerceIn(0, points.lastIndex)
+                            val xPx = xForIndex(ptIdx)
+                            val label = sdfX.format(java.util.Date(points[ptIdx].timestamp))
+                            val measured = textMeasurer.measure(
+                                label,
+                                TextStyle(
+                                    color = onSurfaceVariant.copy(alpha = 0.7f),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            )
+                            drawText(
+                                textLayoutResult = measured,
+                                topLeft = Offset(
+                                    x = (xPx - measured.size.width / 2f).coerceIn(
+                                        chartPadLeft,
+                                        w - chartPadRight - measured.size.width
+                                    ),
+                                    y = chartPadTop + plotH + with(density) { 8.dp.toPx() }
+                                )
+                            )
+                        }
+                    }
                 }
-            }
-        }
 
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
+}
+
+@Composable
+fun SpendingTrendChart(
+    points: List<DashboardContract.Point>
+) {
+    SpendingTrendChart(
+        expensePoints = points,
+        incomePoints = emptyList(),
+        netFlowPoints = emptyList(),
+        isHapticsEnabled = true
+    )
 }
 
 /**

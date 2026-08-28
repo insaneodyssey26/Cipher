@@ -15,6 +15,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +29,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 
 object VaultMotion {
     val InteractiveSpring = spring<Float>(
@@ -120,7 +122,8 @@ private fun AnimatedDigit(
             androidx.compose.material3.Text(
                 text = targetDigit.toString(),
                 style = textStyle,
-                color = color
+                color = color,
+                modifier = Modifier.padding(horizontal = 0.5.dp, vertical = 2.dp)
             )
         }
     }

@@ -218,10 +218,14 @@ fun InsightsScreen(
                 )
             }
 
-            // 2. Spending Trend Chart
             item {
-                SectionLabel("SPENDING TREND")
-                SpendingTrendChart(points = state.netWorthHistory)
+                SectionLabel("FINANCIAL FLOW")
+                SpendingTrendChart(
+                    expensePoints = state.expenseTrendHistory,
+                    incomePoints = state.incomeTrendHistory,
+                    netFlowPoints = state.netFlowTrendHistory,
+                    isHapticsEnabled = isHapticsEnabled
+                )
             }
 
             // 3. Category Allocation

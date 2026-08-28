@@ -219,7 +219,7 @@ fun DashboardScreen(
     val maxToolbarHeight = androidx.compose.runtime.remember(configuration.screenHeightDp) {
         (configuration.screenHeightDp.dp * 0.32f).coerceIn(240.dp, 300.dp)
     }
-    val minToolbarHeight = 140.dp
+    val minToolbarHeight = 154.dp
     val toolbarHeightRangePx = with(androidx.compose.ui.platform.LocalDensity.current) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
     val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0f) }
 
@@ -1223,13 +1223,12 @@ private fun DashboardHero(
             )
             .statusBarsPadding()
             .height(heroHeight)
-            .clipToBounds()
     ) {
         if (searchQuery.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 80.dp, start = 24.dp, end = 24.dp)
+                    .padding(top = 70.dp, start = 24.dp, end = 24.dp)
                     .graphicsLayer { alpha = contentAlpha }
             ) {
                 androidx.compose.ui.layout.Layout(

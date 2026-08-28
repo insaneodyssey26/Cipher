@@ -62,6 +62,8 @@ class GetInsightsUseCase @Inject constructor(
             
             val allSubscriptions = (manualDomainSubscriptions + filteredAutoDetected).sortedBy { it.nextExpectedDate }
 
+            val (expenseFlow, incomeFlow, netFlow) = calculateFinancialFlowHistory(transactions)
+
             InsightsContract.State(
                 isLoading = false,
                 spendingVelocity = DashboardContract.VelocityData(
@@ -69,7 +71,10 @@ class GetInsightsUseCase @Inject constructor(
                     lastWeekAvg = lastWeekAvg,
                     trendPercentage = trend
                 ),
-                netWorthHistory = calculateNetWorthHistory(transactions),
+                netWorthHistory = expenseFlow,
+                expenseTrendHistory = expenseFlow,
+                incomeTrendHistory = incomeFlow,
+                netFlowTrendHistory = netFlow,
                 calendarHeatmap = calculateHeatmap(allTx),
                 categoryBreakdown = calculateCategories(transactions),
                 detectedSubscriptions = allSubscriptions,
@@ -94,12 +99,11 @@ class GetInsightsUseCase @Inject constructor(
         }.timeInMillis
     }
 
-    private fun calculateNetWorthHistory(transactions: List<TransactionEntity>): List<DashboardContract.Point> {
-        val expenses = transactions.filter { !it.isIncome }
-        if (expenses.isEmpty()) return emptyList()
+    private fun calculateFinancialFlowHistory(transactions: List<TransactionEntity>): Triple<List<DashboardContract.Point>, List<DashboardContract.Point>, List<DashboardContract.Point>> {
+        if (transactions.isEmpty()) return Triple(emptyList(), emptyList(), emptyList())
 
-        val minTime = expenses.minOf { it.timestamp }
-        val maxTime = expenses.maxOf { it.timestamp }
+        val minTime = transactions.minOf { it.timestamp }
+        val maxTime = transactions.maxOf { it.timestamp }
         
         val cal = Calendar.getInstance().apply { 
             timeInMillis = minTime
@@ -116,8 +120,10 @@ class GetInsightsUseCase @Inject constructor(
             set(Calendar.MILLISECOND, 0)
         }
 
-        val dailyTotals = mutableMapOf<Long, Double>()
-        expenses.forEach { tx ->
+        val dailyExpenses = mutableMapOf<Long, Double>()
+        val dailyIncomes = mutableMapOf<Long, Double>()
+
+        transactions.forEach { tx ->
             val txCal = Calendar.getInstance().apply { 
                 timeInMillis = tx.timestamp 
                 set(Calendar.HOUR_OF_DAY, 0)
@@ -126,19 +132,37 @@ class GetInsightsUseCase @Inject constructor(
                 set(Calendar.MILLISECOND, 0)
             }
             val key = txCal.timeInMillis
-            dailyTotals[key] = (dailyTotals[key] ?: 0.0) + tx.amount
+            if (tx.isIncome) {
+                dailyIncomes[key] = (dailyIncomes[key] ?: 0.0) + tx.amount
+            } else {
+                dailyExpenses[key] = (dailyExpenses[key] ?: 0.0) + tx.amount
+            }
         }
 
-        val points = mutableListOf<DashboardContract.Point>()
+        val expensePoints = mutableListOf<DashboardContract.Point>()
+        val incomePoints = mutableListOf<DashboardContract.Point>()
+        val netPoints = mutableListOf<DashboardContract.Point>()
+
         var index = 0f
+        var runningExpense = 0.0
+        var runningIncome = 0.0
+
         while (cal.timeInMillis <= endCal.timeInMillis) {
-            val amount = dailyTotals[cal.timeInMillis] ?: 0.0
-            points.add(DashboardContract.Point(index, amount.toFloat(), cal.timeInMillis))
+            val exp = dailyExpenses[cal.timeInMillis] ?: 0.0
+            val inc = dailyIncomes[cal.timeInMillis] ?: 0.0
+            runningExpense += exp
+            runningIncome += inc
+            val runningNet = runningIncome - runningExpense
+
+            expensePoints.add(DashboardContract.Point(index, runningExpense.toFloat(), cal.timeInMillis))
+            incomePoints.add(DashboardContract.Point(index, runningIncome.toFloat(), cal.timeInMillis))
+            netPoints.add(DashboardContract.Point(index, runningNet.toFloat(), cal.timeInMillis))
+
             index += 1f
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
 
-        return points
+        return Triple(expensePoints, incomePoints, netPoints)
     }
 
     private fun calculateHeatmap(transactions: List<TransactionEntity>): Map<Long, Double> {
