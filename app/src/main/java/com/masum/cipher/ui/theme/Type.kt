@@ -10,36 +10,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 
-/**
- * Space Grotesk - Primary Typeface (Headings, Hero Numbers)
- */
 @OptIn(ExperimentalTextApi::class)
-val SpaceGrotesk = FontFamily(
+val Manrope = FontFamily(
     Font(
-        resId = R.font.spacegrotesk_variable,
+        resId = R.font.manrope_variable,
         variationSettings = FontVariation.Settings(FontVariation.weight(400)),
         weight = FontWeight.Normal
     ),
     Font(
-        resId = R.font.spacegrotesk_variable,
+        resId = R.font.manrope_variable,
         variationSettings = FontVariation.Settings(FontVariation.weight(500)),
         weight = FontWeight.Medium
     ),
     Font(
-        resId = R.font.spacegrotesk_variable,
+        resId = R.font.manrope_variable,
         variationSettings = FontVariation.Settings(FontVariation.weight(600)),
         weight = FontWeight.SemiBold
     ),
     Font(
-        resId = R.font.spacegrotesk_variable,
+        resId = R.font.manrope_variable,
         variationSettings = FontVariation.Settings(FontVariation.weight(700)),
         weight = FontWeight.Bold
+    ),
+    Font(
+        resId = R.font.manrope_variable,
+        variationSettings = FontVariation.Settings(FontVariation.weight(800)),
+        weight = FontWeight.ExtraBold
     )
 )
 
-/**
- * DM Sans - Secondary Typeface (Body, UI Controls)
- */
 @OptIn(ExperimentalTextApi::class)
 val DMSans = FontFamily(
     Font(
@@ -60,64 +59,60 @@ val DMSans = FontFamily(
 )
 
 val Typography = Typography(
-    // Hero Balance / Numbers
     displayLarge = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.Bold,
         fontSize = 52.sp,
         letterSpacing = (-1).sp
     ),
     displayMedium = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.Bold,
         fontSize = 44.sp,
         letterSpacing = (-1).sp
     ),
     displaySmall = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.SemiBold,
         fontSize = 36.sp,
         letterSpacing = (-0.5).sp
     ),
-    // Section Headings
     headlineLarge = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.SemiBold,
         fontSize = 32.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.SemiBold,
         fontSize = 28.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineSmall = TextStyle(
-        fontFamily = SpaceGrotesk,
+        fontFamily = Manrope,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
         letterSpacing = (-0.5).sp
     ),
-    // Card Titles / Subheadings
     titleLarge = TextStyle(
-        fontFamily = DMSans,
+        fontFamily = Manrope,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
-        letterSpacing = 0.sp
+        letterSpacing = (-0.2).sp
     ),
     titleMedium = TextStyle(
-        fontFamily = DMSans,
-        fontWeight = FontWeight.Bold,
+        fontFamily = Manrope,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         letterSpacing = 0.sp
     ),
     titleSmall = TextStyle(
-        fontFamily = DMSans,
-        fontWeight = FontWeight.Medium,
+        fontFamily = Manrope,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
         letterSpacing = 0.sp
     ),
-    // Body Text
     bodyLarge = TextStyle(
         fontFamily = DMSans,
         fontWeight = FontWeight.Normal,
@@ -136,7 +131,6 @@ val Typography = Typography(
         fontSize = 12.sp,
         letterSpacing = 0.sp
     ),
-    // Labels / Metadata
     labelLarge = TextStyle(
         fontFamily = DMSans,
         fontWeight = FontWeight.Bold,

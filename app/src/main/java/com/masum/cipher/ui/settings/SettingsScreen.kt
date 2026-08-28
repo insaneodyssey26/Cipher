@@ -871,7 +871,7 @@ Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "cipher.",
                     style = Typography.headlineLarge.copy(
-                        fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
+                        fontFamily = com.masum.cipher.ui.theme.Manrope,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
@@ -1226,7 +1226,7 @@ private fun SettingsSection(
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
-                            fontFamily = com.masum.cipher.ui.theme.SpaceGrotesk,
+                            fontFamily = com.masum.cipher.ui.theme.Manrope,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                             letterSpacing = 0.5.sp,
                             fontSize = 15.sp

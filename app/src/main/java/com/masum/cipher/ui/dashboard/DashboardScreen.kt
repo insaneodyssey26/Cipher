@@ -96,8 +96,8 @@ import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
-import com.masum.cipher.ui.theme.SpaceGrotesk
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
@@ -1477,7 +1477,7 @@ private fun DashboardHero(
                 Text(
                     text = "cipher.",
                     style = Typography.titleLarge.copy(
-                        fontFamily = SpaceGrotesk,
+                        fontFamily = Manrope,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
