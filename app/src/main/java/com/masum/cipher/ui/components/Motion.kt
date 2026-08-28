@@ -134,12 +134,17 @@ fun StaggeredEntranceItem(
     index: Int,
     content: @Composable () -> Unit
 ) {
+    if (index >= 5) {
+        content()
+        return
+    }
+
     var hasAnimated by rememberSaveable { mutableStateOf(false) }
     var visible by remember { mutableStateOf(hasAnimated) }
     
     LaunchedEffect(Unit) {
         if (!hasAnimated) {
-            kotlinx.coroutines.delay(index * 50L)
+            kotlinx.coroutines.delay(index * 25L)
             visible = true
             hasAnimated = true
         }
@@ -147,12 +152,12 @@ fun StaggeredEntranceItem(
 
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(durationMillis = 400),
+        animationSpec = tween(durationMillis = 250),
         label = "Alpha"
     )
 
     val offsetY by animateFloatAsState(
-        targetValue = if (visible) 0f else 50f,
+        targetValue = if (visible) 0f else 30f,
         animationSpec = VaultMotion.LayoutSpring,
         label = "OffsetY"
     )

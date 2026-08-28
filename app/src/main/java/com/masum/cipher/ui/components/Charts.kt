@@ -20,6 +20,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -88,9 +89,6 @@ import compose.icons.lucideicons.ChevronRight
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-/**
- * Catmull-Rom helper: given 4 control points, build a smooth bezier path segment through p1→p2
- */
 private fun androidx.compose.ui.graphics.Path.catmullRomTo(
     p0: Offset, p1: Offset, p2: Offset, p3: Offset, alpha: Float = 0.5f
 ) {
@@ -105,10 +103,6 @@ private fun androidx.compose.ui.graphics.Path.catmullRomTo(
     cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y)
 }
 
-/**
- * Builds a smooth Catmull-Rom path through all given points.
- * Returns the line path separately so we can also build the filled area path.
- */
 private fun buildSmoothLinePath(pts: List<Offset>): Path {
     val path = Path()
     if (pts.size < 2) return path
@@ -131,18 +125,6 @@ private fun buildSmoothLinePath(pts: List<Offset>): Path {
     return path
 }
 
-/**
- * Premium custom Stock-Market style Spending Trend Chart.
- *
- * Features:
- * - Smooth Catmull-Rom line curve
- * - Gradient area fill beneath the line
- * - Subtle horizontal grid lines with Y-axis labels
- * - Animated draw-in from left to right on first composition
- * - Touch & drag crosshair: vertical line + pulsing dot + floating tooltip
- *   showing exact date and amount for the nearest data point
- * - Start / end date range labels below the chart
- */
 enum class FinancialFlowMode {
     EXPENSE,
     INCOME,
@@ -316,7 +298,10 @@ fun SpendingTrendChart(
                                             .width(tabWidth)
                                             .height(28.dp)
                                             .clip(RoundedCornerShape(9.dp))
-                                            .clickable {
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) {
                                                 if (selectedMode != mode) {
                                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                                     selectedMode = mode
@@ -500,8 +485,8 @@ fun SpendingTrendChart(
 
                             val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
                             val amountText = when (selectedMode) {
-                                FinancialFlowMode.EXPENSE -> "₹${String.format(java.util.Locale.US, "%,.0f", nearestPoint.y)} spent"
-                                FinancialFlowMode.INCOME -> "₹${String.format(java.util.Locale.US, "%,.0f", nearestPoint.y)} earned"
+                                FinancialFlowMode.EXPENSE -> "₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(nearestPoint.y))} spent"
+                                FinancialFlowMode.INCOME -> "₹${String.format(java.util.Locale.US, "%,.0f", kotlin.math.abs(nearestPoint.y))} earned"
                                 FinancialFlowMode.NET_FLOW -> {
                                     val sign = if (nearestPoint.y > 0f) "+" else if (nearestPoint.y < 0f) "-" else ""
                                     val label = if (nearestPoint.y >= 0f) "surplus" else "deficit"
@@ -619,9 +604,6 @@ fun SpendingTrendChart(
     )
 }
 
-/**
- * Premium Thick Donut Chart for Category Allocation
- */
 @Composable
 fun CategoryAllocationDonut(
     categories: List<DashboardContract.CategoryData>,
@@ -875,7 +857,7 @@ fun PeakHoursChart(
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
                     )
 
-                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal.toDouble())
+                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal)
                     val measured = textMeasurer.measure(
                         text = labelText,
                         style = TextStyle(

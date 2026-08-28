@@ -62,7 +62,7 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSubscriptionSheet(
-    subscription: SubscriptionDetector.Subscription?, // null for Add
+    subscription: SubscriptionDetector.Subscription?,
     onDismiss: () -> Unit,
     onConfirm: (merchant: String, amount: Double, category: String, frequencyDays: Int, nextExpectedDate: Long) -> Unit,
     onDelete: (() -> Unit)? = null
@@ -136,7 +136,7 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            if (isEditing && subscription != null) {
+            if (subscription != null) {
                 val monthlyEst = subscription.amount * (30.0 / subscription.frequencyDays.coerceAtLeast(1).toDouble())
                 val trackType = if (subscription.confidence == 1.0f) "Manual Entry" else "Auto-Detected"
                 
@@ -160,14 +160,12 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            // Merchant
             SheetTextFieldSimple(
                 value = merchant,
                 onValueChange = { merchant = it },
                 label = "Merchant / Name"
             )
 
-            // Amount & Frequency row
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
                     SheetTextFieldSimple(
@@ -188,7 +186,6 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            // Date picker
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -215,7 +212,6 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            // Category picker
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
                 onExpandedChange = { categoryExpanded = !categoryExpanded }
@@ -315,7 +311,6 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            // Save button
             Button(
                 onClick = {
                     val finalAmount = amountText.toDoubleOrNull() ?: 0.0

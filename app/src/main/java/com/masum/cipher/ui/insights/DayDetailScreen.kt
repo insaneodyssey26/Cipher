@@ -108,7 +108,6 @@ fun DayDetailScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             if (effect is InsightsContract.Effect.ShowUndoDelete) {
-                // Handle Undo if needed
             }
         }
     }

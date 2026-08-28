@@ -160,19 +160,21 @@ flowchart LR
 ### Dashboard
 - Global Pill-shaped floating Navigation Bar
 - Running balance with income/expense split and scrolling header layout
-- Transaction timeline with spend-based sorting capabilities and weekly interval filtering
+- Advanced Filter Ledger: Filter by direction (All, Expenses, Income), multi-category selection, and min/max amount ranges
+- Custom Time Selector: Quick filters for This Week, Last Week, This Month, Last Month, This Year, All Time, and custom start/end date ranges
 - Live search by merchant or category
 - Add, edit, delete with snackbar undo
 - Transaction Notes: Add personal notes to remember what a transaction was for
-- Monthly budget ring with health color coding
 - Privacy mode — blurs all amounts with one tap
 
 ### Insights
-- High-performance spending velocity charts built on custom `Canvas` Compose
+- 3-tab segmented layout: Spending, Habits, and Recurring
+- Financial Flow charts: Interactive Expense, Income, and Net cash flow curves with drag scrubbing
+- Overview card: Displays top spend category share, no-spend streak, daily run-rate, and average transaction amount
+- Monthly budget health and allocation tracking
 - Category breakdown doughnut
-- Advanced scrollable Calendar heatmap with monthly paging
-- Day-detail drill-down
-- Subscription detector — finds recurring payments and predicted next billing dates
+- Advanced scrollable Calendar heatmap with monthly paging and day-detail drill-down
+- Subscriptions Hub: Tracks recurring bills with monthly totals, annual projections, due date alerts, and manual entry/editing
 
 ### Security
 - **Database**: SQLCipher AES-256 full-disk encryption

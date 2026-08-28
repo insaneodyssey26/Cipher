@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.ui.theme.DMSans
 import compose.icons.lucideicons.ArrowLeft
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,6 +124,7 @@ private fun PolicyMeta() {
         Text(
             text = "cipher.",
             style = MaterialTheme.typography.displaySmall.copy(
+                fontFamily = DMSans,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-1.5).sp
             ),

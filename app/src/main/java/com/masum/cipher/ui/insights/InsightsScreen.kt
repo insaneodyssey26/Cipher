@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -37,6 +38,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -47,14 +59,18 @@ import com.masum.cipher.ui.components.SpendingTrendChart
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.dashboard.DashboardContract
+import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
-import compose.icons.lucideicons.TrendingUp
+import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Target
+import compose.icons.lucideicons.TrendingUp
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,6 +158,10 @@ fun InsightsScreen(
         )
     }
 
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    val tabs = listOf("Spending", "Habits", "Recurring")
+    val selectedTabIndex = pagerState.currentPage
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { 
@@ -169,142 +189,182 @@ fun InsightsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(bottom = 140.dp)
+                .padding(padding)
         ) {
-            // 1. Narrative Hero
-            item {
-                InsightHero(state = state)
-            }
-            
-            item {
-                SectionLabel("MONTHLY BUDGET")
-                com.masum.cipher.ui.components.BudgetHealthCard(
-                    spent = state.monthlySummary.expense,
-                    budget = monthlyBudget,
-                    onEditBudgetClick = { showBudgetDialog = true },
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    isHapticsEnabled = isHapticsEnabled
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(3.dp)
+            ) {
+                val tabWidth = maxWidth / tabs.size
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedTabIndex,
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
+                    label = "insights_tab_offset"
                 )
-            }
 
-            item {
-                SectionLabel("FINANCIAL FLOW")
-                SpendingTrendChart(
-                    expensePoints = state.expenseTrendHistory,
-                    incomePoints = state.incomeTrendHistory,
-                    netFlowPoints = state.netFlowTrendHistory,
-                    isHapticsEnabled = isHapticsEnabled
+                Box(
+                    modifier = Modifier
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(MaterialTheme.colorScheme.primary)
                 )
-            }
 
-            // 3. Category Allocation
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SectionLabel("CATEGORY ALLOCATION")
-                    androidx.compose.material3.TextButton(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            onNavigateToCategories()
-                        },
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-                        Text("View Hub")
-                    }
-                }
-                VaultCard(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    CategoryAllocationDonut(
-                        categories = state.categoryBreakdown,
-                        categoryBudgets = settings?.categoryBudgets ?: emptyMap(),
-                        onCategoryClick = { catData ->
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            selectedCategoryForDetail = catData
-                        }
-                    )
-                }
-            }
-
-            // 4. Heatmap/Peak Hours
-            item {
-                SectionLabel("PEAK SPENDING HOURS")
-                PeakHoursChart(hours = state.peakHours)
-            }
-
-            // 5. Subscriptions
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SectionLabel("SUBSCRIPTIONS")
-                    androidx.compose.material3.TextButton(
-                        onClick = { showAddSubDialog = true },
-                        modifier = Modifier.padding(top = 20.dp)
-                    ) {
-                        Text("+ Add")
-                    }
-                }
-                
-                if (state.detectedSubscriptions.isNotEmpty()) {
-                    val totalMonthly = state.detectedSubscriptions.sumOf { 
-                        it.amount * (30.0 / it.frequencyDays.coerceAtLeast(1)) 
-                    }
-                    Text(
-                        text = "Approx. monthly burden: ₹${String.format(java.util.Locale.getDefault(), "%,.0f", totalMonthly)}",
-                        style = Typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp).padding(bottom = 8.dp)
-                    )
-                    
-                    Column(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        state.detectedSubscriptions.forEach { sub ->
-                            SubscriptionItem(
-                                sub = sub, 
-                                isHapticsEnabled = isHapticsEnabled,
-                                onClick = { selectedSubscription = sub }
+                Row(modifier = Modifier.fillMaxSize()) {
+                    tabs.forEachIndexed { index, title ->
+                        val isSelected = selectedTabIndex == index
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(9.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = title,
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Manrope,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-                } else {
-                    Text(
-                        text = "No subscriptions tracked yet.",
-                        style = Typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                    )
                 }
             }
 
-            // 6. Calendar History
-            item {
-                SectionLabel("ACTIVITY CALENDAR")
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentPadding = 16.dp
-                ) {
-                    CalendarHeatmap(
-                        data = state.calendarHeatmap,
-                        selectedTimestamp = state.selectedDayTimestamp,
-                        onDayClick = { timestamp ->
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
-                            onNavigateToDayDetail(timestamp)
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 140.dp)
+                        ) {
+                            item {
+                                InsightHero(state = state)
+                            }
+                            
+                            item {
+                                SectionLabel("MONTHLY BUDGET")
+                                com.masum.cipher.ui.components.BudgetHealthCard(
+                                    spent = state.monthlySummary.expense,
+                                    budget = monthlyBudget,
+                                    onEditBudgetClick = { showBudgetDialog = true },
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    isHapticsEnabled = isHapticsEnabled
+                                )
+                            }
+
+                            item {
+                                SectionLabel("FINANCIAL FLOW")
+                                SpendingTrendChart(
+                                    expensePoints = state.expenseTrendHistory,
+                                    incomePoints = state.incomeTrendHistory,
+                                    netFlowPoints = state.netFlowTrendHistory,
+                                    isHapticsEnabled = isHapticsEnabled
+                                )
+                            }
                         }
-                    )
+                    }
+                    1 -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 140.dp)
+                        ) {
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    SectionLabel("CATEGORY ALLOCATION")
+                                    androidx.compose.material3.TextButton(
+                                        onClick = {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            onNavigateToCategories()
+                                        },
+                                        modifier = Modifier.padding(top = 20.dp)
+                                    ) {
+                                        Text("View Hub")
+                                    }
+                                }
+                                VaultCard(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                                ) {
+                                    CategoryAllocationDonut(
+                                        categories = state.categoryBreakdown,
+                                        categoryBudgets = settings?.categoryBudgets ?: emptyMap(),
+                                        onCategoryClick = { catData ->
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedCategoryForDetail = catData
+                                        }
+                                    )
+                                }
+                            }
+
+                            item {
+                                SectionLabel("PEAK SPENDING HOURS")
+                                PeakHoursChart(hours = state.peakHours)
+                            }
+
+                            item {
+                                SectionLabel("ACTIVITY CALENDAR")
+                                VaultCard(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentPadding = 16.dp
+                                ) {
+                                    CalendarHeatmap(
+                                        data = state.calendarHeatmap,
+                                        selectedTimestamp = state.selectedDayTimestamp,
+                                        onDayClick = { timestamp ->
+                                            view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                            onNavigateToDayDetail(timestamp)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    2 -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 140.dp)
+                        ) {
+                            item {
+                                SubscriptionsCard(
+                                    subscriptions = state.detectedSubscriptions,
+                                    isHapticsEnabled = isHapticsEnabled,
+                                    onAddClick = { showAddSubDialog = true },
+                                    onSubscriptionClick = { sub -> selectedSubscription = sub },
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -351,93 +411,269 @@ fun InsightsScreen(
 
 @Composable
 private fun InsightHero(state: InsightsContract.State) {
+    val totalSpent = remember(state.categoryBreakdown) { state.categoryBreakdown.sumOf { it.amount } }
     val mostExpensiveCategory = state.categoryBreakdown.maxByOrNull { it.amount }
+    val periodLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
     
-    Column(
+    val daysInRange = remember(state.selectedTimeRange) {
+        val now = System.currentTimeMillis()
+        val end = state.selectedTimeRange.endTime.coerceAtMost(now)
+        val start = state.selectedTimeRange.startTime
+        ((end - start) / (1000L * 60 * 60 * 24)).coerceIn(1L, 3650L)
+    }
+    val dailyRunRate = if (daysInRange > 0) totalSpent / daysInRange.toDouble() else state.avgTransactionSize
+
+    VaultCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        MaterialTheme.colorScheme.background
-                    )
-                ),
-                shape = RoundedCornerShape(32.dp)
-            )
-            .padding(vertical = 32.dp, horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentPadding = 0.dp,
+        shape = RoundedCornerShape(24.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(72.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            androidx.compose.ui.graphics.Color.Transparent
+                        )
+                    )
+                )
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(LucideIcons.TrendingUp, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = if (mostExpensiveCategory != null) {
-                val periodSuffix = when (state.selectedTimePeriod) {
-                    com.masum.cipher.core.domain.model.TimePeriod.THIS_WEEK -> "this week"
-                    com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK -> "last week"
-                    com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "this month"
-                    com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "last month"
-                    com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "this year"
-                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME,
-                    com.masum.cipher.core.domain.model.TimePeriod.CUSTOM -> "in this timeframe"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.TrendingUp,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Text(
+                        text = "OVERVIEW",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                "You've spent the most on ${mostExpensiveCategory.category.lowercase().replaceFirstChar { it.uppercase() }} $periodSuffix."
-            } else {
-                "Your financial story is just beginning."
-            },
-            style = Typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = when (state.selectedTimePeriod) {
-                com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> {
-                    val rangeLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
-                    if (rangeLabel != "All Time") {
-                        "All-time financial activity overview ($rangeLabel)."
-                    } else {
-                        "All-time financial activity overview."
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = periodLabel,
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 10.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (mostExpensiveCategory != null && totalSpent > 0.0) {
+                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(mostExpensiveCategory.category)
+                val catPercent = ((mostExpensiveCategory.amount / totalSpent) * 100.0).toInt().coerceIn(0, 100)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                        Text(
+                            text = "Most spent on ${categoryEnum.displayName}",
+                            style = Typography.titleLarge.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                letterSpacing = (-0.3).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "₹${String.format(Locale.getDefault(), "%,.0f", mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
+                            style = Typography.bodySmall.copy(
+                                fontFamily = Manrope,
+                                fontSize = 12.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(categoryEnum.color.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = categoryEnum.icon,
+                            contentDescription = null,
+                            tint = categoryEnum.color,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 }
-                else -> "Activity overview for ${AppFormatters.getPeriodLabel(state.selectedTimePeriod)}."
-            },
-            style = Typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "No spending recorded",
+                        style = Typography.titleLarge.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Transactions in this period will appear here.",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Manrope,
+                            fontSize = 12.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            InsightMetric(label = "NO-SPEND STREAK", value = "${state.noSpendStreak} Days", icon = LucideIcons.Calendar)
-            InsightMetric(label = "AVG SPEND / TXN", value = "₹${state.avgTransactionSize.toInt()}", icon = LucideIcons.Clock)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "NO-SPEND STREAK",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${state.noSpendStreak} Days",
+                        style = Typography.titleMedium.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .height(28.dp)
+                        .width(1.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                )
+
+                Column(
+                    modifier = Modifier.weight(1.1f).padding(horizontal = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "DAILY AVERAGE",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "₹${String.format(Locale.getDefault(), "%,.0f", dailyRunRate)} / day",
+                        style = Typography.titleMedium.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .height(28.dp)
+                        .width(1.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = "AVG / TXN",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "₹${String.format(Locale.getDefault(), "%,.0f", state.avgTransactionSize)}",
+                        style = Typography.titleMedium.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
-    }
-}
-
-@Composable
-private fun InsightMetric(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = value, style = Typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        Text(text = label, style = Typography.labelSmall, color = MaterialTheme.colorScheme.outline)
     }
 }
 
@@ -456,61 +692,367 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-fun SubscriptionItem(
-    sub: SubscriptionDetector.Subscription,
+fun SubscriptionsCard(
+    subscriptions: List<SubscriptionDetector.Subscription>,
     isHapticsEnabled: Boolean,
-    onClick: () -> Unit = {}
+    onAddClick: () -> Unit,
+    onSubscriptionClick: (SubscriptionDetector.Subscription) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
+    val totalMonthly = remember(subscriptions) {
+        subscriptions.sumOf { it.amount * (30.0 / it.frequencyDays.coerceAtLeast(1)) }
+    }
+    val totalAnnual = remember(totalMonthly) { totalMonthly * 12.0 }
+
+    val nextSub = remember(subscriptions) {
+        subscriptions.minByOrNull { it.nextExpectedDate }
+    }
 
     VaultCard(
-        onClick = { 
-            view.performVibrate(isHapticsEnabled)
-            onClick() 
-        },
-        contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentPadding = 18.dp
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(sub.category.color.copy(alpha = 0.1f), CircleShape),
-                contentAlignment = Alignment.Center
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = sub.category.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = sub.category.color
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Calendar,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Text(
+                        text = "RECURRING BILLS",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (subscriptions.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "${subscriptions.size} Active",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Manrope,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 10.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            onAddClick()
+                        }
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Plus,
+                        contentDescription = "Add Subscription",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = "Add",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
-            Spacer(Modifier.width(16.dp))
+            if (subscriptions.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column {
+                        Text(
+                            text = "MONTHLY COMMITMENT",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.5.sp,
+                                letterSpacing = 0.8.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "₹${String.format(Locale.getDefault(), "%,.0f", totalMonthly)} / mo",
+                            style = Typography.titleLarge.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp,
+                                letterSpacing = (-0.5).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "≈ ₹${String.format(Locale.getDefault(), "%,.0f", totalAnnual)} / yr projected",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Manrope,
+                                fontSize = 11.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = sub.merchant,
-                    style = Typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "Every ${sub.frequencyDays} days · Next: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
-                    style = Typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                    if (nextSub != null) {
+                        val now = System.currentTimeMillis()
+                        val diffDays = ((nextSub.nextExpectedDate - now) / (1000L * 60 * 60 * 24)).toInt()
+                        val (badgeText, badgeColor) = when {
+                            diffDays <= 0 -> Pair("Due today", MaterialTheme.colorScheme.error)
+                            diffDays == 1 -> Pair("Due tomorrow", MaterialTheme.colorScheme.primary)
+                            diffDays <= 7 -> Pair("Due in ${diffDays}d", MaterialTheme.colorScheme.primary)
+                            else -> Pair("Next: ${AppFormatters.getDay().format(Date(nextSub.nextExpectedDate))}", MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
 
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = AppFormatters.getCurrencyNoDecimals().format(sub.amount),
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(badgeColor.copy(alpha = 0.12f))
+                                .border(1.dp, badgeColor.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+                                .padding(horizontal = 9.dp, vertical = 5.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Clock,
+                                    contentDescription = null,
+                                    tint = badgeColor,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                                Text(
+                                    text = badgeText,
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Manrope,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = badgeColor
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                 )
+
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    subscriptions.forEachIndexed { index, sub ->
+                        val diffDays = ((sub.nextExpectedDate - System.currentTimeMillis()) / (1000L * 60 * 60 * 24)).toInt()
+                        val freqLabel = when (sub.frequencyDays) {
+                            7 -> "Weekly"
+                            14 -> "Bi-weekly"
+                            30, 31 -> "Monthly"
+                            90 -> "Quarterly"
+                            365 -> "Annual"
+                            else -> "Every ${sub.frequencyDays}d"
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled)
+                                    onSubscriptionClick(sub)
+                                }
+                                .padding(vertical = 8.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(RoundedCornerShape(11.dp))
+                                    .background(sub.category.color.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = sub.category.icon,
+                                    contentDescription = null,
+                                    tint = sub.category.color,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            Spacer(Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = sub.merchant,
+                                    style = Typography.titleSmall.copy(
+                                        fontFamily = Manrope,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 13.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = "$freqLabel • Next: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Manrope,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    if (diffDays in 0..3) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                                        ) {
+                                            Text(
+                                                text = if (diffDays == 0) "Today" else "${diffDays}d left",
+                                                style = Typography.labelSmall.copy(
+                                                    fontFamily = Manrope,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 9.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = "₹${String.format(Locale.getDefault(), "%,.0f", sub.amount)}",
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = Manrope,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Icon(
+                                    imageVector = LucideIcons.ChevronRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+
+                        if (index < subscriptions.lastIndex) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 50.dp)
+                                    .height(0.5.dp)
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
+                            )
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Calendar,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "No Recurring Bills Tracked",
+                        style = Typography.titleSmall.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Cipher automatically detects repeat payments, or tap + Add to track one manually.",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Manrope,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
             }
         }
     }

@@ -23,13 +23,13 @@ object PdfGenerator {
         val colorExpense = Color.rgb(225, 29, 72)
 
         val logoTypeface = try {
-            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.manrope_variable)
+            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.dmsans_variable)
         } catch (e: Exception) {
             Typeface.DEFAULT
         }
         
         val normalTypeface = try {
-            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.geist_variablefont_weight)
+            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.dmsans_variable)
         } catch (e: Exception) {
             Typeface.DEFAULT
         }

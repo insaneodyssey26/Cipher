@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.ui.theme.DMSans
 
 @Composable
 fun LockScreen(onUnlockClick: () -> Unit) {
@@ -72,6 +73,7 @@ fun LockScreen(onUnlockClick: () -> Unit) {
             Text(
                 text = "cipher",
                 style = MaterialTheme.typography.displaySmall.copy(
+                    fontFamily = DMSans,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-1.5).sp
                 ),

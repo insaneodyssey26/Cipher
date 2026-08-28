@@ -84,6 +84,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.BuildConfig
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.TransactionCategory
@@ -95,17 +96,21 @@ import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
+import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Activity
 import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Bug
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.CalendarClock
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.RefreshCw
@@ -145,7 +150,7 @@ fun DashboardScreen(
 
     val coroutineScope = rememberCoroutineScope()
     
-    val currentVersionCode = 18
+    val currentVersionCode = BuildConfig.VERSION_CODE
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
@@ -367,75 +372,6 @@ fun DashboardScreen(
                         bottom = 140.dp
                     )
                 ) {
-                    if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp)
-                                    .padding(top = 16.dp, bottom = 8.dp)
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
-                                    .padding(20.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(bottom = 12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.BellRing,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
-                                    )
-                                    Text(
-                                        text = "Action Needed",
-                                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                }
-                                
-                                state.pendingSubscriptions.forEach { subscription ->
-                                    val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = "${subscription.merchant}",
-                                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                                                color = MaterialTheme.colorScheme.onErrorContainer
-                                            )
-                                            Text(
-                                                text = "Due for $amountStr",
-                                                style = Typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
-                                            )
-                                        }
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            androidx.compose.material3.TextButton(
-                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(subscription)) },
-                                                contentPadding = PaddingValues(horizontal = 12.dp)
-                                            ) {
-                                                Text("Skip", color = MaterialTheme.colorScheme.error)
-                                            }
-                                            androidx.compose.material3.Button(
-                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
-                                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                                                contentPadding = PaddingValues(horizontal = 16.dp)
-                                            ) {
-                                                Text("Log it", color = MaterialTheme.colorScheme.onError)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
                     if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
                         item {
                             Column(
@@ -890,14 +826,7 @@ fun DashboardScreen(
 
     if (showWhatsNewSheet) {
         val hasSeen4_1 = lastSeenWhatsNewVersionCode >= 9
-        val context = androidx.compose.ui.platform.LocalContext.current
-        val versionName = remember {
-            try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (_: Exception) {
-                "4.8.1"
-            }
-        }
+        val versionName = BuildConfig.VERSION_NAME
         ModalBottomSheet(
             onDismissRequest = {
                 coroutineScope.launch {
@@ -938,24 +867,29 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WhatsNewFeatureItem(
-                        title = "Settings Search",
-                        description = "Added a search bar at the top of the Settings screen to easily find options.",
-                        icon = LucideIcons.Search
+                        title = "Domain Tabs in Insights",
+                        description = "Explore spending, habits, and recurring bills across three focused tabs.",
+                        icon = LucideIcons.Activity
                     )
                     WhatsNewFeatureItem(
-                        title = "Check for Updates",
-                        description = "Added a button to check for app updates (found in Settings > About & Support).",
-                        icon = LucideIcons.RefreshCw
+                        title = "Financial Flow Trends",
+                        description = "Track cash flow over time with interactive expense, income, and net trend lines.",
+                        icon = LucideIcons.TrendingUp
                     )
                     WhatsNewFeatureItem(
-                        title = "App Diagnostics",
-                        description = "Added an option to view crash logs. You can copy and send them to the developer using the 'Contact Developer' button below it.",
-                        icon = LucideIcons.Bug
+                        title = "Advanced Filter Ledger",
+                        description = "Filter by transaction type, multiple categories, and custom amount ranges.",
+                        icon = LucideIcons.SlidersHorizontal
                     )
                     WhatsNewFeatureItem(
-                        title = "Settings Layout",
-                        description = "Minor layout improvements in the Settings screen.",
-                        icon = LucideIcons.Settings
+                        title = "Subscriptions Hub",
+                        description = "Manage recurring bills with monthly estimates, due dates, and manual entry.",
+                        icon = LucideIcons.CalendarClock
+                    )
+                    WhatsNewFeatureItem(
+                        title = "Custom Date Ranges",
+                        description = "Select custom timeframes and date intervals directly from the time picker.",
+                        icon = LucideIcons.Calendar
                     )
                 }
 
@@ -977,7 +911,7 @@ fun DashboardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = if (!hasSeen4_1) "Setup Tracking & Continue" else "Awesome",
+                        text = if (!hasSeen4_1) "Setup Tracking & Continue" else "Got It",
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -1440,11 +1374,11 @@ private fun DashboardHero(
                             val absVal = kotlin.math.abs(totalBalance)
                             val sign = if (totalBalance < 0) "-" else ""
                             when {
-                                absVal >= 1_000_000_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
-                                absVal >= 1_000_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
-                                absVal >= 1_000_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
-                                absVal >= 100_000.0 -> "$sign₹" + String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-                                else -> "$sign₹" + String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
+                                absVal >= 1_000_000_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
+                                absVal >= 1_000_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
+                                absVal >= 1_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
+                                absVal >= 100_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+                                else -> "₹$sign" + String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
                             }
                         }
 
@@ -1484,6 +1418,15 @@ private fun DashboardHero(
                                     )
                                 } else {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "₹",
+                                            style = Typography.headlineMedium.copy(
+                                                fontFamily = Manrope,
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(end = 2.dp)
+                                        )
                                         if (totalBalance < 0) {
                                             Text(
                                                 text = "-",
@@ -1496,15 +1439,6 @@ private fun DashboardHero(
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                         }
-                                        Text(
-                                            text = "₹",
-                                            style = Typography.headlineMedium.copy(
-                                                fontFamily = Manrope,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(end = 2.dp)
-                                        )
                                         AnimatedNumberTicker(
                                             value = kotlin.math.abs(totalBalance),
                                             textStyle = Typography.displayLarge.copy(
@@ -1620,7 +1554,7 @@ private fun DashboardHero(
                 Text(
                     text = "cipher.",
                     style = Typography.titleLarge.copy(
-                        fontFamily = Manrope,
+                        fontFamily = DMSans,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
@@ -2038,7 +1972,6 @@ private fun CashFlowSegmentBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // INCOME side
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
@@ -2082,7 +2015,6 @@ private fun CashFlowSegmentBar(
                 }
             }
 
-            // EXPENSE side
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val formattedExpense = formatAmount(expense)
                 AnimatedContent(

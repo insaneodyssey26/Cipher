@@ -1,5 +1,24 @@
 # Release Notes
 
+## [5.0.0]
+
+### Added
+- **Domain Tabs in Insights**: Organized the Insights screen into three distinct tabs (Spending, Habits, and Recurring) with a sliding indicator.
+- **Financial Flow Trends**: Added cash flow curves with quick switching between Expense, Income, and Net trends, complete with interactive drag scrubbing.
+- **Overview Card**: Replaced the previous insights header with an overview card highlighting your top spend category, no-spend streak, daily run-rate, and average spend per transaction.
+- **Advanced Filter Ledger**: Redesigned the transaction filter sheet with type selectors (All, Expenses, Income), multi-category selection chips, and minimum/maximum amount range sliders.
+- **Custom Date Ranges**: Redesigned the time interval picker with direct options for This Week, Last Week, This Month, Last Month, This Year, All Time, and custom start/end date selection.
+- **Subscriptions Hub**: Redesigned recurring bills with monthly commitment totals, annual cost estimates, countdown badges, and manual subscription creation, editing, and deletion with undo support.
+- **Notification Preferences**: Added dedicated toggles in Settings for transaction alerts, budget limit warnings (50%, 90%, 100%), daily spending recaps, monthly wrap-ups, and subscription reminders.
+
+### Changed & Improved
+- **List Scroll Performance**: Removed artificial stagger delays on scrolled items for instant, smooth 120fps list rendering.
+- **Segmented Control Interactions**: Removed touch ripple shadows across tab controls in favor of spring sliding indicators.
+- **Currency Format Consistency**: Standardized currency prefixes so the rupee symbol consistently appears before negative signs across balances and charts.
+- **Settings Header**: Redesigned the top settings header and search bar with an accent-tinted border.
+
+---
+
 ## [4.9.0]
 - **Settings Search**: Added a search bar at the top of the Settings screen to easily find options.
 - **Check for Updates**: Added a button to check for app updates (found in Settings > About & Support).

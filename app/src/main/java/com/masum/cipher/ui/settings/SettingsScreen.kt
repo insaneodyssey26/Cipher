@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,11 +22,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -63,11 +69,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -79,6 +89,8 @@ import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.DMSans
+import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -251,44 +263,113 @@ fun SettingsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
-                CenterAlignedTopAppBar(
-                    title = { Text(text = "SETTINGS", style = Typography.labelSmall.copy(letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .statusBarsPadding()
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 12.dp)
+            ) {
+                Text(
+                    text = "Settings",
+                    style = Typography.headlineMedium.copy(
+                        fontFamily = Manrope,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        letterSpacing = (-0.8).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 18.dp)
                 )
+
                 val accentColor = Color(state.accentColor.colorValue)
-                val searchGradient = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                val searchGradient = Brush.horizontalGradient(
                     colors = listOf(
-                        accentColor.copy(alpha = 0.15f),
-                        MaterialTheme.colorScheme.surface
+                        accentColor.copy(alpha = 0.12f),
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
                     )
                 )
 
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                var isFocused by remember { mutableStateOf(false) }
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
-                        .background(searchGradient, RoundedCornerShape(16.dp)),
-                    placeholder = { Text("Search settings...", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    leadingIcon = { Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = ""; focusManager.clearFocus() }) {
-                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(searchGradient)
+                        .border(
+                            width = 1.dp,
+                            color = if (isFocused || searchQuery.isNotEmpty()) accentColor.copy(alpha = 0.65f) else accentColor.copy(alpha = 0.22f),
+                            shape = RoundedCornerShape(22.dp)
+                        )
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Search,
+                        contentDescription = "Search",
+                        tint = if (isFocused || searchQuery.isNotEmpty()) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged { isFocused = it.isFocused },
+                        textStyle = Typography.bodyMedium.copy(
+                            fontFamily = DMSans,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 13.5.sp
+                        ),
+                        cursorBrush = SolidColor(accentColor),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = "Search settings, security, backup...",
+                                        style = Typography.bodyMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontSize = 13.5.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                                    )
+                                }
+                                innerTextField()
                             }
                         }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedBorderColor = accentColor.copy(alpha = 0.5f),
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    singleLine = true
-                )
+                    )
+
+                    if (searchQuery.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    searchQuery = ""
+                                    focusManager.clearFocus()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.X,
+                                contentDescription = "Clear",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     ) { padding ->
@@ -871,7 +952,7 @@ Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "cipher.",
                     style = Typography.headlineLarge.copy(
-                        fontFamily = com.masum.cipher.ui.theme.Manrope,
+                        fontFamily = DMSans,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),

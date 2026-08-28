@@ -52,11 +52,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Transparent
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -172,7 +174,11 @@ private fun WelcomePage(onNext: () -> Unit) {
             Spacer(modifier = Modifier.weight(0.9f))
             Text(
                 text = "cipher",
-                style = Typography.displayLarge,
+                style = Typography.displayLarge.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-1.5).sp
+                ),
                 color = MaterialTheme.colorScheme.onSurface
             )
 
