@@ -30,7 +30,11 @@ enum class TransactionCategory(
 
     companion object {
         fun fromString(name: String?): TransactionCategory {
-            return entries.find { it.name.equals(name, ignoreCase = true) } ?: OTHERS
+            if (name.isNullOrBlank()) return OTHERS
+            return entries.find { 
+                it.name.equals(name, ignoreCase = true) || 
+                it.displayName.equals(name, ignoreCase = true)
+            } ?: OTHERS
         }
     }
 }

@@ -55,6 +55,7 @@ class UserPreferences @Inject constructor(
         val NOTIFY_SUBSCRIPTIONS = booleanPreferencesKey("notify_subscriptions")
         val NOTIFY_NEW_APP_DETECTED = booleanPreferencesKey("notify_new_app_detected")
         val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
+        val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -94,7 +95,21 @@ class UserPreferences @Inject constructor(
             notifyUncategorizedReminder = preferences[Keys.NOTIFY_UNCATEGORIZED_REMINDER] ?: true,
             notifySubscriptions = preferences[Keys.NOTIFY_SUBSCRIPTIONS] ?: true,
             notifyNewAppDetected = preferences[Keys.NOTIFY_NEW_APP_DETECTED] ?: true,
-            ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet()
+            ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet(),
+            categoryBudgets = preferences[Keys.CATEGORY_BUDGETS]?.let { jsonStr ->
+                try {
+                    val json = org.json.JSONObject(jsonStr)
+                    val map = mutableMapOf<String, Double>()
+                    val keys = json.keys()
+                    while (keys.hasNext()) {
+                        val k = keys.next()
+                        map[k] = json.getDouble(k)
+                    }
+                    map
+                } catch (e: Exception) {
+                    emptyMap()
+                }
+            } ?: emptyMap()
         )
     }
 
@@ -235,6 +250,20 @@ class UserPreferences @Inject constructor(
             prefs[Keys.IGNORED_SUBSCRIPTIONS] = current + merchant
         }
     }
+
+    suspend fun setCategoryBudget(category: String, limit: Double) {
+        context.dataStore.edit { preferences ->
+            val currentJson = preferences[Keys.CATEGORY_BUDGETS]?.let {
+                try { org.json.JSONObject(it) } catch (e: Exception) { org.json.JSONObject() }
+            } ?: org.json.JSONObject()
+            if (limit > 0) {
+                currentJson.put(category, limit)
+            } else {
+                currentJson.remove(category)
+            }
+            preferences[Keys.CATEGORY_BUDGETS] = currentJson.toString()
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -285,5 +314,6 @@ data class UserSettings(
     val notifyUncategorizedReminder: Boolean = true,
     val notifySubscriptions: Boolean = true,
     val notifyNewAppDetected: Boolean = true,
-    val ignoredSubscriptions: Set<String> = emptySet()
+    val ignoredSubscriptions: Set<String> = emptySet(),
+    val categoryBudgets: Map<String, Double> = emptyMap()
 )

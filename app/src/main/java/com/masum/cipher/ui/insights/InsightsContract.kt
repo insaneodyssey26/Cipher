@@ -22,6 +22,7 @@ class InsightsContract {
         data class DeleteSubscription(val merchant: String) : Intent()
         data class IgnoreSubscription(val merchant: String) : Intent()
         data class RestoreSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
+        data class SetCategoryBudget(val category: String, val limit: Double) : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)

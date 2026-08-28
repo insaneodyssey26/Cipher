@@ -209,7 +209,20 @@ class MainActivity : AppCompatActivity() {
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
                                     onNavigateBack = { navController.popBackStack() },
-                                    onNavigateToDayDetail = { timestamp -> navController.navigate("day_detail/$timestamp") }
+                                    onNavigateToDayDetail = { timestamp -> navController.navigate("day_detail/$timestamp") },
+                                    onNavigateToCategories = { navController.navigate("categories") }
+                                )
+                            }
+                            composable(
+                                route = "categories",
+                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                            ) {
+                                val viewModel: InsightsViewModel = hiltViewModel()
+                                com.masum.cipher.ui.categories.CategoriesScreen(
+                                    viewModel = viewModel,
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                             composable(

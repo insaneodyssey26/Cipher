@@ -46,6 +46,7 @@ import com.masum.cipher.ui.components.PeakHoursChart
 import com.masum.cipher.ui.components.SpendingTrendChart
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
@@ -61,7 +62,8 @@ fun InsightsScreen(
     viewModel: InsightsViewModel,
     userPreferences: UserPreferences,
     onNavigateBack: () -> Unit,
-    onNavigateToDayDetail: (Long) -> Unit
+    onNavigateToDayDetail: (Long) -> Unit,
+    onNavigateToCategories: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
@@ -70,6 +72,8 @@ fun InsightsScreen(
     var showAddSubDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var selectedSubscription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
     var showBudgetDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedCategoryForDetail by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<DashboardContract.CategoryData?>(null) }
+    var editingTransaction by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<com.masum.cipher.core.data.local.entity.TransactionEntity?>(null) }
     var budgetInput by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
     val monthlyBudget = settings?.monthlyBudget ?: 0.0
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
@@ -199,13 +203,33 @@ fun InsightsScreen(
 
             // 3. Category Allocation
             item {
-                SectionLabel("CATEGORY ALLOCATION")
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SectionLabel("CATEGORY ALLOCATION")
+                    androidx.compose.material3.TextButton(
+                        onClick = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            onNavigateToCategories()
+                        },
+                        modifier = Modifier.padding(top = 20.dp)
+                    ) {
+                        Text("View Hub")
+                    }
+                }
                 VaultCard(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     CategoryAllocationDonut(
-                        categories = state.categoryBreakdown
+                        categories = state.categoryBreakdown,
+                        categoryBudgets = settings?.categoryBudgets ?: emptyMap(),
+                        onCategoryClick = { catData ->
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            selectedCategoryForDetail = catData
+                        }
                     )
                 }
             }
@@ -284,6 +308,44 @@ fun InsightsScreen(
                 }
             }
         }
+    }
+
+    selectedCategoryForDetail?.let { catData ->
+        val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(catData.category)
+        val filteredTxs = state.allTransactions.filter { tx ->
+            tx.timestamp in state.selectedTimeRange.startTime..state.selectedTimeRange.endTime
+        }
+        com.masum.cipher.ui.components.CategoryDetailSheet(
+            categoryData = catData,
+            categoryBudget = settings?.categoryBudgets?.get(categoryEnum.displayName) ?: settings?.categoryBudgets?.get(categoryEnum.name) ?: 0.0,
+            transactions = filteredTxs,
+            onSetCategoryBudget = { newLimit ->
+                viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryEnum.displayName, newLimit))
+            },
+            onDismiss = { selectedCategoryForDetail = null },
+            onTransactionClick = { tx ->
+                editingTransaction = tx
+                selectedCategoryForDetail = null
+            },
+            isHapticsEnabled = isHapticsEnabled
+        )
+    }
+
+    editingTransaction?.let { tx ->
+        com.masum.cipher.ui.components.TransactionDetailsSheet(
+            transaction = tx,
+            onDismiss = { editingTransaction = null },
+            onConfirm = { updated ->
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
+                editingTransaction = null
+            },
+            onDelete = {
+                viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(tx))
+                editingTransaction = null
+            },
+            isHapticsEnabled = isHapticsEnabled
+        )
     }
 }
 

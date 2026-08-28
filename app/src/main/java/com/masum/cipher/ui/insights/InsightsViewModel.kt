@@ -61,6 +61,13 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.RestoreSubscription -> {
                 viewModelScope.launch { subscriptionDao.insert(intent.subscription) }
             }
+            is InsightsContract.Intent.SetCategoryBudget -> setCategoryBudget(intent.category, intent.limit)
+        }
+    }
+
+    private fun setCategoryBudget(category: String, limit: Double) {
+        viewModelScope.launch {
+            userPreferences.setCategoryBudget(category, limit)
         }
     }
 

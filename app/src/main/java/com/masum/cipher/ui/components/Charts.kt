@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import java.util.Locale
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -585,13 +587,15 @@ fun SpendingTrendChart(
  */
 @Composable
 fun CategoryAllocationDonut(
-    categories: List<DashboardContract.CategoryData>
+    categories: List<DashboardContract.CategoryData>,
+    categoryBudgets: Map<String, Double> = emptyMap(),
+    onCategoryClick: (DashboardContract.CategoryData) -> Unit = {}
 ) {
     if (categories.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 48.dp),
+                .padding(vertical = 36.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -609,72 +613,120 @@ fun CategoryAllocationDonut(
     LaunchedEffect(categories) {
         if (!hasAnimated.value) {
             animProgress.snapTo(0f)
-            animProgress.animateTo(1f, animationSpec = tween(1200, easing = FastOutSlowInEasing))
+            animProgress.animateTo(1f, animationSpec = tween(1000, easing = FastOutSlowInEasing))
             hasAnimated.value = true
         } else {
             animProgress.snapTo(1f)
         }
     }
 
-    val totalPercent = remember(categories) { categories.sumOf { it.percentage.toDouble() }.toFloat() }
-
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(32.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
-            modifier = Modifier.size(160.dp),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                val strokeWidth = 24.dp.toPx()
-                var startAngle = -90f
-                val safeTotal = if (totalPercent > 0f) totalPercent else 1f
-                
-                categories.forEach { category ->
-                    val sweepAngle = (category.percentage / safeTotal) * 360f * animProgress.value
-                    drawArc(
-                        color = Color(category.color),
-                        startAngle = startAngle,
-                        sweepAngle = sweepAngle,
-                        useCenter = false,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                    )
-                    startAngle += sweepAngle
-                }
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "${categories.size}",
-                    style = Typography.headlineMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "CATEGORIES",
-                    style = Typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 1.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            categories.forEach { category ->
+                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(category.category)
+                val safeWeight = (category.percentage * animProgress.value).coerceAtLeast(0.001f)
+                Box(
+                    modifier = Modifier
+                        .weight(safeWeight)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(categoryEnum.color)
                 )
             }
         }
 
-        // Legend
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             categories.take(4).forEach { category ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(12.dp).background(Color(category.color), CircleShape))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
+                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(category.category)
+                val budget = categoryBudgets[category.category] ?: categoryBudgets[categoryEnum.name] ?: 0.0
+                val isOver = budget > 0 && category.amount > budget
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onCategoryClick(category) }
+                        .padding(vertical = 4.dp, horizontal = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(9.dp))
+                                .background(categoryEnum.color.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = categoryEnum.icon,
+                                contentDescription = null,
+                                tint = categoryEnum.color,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
                         Text(
-                            text = category.category,
-                            style = Typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = categoryEnum.displayName,
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
-                            text = "${(category.percentage * 100).toInt()}%",
-                            style = Typography.labelSmall.copy(fontSize = 10.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "₹${String.format(Locale.getDefault(), "%,.0f", category.amount)}",
+                            style = Typography.titleMedium.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            ),
+                            color = if (isOver) RoseExpense else MaterialTheme.colorScheme.onSurface
                         )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(categoryEnum.color.copy(alpha = 0.12f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "${(category.percentage * 100).toInt()}%",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Manrope,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.5.sp
+                                ),
+                                color = categoryEnum.color
+                            )
+                        }
                     }
                 }
             }
