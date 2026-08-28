@@ -51,7 +51,7 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is InsightsContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is InsightsContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
-            is InsightsContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
+            is InsightsContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period, intent.customStart, intent.customEnd)
             is InsightsContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is InsightsContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
@@ -98,8 +98,7 @@ class InsightsViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadInsights() {
         viewModelScope.launch {
-            sessionManager.selectedTimePeriod.flatMapLatest { period ->
-                val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)
+            sessionManager.selectedTimeRange.flatMapLatest { timeRange ->
                 getInsightsUseCase(timeRange)
             }.combine(_draftTransaction) { state, draft ->
                 state.copy(draftTransaction = draft)

@@ -20,11 +20,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,21 +61,32 @@ import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeSelectorDropdown(
     selectedPeriod: TimePeriod,
-    onPeriodSelected: (TimePeriod) -> Unit,
+    selectedTimeRange: TimeRange? = null,
+    onPeriodSelected: (TimePeriod, Long?, Long?) -> Unit,
     modifier: Modifier = Modifier,
     isHapticsEnabled: Boolean = true,
     iconOnly: Boolean = false
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var showDateRangePicker by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val view = androidx.compose.ui.platform.LocalView.current
     val rotation by animateFloatAsState(targetValue = if (showDialog) 180f else 0f, label = "caret_rot")
+
+    val triggerLabel = if (selectedPeriod == TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
+        val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
+        "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
+    } else {
+        selectedPeriod.label
+    }
 
     Box(modifier = modifier) {
         Row(
@@ -102,7 +118,7 @@ fun TimeSelectorDropdown(
             if (!iconOnly) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = selectedPeriod.label,
+                    text = triggerLabel,
                     style = Typography.labelMedium.copy(
                         fontFamily = Manrope,
                         fontWeight = FontWeight.Bold,
@@ -240,7 +256,7 @@ fun TimeSelectorDropdown(
                                                         .clickable {
                                                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                                                             showDialog = false
-                                                            onPeriodSelected(period)
+                                                            onPeriodSelected(period, null, null)
                                                         }
                                                         .padding(14.dp)
                                                 ) {
@@ -310,13 +326,241 @@ fun TimeSelectorDropdown(
                                         }
                                     }
                                 }
+
+                                val isCustomSelected = selectedPeriod == TimePeriod.CUSTOM
+                                val customSubtitle = if (isCustomSelected && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
+                                    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                                    "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
+                                } else {
+                                    "Pick arbitrary start & end dates"
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(
+                                            if (isCustomSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                        )
+                                        .border(
+                                            width = if (isCustomSelected) 1.5.dp else 1.dp,
+                                            color = if (isCustomSelected) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                            shape = RoundedCornerShape(20.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            showDateRangePicker = true
+                                        }
+                                        .padding(14.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .clip(CircleShape)
+                                                    .background(
+                                                        if (isCustomSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Calendar,
+                                                    contentDescription = null,
+                                                    tint = if (isCustomSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                            Column {
+                                                Text(
+                                                    text = "Custom Range",
+                                                    style = Typography.titleSmall.copy(
+                                                        fontFamily = Manrope,
+                                                        fontWeight = if (isCustomSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                        fontSize = 14.sp
+                                                    ),
+                                                    color = if (isCustomSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = customSubtitle,
+                                                    style = Typography.bodySmall.copy(
+                                                        fontSize = 11.sp,
+                                                        color = if (isCustomSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                )
+                                            }
+                                        }
+
+                                        if (isCustomSelected) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(18.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Check,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(12.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        if (showDateRangePicker) {
+            val initialStart = if (selectedPeriod == TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
+                selectedTimeRange.startTime
+            } else null
+            val initialEnd = if (selectedPeriod == TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.endTime > 0L) {
+                selectedTimeRange.endTime
+            } else null
+
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val dateRangePickerState = rememberDateRangePickerState(
+                initialSelectedStartDateMillis = initialStart,
+                initialSelectedEndDateMillis = initialEnd,
+                initialDisplayedMonthMillis = initialStart ?: System.currentTimeMillis(),
+                yearRange = (currentYear - 5)..(currentYear + 2)
+            )
+            val datePickerColors = androidx.compose.material3.DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                headlineContentColor = MaterialTheme.colorScheme.onSurface,
+                weekdayContentColor = MaterialTheme.colorScheme.primary,
+                subheadContentColor = MaterialTheme.colorScheme.primary,
+                navigationContentColor = MaterialTheme.colorScheme.primary,
+                yearContentColor = MaterialTheme.colorScheme.onSurface,
+                currentYearContentColor = MaterialTheme.colorScheme.primary,
+                selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
+                selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+                dayContentColor = MaterialTheme.colorScheme.onSurface,
+                selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+                dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onSurface,
+                todayContentColor = MaterialTheme.colorScheme.primary,
+                todayDateBorderColor = MaterialTheme.colorScheme.primary,
+                dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
+            )
+
+            DatePickerDialog(
+                onDismissRequest = { showDateRangePicker = false },
+                shape = RoundedCornerShape(28.dp),
+                tonalElevation = 0.dp,
+                colors = datePickerColors,
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val start = dateRangePickerState.selectedStartDateMillis
+                            val end = dateRangePickerState.selectedEndDateMillis
+                            if (start != null && end != null) {
+                                val endCal = Calendar.getInstance().apply {
+                                    timeInMillis = end
+                                    set(Calendar.HOUR_OF_DAY, 23)
+                                    set(Calendar.MINUTE, 59)
+                                    set(Calendar.SECOND, 59)
+                                    set(Calendar.MILLISECOND, 999)
+                                }
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showDateRangePicker = false
+                                showDialog = false
+                                onPeriodSelected(TimePeriod.CUSTOM, start, endCal.timeInMillis)
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Apply",
+                            style = Typography.labelLarge.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDateRangePicker = false }) {
+                        Text(
+                            text = "Cancel",
+                            style = Typography.labelLarge.copy(fontFamily = Manrope),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            ) {
+                DateRangePicker(
+                    state = dateRangePickerState,
+                    title = {
+                        Text(
+                            text = "Select Date Range",
+                            style = Typography.titleMedium.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+                        )
+                    },
+                    headline = {
+                        val start = dateRangePickerState.selectedStartDateMillis
+                        val end = dateRangePickerState.selectedEndDateMillis
+                        val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                        val rangeText = if (start != null && end != null) {
+                            "${sdf.format(Date(start))} – ${sdf.format(Date(end))}"
+                        } else if (start != null) {
+                            "${sdf.format(Date(start))} – End Date"
+                        } else "Start Date – End Date"
+
+                        Text(
+                            text = rangeText,
+                            style = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                            modifier = Modifier.padding(start = 24.dp, bottom = 12.dp)
+                        )
+                    },
+                    showModeToggle = false,
+                    colors = datePickerColors
+                )
+            }
+        }
     }
+}
+
+@Composable
+fun TimeSelectorDropdown(
+    selectedPeriod: TimePeriod,
+    selectedTimeRange: TimeRange? = null,
+    onPeriodSelected: (TimePeriod) -> Unit,
+    modifier: Modifier = Modifier,
+    isHapticsEnabled: Boolean = true,
+    iconOnly: Boolean = false
+) {
+    TimeSelectorDropdown(
+        selectedPeriod = selectedPeriod,
+        selectedTimeRange = selectedTimeRange,
+        onPeriodSelected = { period, _, _ -> onPeriodSelected(period) },
+        modifier = modifier,
+        isHapticsEnabled = isHapticsEnabled,
+        iconOnly = iconOnly
+    )
 }
 
 private fun getPeriodDateSubtitle(period: TimePeriod): String {
@@ -335,5 +579,6 @@ private fun getPeriodDateSubtitle(period: TimePeriod): String {
             sdfYear.format(Date(range.startTime))
         }
         TimePeriod.ALL_TIME -> "All Records"
+        TimePeriod.CUSTOM -> "Pick Dates"
     }
 }

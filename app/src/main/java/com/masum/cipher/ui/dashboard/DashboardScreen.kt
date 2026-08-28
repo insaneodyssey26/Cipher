@@ -560,9 +560,10 @@ fun DashboardScreen(
                     income = state.totalIncome,
                     expense = state.totalExpenses,
                     selectedPeriod = state.selectedTimePeriod,
+                    selectedTimeRange = state.selectedTimeRange,
                     transactions = state.transactions,
-                    onPeriodSelected = { period ->
-                        viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period))
+                    onPeriodSelected = { period, start, end ->
+                        viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
                     },
                     searchQuery = state.searchQuery,
                     onSearchQueryChanged = { viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(it)) },
@@ -1173,8 +1174,9 @@ private fun DashboardHero(
     income: Double,
     expense: Double,
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
+    selectedTimeRange: com.masum.cipher.core.domain.model.TimeRange? = null,
     transactions: List<TransactionEntity>,
-    onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod) -> Unit,
+    onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod, Long?, Long?) -> Unit,
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
     privacyMode: Boolean,
@@ -1252,8 +1254,14 @@ private fun DashboardHero(
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(13.dp)
                                 )
+                                val periodLabel = if (selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
+                                    val sdf = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
+                                    "${sdf.format(java.util.Date(selectedTimeRange.startTime))} – ${sdf.format(java.util.Date(selectedTimeRange.endTime))}"
+                                } else {
+                                    AppFormatters.getPeriodLabel(selectedPeriod, transactions)
+                                }
                                 Text(
-                                    text = "${AppFormatters.getPeriodLabel(selectedPeriod, transactions)} BALANCE".uppercase(),
+                                    text = "$periodLabel BALANCE".uppercase(),
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
                                         fontSize = 11.sp,
@@ -1586,6 +1594,7 @@ private fun DashboardHero(
 
                     TimeSelectorDropdown(
                         selectedPeriod = selectedPeriod,
+                        selectedTimeRange = selectedTimeRange,
                         onPeriodSelected = onPeriodSelected,
                         isHapticsEnabled = isHapticsEnabled,
                         iconOnly = true

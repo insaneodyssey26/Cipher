@@ -65,6 +65,16 @@ object AppFormatters {
             com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> {
                 "All Time"
             }
+            com.masum.cipher.core.domain.model.TimePeriod.CUSTOM -> {
+                if (transactions.isNotEmpty()) {
+                    val minTime = transactions.minOfOrNull { it.timestamp }
+                    val maxTime = transactions.maxOfOrNull { it.timestamp }
+                    if (minTime != null && maxTime != null) {
+                        val format = SimpleDateFormat("MMM d", Locale.getDefault())
+                        "${format.format(Date(minTime))} – ${format.format(Date(maxTime))}"
+                    } else "Custom Range"
+                } else "Custom Range"
+            }
         }
     }
 }

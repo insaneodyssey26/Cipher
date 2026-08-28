@@ -66,6 +66,8 @@ class GetInsightsUseCase @Inject constructor(
 
             InsightsContract.State(
                 isLoading = false,
+                selectedTimePeriod = timeRange.period,
+                selectedTimeRange = timeRange,
                 spendingVelocity = DashboardContract.VelocityData(
                     currentWeekAvg = currentWeekAvg,
                     lastWeekAvg = lastWeekAvg,

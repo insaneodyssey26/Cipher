@@ -72,6 +72,7 @@ class GetDashboardDataUseCase @Inject constructor(
                     searchQuery = query,
                     activeFilter = filter,
                     selectedTimePeriod = timeRange.period,
+                    selectedTimeRange = timeRange,
                     totalIncome = stats.income,
                     totalExpenses = stats.expenses,
                     thisMonthExpenses = stats.thisMonthExpenses,

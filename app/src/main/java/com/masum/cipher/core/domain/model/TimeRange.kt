@@ -8,7 +8,8 @@ enum class TimePeriod(val label: String) {
     THIS_MONTH("This Month"),
     LAST_MONTH("Last Month"),
     THIS_YEAR("This Year"),
-    ALL_TIME("All Time")
+    ALL_TIME("All Time"),
+    CUSTOM("Custom")
 }
 
 data class TimeRange(
@@ -18,7 +19,10 @@ data class TimeRange(
     val label: String = period.label
 ) {
     companion object {
-        fun from(period: TimePeriod): TimeRange {
+        fun from(period: TimePeriod, customStart: Long? = null, customEnd: Long? = null): TimeRange {
+            if (period == TimePeriod.CUSTOM && customStart != null && customEnd != null) {
+                return TimeRange(period, customStart, customEnd, "Custom")
+            }
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 0)
             calendar.set(Calendar.MINUTE, 0)
@@ -65,6 +69,12 @@ data class TimeRange(
                 }
                 TimePeriod.ALL_TIME -> {
                     TimeRange(period, 0L, Long.MAX_VALUE)
+                }
+                TimePeriod.CUSTOM -> {
+                    val start = calendar.timeInMillis
+                    calendar.add(Calendar.DAY_OF_YEAR, 1)
+                    val end = calendar.timeInMillis - 1
+                    TimeRange(period, start, end)
                 }
             }
         }
@@ -127,7 +137,7 @@ data class TimeRange(
                     val end = cal.timeInMillis
                     TimeRange(TimePeriod.THIS_YEAR, start, end, "vs last year")
                 }
-                TimePeriod.ALL_TIME -> null
+                TimePeriod.ALL_TIME, TimePeriod.CUSTOM -> null
             }
         }
     }

@@ -14,7 +14,7 @@ class InsightsContract {
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
-        data class SetTimePeriod(val period: com.masum.cipher.core.domain.model.TimePeriod) : Intent()
+        data class SetTimePeriod(val period: com.masum.cipher.core.domain.model.TimePeriod, val customStart: Long? = null, val customEnd: Long? = null) : Intent()
         data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
         data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
         object DismissCategoryRulePrompt : Intent()
@@ -32,6 +32,7 @@ class InsightsContract {
     data class State(
         val isLoading: Boolean = true,
         val selectedTimePeriod: com.masum.cipher.core.domain.model.TimePeriod = com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH,
+        val selectedTimeRange: com.masum.cipher.core.domain.model.TimeRange = com.masum.cipher.core.domain.model.TimeRange.from(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH),
         val spendingVelocity: DashboardContract.VelocityData = DashboardContract.VelocityData(),
         val netWorthHistory: List<DashboardContract.Point> = emptyList(),
         val expenseTrendHistory: List<DashboardContract.Point> = emptyList(),

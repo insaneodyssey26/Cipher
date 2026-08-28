@@ -182,8 +182,9 @@ fun InsightsScreen(
                 title = {
                     TimeSelectorDropdown(
                         selectedPeriod = state.selectedTimePeriod,
-                        onPeriodSelected = { period ->
-                            viewModel.handleIntent(InsightsContract.Intent.SetTimePeriod(period))
+                        selectedTimeRange = state.selectedTimeRange,
+                        onPeriodSelected = { period, start, end ->
+                            viewModel.handleIntent(InsightsContract.Intent.SetTimePeriod(period, start, end))
                         },
                         isHapticsEnabled = isHapticsEnabled
                     )
@@ -357,7 +358,8 @@ private fun InsightHero(state: InsightsContract.State) {
                     com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> "this month"
                     com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> "last month"
                     com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> "this year"
-                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> "overall"
+                    com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME,
+                    com.masum.cipher.core.domain.model.TimePeriod.CUSTOM -> "in this timeframe"
                 }
                 "You've spent the most on ${mostExpensiveCategory.category.lowercase().replaceFirstChar { it.uppercase() }} $periodSuffix."
             } else {

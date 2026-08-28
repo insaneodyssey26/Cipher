@@ -50,7 +50,7 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = intent.filter
-            is DashboardContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period)
+            is DashboardContract.Intent.SetTimePeriod -> sessionManager.setTimePeriod(intent.period, intent.customStart, intent.customEnd)
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is DashboardContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
@@ -86,10 +86,9 @@ class DashboardViewModel @Inject constructor(
 
     private fun observeDashboardData() {
         viewModelScope.launch {
-            combine(_searchQuery, _activeFilter, sessionManager.selectedTimePeriod) { query, filter, period ->
-                Triple(query, filter, period)
-            }.flatMapLatest { (query, filter, period) ->
-                val timeRange = com.masum.cipher.core.domain.model.TimeRange.from(period)
+            combine(_searchQuery, _activeFilter, sessionManager.selectedTimeRange) { query, filter, timeRange ->
+                Triple(query, filter, timeRange)
+            }.flatMapLatest { (query, filter, timeRange) ->
                 getDashboardDataUseCase(query, filter, timeRange)
             }.combine(_draftTransaction) { state, draft ->
                 state.copy(draftTransaction = draft)
