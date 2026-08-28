@@ -2,7 +2,6 @@ package com.masum.cipher.ui.dashboard
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
@@ -43,7 +42,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,6 +87,7 @@ import com.masum.cipher.ui.components.AnimatedNumberTicker
 import com.masum.cipher.ui.components.StaggeredEntranceItem
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionDetailsSheet
+import com.masum.cipher.ui.components.TransactionListSkeleton
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
 import com.masum.cipher.ui.theme.DMSans
@@ -436,10 +435,11 @@ fun DashboardScreen(
                     }
 
                 if (state.isLoading) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                        }
+                    item(key = "dashboard_skeleton_loader") {
+                        TransactionListSkeleton(
+                            count = 6,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 } else if (state.transactions.isEmpty()) {
                     if (state.searchQuery.isNotEmpty()) {
@@ -675,9 +675,18 @@ fun DashboardScreen(
                         scaleY = scale
                         this.alpha = alpha
                     }
-                    .clip(RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(28.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(32.dp))
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(28.dp)
+                    )
                     .padding(24.dp)
             ) {
                 IconButton(
@@ -685,95 +694,118 @@ fun DashboardScreen(
                         coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
                         showRatingDialog = false
                     },
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-12).dp)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(32.dp)
                 ) {
                     Icon(
                         imageVector = LucideIcons.X,
-                        contentDescription = "Never ask again",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        contentDescription = "Dismiss",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-                
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
+                            .size(64.dp)
                             .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-                                    )
-                                )
-                            ),
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = LucideIcons.Star,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
-                    
-                    Spacer(modifier = Modifier.height(20.dp))
-                    
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         "Enjoying Cipher?",
-                        style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        style = Typography.titleLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center
                     )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        "If Cipher is helping you manage your money, please take a moment to rate it. It really helps!",
-                        style = Typography.bodyMedium,
+                        "If Cipher helps you manage your spending, please consider leaving a review on the Play Store. Your support means the world!",
+                        style = Typography.bodyMedium.copy(fontFamily = DMSans),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
-                        lineHeight = 22.sp
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
+                            showRatingDialog = false
+                            try {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                            } catch (_: android.content.ActivityNotFoundException) {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        TextButton(
-                            onClick = {
-                                coroutineScope.launch { 
-                                    userPreferences.increaseReviewPromptInterval()
-                                    userPreferences.resetAppLaunchCount() 
-                                }
-                                showRatingDialog = false
-                            },
-                            modifier = Modifier.weight(1f).height(56.dp)
-                        ) {
-                            Text("Maybe later", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        
-                        Button(
-                            onClick = {
-                                coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
-                                showRatingDialog = false
-                                try {
-                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
-                                } catch (_: android.content.ActivityNotFoundException) {
-                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
-                                }
-                            },
-                            modifier = Modifier.weight(1f).height(56.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Rate 5 Stars", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-                        }
+                        Icon(
+                            imageVector = LucideIcons.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Rate on Google Play",
+                            style = Typography.labelLarge.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    TextButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                userPreferences.increaseReviewPromptInterval()
+                                userPreferences.resetAppLaunchCount()
+                            }
+                            showRatingDialog = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(
+                            "Maybe later",
+                            style = Typography.labelLarge.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -848,7 +880,7 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Version $versionName is here",
+                    text = "Version $versionName is here 🎉",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -905,7 +937,7 @@ fun DashboardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Got It",
+                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Cool Stuff",
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -1209,7 +1241,6 @@ private fun DashboardHero(
     )
 
     val balanceScale = 0.6f + (0.4f * scrollProgress)
-    val statsScale = 0.85f + (0.15f * scrollProgress)
 
     Box(
         modifier = Modifier
@@ -1397,19 +1428,24 @@ private fun DashboardHero(
                                 )
                             } else {
                                 val isHugeAmount = kotlin.math.abs(totalBalance) >= 100_000
-                                val shouldShorten = isHugeAmount || (scrollProgress < 0.5f && kotlin.math.abs(totalBalance) >= 1000)
 
-                                if (shouldShorten) {
-                                    Text(
-                                        text = formattedBalance,
-                                        style = Typography.displayLarge.copy(
-                                            fontFamily = Manrope,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = balanceFontSize,
-                                            letterSpacing = (-1.2).sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                if (isHugeAmount) {
+                                    AnimatedContent(
+                                        targetState = formattedBalance,
+                                        transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
+                                        label = "huge_balance_fade"
+                                    ) { targetText ->
+                                        Text(
+                                            text = targetText,
+                                            style = Typography.displayLarge.copy(
+                                                fontFamily = Manrope,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = balanceFontSize,
+                                                letterSpacing = (-1.2).sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
                                 } else {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
@@ -1448,23 +1484,61 @@ private fun DashboardHero(
                             }
                         }
                         
+                        val exitAlpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f)
+                        val exitProgress = exitAlpha * exitAlpha * (3f - 2f * exitAlpha)
+
+                        val enterAlpha = ((0.65f - scrollProgress) / 0.65f).coerceIn(0f, 1f)
+                        val enterProgress = enterAlpha * enterAlpha * (3f - 2f * enterAlpha)
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .graphicsLayer {
-                                    scaleX = statsScale
-                                    scaleY = statsScale
-                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0.5f)
+                                    alpha = exitProgress
+                                    translationX = -(1f - exitProgress) * 70.dp.toPx()
                                 }
                                 .background(
                                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                                     RoundedCornerShape(20.dp)
                                 )
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                    shape = RoundedCornerShape(20.dp)
+                                )
                                 .padding(vertical = 12.dp, horizontal = 16.dp)
                         ) {
-                            val isCollapsed = scrollProgress < 0.5f
-                            CashFlowSegmentBar(income = income, expense = expense, privacyMode = privacyMode, isCollapsed = isCollapsed)
+                            CashFlowSegmentBar(
+                                income = income,
+                                expense = expense,
+                                privacyMode = privacyMode,
+                                isCollapsed = false
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    alpha = enterProgress
+                                    translationX = (1f - enterProgress) * 70.dp.toPx()
+                                }
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                    RoundedCornerShape(16.dp)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(vertical = 7.dp, horizontal = 12.dp)
+                        ) {
+                            CashFlowSegmentBar(
+                                income = income,
+                                expense = expense,
+                                privacyMode = privacyMode,
+                                isCollapsed = true
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxSize()
@@ -1473,60 +1547,52 @@ private fun DashboardHero(
                     val headerConstraints = looseConstraints.copy(minWidth = constraints.maxWidth, maxWidth = constraints.maxWidth)
                     val periodLabelPlaceable = measurables[0].measure(headerConstraints)
                     val balancePlaceable = measurables[1].measure(looseConstraints)
+                    val expandedStatsPlaceable = measurables[2].measure(looseConstraints.copy(minWidth = constraints.maxWidth, maxWidth = constraints.maxWidth))
                     
-                    val statsExpandedWidth = constraints.maxWidth
-                    val balanceVisualCollapsedWidth = (balancePlaceable.width * 0.6f).toInt()
+                    val balanceVisualCollapsedWidth = (balancePlaceable.width * 0.62f).toInt()
                     val gapBetween = 16.dp.roundToPx()
-                    val dynamicCollapsedWidth = constraints.maxWidth - balanceVisualCollapsedWidth - gapBetween
-                    val statsCollapsedWidth = dynamicCollapsedWidth.coerceIn(
-                        (constraints.maxWidth * 0.50f).toInt(),
-                        (constraints.maxWidth * 0.74f).toInt()
+                    val maxSafeCollapsedWidth = (constraints.maxWidth - balanceVisualCollapsedWidth - gapBetween).coerceAtLeast(100)
+                    val collapsedStatsConstraints = looseConstraints.copy(
+                        minWidth = (maxSafeCollapsedWidth * 0.85f).toInt(),
+                        maxWidth = maxSafeCollapsedWidth
                     )
-                    val currentStatsWidth = statsCollapsedWidth + ((statsExpandedWidth - statsCollapsedWidth) * scrollProgress).toInt()
-                    
-                    val statsConstraints = looseConstraints.copy(minWidth = currentStatsWidth, maxWidth = currentStatsWidth)
-                    val statsPlaceable = measurables[2].measure(statsConstraints)
+                    val collapsedStatsPlaceable = measurables[3].measure(collapsedStatsConstraints)
+
+                    val progress = scrollProgress.coerceIn(0f, 1f)
 
                     layout(constraints.maxWidth, constraints.maxHeight) {
                         val periodLabelY = 10.dp.roundToPx()
-                        if (scrollProgress > 0.4f) {
+                        if (progress > 0.4f) {
                             periodLabelPlaceable.placeRelative(0, periodLabelY)
                         }
 
-                        val balanceXProgress = scrollProgress * scrollProgress
-                        val statsXProgress = scrollProgress * scrollProgress
-
                         val expBalanceX = (constraints.maxWidth - balancePlaceable.width) / 2f
                         val colBalanceX = 0f
-                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * balanceXProgress
+                        val currentBalanceX = colBalanceX + (expBalanceX - colBalanceX) * progress
 
                         val expBalanceY = (periodLabelY + periodLabelPlaceable.height + 14.dp.roundToPx()).toFloat()
                         val colBalanceY = (constraints.maxHeight - balancePlaceable.height) / 2f
-                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * scrollProgress
-
-                        val balanceVisualRight = currentBalanceX + balancePlaceable.width * balanceScale
-                        val balanceVisualBottom = currentBalanceY + balancePlaceable.height * (0.5f + 0.5f * balanceScale)
-
-                        val expStatsX = (constraints.maxWidth - statsPlaceable.width) / 2f
-                        val colStatsX = (constraints.maxWidth - statsPlaceable.width).toFloat()
-                        val currentStatsX = colStatsX + (expStatsX - colStatsX) * statsXProgress
-
-                        val colStatsY = (constraints.maxHeight - statsPlaceable.height) / 2f
-                        val maxAllowedStatsY = (constraints.maxHeight - statsPlaceable.height).toFloat().coerceAtLeast(0f)
-                        val expStatsY = (expBalanceY + balancePlaceable.height + 14.dp.toPx()).coerceAtMost(maxAllowedStatsY)
-                        val nominalStatsY = colStatsY + (expStatsY - colStatsY) * scrollProgress
-
-                        val horizontalOverlap = (balanceVisualRight + 8.dp.toPx()) - currentStatsX
-                        val currentStatsY = if (horizontalOverlap > 0f && scrollProgress > 0.05f) {
-                            val safeSeparatedY = (balanceVisualBottom + 8.dp.toPx()).coerceAtMost(maxAllowedStatsY)
-                            val overlapRatio = (horizontalOverlap / (balancePlaceable.width * balanceScale).coerceAtLeast(1f)).coerceIn(0f, 1f)
-                            (nominalStatsY * (1f - overlapRatio) + safeSeparatedY * overlapRatio).coerceIn(0f, maxAllowedStatsY)
-                        } else {
-                            nominalStatsY.coerceIn(0f, maxAllowedStatsY)
-                        }
+                        val currentBalanceY = colBalanceY + (expBalanceY - colBalanceY) * progress
 
                         balancePlaceable.placeRelative(currentBalanceX.toInt(), currentBalanceY.toInt())
-                        statsPlaceable.placeRelative(currentStatsX.toInt(), currentStatsY.toInt())
+
+                        val balanceVisualHeight = balancePlaceable.height * balanceScale
+                        val balanceBottom = expBalanceY + balanceVisualHeight
+                        val remainingSpace = constraints.maxHeight - balanceBottom
+                        val maxAllowedExpStatsY = (constraints.maxHeight - expandedStatsPlaceable.height).toFloat().coerceAtLeast(0f)
+                        val expStatsY = (balanceBottom + (remainingSpace - expandedStatsPlaceable.height) / 2f).coerceIn(0f, maxAllowedExpStatsY)
+
+                        val exitAlpha = ((scrollProgress - 0.35f) / 0.65f).coerceIn(0f, 1f)
+                        if (exitAlpha > 0.01f) {
+                            expandedStatsPlaceable.placeRelative(0, expStatsY.toInt())
+                        }
+
+                        val enterAlpha = ((0.65f - scrollProgress) / 0.65f).coerceIn(0f, 1f)
+                        if (enterAlpha > 0.01f) {
+                            val colStatsX = (constraints.maxWidth - collapsedStatsPlaceable.width)
+                            val colStatsY = (constraints.maxHeight - collapsedStatsPlaceable.height) / 2f
+                            collapsedStatsPlaceable.placeRelative(colStatsX, colStatsY.toInt())
+                        }
                     }
                 }
             }
@@ -1945,11 +2011,7 @@ private fun CashFlowSegmentBar(
         animationSpec = spring(dampingRatio = 0.75f, stiffness = 150f),
         label = "incomeRatio"
     )
-    val barHeight by animateDpAsState(
-        targetValue = if (isCollapsed) 4.dp else 8.dp,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 200f),
-        label = "barHeight"
-    )
+    val barHeight = if (isCollapsed) 4.dp else 8.dp
 
     fun formatAmount(value: Double): String {
         val absVal = kotlin.math.abs(value)
@@ -1964,45 +2026,51 @@ private fun CashFlowSegmentBar(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = if (isCollapsed) 5.dp else 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(18.dp)
+                        .size(if (isCollapsed) 17.dp else 18.dp)
                         .background(EmeraldIncome.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(LucideIcons.ArrowDown, contentDescription = null, tint = EmeraldIncome, modifier = Modifier.size(12.dp))
+                    Icon(
+                        imageVector = LucideIcons.ArrowDown,
+                        contentDescription = null,
+                        tint = EmeraldIncome,
+                        modifier = Modifier.size(if (isCollapsed) 11.5.dp else 12.dp)
+                    )
                 }
                 
-                AnimatedVisibility(visible = !isCollapsed) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "INCOME",
-                            style = Typography.labelSmall.copy(
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                if (!isCollapsed) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "INCOME",
+                        style = Typography.labelSmall.copy(
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(if (isCollapsed) 4.dp else 6.dp))
                 val formattedIncome = formatAmount(income)
                 AnimatedContent(
                     targetState = if (privacyMode) "••••" else "₹$formattedIncome",
-                    transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(400)) },
-                    label = "income_anim"
+                    transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
+                    label = "income_fade"
                 ) { targetText ->
                     Text(
                         text = targetText,
                         style = Typography.titleMedium.copy(
+                            fontSize = if (isCollapsed) 14.5.sp else 16.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
                         ),
@@ -2015,12 +2083,13 @@ private fun CashFlowSegmentBar(
                 val formattedExpense = formatAmount(expense)
                 AnimatedContent(
                     targetState = if (privacyMode) "••••" else "₹$formattedExpense",
-                    transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(400)) },
-                    label = "expense_anim"
+                    transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
+                    label = "expense_fade"
                 ) { targetText ->
                     Text(
                         text = targetText,
                         style = Typography.titleMedium.copy(
+                            fontSize = if (isCollapsed) 14.5.sp else 16.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
                         ),
@@ -2028,29 +2097,32 @@ private fun CashFlowSegmentBar(
                     )
                 }
                 
-                AnimatedVisibility(visible = !isCollapsed) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "EXPENSE",
-                            style = Typography.labelSmall.copy(
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                if (!isCollapsed) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "EXPENSE",
+                        style = Typography.labelSmall.copy(
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(if (isCollapsed) 4.dp else 6.dp))
                 Box(
                     modifier = Modifier
-                        .size(18.dp)
+                        .size(if (isCollapsed) 17.dp else 18.dp)
                         .background(RoseExpense.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(LucideIcons.ArrowUp, contentDescription = null, tint = RoseExpense, modifier = Modifier.size(12.dp))
+                    Icon(
+                        imageVector = LucideIcons.ArrowUp,
+                        contentDescription = null,
+                        tint = RoseExpense,
+                        modifier = Modifier.size(if (isCollapsed) 11.5.dp else 12.dp)
+                    )
                 }
             }
         }

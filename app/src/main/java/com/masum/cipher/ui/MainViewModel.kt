@@ -98,7 +98,7 @@ class MainViewModel @Inject constructor(
             userPreferences.setOnboardingCompleted(completed)
             if (completed) {
                 userPreferences.setHasSeenNotificationFeature(true)
-                userPreferences.setLastSeenWhatsNewVersionCode(10)
+                userPreferences.setLastSeenWhatsNewVersionCode(com.masum.cipher.BuildConfig.VERSION_CODE)
             }
         }
     }

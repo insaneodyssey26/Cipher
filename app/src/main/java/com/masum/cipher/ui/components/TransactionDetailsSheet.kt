@@ -577,6 +577,14 @@ private fun AmountInputField(
                 val currentText = textFieldValue.text
                 val safeCursor = textFieldValue.selection.start.coerceIn(0, currentText.length)
 
+                LaunchedEffect(safeCursor, currentText, textLayoutResult) {
+                    val layout = textLayoutResult ?: return@LaunchedEffect
+                    if (currentText.isNotEmpty()) {
+                        val cursorRect = layout.getCursorRect(safeCursor)
+                        textScrollState.animateScrollTo(cursorRect.left.toInt())
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .weight(1f, fill = false)

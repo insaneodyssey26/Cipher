@@ -553,7 +553,6 @@ Column(modifier = Modifier.fillMaxWidth()) {
             }
 
             if (matchHaptic) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Zap,
