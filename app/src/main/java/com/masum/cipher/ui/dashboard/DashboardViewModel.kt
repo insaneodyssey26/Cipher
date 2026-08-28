@@ -27,7 +27,8 @@ class DashboardViewModel @Inject constructor(
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
     private val categoryRuleDao: CategoryRuleDao,
-    private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao
+    private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
+    private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
     initialState = DashboardContract.State()
 ) {
@@ -56,6 +57,13 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
             is DashboardContract.Intent.ApproveSubscription -> approveSubscription(intent.subscription)
             is DashboardContract.Intent.SkipSubscription -> skipSubscription(intent.subscription)
+            is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget)
+        }
+    }
+
+    private fun updateMonthlyBudget(budget: Double) {
+        viewModelScope.launch {
+            updateSettingsUseCase.monthlyBudget(budget)
         }
     }
 

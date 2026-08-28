@@ -125,47 +125,16 @@ fun InsightsScreen(
     }
     
     if (showBudgetDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showBudgetDialog = false },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            title = { Text("Monthly Budget", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
-            text = {
-                androidx.compose.material3.OutlinedTextField(
-                    value = budgetInput,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
-                    label = { Text("Limit (₹)") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
-                    ),
-                    colors = androidx.compose.material3.TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.Button(
-                    onClick = {
-                        val amount = budgetInput.toDoubleOrNull() ?: 0.0
-                        coroutineScope.launch {
-                            userPreferences.setMonthlyBudget(amount)
-                        }
-                        showBudgetDialog = false
-                    },
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Save", color = MaterialTheme.colorScheme.onSurface)
+        com.masum.cipher.ui.components.EditBudgetDialog(
+            currentBudget = monthlyBudget,
+            onDismiss = { showBudgetDialog = false },
+            onConfirm = { amount ->
+                coroutineScope.launch {
+                    userPreferences.setMonthlyBudget(amount)
                 }
+                showBudgetDialog = false
             },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showBudgetDialog = false }) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) 
-                }
-            }
+            isHapticsEnabled = isHapticsEnabled
         )
     }
 
@@ -209,13 +178,12 @@ fun InsightsScreen(
             
             item {
                 SectionLabel("MONTHLY BUDGET")
-                BudgetGaugeCard(
+                com.masum.cipher.ui.components.BudgetHealthCard(
                     spent = state.monthlySummary.expense,
                     budget = monthlyBudget,
-                    onSetBudgetClick = {
-                        budgetInput = if (monthlyBudget > 0) monthlyBudget.toInt().toString() else ""
-                        showBudgetDialog = true
-                    }
+                    onEditBudgetClick = { showBudgetDialog = true },
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    isHapticsEnabled = isHapticsEnabled
                 )
             }
 
@@ -481,233 +449,6 @@ fun SubscriptionItem(
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-            }
-        }
-    }
-}
-
-
-
-@Composable
-fun BudgetGaugeCard(
-    spent: Double,
-    budget: Double,
-    onSetBudgetClick: () -> Unit
-) {
-    VaultCard(
-        modifier = Modifier.padding(horizontal = 24.dp),
-        onClick = onSetBudgetClick,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        if (budget > 0) {
-            val progress = (spent / budget).toFloat().coerceIn(0f, 1f)
-            val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
-                targetValue = progress,
-                animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-                label = "budgetProgress"
-            )
-            val remaining = (budget - spent).coerceAtLeast(0.0)
-            val formattedRemaining = String.format(java.util.Locale.US, "%.0f", remaining)
-            
-            val barColor = when {
-                progress >= 0.9f -> com.masum.cipher.ui.theme.RoseExpense
-                progress >= 0.75f -> androidx.compose.ui.graphics.Color(0xFFF59E0B)
-                else -> com.masum.cipher.ui.theme.EmeraldIncome
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val statusText = when {
-                        progress >= 1f -> "Exceeded"
-                        progress >= 0.9f -> "Critical"
-                        progress >= 0.75f -> "Warning"
-                        else -> "On Track"
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .background(barColor.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = statusText,
-                            style = Typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                            color = barColor
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-                    androidx.compose.foundation.Canvas(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        val strokeWidth = 14.dp.toPx()
-                        val maxRadius = kotlin.math.min((size.width - strokeWidth) / 2, size.height - strokeWidth / 2)
-                        val diameter = maxRadius * 2
-                        val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
-                        val topLeft = androidx.compose.ui.geometry.Offset(
-                            x = (size.width - diameter) / 2,
-                            y = size.height - maxRadius - strokeWidth / 2
-                        )
-                        
-                        drawArc(
-                            color = trackColor,
-                            startAngle = 180f,
-                            sweepAngle = 180f,
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                width = strokeWidth,
-                                cap = androidx.compose.ui.graphics.StrokeCap.Round
-                            ),
-                            size = arcSize,
-                            topLeft = topLeft
-                        )
-                        
-                        if (animatedProgress > 0f) {
-                            drawArc(
-                                color = barColor,
-                                startAngle = 180f,
-                                sweepAngle = 180f * animatedProgress,
-                                useCenter = false,
-                                style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                    width = strokeWidth,
-                                    cap = androidx.compose.ui.graphics.StrokeCap.Round
-                                ),
-                                size = arcSize,
-                                topLeft = topLeft
-                            )
-                        }
-                    }
-                    
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ) {
-                        Text(
-                            text = "₹$formattedRemaining",
-                            style = Typography.headlineMedium.copy(
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 32.sp,
-                                letterSpacing = (-1).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Remaining",
-                            style = Typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text("Spent", style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(
-                            "₹${String.format(java.util.Locale.US, "%.0f", spent)}", 
-                            style = Typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), 
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("Limit", style = Typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(
-                            "₹${String.format(java.util.Locale.US, "%.0f", budget)}", 
-                            style = Typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), 
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Not Set",
-                            style = Typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.Target,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "No Monthly Budget Set",
-                    style = Typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Set a monthly spending limit to monitor expenses and stay on track with your financial targets.",
-                    style = Typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(14.dp))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "+ Set Budget Target",
-                        style = Typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
         }
     }

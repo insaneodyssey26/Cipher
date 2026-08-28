@@ -21,6 +21,7 @@ class DashboardContract {
         object DismissCategoryRulePrompt : Intent()
         data class ApproveSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class SkipSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
+        data class UpdateMonthlyBudget(val budget: Double) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
