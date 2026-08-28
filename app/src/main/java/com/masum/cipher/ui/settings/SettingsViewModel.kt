@@ -43,6 +43,12 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
             is SettingsContract.Intent.SetNotifyAllTransactions -> updateNotifyAllTransactions(intent.enabled)
+            is SettingsContract.Intent.SetNotifyBudgetAlerts -> updateNotifyBudgetAlerts(intent.enabled)
+            is SettingsContract.Intent.SetNotifyDailySummary -> updateNotifyDailySummary(intent.enabled)
+            is SettingsContract.Intent.SetNotifyMonthlyWrapped -> updateNotifyMonthlyWrapped(intent.enabled)
+            is SettingsContract.Intent.SetNotifyUncategorizedReminder -> updateNotifyUncategorizedReminder(intent.enabled)
+            is SettingsContract.Intent.SetNotifySubscriptions -> updateNotifySubscriptions(intent.enabled)
+            is SettingsContract.Intent.SetNotifyNewAppDetected -> updateNotifyNewAppDetected(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount)
@@ -68,6 +74,12 @@ class SettingsViewModel @Inject constructor(
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
                         notifyAllTransactions = settings.notifyAllTransactions,
+                        notifyBudgetAlerts = settings.notifyBudgetAlerts,
+                        notifyDailySummary = settings.notifyDailySummary,
+                        notifyMonthlyWrapped = settings.notifyMonthlyWrapped,
+                        notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
+                        notifySubscriptions = settings.notifySubscriptions,
+                        notifyNewAppDetected = settings.notifyNewAppDetected,
                         isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout,
                         monthlyBudget = settings.monthlyBudget,
@@ -96,6 +108,48 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setNotifyAllTransactions(enabled)
             updateState { copy(notifyAllTransactions = enabled) }
+        }
+    }
+
+    private fun updateNotifyBudgetAlerts(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyBudgetAlerts(enabled)
+            updateState { copy(notifyBudgetAlerts = enabled) }
+        }
+    }
+
+    private fun updateNotifyDailySummary(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyDailySummary(enabled)
+            updateState { copy(notifyDailySummary = enabled) }
+        }
+    }
+
+    private fun updateNotifyMonthlyWrapped(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyMonthlyWrapped(enabled)
+            updateState { copy(notifyMonthlyWrapped = enabled) }
+        }
+    }
+
+    private fun updateNotifyUncategorizedReminder(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyUncategorizedReminder(enabled)
+            updateState { copy(notifyUncategorizedReminder = enabled) }
+        }
+    }
+
+    private fun updateNotifySubscriptions(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifySubscriptions(enabled)
+            updateState { copy(notifySubscriptions = enabled) }
+        }
+    }
+
+    private fun updateNotifyNewAppDetected(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyNewAppDetected(enabled)
+            updateState { copy(notifyNewAppDetected = enabled) }
         }
     }
 

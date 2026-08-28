@@ -14,6 +14,12 @@ class SettingsContract {
         data class SetAutoLockTimeout(val timeout: Long) : Intent()
         data class SetPrivacyModeEnabled(val enabled: Boolean) : Intent()
         data class SetNotifyAllTransactions(val enabled: Boolean) : Intent()
+        data class SetNotifyBudgetAlerts(val enabled: Boolean) : Intent()
+        data class SetNotifyDailySummary(val enabled: Boolean) : Intent()
+        data class SetNotifyMonthlyWrapped(val enabled: Boolean) : Intent()
+        data class SetNotifyUncategorizedReminder(val enabled: Boolean) : Intent()
+        data class SetNotifySubscriptions(val enabled: Boolean) : Intent()
+        data class SetNotifyNewAppDetected(val enabled: Boolean) : Intent()
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
         data class SetMonthlyBudget(val amount: Double) : Intent()
         object ClearAllData : Intent()
@@ -33,7 +39,13 @@ class SettingsContract {
         val isBiometricEnabled: Boolean = false,
         val autoLockTimeout: Long = 0,
         val isPrivacyModeEnabled: Boolean = false,
-        val notifyAllTransactions: Boolean = false,
+        val notifyAllTransactions: Boolean = true,
+        val notifyBudgetAlerts: Boolean = true,
+        val notifyDailySummary: Boolean = true,
+        val notifyMonthlyWrapped: Boolean = true,
+        val notifyUncategorizedReminder: Boolean = true,
+        val notifySubscriptions: Boolean = true,
+        val notifyNewAppDetected: Boolean = true,
         val isHapticsEnabled: Boolean = true,
         val monthlyBudget: Double = 0.0,
         val autoBackupEnabled: Boolean = false,

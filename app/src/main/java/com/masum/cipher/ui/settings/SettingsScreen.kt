@@ -90,6 +90,7 @@ import compose.icons.lucideicons.CalendarClock
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronRight
+import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.CloudDownload
 import compose.icons.lucideicons.CloudUpload
 import compose.icons.lucideicons.Coffee
@@ -110,6 +111,7 @@ import compose.icons.lucideicons.Moon
 import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.RefreshCw
 import compose.icons.lucideicons.Search
+import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Star
@@ -205,11 +207,20 @@ fun SettingsScreen(
     val matchPrivacy = query.isBlank() || "privacy mode".contains(query) || "hide balances on dashboard".contains(query)
     val matchSecurity = query.isBlank() || "security".contains(query) || "privacy".contains(query) || matchBiometric || matchAutoLock || matchHaptic || matchPrivacy
 
-    val matchAlerts = query.isBlank() || "interactive transaction alerts".contains(query) || "alert on every transaction".contains(query)
     val matchApps = query.isBlank() || "manage tracked apps".contains(query) || "select which apps to monitor for transactions".contains(query)
     val matchHealth = query.isBlank() || "permissions health".contains(query) || "check if cipher is working at its best".contains(query)
     val matchRules = query.isBlank() || "manage category rules".contains(query) || "view and edit custom merchant categories".contains(query)
-    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchAlerts || matchApps || matchHealth || matchRules
+    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchApps || matchHealth || matchRules
+
+    val matchNotifyTx = query.isBlank() || "transaction alerts".contains(query) || "interactive transaction alerts".contains(query)
+    val matchNotifyBudget = query.isBlank() || "budget alerts".contains(query) || "budget warnings".contains(query)
+    val matchNotifyDaily = query.isBlank() || "daily spending summary".contains(query) || "daily summary".contains(query)
+    val matchNotifyMonthly = query.isBlank() || "monthly wrapped".contains(query) || "monthly wrap-up".contains(query)
+    val matchNotifySubs = query.isBlank() || "subscription reminders".contains(query) || "recurring subscriptions".contains(query)
+    val matchNotifyUncategorized = query.isBlank() || "uncategorized reminders".contains(query) || "action needed".contains(query)
+    val matchNotifyApp = query.isBlank() || "new app suggestions".contains(query) || "payment app detected".contains(query)
+    val matchNotifySystem = query.isBlank() || "system notification channels".contains(query) || "notification channels".contains(query)
+    val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifyMonthly || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifySystem
 
     val matchBudget = query.isBlank() || "monthly budget".contains(query)
     val matchGoals = query.isBlank() || "financial goals".contains(query) || matchBudget
@@ -525,46 +536,136 @@ SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled 
             }
 
             }
-if (matchAutomation) {
-SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
-                if (matchAlerts) VaultSettingsSwitch(
-                    isHapticsEnabled = state.isHapticsEnabled,
-                    icon = LucideIcons.BellRing,
-                    title = "Interactive Transaction Alerts",
-                    description = "Alert on every transaction",
-                    checked = state.notifyAllTransactions,
-                    onCheckedChange = { 
-                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                        viewModel.handleIntent(SettingsContract.Intent.SetNotifyAllTransactions(it)) 
-                    }
-                )
-                if (matchApps) VaultSettingsItem(
-                    isHapticsEnabled = state.isHapticsEnabled,
-                    icon = LucideIcons.Smartphone,
-                    title = "Manage Tracked Apps",
-                    subtitle = "Select which apps to monitor for transactions",
-                    onClick = onNavigateToManageApps
-                )
-                if (matchHealth) VaultSettingsItem(
-                    isHapticsEnabled = state.isHapticsEnabled,
-                    icon = LucideIcons.Activity,
-                    title = "Permissions Health",
-                    subtitle = "Check if Cipher is working at its best",
-                    onClick = {
-                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                        showPermissionsHealthSheet = true
-                    }
-                )
-            
-                if (matchRules) VaultSettingsItem(
-                    isHapticsEnabled = state.isHapticsEnabled,
-                    icon = LucideIcons.BookOpen,
-                    title = "Manage Category Rules",
-                    subtitle = "View and edit custom merchant categories",
-                    onClick = onNavigateToSmartRules
-                )
+            if (matchAutomation) {
+                SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
+                    if (matchApps) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Smartphone,
+                        title = "Manage Tracked Apps",
+                        subtitle = "Select which apps to monitor for transactions",
+                        onClick = onNavigateToManageApps
+                    )
+                    if (matchHealth) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Activity,
+                        title = "Permissions Health",
+                        subtitle = "Check if Cipher is working at its best",
+                        onClick = {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            showPermissionsHealthSheet = true
+                        }
+                    )
+                
+                    if (matchRules) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.BookOpen,
+                        title = "Manage Category Rules",
+                        subtitle = "View and edit custom merchant categories",
+                        onClick = onNavigateToSmartRules
+                    )
+                }
             }
 
+            if (matchNotifications) {
+                SettingsSection("NOTIFICATIONS", icon = LucideIcons.BellRing, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "NOTIFICATIONS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "NOTIFICATIONS") null else "NOTIFICATIONS" }) {
+                    if (matchNotifyTx) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.BellRing,
+                        title = "Transaction Alerts",
+                        description = "Interactive alerts with Quick Note & Categorize",
+                        checked = state.notifyAllTransactions,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyAllTransactions(it)) 
+                        }
+                    )
+                    if (matchNotifyBudget) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Target,
+                        title = "Budget Alerts",
+                        description = "Warnings when reaching 50%, 90%, or 100% of budget",
+                        checked = state.notifyBudgetAlerts,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyBudgetAlerts(it)) 
+                        }
+                    )
+                    if (matchNotifyDaily) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Clock,
+                        title = "Daily Spending Summary",
+                        description = "Evening recap of today's total expenses",
+                        checked = state.notifyDailySummary,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyDailySummary(it)) 
+                        }
+                    )
+                    if (matchNotifyMonthly) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.CalendarClock,
+                        title = "Monthly Wrapped",
+                        description = "Monthly spending recap & insights on 1st of every month",
+                        checked = state.notifyMonthlyWrapped,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyMonthlyWrapped(it)) 
+                        }
+                    )
+                    if (matchNotifySubs) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.RefreshCw,
+                        title = "Subscription Reminders",
+                        description = "Upcoming renewal dues and auto-log alerts",
+                        checked = state.notifySubscriptions,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifySubscriptions(it)) 
+                        }
+                    )
+                    if (matchNotifyUncategorized) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Info,
+                        title = "Uncategorized Reminders",
+                        description = "Nudges to review transactions marked as Others",
+                        checked = state.notifyUncategorizedReminder,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyUncategorizedReminder(it)) 
+                        }
+                    )
+                    if (matchNotifyApp) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Smartphone,
+                        title = "New App Suggestions",
+                        description = "Prompt to track newly installed banking or payment apps",
+                        checked = state.notifyNewAppDetected,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyNewAppDetected(it)) 
+                        }
+                    )
+                    if (matchNotifySystem) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Settings,
+                        title = "System Notification Channels",
+                        subtitle = "Configure system channels and lockscreen visibility",
+                        onClick = {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            try {
+                                val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = android.net.Uri.fromParts("package", context.packageName, null)
+                                }
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                }
             }
 if (matchGoals) {
 SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {

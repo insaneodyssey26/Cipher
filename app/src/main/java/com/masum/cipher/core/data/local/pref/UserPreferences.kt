@@ -48,6 +48,12 @@ class UserPreferences @Inject constructor(
         val REVIEW_PROMPT_INTERVAL = intPreferencesKey("review_prompt_interval")
         
         val NOTIFY_ALL_TRANSACTIONS = booleanPreferencesKey("notify_all_transactions")
+        val NOTIFY_BUDGET_ALERTS = booleanPreferencesKey("notify_budget_alerts")
+        val NOTIFY_DAILY_SUMMARY = booleanPreferencesKey("notify_daily_summary")
+        val NOTIFY_MONTHLY_WRAPPED = booleanPreferencesKey("notify_monthly_wrapped")
+        val NOTIFY_UNCATEGORIZED_REMINDER = booleanPreferencesKey("notify_uncategorized_reminder")
+        val NOTIFY_SUBSCRIPTIONS = booleanPreferencesKey("notify_subscriptions")
+        val NOTIFY_NEW_APP_DETECTED = booleanPreferencesKey("notify_new_app_detected")
         val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
     }
 
@@ -82,6 +88,12 @@ class UserPreferences @Inject constructor(
             hasPromptedReview = preferences[Keys.HAS_PROMPTED_REVIEW] ?: false,
             reviewPromptInterval = preferences[Keys.REVIEW_PROMPT_INTERVAL] ?: 10,
             notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true,
+            notifyBudgetAlerts = preferences[Keys.NOTIFY_BUDGET_ALERTS] ?: true,
+            notifyDailySummary = preferences[Keys.NOTIFY_DAILY_SUMMARY] ?: true,
+            notifyMonthlyWrapped = preferences[Keys.NOTIFY_MONTHLY_WRAPPED] ?: true,
+            notifyUncategorizedReminder = preferences[Keys.NOTIFY_UNCATEGORIZED_REMINDER] ?: true,
+            notifySubscriptions = preferences[Keys.NOTIFY_SUBSCRIPTIONS] ?: true,
+            notifyNewAppDetected = preferences[Keys.NOTIFY_NEW_APP_DETECTED] ?: true,
             ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet()
         )
     }
@@ -193,6 +205,30 @@ class UserPreferences @Inject constructor(
         context.dataStore.edit { it[Keys.NOTIFY_ALL_TRANSACTIONS] = enabled }
     }
 
+    suspend fun setNotifyBudgetAlerts(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_BUDGET_ALERTS] = enabled }
+    }
+
+    suspend fun setNotifyDailySummary(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_DAILY_SUMMARY] = enabled }
+    }
+
+    suspend fun setNotifyMonthlyWrapped(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_MONTHLY_WRAPPED] = enabled }
+    }
+
+    suspend fun setNotifyUncategorizedReminder(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_UNCATEGORIZED_REMINDER] = enabled }
+    }
+
+    suspend fun setNotifySubscriptions(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_SUBSCRIPTIONS] = enabled }
+    }
+
+    suspend fun setNotifyNewAppDetected(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_NEW_APP_DETECTED] = enabled }
+    }
+
     suspend fun addIgnoredSubscription(merchant: String) {
         context.dataStore.edit { prefs ->
             val current = prefs[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet()
@@ -242,6 +278,12 @@ data class UserSettings(
     val appLaunchCount: Int = 0,
     val hasPromptedReview: Boolean = false,
     val reviewPromptInterval: Int = 10,
-    val notifyAllTransactions: Boolean = false,
+    val notifyAllTransactions: Boolean = true,
+    val notifyBudgetAlerts: Boolean = true,
+    val notifyDailySummary: Boolean = true,
+    val notifyMonthlyWrapped: Boolean = true,
+    val notifyUncategorizedReminder: Boolean = true,
+    val notifySubscriptions: Boolean = true,
+    val notifyNewAppDetected: Boolean = true,
     val ignoredSubscriptions: Set<String> = emptySet()
 )
