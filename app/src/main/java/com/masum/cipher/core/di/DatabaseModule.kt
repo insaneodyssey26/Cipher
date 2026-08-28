@@ -65,8 +65,18 @@ object DatabaseModule {
     fun provideBackupRepository(
         @ApplicationContext context: Context,
         transactionDao: TransactionDao,
-        merchantAliasDao: MerchantAliasDao
+        merchantAliasDao: MerchantAliasDao,
+        categoryRuleDao: CategoryRuleDao,
+        subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
+        userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
     ): BackupRepository {
-        return BackupRepository(context, transactionDao, merchantAliasDao)
+        return BackupRepository(
+            context = context,
+            transactionDao = transactionDao,
+            merchantAliasDao = merchantAliasDao,
+            categoryRuleDao = categoryRuleDao,
+            subscriptionDao = subscriptionDao,
+            userPreferences = userPreferences
+        )
     }
 }

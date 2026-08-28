@@ -210,13 +210,13 @@ fun SettingsScreen(
 
     val matchTheme = query.isBlank() || "light".contains(query) || "dark".contains(query) || "system".contains(query) || "theme".contains(query)
     val matchAccent = query.isBlank() || "accent color".contains(query)
-    val matchAppearance = query.isBlank() || "appearance".contains(query) || matchTheme || matchAccent
+    val matchHaptic = query.isBlank() || "haptic feedback".contains(query) || "physical response to touch".contains(query)
+    val matchAppearance = query.isBlank() || "appearance".contains(query) || "interaction".contains(query) || matchTheme || matchAccent || matchHaptic
 
     val matchBiometric = query.isBlank() || "biometric lock".contains(query) || "require authentication to open the app".contains(query)
     val matchAutoLock = query.isBlank() || "auto-lock timer".contains(query) || "auto lock".contains(query)
-    val matchHaptic = query.isBlank() || "haptic feedback".contains(query) || "physical response to touch".contains(query)
     val matchPrivacy = query.isBlank() || "privacy mode".contains(query) || "hide balances on dashboard".contains(query)
-    val matchSecurity = query.isBlank() || "security".contains(query) || "privacy".contains(query) || matchBiometric || matchAutoLock || matchHaptic || matchPrivacy
+    val matchSecurity = query.isBlank() || "security".contains(query) || "privacy".contains(query) || matchBiometric || matchAutoLock || matchPrivacy
 
     val matchApps = query.isBlank() || "manage tracked apps".contains(query) || "select which apps to monitor for transactions".contains(query)
     val matchHealth = query.isBlank() || "permissions health".contains(query) || "check if cipher is working at its best".contains(query)
@@ -552,10 +552,25 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 }
             }
 
+            if (matchHaptic) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                VaultSettingsSwitch(
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    icon = LucideIcons.Zap,
+                    title = "Haptic Feedback",
+                    description = "Physical response to touch",
+                    checked = state.isHapticsEnabled,
+                    onCheckedChange = { 
+                        view.performVibrate(it, isLongPress = true)
+                        viewModel.handleIntent(SettingsContract.Intent.SetHapticsEnabled(it)) 
+                    }
+                )
             }
-}
-if (matchSecurity) {
-SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
+        }
+    }
+
+    if (matchSecurity) {
+        SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
                 if (matchBiometric) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.ShieldCheck,
@@ -589,17 +604,6 @@ SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled 
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showTimeoutDialog = true
-                    }
-                )
-                if (matchHaptic) VaultSettingsSwitch(
-                    isHapticsEnabled = state.isHapticsEnabled,
-                    icon = LucideIcons.Zap,
-                    title = "Haptic Feedback",
-                    description = "Physical response to touch",
-                    checked = state.isHapticsEnabled,
-                    onCheckedChange = { 
-                        view.performVibrate(it, isLongPress = true)
-                        viewModel.handleIntent(SettingsContract.Intent.SetHapticsEnabled(it)) 
                     }
                 )
                 if (matchPrivacy) VaultSettingsSwitch(

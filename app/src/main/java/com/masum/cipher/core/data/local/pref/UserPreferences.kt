@@ -260,6 +260,22 @@ class UserPreferences @Inject constructor(
             preferences[Keys.CATEGORY_BUDGETS] = currentJson.toString()
         }
     }
+
+    suspend fun setCategoryBudgets(budgets: Map<String, Double>) {
+        context.dataStore.edit { preferences ->
+            val json = org.json.JSONObject()
+            budgets.forEach { (cat, limit) ->
+                if (limit > 0) json.put(cat, limit)
+            }
+            preferences[Keys.CATEGORY_BUDGETS] = json.toString()
+        }
+    }
+
+    suspend fun setIgnoredSubscriptions(ignored: Set<String>) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.IGNORED_SUBSCRIPTIONS] = ignored
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {

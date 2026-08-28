@@ -2,10 +2,15 @@ package com.masum.cipher.core.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
+import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -26,14 +31,36 @@ import javax.inject.Singleton
 @Serializable
 data class BackupData(
     val transactions: List<TransactionEntity>,
-    val aliases: List<MerchantAliasEntity>
+    val aliases: List<MerchantAliasEntity> = emptyList(),
+    val rules: List<CategoryRuleEntity> = emptyList(),
+    val subscriptions: List<SubscriptionEntity> = emptyList(),
+    val monthlyBudget: Double = 0.0,
+    val categoryBudgets: Map<String, Double> = emptyMap(),
+    val trackedApps: Set<String> = emptySet(),
+    val ignoredSubscriptions: Set<String> = emptySet(),
+    val theme: String? = null,
+    val accentColor: String? = null,
+    val isBiometricEnabled: Boolean? = null,
+    val isPrivacyModeEnabled: Boolean? = null,
+    val isHapticsEnabled: Boolean? = null,
+    val autoLockTimeout: Long? = null,
+    val notifyAllTransactions: Boolean? = null,
+    val notifyBudgetAlerts: Boolean? = null,
+    val notifyDailySummary: Boolean? = null,
+    val notifyMonthlyWrapped: Boolean? = null,
+    val notifyUncategorizedReminder: Boolean? = null,
+    val notifySubscriptions: Boolean? = null,
+    val notifyNewAppDetected: Boolean? = null
 )
 
 @Singleton
 class BackupRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val transactionDao: TransactionDao,
-    private val merchantAliasDao: MerchantAliasDao
+    private val merchantAliasDao: MerchantAliasDao,
+    private val categoryRuleDao: CategoryRuleDao,
+    private val subscriptionDao: SubscriptionDao,
+    private val userPreferences: UserPreferences
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -47,9 +74,29 @@ class BackupRepository @Inject constructor(
 
     suspend fun exportData(outputStream: OutputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            val settings = userPreferences.settingsFlow.first()
             val data = BackupData(
                 transactions = transactionDao.getAllTransactions().first(),
-                aliases = merchantAliasDao.getAllAliases().first()
+                aliases = merchantAliasDao.getAllAliases().first(),
+                rules = categoryRuleDao.getAllRules().first(),
+                subscriptions = subscriptionDao.getAllSubscriptions().first(),
+                monthlyBudget = settings.monthlyBudget,
+                categoryBudgets = settings.categoryBudgets,
+                trackedApps = settings.trackedApps,
+                ignoredSubscriptions = settings.ignoredSubscriptions,
+                theme = settings.theme.name,
+                accentColor = settings.accentColor.name,
+                isBiometricEnabled = settings.isBiometricEnabled,
+                isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
+                isHapticsEnabled = settings.isHapticsEnabled,
+                autoLockTimeout = settings.autoLockTimeout,
+                notifyAllTransactions = settings.notifyAllTransactions,
+                notifyBudgetAlerts = settings.notifyBudgetAlerts,
+                notifyDailySummary = settings.notifyDailySummary,
+                notifyMonthlyWrapped = settings.notifyMonthlyWrapped,
+                notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
+                notifySubscriptions = settings.notifySubscriptions,
+                notifyNewAppDetected = settings.notifyNewAppDetected
             )
             val jsonString = json.encodeToString(data)
             
@@ -92,9 +139,41 @@ class BackupRepository @Inject constructor(
                 val jsonString = String(jsonBytes)
                 val data = json.decodeFromString<BackupData>(jsonString)
                 
-                // Using transaction for atomic import if possible, but here we just iterate
                 data.transactions.forEach { transactionDao.insertTransaction(it) }
                 data.aliases.forEach { merchantAliasDao.insertAlias(it) }
+                data.rules.forEach { categoryRuleDao.insertRule(it) }
+                data.subscriptions.forEach { subscriptionDao.insert(it) }
+
+                if (data.monthlyBudget > 0) {
+                    userPreferences.setMonthlyBudget(data.monthlyBudget)
+                }
+                if (data.categoryBudgets.isNotEmpty()) {
+                    userPreferences.setCategoryBudgets(data.categoryBudgets)
+                }
+                if (data.trackedApps.isNotEmpty()) {
+                    userPreferences.setTrackedApps(data.trackedApps)
+                }
+                if (data.ignoredSubscriptions.isNotEmpty()) {
+                    userPreferences.setIgnoredSubscriptions(data.ignoredSubscriptions)
+                }
+
+                data.theme?.let {
+                    try { userPreferences.setTheme(com.masum.cipher.core.data.local.pref.AppTheme.valueOf(it)) } catch (_: Exception) {}
+                }
+                data.accentColor?.let {
+                    try { userPreferences.setAccentColor(com.masum.cipher.core.data.local.pref.AccentColor.valueOf(it)) } catch (_: Exception) {}
+                }
+                data.isBiometricEnabled?.let { userPreferences.setBiometricEnabled(it) }
+                data.isPrivacyModeEnabled?.let { userPreferences.setPrivacyModeEnabled(it) }
+                data.isHapticsEnabled?.let { userPreferences.setHapticsEnabled(it) }
+                data.autoLockTimeout?.let { userPreferences.setAutoLockTimeout(it) }
+                data.notifyAllTransactions?.let { userPreferences.setNotifyAllTransactions(it) }
+                data.notifyBudgetAlerts?.let { userPreferences.setNotifyBudgetAlerts(it) }
+                data.notifyDailySummary?.let { userPreferences.setNotifyDailySummary(it) }
+                data.notifyMonthlyWrapped?.let { userPreferences.setNotifyMonthlyWrapped(it) }
+                data.notifyUncategorizedReminder?.let { userPreferences.setNotifyUncategorizedReminder(it) }
+                data.notifySubscriptions?.let { userPreferences.setNotifySubscriptions(it) }
+                data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
             }
             Result.success(Unit)
         } catch (e: Exception) {
