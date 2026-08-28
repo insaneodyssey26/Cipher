@@ -164,7 +164,6 @@ fun SmartRulesScreen(
                 items(state.rules, key = { it.merchantName }) { rule ->
                     RuleItem(
                         rule = rule,
-                        isHapticsEnabled = state.isHapticsEnabled,
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled)
                             editRule = rule
@@ -196,7 +195,6 @@ fun SmartRulesScreen(
 @Composable
 private fun RuleItem(
     rule: CategoryRuleEntity,
-    isHapticsEnabled: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {

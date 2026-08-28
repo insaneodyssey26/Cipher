@@ -23,8 +23,46 @@ class SettingsContract {
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
         data class SetMonthlyBudget(val amount: Double) : Intent()
         object ClearAllData : Intent()
-        data class ExportData(val uri: Uri, val password: CharArray) : Intent()
-        data class ImportData(val uri: Uri, val password: CharArray) : Intent()
+        data class ExportData(val uri: Uri, val password: CharArray) : Intent() {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as ExportData
+
+                if (uri != other.uri) return false
+                if (!password.contentEquals(other.password)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = uri.hashCode()
+                result = 31 * result + password.contentHashCode()
+                return result
+            }
+        }
+
+        data class ImportData(val uri: Uri, val password: CharArray) : Intent() {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as ImportData
+
+                if (uri != other.uri) return false
+                if (!password.contentEquals(other.password)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = uri.hashCode()
+                result = 31 * result + password.contentHashCode()
+                return result
+            }
+        }
+
         data class ExportCsv(val uri: Uri) : Intent()
         data class ExportPdf(val uri: Uri) : Intent()
         data class SetAutoBackupEnabled(val enabled: Boolean) : Intent()

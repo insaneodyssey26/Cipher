@@ -97,6 +97,7 @@ fun AppSelectionScreen(
                 pm.queryIntentActivities(intent, 0)
             }
             val apps = resolveInfos
+                .asSequence()
                 .map { it.activityInfo.applicationInfo }
                 .distinctBy { it.packageName }
                 .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
@@ -107,11 +108,12 @@ fun AppSelectionScreen(
                             appName = pm.getApplicationLabel(info).toString(),
                             icon = pm.getApplicationIcon(info).toBitmap().asImageBitmap()
                         )
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
                 }
                 .sortedBy { it.appName }
+                .toList()
             
             withContext(Dispatchers.Main) {
                 installedApps = apps

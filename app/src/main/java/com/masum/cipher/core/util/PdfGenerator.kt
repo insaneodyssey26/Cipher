@@ -1,20 +1,22 @@
 package com.masum.cipher.core.util
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import androidx.core.content.res.ResourcesCompat
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import java.io.OutputStream
 import java.util.Date
+import java.util.Locale
 
 object PdfGenerator {
-    fun generateStatement(context: android.content.Context, transactions: List<TransactionEntity>, outputStream: OutputStream) {
+    fun generateStatement(context: Context, transactions: List<TransactionEntity>, outputStream: OutputStream) {
         val document = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 standard size
         
-        // Define premium color palette
-        val colorBrand = Color.rgb(99, 102, 241) // Indigo
         val colorTextPrimary = Color.rgb(17, 24, 39)
         val colorTextSecondary = Color.rgb(107, 114, 128)
         val colorBackgroundMuted = Color.rgb(249, 250, 251)
@@ -23,14 +25,14 @@ object PdfGenerator {
         val colorExpense = Color.rgb(225, 29, 72)
 
         val logoTypeface = try {
-            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.dmsans_variable)
-        } catch (e: Exception) {
+            ResourcesCompat.getFont(context, R.font.dmsans_variable)
+        } catch (_: Exception) {
             Typeface.DEFAULT
         }
         
         val normalTypeface = try {
-            androidx.core.content.res.ResourcesCompat.getFont(context, com.masum.cipher.R.font.dmsans_variable)
-        } catch (e: Exception) {
+            ResourcesCompat.getFont(context, R.font.dmsans_variable)
+        } catch (_: Exception) {
             Typeface.DEFAULT
         }
 
@@ -115,8 +117,8 @@ object PdfGenerator {
         // Layout constants
         val marginX = 50f
         val rightMargin = pageInfo.pageWidth - marginX
-        var currentY = 0f
-        
+        var currentY: Float
+
         // Define column layout (Date, Merchant, Category, Amount)
         val colDate = marginX + 10f
         val colMerchant = colDate + 90f
@@ -130,7 +132,7 @@ object PdfGenerator {
         val dateFormatter = AppFormatters.getFullDate()
         val rowDateFormatter = AppFormatters.getDay()
         
-        fun formatMoney(amount: Double): String = String.format(java.util.Locale.getDefault(), "Rs. %,.2f", amount)
+        fun formatMoney(amount: Double): String = String.format(Locale.getDefault(), "Rs. %,.2f", amount)
 
         if (transactions.isEmpty()) {
             val page = document.startPage(pageInfo)
@@ -191,17 +193,18 @@ object PdfGenerator {
                 
                 val cardWidth = (rightMargin - marginX - 20f) / 3f
                 val cardHeight = 55f
-                
-                val incomesX = marginX
+
                 val expensesX = marginX + cardWidth + 10f
                 val netX = expensesX + cardWidth + 10f
                 
                 // Income Card
-                canvas.drawRoundRect(incomesX, currentY, incomesX + cardWidth, currentY + cardHeight, 6f, 6f, headerBackgroundPaint)
-                canvas.drawText("TOTAL INCOME", incomesX + 15f, currentY + 25f, labelPaint)
+                canvas.drawRoundRect(
+                    marginX, currentY,
+                    marginX + cardWidth, currentY + cardHeight, 6f, 6f, headerBackgroundPaint)
+                canvas.drawText("TOTAL INCOME", marginX + 15f, currentY + 25f, labelPaint)
                 incomePaint.textAlign = Paint.Align.LEFT
                 incomePaint.textSize = 14f
-                canvas.drawText(formatMoney(totalIncome), incomesX + 15f, currentY + 45f, incomePaint)
+                canvas.drawText(formatMoney(totalIncome), marginX + 15f, currentY + 45f, incomePaint)
                 incomePaint.textAlign = Paint.Align.RIGHT
                 incomePaint.textSize = 11f
                 

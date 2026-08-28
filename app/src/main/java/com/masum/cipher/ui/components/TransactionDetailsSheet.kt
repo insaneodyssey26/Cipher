@@ -46,7 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -66,10 +65,8 @@ import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
-import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
-import androidx.compose.ui.draw.rotate
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -82,6 +79,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
 import java.util.Locale
@@ -121,7 +119,7 @@ fun TransactionDetailsSheet(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val view = androidx.compose.ui.platform.LocalView.current
+    val view = LocalView.current
 
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
@@ -441,7 +439,7 @@ private fun VaultSheetTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     showClearButton: Boolean = false
 ) {
-    val view = androidx.compose.ui.platform.LocalView.current
+    val view = LocalView.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -527,6 +525,7 @@ private fun AmountInputField(
     var showCalculator by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val view = LocalView.current
+    val locale = LocalLocale.current.platformLocale
     val hapticsEnabled = true
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -706,7 +705,7 @@ private fun AmountInputField(
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
-                text = "= ₹${String.format(Locale.getDefault(), "%,.2f", computed)}",
+                text = "= ₹${String.format(locale, "%,.2f", computed)}",
                 style = Typography.titleMedium,
                 color = color.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
@@ -734,7 +733,7 @@ private fun AmountInputField(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = compose.icons.LucideIcons.Calculator,
+                    imageVector = LucideIcons.Calculator,
                     contentDescription = "Toggle Input",
                     tint = if (showCalculator) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(14.dp)
@@ -748,10 +747,10 @@ private fun AmountInputField(
             }
         }
         
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = showCalculator,
-            enter = androidx.compose.animation.expandVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeIn(),
-            exit = androidx.compose.animation.shrinkVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeOut()
+            enter = expandVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeIn(),
+            exit = shrinkVertically(animationSpec = androidx.compose.animation.core.tween(300)) + androidx.compose.animation.fadeOut()
         ) {
             CalculatorNumpad(
                 input = textFieldValue.text,

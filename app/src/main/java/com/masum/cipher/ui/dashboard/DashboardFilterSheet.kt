@@ -1,7 +1,6 @@
 package com.masum.cipher.ui.dashboard
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -66,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
@@ -73,8 +73,6 @@ import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
-import compose.icons.lucideicons.RotateCcw
-import compose.icons.lucideicons.X
 
 data class DashboardFilter(
     val type: DashboardContract.FilterType = DashboardContract.FilterType.ALL,
@@ -85,14 +83,6 @@ data class DashboardFilter(
     val isActive: Boolean
         get() = type != DashboardContract.FilterType.ALL || selectedCategories.isNotEmpty() || minAmount != null || maxAmount != null
 
-    val activeCount: Int
-        get() {
-            var count = 0
-            if (type != DashboardContract.FilterType.ALL) count++
-            if (selectedCategories.isNotEmpty()) count += selectedCategories.size
-            if (minAmount != null || maxAmount != null) count++
-            return count
-        }
 }
 
 private data class QuickAmountRange(
@@ -141,15 +131,6 @@ fun DashboardFilterSheet(
             QuickAmountRange("₹2k - ₹10k", 2000.0, 10000.0),
             QuickAmountRange("> ₹10k", 10000.0, null)
         )
-    }
-
-    val hasChanges = remember(draftType, draftCategories, minInput, maxInput, currentFilter) {
-        val currentMin = minInput.toDoubleOrNull()
-        val currentMax = maxInput.toDoubleOrNull()
-        draftType != currentFilter.type ||
-                draftCategories != currentFilter.selectedCategories ||
-                currentMin != currentFilter.minAmount ||
-                currentMax != currentFilter.maxAmount
     }
 
     val draftIsActive = remember(draftType, draftCategories, minInput, maxInput) {
@@ -264,7 +245,7 @@ fun DashboardFilterSheet(
 
                         Box(
                             modifier = Modifier
-                                .offset(x = indicatorOffset)
+                                .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                                 .width(tabWidth)
                                 .fillMaxHeight()
                                 .clip(RoundedCornerShape(9.dp))

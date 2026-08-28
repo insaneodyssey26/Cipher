@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class SecurityManager @Inject constructor(
@@ -55,11 +56,11 @@ class SecurityManager @Inject constructor(
         
         if (legacyPassphrase != null) {
             val encryptedHex = keystoreManager.encrypt(legacyPassphrase)
-            sharedPrefs.edit()
-                .putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
-                .apply()
+            sharedPrefs.edit {
+                putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
+            }
                 
-            legacyPrefs.edit().clear().apply()
+            legacyPrefs.edit { clear() }
             
             return decodePassphrase(legacyPassphrase)
         }
@@ -73,9 +74,9 @@ class SecurityManager @Inject constructor(
         
         val encryptedHex = keystoreManager.encrypt(base64Passphrase)
         
-        sharedPrefs.edit()
-            .putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
-            .apply()
+        sharedPrefs.edit {
+            putString(KEY_DB_PASSPHRASE_V2, encryptedHex)
+        }
             
         return newPassphrase
     }

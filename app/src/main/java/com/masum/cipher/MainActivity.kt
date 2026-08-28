@@ -37,19 +37,27 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.graphics.Color as AndroidColor
+import androidx.activity.SystemBarStyle
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.core.updates.UpdateManager
 import com.masum.cipher.core.worker.NotificationScheduler
 import com.masum.cipher.ui.MainContract
 import com.masum.cipher.ui.MainViewModel
+import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
+import com.masum.cipher.ui.components.LockScreen
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.dashboard.DashboardScreen
 import com.masum.cipher.ui.dashboard.DashboardViewModel
@@ -86,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         
         notificationScheduler.scheduleDailyNotifications()
-        com.masum.cipher.core.updates.UpdateManager.checkForUpdates(this) {
+        UpdateManager.checkForUpdates(this) {
             updateReady.value = true
         }
         
@@ -102,26 +110,24 @@ class MainActivity : AppCompatActivity() {
             
             state.settings?.let { userSettings ->
                 val isSystemDark = isSystemInDarkTheme()
-                val darkTheme = remember(userSettings.theme, isSystemDark) {
-                    when (userSettings.theme) {
-                        AppTheme.LIGHT -> false
-                        AppTheme.DARK -> true
-                        AppTheme.SYSTEM -> isSystemDark
-                    }
+                val darkTheme = when (userSettings.theme) {
+                    AppTheme.LIGHT -> false
+                    AppTheme.DARK -> true
+                    AppTheme.SYSTEM -> isSystemDark
                 }
 
                 LaunchedEffect(darkTheme) {
                     val style = if (darkTheme) {
-                        androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                        SystemBarStyle.dark(AndroidColor.TRANSPARENT)
                     } else {
-                        androidx.activity.SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                        SystemBarStyle.light(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT)
                     }
                     enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 }
 
                 CipherTheme(
                     darkTheme = darkTheme,
-                    accentColor = androidx.compose.ui.graphics.Color(userSettings.accentColor.colorValue)
+                    accentColor = Color(userSettings.accentColor.colorValue)
                 ) {
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
@@ -208,7 +214,6 @@ class MainActivity : AppCompatActivity() {
                                 InsightsScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateBack = { navController.popBackStack() },
                                     onNavigateToDayDetail = { timestamp -> navController.navigate("day_detail/$timestamp") },
                                     onNavigateToCategories = { navController.navigate("categories") }
                                 )
@@ -219,7 +224,7 @@ class MainActivity : AppCompatActivity() {
                                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
                             ) {
                                 val viewModel: InsightsViewModel = hiltViewModel()
-                                com.masum.cipher.ui.categories.CategoriesScreen(
+                                CategoriesScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
                                     onNavigateBack = { navController.popBackStack() }
@@ -243,7 +248,6 @@ class MainActivity : AppCompatActivity() {
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     biometricAuthenticator = biometricAuthenticator,
-                                    onNavigateBack = { navController.popBackStack() },
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToSmartRules = { navController.navigate("smart_rules") }
@@ -295,7 +299,7 @@ class MainActivity : AppCompatActivity() {
 
                         if (showAddSheet) {
                             TransactionDetailsSheet(
-                                transaction = state.draftTransaction ?: com.masum.cipher.core.data.local.entity.TransactionEntity(
+                                transaction = state.draftTransaction ?: TransactionEntity(
                                     amount = 0.0,
                                     merchant = "",
                                     currency = "INR",
@@ -318,14 +322,14 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         if (!state.isAuthenticated && !state.isOnboardingRequired) {
-                            com.masum.cipher.ui.components.LockScreen(
+                            LockScreen(
                                 onUnlockClick = { mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication) }
                             )
                         }
 
                         if (state.isOnboardingRequired) {
                             OnboardingScreen(
-                                currentAccentColor = state.settings?.accentColor ?: com.masum.cipher.core.data.local.pref.AccentColor.INDIGO,
+                                currentAccentColor = state.settings?.accentColor ?: AccentColor.INDIGO,
                                 onAccentColorSelected = { color -> mainViewModel.handleIntent(MainContract.Intent.SaveAccentColor(color)) },
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
@@ -337,7 +341,7 @@ class MainActivity : AppCompatActivity() {
                                 Snackbar(
                                     modifier = Modifier.padding(16.dp).navigationBarsPadding(),
                                     action = {
-                                        TextButton(onClick = { com.masum.cipher.core.updates.UpdateManager.completeUpdate(this@MainActivity) }) {
+                                        TextButton(onClick = { UpdateManager.completeUpdate(this@MainActivity) }) {
                                             Text("RESTART", color = MaterialTheme.colorScheme.primary)
                                         }
                                     }

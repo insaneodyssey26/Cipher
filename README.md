@@ -294,20 +294,19 @@ app/
 
 ## Tech stack
 
-| Layer | Technology |
-|-------|-----------|
-| Language | Kotlin 2.4.10 |
-| UI | Jetpack Compose + Material 3 |
-| Architecture | MVI via `MviBase` |
-| DI | Hilt |
-| Database | Room 2.x + SQLCipher (AES-256) |
-| Preferences | DataStore Preferences |
+| Layer | Technology                              |
+|-------|-----------------------------------------|
+| Language | Kotlin 2.4.10                           |
+| UI | Jetpack Compose + Material 3            |
+| Architecture | MVI via `MviBase`                       |
+| DI | Hilt                                    |
+| Database | Room 2.x + SQLCipher (AES-256)          |
+| Preferences | DataStore Preferences                   |
 | Security | BiometricPrompt, androidx.security.crypto |
-| Navigation | Navigation Compose |
-| Widgets | Glance (AppWidget) |
-| Min SDK | 24 (Android 7.0) |
-| Target SDK | 37 (Android 17) |
-| Version | 4.9.0 |
+| Navigation | Navigation Compose                      |
+| Widgets | Glance (AppWidget)                      |
+| Min SDK | 24 (Android 7.0)                        |
+| Target SDK | 37 (Android 17)                         |
 
 ---
 

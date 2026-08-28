@@ -1,3 +1,5 @@
+@file:Suppress("RestrictedApi")
+
 package com.masum.cipher.ui.widget
 
 import android.content.Context

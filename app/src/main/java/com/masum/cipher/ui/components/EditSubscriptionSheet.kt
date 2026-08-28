@@ -5,7 +5,6 @@ import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +31,6 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -44,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -68,12 +65,12 @@ fun EditSubscriptionSheet(
     onDelete: (() -> Unit)? = null
 ) {
     var merchant by remember { mutableStateOf(subscription?.merchant ?: "") }
-    var amountText by remember { mutableStateOf(if (subscription != null) subscription.amount.toString() else "") }
+    var amountText by remember { mutableStateOf(subscription?.amount?.toString() ?: "") }
     var frequencyDays by remember { mutableStateOf(subscription?.frequencyDays?.toString() ?: "30") }
     var selectedCategory by remember { mutableStateOf(subscription?.category ?: TransactionCategory.OTHERS) }
     var categoryExpanded by remember { mutableStateOf(false) }
     
-    var nextExpectedDate by remember { mutableStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
+    var nextExpectedDate by remember { androidx.compose.runtime.mutableLongStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
     
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

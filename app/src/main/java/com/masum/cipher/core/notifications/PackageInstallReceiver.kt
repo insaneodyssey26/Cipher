@@ -17,7 +17,6 @@ class PackageInstallReceiver @Inject constructor(
             val data = intent.data ?: return
             val packageName = data.encodedSchemeSpecificPart ?: return
 
-            // Avoid reacting to app updates (EXTRA_REPLACING will be true if it's an update)
             val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
             if (isReplacing) return
 
@@ -29,8 +28,8 @@ class PackageInstallReceiver @Inject constructor(
                 if (isLikelyFinanceApp(packageName, appName)) {
                     localNotificationManager.showNewAppDetectedNotification(appName, packageName)
                 }
-            } catch (e: PackageManager.NameNotFoundException) {
-                // Ignore if not found
+            } catch (_: PackageManager.NameNotFoundException) {
+
             }
         }
     }

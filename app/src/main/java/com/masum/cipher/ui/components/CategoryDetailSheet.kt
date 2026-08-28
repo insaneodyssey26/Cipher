@@ -66,9 +66,9 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Target
+import androidx.compose.ui.platform.LocalLocale
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 private data class CategoryMerchantSpend(
     val merchant: String,
@@ -88,6 +88,7 @@ fun CategoryDetailSheet(
     isHapticsEnabled: Boolean = true
 ) {
     val view = LocalView.current
+    val locale = LocalLocale.current.platformLocale
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBudgetDialog by remember { mutableStateOf(false) }
 
@@ -217,7 +218,7 @@ fun CategoryDetailSheet(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "${String.format(Locale.getDefault(), "%.1f", categoryData.percentage * 100)}% of total expenses",
+                                text = "${String.format(locale, "%.1f", categoryData.percentage * 100)}% of total expenses",
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Manrope,
                                     fontSize = 12.sp
@@ -230,7 +231,7 @@ fun CategoryDetailSheet(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Text(
-                        text = "₹${String.format(Locale.getDefault(), "%,.0f", totalSpent)}",
+                        text = "₹${String.format(locale, "%,.0f", totalSpent)}",
                         style = Typography.headlineMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -293,7 +294,7 @@ fun CategoryDetailSheet(
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
-                                        text = "Limit: ₹${String.format(Locale.getDefault(), "%,.0f", categoryBudget)}",
+                                        text = "Limit: ₹${String.format(locale, "%,.0f", categoryBudget)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -330,9 +331,9 @@ fun CategoryDetailSheet(
                             ) {
                                 Text(
                                     text = if (isOverBudget) {
-                                        "Exceeded by ₹${String.format(Locale.getDefault(), "%,.0f", totalSpent - categoryBudget)}"
+                                        "Exceeded by ₹${String.format(locale, "%,.0f", totalSpent - categoryBudget)}"
                                     } else {
-                                        "₹${String.format(Locale.getDefault(), "%,.0f", remainingBudget)} remaining"
+                                        "₹${String.format(locale, "%,.0f", remainingBudget)} remaining"
                                     },
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
@@ -344,7 +345,7 @@ fun CategoryDetailSheet(
 
                                 if (!isOverBudget) {
                                     Text(
-                                        text = "Safe: ₹${String.format(Locale.getDefault(), "%,.0f", safeSpendPerDay)}/day",
+                                        text = "Safe: ₹${String.format(locale, "%,.0f", safeSpendPerDay)}/day",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontSize = 11.sp,
@@ -466,7 +467,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "₹${String.format(Locale.getDefault(), "%,.0f", avgSpend)}",
+                                text = "₹${String.format(locale, "%,.0f", avgSpend)}",
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -540,7 +541,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "₹${String.format(Locale.getDefault(), "%,.0f", maxSpend)}",
+                                text = "₹${String.format(locale, "%,.0f", maxSpend)}",
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -598,7 +599,7 @@ fun CategoryDetailSheet(
                                             modifier = Modifier.weight(1f)
                                         )
                                         Text(
-                                            text = "₹${String.format(Locale.getDefault(), "%,.0f", merchant.totalAmount)}",
+                                            text = "₹${String.format(locale, "%,.0f", merchant.totalAmount)}",
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.Bold,
@@ -689,7 +690,7 @@ fun CategoryDetailSheet(
                         }
 
                         Text(
-                            text = "-₹${String.format(Locale.getDefault(), "%,.0f", tx.amount)}",
+                            text = "₹-${String.format(locale, "%,.0f", tx.amount)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,

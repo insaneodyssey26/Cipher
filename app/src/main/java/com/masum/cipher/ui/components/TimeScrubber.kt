@@ -60,6 +60,7 @@ import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalLocale
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -79,10 +80,11 @@ fun TimeSelectorDropdown(
     var showDateRangePicker by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val view = androidx.compose.ui.platform.LocalView.current
+    val locale = LocalLocale.current.platformLocale
     val rotation by animateFloatAsState(targetValue = if (showDialog) 180f else 0f, label = "caret_rot")
 
     val triggerLabel = if (selectedPeriod == TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
-        val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
+        val sdf = SimpleDateFormat("MMM d", locale)
         "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
     } else {
         selectedPeriod.label
@@ -240,12 +242,12 @@ fun TimeSelectorDropdown(
                             Spacer(modifier = Modifier.height(18.dp))
 
                             val periods = listOf(
-                                Pair(TimePeriod.THIS_MONTH, Pair(LucideIcons.Calendar, getPeriodDateSubtitle(TimePeriod.THIS_MONTH))),
-                                Pair(TimePeriod.LAST_MONTH, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_MONTH))),
-                                Pair(TimePeriod.THIS_WEEK, Pair(LucideIcons.Zap, getPeriodDateSubtitle(TimePeriod.THIS_WEEK))),
-                                Pair(TimePeriod.LAST_WEEK, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_WEEK))),
-                                Pair(TimePeriod.THIS_YEAR, Pair(LucideIcons.TrendingUp, getPeriodDateSubtitle(TimePeriod.THIS_YEAR))),
-                                Pair(TimePeriod.ALL_TIME, Pair(LucideIcons.Target, getPeriodDateSubtitle(TimePeriod.ALL_TIME)))
+                                Pair(TimePeriod.THIS_MONTH, Pair(LucideIcons.Calendar, getPeriodDateSubtitle(TimePeriod.THIS_MONTH, locale))),
+                                Pair(TimePeriod.LAST_MONTH, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_MONTH, locale))),
+                                Pair(TimePeriod.THIS_WEEK, Pair(LucideIcons.Zap, getPeriodDateSubtitle(TimePeriod.THIS_WEEK, locale))),
+                                Pair(TimePeriod.LAST_WEEK, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_WEEK, locale))),
+                                Pair(TimePeriod.THIS_YEAR, Pair(LucideIcons.TrendingUp, getPeriodDateSubtitle(TimePeriod.THIS_YEAR, locale))),
+                                Pair(TimePeriod.ALL_TIME, Pair(LucideIcons.Target, getPeriodDateSubtitle(TimePeriod.ALL_TIME, locale)))
                             )
 
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -349,7 +351,7 @@ fun TimeSelectorDropdown(
 
                                 val isCustomSelected = selectedPeriod == TimePeriod.CUSTOM
                                 val customSubtitle = if (isCustomSelected && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
-                                    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                                    val sdf = SimpleDateFormat("MMM d, yyyy", locale)
                                     "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
                                 } else {
                                     "Pick arbitrary start & end dates"
@@ -543,7 +545,7 @@ fun TimeSelectorDropdown(
                     headline = {
                         val start = dateRangePickerState.selectedStartDateMillis
                         val end = dateRangePickerState.selectedEndDateMillis
-                        val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                        val sdf = SimpleDateFormat("MMM d, yyyy", locale)
                         val rangeText = if (start != null && end != null) {
                             "${sdf.format(Date(start))} – ${sdf.format(Date(end))}"
                         } else if (start != null) {
@@ -583,16 +585,16 @@ fun TimeSelectorDropdown(
     )
 }
 
-private fun getPeriodDateSubtitle(period: TimePeriod): String {
+private fun getPeriodDateSubtitle(period: TimePeriod, locale: Locale = Locale.getDefault()): String {
     val range = TimeRange.from(period)
-    val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
-    val sdfYear = SimpleDateFormat("yyyy", Locale.getDefault())
+    val sdf = SimpleDateFormat("MMM d", locale)
+    val sdfYear = SimpleDateFormat("yyyy", locale)
     return when (period) {
         TimePeriod.THIS_WEEK, TimePeriod.LAST_WEEK -> {
             "${sdf.format(Date(range.startTime))} – ${sdf.format(Date(range.endTime))}"
         }
         TimePeriod.THIS_MONTH, TimePeriod.LAST_MONTH -> {
-            val sdfMonth = SimpleDateFormat("MMMM", Locale.getDefault())
+            val sdfMonth = SimpleDateFormat("MMMM", locale)
             sdfMonth.format(Date(range.startTime))
         }
         TimePeriod.THIS_YEAR -> {

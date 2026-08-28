@@ -1,19 +1,29 @@
 package com.masum.cipher.ui.insights
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -25,30 +35,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.pref.UserPreferences
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.ui.draw.clip
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -66,33 +68,28 @@ import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.TrendingUp
 import kotlinx.coroutines.launch
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsScreen(
     viewModel: InsightsViewModel,
     userPreferences: UserPreferences,
-    onNavigateBack: () -> Unit,
     onNavigateToDayDetail: (Long) -> Unit,
     onNavigateToCategories: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = androidx.compose.ui.platform.LocalView.current
-    val context = androidx.compose.ui.platform.LocalContext.current
-    var showAddSubDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    var selectedSubscription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
-    var showBudgetDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    var selectedCategoryForDetail by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<DashboardContract.CategoryData?>(null) }
-    var editingTransaction by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<com.masum.cipher.core.data.local.entity.TransactionEntity?>(null) }
-    var budgetInput by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var showAddSubDialog by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedSubscription by remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
+    var showBudgetDialog by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var selectedCategoryForDetail by remember { androidx.compose.runtime.mutableStateOf<DashboardContract.CategoryData?>(null) }
+    var editingTransaction by remember { androidx.compose.runtime.mutableStateOf<com.masum.cipher.core.data.local.entity.TransactionEntity?>(null) }
     val monthlyBudget = settings?.monthlyBudget ?: 0.0
-    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
@@ -124,7 +121,7 @@ fun InsightsScreen(
         )
     }
 
-    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+    val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
 
     androidx.compose.runtime.LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
@@ -212,7 +209,7 @@ fun InsightsScreen(
 
                 Box(
                     modifier = Modifier
-                        .offset(x = indicatorOffset)
+                        .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                         .width(tabWidth)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(9.dp))
@@ -411,6 +408,7 @@ fun InsightsScreen(
 
 @Composable
 private fun InsightHero(state: InsightsContract.State) {
+    val locale = LocalLocale.current.platformLocale
     val totalSpent = remember(state.categoryBreakdown) { state.categoryBreakdown.sumOf { it.amount } }
     val mostExpensiveCategory = state.categoryBreakdown.maxByOrNull { it.amount }
     val periodLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
@@ -520,7 +518,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "₹${String.format(Locale.getDefault(), "%,.0f", mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
+                            text = "₹${String.format(locale, "%,.0f", mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
                             style = Typography.bodySmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 12.5.sp
@@ -630,7 +628,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "₹${String.format(Locale.getDefault(), "%,.0f", dailyRunRate)} / day",
+                        text = "₹${String.format(locale, "%,.0f", dailyRunRate)} / day",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -663,7 +661,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "₹${String.format(Locale.getDefault(), "%,.0f", state.avgTransactionSize)}",
+                        text = "₹${String.format(locale, "%,.0f", state.avgTransactionSize)}",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -683,7 +681,7 @@ private fun SectionLabel(text: String) {
         text = text.uppercase(),
         style = Typography.labelSmall.copy(
             fontSize = 11.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.2.sp
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
@@ -700,6 +698,7 @@ fun SubscriptionsCard(
     modifier: Modifier = Modifier
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
+    val locale = LocalLocale.current.platformLocale
     val totalMonthly = remember(subscriptions) {
         subscriptions.sumOf { it.amount * (30.0 / it.frequencyDays.coerceAtLeast(1)) }
     }
@@ -824,7 +823,7 @@ fun SubscriptionsCard(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "₹${String.format(Locale.getDefault(), "%,.0f", totalMonthly)} / mo",
+                            text = "₹${String.format(locale, "%,.0f", totalMonthly)} / mo",
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -834,7 +833,7 @@ fun SubscriptionsCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "≈ ₹${String.format(Locale.getDefault(), "%,.0f", totalAnnual)} / yr projected",
+                            text = "≈ ₹${String.format(locale, "%,.0f", totalAnnual)} / yr projected",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 11.sp
@@ -981,7 +980,7 @@ fun SubscriptionsCard(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = "₹${String.format(Locale.getDefault(), "%,.0f", sub.amount)}",
+                                    text = "₹${String.format(locale, "%,.0f", sub.amount)}",
                                     style = Typography.titleMedium.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,

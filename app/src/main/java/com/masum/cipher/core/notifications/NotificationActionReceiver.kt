@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
+import androidx.core.graphics.toColorInt
 import com.masum.cipher.core.data.repository.TransactionRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +40,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, transactionId.toInt())
                         val builder = NotificationCompat.Builder(context, LocalNotificationManager.CHANNEL_ID)
                             .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                            .setColor(android.graphics.Color.parseColor("#4F46E5"))
+                            .setColor("#4F46E5".toColorInt())
                             .setContentTitle("Note Added!")
                             .setContentText("Your note was saved successfully.")
                             .setAutoCancel(true)

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -58,7 +58,6 @@ import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Target
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 fun BudgetHealthCard(
@@ -69,6 +68,7 @@ fun BudgetHealthCard(
     isHapticsEnabled: Boolean = true
 ) {
     val view = LocalView.current
+    val locale = LocalLocale.current.platformLocale
 
     VaultCard(
         modifier = modifier.fillMaxWidth(),
@@ -93,7 +93,7 @@ fun BudgetHealthCard(
                 label = "budgetProgress"
             )
 
-            val rawPercent = if (budget > 0) (spent / budget) * 100.0 else 0.0
+            val rawPercent = (spent / budget) * 100.0
             val percentUsed = when {
                 rawPercent.isInfinite() || rawPercent.isNaN() -> 0L
                 rawPercent > 99999.0 -> 99999L
@@ -102,7 +102,7 @@ fun BudgetHealthCard(
             val percentDisplay = if (percentUsed >= 99999) ">99999%" else "$percentUsed%"
 
             val safeSpendPerDay = if (remainingBudget > 0) remainingBudget / daysRemaining else 0.0
-            val currentDailyPace = if (currentDay > 0) spent / currentDay else 0.0
+            val currentDailyPace = spent / currentDay
 
             val isOverBudget = spent > budget
             val isNearLimit = percentUsed >= 85
@@ -153,7 +153,7 @@ fun BudgetHealthCard(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Limit: ₹${String.format(Locale.getDefault(), "%,.0f", budget)}",
+                            text = "Limit: ₹${String.format(locale, "%,.0f", budget)}",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.SemiBold,
@@ -183,9 +183,9 @@ fun BudgetHealthCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val amountText = if (isOverBudget) {
-                    "₹${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
+                    "₹${String.format(locale, "%,.0f", spent - budget)}"
                 } else {
-                    "₹${String.format(Locale.getDefault(), "%,.0f", remainingBudget)}"
+                    "₹${String.format(locale, "%,.0f", remainingBudget)}"
                 }
                 val amountFontSize = when {
                     amountText.length > 18 -> 17.sp
@@ -257,7 +257,7 @@ fun BudgetHealthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹${String.format(Locale.getDefault(), "%,.0f", spent)} spent ($percentDisplay)",
+                        text = "₹${String.format(locale, "%,.0f", spent)} spent ($percentDisplay)",
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontSize = 10.5.sp,
@@ -309,7 +309,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = if (isOverBudget) "₹0 / day" else "₹${String.format(Locale.getDefault(), "%,.0f", safeSpendPerDay)} / day",
+                            text = if (isOverBudget) "₹0 / day" else "₹${String.format(locale, "%,.0f", safeSpendPerDay)} / day",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -337,7 +337,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = "₹${String.format(Locale.getDefault(), "%,.0f", currentDailyPace)} / day",
+                            text = "₹${String.format(locale, "%,.0f", currentDailyPace)} / day",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,

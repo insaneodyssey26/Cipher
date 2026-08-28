@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,29 +32,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.StaggeredEntranceItem
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.dashboard.TransactionItem
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
-import kotlinx.coroutines.flow.collectLatest
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,14 +65,15 @@ fun DayDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = androidx.compose.ui.platform.LocalView.current
+    val locale = LocalLocale.current.platformLocale
     
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     
     val date = remember(timestamp) { Date(timestamp) }
-    val dayName = remember(date) { SimpleDateFormat("EEEE", Locale.getDefault()).format(date) }
-    val fullDate = remember(date) { SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(date) }
+    val dayName = remember(date, locale) { SimpleDateFormat("EEEE", locale).format(date) }
+    val fullDate = remember(date, locale) { SimpleDateFormat("MMMM dd, yyyy", locale).format(date) }
     
     val dayRange = remember(timestamp) {
         val start = Calendar.getInstance().apply {
@@ -99,17 +97,6 @@ fun DayDetailScreen(
     
     val totalIncome = remember(dayTransactions) {
         dayTransactions.filter { it.isIncome }.sumOf { it.amount }
-    }
-
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("en-IN"))
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest { effect ->
-            if (effect is InsightsContract.Effect.ShowUndoDelete) {
-            }
-        }
     }
 
     Scaffold(
@@ -162,13 +149,13 @@ fun DayDetailScreen(
                 ) {
                     DetailStatCard(
                         label = "SPENT",
-                        amount = "₹${String.format(Locale.getDefault(), "%,.0f", totalSpent)}",
+                        amount = "₹${String.format(locale, "%,.0f", totalSpent)}",
                         color = RoseExpense,
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatCard(
                         label = "INCOME",
-                        amount = "₹${String.format(Locale.getDefault(), "%,.0f", totalIncome)}",
+                        amount = "₹${String.format(locale, "%,.0f", totalIncome)}",
                         color = EmeraldIncome,
                         modifier = Modifier.weight(1f)
                     )

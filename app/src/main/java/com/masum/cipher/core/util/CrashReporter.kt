@@ -32,11 +32,10 @@ object CrashReporter {
                                "$stackTrace\n"
                                
                 crashFile.writeText(logContent)
-            } catch (e: Exception) {
-                // Ignore, app is already crashing
+            } catch (_: Exception) {
+
             }
             
-            // Let the default handler finish the crash (shows standard Android crash dialog/force close)
             defaultHandler?.uncaughtException(thread, exception)
             if (defaultHandler == null) {
                 exitProcess(1)

@@ -1,5 +1,6 @@
 package com.masum.cipher.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -34,7 +34,7 @@ fun CalculatorNumpad(
     input: String,
     cursorPosition: Int = input.length,
     onInputChange: (newInput: String, newCursorPosition: Int) -> Unit,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
     val safeCursor = cursorPosition.coerceIn(0, input.length)
@@ -58,11 +58,6 @@ fun CalculatorNumpad(
             builder.deleteCharAt(safeCursor - 1)
             onInputChange(builder.toString(), safeCursor - 1)
         }
-    }
-
-    val onClear: () -> Unit = {
-        view.performVibrate(true, isLongPress = true)
-        onInputChange("", 0)
     }
 
     Column(
@@ -125,7 +120,7 @@ fun CalculatorNumpad(
 private fun NumpadButton(
     text: String,
     isOperator: Boolean = false,
-    modifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val bgColor = MaterialTheme.colorScheme.surface

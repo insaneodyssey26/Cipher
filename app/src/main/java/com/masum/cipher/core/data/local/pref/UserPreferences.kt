@@ -72,7 +72,7 @@ class UserPreferences @Inject constructor(
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
             accentColor = try {
                 AccentColor.valueOf(preferences[Keys.ACCENT_COLOR] ?: AccentColor.INDIGO.name)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 AccentColor.INDIGO
             },
             hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
@@ -80,7 +80,7 @@ class UserPreferences @Inject constructor(
             autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
             autoBackupFrequency = try {
                 AutoBackupFrequency.valueOf(preferences[Keys.AUTO_BACKUP_FREQUENCY] ?: AutoBackupFrequency.NEVER.name)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 AutoBackupFrequency.NEVER
             },
             autoBackupUri = preferences[Keys.AUTO_BACKUP_URI],
@@ -106,7 +106,7 @@ class UserPreferences @Inject constructor(
                         map[k] = json.getDouble(k)
                     }
                     map
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     emptyMap()
                 }
             } ?: emptyMap()
@@ -127,10 +127,6 @@ class UserPreferences @Inject constructor(
 
     suspend fun setHapticsEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.HAPTICS_ENABLED] = enabled }
-    }
-
-    suspend fun setCurrency(currency: String) {
-        context.dataStore.edit { it[Keys.PREFERRED_CURRENCY] = currency }
     }
 
     suspend fun setAutoLockTimeout(timeoutMillis: Long) {
@@ -254,7 +250,7 @@ class UserPreferences @Inject constructor(
     suspend fun setCategoryBudget(category: String, limit: Double) {
         context.dataStore.edit { preferences ->
             val currentJson = preferences[Keys.CATEGORY_BUDGETS]?.let {
-                try { org.json.JSONObject(it) } catch (e: Exception) { org.json.JSONObject() }
+                try { org.json.JSONObject(it) } catch (_: Exception) { org.json.JSONObject() }
             } ?: org.json.JSONObject()
             if (limit > 0) {
                 currentJson.put(category, limit)

@@ -10,10 +10,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,7 +49,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -59,7 +56,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +67,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -98,29 +93,26 @@ import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
-import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
-import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Activity
 import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
-import compose.icons.lucideicons.Bug
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.CalendarClock
 import compose.icons.lucideicons.Info
-import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.RefreshCw
-import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Search
-import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.LocalDensity
+import androidx.core.net.toUri
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -135,6 +127,7 @@ fun DashboardScreen(
     onNavigateToManageApps: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val locale = LocalLocale.current.platformLocale
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val view = androidx.compose.ui.platform.LocalView.current
@@ -222,13 +215,15 @@ fun DashboardScreen(
 
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     
-    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-    val maxToolbarHeight = androidx.compose.runtime.remember(configuration.screenHeightDp) {
-        (configuration.screenHeightDp.dp * 0.32f).coerceIn(240.dp, 300.dp)
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val maxToolbarHeight = remember(windowInfo.containerSize.height, density) {
+        val heightDp = with(density) { windowInfo.containerSize.height.toDp() }
+        (heightDp * 0.32f).coerceIn(240.dp, 300.dp)
     }
     val minToolbarHeight = 154.dp
-    val toolbarHeightRangePx = with(androidx.compose.ui.platform.LocalDensity.current) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
-    val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0f) }
+    val toolbarHeightRangePx = with(density) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
+    val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableFloatStateOf(0f) }
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     val wasAtTopAtFlingStart = remember { mutableStateOf(true) }
@@ -239,10 +234,10 @@ fun DashboardScreen(
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
                 val delta = available.y
                 if (delta < 0) {
-                    val previousOffset = toolbarOffsetHeightPx.value
-                    val newOffset = toolbarOffsetHeightPx.value + delta
-                    toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
-                    val consumed = toolbarOffsetHeightPx.value - previousOffset
+                    val previousOffset = toolbarOffsetHeightPx.floatValue
+                    val newOffset = toolbarOffsetHeightPx.floatValue + delta
+                    toolbarOffsetHeightPx.floatValue = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumed = toolbarOffsetHeightPx.floatValue - previousOffset
                     return androidx.compose.ui.geometry.Offset(0f, consumed)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
@@ -256,10 +251,10 @@ fun DashboardScreen(
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
                 val delta = available.y
                 if (delta > 0 && source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.UserInput) {
-                    val previousOffset = toolbarOffsetHeightPx.value
-                    val newOffset = toolbarOffsetHeightPx.value + delta
-                    toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
-                    val consumedOffset = toolbarOffsetHeightPx.value - previousOffset
+                    val previousOffset = toolbarOffsetHeightPx.floatValue
+                    val newOffset = toolbarOffsetHeightPx.floatValue + delta
+                    toolbarOffsetHeightPx.floatValue = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumedOffset = toolbarOffsetHeightPx.floatValue - previousOffset
                     return androidx.compose.ui.geometry.Offset(0f, consumedOffset)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
@@ -278,14 +273,14 @@ fun DashboardScreen(
                 val velocity = available.y
                 if (velocity > 0f && wasAtTopAtFlingStart.value) {
                     animate(
-                        initialValue = toolbarOffsetHeightPx.value,
+                        initialValue = toolbarOffsetHeightPx.floatValue,
                         targetValue = 0f,
                         initialVelocity = velocity,
                         animationSpec = spring(
                             stiffness = Spring.StiffnessMediumLow
                         )
                     ) { value, _ ->
-                        toolbarOffsetHeightPx.value = value.coerceIn(-toolbarHeightRangePx, 0f)
+                        toolbarOffsetHeightPx.floatValue = value.coerceIn(-toolbarHeightRangePx, 0f)
                     }
                     return androidx.compose.ui.unit.Velocity(0f, velocity)
                 }
@@ -296,7 +291,7 @@ fun DashboardScreen(
 
     LaunchedEffect(state.searchQuery) {
         if (state.searchQuery.isNotEmpty()) {
-            toolbarOffsetHeightPx.value = 0f
+            toolbarOffsetHeightPx.floatValue = 0f
         }
     }
 
@@ -335,9 +330,9 @@ fun DashboardScreen(
                 label = "SearchTransition"
             )
 
-            val groupedTransactions = remember(state.transactions) {
+            val groupedTransactions = remember(state.transactions, locale) {
                 state.transactions.groupBy {
-                    SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(it.timestamp))
+                    SimpleDateFormat("MMMM yyyy", locale).format(Date(it.timestamp))
                 }
             }
 
@@ -364,7 +359,7 @@ fun DashboardScreen(
                                 val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
                                 translationY = -(offsetPx * searchTransition)
                             } else {
-                                translationY = toolbarOffsetHeightPx.value
+                                translationY = toolbarOffsetHeightPx.floatValue
                             }
                         },
                     contentPadding = PaddingValues(
@@ -402,14 +397,14 @@ fun DashboardScreen(
                                 }
                                 
                                 state.pendingSubscriptions.forEach { subscription ->
-                                    val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+                                    val amountStr = "₹${String.format(locale, "%.0f", subscription.amount)}"
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "${subscription.merchant}",
+                                                text = subscription.merchant,
                                                 style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                                                 color = MaterialTheme.colorScheme.onErrorContainer
                                             )
@@ -420,13 +415,13 @@ fun DashboardScreen(
                                             )
                                         }
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            androidx.compose.material3.TextButton(
+                                            TextButton(
                                                 onClick = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(subscription)) },
                                                 contentPadding = PaddingValues(horizontal = 12.dp)
                                             ) {
                                                 Text("Skip", color = MaterialTheme.colorScheme.error)
                                             }
-                                            androidx.compose.material3.Button(
+                                            Button(
                                                 onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
                                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                                                 contentPadding = PaddingValues(horizontal = 16.dp)
@@ -566,9 +561,8 @@ fun DashboardScreen(
                     privacyMode = privacyMode,
                     isHapticsEnabled = isHapticsEnabled,
                     expenseComparisonPercent = state.expenseComparisonPercent,
-                    expenseComparisonLabel = state.expenseComparisonLabel,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
-                    toolbarOffsetHeightPx = toolbarOffsetHeightPx.value,
+                    toolbarOffsetHeightPx = toolbarOffsetHeightPx.floatValue,
                     toolbarHeightRangePx = toolbarHeightRangePx,
                     maxToolbarHeight = maxToolbarHeight
                 )
@@ -583,11 +577,11 @@ fun DashboardScreen(
                                 val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
                                 translationY = -(offsetPx * searchTransition)
                             } else {
-                                translationY = toolbarOffsetHeightPx.value
+                                translationY = toolbarOffsetHeightPx.floatValue
                             }
                             
                             val progress = if (toolbarHeightRangePx > 0f) {
-                                (kotlin.math.abs(toolbarOffsetHeightPx.value) / toolbarHeightRangePx).coerceIn(0f, 1f)
+                                (kotlin.math.abs(toolbarOffsetHeightPx.floatValue) / toolbarHeightRangePx).coerceIn(0f, 1f)
                             } else 0f
                             
                             alpha = if (searchTransition > 0f) 1f else progress
@@ -673,7 +667,7 @@ fun DashboardScreen(
                 label = "rating_alpha"
             )
             
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .graphicsLayer {
@@ -693,21 +687,21 @@ fun DashboardScreen(
                     },
                     modifier = Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-12).dp)
                 ) {
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = LucideIcons.X,
                         contentDescription = "Never ask again",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 
-                androidx.compose.foundation.layout.Column(
+                Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    androidx.compose.foundation.layout.Box(
+                    Box(
                         modifier = Modifier
                             .size(72.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(
@@ -718,7 +712,7 @@ fun DashboardScreen(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             imageVector = LucideIcons.Star,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
@@ -747,11 +741,11 @@ fun DashboardScreen(
                     
                     Spacer(modifier = Modifier.height(32.dp))
                     
-                    androidx.compose.foundation.layout.Row(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        androidx.compose.material3.TextButton(
+                        TextButton(
                             onClick = {
                                 coroutineScope.launch { 
                                     userPreferences.increaseReviewPromptInterval()
@@ -764,21 +758,21 @@ fun DashboardScreen(
                             Text("Maybe later", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         
-                        androidx.compose.material3.Button(
+                        Button(
                             onClick = {
                                 coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
                                 showRatingDialog = false
                                 try {
-                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=com.masum.cipher")))
-                                } catch (e: android.content.ActivityNotFoundException) {
-                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
+                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                                } catch (_: android.content.ActivityNotFoundException) {
+                                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
                                 }
                             },
                             modifier = Modifier.weight(1f).height(56.dp),
                             shape = RoundedCornerShape(16.dp),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
-                            Text("Rate App", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                            Text("Rate 5 Stars", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -825,7 +819,7 @@ fun DashboardScreen(
     }
 
     if (showWhatsNewSheet) {
-        val hasSeen4_1 = lastSeenWhatsNewVersionCode >= 9
+        val hasSeenV41 = lastSeenWhatsNewVersionCode >= 9
         val versionName = BuildConfig.VERSION_NAME
         ModalBottomSheet(
             onDismissRequest = {
@@ -858,7 +852,7 @@ fun DashboardScreen(
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 
@@ -899,7 +893,7 @@ fun DashboardScreen(
                         coroutineScope.launch {
                             userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
                             showWhatsNewSheet = false
-                            if (!hasSeen4_1) {
+                            if (!hasSeenV41) {
                                 onNavigateToManageApps()
                             }
                         }
@@ -911,7 +905,7 @@ fun DashboardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = if (!hasSeen4_1) "Setup Tracking & Continue" else "Got It",
+                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Got It",
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -1010,7 +1004,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "₹${String.format(java.util.Locale.US, "%.0f", currentExp)}",
+                                    text = "₹${String.format(Locale.US, "%.0f", currentExp)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -1029,7 +1023,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "₹${String.format(java.util.Locale.US, "%.0f", prevExp)}",
+                                    text = "₹${String.format(Locale.US, "%.0f", prevExp)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1040,7 +1034,7 @@ fun DashboardScreen(
                             Spacer(Modifier.height(14.dp))
 
                             Text(
-                                text = "$arrow ₹${String.format(java.util.Locale.US, "%.0f", diff)} $actionWord (${String.format(java.util.Locale.US, "%.1f", kotlin.math.abs(percent))}%)",
+                                text = "$arrow ₹${String.format(Locale.US, "%.0f", diff)} $actionWord (${String.format(Locale.US, "%.1f", kotlin.math.abs(percent))}%)",
                                 style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 color = color
                             )
@@ -1066,7 +1060,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "₹${String.format(java.util.Locale.US, "%.0f", currentExp)}",
+                                    text = "₹${String.format(Locale.US, "%.0f", currentExp)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -1085,7 +1079,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "₹${String.format(java.util.Locale.US, "%.0f", state.totalIncome)}",
+                                    text = "₹${String.format(Locale.US, "%.0f", state.totalIncome)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = EmeraldIncome
                                 )
@@ -1189,18 +1183,18 @@ private fun DashboardHero(
     privacyMode: Boolean,
     isHapticsEnabled: Boolean,
     expenseComparisonPercent: Double? = null,
-    expenseComparisonLabel: String? = null,
     onComparisonBadgeClick: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
     maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
+    val locale = LocalLocale.current.platformLocale
     val scrollProgress = if (toolbarHeightRangePx > 0f) {
         1f - (kotlin.math.abs(toolbarOffsetHeightPx) / toolbarHeightRangePx)
     } else 1f
 
-    val targetHeight = if (searchQuery.isNotEmpty()) 80.dp else maxToolbarHeight + with(androidx.compose.ui.platform.LocalDensity.current) { toolbarOffsetHeightPx.toDp() }
+    val targetHeight = if (searchQuery.isNotEmpty()) 80.dp else maxToolbarHeight + with(LocalDensity.current) { toolbarOffsetHeightPx.toDp() }
     
     val heroHeight by animateDpAsState(
         targetValue = targetHeight,
@@ -1262,8 +1256,8 @@ private fun DashboardHero(
                                     modifier = Modifier.size(13.dp)
                                 )
                                 val periodLabel = if (selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
-                                    val sdf = java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
-                                    "${sdf.format(java.util.Date(selectedTimeRange.startTime))} – ${sdf.format(java.util.Date(selectedTimeRange.endTime))}"
+                                    val sdf = SimpleDateFormat("MMM d", locale)
+                                    "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
                                 } else {
                                     AppFormatters.getPeriodLabel(selectedPeriod, transactions)
                                 }
@@ -1286,7 +1280,7 @@ private fun DashboardHero(
                                 val percentFormatted = if (kotlin.math.abs(expenseComparisonPercent) > 999) {
                                     ">999"
                                 } else {
-                                    String.format(java.util.Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
+                                    String.format(Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
                                 }
 
                                 Row(
@@ -1370,15 +1364,15 @@ private fun DashboardHero(
                         }
 
                         val balanceFontSize = 52.sp
-                        val formattedBalance = remember(totalBalance) {
+                        val formattedBalance = remember(totalBalance, locale) {
                             val absVal = kotlin.math.abs(totalBalance)
                             val sign = if (totalBalance < 0) "-" else ""
                             when {
-                                absVal >= 1_000_000_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
-                                absVal >= 1_000_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
-                                absVal >= 1_000_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
-                                absVal >= 100_000.0 -> "₹$sign" + String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-                                else -> "₹$sign" + String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
+                                absVal >= 1_000_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
+                                absVal >= 1_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
+                                absVal >= 1_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
+                                absVal >= 100_000.0 -> "₹$sign" + String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+                                else -> "₹$sign" + String.format(locale, "%,.0f", absVal)
                             }
                         }
 
@@ -1712,6 +1706,7 @@ fun TransactionItem(
     privacyMode: Boolean,
     onClick: () -> Unit
 ) {
+    val locale = LocalLocale.current.platformLocale
     VaultCard(
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
         onClick = onClick,
@@ -1744,10 +1739,10 @@ fun TransactionItem(
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = SimpleDateFormat("d MMM, HH:mm", Locale.getDefault()).format(Date(transaction.timestamp)),
+                    text = SimpleDateFormat("d MMM, HH:mm", locale).format(Date(transaction.timestamp)),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1757,13 +1752,13 @@ fun TransactionItem(
                         style = Typography.bodySmall.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         maxLines = 2,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
 
-            val amountFormatted = String.format(Locale.getDefault(), "%,.0f", transaction.amount)
+            val amountFormatted = String.format(locale, "%,.0f", transaction.amount)
             Text(
                 text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+" else "-"}₹$amountFormatted",
                 style = Typography.titleMedium.copy(
@@ -1772,7 +1767,7 @@ fun TransactionItem(
                 ),
                 color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
                 maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -1863,7 +1858,7 @@ private fun SearchEmptyState(query: String) {
             text = "No transactions found for '$query'",
             style = Typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -1888,14 +1883,14 @@ private fun FilterEmptyState(period: com.masum.cipher.core.domain.model.TimePeri
             text = "No transactions found for ${AppFormatters.getPeriodLabel(period, emptyList()).lowercase()}",
             style = Typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Try changing the time filter above to see your older data.",
             style = Typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -1941,6 +1936,7 @@ private fun CashFlowSegmentBar(
     privacyMode: Boolean,
     isCollapsed: Boolean
 ) {
+    val locale = LocalLocale.current.platformLocale
     val total = income + expense
     val incomeFraction = if (total > 0) (income / total).toFloat() else 0.5f
     
@@ -1958,11 +1954,11 @@ private fun CashFlowSegmentBar(
     fun formatAmount(value: Double): String {
         val absVal = kotlin.math.abs(value)
         return when {
-            absVal >= 1_000_000_000_000.0 -> String.format(java.util.Locale.US, "%.1fT", absVal / 1_000_000_000_000.0).replace(".0T", "T")
-            absVal >= 1_000_000_000.0 -> String.format(java.util.Locale.US, "%.1fB", absVal / 1_000_000_000.0).replace(".0B", "B")
-            absVal >= 1_000_000.0 -> String.format(java.util.Locale.US, "%.1fM", absVal / 1_000_000.0).replace(".0M", "M")
-            absVal >= 100_000.0 -> String.format(java.util.Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-            else -> String.format(java.util.Locale.getDefault(), "%,.0f", absVal)
+            absVal >= 1_000_000_000_000.0 -> String.format(Locale.US, "%.1fT", absVal / 1_000_000_000_000.0).replace(".0T", "T")
+            absVal >= 1_000_000_000.0 -> String.format(Locale.US, "%.1fB", absVal / 1_000_000_000.0).replace(".0B", "B")
+            absVal >= 1_000_000.0 -> String.format(Locale.US, "%.1fM", absVal / 1_000_000.0).replace(".0M", "M")
+            absVal >= 100_000.0 -> String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+            else -> String.format(locale, "%,.0f", absVal)
         }
     }
 

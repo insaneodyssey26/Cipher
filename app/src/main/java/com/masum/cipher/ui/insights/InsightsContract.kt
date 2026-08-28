@@ -52,17 +52,7 @@ class InsightsContract {
         val avgTransactionSize: Double = 0.0,
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null
-    ) : UiState {
-        val selectedDayTransactions: List<TransactionEntity>
-            get() = selectedDayTimestamp?.let { timestamp ->
-                allTransactions.filter { tx ->
-                    val txCal = java.util.Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-                    val targetCal = java.util.Calendar.getInstance().apply { timeInMillis = timestamp }
-                    txCal.get(java.util.Calendar.YEAR) == targetCal.get(java.util.Calendar.YEAR) &&
-                    txCal.get(java.util.Calendar.DAY_OF_YEAR) == targetCal.get(java.util.Calendar.DAY_OF_YEAR)
-                }
-            } ?: emptyList()
-    }
+    ) : UiState
 
     sealed class Effect : UiEffect {
         data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()

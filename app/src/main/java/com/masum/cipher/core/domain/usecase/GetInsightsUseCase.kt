@@ -1,10 +1,12 @@
 package com.masum.cipher.core.domain.usecase
 
 import androidx.compose.ui.graphics.toArgb
+import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.SubscriptionDetector
-import com.masum.cipher.core.data.local.dao.SubscriptionDao
+import com.masum.cipher.core.domain.model.TimeRange
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
@@ -20,9 +22,9 @@ class GetInsightsUseCase @Inject constructor(
     private val repository: TransactionRepository,
     private val subscriptionDetector: SubscriptionDetector,
     private val subscriptionDao: SubscriptionDao,
-    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
+    private val userPreferences: UserPreferences
 ) {
-    operator fun invoke(timeRange: com.masum.cipher.core.domain.model.TimeRange): Flow<InsightsContract.State> {
+    operator fun invoke(timeRange: TimeRange): Flow<InsightsContract.State> {
         val startOfCurrentWeek = getStartOfCurrentWeek()
         val startOfLastWeek = startOfCurrentWeek - TimeUnit.DAYS.toMillis(7)
 
@@ -197,7 +199,7 @@ class GetInsightsUseCase @Inject constructor(
     }
 
     private fun calculateTopMerchants(transactions: List<TransactionEntity>): List<InsightsContract.MerchantData> {
-        return transactions.filter { !it.isIncome }
+        return transactions.asSequence().filter { !it.isIncome }
             .groupBy { it.merchant.trim() }
             .map { (merchant, txs) ->
                 InsightsContract.MerchantData(
@@ -207,7 +209,7 @@ class GetInsightsUseCase @Inject constructor(
                 )
             }
             .sortedByDescending { it.amount }
-            .take(5)
+            .take(5).toList()
     }
 
     private fun calculateMonthlySummary(transactions: List<TransactionEntity>): InsightsContract.MonthlySummary {
@@ -253,10 +255,10 @@ class GetInsightsUseCase @Inject constructor(
 
         transactions.filter { !it.isIncome }.forEach { tx ->
             val hour = Calendar.getInstance().apply { timeInMillis = tx.timestamp }.get(Calendar.HOUR_OF_DAY)
-            val label = when {
-                hour in 6..11 -> "Morning"
-                hour in 12..16 -> "Afternoon"
-                hour in 17..21 -> "Evening"
+            val label = when (hour) {
+                in 6..11 -> "Morning"
+                in 12..16 -> "Afternoon"
+                in 17..21 -> "Evening"
                 else -> "Night"
             }
             buckets[label] = (buckets[label] ?: 0.0) + tx.amount
@@ -280,13 +282,15 @@ class GetInsightsUseCase @Inject constructor(
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        val spendDays = transactions.filter { !it.isIncome }.map { tx ->
-            Calendar.getInstance().apply {
-                timeInMillis = tx.timestamp
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-        }.toSet()
+        val spendDays = transactions.asSequence()
+            .filter { !it.isIncome }
+            .map { tx ->
+                Calendar.getInstance().apply {
+                    timeInMillis = tx.timestamp
+                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }.toSet()
 
         var streak = 0
         var day = today

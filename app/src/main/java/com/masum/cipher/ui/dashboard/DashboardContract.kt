@@ -69,7 +69,6 @@ class DashboardContract {
     )
 
     sealed class Effect : UiEffect {
-        data class ShowError(val message: String) : Effect()
         data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()
     }
 }

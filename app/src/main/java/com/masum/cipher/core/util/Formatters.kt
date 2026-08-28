@@ -1,34 +1,18 @@
 package com.masum.cipher.core.util
 
 import com.masum.cipher.core.data.local.entity.TransactionEntity
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 object AppFormatters {
-    fun getCurrency(locale: Locale = Locale.forLanguageTag("en-IN")): NumberFormat = 
-        NumberFormat.getCurrencyInstance(locale).apply {
-            maximumFractionDigits = 2
-        }
 
-    fun getCurrencyNoDecimals(locale: Locale = Locale.forLanguageTag("en-IN")): NumberFormat = 
-        NumberFormat.getCurrencyInstance(locale).apply {
-            maximumFractionDigits = 0
-        }
-
-    fun getTime(locale: Locale = Locale.getDefault()): SimpleDateFormat = 
-        SimpleDateFormat("HH:mm", locale)
-
-    fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat = 
+    fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat("MMM dd", locale)
 
     fun getFullDate(locale: Locale = Locale.getDefault()): SimpleDateFormat = 
         SimpleDateFormat("MMMM dd, yyyy", locale)
-
-    fun getDayName(locale: Locale = Locale.getDefault()): SimpleDateFormat = 
-        SimpleDateFormat("EEEE", locale)
 
     fun getPeriodLabel(
         period: com.masum.cipher.core.domain.model.TimePeriod,

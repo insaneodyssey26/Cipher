@@ -10,9 +10,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -25,11 +22,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
 
 object VaultMotion {
     val InteractiveSpring = spring<Float>(
@@ -42,10 +38,6 @@ object VaultMotion {
         stiffness = 300f
     )
 
-    val DataSpring = spring<Float>(
-        dampingRatio = 1.0f,
-        stiffness = 100f
-    )
 }
 
 @Composable
@@ -56,7 +48,7 @@ fun AnimatedNumberTicker(
     textStyle: androidx.compose.ui.text.TextStyle,
     color: androidx.compose.ui.graphics.Color = textStyle.color
 ) {
-    var oldValue by remember { mutableStateOf(value) }
+    var oldValue by remember { androidx.compose.runtime.mutableDoubleStateOf(value) }
     val isCountingUp = value >= oldValue
     LaunchedEffect(value) { oldValue = value }
 
@@ -144,7 +136,7 @@ fun StaggeredEntranceItem(
     
     LaunchedEffect(Unit) {
         if (!hasAnimated) {
-            kotlinx.coroutines.delay(index * 25L)
+            kotlinx.coroutines.delay((index * 25L).milliseconds)
             visible = true
             hasAnimated = true
         }
@@ -168,34 +160,6 @@ fun StaggeredEntranceItem(
             this.translationY = offsetY
         }
     ) {
-        content()
-    }
-}
-
-fun Modifier.bounceClick(
-    onClick: () -> Unit
-): Modifier = composed {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.90f else 1f,
-        animationSpec = VaultMotion.InteractiveSpring,
-        label = "BounceClick"
-    )
-
-    this
-        .scale(scale)
-        .clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = onClick
-        )
-}
-
-@Composable
-private fun Box(modifier: Modifier, content: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.Box(modifier = modifier) {
         content()
     }
 }

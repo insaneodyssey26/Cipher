@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.DMSans
@@ -75,11 +76,12 @@ import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.WifiOff
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun OnboardingScreen(
-    currentAccentColor: com.masum.cipher.core.data.local.pref.AccentColor,
-    onAccentColorSelected: (com.masum.cipher.core.data.local.pref.AccentColor) -> Unit,
+    currentAccentColor: AccentColor,
+    onAccentColorSelected: (AccentColor) -> Unit,
     onComplete: () -> Unit,
     onSaveApps: (Set<String>) -> Unit
 ) {
@@ -144,7 +146,7 @@ fun OnboardingScreen(
 @Composable
 private fun WelcomePage(onNext: () -> Unit) {
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(100); visible = true }
+    LaunchedEffect(Unit) { delay(100.milliseconds); visible = true }
 
     val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(600), label = "alpha")
     val offsetY by animateFloatAsState(if (visible) 0f else 40f, spring(stiffness = 200f), label = "offset")
@@ -223,12 +225,12 @@ private fun WelcomePage(onNext: () -> Unit) {
 
 @Composable
 private fun ThemeSelectionPage(
-    currentAccentColor: com.masum.cipher.core.data.local.pref.AccentColor,
-    onAccentColorSelected: (com.masum.cipher.core.data.local.pref.AccentColor) -> Unit,
+    currentAccentColor: AccentColor,
+    onAccentColorSelected: (AccentColor) -> Unit,
     onNext: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(100); visible = true }
+    LaunchedEffect(Unit) { delay(100.milliseconds); visible = true }
 
     val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(600), label = "alpha")
     val offsetY by animateFloatAsState(if (visible) 0f else 40f, spring(stiffness = 200f), label = "offset")
@@ -285,7 +287,7 @@ private fun ThemeSelectionPage(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                com.masum.cipher.core.data.local.pref.AccentColor.values().toList().chunked(5).forEach { rowColors ->
+                AccentColor.entries.chunked(5).forEach { rowColors ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -644,7 +646,7 @@ private fun AppTourDialog(onDismiss: () -> Unit) {
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text("The Dashboard", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Your financial command center. Watch your incoming digital transactions appear here automatically.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                Text("Your financial command center. Watch your incoming digital transactions appear here automatically.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                             }
                             1 -> {
                                 Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.primaryContainer, androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
@@ -653,14 +655,14 @@ private fun AppTourDialog(onDismiss: () -> Unit) {
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text("Add Manual Expenses", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Paid in cash? Tap the floating + button on the navigation bar anytime to log manual expenses.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                Text("Paid in cash? Tap the floating + button on the navigation bar anytime to log manual expenses.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                             }
                             2 -> {
                                 Icon(LucideIcons.ChartBar, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text("Deep Insights", style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Tap the pie-chart icon to explore your Insights. See where your money goes with deep category breakdowns.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                Text("Tap the pie-chart icon to explore your Insights. See where your money goes with deep category breakdowns.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                             }
                         }
                     }

@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -38,12 +37,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -55,7 +52,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -85,7 +81,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.AutoBackupFrequency
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
@@ -134,13 +132,14 @@ import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
+import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     biometricAuthenticator: BiometricAuthenticator,
-    onNavigateBack: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
     onNavigateToManageApps: () -> Unit,
     onNavigateToSmartRules: () -> Unit
@@ -485,7 +484,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
                                 .padding(horizontal = 16.dp, vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            com.masum.cipher.core.data.local.pref.AccentColor.values().toList().chunked(5).forEach { rowColors ->
+                            AccentColor.entries.chunked(5).forEach { rowColors ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -509,7 +508,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .clickable(
-                                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                                    interactionSource = remember { MutableInteractionSource() },
                                                     indication = null
                                                 ) {
                                                     if (!isSelected) {
@@ -522,9 +521,9 @@ Column(modifier = Modifier.fillMaxWidth()) {
                                                 modifier = Modifier
                                                     .size(48.dp)
                                                     .scale(scale)
-                                                    .border(2.dp, borderColor, androidx.compose.foundation.shape.CircleShape)
+                                                    .border(2.dp, borderColor, CircleShape)
                                                     .padding(4.dp)
-                                                    .background(Color(color.colorValue), androidx.compose.foundation.shape.CircleShape),
+                                                    .background(Color(color.colorValue), CircleShape),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 if (isSelected) {
@@ -734,13 +733,20 @@ SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled 
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             try {
-                                val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                    putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                        putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    }
+                                    context.startActivity(intent)
+                                } else {
+                                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = "package:${context.packageName}".toUri()
+                                    }
+                                    context.startActivity(intent)
                                 }
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = android.net.Uri.fromParts("package", context.packageName, null)
+                                    data = "package:${context.packageName}".toUri()
                                 }
                                 context.startActivity(intent)
                             }
@@ -848,11 +854,11 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                         title = "Backup Location",
                         subtitle = if (state.autoBackupUri != null) {
                             try {
-                                val decodedPath = android.net.Uri.decode(state.autoBackupUri)
+                                val decodedPath = Uri.decode(state.autoBackupUri)
                                 val readablePath = decodedPath.substringAfter("tree/", decodedPath)
                                     .replace("primary:", "Internal Storage/")
                                 "Selected: $readablePath"
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 "Folder Selected"
                             }
                         } else "Tap to select folder",
@@ -873,9 +879,12 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     subtitle = "Enjoying Cipher? Leave a review!",
                     onClick = {
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.masum.cipher")))
-                        } catch (e: android.content.ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                        } catch (_: android.content.ActivityNotFoundException) {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
                         }
                     }
                 )
@@ -883,7 +892,7 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     icon = LucideIcons.MessagesSquare,
                     title = "Feedback & Feature Requests",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tally.so/r/gDz7NK"))
+                        val intent = Intent(Intent.ACTION_VIEW, "https://tally.so/r/gDz7NK".toUri())
                         context.startActivity(intent)
                     }
                 )
@@ -893,9 +902,9 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     subtitle = "Look for the latest version on Play Store",
                     onClick = {
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.masum.cipher")))
-                        } catch (e: android.content.ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.masum.cipher")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                        } catch (_: android.content.ActivityNotFoundException) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
                         }
                     }
                 )
@@ -911,7 +920,7 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     subtitle = "masumali262006@gmail.com",
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:masumali262006@gmail.com")
+                            data = "mailto:masumali262006@gmail.com".toUri()
                             putExtra(Intent.EXTRA_SUBJECT, "Hello from Cipher App!")
                         }
                         context.startActivity(Intent.createChooser(intent, "Send Email"))
@@ -923,7 +932,8 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     title = "Open Source",
                     subtitle = "github.com/insaneodyssey26/cipher",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/insaneodyssey26/cipher"))
+                        val intent = Intent(Intent.ACTION_VIEW,
+                            "https://github.com/insaneodyssey26/cipher".toUri())
                         context.startActivity(intent)
                     }
                 )
@@ -937,7 +947,8 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                     title = "Support Development",
                     subtitle = "ko-fi.com/insane_odyssey",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/insane_odyssey"))
+                        val intent = Intent(Intent.ACTION_VIEW,
+                            "https://ko-fi.com/insane_odyssey".toUri())
                         context.startActivity(intent)
                     }
                 )
@@ -953,7 +964,7 @@ Spacer(modifier = Modifier.weight(1f))
                     text = "cipher.",
                     style = Typography.headlineLarge.copy(
                         fontFamily = DMSans,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        fontWeight = FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
@@ -961,7 +972,7 @@ Spacer(modifier = Modifier.weight(1f))
                 Spacer(modifier = Modifier.height(4.dp))
                 val versionName = try {
                     context.packageManager.getPackageInfo(context.packageName, 0).versionName
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     "4.1.0"
                 }
                 Text(
@@ -976,7 +987,7 @@ Spacer(modifier = Modifier.weight(1f))
 
     if (showCrashLogDialog) {
         val crashLog = com.masum.cipher.core.util.CrashReporter.getCrashLog(context)
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showCrashLogDialog = false },
             title = { 
                 Text(
@@ -1028,7 +1039,7 @@ Spacer(modifier = Modifier.weight(1f))
                             val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                             val clip = android.content.ClipData.newPlainText("Crash Log", crashLog)
                             clipboard.setPrimaryClip(clip)
-                            android.widget.Toast.makeText(context, "Copied to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Copied to clipboard!", Toast.LENGTH_SHORT).show()
                             showCrashLogDialog = false
                         }
                     ) {
@@ -1042,7 +1053,7 @@ Spacer(modifier = Modifier.weight(1f))
                         TextButton(
                             onClick = {
                                 com.masum.cipher.core.util.CrashReporter.clearCrashLog(context)
-                                android.widget.Toast.makeText(context, "Crash log cleared", android.widget.Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Crash log cleared", Toast.LENGTH_SHORT).show()
                                 showCrashLogDialog = false
                             }
                         ) {
@@ -1074,9 +1085,9 @@ Spacer(modifier = Modifier.weight(1f))
                 value = budgetInput,
                 onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
                 label = { Text("Limit (₹)") },
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
-                    imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -1097,7 +1108,7 @@ Spacer(modifier = Modifier.weight(1f))
             onConfirm = { showFrequencyDialog = false }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                com.masum.cipher.core.data.local.pref.AutoBackupFrequency.values().forEach { freq ->
+                AutoBackupFrequency.entries.forEach { freq ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1269,7 +1280,7 @@ private fun SettingsSection(
     
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(100.milliseconds)
             bringIntoViewRequester.bringIntoView()
         }
     }
@@ -1279,7 +1290,7 @@ private fun SettingsSection(
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
             .bringIntoViewRequester(bringIntoViewRequester)
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable(enabled = onToggle != null, onClick = { 
                 view.performVibrate(isHapticsEnabled)
                 onToggle?.invoke() 
@@ -1292,7 +1303,7 @@ private fun SettingsSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1307,8 +1318,8 @@ private fun SettingsSection(
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
-                            fontFamily = com.masum.cipher.ui.theme.Manrope,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.5.sp,
                             fontSize = 15.sp
                         ),
@@ -1494,7 +1505,7 @@ private fun PermissionsHealthSheet(
     onDismiss: () -> Unit,
     isHapticsEnabled: Boolean
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
@@ -1512,14 +1523,14 @@ private fun PermissionsHealthSheet(
         mutableStateOf(androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECEIVE_SMS) == android.content.pm.PackageManager.PERMISSION_GRANTED)
     }
 
-    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         hasPostNotifications = isGranted
     }
     
-    val smsLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    val smsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         hasSmsPermission = permissions[android.Manifest.permission.RECEIVE_SMS] == true
     }
@@ -1572,7 +1583,7 @@ private fun PermissionsHealthSheet(
                 icon = LucideIcons.BellRing,
                 onFixClick = {
                     view.performVibrate(isHapticsEnabled)
-                    context.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    context.startActivity(Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                 }
             )
 
@@ -1628,7 +1639,7 @@ private fun HealthItemCard(
     val backgroundColor = if (isGranted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.errorContainer
     val iconTint = if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
     
-    com.masum.cipher.ui.components.VaultCard(backgroundColor = backgroundColor) {
+    VaultCard(backgroundColor = backgroundColor) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -1636,7 +1647,7 @@ private fun HealthItemCard(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(if (isGranted) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.error.copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape),
+                    .background(if (isGranted) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.error.copy(alpha = 0.1f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

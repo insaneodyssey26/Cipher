@@ -66,7 +66,7 @@ object MathEvaluator {
                     return x
                 }
             }.parse()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

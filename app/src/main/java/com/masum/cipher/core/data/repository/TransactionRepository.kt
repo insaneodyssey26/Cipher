@@ -12,6 +12,7 @@ import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.domain.CategorizerEngine
+import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.notifications.LocalNotificationManager
 import com.masum.cipher.ui.widget.BudgetWidget
 import com.masum.cipher.ui.widget.StatsWidget
@@ -29,12 +30,10 @@ class TransactionRepository @Inject constructor(
     private val categoryRuleDao: CategoryRuleDao,
     private val categorizerEngine: CategorizerEngine,
     private val notificationManager: LocalNotificationManager,
-    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
+    private val userPreferences: UserPreferences,
     @ApplicationContext private val context: Context
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
-
-    fun getRecentTransactions(limit: Int): Flow<List<TransactionEntity>> = transactionDao.getRecentTransactions(limit)
 
     suspend fun insertTransaction(transaction: TransactionEntity) {
         val timeWindow = 60_000L
@@ -55,10 +54,8 @@ class TransactionRepository @Inject constructor(
         if (alias != null) {
             finalMerchant = alias.cleanName
             val savedCategory = categoryRuleDao.getCategoryForMerchant(finalMerchant)
-            finalCategory = if (transaction.category.isBlank()) {
+            finalCategory = transaction.category.ifBlank {
                 savedCategory ?: categorizerEngine.categorize(finalMerchant).name
-            } else {
-                transaction.category
             }
         } else {
             val cleanName = categorizerEngine.cleanMerchantName(transaction.merchant)
@@ -69,7 +66,9 @@ class TransactionRepository @Inject constructor(
                 merchantAliasDao.insertAlias(MerchantAliasEntity(rawMerchant, cleanName))
             }
             finalMerchant = cleanName
-            finalCategory = if (transaction.category.isBlank()) savedCategory ?: autoCategory.name else transaction.category
+            finalCategory = transaction.category.ifBlank {
+                savedCategory ?: autoCategory.name
+            }
         }
 
         val start = monthStart()
@@ -89,7 +88,7 @@ class TransactionRepository @Inject constructor(
         }
         checkBudgetAlert(previousSpent)
         
-        if (finalCategory == com.masum.cipher.core.domain.model.TransactionCategory.OTHERS.name) {
+        if (finalCategory == TransactionCategory.OTHERS.name) {
             val count = transactionDao.getUncategorizedCount()
             if (count > 0) {
                 notificationManager.showUncategorizedReminderNotification(count)
@@ -97,12 +96,11 @@ class TransactionRepository @Inject constructor(
         }
     }
 
-    suspend fun getTransactionById(id: Long): com.masum.cipher.core.data.local.entity.TransactionEntity? {
+    suspend fun getTransactionById(id: Long): TransactionEntity? {
         return transactionDao.getTransactionById(id)
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
-        val existing = transactionDao.getTransactionById(transaction.id)
         transactionDao.insertTransaction(transaction)
         syncWidget()
     }
@@ -113,23 +111,20 @@ class TransactionRepository @Inject constructor(
     }
 
     private suspend fun checkBudgetAlert(previousSpent: Double) {
-        val budget = UserPreferences(context).settingsFlow.first().monthlyBudget
+        val budget = userPreferences.settingsFlow.first().monthlyBudget
         if (budget <= 0) return
 
         val start = monthStart()
         val newSpent = transactionDao.sumExpensesSince(start)
         
-        if (previousSpent <= budget && newSpent > budget) {
+        if (budget in previousSpent..<newSpent) {
             notificationManager.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)
-        } else if (previousSpent < budget * 0.9 && newSpent >= budget * 0.9) {
+        } else if ((budget * 0.9) in previousSpent..<newSpent) {
             notificationManager.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 90)
-        } else if (previousSpent < budget * 0.5 && newSpent >= budget * 0.5) {
+        } else if ((budget * 0.5) in previousSpent..<newSpent) {
             notificationManager.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 50)
         }
     }
-
-    fun getTotalExpenses(): Flow<Double?> = transactionDao.getTotalExpenses()
-    fun getTotalIncome(): Flow<Double?> = transactionDao.getTotalIncome()
 
     fun getTransactionsBetween(startTime: Long, endTime: Long): Flow<List<TransactionEntity>> =
         transactionDao.getTransactionsBetween(startTime, endTime)

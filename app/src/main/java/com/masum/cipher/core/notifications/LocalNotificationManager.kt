@@ -12,7 +12,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
+import androidx.core.graphics.toColorInt
 import com.masum.cipher.MainActivity
+import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -105,7 +107,7 @@ class LocalNotificationManager @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_SYSTEM)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#4F46E5"))
+                .setColor("#4F46E5".toColorInt())
                 .setContentTitle("New Payment App Detected")
                 .setContentText("Would you like Cipher to track transactions from $appName?")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -139,7 +141,7 @@ class LocalNotificationManager @Inject constructor(
 
         val builder = NotificationCompat.Builder(context, CHANNEL_SYSTEM)
             .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-            .setColor(android.graphics.Color.parseColor("#4F46E5"))
+            .setColor("#4F46E5".toColorInt())
             .setContentTitle("Statement Generated")
             .setContentText("Your PDF statement is ready. Tap to view.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -172,7 +174,7 @@ class LocalNotificationManager @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_BUDGET)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor(if (isExceeded) "#F43F5E" else "#F59E0B"))
+                .setColor(if (isExceeded) "#F43F5E".toColorInt() else "#F59E0B".toColorInt())
                 .setContentTitle(title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -199,7 +201,7 @@ class LocalNotificationManager @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_SUMMARIES)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#10B981"))
+                .setColor("#10B981".toColorInt())
                 .setContentTitle("Daily Summary")
                 .setContentText("You spent ₹${spent.toInt()} today across $count transactions. Tap to review.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -226,7 +228,7 @@ class LocalNotificationManager @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_SUMMARIES)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#4F46E5"))
+                .setColor("#4F46E5".toColorInt())
                 .setContentTitle("Your $monthName Wrap-up")
                 .setContentText("Your spending report for $monthName is ready! See how you did.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -253,7 +255,7 @@ class LocalNotificationManager @Inject constructor(
 
             val builder = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#F59E0B"))
+                .setColor("#F59E0B".toColorInt())
                 .setContentTitle("Action Needed")
                 .setContentText("You have $count new transactions waiting to be categorized.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -319,7 +321,7 @@ class LocalNotificationManager @Inject constructor(
             val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}"
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor(if (transaction.isIncome) "#10B981" else "#F43F5E"))
+                .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
                 .setContentTitle("New Transaction")
                 .setContentText("You spent $amountStr at ${transaction.merchant}.")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -332,35 +334,7 @@ class LocalNotificationManager @Inject constructor(
         }
     }
 
-    fun showSubscriptionAutoLoggedNotification(merchant: String, amount: Double) {
-        scope.launch {
-            val settings = userPreferences.settingsFlow.first()
-            if (!settings.notifySubscriptions) return@launch
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-            ) return@launch
-
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pendingIntent = PendingIntent.getActivity(context, 6, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-            val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", amount)}"
-            val builder = NotificationCompat.Builder(context, CHANNEL_SUBSCRIPTIONS)
-                .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#3B82F6"))
-                .setContentTitle("Subscription Renewed")
-                .setContentText("Auto-logged $amountStr for $merchant.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-
-            with(NotificationManagerCompat.from(context)) { notify(1007, builder.build()) }
-        }
-    }
-
-    fun showSubscriptionPendingNotification(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
+    fun showSubscriptionPendingNotification(subscription: SubscriptionEntity) {
         scope.launch {
             val settings = userPreferences.settingsFlow.first()
             if (!settings.notifySubscriptions) return@launch
@@ -413,7 +387,7 @@ class LocalNotificationManager @Inject constructor(
             val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
             val builder = NotificationCompat.Builder(context, CHANNEL_SUBSCRIPTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor(android.graphics.Color.parseColor("#F59E0B"))
+                .setColor("#F59E0B".toColorInt())
                 .setContentTitle("Subscription Due")
                 .setContentText("$amountStr for ${subscription.merchant} is due today.")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
