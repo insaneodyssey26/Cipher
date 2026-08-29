@@ -321,7 +321,12 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
 
-                        if (!state.isAuthenticated && !state.isOnboardingRequired) {
+                        val shouldShowLock = state.settings?.isBiometricEnabled == true
+                            && biometricAuthenticator.isBiometricAvailable()
+                            && !state.isAuthenticated
+                            && !state.isOnboardingRequired
+
+                        if (shouldShowLock) {
                             LockScreen(
                                 onUnlockClick = { mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication) }
                             )
