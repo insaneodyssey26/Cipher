@@ -6,21 +6,13 @@ A local-first, privacy-focused personal finance app for Android. cipher reads yo
 
 ## Screenshots
 
-| Onboarding (Get Started) | Onboarding (Styling) | Onboarding (Permissions) | Onboarding (Tracked Apps) |
-|:------------------------:|:--------------------:|:------------------------:|:-------------------------:|
-| ![Get Started](docs/screenshots/onboarding.png) | ![Styling](docs/screenshots/onboarding-styling.png) | ![Permissions](docs/screenshots/onboarding-permission.png) | ![Tracked Apps](docs/screenshots/onboarding-tracked-apps.png) |
+| Dashboard | Financial Flow | Calendar Heatmap | Subscriptions Hub |
+|:---------:|:--------------:|:----------------:|:-----------------:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Financial Flow](docs/screenshots/insights-spending.png) | ![Calendar Heatmap](docs/screenshots/insights-habits.png) | ![Subscriptions Hub](docs/screenshots/insights-recurring.png) |
 
-| Dashboard | Transaction Editor |
-|:---------:|:------------------:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Transaction Editor](docs/screenshots/transaction-editor.png) |
-
-| Insights | Insights 2 | Insights 3 |
-|:--------:|:----------:|:----------:|
-| ![Insights](docs/screenshots/insights.png) | ![Insights 2](docs/screenshots/insights-2.png) | ![Insights 3](docs/screenshots/insights-3.png) |
-
-| Settings | Settings 2 |
-|:--------:|:----------:|
-| ![Settings](docs/screenshots/settings-1.png) | ![Settings 2](docs/screenshots/settings-2.png) |
+| Category Hub | Category Drilldown | Calculator Keypad | Security & Settings |
+|:------------:|:------------------:|:-----------------:|:-------------------:|
+| ![Category Hub](docs/screenshots/categories.png) | ![Category Drilldown](docs/screenshots/category-detail.png) | ![Calculator Keypad](docs/screenshots/transaction-calculator.png) | ![Security & Settings](docs/screenshots/settings.png) |
 
 ---
 
