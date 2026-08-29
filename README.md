@@ -6,13 +6,13 @@ A local-first, privacy-focused personal finance app for Android. cipher reads yo
 
 ## Screenshots
 
-| Dashboard | Financial Flow | Calendar Heatmap | Subscriptions Hub |
-|:---------:|:--------------:|:----------------:|:-----------------:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Financial Flow](docs/screenshots/insights-spending.png) | ![Calendar Heatmap](docs/screenshots/insights-habits.png) | ![Subscriptions Hub](docs/screenshots/insights-recurring.png) |
+| Dashboard | Financial Flow | Spending Habits | Calendar Heatmap | Subscriptions Hub |
+|:---------:|:--------------:|:---------------:|:----------------:|:-----------------:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Financial Flow](docs/screenshots/insights-spending.png) | ![Spending Habits](docs/screenshots/spending-habits.png) | ![Calendar Heatmap](docs/screenshots/insights-habits.png) | ![Subscriptions Hub](docs/screenshots/insights-recurring.png) |
 
-| Category Hub | Category Drilldown | Calculator Keypad | Security & Settings |
-|:------------:|:------------------:|:-----------------:|:-------------------:|
-| ![Category Hub](docs/screenshots/categories.png) | ![Category Drilldown](docs/screenshots/category-detail.png) | ![Calculator Keypad](docs/screenshots/transaction-calculator.png) | ![Security & Settings](docs/screenshots/settings.png) |
+| Category Overview | Category Breakdown | Calculator Keypad | Theme Customization | Settings & Privacy |
+|:-----------------:|:------------------:|:-----------------:|:-------------------:|:------------------:|
+| ![Category Overview](docs/screenshots/categories.png) | ![Category Breakdown](docs/screenshots/category-detail.png) | ![Calculator Keypad](docs/screenshots/transaction-calculator.png) | ![Theme Customization](docs/screenshots/settings-appearance.png) | ![Settings & Privacy](docs/screenshots/settings.png) |
 
 ---
 
