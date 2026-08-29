@@ -59,6 +59,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -199,6 +200,15 @@ fun DashboardScreen(
 
     BackHandler(enabled = state.searchQuery.isNotEmpty()) {
         viewModel.handleIntent(DashboardContract.Intent.SearchTransactions(""))
+    }
+
+    val shouldShowSkeleton by produceState(initialValue = false, key1 = state.isLoading, key2 = state.transactions.isEmpty()) {
+        if (state.isLoading && state.transactions.isEmpty()) {
+            kotlinx.coroutines.delay(200)
+            value = true
+        } else {
+            value = false
+        }
     }
 
     val mainScale by animateFloatAsState(
@@ -434,28 +444,7 @@ fun DashboardScreen(
                         }
                     }
 
-                if (state.isLoading) {
-                    item(key = "dashboard_skeleton_loader") {
-                        TransactionListSkeleton(
-                            count = 6,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                } else if (state.transactions.isEmpty()) {
-                    if (state.searchQuery.isNotEmpty()) {
-                        item {
-                            SearchEmptyState(query = state.searchQuery)
-                        }
-                    } else if (state.hasAnyTransactions) {
-                        item {
-                            FilterEmptyState(period = state.selectedTimePeriod)
-                        }
-                    } else {
-                        item {
-                            GenesisEmptyState()
-                        }
-                    }
-                } else {
+                if (state.transactions.isNotEmpty()) {
                     if (state.filter.isActive) {
                         item(key = "active_filter_summary") {
                             Row(
@@ -539,6 +528,27 @@ fun DashboardScreen(
                                     }
                                 )
                             }
+                        }
+                    }
+                } else if (state.isLoading && shouldShowSkeleton) {
+                    item(key = "dashboard_skeleton_loader") {
+                        TransactionListSkeleton(
+                            count = 6,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                } else if (!state.isLoading && state.transactions.isEmpty()) {
+                    if (state.searchQuery.isNotEmpty()) {
+                        item {
+                            SearchEmptyState(query = state.searchQuery)
+                        }
+                    } else if (state.hasAnyTransactions) {
+                        item {
+                            FilterEmptyState(period = state.selectedTimePeriod)
+                        }
+                    } else {
+                        item {
+                            GenesisEmptyState()
                         }
                     }
                 }
