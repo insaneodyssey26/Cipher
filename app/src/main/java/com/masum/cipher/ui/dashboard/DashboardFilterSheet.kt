@@ -158,9 +158,8 @@ fun DashboardFilterSheet(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.88f)
                 .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = 36.dp),
+            contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
@@ -326,7 +325,7 @@ fun DashboardFilterSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        TransactionCategory.entries.forEach { cat ->
+                        for (cat in TransactionCategory.entries) {
                             val isSelected = draftCategories.contains(cat.displayName) || draftCategories.contains(cat.name)
                             val catColor = cat.color
 
@@ -409,7 +408,7 @@ fun DashboardFilterSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        quickRanges.forEach { range ->
+                        for (range in quickRanges) {
                             val currentMin = minInput.toDoubleOrNull()
                             val currentMax = maxInput.toDoubleOrNull()
                             val isSelected = currentMin == range.min && currentMax == range.max

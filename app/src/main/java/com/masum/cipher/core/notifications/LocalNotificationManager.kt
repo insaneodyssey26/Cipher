@@ -322,8 +322,11 @@ class LocalNotificationManager @Inject constructor(
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
-                .setContentTitle("New Transaction")
-                .setContentText("You spent $amountStr at ${transaction.merchant}.")
+                .setContentTitle(if (transaction.isIncome) "Money Received" else "New Expense")
+                .setContentText(
+                    if (transaction.isIncome) "You received $amountStr from ${transaction.merchant}."
+                    else "You spent $amountStr at ${transaction.merchant}."
+                )
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(categorizePendingIntent)
                 .addAction(addNoteAction)
