@@ -274,13 +274,16 @@ fun InsightsScreen(
                                     income = state.monthlySummary.income,
                                     isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
                                     onEditBudgetClick = { showBudgetDialog = true },
+                                    onToggleDynamicMode = { enabled ->
+                                        viewModel.handleIntent(InsightsContract.Intent.SetDynamicBudget(enabled))
+                                    },
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     isHapticsEnabled = isHapticsEnabled
                                 )
                             }
 
                             item {
-                                SectionLabel("FINANCIAL FLOW")
+                                SectionLabel("CASH FLOW TREND")
                                 SpendingTrendChart(
                                     expensePoints = state.expenseTrendHistory,
                                     incomePoints = state.incomeTrendHistory,
@@ -301,7 +304,7 @@ fun InsightsScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    SectionLabel("CATEGORY ALLOCATION")
+                                    SectionLabel("SPENDING BY CATEGORY")
                                     androidx.compose.material3.TextButton(
                                         onClick = {
                                             view.performVibrate(isHapticsEnabled, isLongPress = false)

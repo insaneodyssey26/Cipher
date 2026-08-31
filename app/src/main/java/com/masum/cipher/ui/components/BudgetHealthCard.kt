@@ -42,12 +42,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
@@ -81,6 +88,7 @@ fun BudgetHealthCard(
     isDynamicBudget: Boolean = false,
     onEditBudgetClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleDynamicMode: ((Boolean) -> Unit)? = null,
     isHapticsEnabled: Boolean = true
 ) {
     val view = LocalView.current
@@ -169,22 +177,85 @@ fun BudgetHealthCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = if (isDynamicBudget) "Dynamic: ₹${String.format(locale, "%,.0f", effectiveBudget)}" else "Limit: ₹${String.format(locale, "%,.0f", budget)}",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.5.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (onToggleDynamicMode != null) {
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                                    .padding(2.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(if (!isDynamicBudget) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f) else Color.Transparent)
+                                        .clickable {
+                                            if (isDynamicBudget) {
+                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                onToggleDynamicMode(false)
+                                            }
+                                        }
+                                        .padding(horizontal = 9.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Fixed",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = if (!isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = if (!isDynamicBudget) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(if (isDynamicBudget) EmeraldIncome.copy(alpha = 0.18f) else Color.Transparent)
+                                        .clickable {
+                                            if (!isDynamicBudget) {
+                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                onToggleDynamicMode(true)
+                                            }
+                                        }
+                                        .padding(horizontal = 9.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Dynamic",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Manrope,
+                                            fontWeight = if (isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = if (isDynamicBudget) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = if (isDynamicBudget) "Dynamic: ₹${String.format(locale, "%,.0f", effectiveBudget)}" else "Limit: ₹${String.format(locale, "%,.0f", budget)}",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Manrope,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
 
                         Box(
                             modifier = Modifier
-                                .size(26.dp)
+                                .size(28.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), CircleShape),
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), CircleShape)
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onEditBudgetClick()
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -219,7 +290,7 @@ fun BudgetHealthCard(
                     Text(
                         text = amountText,
                         style = Typography.headlineLarge.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = amountFontSize,
                             letterSpacing = (-0.6).sp
@@ -246,27 +317,58 @@ fun BudgetHealthCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(7.dp)
-                        .clip(RoundedCornerShape(3.5.dp))
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(animatedProgress)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(3.5.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        accentColor.copy(alpha = 0.75f),
-                                        accentColor
-                                    )
+                        .drawBehind {
+                            val fillWidth = (size.width * animatedProgress).coerceAtLeast(0f)
+                            if (fillWidth > 0f) {
+                                drawRoundRect(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            accentColor.copy(alpha = 0.8f),
+                                            accentColor
+                                        )
+                                    ),
+                                    size = Size(fillWidth, size.height),
+                                    cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
                                 )
+                            }
+                        }
+                ) {
+                    if (isDynamicBudget && income > 0 && effectiveBudget > 0) {
+                        val baseRatio = (budget / effectiveBudget).toFloat().coerceIn(0f, 1f)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(1f - baseRatio)
+                                    .fillMaxHeight()
+                                    .align(Alignment.CenterEnd)
+                                    .background(EmeraldIncome.copy(alpha = 0.18f))
                             )
-                    )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(baseRatio)
+                                    .fillMaxHeight()
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(1.5.dp)
+                                        .fillMaxHeight()
+                                        .align(Alignment.CenterEnd)
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f))
+                                )
+                            }
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -274,26 +376,35 @@ fun BudgetHealthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹${String.format(locale, "%,.0f", spent)} spent ($percentDisplay)",
+                        text = "₹${String.format(locale, "%,.0f", spent)} spent of ₹${String.format(locale, "%,.0f", effectiveBudget)}",
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Medium
+                            fontFamily = Lato,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "$daysRemaining days left",
+                        text = "$daysRemaining days left ($percentDisplay)",
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
-                            fontSize = 10.5.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (isDynamicBudget && income > 0) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "Base ₹${String.format(locale, "%,.0f", budget)} + ₹${String.format(locale, "%,.0f", income)} from income",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = EmeraldIncome
                     )
                 }
 
@@ -315,7 +426,7 @@ fun BudgetHealthCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "SAFE DAILY PACE",
+                            text = "SAFE DAILY SPEND",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -328,7 +439,7 @@ fun BudgetHealthCard(
                         Text(
                             text = if (isOverBudget) "₹0 / day" else "₹${String.format(locale, "%,.0f", safeSpendPerDay)} / day",
                             style = Typography.titleMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
@@ -343,7 +454,7 @@ fun BudgetHealthCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "ACTUAL RUN-RATE",
+                            text = "DAILY AVERAGE",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -356,7 +467,7 @@ fun BudgetHealthCard(
                         Text(
                             text = "₹${String.format(locale, "%,.0f", currentDailyPace)} / day",
                             style = Typography.titleMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
@@ -446,6 +557,7 @@ fun BudgetHealthCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBudgetDialog(
     currentBudget: Double,
@@ -455,6 +567,8 @@ fun EditBudgetDialog(
     onConfirm: (Double, Boolean) -> Unit,
     isHapticsEnabled: Boolean = true
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
     var budgetInput by remember {
         mutableStateOf(if (currentBudget > 0) currentBudget.toInt().toString() else "")
     }
@@ -468,15 +582,44 @@ fun EditBudgetDialog(
     val currentAmount = budgetInput.toDoubleOrNull() ?: 0.0
     val effectiveAmount = if (selectedIsDynamic) currentAmount + currentMonthIncome else currentAmount
 
-    AlertDialog(
+    val closeWithAnimation: () -> Unit = {
+        coroutineScope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismiss()
+            }
+        }
+    }
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(24.dp),
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
-        title = {
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 8.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f))
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -484,16 +627,16 @@ fun EditBudgetDialog(
                         style = Typography.titleLarge.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 20.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Set your baseline budget and adjustment mode",
+                        text = "Set your baseline budget and adjustment rules",
                         style = Typography.bodySmall.copy(
                             fontFamily = Manrope,
-                            fontSize = 12.sp
+                            fontSize = 12.5.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -503,24 +646,21 @@ fun EditBudgetDialog(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                             onConfirm(0.0, false)
+                            closeWithAnimation()
                         },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = LucideIcons.Trash2,
                             contentDescription = "Remove Budget",
-                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
-                            modifier = Modifier.size(18.dp)
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = budgetInput,
                     onValueChange = { input ->
@@ -529,11 +669,11 @@ fun EditBudgetDialog(
                         }
                     },
                     label = { Text("Monthly Base Limit (₹)") },
-                    placeholder = { Text("e.g. 40000") },
-                    textStyle = Typography.bodyLarge.copy(
+                    placeholder = { Text("e.g. 40,000") },
+                    textStyle = Typography.headlineSmall.copy(
                         fontFamily = Lato,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
                     ),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -543,40 +683,37 @@ fun EditBudgetDialog(
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
-                            val amount = budgetInput.toDoubleOrNull() ?: 0.0
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            onConfirm(amount, selectedIsDynamic)
                         }
                     ),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                     ),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     val presets = listOf(1000, 5000, 10000, 25000)
                     presets.forEach { preset ->
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                     val current = budgetInput.toIntOrNull() ?: 0
                                     budgetInput = (current + preset).toString()
                                 }
-                                .padding(vertical = 5.dp),
+                                .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -584,7 +721,7 @@ fun EditBudgetDialog(
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 11.sp
+                                    fontSize = 12.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -594,13 +731,13 @@ fun EditBudgetDialog(
                     if (budgetInput.isNotEmpty()) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                     budgetInput = ""
                                 }
-                                .padding(horizontal = 8.dp, vertical = 5.dp),
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -608,22 +745,35 @@ fun EditBudgetDialog(
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 11.sp
+                                    fontSize = 12.sp
                                 ),
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
                     }
                 }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = "BUDGET BEHAVIOR",
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Manrope,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.5.sp,
+                        letterSpacing = 0.8.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (!selectedIsDynamic) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
@@ -631,26 +781,26 @@ fun EditBudgetDialog(
                             .border(
                                 width = if (!selectedIsDynamic) 1.5.dp else 1.dp,
                                 color = if (!selectedIsDynamic) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                shape = RoundedCornerShape(14.dp)
+                                shape = RoundedCornerShape(16.dp)
                             )
                             .clickable {
                                 view.performVibrate(isHapticsEnabled, isLongPress = false)
                                 selectedIsDynamic = false
                             }
-                            .padding(10.dp)
+                            .padding(14.dp)
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Fixed Cap",
+                                    text = "Fixed Limit",
                                     style = Typography.titleSmall.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 12.5.sp
+                                        fontSize = 14.sp
                                     ),
                                     color = if (!selectedIsDynamic) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
@@ -659,15 +809,16 @@ fun EditBudgetDialog(
                                         imageVector = LucideIcons.Check,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
                             Text(
-                                text = "Strict expense ceiling",
+                                text = "Strict monthly ceiling. Income is not added.",
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Manrope,
-                                    fontSize = 10.5.sp
+                                    fontSize = 11.5.sp,
+                                    lineHeight = 15.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -677,142 +828,136 @@ fun EditBudgetDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (selectedIsDynamic) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                if (selectedIsDynamic) EmeraldIncome.copy(alpha = 0.14f)
                                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                             )
                             .border(
                                 width = if (selectedIsDynamic) 1.5.dp else 1.dp,
-                                color = if (selectedIsDynamic) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                shape = RoundedCornerShape(14.dp)
+                                color = if (selectedIsDynamic) EmeraldIncome else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                shape = RoundedCornerShape(16.dp)
                             )
                             .clickable {
                                 view.performVibrate(isHapticsEnabled, isLongPress = false)
                                 selectedIsDynamic = true
                             }
-                            .padding(10.dp)
+                            .padding(14.dp)
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Dynamic Flow",
+                                    text = "Dynamic Budget",
                                     style = Typography.titleSmall.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 12.5.sp
+                                        fontSize = 14.sp
                                     ),
-                                    color = if (selectedIsDynamic) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    color = if (selectedIsDynamic) EmeraldIncome else MaterialTheme.colorScheme.onSurface
                                 )
                                 if (selectedIsDynamic) {
                                     Icon(
                                         imageVector = LucideIcons.Check,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
+                                        tint = EmeraldIncome,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
                             Text(
-                                text = "Grows with income",
+                                text = "Income received expands your monthly limit.",
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Manrope,
-                                    fontSize = 10.5.sp
+                                    fontSize = 11.5.sp,
+                                    lineHeight = 15.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
+            }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (selectedIsDynamic) "Effective Spending Power" else "Fixed Monthly Limit",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "₹${String.format(locale, "%,.0f", effectiveAmount)}",
-                            style = Typography.titleMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
-                            ),
-                            color = if (selectedIsDynamic) EmeraldIncome else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
                     Text(
-                        text = if (selectedIsDynamic) {
-                            if (currentMonthIncome > 0) {
-                                "Base ₹${String.format(locale, "%,.0f", currentAmount)} + ₹${String.format(locale, "%,.0f", currentMonthIncome)} received this month."
-                            } else {
-                                "Base ₹${String.format(locale, "%,.0f", currentAmount)}. Income received automatically expands your spending limit."
-                            }
-                        } else {
-                            "Strict ceiling of ₹${String.format(locale, "%,.0f", currentAmount)}. Money received does not increase this limit."
-                        },
-                        style = Typography.bodySmall.copy(
+                        text = if (selectedIsDynamic) "Total Monthly Budget" else "Fixed Monthly Limit",
+                        style = Typography.labelMedium.copy(
                             fontFamily = Manrope,
-                            fontSize = 11.sp
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.5.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Text(
+                        text = "₹${String.format(locale, "%,.0f", effectiveAmount)}",
+                        style = Typography.titleLarge.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        color = if (selectedIsDynamic) EmeraldIncome else MaterialTheme.colorScheme.onSurface
+                    )
                 }
+
+                Text(
+                    text = if (selectedIsDynamic) {
+                        if (currentMonthIncome > 0) {
+                            "Base ₹${String.format(locale, "%,.0f", currentAmount)} + ₹${String.format(locale, "%,.0f", currentMonthIncome)} received this month."
+                        } else {
+                            "Base ₹${String.format(locale, "%,.0f", currentAmount)}. Any income received will automatically expand your spending limit."
+                        }
+                    } else {
+                        "Strict ceiling of ₹${String.format(locale, "%,.0f", currentAmount)}. Money received does not increase this limit."
+                    },
+                    style = Typography.bodySmall.copy(
+                        fontFamily = Manrope,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        },
-        confirmButton = {
+
             Button(
                 onClick = {
                     val amount = budgetInput.toDoubleOrNull() ?: 0.0
                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                     onConfirm(amount, selectedIsDynamic)
+                    closeWithAnimation()
                 },
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
             ) {
                 Text(
                     text = "Save Target",
                     style = Typography.labelLarge.copy(
                         fontFamily = Manrope,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
                     ),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Text(
-                    text = "Cancel",
-                    style = Typography.labelLarge.copy(fontFamily = Manrope),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
-    )
+    }
 }

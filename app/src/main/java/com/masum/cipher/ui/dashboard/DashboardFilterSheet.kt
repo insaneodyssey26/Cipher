@@ -170,7 +170,7 @@ fun DashboardFilterSheet(
                 ) {
                     Column {
                         Text(
-                            text = "Filter Ledger",
+                            text = "Filter Transactions",
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,

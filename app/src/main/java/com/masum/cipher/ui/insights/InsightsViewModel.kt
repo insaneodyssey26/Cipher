@@ -62,6 +62,13 @@ class InsightsViewModel @Inject constructor(
                 viewModelScope.launch { subscriptionDao.insert(intent.subscription) }
             }
             is InsightsContract.Intent.SetCategoryBudget -> setCategoryBudget(intent.category, intent.limit)
+            is InsightsContract.Intent.SetDynamicBudget -> setDynamicBudget(intent.enabled)
+        }
+    }
+
+    private fun setDynamicBudget(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setDynamicBudgetEnabled(enabled)
         }
     }
 

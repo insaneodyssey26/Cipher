@@ -922,7 +922,7 @@ fun DashboardScreen(
                         icon = LucideIcons.TrendingUp
                     )
                     WhatsNewFeatureItem(
-                        title = "Advanced Filter Ledger",
+                        title = "Filter Transactions",
                         description = "Filter by transaction type, multiple categories, and custom amount ranges.",
                         icon = LucideIcons.SlidersHorizontal
                     )
