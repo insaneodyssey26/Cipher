@@ -234,9 +234,16 @@ fun DashboardScreen(
     val minToolbarHeight = 154.dp
     val toolbarHeightRangePx = with(density) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
     val toolbarOffsetHeightPx = androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    val animatedToolbarOffset by animateFloatAsState(
+        targetValue = toolbarOffsetHeightPx.floatValue,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "AnimatedToolbarOffset"
+    )
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-    val wasAtTopAtFlingStart = remember { mutableStateOf(true) }
 
     val nestedScrollConnection = remember {
         object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
@@ -245,9 +252,9 @@ fun DashboardScreen(
                 val delta = available.y
                 if (delta < 0) {
                     val previousOffset = toolbarOffsetHeightPx.floatValue
-                    val newOffset = toolbarOffsetHeightPx.floatValue + delta
-                    toolbarOffsetHeightPx.floatValue = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
-                    val consumed = toolbarOffsetHeightPx.floatValue - previousOffset
+                    val newOffset = (previousOffset + delta).coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumed = newOffset - previousOffset
+                    toolbarOffsetHeightPx.floatValue = newOffset
                     return androidx.compose.ui.geometry.Offset(0f, consumed)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
@@ -260,19 +267,14 @@ fun DashboardScreen(
             ): androidx.compose.ui.geometry.Offset {
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
                 val delta = available.y
-                if (delta > 0 && source == androidx.compose.ui.input.nestedscroll.NestedScrollSource.UserInput) {
+                if (delta > 0) {
                     val previousOffset = toolbarOffsetHeightPx.floatValue
-                    val newOffset = toolbarOffsetHeightPx.floatValue + delta
-                    toolbarOffsetHeightPx.floatValue = newOffset.coerceIn(-toolbarHeightRangePx, 0f)
-                    val consumedOffset = toolbarOffsetHeightPx.floatValue - previousOffset
+                    val newOffset = (previousOffset + delta).coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumedOffset = newOffset - previousOffset
+                    toolbarOffsetHeightPx.floatValue = newOffset
                     return androidx.compose.ui.geometry.Offset(0f, consumedOffset)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
-            }
-
-            override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
-                wasAtTopAtFlingStart.value = (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0)
-                return androidx.compose.ui.unit.Velocity.Zero
             }
 
             override suspend fun onPostFling(
@@ -281,17 +283,8 @@ fun DashboardScreen(
             ): androidx.compose.ui.unit.Velocity {
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.unit.Velocity.Zero
                 val velocity = available.y
-                if (velocity > 0f && wasAtTopAtFlingStart.value) {
-                    animate(
-                        initialValue = toolbarOffsetHeightPx.floatValue,
-                        targetValue = 0f,
-                        initialVelocity = velocity,
-                        animationSpec = spring(
-                            stiffness = Spring.StiffnessMediumLow
-                        )
-                    ) { value, _ ->
-                        toolbarOffsetHeightPx.floatValue = value.coerceIn(-toolbarHeightRangePx, 0f)
-                    }
+                if (velocity > 0f && toolbarOffsetHeightPx.floatValue < 0f) {
+                    toolbarOffsetHeightPx.floatValue = 0f
                     return androidx.compose.ui.unit.Velocity(0f, velocity)
                 }
                 return androidx.compose.ui.unit.Velocity.Zero
@@ -369,7 +362,7 @@ fun DashboardScreen(
                                 val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
                                 translationY = -(offsetPx * searchTransition)
                             } else {
-                                translationY = toolbarOffsetHeightPx.floatValue
+                                translationY = animatedToolbarOffset
                             }
                         },
                     contentPadding = PaddingValues(
@@ -573,7 +566,7 @@ fun DashboardScreen(
                     isHapticsEnabled = isHapticsEnabled,
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
-                    toolbarOffsetHeightPx = toolbarOffsetHeightPx.floatValue,
+                    toolbarOffsetHeightPx = animatedToolbarOffset,
                     toolbarHeightRangePx = toolbarHeightRangePx,
                     maxToolbarHeight = maxToolbarHeight
                 )
@@ -588,11 +581,11 @@ fun DashboardScreen(
                                 val offsetPx = (maxToolbarHeight.toPx() - 80.dp.toPx())
                                 translationY = -(offsetPx * searchTransition)
                             } else {
-                                translationY = toolbarOffsetHeightPx.floatValue
+                                translationY = animatedToolbarOffset
                             }
                             
                             val progress = if (toolbarHeightRangePx > 0f) {
-                                (kotlin.math.abs(toolbarOffsetHeightPx.floatValue) / toolbarHeightRangePx).coerceIn(0f, 1f)
+                                (kotlin.math.abs(animatedToolbarOffset) / toolbarHeightRangePx).coerceIn(0f, 1f)
                             } else 0f
                             
                             alpha = if (searchTransition > 0f) 1f else progress
@@ -1252,13 +1245,12 @@ private fun DashboardHero(
         1f - (kotlin.math.abs(toolbarOffsetHeightPx) / toolbarHeightRangePx)
     } else 1f
 
-    val targetHeight = if (searchQuery.isNotEmpty()) 80.dp else maxToolbarHeight + with(LocalDensity.current) { toolbarOffsetHeightPx.toDp() }
-    
-    val heroHeight by animateDpAsState(
-        targetValue = targetHeight,
-        animationSpec = tween(durationMillis = if (searchQuery.isNotEmpty()) 350 else 0),
-        label = "HeroHeight"
+    val searchHeroHeight by animateDpAsState(
+        targetValue = if (searchQuery.isNotEmpty()) 80.dp else maxToolbarHeight,
+        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        label = "SearchHeroHeight"
     )
+    val heroHeight = if (searchQuery.isNotEmpty()) searchHeroHeight else (maxToolbarHeight + with(LocalDensity.current) { toolbarOffsetHeightPx.toDp() })
 
     val contentAlpha by animateFloatAsState(
         targetValue = if (searchQuery.isEmpty()) 1f else 0f,
