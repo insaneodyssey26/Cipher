@@ -1,5 +1,13 @@
 # Release Notes
 
+## [5.0.1]
+
+### Fixed
+- **Category Detail Sheet Stability**: Redesigned the category detail view as a dedicated slide-up modal with pinned category header and close button, eliminating nested fling jumps and accidental dismissals.
+- **Large Number & Text Overflow Protection**: Added dynamic font scaling, overflow ellipsis, and compact currency formatting across Dashboard balance, charts, habit breakdowns, and transaction cards to prevent layout distortion from extreme numbers.
+
+---
+
 ## [5.0.0]
 
 ### Added

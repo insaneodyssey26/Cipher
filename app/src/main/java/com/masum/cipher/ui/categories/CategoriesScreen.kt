@@ -47,12 +47,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.TransactionCategory
+import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.CategoryDetailSheet
 import com.masum.cipher.ui.components.EditCategoryBudgetDialog
@@ -63,6 +65,7 @@ import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.insights.InsightsViewModel
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
@@ -191,7 +194,7 @@ fun CategoriesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = "TOTAL SPENT",
                                     style = Typography.labelSmall.copy(
@@ -204,14 +207,16 @@ fun CategoriesScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "₹${String.format(Locale.getDefault(), "%,.0f", totalExpense)}",
+                                    text = AppFormatters.formatCompactCurrency(totalExpense),
                                     style = Typography.headlineLarge.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 28.sp,
                                         letterSpacing = (-0.8).sp
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
@@ -327,7 +332,8 @@ fun CategoriesScreen(
                                             fontSize = 14.5.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = if (totalExpense > 0 && spent > 0) {
@@ -339,7 +345,9 @@ fun CategoriesScreen(
                                             fontFamily = Manrope,
                                             fontSize = 11.sp
                                         ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -348,16 +356,19 @@ fun CategoriesScreen(
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.weight(1f, fill = false)
                             ) {
                                 Text(
-                                    text = "₹${String.format(Locale.getDefault(), "%,.0f", spent)}",
+                                    text = AppFormatters.formatCompactCurrency(spent),
                                     style = Typography.titleLarge.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
                                     ),
-                                    color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface
+                                    color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
 
                                 Icon(

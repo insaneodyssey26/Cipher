@@ -146,7 +146,7 @@ fun DashboardScreen(
     
     val currentVersionCode = BuildConfig.VERSION_CODE
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
-    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
+    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < 24
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
         mutableStateOf(shouldShowWhatsNew)
     }
