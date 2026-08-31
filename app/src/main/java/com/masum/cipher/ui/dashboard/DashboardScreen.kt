@@ -146,7 +146,7 @@ fun DashboardScreen(
     
     val currentVersionCode = BuildConfig.VERSION_CODE
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
-    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < 24
+    val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember(shouldShowWhatsNew) {
         mutableStateOf(shouldShowWhatsNew)
     }
@@ -899,7 +899,7 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Version $versionName is here 🎉",
+                    text = "What's New in Version $versionName",
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -912,29 +912,24 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WhatsNewFeatureItem(
-                        title = "Domain Tabs in Insights",
-                        description = "Explore spending, habits, and recurring bills across three focused tabs.",
-                        icon = LucideIcons.Activity
-                    )
-                    WhatsNewFeatureItem(
-                        title = "Financial Flow Trends",
-                        description = "Track cash flow over time with interactive expense, income, and net trend lines.",
+                        title = "Dynamic Monthly Budgets",
+                        description = "Set a fixed spending limit or let your budget increase automatically as income arrives.",
                         icon = LucideIcons.TrendingUp
                     )
                     WhatsNewFeatureItem(
-                        title = "Filter Transactions",
-                        description = "Filter by transaction type, multiple categories, and custom amount ranges.",
+                        title = "Easier Budget Setup",
+                        description = "Set monthly targets faster with quick-add amounts and a clear breakdown of your limits.",
                         icon = LucideIcons.SlidersHorizontal
                     )
                     WhatsNewFeatureItem(
-                        title = "Subscriptions Hub",
-                        description = "Manage recurring bills with monthly estimates, due dates, and manual entry.",
-                        icon = LucideIcons.CalendarClock
+                        title = "Smoother Dashboard Scrolling",
+                        description = "Header and balance summary now fold and scroll cleanly with better touch response.",
+                        icon = LucideIcons.ArrowDown
                     )
                     WhatsNewFeatureItem(
-                        title = "Custom Date Ranges",
-                        description = "Select custom timeframes and date intervals directly from the time picker.",
-                        icon = LucideIcons.Calendar
+                        title = "Clearer Labels & Trends",
+                        description = "Simplified names across transactions, filters, and spending charts so everything is easy to understand.",
+                        icon = LucideIcons.Activity
                     )
                 }
 
@@ -956,7 +951,7 @@ fun DashboardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Cool Stuff",
+                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Continue",
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

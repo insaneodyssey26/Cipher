@@ -1,5 +1,18 @@
 # Release Notes
 
+## [5.1.0]
+
+### Added
+- **Dynamic & Fixed Budget Modes**: Support for both strict fixed spending limits and income-adjusted dynamic budgets. In dynamic mode, received income automatically increases your effective monthly spending limit.
+- **Full-Width Budget Editor**: Redesigned monthly budget configuration into a spacious bottom sheet with currency inputs, quick preset chips (+1k, +5k, +10k, +25k), and real-time total calculation previews.
+- **Dual-Layer Budget Progress Bar**: Visual breakdown showing base budget utilization alongside extra spending capacity from income, rendered with rounded capsule caps.
+
+### Changed & Improved
+- **Symmetrical 2-Stage Dashboard Scrolling**: Refined nested scroll physics so fast fling gestures stop cleanly when the hero balance docks or returns to the top, requiring a deliberate second stroke to continue scrolling.
+- **Hardware-Accelerated Progress Animation**: Migrated progress bar rendering to GPU draw operations (`drawBehind`), eliminating CPU layout passes during animations.
+
+---
+
 ## [5.0.1]
 
 ### Fixed
