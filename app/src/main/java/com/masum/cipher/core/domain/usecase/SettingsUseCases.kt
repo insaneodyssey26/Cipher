@@ -32,6 +32,10 @@ class UpdateSettingsUseCase @Inject constructor(
         userPreferences.setMonthlyBudget(amount)
         transactionRepository.refreshWidgets()
     }
+    suspend fun dynamicBudget(enabled: Boolean) {
+        userPreferences.setDynamicBudgetEnabled(enabled)
+        transactionRepository.refreshWidgets()
+    }
 
     suspend fun autoBackupEnabled(enabled: Boolean) = userPreferences.setAutoBackupEnabled(enabled)
     suspend fun autoBackupFrequency(frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) = userPreferences.setAutoBackupFrequency(frequency)

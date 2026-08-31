@@ -35,6 +35,7 @@ data class BackupData(
     val rules: List<CategoryRuleEntity> = emptyList(),
     val subscriptions: List<SubscriptionEntity> = emptyList(),
     val monthlyBudget: Double = 0.0,
+    val isDynamicBudgetEnabled: Boolean? = null,
     val categoryBudgets: Map<String, Double> = emptyMap(),
     val trackedApps: Set<String> = emptySet(),
     val ignoredSubscriptions: Set<String> = emptySet(),
@@ -81,6 +82,7 @@ class BackupRepository @Inject constructor(
                 rules = categoryRuleDao.getAllRules().first(),
                 subscriptions = subscriptionDao.getAllSubscriptions().first(),
                 monthlyBudget = settings.monthlyBudget,
+                isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                 categoryBudgets = settings.categoryBudgets,
                 trackedApps = settings.trackedApps,
                 ignoredSubscriptions = settings.ignoredSubscriptions,
@@ -146,6 +148,9 @@ class BackupRepository @Inject constructor(
 
                 if (data.monthlyBudget > 0) {
                     userPreferences.setMonthlyBudget(data.monthlyBudget)
+                }
+                data.isDynamicBudgetEnabled?.let {
+                    userPreferences.setDynamicBudgetEnabled(it)
                 }
                 if (data.categoryBudgets.isNotEmpty()) {
                     userPreferences.setCategoryBudgets(data.categoryBudgets)

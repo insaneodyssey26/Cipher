@@ -23,7 +23,7 @@ class DashboardContract {
         object DismissCategoryRulePrompt : Intent()
         data class ApproveSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class SkipSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
-        data class UpdateMonthlyBudget(val budget: Double) : Intent()
+        data class UpdateMonthlyBudget(val budget: Double, val isDynamic: Boolean = false) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
@@ -42,7 +42,9 @@ class DashboardContract {
         val totalIncome: Double = 0.0,
         val totalExpenses: Double = 0.0,
         val thisMonthExpenses: Double = 0.0,
+        val thisMonthIncome: Double = 0.0,
         val monthlyBudget: Double = 0.0,
+        val isDynamicBudget: Boolean = false,
         val expenseComparisonPercent: Double? = null,
         val expenseComparisonLabel: String? = null,
         val previousPeriodExpenses: Double? = null,
@@ -50,7 +52,10 @@ class DashboardContract {
         val categories: List<CategoryData> = emptyList(),
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null
-    ) : UiState
+    ) : UiState {
+        val effectiveMonthlyBudget: Double
+            get() = if (isDynamicBudget && monthlyBudget > 0) (monthlyBudget + thisMonthIncome) else monthlyBudget
+    }
 
     data class VelocityData(
         val currentWeekAvg: Double = 0.0,

@@ -144,10 +144,13 @@ fun InsightsScreen(
     if (showBudgetDialog) {
         com.masum.cipher.ui.components.EditBudgetDialog(
             currentBudget = monthlyBudget,
+            isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
+            currentMonthIncome = state.monthlySummary.income,
             onDismiss = { showBudgetDialog = false },
-            onConfirm = { amount ->
+            onConfirm = { amount, isDynamic ->
                 coroutineScope.launch {
                     userPreferences.setMonthlyBudget(amount)
+                    userPreferences.setDynamicBudgetEnabled(isDynamic)
                 }
                 showBudgetDialog = false
             },
@@ -268,6 +271,8 @@ fun InsightsScreen(
                                 com.masum.cipher.ui.components.BudgetHealthCard(
                                     spent = state.monthlySummary.expense,
                                     budget = monthlyBudget,
+                                    income = state.monthlySummary.income,
+                                    isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
                                     onEditBudgetClick = { showBudgetDialog = true },
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     isHapticsEnabled = isHapticsEnabled

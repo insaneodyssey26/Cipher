@@ -763,10 +763,9 @@ SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled =
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
                     title = "Monthly Budget",
-                    value = if (state.monthlyBudget > 0) "₹${state.monthlyBudget.toInt()}" else "No limit set",
+                    value = if (state.monthlyBudget > 0) "₹${state.monthlyBudget.toInt()} (${if (state.isDynamicBudgetEnabled) "Dynamic" else "Fixed"})" else "No limit set",
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                        budgetInput = if (state.monthlyBudget > 0) state.monthlyBudget.toInt().toString() else ""
                         showBudgetDialog = true
                     }
                 )
@@ -1074,33 +1073,17 @@ Spacer(modifier = Modifier.weight(1f))
     }
 
     if (showBudgetDialog) {
-        VaultSettingsDialog(
-            title = "Monthly Budget",
+        com.masum.cipher.ui.components.EditBudgetDialog(
+            currentBudget = state.monthlyBudget,
+            isDynamicBudget = state.isDynamicBudgetEnabled,
+            currentMonthIncome = state.thisMonthIncome,
             onDismiss = { showBudgetDialog = false },
-            confirmText = "Save",
-            onConfirm = {
-                val amount = budgetInput.toDoubleOrNull() ?: 0.0
-                viewModel.handleIntent(SettingsContract.Intent.SetMonthlyBudget(amount))
+            onConfirm = { amount, isDynamic ->
+                viewModel.handleIntent(SettingsContract.Intent.SetMonthlyBudget(amount, isDynamic))
                 showBudgetDialog = false
-            }
-        ) {
-            OutlinedTextField(
-                value = budgetInput,
-                onValueChange = { if (it.all { char -> char.isDigit() }) budgetInput = it },
-                label = { Text("Limit (₹)") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+            },
+            isHapticsEnabled = state.isHapticsEnabled
+        )
     }
     if (showFrequencyDialog) {
         VaultSettingsDialog(

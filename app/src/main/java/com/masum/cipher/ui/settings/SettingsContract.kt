@@ -21,7 +21,7 @@ class SettingsContract {
         data class SetNotifySubscriptions(val enabled: Boolean) : Intent()
         data class SetNotifyNewAppDetected(val enabled: Boolean) : Intent()
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
-        data class SetMonthlyBudget(val amount: Double) : Intent()
+        data class SetMonthlyBudget(val amount: Double, val isDynamic: Boolean = false) : Intent()
         object ClearAllData : Intent()
         data class ExportData(val uri: Uri, val password: CharArray) : Intent() {
             override fun equals(other: Any?): Boolean {
@@ -86,6 +86,8 @@ class SettingsContract {
         val notifyNewAppDetected: Boolean = true,
         val isHapticsEnabled: Boolean = true,
         val monthlyBudget: Double = 0.0,
+        val isDynamicBudgetEnabled: Boolean = false,
+        val thisMonthIncome: Double = 0.0,
         val autoBackupEnabled: Boolean = false,
         val autoBackupFrequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency = com.masum.cipher.core.data.local.pref.AutoBackupFrequency.NEVER,
         val autoBackupUri: String? = null,

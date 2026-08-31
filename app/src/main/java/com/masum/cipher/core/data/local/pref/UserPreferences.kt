@@ -56,6 +56,7 @@ class UserPreferences @Inject constructor(
         val NOTIFY_NEW_APP_DETECTED = booleanPreferencesKey("notify_new_app_detected")
         val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
         val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
+        val IS_DYNAMIC_BUDGET_ENABLED = booleanPreferencesKey("is_dynamic_budget_enabled")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -68,6 +69,7 @@ class UserPreferences @Inject constructor(
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
             monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
+            isDynamicBudgetEnabled = preferences[Keys.IS_DYNAMIC_BUDGET_ENABLED] ?: false,
             hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false,
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
             accentColor = try {
@@ -139,6 +141,10 @@ class UserPreferences @Inject constructor(
 
     suspend fun setMonthlyBudget(amount: Double) {
         context.dataStore.edit { it[Keys.MONTHLY_BUDGET] = amount }
+    }
+
+    suspend fun setDynamicBudgetEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.IS_DYNAMIC_BUDGET_ENABLED] = enabled }
     }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
@@ -327,5 +333,6 @@ data class UserSettings(
     val notifySubscriptions: Boolean = true,
     val notifyNewAppDetected: Boolean = true,
     val ignoredSubscriptions: Set<String> = emptySet(),
-    val categoryBudgets: Map<String, Double> = emptyMap()
+    val categoryBudgets: Map<String, Double> = emptyMap(),
+    val isDynamicBudgetEnabled: Boolean = false
 )

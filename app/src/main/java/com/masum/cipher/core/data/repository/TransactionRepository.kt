@@ -111,10 +111,13 @@ class TransactionRepository @Inject constructor(
     }
 
     private suspend fun checkBudgetAlert(previousSpent: Double) {
-        val budget = userPreferences.settingsFlow.first().monthlyBudget
-        if (budget <= 0) return
+        val settings = userPreferences.settingsFlow.first()
+        val baseBudget = settings.monthlyBudget
+        if (baseBudget <= 0) return
 
         val start = monthStart()
+        val totalIncome = if (settings.isDynamicBudgetEnabled) transactionDao.sumIncomeSince(start) else 0.0
+        val budget = baseBudget + totalIncome
         val newSpent = transactionDao.sumExpensesSince(start)
         
         if (budget in previousSpent..<newSpent) {

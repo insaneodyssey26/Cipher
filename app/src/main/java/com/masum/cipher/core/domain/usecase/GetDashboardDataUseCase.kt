@@ -30,16 +30,23 @@ class GetDashboardDataUseCase @Inject constructor(
             kotlinx.coroutines.flow.flowOf(null)
         }
 
-        return combine(
+        val rangeStatsFlow = combine(
             repository.getTotalIncomeBetween(timeRange.startTime, timeRange.endTime),
             repository.getTotalExpensesBetween(timeRange.startTime, timeRange.endTime),
+            prevExpenseFlow
+        ) { inc, exp, prev ->
+            Triple(inc ?: 0.0, exp ?: 0.0, prev)
+        }
+
+        val monthStatsFlow = combine(
             repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime),
-            prevExpenseFlow,
+            repository.getTotalIncomeBetween(thisMonthRange.startTime, thisMonthRange.endTime),
             userPreferences.settingsFlow
-        ) { incomeRange, expensesRange, thisMonthExp, prevExp, settings ->
-            val rangeInc = incomeRange ?: 0.0
-            val rangeExp = expensesRange ?: 0.0
-            val monthExp = thisMonthExp ?: 0.0
+        ) { monthExp, monthInc, settings ->
+            Triple(monthExp ?: 0.0, monthInc ?: 0.0, settings)
+        }
+
+        return combine(rangeStatsFlow, monthStatsFlow) { (rangeInc, rangeExp, prevExp), (monthExp, monthInc, settings) ->
             val rangeBalance = rangeInc - rangeExp
             val (deltaPercent, compLabel) = if (prevExp != null && prevExp > 0.0) {
                 val delta = ((rangeExp - prevExp) / prevExp) * 100.0
@@ -47,7 +54,7 @@ class GetDashboardDataUseCase @Inject constructor(
             } else {
                 Pair(null, null)
             }
-            StateTuple(rangeInc, rangeExp, monthExp, rangeBalance, settings.monthlyBudget, deltaPercent, compLabel, prevExp)
+            StateTuple(rangeInc, rangeExp, monthExp, monthInc, rangeBalance, settings.monthlyBudget, settings.isDynamicBudgetEnabled, deltaPercent, compLabel, prevExp)
         }.flatMapLatest { stats ->
             val transactionsFlow = if (query.isBlank()) {
                 repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
@@ -99,8 +106,10 @@ class GetDashboardDataUseCase @Inject constructor(
                     totalIncome = stats.income,
                     totalExpenses = stats.expenses,
                     thisMonthExpenses = stats.thisMonthExpenses,
+                    thisMonthIncome = stats.thisMonthIncome,
                     totalBalance = stats.totalBalance,
                     monthlyBudget = stats.budget,
+                    isDynamicBudget = stats.isDynamicBudget,
                     expenseComparisonPercent = stats.deltaPercent,
                     expenseComparisonLabel = stats.compLabel,
                     previousPeriodExpenses = stats.prevExp
@@ -113,8 +122,10 @@ class GetDashboardDataUseCase @Inject constructor(
         val income: Double,
         val expenses: Double,
         val thisMonthExpenses: Double,
+        val thisMonthIncome: Double,
         val totalBalance: Double,
         val budget: Double,
+        val isDynamicBudget: Boolean,
         val deltaPercent: Double?,
         val compLabel: String?,
         val prevExp: Double?

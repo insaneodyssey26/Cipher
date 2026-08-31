@@ -53,10 +53,13 @@ class BudgetWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val settings = UserPreferences(context).settingsFlow.first()
-        val budget = settings.monthlyBudget
+        val baseBudget = settings.monthlyBudget
+        val isDynamic = settings.isDynamicBudgetEnabled
         val accentColor = Color(settings.accentColor.colorValue)
         provideContent {
             val spent = currentState<Preferences>()[WidgetKeys.BUDGET_SPENT] ?: 0.0
+            val income = currentState<Preferences>()[WidgetKeys.STATS_INCOME] ?: 0.0
+            val budget = if (isDynamic && baseBudget > 0) baseBudget + income else baseBudget
             GlanceTheme {
                 Content(spent = spent, budget = budget, brandColor = ColorProvider(accentColor))
             }

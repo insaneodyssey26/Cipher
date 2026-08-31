@@ -245,7 +245,7 @@ fun DashboardScreen(
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
 
-    val nestedScrollConnection = remember {
+    val nestedScrollConnection = remember(toolbarHeightRangePx) {
         object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
             override fun onPreScroll(available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
@@ -256,6 +256,12 @@ fun DashboardScreen(
                     val consumed = newOffset - previousOffset
                     toolbarOffsetHeightPx.floatValue = newOffset
                     return androidx.compose.ui.geometry.Offset(0f, consumed)
+                } else if (delta > 0 && listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
+                    val previousOffset = toolbarOffsetHeightPx.floatValue
+                    val newOffset = (previousOffset + delta).coerceIn(-toolbarHeightRangePx, 0f)
+                    val consumedOffset = newOffset - previousOffset
+                    toolbarOffsetHeightPx.floatValue = newOffset
+                    return androidx.compose.ui.geometry.Offset(0f, consumedOffset)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
             }
@@ -268,13 +274,23 @@ fun DashboardScreen(
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.geometry.Offset.Zero
                 val delta = available.y
                 if (delta > 0) {
-                    val previousOffset = toolbarOffsetHeightPx.floatValue
-                    val newOffset = (previousOffset + delta).coerceIn(-toolbarHeightRangePx, 0f)
-                    val consumedOffset = newOffset - previousOffset
-                    toolbarOffsetHeightPx.floatValue = newOffset
-                    return androidx.compose.ui.geometry.Offset(0f, consumedOffset)
+                    return androidx.compose.ui.geometry.Offset(0f, delta)
                 }
                 return androidx.compose.ui.geometry.Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
+                if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.unit.Velocity.Zero
+                val velocity = available.y
+                if (velocity < 0f && toolbarOffsetHeightPx.floatValue > -toolbarHeightRangePx) {
+                    toolbarOffsetHeightPx.floatValue = -toolbarHeightRangePx
+                    return available
+                }
+                if (velocity > 0f && listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0 && toolbarOffsetHeightPx.floatValue < 0f) {
+                    toolbarOffsetHeightPx.floatValue = 0f
+                    return available
+                }
+                return androidx.compose.ui.unit.Velocity.Zero
             }
 
             override suspend fun onPostFling(
@@ -283,9 +299,8 @@ fun DashboardScreen(
             ): androidx.compose.ui.unit.Velocity {
                 if (state.searchQuery.isNotEmpty()) return androidx.compose.ui.unit.Velocity.Zero
                 val velocity = available.y
-                if (velocity > 0f && toolbarOffsetHeightPx.floatValue < 0f) {
-                    toolbarOffsetHeightPx.floatValue = 0f
-                    return androidx.compose.ui.unit.Velocity(0f, velocity)
+                if (velocity > 0f) {
+                    return available
                 }
                 return androidx.compose.ui.unit.Velocity.Zero
             }

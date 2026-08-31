@@ -59,13 +59,14 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
             is DashboardContract.Intent.ApproveSubscription -> approveSubscription(intent.subscription)
             is DashboardContract.Intent.SkipSubscription -> skipSubscription(intent.subscription)
-            is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget)
+            is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget, intent.isDynamic)
         }
     }
 
-    private fun updateMonthlyBudget(budget: Double) {
+    private fun updateMonthlyBudget(budget: Double, isDynamic: Boolean) {
         viewModelScope.launch {
             updateSettingsUseCase.monthlyBudget(budget)
+            updateSettingsUseCase.dynamicBudget(isDynamic)
         }
     }
 
