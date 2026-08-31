@@ -158,6 +158,7 @@ fun DashboardFilterSheet(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.88f)
                 .padding(horizontal = 20.dp),
             contentPadding = PaddingValues(bottom = 36.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)

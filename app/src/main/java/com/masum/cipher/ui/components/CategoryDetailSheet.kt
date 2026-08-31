@@ -1,10 +1,12 @@
 package com.masum.cipher.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,12 +33,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -53,12 +55,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
@@ -66,7 +71,7 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Target
-import androidx.compose.ui.platform.LocalLocale
+import compose.icons.lucideicons.X
 import java.util.Calendar
 import java.util.Date
 
@@ -89,7 +94,6 @@ fun CategoryDetailSheet(
 ) {
     val view = LocalView.current
     val locale = LocalLocale.current.platformLocale
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBudgetDialog by remember { mutableStateOf(false) }
 
     val categoryEnum = remember(categoryData.category) {
@@ -158,32 +162,43 @@ fun CategoryDetailSheet(
         )
     }
 
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .width(36.dp)
-                    .height(4.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f))
-            )
-        }
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
     ) {
-        LazyColumn(
+        BackHandler { onDismiss() }
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = 36.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.7f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onDismiss() },
+            contentAlignment = Alignment.BottomCenter
         ) {
-            item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.92f)
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {}
+                    .navigationBarsPadding()
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -228,21 +243,55 @@ fun CategoryDetailSheet(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "₹${String.format(locale, "%,.0f", totalSpent)}",
+                            style = Typography.headlineMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
 
-                    Text(
-                        text = "₹${String.format(locale, "%,.0f", totalSpent)}",
-                        style = Typography.headlineMedium.copy(
-                            fontFamily = Manrope,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onDismiss()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.X,
+                                contentDescription = "Close",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 20.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 36.dp)
+                ) {
 
             item {
                 VaultCard(
@@ -703,6 +752,8 @@ fun CategoryDetailSheet(
             }
         }
     }
+}
+}
 }
 
 @Composable
