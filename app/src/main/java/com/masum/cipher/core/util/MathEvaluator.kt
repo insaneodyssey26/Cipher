@@ -7,7 +7,7 @@ object MathEvaluator {
             return null
         }
         return try {
-            object : Any() {
+            val result = object : Any() {
                 var pos = -1
                 var ch = 0
 
@@ -34,8 +34,8 @@ object MathEvaluator {
                 fun parseExpression(): Double {
                     var x = parseTerm()
                     while (true) {
-                        if (eat('+'.code)) x += parseTerm() // addition
-                        else if (eat('-'.code)) x -= parseTerm() // subtraction
+                        if (eat('+'.code)) x += parseTerm()
+                        else if (eat('-'.code)) x -= parseTerm()
                         else return x
                     }
                 }
@@ -43,21 +43,21 @@ object MathEvaluator {
                 fun parseTerm(): Double {
                     var x = parseFactor()
                     while (true) {
-                        if (eat('*'.code)) x *= parseFactor() // multiplication
-                        else if (eat('/'.code)) x /= parseFactor() // division
+                        if (eat('*'.code)) x *= parseFactor()
+                        else if (eat('/'.code)) x /= parseFactor()
                         else return x
                     }
                 }
 
                 fun parseFactor(): Double {
-                    if (eat('+'.code)) return parseFactor() // unary plus
-                    if (eat('-'.code)) return -parseFactor() // unary minus
+                    if (eat('+'.code)) return parseFactor()
+                    if (eat('-'.code)) return -parseFactor()
                     var x: Double
                     val startPos = pos
-                    if (eat('('.code)) { // parentheses
+                    if (eat('('.code)) {
                         x = parseExpression()
                         eat(')'.code)
-                    } else if (ch >= '0'.code && ch <= '9'.code || ch == '.'.code) { // numbers
+                    } else if (ch >= '0'.code && ch <= '9'.code || ch == '.'.code) {
                         while (ch >= '0'.code && ch <= '9'.code || ch == '.'.code) nextChar()
                         x = sanitized.substring(startPos, pos).toDouble()
                     } else {
@@ -66,6 +66,11 @@ object MathEvaluator {
                     return x
                 }
             }.parse()
+            if (result.isNaN() || result.isInfinite()) {
+                null
+            } else {
+                result.coerceIn(0.0, 999_999_999_999.0)
+            }
         } catch (_: Exception) {
             null
         }

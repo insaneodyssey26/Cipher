@@ -499,12 +499,14 @@ private fun InsightHero(state: InsightsContract.State) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "₹${String.format(locale, "%,.0f", mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
+                            text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
                             style = Typography.bodySmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 12.5.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
@@ -609,13 +611,15 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "₹${String.format(locale, "%,.0f", dailyRunRate)} / day",
+                        text = "${AppFormatters.formatCompactCurrency(dailyRunRate)}/day",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
@@ -642,13 +646,15 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "₹${String.format(locale, "%,.0f", state.avgTransactionSize)}",
+                        text = AppFormatters.formatCompactCurrency(state.avgTransactionSize),
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

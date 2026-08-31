@@ -194,16 +194,19 @@ fun CategoryAllocationDonut(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
-                            text = "₹${String.format(locale, "%,.0f", category.amount)}",
+                            text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
-                            color = if (isOver) RoseExpense else MaterialTheme.colorScheme.onSurface
+                            color = if (isOver) RoseExpense else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                         Box(
                             modifier = Modifier
@@ -342,26 +345,30 @@ fun SpendingTrendChart(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
+                        val safeTotal = if (currentTotal.isInfinite() || currentTotal.isNaN()) 0.0 else currentTotal.toDouble()
                         val (statTitle, statSubtitle) = when (selectedMode) {
-                            FinancialFlowMode.EXPENSE -> Pair("₹${String.format(locale, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Outflow")
-                            FinancialFlowMode.INCOME -> Pair("₹${String.format(locale, "%,.0f", kotlin.math.abs(currentTotal))}", "Total Inflow")
+                            FinancialFlowMode.EXPENSE -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal)), "Total Outflow")
+                            FinancialFlowMode.INCOME -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal)), "Total Inflow")
                             FinancialFlowMode.NET_FLOW -> {
-                                val prefix = if (currentTotal < 0f) "₹-" else "₹"
-                                val label = if (currentTotal >= 0f) "Net Surplus" else "Net Deficit"
-                                Pair("$prefix${String.format(locale, "%,.0f", kotlin.math.abs(currentTotal))}", label)
+                                val label = if (safeTotal >= 0.0) "Net Surplus" else "Net Deficit"
+                                Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(safeTotal), label)
                             }
                         }
 
                         Text(
                             text = statTitle,
                             style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                         Text(
                             text = statSubtitle,
                             style = Typography.labelSmall.copy(fontSize = 11.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     }
 

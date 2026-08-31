@@ -66,25 +66,29 @@ object AppFormatters {
         val absVal = kotlin.math.abs(value)
         val sign = if (value < 0) "-" else ""
         return when {
+            absVal >= 1_000_000_000_000_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000_000.0).removeSuffix(".0")
+                "$prefix$sign${formatted}Q"
+            }
             absVal >= 1_000_000_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000.0).removeSuffix(".0")
-                "$sign$prefix${formatted}T"
+                "$prefix$sign${formatted}T"
             }
             absVal >= 1_000_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000.0).removeSuffix(".0")
-                "$sign$prefix${formatted}B"
+                "$prefix$sign${formatted}B"
             }
             absVal >= 1_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000.0).removeSuffix(".0")
-                "$sign$prefix${formatted}M"
+                "$prefix$sign${formatted}M"
             }
-            absVal >= 1_000.0 -> {
-                val formatted = String.format(Locale.US, "%.1f", absVal / 1_000.0).removeSuffix(".0")
-                "$sign$prefix${formatted}k"
+            absVal >= 100_000.0 -> {
+                val formatted = String.format(Locale.US, "%.1f", absVal / 1000.0).removeSuffix(".0")
+                "$prefix$sign${formatted}k"
             }
             else -> {
                 val formatted = String.format(Locale.getDefault(), "%,.0f", absVal)
-                "$sign$prefix$formatted"
+                "$prefix$sign$formatted"
             }
         }
     }

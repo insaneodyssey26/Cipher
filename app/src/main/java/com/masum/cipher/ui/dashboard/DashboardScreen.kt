@@ -93,6 +93,7 @@ import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
@@ -1043,12 +1044,18 @@ fun DashboardScreen(
                                 Text(
                                     text = "This period (so far)",
                                     style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                                Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "₹${String.format(Locale.US, "%.0f", currentExp)}",
+                                    text = AppFormatters.formatCompactCurrency(currentExp),
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
@@ -1062,12 +1069,18 @@ fun DashboardScreen(
                                 Text(
                                     text = "Same days $label",
                                     style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                                Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "₹${String.format(Locale.US, "%.0f", prevExp)}",
+                                    text = AppFormatters.formatCompactCurrency(prevExp),
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
@@ -1075,10 +1088,13 @@ fun DashboardScreen(
                             androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                             Spacer(Modifier.height(14.dp))
 
+                            val percentStr = if (kotlin.math.abs(percent) > 9999.0) ">999%" else "${String.format(Locale.US, "%.1f", kotlin.math.abs(percent))}%"
                             Text(
-                                text = "$arrow ₹${String.format(Locale.US, "%.0f", diff)} $actionWord (${String.format(Locale.US, "%.1f", kotlin.math.abs(percent))}%)",
+                                text = "$arrow ${AppFormatters.formatCompactCurrency(diff)} $actionWord ($percentStr)",
                                 style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = color
+                                color = color,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
@@ -1404,16 +1420,25 @@ private fun DashboardHero(
                             }
                         }
 
-                        val balanceFontSize = 52.sp
                         val formattedBalance = remember(totalBalance, locale) {
                             val absVal = kotlin.math.abs(totalBalance)
                             val sign = if (totalBalance < 0) "-" else ""
                             when {
+                                absVal >= 1_000_000_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fQ", absVal / 1_000_000_000_000_000.0).replace(".00Q", "Q")
                                 absVal >= 1_000_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
                                 absVal >= 1_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
                                 absVal >= 1_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
                                 absVal >= 100_000.0 -> "₹$sign" + String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
                                 else -> "₹$sign" + String.format(locale, "%,.0f", absVal)
+                            }
+                        }
+
+                        val balanceFontSize = remember(formattedBalance.length) {
+                            when {
+                                formattedBalance.length > 14 -> 28.sp
+                                formattedBalance.length > 10 -> 36.sp
+                                formattedBalance.length > 8 -> 44.sp
+                                else -> 52.sp
                             }
                         }
 
@@ -1429,7 +1454,7 @@ private fun DashboardHero(
                                 Text(
                                     text = "₹••••••",
                                     style = Typography.displayLarge.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = balanceFontSize,
                                         letterSpacing = (-1).sp
@@ -1448,12 +1473,14 @@ private fun DashboardHero(
                                         Text(
                                             text = targetText,
                                             style = Typography.displayLarge.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = balanceFontSize,
                                                 letterSpacing = (-1.2).sp
                                             ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 } else {
@@ -1461,7 +1488,7 @@ private fun DashboardHero(
                                         Text(
                                             text = "₹",
                                             style = Typography.headlineMedium.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold
                                             ),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1471,7 +1498,7 @@ private fun DashboardHero(
                                             Text(
                                                 text = "-",
                                                 style = Typography.displayLarge.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = balanceFontSize,
                                                     letterSpacing = (-1.2).sp
@@ -1482,7 +1509,7 @@ private fun DashboardHero(
                                         AnimatedNumberTicker(
                                             value = kotlin.math.abs(totalBalance),
                                             textStyle = Typography.displayLarge.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = balanceFontSize,
                                                 letterSpacing = (-1.2).sp
@@ -1820,7 +1847,9 @@ fun TransactionItem(
                 Text(
                     text = SimpleDateFormat("d MMM, HH:mm", locale).format(Date(transaction.timestamp)),
                     style = Typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 if (!transaction.note.isNullOrBlank()) {
                     Text(
@@ -1836,14 +1865,15 @@ fun TransactionItem(
 
             val amountFormatted = String.format(locale, "%,.0f", transaction.amount)
             Text(
-                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+" else "-"}₹$amountFormatted",
+                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+₹" else "₹-"}$amountFormatted",
                 style = Typography.titleMedium.copy(
                     fontFamily = Manrope,
                     fontWeight = FontWeight.Bold
                 ),
                 color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
     }
@@ -2026,6 +2056,7 @@ private fun CashFlowSegmentBar(
     fun formatAmount(value: Double): String {
         val absVal = kotlin.math.abs(value)
         return when {
+            absVal >= 1_000_000_000_000_000.0 -> String.format(Locale.US, "%.1fQ", absVal / 1_000_000_000_000_000.0).replace(".0Q", "Q")
             absVal >= 1_000_000_000_000.0 -> String.format(Locale.US, "%.1fT", absVal / 1_000_000_000_000.0).replace(".0T", "T")
             absVal >= 1_000_000_000.0 -> String.format(Locale.US, "%.1fB", absVal / 1_000_000_000.0).replace(".0B", "B")
             absVal >= 1_000_000.0 -> String.format(Locale.US, "%.1fM", absVal / 1_000_000.0).replace(".0M", "M")
@@ -2042,7 +2073,10 @@ private fun CashFlowSegmentBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f, fill = false)
+            ) {
                 Box(
                     modifier = Modifier
                         .size(if (isCollapsed) 17.dp else 18.dp)
@@ -2066,7 +2100,8 @@ private fun CashFlowSegmentBar(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
                 
@@ -2084,12 +2119,19 @@ private fun CashFlowSegmentBar(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
                         ),
-                        color = EmeraldIncome
+                        color = EmeraldIncome,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f, fill = false)
+            ) {
                 val formattedExpense = formatAmount(expense)
                 AnimatedContent(
                     targetState = if (privacyMode) "••••" else "₹$formattedExpense",
@@ -2103,7 +2145,9 @@ private fun CashFlowSegmentBar(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
                         ),
-                        color = RoseExpense
+                        color = RoseExpense,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 
@@ -2116,7 +2160,8 @@ private fun CashFlowSegmentBar(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
                 

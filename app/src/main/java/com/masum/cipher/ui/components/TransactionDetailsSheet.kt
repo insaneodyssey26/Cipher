@@ -199,10 +199,9 @@ fun TransactionDetailsSheet(
                 )
             }
 
-            // Amount field
             AmountInputField(
                 value = amount,
-                onValueChange = { amount = it },
+                onValueChange = { if (it.length <= 15) amount = it },
                 color = if (isIncome) EmeraldIncome else RoseExpense
             )
 

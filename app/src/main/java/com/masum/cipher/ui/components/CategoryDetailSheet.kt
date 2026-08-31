@@ -243,18 +243,23 @@ fun CategoryDetailSheet(
                         }
                     }
 
+                    Spacer(Modifier.width(10.dp))
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
                             text = "₹${String.format(locale, "%,.0f", totalSpent)}",
                             style = Typography.headlineMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp
+                                fontSize = if (totalSpent >= 1_000_000_000) 18.sp else 22.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
 
                         Box(
@@ -516,7 +521,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "₹${String.format(locale, "%,.0f", avgSpend)}",
+                                text = AppFormatters.formatCompactCurrency(avgSpend),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -590,7 +595,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "₹${String.format(locale, "%,.0f", maxSpend)}",
+                                text = AppFormatters.formatCompactCurrency(maxSpend),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -647,6 +652,7 @@ fun CategoryDetailSheet(
                                             overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.weight(1f)
                                         )
+                                        Spacer(Modifier.width(8.dp))
                                         Text(
                                             text = "₹${String.format(locale, "%,.0f", merchant.totalAmount)}",
                                             style = Typography.bodyMedium.copy(
@@ -654,7 +660,9 @@ fun CategoryDetailSheet(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 13.sp
                                             ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
 
@@ -738,6 +746,8 @@ fun CategoryDetailSheet(
                             )
                         }
 
+                        Spacer(Modifier.width(8.dp))
+
                         Text(
                             text = "₹-${String.format(locale, "%,.0f", tx.amount)}",
                             style = Typography.titleMedium.copy(
@@ -745,7 +755,9 @@ fun CategoryDetailSheet(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
