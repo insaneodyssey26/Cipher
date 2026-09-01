@@ -82,7 +82,7 @@ import java.util.Calendar
 fun CategoryAllocationDonut(
     categories: List<DashboardContract.CategoryData>,
     categoryBudgets: Map<String, Double> = emptyMap(),
-    currencySymbol: String = "₹",
+    currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
     onCategoryClick: (DashboardContract.CategoryData) -> Unit = {}
 ) {
     if (categories.isEmpty()) {
@@ -265,7 +265,7 @@ fun SpendingTrendChart(
     expensePoints: List<DashboardContract.Point>,
     incomePoints: List<DashboardContract.Point> = emptyList(),
     netFlowPoints: List<DashboardContract.Point> = emptyList(),
-    currencySymbol: String = "₹",
+    currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
     isHapticsEnabled: Boolean = true
 ) {
     var selectedMode by rememberSaveable { mutableStateOf(FinancialFlowMode.EXPENSE) }
@@ -488,7 +488,7 @@ fun SpendingTrendChart(
                             )
 
                             val absVal = kotlin.math.abs(yVal)
-                            val prefix = if (yVal < 0f) "₹-" else "₹"
+                            val prefix = if (yVal < 0f) "$currencySymbol-" else currencySymbol
                             val labelText = if (absVal >= 1000f) {
                                 val formatted = String.format(locale, "%.1f", absVal / 1000f)
                                 "$prefix${formatted.removeSuffix(".0")}k"
@@ -700,7 +700,7 @@ fun SpendingTrendChart(
 @Composable
 fun SpendingTrendChart(
     points: List<DashboardContract.Point>,
-    currencySymbol: String = "₹"
+    currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
 ) {
     SpendingTrendChart(
         expensePoints = points,
@@ -714,7 +714,7 @@ fun SpendingTrendChart(
 @Composable
 fun PeakHoursChart(
     hours: List<InsightsContract.PeakHourData>,
-    currencySymbol: String = "₹"
+    currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
 ) {
     if (hours.isEmpty()) {
         Box(

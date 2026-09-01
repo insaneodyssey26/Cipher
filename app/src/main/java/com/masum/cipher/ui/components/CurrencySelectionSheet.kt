@@ -51,6 +51,7 @@ import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.Typography
+import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Globe
@@ -118,12 +119,9 @@ fun CurrencySelectionDialog(
                 .padding(vertical = 24.dp),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp,
-            shadowElevation = 12.dp,
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-            )
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, White10)
         ) {
             Column(
                 modifier = Modifier
@@ -144,7 +142,8 @@ fun CurrencySelectionDialog(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                                .border(1.dp, White10, RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -199,10 +198,10 @@ fun CurrencySelectionDialog(
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -213,7 +212,7 @@ fun CurrencySelectionDialog(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
@@ -253,12 +252,12 @@ fun CurrencySelectionDialog(
                             .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isDefaultSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
                             )
                             .border(
                                 width = 1.dp,
-                                color = if (isDefaultSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f),
+                                color = if (isDefaultSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                else White10,
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clickable {
@@ -274,7 +273,7 @@ fun CurrencySelectionDialog(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(EmeraldIncome.copy(alpha = 0.14f))
+                                    .background(EmeraldIncome.copy(alpha = 0.12f))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
@@ -317,13 +316,13 @@ fun CurrencySelectionDialog(
                                         .height(52.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(
-                                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.09f)
-                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.18f)
+                                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
                                         )
                                         .border(
                                             width = 1.dp,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                                            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.08f),
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                            else White10,
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .clickable {
@@ -343,12 +342,8 @@ fun CurrencySelectionDialog(
                                             modifier = Modifier
                                                 .size(28.dp)
                                                 .clip(RoundedCornerShape(7.dp))
-                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                                .border(
-                                                    1.dp,
-                                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.12f),
-                                                    RoundedCornerShape(7.dp)
-                                                ),
+                                                .background(MaterialTheme.colorScheme.surface)
+                                                .border(1.dp, White10, RoundedCornerShape(7.dp)),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
@@ -358,7 +353,7 @@ fun CurrencySelectionDialog(
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 10.sp
                                                 ),
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
 

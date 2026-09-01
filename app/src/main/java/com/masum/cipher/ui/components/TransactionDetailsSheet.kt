@@ -63,8 +63,10 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
 import androidx.compose.animation.core.RepeatMode
@@ -75,6 +77,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
@@ -82,7 +88,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
+import com.masum.cipher.ui.theme.Manrope
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,8 +113,10 @@ fun TransactionDetailsSheet(
     var categoryExpanded by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf(transaction.note ?: "") }
     var isNoteExpanded by remember { mutableStateOf(transaction.note?.isNotBlank() == true) }
+    var selectedTimestamp by remember { mutableStateOf(transaction.timestamp) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(merchant, amount, isIncome, selectedCategory, note) {
+    LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp) {
         if (onDraftChange != null) {
             val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
             onDraftChange.invoke(
@@ -112,7 +125,8 @@ fun TransactionDetailsSheet(
                     amount = finalAmount,
                     category = selectedCategory.name,
                     isIncome = isIncome,
-                    note = note.ifBlank { null }
+                    note = note.ifBlank { null },
+                    timestamp = selectedTimestamp
                 )
             )
         }
@@ -149,6 +163,15 @@ fun TransactionDetailsSheet(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             val isEditing = transaction.id != 0L
+            val now = Calendar.getInstance()
+            val target = Calendar.getInstance().apply { timeInMillis = selectedTimestamp }
+            val isToday = now.get(Calendar.YEAR) == target.get(Calendar.YEAR) &&
+                    now.get(Calendar.DAY_OF_YEAR) == target.get(Calendar.DAY_OF_YEAR)
+            val dateLabel = if (isToday) {
+                "Today, " + SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(selectedTimestamp))
+            } else {
+                SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(selectedTimestamp))
+            }
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -162,12 +185,56 @@ fun TransactionDetailsSheet(
                 )
                 
                 if (isEditing && onDelete != null) {
-                    IconButton(onClick = {
-                        view.performVibrate(isHapticsEnabled, isLongPress = true)
-                        onDelete()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
+                            onDelete()
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(LucideIcons.Trash2, "Delete", tint = RoseExpense, modifier = Modifier.size(20.dp))
                     }
+                }
+            }
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = selectedTimestamp
+                )
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
+                                    val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                                        timeInMillis = pickedUtcMillis
+                                    }
+                                    val localCal = Calendar.getInstance().apply {
+                                        set(Calendar.YEAR, utcCal.get(Calendar.YEAR))
+                                        set(Calendar.MONTH, utcCal.get(Calendar.MONTH))
+                                        set(Calendar.DAY_OF_MONTH, utcCal.get(Calendar.DAY_OF_MONTH))
+                                    }
+                                    selectedTimestamp = localCal.timeInMillis
+                                }
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text("Select", fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDatePicker = false }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        showModeToggle = false
+                    )
                 }
             }
 
@@ -298,8 +365,10 @@ fun TransactionDetailsSheet(
                                         text = {
                                             Text(
                                                 text = category.name.lowercase().replaceFirstChar { it.uppercase() },
-                                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                                color = MaterialTheme.colorScheme.onSurface
+                                                style = Typography.bodyMedium.copy(
+                                                    fontWeight = if (category == selectedCategory) FontWeight.Bold else FontWeight.Normal
+                                                ),
+                                                color = if (category == selectedCategory) category.color else MaterialTheme.colorScheme.onSurface
                                             )
                                         },
                                         onClick = {
@@ -310,8 +379,11 @@ fun TransactionDetailsSheet(
                                         leadingIcon = {
                                             Box(
                                                 modifier = Modifier
-                                                    .size(32.dp)
-                                                    .background(category.color.copy(alpha = 0.15f), CircleShape),
+                                                    .size(28.dp)
+                                                    .background(
+                                                        category.color.copy(alpha = 0.12f),
+                                                        RoundedCornerShape(8.dp)
+                                                    ),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
@@ -333,21 +405,77 @@ fun TransactionDetailsSheet(
                 }
             }
 
-            if (!isNoteExpanded) {
-                Text(
-                    text = "+ Add note",
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (!isNoteExpanded) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, White10, RoundedCornerShape(8.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                isNoteExpanded = true
+                            }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Plus,
+                            contentDescription = "Add Note",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = "Add note",
+                            style = Typography.labelMedium.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(1.dp))
+                }
+
+                Row(
                     modifier = Modifier
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, White10, RoundedCornerShape(8.dp))
+                        .clickable {
                             view.performVibrate(isHapticsEnabled)
-                            isNoteExpanded = true
+                            focusManager.clearFocus()
+                            showDatePicker = true
                         }
-                        .padding(vertical = 8.dp, horizontal = 4.dp)
-                )
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Calendar,
+                        contentDescription = "Pick Date",
+                        tint = if (isToday) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = dateLabel,
+                        style = Typography.labelMedium.copy(
+                            fontFamily = Manrope,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp
+                        ),
+                        color = if (isToday) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -365,7 +493,6 @@ fun TransactionDetailsSheet(
 
             Spacer(Modifier.height(8.dp))
 
-            // Save button
             Button(
                 onClick = {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
@@ -377,7 +504,8 @@ fun TransactionDetailsSheet(
                                 amount = finalAmount,
                                 category = selectedCategory.name,
                                 isIncome = isIncome,
-                                note = note.ifBlank { null }
+                                note = note.ifBlank { null },
+                                timestamp = selectedTimestamp
                             )
                         )
                     }
