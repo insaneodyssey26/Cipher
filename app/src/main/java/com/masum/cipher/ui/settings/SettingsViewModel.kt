@@ -33,7 +33,10 @@ class SettingsViewModel @Inject constructor(
     private val autoBackupScheduler: AutoBackupScheduler,
     private val transactionDao: TransactionDao
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
-    initialState = SettingsContract.State()
+    initialState = SettingsContract.State(
+        currencyCode = userPreferences.getCachedCurrencyCode(),
+        currencySymbol = userPreferences.getCachedCurrencySymbol()
+    )
 ) {
 
     init {

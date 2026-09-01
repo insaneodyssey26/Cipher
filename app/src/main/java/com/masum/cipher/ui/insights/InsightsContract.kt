@@ -33,8 +33,8 @@ class InsightsContract {
 
     data class State(
         val isLoading: Boolean = true,
-        val currencyCode: String = "INR",
-        val currencySymbol: String = "₹",
+        val currencyCode: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
+        val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
         val selectedTimePeriod: com.masum.cipher.core.domain.model.TimePeriod = com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH,
         val selectedTimeRange: com.masum.cipher.core.domain.model.TimeRange = com.masum.cipher.core.domain.model.TimeRange.from(com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH),
         val spendingVelocity: DashboardContract.VelocityData = DashboardContract.VelocityData(),

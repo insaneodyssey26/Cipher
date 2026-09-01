@@ -62,7 +62,7 @@ object AppFormatters {
         }
     }
 
-    fun formatCompactCurrency(value: Double, currencySymbol: String = "₹", locale: Locale = Locale.getDefault()): String {
+    fun formatCompactCurrency(value: Double, currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol, locale: Locale = Locale.getDefault()): String {
         val absVal = kotlin.math.abs(value)
         val sign = if (value < 0) "-" else ""
         return when {

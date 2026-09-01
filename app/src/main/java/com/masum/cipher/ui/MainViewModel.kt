@@ -19,7 +19,9 @@ class MainViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val merchantAliasDao: MerchantAliasDao
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
-    initialState = MainContract.State()
+    initialState = MainContract.State(
+        settings = userPreferences.getCachedSettings()
+    )
 ) {
 
     init {

@@ -32,7 +32,10 @@ class InsightsViewModel @Inject constructor(
     private val subscriptionDao: SubscriptionDao,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
-    initialState = InsightsContract.State()
+    initialState = InsightsContract.State(
+        currencyCode = userPreferences.getCachedCurrencyCode(),
+        currencySymbol = userPreferences.getCachedCurrencySymbol()
+    )
 ) {
 
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)

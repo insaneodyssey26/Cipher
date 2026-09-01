@@ -91,7 +91,17 @@ fun CurrencySelectionDialog(
 
     val defaultCurrency = remember { AppCurrency.detectDefault() }
     val currencies = remember { AppCurrency.SUPPORTED_CURRENCIES }
-    val isForeignDefault = remember { currencies.none { it.code.equals(defaultCurrency.code, ignoreCase = true) } }
+    val isCustomCurrent = remember(currentCode) {
+        currentCode.isNotBlank() && currencies.none { it.code.equals(currentCode, ignoreCase = true) }
+    }
+    val customCurrentCurrency = remember(currentCode, currentSymbol, isCustomCurrent) {
+        if (isCustomCurrent) {
+            AppCurrency.fromCode(currentCode, currentSymbol.ifBlank { currentCode })
+        } else null
+    }
+    val isForeignDefault = remember(currencies, defaultCurrency, isCustomCurrent) {
+        !isCustomCurrent && currencies.none { it.code.equals(defaultCurrency.code, ignoreCase = true) }
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -182,7 +192,59 @@ fun CurrencySelectionDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (isForeignDefault) {
+                if (customCurrentCurrency != null) {
+                    val isDevice = customCurrentCurrency.code.equals(defaultCurrency.code, ignoreCase = true)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = if (isDevice) "Device" else "Custom",
+                                    style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${customCurrentCurrency.name} (${customCurrentCurrency.code})",
+                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = customCurrentCurrency.symbol,
+                                style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = LucideIcons.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                } else if (isForeignDefault) {
                     val isDefaultSelected = defaultCurrency.code.equals(currentCode, ignoreCase = true)
                     Row(
                         modifier = Modifier

@@ -28,9 +28,13 @@ class DashboardViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
-    private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase
+    private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
+    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
-    initialState = DashboardContract.State()
+    initialState = DashboardContract.State(
+        currencyCode = userPreferences.getCachedCurrencyCode(),
+        currencySymbol = userPreferences.getCachedCurrencySymbol()
+    )
 ) {
 
     private val _searchQuery = MutableStateFlow("")

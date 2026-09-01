@@ -23,6 +23,36 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    private val syncPrefs = context.getSharedPreferences("sync_currency_cache", Context.MODE_PRIVATE)
+
+    fun getCachedCurrencyCode(): String {
+        val default = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
+        return syncPrefs.getString("cached_currency_code", default.code) ?: default.code
+    }
+
+    fun getCachedCurrencySymbol(): String {
+        val default = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
+        return syncPrefs.getString("cached_currency_symbol", default.symbol) ?: default.symbol
+    }
+
+    fun getCachedSettings(): UserSettings {
+        val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
+        val curCode = getCachedCurrencyCode()
+        val curSymbol = getCachedCurrencySymbol()
+        return UserSettings(
+            theme = AppTheme.SYSTEM,
+            isBiometricEnabled = false,
+            isPrivacyModeEnabled = false,
+            isHapticsEnabled = true,
+            currency = curCode,
+            currencyCode = curCode,
+            currencySymbol = curSymbol,
+            autoLockTimeout = 0L,
+            lastStopTime = 0L,
+            monthlyBudget = 0.0
+        )
+    }
+
     private object Keys {
         val APP_THEME = stringPreferencesKey("app_theme")
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
@@ -65,6 +95,11 @@ class UserPreferences @Inject constructor(
         val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
         val curCode = preferences[Keys.PREFERRED_CURRENCY_CODE] ?: preferences[Keys.PREFERRED_CURRENCY] ?: defaultCurrency.code
         val curSymbol = preferences[Keys.PREFERRED_CURRENCY_SYMBOL] ?: com.masum.cipher.core.domain.model.AppCurrency.fromCode(curCode).symbol
+
+        syncPrefs.edit()
+            .putString("cached_currency_code", curCode)
+            .putString("cached_currency_symbol", curSymbol)
+            .apply()
 
         UserSettings(
             theme = AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name),
@@ -292,6 +327,10 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun setCurrency(code: String, symbol: String) {
+        syncPrefs.edit()
+            .putString("cached_currency_code", code)
+            .putString("cached_currency_symbol", symbol)
+            .apply()
         context.dataStore.edit { preferences ->
             preferences[Keys.PREFERRED_CURRENCY] = code
             preferences[Keys.PREFERRED_CURRENCY_CODE] = code
@@ -326,8 +365,8 @@ data class UserSettings(
     val isPrivacyModeEnabled: Boolean,
     val isHapticsEnabled: Boolean,
     val currency: String,
-    val currencyCode: String = "INR",
-    val currencySymbol: String = "₹",
+    val currencyCode: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
+    val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
     val autoLockTimeout: Long,
     val lastStopTime: Long,
     val monthlyBudget: Double,
