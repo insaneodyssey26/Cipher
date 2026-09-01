@@ -13,13 +13,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -93,13 +90,8 @@ fun CurrencySelectionDialog(
     var customSymbolInput by remember { mutableStateOf("") }
 
     val defaultCurrency = remember { AppCurrency.detectDefault() }
-    val displayCurrencies = remember {
-        val list = AppCurrency.SUPPORTED_CURRENCIES.toMutableList()
-        if (list.none { it.code.equals(defaultCurrency.code, ignoreCase = true) }) {
-            list.add(0, defaultCurrency)
-        }
-        list
-    }
+    val currencies = remember { AppCurrency.SUPPORTED_CURRENCIES }
+    val isForeignDefault = remember { currencies.none { it.code.equals(defaultCurrency.code, ignoreCase = true) } }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -190,121 +182,154 @@ fun CurrencySelectionDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 340.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    items(displayCurrencies, key = { it.code }) { item ->
-                        val isSelected = item.code.equals(currentCode, ignoreCase = true)
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.16f)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.08f),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
-                                    view.performVibrate(isHapticsEnabled)
-                                    onCurrencySelected(item.code, item.symbol)
-                                    onDismiss()
-                                }
-                                .padding(horizontal = 14.dp, vertical = 11.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
+                if (isForeignDefault) {
+                    val isDefaultSelected = defaultCurrency.code.equals(currentCode, ignoreCase = true)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (isDefaultSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = if (isDefaultSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                                else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                onCurrencySelected(defaultCurrency.code, defaultCurrency.symbol)
+                                onDismiss()
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(EmeraldIncome.copy(alpha = 0.14f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
-                                Box(
+                                Text(
+                                    text = "Device",
+                                    style = Typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                    color = EmeraldIncome
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${defaultCurrency.name} (${defaultCurrency.code})",
+                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Text(
+                            text = defaultCurrency.symbol,
+                            style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val pairs = currencies.chunked(2)
+                    pairs.forEach { rowPair ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowPair.forEach { item ->
+                                val isSelected = item.code.equals(currentCode, ignoreCase = true)
+
+                                Row(
                                     modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                                        .border(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.12f),
-                                            RoundedCornerShape(8.dp)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = item.countryCode,
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(12.dp))
-
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = item.name,
-                                            style = Typography.bodyMedium.copy(
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                        .weight(1f)
+                                        .height(52.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.09f)
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.18f)
                                         )
-                                        if (item.code.equals(defaultCurrency.code, ignoreCase = true)) {
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Box(
-                                                modifier = Modifier
-                                                    .clip(RoundedCornerShape(4.dp))
-                                                    .background(EmeraldIncome.copy(alpha = 0.12f))
-                                                    .padding(horizontal = 5.dp, vertical = 1.dp)
-                                            ) {
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                                            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.08f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled)
+                                            onCurrencySelected(item.code, item.symbol)
+                                            onDismiss()
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(28.dp)
+                                                .clip(RoundedCornerShape(7.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                                                .border(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.12f),
+                                                    RoundedCornerShape(7.dp)
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = item.countryCode,
+                                                style = Typography.labelMedium.copy(
+                                                    fontFamily = DMSans,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 10.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        Column {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Text(
-                                                    text = "Device",
-                                                    style = Typography.labelSmall.copy(
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.SemiBold
+                                                    text = item.code,
+                                                    style = Typography.bodyMedium.copy(
+                                                        fontFamily = Manrope,
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                        fontSize = 13.sp
                                                     ),
-                                                    color = EmeraldIncome
+                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
+                                            Text(
+                                                text = item.symbol,
+                                                style = Typography.labelSmall.copy(fontSize = 10.5.sp),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                                            )
                                         }
                                     }
-                                    Text(
-                                        text = "${item.code} (${item.symbol})",
-                                        style = Typography.bodySmall.copy(fontSize = 11.sp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = item.symbol,
-                                    style = Typography.titleMedium.copy(
-                                        fontFamily = Manrope,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                )
-                                if (isSelected) {
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Icon(
-                                        imageVector = LucideIcons.Check,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -403,7 +428,7 @@ fun CurrencySelectionDialog(
                         Icon(
                             imageVector = LucideIcons.Plus,
                             contentDescription = null,
-                            modifier = Modifier.size(15.dp),
+                            modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -418,3 +443,4 @@ fun CurrencySelectionDialog(
         }
     }
 }
+

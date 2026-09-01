@@ -6,7 +6,12 @@ object RegionRuleProvider {
         return when (currencyCode.uppercase()) {
             "INR" -> IndiaParserRules
             "USD" -> UsParserRules
+            "EUR" -> EuroParserRules
             "GBP" -> UkParserRules
+            "CAD" -> CanadaParserRules
+            "AUD" -> AustraliaParserRules
+            "AED" -> UaeParserRules
+            "SGD" -> SingaporeParserRules
             else -> GlobalFallbackRules
         }
     }
@@ -14,7 +19,17 @@ object RegionRuleProvider {
     fun getAllRules(activeCurrencyCode: String): List<RegionParserRules> {
         val primary = getRulesForCurrency(activeCurrencyCode)
         return if (primary == GlobalFallbackRules) {
-            listOf(GlobalFallbackRules, IndiaParserRules, UsParserRules, UkParserRules)
+            listOf(
+                GlobalFallbackRules,
+                UsParserRules,
+                EuroParserRules,
+                UkParserRules,
+                IndiaParserRules,
+                CanadaParserRules,
+                AustraliaParserRules,
+                UaeParserRules,
+                SingaporeParserRules
+            )
         } else {
             listOf(primary, GlobalFallbackRules)
         }

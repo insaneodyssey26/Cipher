@@ -90,9 +90,11 @@ class TransactionParser @Inject constructor() {
 
     private fun findBrandInText(message: String, rules: RegionParserRules): String? {
         val upper = message.uppercase()
-        return rules.brandDictionary.find { brand ->
-            upper.contains(Regex("\\b${Regex.escape(brand)}\\b"))
-        }
+        return rules.brandDictionary
+            .sortedByDescending { it.length }
+            .find { brand ->
+                upper.contains(Regex("\\b${Regex.escape(brand)}\\b"))
+            }
     }
 
     private fun extractMerchantStructural(message: String, rules: RegionParserRules): String? {

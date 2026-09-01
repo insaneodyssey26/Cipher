@@ -411,8 +411,6 @@ class TransactionParserTest {
         assertTrue(!result.isIncome)
     }
 
-    // ─── US & UK REGIONAL TESTS ───────────────────────────────────────────────
-
     @Test
     fun `US Chase bank push notification parse`() {
         val result = parser.parse("Chase: You made a $14.20 purchase at STARBUCKS with card ending 4012.", "USD")
@@ -438,6 +436,56 @@ class TransactionParserTest {
         assertNotNull(result)
         assertEquals(12.50, result!!.amount, 0.001)
         assertEquals("GBP", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `EU N26 Euro transaction parse`() {
+        val result = parser.parse("N26: Spent €32.50 at Carrefour with card ending 1024", "EUR")
+        assertNotNull(result)
+        assertEquals(32.50, result!!.amount, 0.001)
+        assertEquals("CARREFOUR", result.merchant)
+        assertEquals("EUR", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `Canada Interac e-Transfer parse`() {
+        val result = parser.parse("INTERAC e-Transfer: You sent $85.00 to Tim Hortons", "CAD")
+        assertNotNull(result)
+        assertEquals(85.00, result!!.amount, 0.001)
+        assertEquals("TIM HORTONS", result.merchant)
+        assertEquals("CAD", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `Australia CommBank PayID parse`() {
+        val result = parser.parse("CommBank: You transferred $45.00 to Woolworths via PayID", "AUD")
+        assertNotNull(result)
+        assertEquals(45.00, result!!.amount, 0.001)
+        assertEquals("WOOLWORTHS", result.merchant)
+        assertEquals("AUD", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `UAE Emirates NBD AED parse`() {
+        val result = parser.parse("Emirates NBD: AED 150.00 spent on Card ending 4455 at Lulu Hypermarket", "AED")
+        assertNotNull(result)
+        assertEquals(150.00, result!!.amount, 0.001)
+        assertEquals("LULU HYPERMARKET", result.merchant)
+        assertEquals("AED", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `Singapore DBS PayNow parse`() {
+        val result = parser.parse("DBS: You have sent S$22.80 to Grab via PayNow", "SGD")
+        assertNotNull(result)
+        assertEquals(22.80, result!!.amount, 0.001)
+        assertEquals("GRAB", result.merchant)
+        assertEquals("SGD", result.currency)
         assertTrue(!result.isIncome)
     }
 
