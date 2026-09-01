@@ -13,9 +13,14 @@ import java.util.Date
 import java.util.Locale
 
 object PdfGenerator {
-    fun generateStatement(context: Context, transactions: List<TransactionEntity>, outputStream: OutputStream) {
+    fun generateStatement(
+        context: Context,
+        transactions: List<TransactionEntity>,
+        outputStream: OutputStream,
+        currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
+    ) {
         val document = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 standard size
+        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
         
         val colorTextPrimary = Color.rgb(17, 24, 39)
         val colorTextSecondary = Color.rgb(107, 114, 128)
@@ -36,13 +41,12 @@ object PdfGenerator {
             Typeface.DEFAULT
         }
 
-        // Define paints
         val logoPaint = Paint().apply {
-            color = colorTextPrimary // Black
+            color = colorTextPrimary
             textSize = 28f
             typeface = Typeface.create(logoTypeface, Typeface.BOLD)
             isAntiAlias = true
-            letterSpacing = -0.02f // Negative letter spacing
+            letterSpacing = -0.02f
         }
         
         val titlePaint = Paint().apply {
@@ -110,16 +114,14 @@ object PdfGenerator {
         }
 
         val rowBackgroundPaint = Paint().apply {
-            color = Color.rgb(251, 251, 253) // Very subtle alternating background
+            color = Color.rgb(251, 251, 253)
             style = Paint.Style.FILL
         }
 
-        // Layout constants
         val marginX = 50f
         val rightMargin = pageInfo.pageWidth - marginX
         var currentY: Float
 
-        // Define column layout (Date, Merchant, Category, Amount)
         val colDate = marginX + 10f
         val colMerchant = colDate + 90f
         val colCategory = colMerchant + 180f
@@ -128,11 +130,10 @@ object PdfGenerator {
         val itemsFirstPage = 11
         val itemsNextPages = 15
         
-        // Formatter
         val dateFormatter = AppFormatters.getFullDate()
         val rowDateFormatter = AppFormatters.getDay()
         
-        fun formatMoney(amount: Double): String = String.format(Locale.getDefault(), "Rs. %,.2f", amount)
+        fun formatMoney(amount: Double): String = String.format(Locale.getDefault(), "%s %,.2f", currencySymbol, amount)
 
         if (transactions.isEmpty()) {
             val page = document.startPage(pageInfo)
@@ -143,7 +144,6 @@ object PdfGenerator {
             return
         }
         
-        // Calculate chunks
         val firstChunk = transactions.take(itemsFirstPage)
         val remainingChunks = transactions.drop(itemsFirstPage).chunked(itemsNextPages)
         val allChunks = listOf(firstChunk) + remainingChunks
@@ -158,7 +158,6 @@ object PdfGenerator {
             if (index == 0) {
                 currentY = 50f
                 
-                // --- Brand Header ---
                 canvas.drawText("cipher.", marginX, currentY, logoPaint)
                 
                 titlePaint.textAlign = Paint.Align.RIGHT
@@ -169,7 +168,6 @@ object PdfGenerator {
                 canvas.drawLine(marginX, currentY, rightMargin, currentY, linePaint)
                 currentY += 25f
                 
-                // --- Meta Info ---
                 val generatedDate = dateFormatter.format(Date())
                 val startDate = if (transactions.isNotEmpty()) dateFormatter.format(Date(transactions.last().timestamp)) else generatedDate
                 val endDate = if (transactions.isNotEmpty()) dateFormatter.format(Date(transactions.first().timestamp)) else generatedDate
@@ -186,7 +184,6 @@ object PdfGenerator {
                 
                 currentY += 45f
                 
-                // --- Summary Cards ---
                 val totalIncome = transactions.filter { it.isIncome }.sumOf { it.amount }
                 val totalExpense = transactions.filter { !it.isIncome }.sumOf { it.amount }
                 val net = totalIncome - totalExpense
@@ -197,7 +194,6 @@ object PdfGenerator {
                 val expensesX = marginX + cardWidth + 10f
                 val netX = expensesX + cardWidth + 10f
                 
-                // Income Card
                 canvas.drawRoundRect(
                     marginX, currentY,
                     marginX + cardWidth, currentY + cardHeight, 6f, 6f, headerBackgroundPaint)
@@ -208,7 +204,6 @@ object PdfGenerator {
                 incomePaint.textAlign = Paint.Align.RIGHT
                 incomePaint.textSize = 11f
                 
-                // Expense Card
                 canvas.drawRoundRect(expensesX, currentY, expensesX + cardWidth, currentY + cardHeight, 6f, 6f, headerBackgroundPaint)
                 canvas.drawText("TOTAL EXPENSE", expensesX + 15f, currentY + 25f, labelPaint)
                 expensePaint.textAlign = Paint.Align.LEFT
@@ -217,14 +212,14 @@ object PdfGenerator {
                 expensePaint.textAlign = Paint.Align.RIGHT
                 expensePaint.textSize = 11f
                 
-                // Net Card
                 canvas.drawRoundRect(netX, currentY, netX + cardWidth, currentY + cardHeight, 6f, 6f, headerBackgroundPaint)
                 canvas.drawText("NET CHANGE", netX + 15f, currentY + 25f, labelPaint)
                 val netPaint = if (net >= 0) incomePaint else expensePaint
                 netPaint.textAlign = Paint.Align.LEFT
                 netPaint.textSize = 14f
-                val sign = if (net > 0) "+" else ""
-                canvas.drawText("$sign${formatMoney(net)}", netX + 15f, currentY + 45f, netPaint)
+                val sign = if (net > 0) "+" else if (net < 0) "-" else ""
+                val absNet = kotlin.math.abs(net)
+                canvas.drawText("$sign${formatMoney(absNet)}", netX + 15f, currentY + 45f, netPaint)
                 netPaint.textAlign = Paint.Align.RIGHT
                 netPaint.textSize = 11f
                 
@@ -232,7 +227,7 @@ object PdfGenerator {
             } else {
                 currentY = 60f
                 canvas.drawText("cipher.", marginX, currentY, logoPaint.apply { textSize = 20f })
-                logoPaint.textSize = 28f // reset
+                logoPaint.textSize = 28f
                 
                 labelPaint.textAlign = Paint.Align.RIGHT
                 canvas.drawText("Page ${index + 1} of $totalPages", rightMargin, currentY, labelPaint)
@@ -243,7 +238,6 @@ object PdfGenerator {
                 currentY += 30f
             }
             
-            // --- Table Header ---
             canvas.drawRoundRect(marginX, currentY, rightMargin, currentY + 25f, 4f, 4f, headerBackgroundPaint)
             val tableHeaderY = currentY + 16f
             
@@ -256,7 +250,6 @@ object PdfGenerator {
             
             currentY += 45f
             
-            // --- Table Rows ---
             val rowHeight = 42f
             chunk.forEachIndexed { rowIndex, tx ->
                 if (rowIndex % 2 != 0) {
@@ -270,7 +263,7 @@ object PdfGenerator {
                 
                 canvas.drawText(date, colDate, textY, rowTextPaint)
                 canvas.drawText(merchant, colMerchant, textY, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
-                rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL) // reset
+                rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
                 
                 labelPaint.textAlign = Paint.Align.LEFT
                 canvas.drawText(category, colCategory, textY, labelPaint)
@@ -283,7 +276,6 @@ object PdfGenerator {
                 currentY += rowHeight
             }
             
-            // --- Footer ---
             labelPaint.textAlign = Paint.Align.CENTER
             canvas.drawText("This is a computer-generated document. No signature is required.", pageInfo.pageWidth / 2f, pageInfo.pageHeight - 40f, labelPaint)
             labelPaint.textAlign = Paint.Align.LEFT
