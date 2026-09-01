@@ -55,6 +55,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetNotifyNewAppDetected -> updateNotifyNewAppDetected(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
+            is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.code, intent.symbol)
             is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount, intent.isDynamic)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
@@ -96,6 +97,8 @@ class SettingsViewModel @Inject constructor(
                         notifyNewAppDetected = settings.notifyNewAppDetected,
                         isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout,
+                        currencyCode = settings.currencyCode,
+                        currencySymbol = settings.currencySymbol,
                         monthlyBudget = settings.monthlyBudget,
                         isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                         thisMonthIncome = monthIncome,
@@ -275,6 +278,12 @@ class SettingsViewModel @Inject constructor(
             
             val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"
             emitEffect(SettingsContract.Effect.ShowToast(message))
+        }
+    }
+
+    private fun updateCurrency(code: String, symbol: String) {
+        viewModelScope.launch {
+            userPreferences.setCurrency(code, symbol)
         }
     }
 }

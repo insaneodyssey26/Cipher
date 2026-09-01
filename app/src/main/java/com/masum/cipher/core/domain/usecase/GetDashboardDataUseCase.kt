@@ -54,7 +54,7 @@ class GetDashboardDataUseCase @Inject constructor(
             } else {
                 Pair(null, null)
             }
-            StateTuple(rangeInc, rangeExp, monthExp, monthInc, rangeBalance, settings.monthlyBudget, settings.isDynamicBudgetEnabled, deltaPercent, compLabel, prevExp)
+            StateTuple(rangeInc, rangeExp, monthExp, monthInc, rangeBalance, settings.monthlyBudget, settings.isDynamicBudgetEnabled, deltaPercent, compLabel, prevExp, settings.currencyCode, settings.currencySymbol)
         }.flatMapLatest { stats ->
             val transactionsFlow = if (query.isBlank()) {
                 repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
@@ -107,6 +107,8 @@ class GetDashboardDataUseCase @Inject constructor(
                     totalExpenses = stats.expenses,
                     thisMonthExpenses = stats.thisMonthExpenses,
                     thisMonthIncome = stats.thisMonthIncome,
+                    currencyCode = stats.currencyCode,
+                    currencySymbol = stats.currencySymbol,
                     totalBalance = stats.totalBalance,
                     monthlyBudget = stats.budget,
                     isDynamicBudget = stats.isDynamicBudget,
@@ -128,6 +130,8 @@ class GetDashboardDataUseCase @Inject constructor(
         val isDynamicBudget: Boolean,
         val deltaPercent: Double?,
         val compLabel: String?,
-        val prevExp: Double?
+        val prevExp: Double?,
+        val currencyCode: String,
+        val currencySymbol: String
     )
 }

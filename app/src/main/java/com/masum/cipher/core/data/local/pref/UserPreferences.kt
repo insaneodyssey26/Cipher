@@ -29,6 +29,8 @@ class UserPreferences @Inject constructor(
         val PRIVACY_MODE = booleanPreferencesKey("privacy_mode")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
         val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
+        val PREFERRED_CURRENCY_CODE = stringPreferencesKey("preferred_currency_code")
+        val PREFERRED_CURRENCY_SYMBOL = stringPreferencesKey("preferred_currency_symbol")
         val AUTO_LOCK_TIMEOUT = longPreferencesKey("auto_lock_timeout")
         val LAST_STOP_TIME = longPreferencesKey("last_stop_time")
         val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
@@ -60,12 +62,18 @@ class UserPreferences @Inject constructor(
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
+        val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
+        val curCode = preferences[Keys.PREFERRED_CURRENCY_CODE] ?: preferences[Keys.PREFERRED_CURRENCY] ?: defaultCurrency.code
+        val curSymbol = preferences[Keys.PREFERRED_CURRENCY_SYMBOL] ?: com.masum.cipher.core.domain.model.AppCurrency.fromCode(curCode).symbol
+
         UserSettings(
             theme = AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name),
             isBiometricEnabled = preferences[Keys.BIOMETRIC_ENABLED] ?: false,
             isPrivacyModeEnabled = preferences[Keys.PRIVACY_MODE] ?: false,
             isHapticsEnabled = preferences[Keys.HAPTICS_ENABLED] ?: true,
-            currency = preferences[Keys.PREFERRED_CURRENCY] ?: "INR",
+            currency = curCode,
+            currencyCode = curCode,
+            currencySymbol = curSymbol,
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
             monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
@@ -282,6 +290,14 @@ class UserPreferences @Inject constructor(
             prefs[Keys.IGNORED_SUBSCRIPTIONS] = ignored
         }
     }
+
+    suspend fun setCurrency(code: String, symbol: String) {
+        context.dataStore.edit { preferences ->
+            preferences[Keys.PREFERRED_CURRENCY] = code
+            preferences[Keys.PREFERRED_CURRENCY_CODE] = code
+            preferences[Keys.PREFERRED_CURRENCY_SYMBOL] = symbol
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -310,6 +326,8 @@ data class UserSettings(
     val isPrivacyModeEnabled: Boolean,
     val isHapticsEnabled: Boolean,
     val currency: String,
+    val currencyCode: String = "INR",
+    val currencySymbol: String = "₹",
     val autoLockTimeout: Long,
     val lastStopTime: Long,
     val monthlyBudget: Double,

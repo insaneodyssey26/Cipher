@@ -21,6 +21,7 @@ class SettingsContract {
         data class SetNotifySubscriptions(val enabled: Boolean) : Intent()
         data class SetNotifyNewAppDetected(val enabled: Boolean) : Intent()
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
+        data class SetCurrency(val code: String, val symbol: String) : Intent()
         data class SetMonthlyBudget(val amount: Double, val isDynamic: Boolean = false) : Intent()
         object ClearAllData : Intent()
         data class ExportData(val uri: Uri, val password: CharArray) : Intent() {
@@ -85,6 +86,8 @@ class SettingsContract {
         val notifySubscriptions: Boolean = true,
         val notifyNewAppDetected: Boolean = true,
         val isHapticsEnabled: Boolean = true,
+        val currencyCode: String = "INR",
+        val currencySymbol: String = "₹",
         val monthlyBudget: Double = 0.0,
         val isDynamicBudgetEnabled: Boolean = false,
         val thisMonthIncome: Double = 0.0,

@@ -43,6 +43,8 @@ class DashboardContract {
         val totalExpenses: Double = 0.0,
         val thisMonthExpenses: Double = 0.0,
         val thisMonthIncome: Double = 0.0,
+        val currencyCode: String = "INR",
+        val currencySymbol: String = "₹",
         val monthlyBudget: Double = 0.0,
         val isDynamicBudget: Boolean = false,
         val expenseComparisonPercent: Double? = null,
@@ -52,10 +54,7 @@ class DashboardContract {
         val categories: List<CategoryData> = emptyList(),
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null
-    ) : UiState {
-        val effectiveMonthlyBudget: Double
-            get() = if (isDynamicBudget && monthlyBudget > 0) (monthlyBudget + thisMonthIncome) else monthlyBudget
-    }
+    ) : UiState
 
     data class VelocityData(
         val currentWeekAvg: Double = 0.0,

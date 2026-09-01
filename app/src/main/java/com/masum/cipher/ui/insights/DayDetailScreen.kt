@@ -149,13 +149,13 @@ fun DayDetailScreen(
                 ) {
                     DetailStatCard(
                         label = "SPENT",
-                        amount = "₹${String.format(locale, "%,.0f", totalSpent)}",
+                        amount = "${state.currencySymbol}${String.format(locale, "%,.0f", totalSpent)}",
                         color = RoseExpense,
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatCard(
                         label = "INCOME",
-                        amount = "₹${String.format(locale, "%,.0f", totalIncome)}",
+                        amount = "${state.currencySymbol}${String.format(locale, "%,.0f", totalIncome)}",
                         color = EmeraldIncome,
                         modifier = Modifier.weight(1f)
                     )
@@ -192,6 +192,7 @@ fun DayDetailScreen(
                         TransactionItem(
                             transaction = transaction,
                             privacyMode = false,
+                            currencySymbol = state.currencySymbol,
                             onClick = {
                                 view.performVibrate(isHapticsEnabled)
                                 editingTransaction = transaction
@@ -206,6 +207,7 @@ fun DayDetailScreen(
     editingTransaction?.let { transaction ->
         TransactionDetailsSheet(
             transaction = transaction,
+            currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)

@@ -207,7 +207,7 @@ fun CategoriesScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = AppFormatters.formatCompactCurrency(totalExpense),
+                                    text = AppFormatters.formatCompactCurrency(totalExpense, currencySymbol = state.currencySymbol),
                                     style = Typography.headlineLarge.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -360,7 +360,7 @@ fun CategoriesScreen(
                                 modifier = Modifier.weight(1f, fill = false)
                             ) {
                                 Text(
-                                    text = AppFormatters.formatCompactCurrency(spent),
+                                    text = AppFormatters.formatCompactCurrency(spent, currencySymbol = state.currencySymbol),
                                     style = Typography.titleLarge.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
@@ -428,8 +428,9 @@ fun CategoriesScreen(
                                             )
                                         }
 
+                                        val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
                                         Text(
-                                            text = "Limit: ₹${String.format(Locale.getDefault(), "%,.0f", budget)}",
+                                            text = "Limit: $currencySymbol${String.format(Locale.getDefault(), "%,.0f", budget)}",
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.SemiBold,
@@ -463,11 +464,12 @@ fun CategoriesScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
+                                        val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
                                         Text(
                                             text = if (isOverBudget) {
-                                                "Exceeded by ₹${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
+                                                "Exceeded by $currencySymbol${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
                                             } else {
-                                                "₹${String.format(Locale.getDefault(), "%,.0f", remainingBudget)} left"
+                                                "$currencySymbol${String.format(Locale.getDefault(), "%,.0f", remainingBudget)} left"
                                             },
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Manrope,
@@ -479,7 +481,7 @@ fun CategoriesScreen(
 
                                         if (!isOverBudget) {
                                             Text(
-                                                text = "Safe: ₹${String.format(Locale.getDefault(), "%,.0f", safeDaily)}/day",
+                                                text = "Safe: $currencySymbol${String.format(Locale.getDefault(), "%,.0f", safeDaily)}/day",
                                                 style = Typography.labelSmall.copy(
                                                     fontFamily = Manrope,
                                                     fontSize = 10.5.sp,

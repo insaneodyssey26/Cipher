@@ -39,6 +39,8 @@ data class BackupData(
     val categoryBudgets: Map<String, Double> = emptyMap(),
     val trackedApps: Set<String> = emptySet(),
     val ignoredSubscriptions: Set<String> = emptySet(),
+    val currencyCode: String? = null,
+    val currencySymbol: String? = null,
     val theme: String? = null,
     val accentColor: String? = null,
     val isBiometricEnabled: Boolean? = null,
@@ -86,6 +88,8 @@ class BackupRepository @Inject constructor(
                 categoryBudgets = settings.categoryBudgets,
                 trackedApps = settings.trackedApps,
                 ignoredSubscriptions = settings.ignoredSubscriptions,
+                currencyCode = settings.currencyCode,
+                currencySymbol = settings.currencySymbol,
                 theme = settings.theme.name,
                 accentColor = settings.accentColor.name,
                 isBiometricEnabled = settings.isBiometricEnabled,
@@ -160,6 +164,9 @@ class BackupRepository @Inject constructor(
                 }
                 if (data.ignoredSubscriptions.isNotEmpty()) {
                     userPreferences.setIgnoredSubscriptions(data.ignoredSubscriptions)
+                }
+                if (!data.currencyCode.isNullOrBlank() && !data.currencySymbol.isNullOrBlank()) {
+                    userPreferences.setCurrency(data.currencyCode, data.currencySymbol)
                 }
 
                 data.theme?.let {

@@ -62,33 +62,33 @@ object AppFormatters {
         }
     }
 
-    fun formatCompactCurrency(value: Double, prefix: String = "₹"): String {
+    fun formatCompactCurrency(value: Double, currencySymbol: String = "₹", locale: Locale = Locale.getDefault()): String {
         val absVal = kotlin.math.abs(value)
         val sign = if (value < 0) "-" else ""
         return when {
             absVal >= 1_000_000_000_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000_000.0).removeSuffix(".0")
-                "$prefix$sign${formatted}Q"
+                "$currencySymbol$sign${formatted}Q"
             }
             absVal >= 1_000_000_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000.0).removeSuffix(".0")
-                "$prefix$sign${formatted}T"
+                "$currencySymbol$sign${formatted}T"
             }
             absVal >= 1_000_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000_000.0).removeSuffix(".0")
-                "$prefix$sign${formatted}B"
+                "$currencySymbol$sign${formatted}B"
             }
             absVal >= 1_000_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1_000_000.0).removeSuffix(".0")
-                "$prefix$sign${formatted}M"
+                "$currencySymbol$sign${formatted}M"
             }
             absVal >= 100_000.0 -> {
                 val formatted = String.format(Locale.US, "%.1f", absVal / 1000.0).removeSuffix(".0")
-                "$prefix$sign${formatted}k"
+                "$currencySymbol$sign${formatted}k"
             }
             else -> {
-                val formatted = String.format(Locale.getDefault(), "%,.0f", absVal)
-                "$prefix$sign$formatted"
+                val formatted = String.format(locale, "%,.0f", absVal)
+                "$currencySymbol$sign$formatted"
             }
         }
     }

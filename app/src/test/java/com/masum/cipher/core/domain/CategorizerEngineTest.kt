@@ -41,8 +41,7 @@ class CategorizerEngineTest {
 
     @Test
     fun `unknown merchant is categorized as OTHERS`() {
-        val result = engine.categorize("RANDOM_STORE")
-        println("DEBUG: Category for RANDOM_STORE is $result")
+        val result = engine.categorize("UNKNOWN_MERCHANT_XYZ")
         assertEquals(TransactionCategory.OTHERS, result)
     }
 

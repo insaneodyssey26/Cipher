@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -72,11 +71,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.BuildConfig
 import com.masum.cipher.core.data.local.entity.TransactionEntity
@@ -103,22 +106,18 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
-import compose.icons.lucideicons.CalendarClock
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
-import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.platform.LocalDensity
-import androidx.core.net.toUri
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -205,7 +204,7 @@ fun DashboardScreen(
 
     val shouldShowSkeleton by produceState(initialValue = false, key1 = state.isLoading, key2 = state.transactions.isEmpty()) {
         if (state.isLoading && state.transactions.isEmpty()) {
-            kotlinx.coroutines.delay(200)
+            kotlinx.coroutines.delay(200.milliseconds)
             value = true
         } else {
             value = false
@@ -415,7 +414,7 @@ fun DashboardScreen(
                                 }
                                 
                                 state.pendingSubscriptions.forEach { subscription ->
-                                    val amountStr = "₹${String.format(locale, "%.0f", subscription.amount)}"
+                                    val amountStr = "${state.currencySymbol}${String.format(locale, "%.0f", subscription.amount)}"
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -439,12 +438,14 @@ fun DashboardScreen(
                                             ) {
                                                 Text("Skip", color = MaterialTheme.colorScheme.error)
                                             }
-                                            Button(
+                                             Button(
                                                 onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
-                                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                                                contentPadding = PaddingValues(horizontal = 16.dp)
+                                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.error
+                                                )
                                             ) {
-                                                Text("Log it", color = MaterialTheme.colorScheme.onError)
+                                                Text("Log", color = MaterialTheme.colorScheme.onError)
                                             }
                                         }
                                     }
@@ -453,18 +454,18 @@ fun DashboardScreen(
                         }
                     }
 
-                if (state.transactions.isNotEmpty()) {
                     if (state.filter.isActive) {
-                        item(key = "active_filter_summary") {
+                        item(key = "dashboard_filter_active_bar") {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 24.dp, vertical = 6.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                                    .clickable { showFilterSheet = true }
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -478,7 +479,7 @@ fun DashboardScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Text(
-                                        text = buildFilterSummary(state.filter),
+                                        text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol),
                                         style = Typography.labelMedium.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -510,7 +511,8 @@ fun DashboardScreen(
                         }
                     }
 
-                    groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
+                    if (state.transactions.isNotEmpty()) {
+                        groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
                         item(key = "header_$monthYear") {
                             Text(
                                 text = monthYear.uppercase(),
@@ -531,6 +533,7 @@ fun DashboardScreen(
                                 TransactionItem(
                                     transaction = transaction,
                                     privacyMode = privacyMode,
+                                    currencySymbol = state.currencySymbol,
                                     onClick = {
                                         view.performVibrate(isHapticsEnabled)
                                         editingTransaction = transaction
@@ -546,7 +549,7 @@ fun DashboardScreen(
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
-                } else if (!state.isLoading && state.transactions.isEmpty()) {
+                } else if (!state.isLoading) {
                     if (state.searchQuery.isNotEmpty()) {
                         item {
                             SearchEmptyState(query = state.searchQuery)
@@ -567,6 +570,7 @@ fun DashboardScreen(
                     totalBalance = state.totalBalance,
                     income = state.totalIncome,
                     expense = state.totalExpenses,
+                    currencySymbol = state.currencySymbol,
                     selectedPeriod = state.selectedTimePeriod,
                     selectedTimeRange = state.selectedTimeRange,
                     transactions = state.transactions,
@@ -623,12 +627,13 @@ fun DashboardScreen(
             transaction = state.draftTransaction ?: TransactionEntity(
                 amount = 0.0,
                 merchant = "",
-                currency = "INR",
+                currency = state.currencyCode,
                 timestamp = System.currentTimeMillis(),
                 category = "OTHERS",
                 rawSms = null,
                 isIncome = false
             ),
+            currencySymbol = state.currencySymbol,
             onDismiss = { showAddSheet = false },
             onConfirm = { newTransaction ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
@@ -646,6 +651,7 @@ fun DashboardScreen(
     editingTransaction?.let { transaction ->
         TransactionDetailsSheet(
             transaction = transaction,
+            currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
@@ -1054,7 +1060,7 @@ fun DashboardScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = AppFormatters.formatCompactCurrency(currentExp),
+                                    text = AppFormatters.formatCompactCurrency(currentExp, currencySymbol = state.currencySymbol),
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
@@ -1079,7 +1085,7 @@ fun DashboardScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = AppFormatters.formatCompactCurrency(prevExp),
+                                    text = AppFormatters.formatCompactCurrency(prevExp, currencySymbol = state.currencySymbol),
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -1091,9 +1097,11 @@ fun DashboardScreen(
                             androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                             Spacer(Modifier.height(14.dp))
 
-                            val percentStr = if (kotlin.math.abs(percent) > 9999.0) ">999%" else "${String.format(Locale.US, "%.1f", kotlin.math.abs(percent))}%"
+                            val percentStr = if (kotlin.math.abs(percent) > 9999.0) ">999%" else "${String.format(Locale.US, "%.1f", kotlin.math.abs(
+                                percent
+                            ))}%"
                             Text(
-                                text = "$arrow ${AppFormatters.formatCompactCurrency(diff)} $actionWord ($percentStr)",
+                                text = "$arrow ${AppFormatters.formatCompactCurrency(diff, currencySymbol = state.currencySymbol)} $actionWord ($percentStr)",
                                 style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 color = color,
                                 maxLines = 2,
@@ -1121,7 +1129,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "₹${String.format(Locale.US, "%.0f", currentExp)}",
+                                    text = "${state.currencySymbol}${String.format(Locale.US, "%.0f", currentExp)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -1140,7 +1148,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "₹${String.format(Locale.US, "%.0f", state.totalIncome)}",
+                                    text = "${state.currencySymbol}${String.format(Locale.US, "%.0f", state.totalIncome)}",
                                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = EmeraldIncome
                                 )
@@ -1219,6 +1227,7 @@ fun DashboardScreen(
     if (showFilterSheet) {
         DashboardFilterSheet(
             currentFilter = state.filter,
+            currencySymbol = state.currencySymbol,
             onApplyFilter = { newFilter ->
                 viewModel.handleIntent(DashboardContract.Intent.SetDashboardFilter(newFilter))
             },
@@ -1233,6 +1242,7 @@ private fun DashboardHero(
     totalBalance: Double,
     income: Double,
     expense: Double,
+    currencySymbol: String = "₹",
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
     selectedTimeRange: com.masum.cipher.core.domain.model.TimeRange? = null,
     transactions: List<TransactionEntity>,
@@ -1422,16 +1432,16 @@ private fun DashboardHero(
                             }
                         }
 
-                        val formattedBalance = remember(totalBalance, locale) {
+                        val formattedBalance = remember(totalBalance, currencySymbol, locale) {
                             val absVal = kotlin.math.abs(totalBalance)
                             val sign = if (totalBalance < 0) "-" else ""
                             when {
-                                absVal >= 1_000_000_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fQ", absVal / 1_000_000_000_000_000.0).replace(".00Q", "Q")
-                                absVal >= 1_000_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
-                                absVal >= 1_000_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
-                                absVal >= 1_000_000.0 -> "₹$sign" + String.format(Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
-                                absVal >= 100_000.0 -> "₹$sign" + String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-                                else -> "₹$sign" + String.format(locale, "%,.0f", absVal)
+                                absVal >= 1_000_000_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fQ", absVal / 1_000_000_000_000_000.0).replace(".00Q", "Q")
+                                absVal >= 1_000_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
+                                absVal >= 1_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
+                                absVal >= 1_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
+                                absVal >= 100_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
+                                else -> "$currencySymbol$sign" + String.format(locale, "%,.0f", absVal)
                             }
                         }
 
@@ -1454,7 +1464,7 @@ private fun DashboardHero(
                         ) {
                             if (privacyMode) {
                                 Text(
-                                    text = "₹••••••",
+                                    text = "$currencySymbol••••••",
                                     style = Typography.displayLarge.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -1488,7 +1498,7 @@ private fun DashboardHero(
                                 } else {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = "₹",
+                                            text = currencySymbol,
                                             style = Typography.headlineMedium.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold
@@ -1550,6 +1560,7 @@ private fun DashboardHero(
                             CashFlowSegmentBar(
                                 income = income,
                                 expense = expense,
+                                currencySymbol = currencySymbol,
                                 privacyMode = privacyMode,
                                 isCollapsed = false
                             )
@@ -1575,6 +1586,7 @@ private fun DashboardHero(
                             CashFlowSegmentBar(
                                 income = income,
                                 expense = expense,
+                                currencySymbol = currencySymbol,
                                 privacyMode = privacyMode,
                                 isCollapsed = true
                             )
@@ -1778,7 +1790,7 @@ private fun DashboardHero(
     }
 }
 
-private fun buildFilterSummary(filter: DashboardFilter): String {
+private fun buildFilterSummary(filter: DashboardFilter, currencySymbol: String = "₹"): String {
     val parts = mutableListOf<String>()
     when (filter.type) {
         DashboardContract.FilterType.EXPENSE -> parts.add("Expenses")
@@ -1793,11 +1805,11 @@ private fun buildFilterSummary(filter: DashboardFilter): String {
         }
     }
     if (filter.minAmount != null && filter.maxAmount != null) {
-        parts.add("₹${filter.minAmount.toInt()} – ₹${filter.maxAmount.toInt()}")
+        parts.add("$currencySymbol${filter.minAmount.toInt()} – $currencySymbol${filter.maxAmount.toInt()}")
     } else if (filter.minAmount != null) {
-        parts.add("> ₹${filter.minAmount.toInt()}")
+        parts.add("> $currencySymbol${filter.minAmount.toInt()}")
     } else if (filter.maxAmount != null) {
-        parts.add("< ₹${filter.maxAmount.toInt()}")
+        parts.add("< $currencySymbol${filter.maxAmount.toInt()}")
     }
     return parts.joinToString(" • ")
 }
@@ -1809,6 +1821,7 @@ private fun buildFilterSummary(filter: DashboardFilter): String {
 fun TransactionItem(
     transaction: TransactionEntity,
     privacyMode: Boolean,
+    currencySymbol: String = "₹",
     onClick: () -> Unit
 ) {
     val locale = LocalLocale.current.platformLocale
@@ -1867,7 +1880,7 @@ fun TransactionItem(
 
             val amountFormatted = String.format(locale, "%,.0f", transaction.amount)
             Text(
-                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+₹" else "₹-"}$amountFormatted",
+                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+$currencySymbol" else "$currencySymbol-"}$amountFormatted",
                 style = Typography.titleMedium.copy(
                     fontFamily = Manrope,
                     fontWeight = FontWeight.Bold
@@ -2041,6 +2054,7 @@ fun WhatsNewFeatureItem(
 private fun CashFlowSegmentBar(
     income: Double,
     expense: Double,
+    currencySymbol: String = "₹",
     privacyMode: Boolean,
     isCollapsed: Boolean
 ) {
@@ -2110,7 +2124,7 @@ private fun CashFlowSegmentBar(
                 Spacer(Modifier.width(if (isCollapsed) 4.dp else 6.dp))
                 val formattedIncome = formatAmount(income)
                 AnimatedContent(
-                    targetState = if (privacyMode) "••••" else "₹$formattedIncome",
+                    targetState = if (privacyMode) "••••" else "$currencySymbol$formattedIncome",
                     transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
                     label = "income_fade"
                 ) { targetText ->
@@ -2136,7 +2150,7 @@ private fun CashFlowSegmentBar(
             ) {
                 val formattedExpense = formatAmount(expense)
                 AnimatedContent(
-                    targetState = if (privacyMode) "••••" else "₹$formattedExpense",
+                    targetState = if (privacyMode) "••••" else "$currencySymbol$formattedExpense",
                     transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
                     label = "expense_fade"
                 ) { targetText ->

@@ -410,4 +410,43 @@ class TransactionParserTest {
         assertEquals("SWIGGY", result.merchant)
         assertTrue(!result.isIncome)
     }
+
+    // ─── US & UK REGIONAL TESTS ───────────────────────────────────────────────
+
+    @Test
+    fun `US Chase bank push notification parse`() {
+        val result = parser.parse("Chase: You made a $14.20 purchase at STARBUCKS with card ending 4012.", "USD")
+        assertNotNull(result)
+        assertEquals(14.20, result!!.amount, 0.001)
+        assertEquals("STARBUCKS", result.merchant)
+        assertEquals("USD", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `US Venmo payment parse`() {
+        val result = parser.parse("Venmo: You paid John $25.00 for Dinner", "USD")
+        assertNotNull(result)
+        assertEquals(25.0, result!!.amount, 0.001)
+        assertEquals("USD", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `UK Monzo transaction parse`() {
+        val result = parser.parse("You spent £12.50 at Pret A Manger", "GBP")
+        assertNotNull(result)
+        assertEquals(12.50, result!!.amount, 0.001)
+        assertEquals("GBP", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `Global universal fallback format parse`() {
+        val result = parser.parse("Paid €45.00 to ZARA with card ending 9999", "EUR")
+        assertNotNull(result)
+        assertEquals(45.0, result!!.amount, 0.001)
+        assertEquals("ZARA", result.merchant)
+        assertTrue(!result.isIncome)
+    }
 }

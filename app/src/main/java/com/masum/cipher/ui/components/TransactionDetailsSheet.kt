@@ -88,6 +88,7 @@ import java.util.Locale
 @Composable
 fun TransactionDetailsSheet(
     transaction: TransactionEntity,
+    currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onConfirm: (TransactionEntity) -> Unit,
     onDelete: (() -> Unit)? = null,
@@ -202,6 +203,7 @@ fun TransactionDetailsSheet(
             AmountInputField(
                 value = amount,
                 onValueChange = { if (it.length <= 15) amount = it },
+                currencySymbol = currencySymbol,
                 color = if (isIncome) EmeraldIncome else RoseExpense
             )
 
@@ -516,6 +518,7 @@ private fun VaultSheetTextField(
 private fun AmountInputField(
     value: String,
     onValueChange: (String) -> Unit,
+    currencySymbol: String = "₹",
     color: Color
 ) {
     var textFieldValue by remember {
@@ -563,7 +566,7 @@ private fun AmountInputField(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "₹",
+                text = currencySymbol,
                 style = Typography.displayLarge.copy(
                     color = color.copy(alpha = 0.5f),
                     fontSize = 48.sp
@@ -712,7 +715,7 @@ private fun AmountInputField(
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
-                text = "= ₹${String.format(locale, "%,.2f", computed)}",
+                text = "= $currencySymbol${String.format(locale, "%,.2f", computed)}",
                 style = Typography.titleMedium,
                 color = color.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)

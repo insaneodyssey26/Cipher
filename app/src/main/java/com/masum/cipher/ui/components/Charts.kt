@@ -82,6 +82,7 @@ import java.util.Calendar
 fun CategoryAllocationDonut(
     categories: List<DashboardContract.CategoryData>,
     categoryBudgets: Map<String, Double> = emptyMap(),
+    currencySymbol: String = "₹",
     onCategoryClick: (DashboardContract.CategoryData) -> Unit = {}
 ) {
     if (categories.isEmpty()) {
@@ -198,7 +199,7 @@ fun CategoryAllocationDonut(
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
-                            text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount),
+                            text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount, currencySymbol = currencySymbol),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -264,6 +265,7 @@ fun SpendingTrendChart(
     expensePoints: List<DashboardContract.Point>,
     incomePoints: List<DashboardContract.Point> = emptyList(),
     netFlowPoints: List<DashboardContract.Point> = emptyList(),
+    currencySymbol: String = "₹",
     isHapticsEnabled: Boolean = true
 ) {
     var selectedMode by rememberSaveable { mutableStateOf(FinancialFlowMode.EXPENSE) }
@@ -348,11 +350,11 @@ fun SpendingTrendChart(
                     Column(modifier = Modifier.weight(1f, fill = false)) {
                         val safeTotal = if (currentTotal.isInfinite() || currentTotal.isNaN()) 0.0 else currentTotal.toDouble()
                         val (statTitle, statSubtitle) = when (selectedMode) {
-                            FinancialFlowMode.EXPENSE -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal)), "Total Outflow")
-                            FinancialFlowMode.INCOME -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal)), "Total Inflow")
+                            FinancialFlowMode.EXPENSE -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), "Total Outflow")
+                            FinancialFlowMode.INCOME -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), "Total Inflow")
                             FinancialFlowMode.NET_FLOW -> {
                                 val label = if (safeTotal >= 0.0) "Net Surplus" else "Net Deficit"
-                                Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(safeTotal), label)
+                                Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(safeTotal, currencySymbol = currencySymbol), label)
                             }
                         }
 
@@ -588,10 +590,10 @@ fun SpendingTrendChart(
 
                             val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", locale)
                             val amountText = when (selectedMode) {
-                                FinancialFlowMode.EXPENSE -> "₹${String.format(locale, "%,.0f", nearestPoint.y)} spent"
-                                FinancialFlowMode.INCOME -> "₹${String.format(locale, "%,.0f", nearestPoint.y)} earned"
+                                FinancialFlowMode.EXPENSE -> "$currencySymbol${String.format(locale, "%,.0f", nearestPoint.y)} spent"
+                                FinancialFlowMode.INCOME -> "$currencySymbol${String.format(locale, "%,.0f", nearestPoint.y)} earned"
                                 FinancialFlowMode.NET_FLOW -> {
-                                    val prefix = if (nearestPoint.y < 0f) "₹-" else "₹"
+                                    val prefix = if (nearestPoint.y < 0f) "$currencySymbol-" else currencySymbol
                                     val label = if (nearestPoint.y >= 0f) "surplus" else "deficit"
                                     "$prefix${String.format(locale, "%,.0f", kotlin.math.abs(nearestPoint.y))} $label"
                                 }
@@ -697,19 +699,22 @@ fun SpendingTrendChart(
 
 @Composable
 fun SpendingTrendChart(
-    points: List<DashboardContract.Point>
+    points: List<DashboardContract.Point>,
+    currencySymbol: String = "₹"
 ) {
     SpendingTrendChart(
         expensePoints = points,
         incomePoints = emptyList(),
         netFlowPoints = emptyList(),
+        currencySymbol = currencySymbol,
         isHapticsEnabled = true
     )
 }
 
 @Composable
 fun PeakHoursChart(
-    hours: List<InsightsContract.PeakHourData>
+    hours: List<InsightsContract.PeakHourData>,
+    currencySymbol: String = "₹"
 ) {
     if (hours.isEmpty()) {
         Box(
@@ -805,7 +810,7 @@ fun PeakHoursChart(
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
                     )
 
-                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal)
+                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal, currencySymbol = currencySymbol)
                     val measured = textMeasurer.measure(
                         text = labelText,
                         style = TextStyle(
@@ -890,7 +895,7 @@ fun PeakHoursChart(
                     val barTopY = chartPadT + plotH - plotH * intensity * animProgress.value
 
                     val amtMeasured = textMeasurer.measure(
-                        "₹${data.amount.toInt()}",
+                        "$currencySymbol${data.amount.toInt()}",
                         TextStyle(color = onSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     )
                     val lblMeasured = textMeasurer.measure(

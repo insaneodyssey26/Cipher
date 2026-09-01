@@ -60,6 +60,7 @@ import java.util.Date
 @Composable
 fun EditSubscriptionSheet(
     subscription: SubscriptionDetector.Subscription?,
+    currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onConfirm: (merchant: String, amount: Double, category: String, frequencyDays: Int, nextExpectedDate: Long) -> Unit,
     onDelete: (() -> Unit)? = null
@@ -147,7 +148,7 @@ fun EditSubscriptionSheet(
                     ) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Monthly Average", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("₹${String.format(java.util.Locale.US, "%.0f", monthlyEst)}/mo", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                            Text("$currencySymbol${String.format(java.util.Locale.US, "%.0f", monthlyEst)}/mo", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Tracking Method", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -169,7 +170,7 @@ fun EditSubscriptionSheet(
                         value = amountText,
                         onValueChange = { amountText = it },
                         label = "Amount",
-                        prefix = "₹",
+                        prefix = currencySymbol,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }

@@ -53,10 +53,11 @@ class TransactionNotificationService : NotificationListenerService() {
         if (fullMessage.isBlank()) return
 
         serviceScope.launch {
-            val trackedApps = userPreferences.settingsFlow.first().trackedApps
+            val settings = userPreferences.settingsFlow.first()
+            val trackedApps = settings.trackedApps
             if (!trackedApps.contains(packageName)) return@launch
 
-            val parsedTx = transactionParser.parse(fullMessage)
+            val parsedTx = transactionParser.parse(fullMessage, settings.currencyCode)
             if (parsedTx != null) {
                 val transactionEntity = TransactionEntity(
                     merchant = parsedTx.merchant,

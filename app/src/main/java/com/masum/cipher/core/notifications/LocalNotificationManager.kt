@@ -162,10 +162,11 @@ class LocalNotificationManager @Inject constructor(
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) return@launch
 
+            val currencySymbol = settings.currencySymbol
             val title = if (isExceeded) "Budget Exceeded" else "Budget Alert ($threshold%)"
-            val text = if (isExceeded) "You have exceeded your monthly budget by ₹${amount.toInt()}." 
-                       else if (threshold == 90) "You've used 90% of your budget! Only ₹${amount.toInt()} remaining."
-                       else "You've used 50% of your budget. ₹${amount.toInt()} remaining."
+            val text = if (isExceeded) "You have exceeded your monthly budget by $currencySymbol${amount.toInt()}." 
+                       else if (threshold == 90) "You've used 90% of your budget! Only $currencySymbol${amount.toInt()} remaining."
+                       else "You've used 50% of your budget. $currencySymbol${amount.toInt()} remaining."
                        
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -194,6 +195,7 @@ class LocalNotificationManager @Inject constructor(
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) return@launch
 
+            val currencySymbol = settings.currencySymbol
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
@@ -203,7 +205,7 @@ class LocalNotificationManager @Inject constructor(
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor("#10B981".toColorInt())
                 .setContentTitle("Daily Summary")
-                .setContentText("You spent ₹${spent.toInt()} today across $count transactions. Tap to review.")
+                .setContentText("You spent $currencySymbol${spent.toInt()} today across $count transactions. Tap to review.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
@@ -318,7 +320,8 @@ class LocalNotificationManager @Inject constructor(
                 categorizePendingIntent
             ).build()
 
-            val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}"
+            val currencySymbol = settings.currencySymbol
+            val amountStr = "$currencySymbol${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}"
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
@@ -387,7 +390,8 @@ class LocalNotificationManager @Inject constructor(
                 skipPendingIntent
             ).build()
 
-            val amountStr = "₹${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+            val currencySymbol = settings.currencySymbol
+            val amountStr = "$currencySymbol${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
             val builder = NotificationCompat.Builder(context, CHANNEL_SUBSCRIPTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor("#F59E0B".toColorInt())

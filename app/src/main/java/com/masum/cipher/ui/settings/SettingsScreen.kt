@@ -111,6 +111,7 @@ import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.FolderDown
 import compose.icons.lucideicons.FolderSync
 import compose.icons.lucideicons.Github
+import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Laptop
 import compose.icons.lucideicons.Lock
@@ -153,8 +154,8 @@ fun SettingsScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showBudgetDialog by remember { mutableStateOf(false) }
+    var showCurrencyDialog by remember { mutableStateOf(false) }
     var showCrashLogDialog by remember { mutableStateOf(false) }
-    var budgetInput by remember { mutableStateOf("") }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
     var expandedSection by remember { mutableStateOf<String?>(null) }
     var showFrequencyDialog by remember { mutableStateOf(false) }
@@ -233,8 +234,11 @@ fun SettingsScreen(
     val matchNotifySystem = query.isBlank() || "system notification channels".contains(query) || "notification channels".contains(query)
     val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifyMonthly || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifySystem
 
-    val matchBudget = query.isBlank() || "monthly budget".contains(query)
+    val matchBudget = query.isBlank() || "monthly budget".contains(query) || "budget".contains(query)
     val matchGoals = query.isBlank() || "financial goals".contains(query) || matchBudget
+
+    val matchCurrency = query.isBlank() || "currency & region".contains(query) || "currency".contains(query) || "region".contains(query) || "preferred currency".contains(query) || "dollar".contains(query) || "rupee".contains(query) || "euro".contains(query) || "pound".contains(query) || "usd".contains(query) || "inr".contains(query) || "eur".contains(query) || "gbp".contains(query)
+    val matchRegion = query.isBlank() || "currency & region".contains(query) || "region".contains(query) || "locale".contains(query) || matchCurrency
 
     val matchCsv = query.isBlank() || "export csv report".contains(query)
     val matchPdf = query.isBlank() || "export pdf statement".contains(query)
@@ -568,6 +572,28 @@ Column(modifier = Modifier.fillMaxWidth()) {
         }
     }
 
+    if (matchRegion) {
+        SettingsSection(
+            "CURRENCY & REGION",
+            icon = LucideIcons.Globe,
+            isHapticsEnabled = state.isHapticsEnabled,
+            isExpanded = expandedSection == "CURRENCY & REGION" || query.isNotBlank(),
+            onToggle = { expandedSection = if (expandedSection == "CURRENCY & REGION") null else "CURRENCY & REGION" }
+        ) {
+            VaultSettingsItem(
+                isHapticsEnabled = state.isHapticsEnabled,
+                icon = LucideIcons.Globe,
+                title = "Preferred Currency",
+                subtitle = "Active currency for dashboard, statistics, and parser rules",
+                value = "${state.currencyCode} (${state.currencySymbol})",
+                onClick = {
+                    view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                    showCurrencyDialog = true
+                }
+            )
+        }
+    }
+
     if (matchSecurity) {
         SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
                 if (matchBiometric) VaultSettingsSwitch(
@@ -763,7 +789,7 @@ SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled =
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
                     title = "Monthly Budget",
-                    value = if (state.monthlyBudget > 0) "₹${state.monthlyBudget.toInt()} (${if (state.isDynamicBudgetEnabled) "Dynamic" else "Fixed"})" else "No limit set",
+                    value = if (state.monthlyBudget > 0) "${state.currencySymbol}${state.monthlyBudget.toInt()} (${if (state.isDynamicBudgetEnabled) "Dynamic" else "Fixed"})" else "No limit set",
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showBudgetDialog = true
@@ -1248,6 +1274,18 @@ Spacer(modifier = Modifier.weight(1f))
         PermissionsHealthSheet(
             onDismiss = { showPermissionsHealthSheet = false },
             isHapticsEnabled = state.isHapticsEnabled
+        )
+    }
+
+    if (showCurrencyDialog) {
+        com.masum.cipher.ui.components.CurrencySelectionDialog(
+            currentCode = state.currencyCode,
+            currentSymbol = state.currencySymbol,
+            isHapticsEnabled = state.isHapticsEnabled,
+            onCurrencySelected = { code, symbol ->
+                viewModel.handleIntent(SettingsContract.Intent.SetCurrency(code, symbol))
+            },
+            onDismiss = { showCurrencyDialog = false }
         )
     }
 }

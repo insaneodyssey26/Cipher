@@ -2,54 +2,67 @@ package com.masum.cipher.core.sms
 
 import com.masum.cipher.core.domain.model.ParsedTransaction
 import com.masum.cipher.core.sms.config.TransactionPatterns
+import com.masum.cipher.core.sms.region.RegionParserRules
+import com.masum.cipher.core.sms.region.RegionRuleProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TransactionParser @Inject constructor() {
 
-    fun parse(message: String): ParsedTransaction? {
+    fun parse(message: String, preferredCurrency: String? = null): ParsedTransaction? {
         val cleanMessage = message.replace("\\s+".toRegex(), " ")
 
-        if (hasExclusionKeywords(cleanMessage)) return null
-        if (!hasTransactionIntent(cleanMessage)) return null
-        if (!hasTransactionEvidence(cleanMessage)) return null
+        val ruleChain = RegionRuleProvider.getAllRules(preferredCurrency ?: "INR")
 
-        val amount = extractAmount(cleanMessage) ?: return null
+        for (rules in ruleChain) {
+            val parsed = tryParseWithRules(cleanMessage, rules)
+            if (parsed != null) return parsed
+        }
 
-        var merchant = findBrandInText(cleanMessage)
-        if (merchant == null) merchant = extractMerchantStructural(cleanMessage)
+        return null
+    }
 
-        val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
-        val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { cleanMessage.contains(it, ignoreCase = true) }
+    private fun tryParseWithRules(message: String, rules: RegionParserRules): ParsedTransaction? {
+        if (hasExclusionKeywords(message, rules)) return null
+        if (!hasTransactionIntent(message, rules)) return null
+        if (!hasTransactionEvidence(message, rules)) return null
+
+        val amount = extractAmount(message, rules) ?: return null
+
+        var merchant = findBrandInText(message, rules)
+        if (merchant == null) merchant = extractMerchantStructural(message, rules)
+
+        val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
+        val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
         val isIncome = isCredit && !isDebit
 
         return ParsedTransaction(
             amount = amount,
             merchant = sanitizeMerchant(merchant ?: "Miscellaneous"),
-            currency = "INR",
+            currency = rules.defaultCurrency,
             isIncome = isIncome
         )
     }
 
-    private fun hasExclusionKeywords(message: String): Boolean {
+    private fun hasExclusionKeywords(message: String, rules: RegionParserRules): Boolean {
         val lower = message.lowercase()
-        return TransactionPatterns.EXCLUSION_KEYWORDS.any { lower.contains(it) }
+        return rules.exclusionKeywords.any { lower.contains(it) }
     }
 
-    private fun hasTransactionIntent(message: String): Boolean {
+    private fun hasTransactionIntent(message: String, rules: RegionParserRules): Boolean {
         val lower = message.lowercase()
-        return TransactionPatterns.INTENT_KEYWORDS.any { lower.contains(it) }
+        return rules.intentKeywords.any { lower.contains(it) }
     }
 
-    private fun hasTransactionEvidence(message: String): Boolean {
-        return TransactionPatterns.TRANSACTION_EVIDENCE_PATTERNS.any { pattern ->
+    private fun hasTransactionEvidence(message: String, rules: RegionParserRules): Boolean {
+        return rules.evidencePatterns.any { pattern ->
             pattern.matcher(message).find()
         }
     }
 
-    private fun extractAmount(message: String): Double? {
-        for (pattern in TransactionPatterns.AMOUNT_PATTERNS) {
+    private fun extractAmount(message: String, rules: RegionParserRules): Double? {
+        for (pattern in rules.amountPatterns) {
             val matcher = pattern.matcher(message)
             while (matcher.find()) {
                 val match = matcher.group(1) ?: matcher.group(0)
@@ -75,15 +88,15 @@ class TransactionParser @Inject constructor() {
         return false
     }
 
-    private fun findBrandInText(message: String): String? {
+    private fun findBrandInText(message: String, rules: RegionParserRules): String? {
         val upper = message.uppercase()
-        return TransactionPatterns.BRAND_DICTIONARY.find { brand ->
+        return rules.brandDictionary.find { brand ->
             upper.contains(Regex("\\b${Regex.escape(brand)}\\b"))
         }
     }
 
-    private fun extractMerchantStructural(message: String): String? {
-        for (pattern in TransactionPatterns.STRUCTURAL_MERCHANT_PATTERNS) {
+    private fun extractMerchantStructural(message: String, rules: RegionParserRules): String? {
+        for (pattern in rules.structuralMerchantPatterns) {
             val matcher = pattern.matcher(message)
             while (matcher.find()) {
                 val raw = matcher.group(1)?.trim() ?: continue
@@ -104,7 +117,7 @@ class TransactionParser @Inject constructor() {
 
     private fun sanitizeMerchant(merchant: String): String {
         return merchant
-            .replace(Regex("(?i)\\busing\\b.*|\\bvia\\b.*|\\bon\\b.*|\\bref\\b.*|\\bVPA\\b.*|\\bUPI\\b.*"), "")
+            .replace(Regex("(?i)\\busing\\b.*|\\bvia\\b.*|\\bon\\b.*|\\bref\\b.*|\\bVPA\\b.*|\\bUPI\\b.*|\\bcard\\b.*|\\bwith\\b.*"), "")
             .trim()
             .split(" ")
             .take(2)

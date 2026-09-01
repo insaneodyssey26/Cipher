@@ -68,6 +68,8 @@ class GetInsightsUseCase @Inject constructor(
 
             InsightsContract.State(
                 isLoading = false,
+                currencyCode = settings.currencyCode,
+                currencySymbol = settings.currencySymbol,
                 selectedTimePeriod = timeRange.period,
                 selectedTimeRange = timeRange,
                 spendingVelocity = DashboardContract.VelocityData(

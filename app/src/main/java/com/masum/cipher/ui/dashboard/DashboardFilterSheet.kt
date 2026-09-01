@@ -95,6 +95,7 @@ private data class QuickAmountRange(
 @Composable
 fun DashboardFilterSheet(
     currentFilter: DashboardFilter,
+    currencySymbol: String = "₹",
     onApplyFilter: (DashboardFilter) -> Unit,
     onDismiss: () -> Unit,
     isHapticsEnabled: Boolean = true
@@ -114,22 +115,18 @@ fun DashboardFilterSheet(
         }
     }
 
-    var draftType by remember(currentFilter) { mutableStateOf(currentFilter.type) }
-    var draftCategories by remember(currentFilter) { mutableStateOf(currentFilter.selectedCategories) }
-    var minInput by remember(currentFilter) {
-        mutableStateOf(currentFilter.minAmount?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() } ?: "")
-    }
-    var maxInput by remember(currentFilter) {
-        mutableStateOf(currentFilter.maxAmount?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() } ?: "")
-    }
+    var draftType by remember { mutableStateOf(currentFilter.type) }
+    var draftCategories by remember { mutableStateOf(currentFilter.selectedCategories) }
+    var minInput by remember { mutableStateOf(currentFilter.minAmount?.toInt()?.toString() ?: "") }
+    var maxInput by remember { mutableStateOf(currentFilter.maxAmount?.toInt()?.toString() ?: "") }
 
-    val quickRanges = remember {
+    val quickRanges = remember(currencySymbol) {
         listOf(
             QuickAmountRange("Any", null, null),
-            QuickAmountRange("< ₹500", null, 500.0),
-            QuickAmountRange("₹500 - ₹2k", 500.0, 2000.0),
-            QuickAmountRange("₹2k - ₹10k", 2000.0, 10000.0),
-            QuickAmountRange("> ₹10k", 10000.0, null)
+            QuickAmountRange("< ${currencySymbol}500", null, 500.0),
+            QuickAmountRange("${currencySymbol}500 - ${currencySymbol}2k", 500.0, 2000.0),
+            QuickAmountRange("${currencySymbol}2k - ${currencySymbol}10k", 2000.0, 10000.0),
+            QuickAmountRange("> ${currencySymbol}10k", 10000.0, null)
         )
     }
 
@@ -458,7 +455,7 @@ fun DashboardFilterSheet(
                                     minInput = input
                                 }
                             },
-                            label = { Text("Min (₹)", fontSize = 12.sp) },
+                            label = { Text("Min ($currencySymbol)", fontSize = 12.sp) },
                             placeholder = { Text("0", fontSize = 12.sp) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -479,7 +476,7 @@ fun DashboardFilterSheet(
                                     maxInput = input
                                 }
                             },
-                            label = { Text("Max (₹)", fontSize = 12.sp) },
+                            label = { Text("Max ($currencySymbol)", fontSize = 12.sp) },
                             placeholder = { Text("No limit", fontSize = 12.sp) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),

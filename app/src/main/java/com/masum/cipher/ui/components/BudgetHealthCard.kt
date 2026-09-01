@@ -19,13 +19,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -44,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +48,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
@@ -62,7 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.core.util.performVibrate
@@ -77,7 +69,7 @@ import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Trash2
-import compose.icons.lucideicons.TrendingUp
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
@@ -86,6 +78,7 @@ fun BudgetHealthCard(
     budget: Double,
     income: Double = 0.0,
     isDynamicBudget: Boolean = false,
+    currencySymbol: String = "₹",
     onEditBudgetClick: () -> Unit,
     modifier: Modifier = Modifier,
     onToggleDynamicMode: ((Boolean) -> Unit)? = null,
@@ -236,7 +229,7 @@ fun BudgetHealthCard(
                             }
                         } else {
                             Text(
-                                text = if (isDynamicBudget) "Dynamic: ₹${String.format(locale, "%,.0f", effectiveBudget)}" else "Limit: ₹${String.format(locale, "%,.0f", budget)}",
+                                text = if (isDynamicBudget) "Dynamic: $currencySymbol${String.format(locale, "%,.0f", effectiveBudget)}" else "Limit: $currencySymbol${String.format(locale, "%,.0f", budget)}",
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
@@ -271,9 +264,9 @@ fun BudgetHealthCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val amountText = if (isOverBudget) {
-                    "₹${String.format(locale, "%,.0f", spent - effectiveBudget)}"
+                    "$currencySymbol${String.format(locale, "%,.0f", spent - effectiveBudget)}"
                 } else {
-                    "₹${String.format(locale, "%,.0f", remainingBudget)}"
+                    "$currencySymbol${String.format(locale, "%,.0f", remainingBudget)}"
                 }
                 val amountFontSize = when {
                     amountText.length > 18 -> 17.sp
@@ -376,7 +369,7 @@ fun BudgetHealthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "₹${String.format(locale, "%,.0f", spent)} spent of ₹${String.format(locale, "%,.0f", effectiveBudget)}",
+                        text = "$currencySymbol${String.format(locale, "%,.0f", spent)} spent of $currencySymbol${String.format(locale, "%,.0f", effectiveBudget)}",
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,
@@ -398,7 +391,7 @@ fun BudgetHealthCard(
                 if (isDynamicBudget && income > 0) {
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Base ₹${String.format(locale, "%,.0f", budget)} + ₹${String.format(locale, "%,.0f", income)} from income",
+                        text = "Base $currencySymbol${String.format(locale, "%,.0f", budget)} + $currencySymbol${String.format(locale, "%,.0f", income)} from income",
                         style = Typography.bodySmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,
@@ -437,7 +430,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = if (isOverBudget) "₹0 / day" else "₹${String.format(locale, "%,.0f", safeSpendPerDay)} / day",
+                            text = if (isOverBudget) "${currencySymbol}0 / day" else "$currencySymbol${String.format(locale, "%,.0f", safeSpendPerDay)} / day",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -465,7 +458,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = "₹${String.format(locale, "%,.0f", currentDailyPace)} / day",
+                            text = "$currencySymbol${String.format(locale, "%,.0f", currentDailyPace)} / day",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -563,6 +556,7 @@ fun EditBudgetDialog(
     currentBudget: Double,
     isDynamicBudget: Boolean = false,
     currentMonthIncome: Double = 0.0,
+    currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onConfirm: (Double, Boolean) -> Unit,
     isHapticsEnabled: Boolean = true
@@ -668,7 +662,7 @@ fun EditBudgetDialog(
                             budgetInput = input
                         }
                     },
-                    label = { Text("Monthly Base Limit (₹)") },
+                    label = { Text("Monthly Base Limit ($currencySymbol)") },
                     placeholder = { Text("e.g. 40,000") },
                     textStyle = Typography.headlineSmall.copy(
                         fontFamily = Lato,
@@ -906,7 +900,7 @@ fun EditBudgetDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "₹${String.format(locale, "%,.0f", effectiveAmount)}",
+                        text = "$currencySymbol${String.format(locale, "%,.0f", effectiveAmount)}",
                         style = Typography.titleLarge.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -919,12 +913,12 @@ fun EditBudgetDialog(
                 Text(
                     text = if (selectedIsDynamic) {
                         if (currentMonthIncome > 0) {
-                            "Base ₹${String.format(locale, "%,.0f", currentAmount)} + ₹${String.format(locale, "%,.0f", currentMonthIncome)} received this month."
+                            "Base $currencySymbol${String.format(locale, "%,.0f", currentAmount)} + $currencySymbol${String.format(locale, "%,.0f", currentMonthIncome)} received this month."
                         } else {
-                            "Base ₹${String.format(locale, "%,.0f", currentAmount)}. Any income received will automatically expand your spending limit."
+                            "Base $currencySymbol${String.format(locale, "%,.0f", currentAmount)}. Any income received will automatically expand your spending limit."
                         }
                     } else {
-                        "Strict ceiling of ₹${String.format(locale, "%,.0f", currentAmount)}. Money received does not increase this limit."
+                        "Strict ceiling of $currencySymbol${String.format(locale, "%,.0f", currentAmount)}. Money received does not increase this limit."
                     },
                     style = Typography.bodySmall.copy(
                         fontFamily = Manrope,

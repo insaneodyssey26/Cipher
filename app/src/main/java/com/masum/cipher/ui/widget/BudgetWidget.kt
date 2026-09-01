@@ -56,18 +56,19 @@ class BudgetWidget : GlanceAppWidget() {
         val baseBudget = settings.monthlyBudget
         val isDynamic = settings.isDynamicBudgetEnabled
         val accentColor = Color(settings.accentColor.colorValue)
+        val currencySymbol = settings.currencySymbol
         provideContent {
             val spent = currentState<Preferences>()[WidgetKeys.BUDGET_SPENT] ?: 0.0
             val income = currentState<Preferences>()[WidgetKeys.STATS_INCOME] ?: 0.0
             val budget = if (isDynamic && baseBudget > 0) baseBudget + income else baseBudget
             GlanceTheme {
-                Content(spent = spent, budget = budget, brandColor = ColorProvider(accentColor))
+                Content(spent = spent, budget = budget, currencySymbol = currencySymbol, brandColor = ColorProvider(accentColor))
             }
         }
     }
 
     @Composable
-    private fun Content(spent: Double, budget: Double, brandColor: ColorProvider) {
+    private fun Content(spent: Double, budget: Double, currencySymbol: String = "₹", brandColor: ColorProvider) {
         val progress = if (budget > 0) (spent / budget).toFloat().coerceIn(0f, 1f) else 0f
         val overBudget = spent > budget && budget > 0
         val remaining = budget - spent
@@ -172,7 +173,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                 } else {
                     Text(
-                        text = "₹${fmt(spent)}",
+                        text = "$currencySymbol${fmt(spent)}",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -181,7 +182,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.height(1.dp))
                     Text(
-                        text = "spent of ₹${fmt(budget)}",
+                        text = "spent of $currencySymbol${fmt(budget)}",
                         style = TextStyle(
                             fontSize = 10.sp,
                             color = textMuted
@@ -196,7 +197,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.height(6.dp))
                     Text(
-                        text = if (overBudget) "Over by ₹${fmt(-remaining)}" else "₹${fmt(remaining)} remaining",
+                        text = if (overBudget) "Over by $currencySymbol${fmt(-remaining)}" else "$currencySymbol${fmt(remaining)} remaining",
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,

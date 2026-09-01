@@ -68,7 +68,6 @@ import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.TrendingUp
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -96,6 +95,7 @@ fun InsightsScreen(
     if (showAddSubDialog || selectedSubscription != null) {
         com.masum.cipher.ui.components.EditSubscriptionSheet(
             subscription = selectedSubscription,
+            currencySymbol = state.currencySymbol,
             onDismiss = { 
                 showAddSubDialog = false 
                 selectedSubscription = null
@@ -146,6 +146,7 @@ fun InsightsScreen(
             currentBudget = monthlyBudget,
             isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
             currentMonthIncome = state.monthlySummary.income,
+            currencySymbol = state.currencySymbol,
             onDismiss = { showBudgetDialog = false },
             onConfirm = { amount, isDynamic ->
                 coroutineScope.launch {
@@ -273,6 +274,7 @@ fun InsightsScreen(
                                     budget = monthlyBudget,
                                     income = state.monthlySummary.income,
                                     isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
+                                    currencySymbol = state.currencySymbol,
                                     onEditBudgetClick = { showBudgetDialog = true },
                                     onToggleDynamicMode = { enabled ->
                                         viewModel.handleIntent(InsightsContract.Intent.SetDynamicBudget(enabled))
@@ -288,6 +290,7 @@ fun InsightsScreen(
                                     expensePoints = state.expenseTrendHistory,
                                     incomePoints = state.incomeTrendHistory,
                                     netFlowPoints = state.netFlowTrendHistory,
+                                    currencySymbol = state.currencySymbol,
                                     isHapticsEnabled = isHapticsEnabled
                                 )
                             }
@@ -322,6 +325,7 @@ fun InsightsScreen(
                                     CategoryAllocationDonut(
                                         categories = state.categoryBreakdown,
                                         categoryBudgets = settings?.categoryBudgets ?: emptyMap(),
+                                        currencySymbol = state.currencySymbol,
                                         onCategoryClick = { catData ->
                                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                                             selectedCategoryForDetail = catData
@@ -332,7 +336,7 @@ fun InsightsScreen(
 
                             item {
                                 SectionLabel("PEAK SPENDING HOURS")
-                                PeakHoursChart(hours = state.peakHours)
+                                PeakHoursChart(hours = state.peakHours, currencySymbol = state.currencySymbol)
                             }
 
                             item {
@@ -362,6 +366,7 @@ fun InsightsScreen(
                             item {
                                 SubscriptionsCard(
                                     subscriptions = state.detectedSubscriptions,
+                                    currencySymbol = state.currencySymbol,
                                     isHapticsEnabled = isHapticsEnabled,
                                     onAddClick = { showAddSubDialog = true },
                                     onSubscriptionClick = { sub -> selectedSubscription = sub },
@@ -384,6 +389,7 @@ fun InsightsScreen(
             categoryData = catData,
             categoryBudget = settings?.categoryBudgets?.get(categoryEnum.displayName) ?: settings?.categoryBudgets?.get(categoryEnum.name) ?: 0.0,
             transactions = filteredTxs,
+            currencySymbol = state.currencySymbol,
             onSetCategoryBudget = { newLimit ->
                 viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryEnum.displayName, newLimit))
             },
@@ -399,6 +405,7 @@ fun InsightsScreen(
     editingTransaction?.let { tx ->
         com.masum.cipher.ui.components.TransactionDetailsSheet(
             transaction = tx,
+            currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
@@ -416,7 +423,6 @@ fun InsightsScreen(
 
 @Composable
 private fun InsightHero(state: InsightsContract.State) {
-    val locale = LocalLocale.current.platformLocale
     val totalSpent = remember(state.categoryBreakdown) { state.categoryBreakdown.sumOf { it.amount } }
     val mostExpensiveCategory = state.categoryBreakdown.maxByOrNull { it.amount }
     val periodLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
@@ -507,7 +513,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount)} spent · $catPercent% of total spending",
+                            text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount, currencySymbol = state.currencySymbol)} spent · $catPercent% of total spending",
                             style = Typography.bodySmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 12.5.sp
@@ -619,7 +625,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "${AppFormatters.formatCompactCurrency(dailyRunRate)}/day",
+                        text = "${AppFormatters.formatCompactCurrency(dailyRunRate, currencySymbol = state.currencySymbol)}/day",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -654,7 +660,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = AppFormatters.formatCompactCurrency(state.avgTransactionSize),
+                        text = AppFormatters.formatCompactCurrency(state.avgTransactionSize, currencySymbol = state.currencySymbol),
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -687,6 +693,7 @@ private fun SectionLabel(text: String) {
 @Composable
 fun SubscriptionsCard(
     subscriptions: List<SubscriptionDetector.Subscription>,
+    currencySymbol: String = "₹",
     isHapticsEnabled: Boolean,
     onAddClick: () -> Unit,
     onSubscriptionClick: (SubscriptionDetector.Subscription) -> Unit,
@@ -818,7 +825,7 @@ fun SubscriptionsCard(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "₹${String.format(locale, "%,.0f", totalMonthly)} / mo",
+                            text = "$currencySymbol${String.format(locale, "%,.0f", totalMonthly)} / mo",
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -828,7 +835,7 @@ fun SubscriptionsCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "≈ ₹${String.format(locale, "%,.0f", totalAnnual)} / yr projected",
+                            text = "≈ $currencySymbol${String.format(locale, "%,.0f", totalAnnual)} / yr projected",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 11.sp
@@ -975,7 +982,7 @@ fun SubscriptionsCard(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = "₹${String.format(locale, "%,.0f", sub.amount)}",
+                                    text = "$currencySymbol${String.format(locale, "%,.0f", sub.amount)}",
                                     style = Typography.titleMedium.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,

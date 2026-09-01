@@ -53,18 +53,19 @@ class StatsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val settings = UserPreferences(context).settingsFlow.first()
         val accentColor = Color(settings.accentColor.colorValue)
+        val currencySymbol = settings.currencySymbol
         provideContent {
             val prefs = currentState<Preferences>()
             val spent = prefs[WidgetKeys.STATS_SPENT] ?: 0.0
             val income = prefs[WidgetKeys.STATS_INCOME] ?: 0.0
             GlanceTheme {
-                Content(spent = spent, income = income, brandColor = ColorProvider(accentColor))
+                Content(spent = spent, income = income, currencySymbol = currencySymbol, brandColor = ColorProvider(accentColor))
             }
         }
     }
 
     @Composable
-    private fun Content(spent: Double, income: Double, brandColor: ColorProvider) {
+    private fun Content(spent: Double, income: Double, currencySymbol: String = "₹", brandColor: ColorProvider) {
         val net = income - spent
         val netPositive = net >= 0
 
@@ -107,7 +108,7 @@ class StatsWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.width(4.dp))
                     Text(
-                        text = "overview",
+                        text = "flow",
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
@@ -143,7 +144,7 @@ class StatsWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Text(
-                    text = "${if (netPositive) "+" else "−"}₹${fmt(net)}",
+                    text = "${if (netPositive) "+" else "−"}$currencySymbol${fmt(net)}",
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -164,7 +165,7 @@ class StatsWidget : GlanceAppWidget() {
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "↓ ₹${fmt(income)}",
+                            text = "↓ $currencySymbol${fmt(income)}",
                             style = TextStyle(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -175,7 +176,7 @@ class StatsWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.width(4.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
                         Text(
-                            text = "↑ ₹${fmt(spent)}",
+                            text = "↑ $currencySymbol${fmt(spent)}",
                             style = TextStyle(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,

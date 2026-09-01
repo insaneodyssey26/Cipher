@@ -88,6 +88,7 @@ fun CategoryDetailSheet(
     categoryBudget: Double,
     transactions: List<TransactionEntity>,
     onSetCategoryBudget: (Double) -> Unit,
+    currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onTransactionClick: (TransactionEntity) -> Unit,
     isHapticsEnabled: Boolean = true
@@ -153,6 +154,7 @@ fun CategoryDetailSheet(
         EditCategoryBudgetDialog(
             categoryName = categoryEnum.displayName,
             currentBudget = categoryBudget,
+            currencySymbol = currencySymbol,
             onDismiss = { showBudgetDialog = false },
             onConfirm = { newLimit ->
                 onSetCategoryBudget(newLimit)
@@ -251,7 +253,7 @@ fun CategoryDetailSheet(
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
-                            text = "₹${String.format(locale, "%,.0f", totalSpent)}",
+                            text = "$currencySymbol${String.format(locale, "%,.0f", totalSpent)}",
                             style = Typography.headlineMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -348,7 +350,7 @@ fun CategoryDetailSheet(
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
-                                        text = "Limit: ₹${String.format(locale, "%,.0f", categoryBudget)}",
+                                        text = "Limit: $currencySymbol${String.format(locale, "%,.0f", categoryBudget)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -385,9 +387,9 @@ fun CategoryDetailSheet(
                             ) {
                                 Text(
                                     text = if (isOverBudget) {
-                                        "Exceeded by ₹${String.format(locale, "%,.0f", totalSpent - categoryBudget)}"
+                                        "Exceeded by $currencySymbol${String.format(locale, "%,.0f", totalSpent - categoryBudget)}"
                                     } else {
-                                        "₹${String.format(locale, "%,.0f", remainingBudget)} remaining"
+                                        "$currencySymbol${String.format(locale, "%,.0f", remainingBudget)} remaining"
                                     },
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
@@ -399,7 +401,7 @@ fun CategoryDetailSheet(
 
                                 if (!isOverBudget) {
                                     Text(
-                                        text = "Safe: ₹${String.format(locale, "%,.0f", safeSpendPerDay)}/day",
+                                        text = "Safe: $currencySymbol${String.format(locale, "%,.0f", safeSpendPerDay)}/day",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontSize = 11.sp,
@@ -521,7 +523,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = AppFormatters.formatCompactCurrency(avgSpend),
+                                text = AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -595,7 +597,7 @@ fun CategoryDetailSheet(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = AppFormatters.formatCompactCurrency(maxSpend),
+                                text = AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -654,7 +656,7 @@ fun CategoryDetailSheet(
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = "₹${String.format(locale, "%,.0f", merchant.totalAmount)}",
+                                            text = "$currencySymbol${String.format(locale, "%,.0f", merchant.totalAmount)}",
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.Bold,
@@ -749,7 +751,7 @@ fun CategoryDetailSheet(
                         Spacer(Modifier.width(8.dp))
 
                         Text(
-                            text = "₹-${String.format(locale, "%,.0f", tx.amount)}",
+                            text = "$currencySymbol-${String.format(locale, "%,.0f", tx.amount)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -772,6 +774,7 @@ fun CategoryDetailSheet(
 fun EditCategoryBudgetDialog(
     categoryName: String,
     currentBudget: Double,
+    currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onConfirm: (Double) -> Unit,
     isHapticsEnabled: Boolean = true
@@ -813,7 +816,7 @@ fun EditCategoryBudgetDialog(
                             budgetInput = input
                         }
                     },
-                    label = { Text("Monthly Limit (₹)") },
+                    label = { Text("Monthly Limit ($currencySymbol)") },
                     placeholder = { Text("e.g. 10000") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
