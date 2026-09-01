@@ -47,6 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -133,7 +135,7 @@ fun AppSelectionScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Select Tracked Apps",
+            text = stringResource(R.string.select_tracked_apps_title),
             style = Typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -141,7 +143,7 @@ fun AppSelectionScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Choose the finance apps you want Cipher to monitor for transactions via notifications. You can change this later.",
+            text = stringResource(R.string.select_tracked_apps_desc),
             style = Typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -156,11 +158,11 @@ fun AppSelectionScreen(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search apps...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            placeholder = { Text(stringResource(R.string.search_apps_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
             leadingIcon = {
                 Icon(
                     imageVector = LucideIcons.Search,
-                    contentDescription = "Search",
+                    contentDescription = stringResource(R.string.search),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
@@ -213,7 +215,7 @@ fun AppSelectionScreen(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(text = "Continue", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+            Text(text = stringResource(R.string.action_continue), style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

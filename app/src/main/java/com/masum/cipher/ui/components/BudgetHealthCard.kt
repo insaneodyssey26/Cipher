@@ -51,12 +51,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
@@ -132,9 +134,9 @@ fun BudgetHealthCard(
             }
 
             val statusText = when {
-                isOverBudget -> "Over Budget"
-                isNearLimit -> "$percentDisplay Used"
-                else -> "On Track"
+                isOverBudget -> stringResource(R.string.over_budget)
+                isNearLimit -> "$percentDisplay ${stringResource(R.string.used)}"
+                else -> stringResource(R.string.on_track)
             }
 
             Column(
@@ -193,7 +195,7 @@ fun BudgetHealthCard(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Fixed",
+                                        text = stringResource(R.string.fixed),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = if (!isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
@@ -217,7 +219,7 @@ fun BudgetHealthCard(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Dynamic",
+                                        text = stringResource(R.string.dynamic),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = if (isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
@@ -229,7 +231,7 @@ fun BudgetHealthCard(
                             }
                         } else {
                             Text(
-                                text = if (isDynamicBudget) "Dynamic: $currencySymbol${String.format(locale, "%,.0f", effectiveBudget)}" else "Limit: $currencySymbol${String.format(locale, "%,.0f", budget)}",
+                                text = if (isDynamicBudget) "${stringResource(R.string.dynamic)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(effectiveBudget, currencySymbol, locale)}" else "${stringResource(R.string.fixed)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
@@ -264,9 +266,9 @@ fun BudgetHealthCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val amountText = if (isOverBudget) {
-                    "$currencySymbol${String.format(locale, "%,.0f", spent - effectiveBudget)}"
+                    com.masum.cipher.core.util.AppFormatters.formatCurrency(spent - effectiveBudget, currencySymbol, locale)
                 } else {
-                    "$currencySymbol${String.format(locale, "%,.0f", remainingBudget)}"
+                    com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)
                 }
                 val amountFontSize = when {
                     amountText.length > 18 -> 17.sp
@@ -294,7 +296,7 @@ fun BudgetHealthCard(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     Text(
-                        text = if (isOverBudget) "exceeded" else "remaining",
+                        text = if (isOverBudget) stringResource(R.string.exceeded) else stringResource(R.string.remaining),
                         style = Typography.titleSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Medium,
@@ -369,7 +371,11 @@ fun BudgetHealthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$currencySymbol${String.format(locale, "%,.0f", spent)} spent of $currencySymbol${String.format(locale, "%,.0f", effectiveBudget)}",
+                        text = stringResource(
+                            R.string.spent_of,
+                            com.masum.cipher.core.util.AppFormatters.formatCurrency(spent, currencySymbol, locale),
+                            com.masum.cipher.core.util.AppFormatters.formatCurrency(effectiveBudget, currencySymbol, locale)
+                        ),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,
@@ -378,7 +384,7 @@ fun BudgetHealthCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "$daysRemaining days left ($percentDisplay)",
+                        text = "${stringResource(R.string.days_left, daysRemaining)} ($percentDisplay)",
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontSize = 11.sp,
@@ -391,7 +397,7 @@ fun BudgetHealthCard(
                 if (isDynamicBudget && income > 0) {
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Base $currencySymbol${String.format(locale, "%,.0f", budget)} + $currencySymbol${String.format(locale, "%,.0f", income)} from income",
+                        text = "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)} + ${com.masum.cipher.core.util.AppFormatters.formatCurrency(income, currencySymbol, locale)} from income",
                         style = Typography.bodySmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,
@@ -401,25 +407,19 @@ fun BudgetHealthCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
                         Text(
-                            text = "SAFE DAILY SPEND",
+                            text = stringResource(R.string.safe_daily_spend).uppercase(),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -430,7 +430,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = if (isOverBudget) "${currencySymbol}0 / day" else "$currencySymbol${String.format(locale, "%,.0f", safeSpendPerDay)} / day",
+                            text = if (isOverBudget) "${com.masum.cipher.core.util.AppFormatters.formatCurrency(0.0, currencySymbol, locale)} / ${stringResource(R.string.day_unit)}" else "${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)} / ${stringResource(R.string.day_unit)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -447,7 +447,7 @@ fun BudgetHealthCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = "DAILY AVERAGE",
+                            text = stringResource(R.string.daily_average).uppercase(),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -458,7 +458,7 @@ fun BudgetHealthCard(
                         )
                         Spacer(modifier = Modifier.height(1.dp))
                         Text(
-                            text = "$currencySymbol${String.format(locale, "%,.0f", currentDailyPace)} / day",
+                            text = "${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentDailyPace, currencySymbol, locale)} / ${stringResource(R.string.day_unit)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -900,7 +900,7 @@ fun EditBudgetDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "$currencySymbol${String.format(locale, "%,.0f", effectiveAmount)}",
+                        text = com.masum.cipher.core.util.AppFormatters.formatCurrency(effectiveAmount, currencySymbol, locale),
                         style = Typography.titleLarge.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -913,12 +913,12 @@ fun EditBudgetDialog(
                 Text(
                     text = if (selectedIsDynamic) {
                         if (currentMonthIncome > 0) {
-                            "Base $currencySymbol${String.format(locale, "%,.0f", currentAmount)} + $currencySymbol${String.format(locale, "%,.0f", currentMonthIncome)} received this month."
+                            "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)} + ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentMonthIncome, currencySymbol, locale)} received this month."
                         } else {
-                            "Base $currencySymbol${String.format(locale, "%,.0f", currentAmount)}. Any income received will automatically expand your spending limit."
+                            "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)}. Any income received will automatically expand your spending limit."
                         }
                     } else {
-                        "Strict ceiling of $currencySymbol${String.format(locale, "%,.0f", currentAmount)}. Money received does not increase this limit."
+                        "Strict ceiling of ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)}. Money received does not increase this limit."
                     },
                     style = Typography.bodySmall.copy(
                         fontFamily = Manrope,

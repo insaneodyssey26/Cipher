@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import com.masum.cipher.ui.theme.DMSans
 import compose.icons.lucideicons.ArrowLeft
 
@@ -34,13 +36,13 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Privacy Policy",
+                        text = stringResource(R.string.privacy_policy_title),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(compose.icons.LucideIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(compose.icons.LucideIcons.ArrowLeft, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -63,43 +65,43 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             PolicyMeta()
 
             PolicySection(
-                title = "The Short Version",
-                body = "Cipher does not collect, transmit, or share any of your data. Everything stays on your device, encrypted. That's the whole point of the app."
+                title = stringResource(R.string.privacy_short_version_title),
+                body = stringResource(R.string.privacy_short_version_body)
             )
 
             PolicySection(
-                title = "Data Storage",
-                body = "All transaction records, settings, and preferences are stored locally on your device using SQLCipher — an encrypted database. No data is written to external storage without your explicit action (export)."
+                title = stringResource(R.string.privacy_data_storage_title),
+                body = stringResource(R.string.privacy_data_storage_body)
             )
 
             PolicySection(
-                title = "SMS & App Permissions",
-                body = "Cipher requests permission to read SMS messages and (optionally) read app notifications solely to detect and parse financial transactions. Message content is processed in memory and immediately discarded — it is never stored in raw form, logged, or transmitted anywhere. Cipher may also request permission to send you notifications (for budget alerts), all processed locally."
+                title = stringResource(R.string.privacy_permissions_title),
+                body = stringResource(R.string.privacy_permissions_body)
             )
 
             PolicySection(
-                title = "Biometrics",
-                body = "If you enable biometric lock, authentication is handled entirely by your device's operating system via Android BiometricPrompt. Cipher never accesses, stores, or processes your biometric data."
+                title = stringResource(R.string.privacy_biometrics_title),
+                body = stringResource(R.string.privacy_biometrics_body)
             )
 
             PolicySection(
-                title = "Network Access",
-                body = "Cipher does not request internet permission and makes zero network calls. There are no remote servers, analytics SDKs, crash reporters, or ad libraries in this app."
+                title = stringResource(R.string.privacy_network_title),
+                body = stringResource(R.string.privacy_network_body)
             )
 
             PolicySection(
-                title = "Exports & Auto Backups",
-                body = "When you export a CSV, PDF statement, or configure Auto Backup, the files are saved directly to your selected device storage or cloud-synced folder via Android's native Storage Framework. Database backups are encrypted with a password you choose. Cipher does not transmit this data anywhere and has no remote access to where you store these files beyond the folder permissions you explicitly grant."
+                title = stringResource(R.string.privacy_exports_title),
+                body = stringResource(R.string.privacy_exports_body)
             )
 
             PolicySection(
-                title = "Open Source",
-                body = "Cipher is open source. You can audit every line of code on GitHub to verify all of the above. If you find anything that contradicts this policy, please open an issue."
+                title = stringResource(R.string.privacy_open_source_title),
+                body = stringResource(R.string.privacy_open_source_body)
             )
 
             PolicySection(
-                title = "Changes",
-                body = "If this policy ever changes, the updated version will be shipped with the app release and noted in the changelog."
+                title = stringResource(R.string.privacy_changes_title),
+                body = stringResource(R.string.privacy_changes_body)
             )
 
             HorizontalDivider(
@@ -108,7 +110,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
             )
 
             Text(
-                text = "Last updated: July 2026",
+                text = stringResource(R.string.privacy_last_updated),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -131,7 +133,7 @@ private fun PolicyMeta() {
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "A privacy-first finance tracker. No accounts. No cloud. No tracking.",
+            text = stringResource(R.string.privacy_policy_tagline),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )

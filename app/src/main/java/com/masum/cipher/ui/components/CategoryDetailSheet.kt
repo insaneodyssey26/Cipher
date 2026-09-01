@@ -36,6 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -152,7 +154,7 @@ fun CategoryDetailSheet(
 
     if (showBudgetDialog) {
         EditCategoryBudgetDialog(
-            categoryName = categoryEnum.displayName,
+            categoryName = stringResource(categoryEnum.titleRes),
             currentBudget = categoryBudget,
             currencySymbol = currencySymbol,
             onDismiss = { showBudgetDialog = false },
@@ -224,7 +226,7 @@ fun CategoryDetailSheet(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = categoryEnum.displayName,
+                                text = stringResource(categoryEnum.titleRes),
                                 style = Typography.titleLarge.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -235,7 +237,7 @@ fun CategoryDetailSheet(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "${String.format(locale, "%.1f", categoryData.percentage * 100)}% of total expenses",
+                                text = stringResource(R.string.percent_of_expenses, String.format(locale, "%.1f", categoryData.percentage * 100)),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Manrope,
                                     fontSize = 12.sp
@@ -253,7 +255,7 @@ fun CategoryDetailSheet(
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
-                            text = "$currencySymbol${String.format(locale, "%,.0f", totalSpent)}",
+                            text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale),
                             style = Typography.headlineMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -350,7 +352,7 @@ fun CategoryDetailSheet(
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
-                                        text = "Limit: $currencySymbol${String.format(locale, "%,.0f", categoryBudget)}",
+                                        text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -387,9 +389,9 @@ fun CategoryDetailSheet(
                             ) {
                                 Text(
                                     text = if (isOverBudget) {
-                                        "Exceeded by $currencySymbol${String.format(locale, "%,.0f", totalSpent - categoryBudget)}"
+                                        "Exceeded by ${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalSpent - categoryBudget, currencySymbol, locale)}"
                                     } else {
-                                        "$currencySymbol${String.format(locale, "%,.0f", remainingBudget)} remaining"
+                                        "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} remaining"
                                     },
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
@@ -401,7 +403,7 @@ fun CategoryDetailSheet(
 
                                 if (!isOverBudget) {
                                     Text(
-                                        text = "Safe: $currencySymbol${String.format(locale, "%,.0f", safeSpendPerDay)}/day",
+                                        text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontSize = 11.sp,
@@ -440,7 +442,7 @@ fun CategoryDetailSheet(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Set Category Budget",
+                                        text = stringResource(R.string.set_category_budget),
                                         style = Typography.titleSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.Bold,
@@ -449,7 +451,7 @@ fun CategoryDetailSheet(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Set a spending limit for ${categoryEnum.displayName}",
+                                        text = stringResource(R.string.set_spending_limit_for, stringResource(categoryEnum.titleRes)),
                                         style = Typography.bodySmall.copy(fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -475,7 +477,7 @@ fun CategoryDetailSheet(
                                         modifier = Modifier.size(11.dp)
                                     )
                                     Text(
-                                        text = "Set Limit",
+                                        text = stringResource(R.string.set_limit),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.Bold,
@@ -511,7 +513,7 @@ fun CategoryDetailSheet(
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "AVG SPEND",
+                                text = stringResource(R.string.avg_spend_header),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -548,7 +550,7 @@ fun CategoryDetailSheet(
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "COUNT",
+                                text = stringResource(R.string.count_header),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -585,7 +587,7 @@ fun CategoryDetailSheet(
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "LARGEST",
+                                text = stringResource(R.string.largest_header),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -617,7 +619,7 @@ fun CategoryDetailSheet(
             if (topMerchants.isNotEmpty()) {
                 item {
                     Text(
-                        text = "TOP MERCHANTS",
+                        text = stringResource(R.string.top_merchants),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -656,7 +658,7 @@ fun CategoryDetailSheet(
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = "$currencySymbol${String.format(locale, "%,.0f", merchant.totalAmount)}",
+                                            text = com.masum.cipher.core.util.AppFormatters.formatCurrency(merchant.totalAmount, currencySymbol, locale),
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.Bold,
@@ -697,7 +699,7 @@ fun CategoryDetailSheet(
             if (categoryTransactions.isNotEmpty()) {
                 item {
                     Text(
-                        text = "TRANSACTIONS (${categoryTransactions.size})",
+                        text = "${stringResource(R.string.transactions_header)} (${categoryTransactions.size})",
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -727,7 +729,7 @@ fun CategoryDetailSheet(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = tx.merchant.ifEmpty { "Expense" },
+                                text = tx.merchant.ifEmpty { stringResource(R.string.expense) },
                                 style = Typography.bodyMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
@@ -751,15 +753,13 @@ fun CategoryDetailSheet(
                         Spacer(Modifier.width(8.dp))
 
                         Text(
-                            text = "$currencySymbol-${String.format(locale, "%,.0f", tx.amount)}",
+                            text = "-${com.masum.cipher.core.util.AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -774,16 +774,16 @@ fun CategoryDetailSheet(
 fun EditCategoryBudgetDialog(
     categoryName: String,
     currentBudget: Double,
-    currencySymbol: String = "₹",
+    currencySymbol: String,
     onDismiss: () -> Unit,
     onConfirm: (Double) -> Unit,
     isHapticsEnabled: Boolean = true
 ) {
+    val focusManager = LocalFocusManager.current
+    val view = LocalView.current
     var budgetInput by remember {
         mutableStateOf(if (currentBudget > 0) currentBudget.toInt().toString() else "")
     }
-    val view = LocalView.current
-    val focusManager = LocalFocusManager.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -792,7 +792,7 @@ fun EditCategoryBudgetDialog(
         title = {
             Column {
                 Text(
-                    text = "$categoryName Limit",
+                    text = "$categoryName ${stringResource(R.string.limit_suffix)}",
                     style = Typography.titleLarge.copy(
                         fontFamily = Manrope,
                         fontWeight = FontWeight.Bold
@@ -801,7 +801,7 @@ fun EditCategoryBudgetDialog(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Set a monthly spending limit for $categoryName",
+                    text = stringResource(R.string.set_spending_limit_for, categoryName),
                     style = Typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -816,7 +816,7 @@ fun EditCategoryBudgetDialog(
                             budgetInput = input
                         }
                     },
-                    label = { Text("Monthly Limit ($currencySymbol)") },
+                    label = { Text(stringResource(R.string.monthly_limit_label, currencySymbol)) },
                     placeholder = { Text("e.g. 10000") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
@@ -853,7 +853,7 @@ fun EditCategoryBudgetDialog(
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text(
-                            text = "Remove Limit",
+                            text = stringResource(R.string.action_remove_limit),
                             style = Typography.labelMedium.copy(fontFamily = Manrope),
                             color = MaterialTheme.colorScheme.error
                         )
@@ -872,7 +872,7 @@ fun EditCategoryBudgetDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(
-                    text = "Save Limit",
+                    text = stringResource(R.string.action_save),
                     style = Typography.labelLarge.copy(
                         fontFamily = Manrope,
                         fontWeight = FontWeight.Bold
@@ -887,7 +887,7 @@ fun EditCategoryBudgetDialog(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(R.string.action_cancel),
                     style = Typography.labelLarge.copy(fontFamily = Manrope),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

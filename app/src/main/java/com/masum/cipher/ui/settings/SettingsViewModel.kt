@@ -59,6 +59,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.code, intent.symbol)
+            is SettingsContract.Intent.SetAppLanguage -> updateAppLanguage(intent.languageCode)
             is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount, intent.isDynamic)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
@@ -102,6 +103,7 @@ class SettingsViewModel @Inject constructor(
                         autoLockTimeout = settings.autoLockTimeout,
                         currencyCode = settings.currencyCode,
                         currencySymbol = settings.currencySymbol,
+                        appLanguage = settings.appLanguage,
                         monthlyBudget = settings.monthlyBudget,
                         isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                         thisMonthIncome = monthIncome,
@@ -111,6 +113,13 @@ class SettingsViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun updateAppLanguage(languageCode: String) {
+        viewModelScope.launch {
+            userPreferences.setAppLanguage(languageCode)
+            updateState { copy(appLanguage = languageCode) }
         }
     }
 

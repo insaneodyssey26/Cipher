@@ -58,6 +58,8 @@ import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.Typography
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Plus
@@ -104,7 +106,7 @@ fun SmartRulesScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Smart Rules", 
+                        stringResource(R.string.smart_rules_title), 
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     ) 
@@ -116,7 +118,7 @@ fun SmartRulesScreen(
                     }) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -136,7 +138,7 @@ fun SmartRulesScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                Icon(LucideIcons.Plus, contentDescription = "Add Rule")
+                Icon(LucideIcons.Plus, contentDescription = stringResource(R.string.action_add_rule))
             }
         }
     ) { padding ->
@@ -147,7 +149,7 @@ fun SmartRulesScreen(
         } else if (state.rules.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "No custom rules yet.\nRules are created when you edit a transaction's category.",
+                    text = stringResource(R.string.smart_rules_empty),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -235,7 +237,7 @@ private fun RuleItem(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Always as ${category.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                    text = stringResource(R.string.smart_rules_always_as, stringResource(category.titleRes)),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -249,7 +251,7 @@ private fun RuleItem(
             ) {
                 Icon(
                     imageVector = LucideIcons.Trash2,
-                    contentDescription = "Delete Rule",
+                    contentDescription = stringResource(R.string.action_delete_rule),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(18.dp)
                 )
@@ -275,7 +277,7 @@ private fun RuleEditDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = if (initialMerchant.isEmpty()) "New Rule" else "Edit Rule",
+                text = if (initialMerchant.isEmpty()) stringResource(R.string.smart_rules_dialog_new) else stringResource(R.string.smart_rules_dialog_edit),
                 style = Typography.titleLarge
             )
         },
@@ -287,10 +289,10 @@ private fun RuleEditDialog(
                 OutlinedTextField(
                     value = merchantName,
                     onValueChange = { merchantName = it },
-                    label = { Text("Merchant Name") },
+                    label = { Text(stringResource(R.string.merchant_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    enabled = initialMerchant.isEmpty() // Only editable if new
+                    enabled = initialMerchant.isEmpty()
                 )
                 
                 ExposedDropdownMenuBox(
@@ -301,10 +303,10 @@ private fun RuleEditDialog(
                     }
                 ) {
                     OutlinedTextField(
-                        value = selectedCategory.name.lowercase().replaceFirstChar { it.uppercase() },
+                        value = stringResource(selectedCategory.titleRes),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Category") },
+                        label = { Text(stringResource(R.string.category_label)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
@@ -343,7 +345,7 @@ private fun RuleEditDialog(
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = cat.name.lowercase().replaceFirstChar { it.uppercase() },
+                                            text = stringResource(cat.titleRes),
                                             style = Typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                             color = MaterialTheme.colorScheme.onSurface
                                         ) 
@@ -386,12 +388,12 @@ private fun RuleEditDialog(
                 },
                 enabled = merchantName.isNotBlank()
             ) {
-                Text("Save")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceVariant

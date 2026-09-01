@@ -1,15 +1,20 @@
 package com.masum.cipher.core.domain.model
 
+import androidx.annotation.StringRes
+import com.masum.cipher.R
 import java.util.Calendar
 
-enum class TimePeriod(val label: String) {
-    THIS_WEEK("This Week"),
-    LAST_WEEK("Last Week"),
-    THIS_MONTH("This Month"),
-    LAST_MONTH("Last Month"),
-    THIS_YEAR("This Year"),
-    ALL_TIME("All Time"),
-    CUSTOM("Custom")
+enum class TimePeriod(
+    val label: String,
+    @StringRes val labelRes: Int
+) {
+    THIS_WEEK("This Week", R.string.period_this_week),
+    LAST_WEEK("Last Week", R.string.period_last_week),
+    THIS_MONTH("This Month", R.string.period_this_month),
+    LAST_MONTH("Last Month", R.string.period_last_month),
+    THIS_YEAR("This Year", R.string.period_this_year),
+    ALL_TIME("All Time", R.string.period_all_time),
+    CUSTOM("Custom", R.string.period_custom)
 }
 
 data class TimeRange(

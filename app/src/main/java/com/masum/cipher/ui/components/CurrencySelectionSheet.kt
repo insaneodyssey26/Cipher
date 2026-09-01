@@ -156,7 +156,7 @@ fun CurrencySelectionDialog(
 
                         Column {
                             Text(
-                                text = "Currency & Region",
+                                text = androidx.compose.ui.res.stringResource(com.masum.cipher.R.string.dialog_currency_title),
                                 style = Typography.titleLarge.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.Bold,
@@ -166,7 +166,7 @@ fun CurrencySelectionDialog(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Active currency for transactions & charts",
+                                text = androidx.compose.ui.res.stringResource(com.masum.cipher.R.string.dialog_currency_subtitle),
                                 style = Typography.bodySmall.copy(fontSize = 11.5.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                             )
@@ -182,7 +182,7 @@ fun CurrencySelectionDialog(
                     ) {
                         Icon(
                             imageVector = LucideIcons.X,
-                            contentDescription = "Close",
+                            contentDescription = androidx.compose.ui.res.stringResource(com.masum.cipher.R.string.action_close),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )

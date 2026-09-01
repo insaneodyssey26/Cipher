@@ -35,10 +35,15 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString("cached_currency_symbol", default.symbol) ?: default.symbol
     }
 
+    fun getCachedLanguageCode(): String {
+        return syncPrefs.getString("cached_app_language", "system") ?: "system"
+    }
+
     fun getCachedSettings(): UserSettings {
         val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
         val curCode = getCachedCurrencyCode()
         val curSymbol = getCachedCurrencySymbol()
+        val langCode = getCachedLanguageCode()
         return UserSettings(
             theme = AppTheme.SYSTEM,
             isBiometricEnabled = false,
@@ -47,6 +52,7 @@ class UserPreferences @Inject constructor(
             currency = curCode,
             currencyCode = curCode,
             currencySymbol = curSymbol,
+            appLanguage = langCode,
             autoLockTimeout = 0L,
             lastStopTime = 0L,
             monthlyBudget = 0.0
@@ -55,6 +61,7 @@ class UserPreferences @Inject constructor(
 
     private object Keys {
         val APP_THEME = stringPreferencesKey("app_theme")
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
         val PRIVACY_MODE = booleanPreferencesKey("privacy_mode")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
@@ -109,6 +116,7 @@ class UserPreferences @Inject constructor(
             currency = curCode,
             currencyCode = curCode,
             currencySymbol = curSymbol,
+            appLanguage = preferences[Keys.APP_LANGUAGE] ?: getCachedLanguageCode(),
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
             monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
@@ -337,6 +345,16 @@ class UserPreferences @Inject constructor(
             preferences[Keys.PREFERRED_CURRENCY_SYMBOL] = symbol
         }
     }
+
+    suspend fun setAppLanguage(languageCode: String) {
+        syncPrefs.edit()
+            .putString("cached_app_language", languageCode)
+            .apply()
+        com.masum.cipher.core.util.LocaleHelper.setLocale(languageCode)
+        context.dataStore.edit { preferences ->
+            preferences[Keys.APP_LANGUAGE] = languageCode
+        }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -367,6 +385,7 @@ data class UserSettings(
     val currency: String,
     val currencyCode: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
     val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
+    val appLanguage: String = "system",
     val autoLockTimeout: Long,
     val lastStopTime: Long,
     val monthlyBudget: Double,

@@ -163,11 +163,12 @@ class LocalNotificationManager @Inject constructor(
             ) return@launch
 
             val currencySymbol = settings.currencySymbol
+            val formattedAmount = com.masum.cipher.core.util.AppFormatters.formatCurrency(amount, currencySymbol, decimals = 0)
             val title = if (isExceeded) "Budget Exceeded" else "Budget Alert ($threshold%)"
-            val text = if (isExceeded) "You have exceeded your monthly budget by $currencySymbol${amount.toInt()}." 
-                       else if (threshold == 90) "You've used 90% of your budget! Only $currencySymbol${amount.toInt()} remaining."
-                       else "You've used 50% of your budget. $currencySymbol${amount.toInt()} remaining."
-                       
+            val text = if (isExceeded) "You have exceeded your monthly budget by $formattedAmount." 
+                       else if (threshold == 90) "You've used 90% of your budget! Only $formattedAmount remaining."
+                       else "You've used 50% of your budget. $formattedAmount remaining."
+                        
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
@@ -196,6 +197,7 @@ class LocalNotificationManager @Inject constructor(
             ) return@launch
 
             val currencySymbol = settings.currencySymbol
+            val formattedSpent = com.masum.cipher.core.util.AppFormatters.formatCurrency(spent, currencySymbol, decimals = 0)
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
@@ -205,7 +207,7 @@ class LocalNotificationManager @Inject constructor(
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor("#10B981".toColorInt())
                 .setContentTitle("Daily Summary")
-                .setContentText("You spent $currencySymbol${spent.toInt()} today across $count transactions. Tap to review.")
+                .setContentText("You spent $formattedSpent today across $count transactions. Tap to review.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
@@ -321,7 +323,7 @@ class LocalNotificationManager @Inject constructor(
             ).build()
 
             val currencySymbol = settings.currencySymbol
-            val amountStr = "$currencySymbol${String.format(java.util.Locale.getDefault(), "%.0f", transaction.amount)}"
+            val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, currencySymbol, decimals = 0)
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
@@ -391,7 +393,7 @@ class LocalNotificationManager @Inject constructor(
             ).build()
 
             val currencySymbol = settings.currencySymbol
-            val amountStr = "$currencySymbol${String.format(java.util.Locale.getDefault(), "%.0f", subscription.amount)}"
+            val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(subscription.amount, currencySymbol, decimals = 0)
             val builder = NotificationCompat.Builder(context, CHANNEL_SUBSCRIPTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor("#F59E0B".toColorInt())

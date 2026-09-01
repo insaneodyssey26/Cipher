@@ -40,11 +40,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.masum.cipher.R
 import com.masum.cipher.core.domain.model.TimePeriod
 import com.masum.cipher.core.domain.model.TimeRange
 import com.masum.cipher.core.util.performVibrate
@@ -61,6 +63,7 @@ import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalLocale
+import com.masum.cipher.core.util.AppFormatters
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -87,7 +90,7 @@ fun TimeSelectorDropdown(
         val sdf = SimpleDateFormat("MMM d", locale)
         "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
     } else {
-        selectedPeriod.label
+        stringResource(selectedPeriod.labelRes)
     }
 
     Box(modifier = modifier) {
@@ -210,7 +213,7 @@ fun TimeSelectorDropdown(
                             ) {
                                 Column {
                                     Text(
-                                        text = "Timeframe",
+                                        text = stringResource(R.string.timeframe_title),
                                         style = Typography.titleLarge.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.Bold
@@ -218,7 +221,7 @@ fun TimeSelectorDropdown(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Select active ledger range",
+                                        text = stringResource(R.string.timeframe_subtitle),
                                         style = Typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -232,7 +235,7 @@ fun TimeSelectorDropdown(
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.X,
-                                        contentDescription = "Close",
+                                        contentDescription = stringResource(R.string.action_close),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(18.dp)
                                     )
@@ -241,13 +244,14 @@ fun TimeSelectorDropdown(
 
                             Spacer(modifier = Modifier.height(18.dp))
 
+                            val context = androidx.compose.ui.platform.LocalContext.current
                             val periods = listOf(
-                                Pair(TimePeriod.THIS_MONTH, Pair(LucideIcons.Calendar, getPeriodDateSubtitle(TimePeriod.THIS_MONTH, locale))),
-                                Pair(TimePeriod.LAST_MONTH, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_MONTH, locale))),
-                                Pair(TimePeriod.THIS_WEEK, Pair(LucideIcons.Zap, getPeriodDateSubtitle(TimePeriod.THIS_WEEK, locale))),
-                                Pair(TimePeriod.LAST_WEEK, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_WEEK, locale))),
-                                Pair(TimePeriod.THIS_YEAR, Pair(LucideIcons.TrendingUp, getPeriodDateSubtitle(TimePeriod.THIS_YEAR, locale))),
-                                Pair(TimePeriod.ALL_TIME, Pair(LucideIcons.Target, getPeriodDateSubtitle(TimePeriod.ALL_TIME, locale)))
+                                Pair(TimePeriod.THIS_MONTH, Pair(LucideIcons.Calendar, getPeriodDateSubtitle(TimePeriod.THIS_MONTH, context, locale))),
+                                Pair(TimePeriod.LAST_MONTH, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_MONTH, context, locale))),
+                                Pair(TimePeriod.THIS_WEEK, Pair(LucideIcons.Zap, getPeriodDateSubtitle(TimePeriod.THIS_WEEK, context, locale))),
+                                Pair(TimePeriod.LAST_WEEK, Pair(LucideIcons.Clock, getPeriodDateSubtitle(TimePeriod.LAST_WEEK, context, locale))),
+                                Pair(TimePeriod.THIS_YEAR, Pair(LucideIcons.TrendingUp, getPeriodDateSubtitle(TimePeriod.THIS_YEAR, context, locale))),
+                                Pair(TimePeriod.ALL_TIME, Pair(LucideIcons.Target, getPeriodDateSubtitle(TimePeriod.ALL_TIME, context, locale)))
                             )
 
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -325,7 +329,7 @@ fun TimeSelectorDropdown(
 
                                                     Column(modifier = Modifier.padding(top = 44.dp)) {
                                                         Text(
-                                                            text = period.label,
+                                                            text = stringResource(period.labelRes),
                                                             style = Typography.titleSmall.copy(
                                                                 fontFamily = Manrope,
                                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
@@ -350,11 +354,12 @@ fun TimeSelectorDropdown(
                                 }
 
                                 val isCustomSelected = selectedPeriod == TimePeriod.CUSTOM
+                                val defaultCustomDesc = stringResource(R.string.period_custom_range_desc)
                                 val customSubtitle = if (isCustomSelected && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
                                     val sdf = SimpleDateFormat("MMM d, yyyy", locale)
                                     "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
                                 } else {
-                                    "Pick arbitrary start & end dates"
+                                    defaultCustomDesc
                                 }
 
                                 Box(
@@ -405,7 +410,7 @@ fun TimeSelectorDropdown(
                                             }
                                             Column {
                                                 Text(
-                                                    text = "Custom Range",
+                                                    text = stringResource(R.string.period_custom_range),
                                                     style = Typography.titleSmall.copy(
                                                         fontFamily = Manrope,
                                                         fontWeight = if (isCustomSelected) FontWeight.Bold else FontWeight.SemiBold,
@@ -585,22 +590,22 @@ fun TimeSelectorDropdown(
     )
 }
 
-private fun getPeriodDateSubtitle(period: TimePeriod, locale: Locale = Locale.getDefault()): String {
+private fun getPeriodDateSubtitle(period: TimePeriod, context: android.content.Context? = null, locale: Locale = Locale.getDefault()): String {
     val range = TimeRange.from(period)
-    val sdf = SimpleDateFormat("MMM d", locale)
-    val sdfYear = SimpleDateFormat("yyyy", locale)
+    val sdf = AppFormatters.getDay(locale)
+    val sdfYear = SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyy"), locale)
     return when (period) {
         TimePeriod.THIS_WEEK, TimePeriod.LAST_WEEK -> {
             "${sdf.format(Date(range.startTime))} – ${sdf.format(Date(range.endTime))}"
         }
         TimePeriod.THIS_MONTH, TimePeriod.LAST_MONTH -> {
-            val sdfMonth = SimpleDateFormat("MMMM", locale)
+            val sdfMonth = SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMM"), locale)
             sdfMonth.format(Date(range.startTime))
         }
         TimePeriod.THIS_YEAR -> {
             sdfYear.format(Date(range.startTime))
         }
-        TimePeriod.ALL_TIME -> "All Records"
-        TimePeriod.CUSTOM -> "Pick Dates"
+        TimePeriod.ALL_TIME -> context?.getString(R.string.all_records) ?: "All Records"
+        TimePeriod.CUSTOM -> context?.getString(R.string.period_custom_range) ?: "Custom Range"
     }
 }

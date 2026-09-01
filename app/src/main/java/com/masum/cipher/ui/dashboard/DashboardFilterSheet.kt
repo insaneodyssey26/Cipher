@@ -61,12 +61,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.Manrope
@@ -120,9 +122,10 @@ fun DashboardFilterSheet(
     var minInput by remember { mutableStateOf(currentFilter.minAmount?.toInt()?.toString() ?: "") }
     var maxInput by remember { mutableStateOf(currentFilter.maxAmount?.toInt()?.toString() ?: "") }
 
-    val quickRanges = remember(currencySymbol) {
+    val anyLabel = stringResource(R.string.any)
+    val quickRanges = remember(currencySymbol, anyLabel) {
         listOf(
-            QuickAmountRange("Any", null, null),
+            QuickAmountRange(anyLabel, null, null),
             QuickAmountRange("< ${currencySymbol}500", null, 500.0),
             QuickAmountRange("${currencySymbol}500 - ${currencySymbol}2k", 500.0, 2000.0),
             QuickAmountRange("${currencySymbol}2k - ${currencySymbol}10k", 2000.0, 10000.0),
@@ -167,7 +170,7 @@ fun DashboardFilterSheet(
                 ) {
                     Column {
                         Text(
-                            text = "Filter Transactions",
+                            text = stringResource(R.string.filter_title),
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -176,7 +179,7 @@ fun DashboardFilterSheet(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Refine by transaction type, categories & amount",
+                            text = stringResource(R.string.filter_subtitle),
                             style = Typography.bodySmall.copy(fontSize = 11.5.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -193,7 +196,7 @@ fun DashboardFilterSheet(
                             }
                         ) {
                             Text(
-                                text = "Reset All",
+                                text = stringResource(R.string.action_delete),
                                 style = Typography.labelMedium.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold
@@ -208,7 +211,7 @@ fun DashboardFilterSheet(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "TRANSACTION TYPE",
+                        text = stringResource(R.string.tx_type).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -219,9 +222,9 @@ fun DashboardFilterSheet(
                     )
 
                     val types = listOf(
-                        DashboardContract.FilterType.ALL to "All",
-                        DashboardContract.FilterType.EXPENSE to "Expenses",
-                        DashboardContract.FilterType.INCOME to "Income"
+                        DashboardContract.FilterType.ALL to stringResource(R.string.all),
+                        DashboardContract.FilterType.EXPENSE to stringResource(R.string.expenses),
+                        DashboardContract.FilterType.INCOME to stringResource(R.string.income)
                     )
                     val selectedIndex = types.indexOfFirst { it.first == draftType }.coerceAtLeast(0)
 
@@ -290,7 +293,7 @@ fun DashboardFilterSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "CATEGORIES (${draftCategories.size} selected)",
+                            text = "${stringResource(R.string.categories_header).uppercase()} (${draftCategories.size})",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -302,7 +305,7 @@ fun DashboardFilterSheet(
 
                         if (draftCategories.isNotEmpty()) {
                             Text(
-                                text = "Clear",
+                                text = stringResource(R.string.action_cancel),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
@@ -374,7 +377,7 @@ fun DashboardFilterSheet(
                                     )
                                 }
                                 Text(
-                                    text = cat.displayName,
+                                    text = stringResource(cat.titleRes),
                                     style = Typography.labelMedium.copy(
                                         fontFamily = Manrope,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -391,7 +394,7 @@ fun DashboardFilterSheet(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "AMOUNT RANGE",
+                        text = stringResource(R.string.amount_range).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -448,6 +451,8 @@ fun DashboardFilterSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        val minLabel = stringResource(R.string.min)
+                        val maxLabel = stringResource(R.string.max)
                         OutlinedTextField(
                             value = minInput,
                             onValueChange = { input ->
@@ -455,7 +460,7 @@ fun DashboardFilterSheet(
                                     minInput = input
                                 }
                             },
-                            label = { Text("Min ($currencySymbol)", fontSize = 12.sp) },
+                            label = { Text("$minLabel ($currencySymbol)", fontSize = 12.sp) },
                             placeholder = { Text("0", fontSize = 12.sp) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
@@ -476,8 +481,8 @@ fun DashboardFilterSheet(
                                     maxInput = input
                                 }
                             },
-                            label = { Text("Max ($currencySymbol)", fontSize = 12.sp) },
-                            placeholder = { Text("No limit", fontSize = 12.sp) },
+                            label = { Text("$maxLabel ($currencySymbol)", fontSize = 12.sp) },
+                            placeholder = { Text("0", fontSize = 12.sp) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -511,7 +516,7 @@ fun DashboardFilterSheet(
                             .height(48.dp)
                     ) {
                         Text(
-                            text = "Cancel",
+                            text = stringResource(R.string.action_cancel),
                             style = Typography.labelLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.SemiBold
@@ -539,7 +544,7 @@ fun DashboardFilterSheet(
                             .height(48.dp)
                     ) {
                         Text(
-                            text = if (draftIsActive) "Apply Filters" else "Show All",
+                            text = if (draftIsActive) stringResource(R.string.action_done) else stringResource(R.string.action_show_all),
                             style = Typography.labelLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold

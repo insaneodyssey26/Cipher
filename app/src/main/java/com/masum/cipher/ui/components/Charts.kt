@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
@@ -93,7 +95,7 @@ fun CategoryAllocationDonut(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Not enough category data.\nYour spending breakdown will appear here.",
+                text = stringResource(R.string.not_enough_category_data),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -287,7 +289,7 @@ fun SpendingTrendChart(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Not enough data to map a trend.\nKeep logging transactions!",
+                text = stringResource(R.string.not_enough_data_trend),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -349,11 +351,15 @@ fun SpendingTrendChart(
                 ) {
                     Column(modifier = Modifier.weight(1f, fill = false)) {
                         val safeTotal = if (currentTotal.isInfinite() || currentTotal.isNaN()) 0.0 else currentTotal.toDouble()
+                        val strOutflow = stringResource(R.string.total_outflow)
+                        val strInflow = stringResource(R.string.total_inflow)
+                        val strSurplus = stringResource(R.string.net_surplus)
+                        val strDeficit = stringResource(R.string.net_deficit)
                         val (statTitle, statSubtitle) = when (selectedMode) {
-                            FinancialFlowMode.EXPENSE -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), "Total Outflow")
-                            FinancialFlowMode.INCOME -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), "Total Inflow")
+                            FinancialFlowMode.EXPENSE -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), strOutflow)
+                            FinancialFlowMode.INCOME -> Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(safeTotal), currencySymbol = currencySymbol), strInflow)
                             FinancialFlowMode.NET_FLOW -> {
-                                val label = if (safeTotal >= 0.0) "Net Surplus" else "Net Deficit"
+                                val label = if (safeTotal >= 0.0) strSurplus else strDeficit
                                 Pair(com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(safeTotal, currencySymbol = currencySymbol), label)
                             }
                         }
@@ -382,13 +388,16 @@ fun SpendingTrendChart(
                                 .padding(3.dp),
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
+                            val strExpense = stringResource(R.string.expense)
+                            val strIncome = stringResource(R.string.income)
+                            val strNet = stringResource(R.string.net)
                             FinancialFlowMode.entries.forEach { mode ->
                                 val isSelected = selectedMode == mode
                                 val bgAlpha by animateFloatAsState(if (isSelected) 1f else 0f, label = "flow_toggle_bg")
                                 val label = when (mode) {
-                                    FinancialFlowMode.EXPENSE -> "Expense"
-                                    FinancialFlowMode.INCOME -> "Income"
-                                    FinancialFlowMode.NET_FLOW -> "Net"
+                                    FinancialFlowMode.EXPENSE -> strExpense
+                                    FinancialFlowMode.INCOME -> strIncome
+                                    FinancialFlowMode.NET_FLOW -> strNet
                                 }
                                 val modeActiveColor = when (mode) {
                                     FinancialFlowMode.EXPENSE -> MaterialTheme.colorScheme.primary
@@ -487,14 +496,11 @@ fun SpendingTrendChart(
                                 strokeWidth = 1f
                             )
 
-                            val absVal = kotlin.math.abs(yVal)
-                            val prefix = if (yVal < 0f) "$currencySymbol-" else currencySymbol
-                            val labelText = if (absVal >= 1000f) {
-                                val formatted = String.format(locale, "%.1f", absVal / 1000f)
-                                "$prefix${formatted.removeSuffix(".0")}k"
-                            } else {
-                                "$prefix${absVal.toInt()}"
-                            }
+                            val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(
+                                yVal.toDouble(),
+                                currencySymbol = currencySymbol,
+                                locale = locale
+                            )
 
                             val measured = textMeasurer.measure(
                                 text = labelText,
@@ -589,13 +595,13 @@ fun SpendingTrendChart(
                             )
 
                             val sdf = java.text.SimpleDateFormat("MMM dd, yyyy", locale)
+                            val formattedNearest = com.masum.cipher.core.util.AppFormatters.formatCurrency(nearestPoint.y.toDouble(), currencySymbol, locale)
                             val amountText = when (selectedMode) {
-                                FinancialFlowMode.EXPENSE -> "$currencySymbol${String.format(locale, "%,.0f", nearestPoint.y)} spent"
-                                FinancialFlowMode.INCOME -> "$currencySymbol${String.format(locale, "%,.0f", nearestPoint.y)} earned"
+                                FinancialFlowMode.EXPENSE -> "$formattedNearest spent"
+                                FinancialFlowMode.INCOME -> "$formattedNearest earned"
                                 FinancialFlowMode.NET_FLOW -> {
-                                    val prefix = if (nearestPoint.y < 0f) "$currencySymbol-" else currencySymbol
                                     val label = if (nearestPoint.y >= 0f) "surplus" else "deficit"
-                                    "$prefix${String.format(locale, "%,.0f", kotlin.math.abs(nearestPoint.y))} $label"
+                                    "$formattedNearest $label"
                                 }
                             }
                             val dateText = sdf.format(java.util.Date(nearestPoint.timestamp))
@@ -726,7 +732,7 @@ fun PeakHoursChart(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Not enough hourly data.\nYour spending habits will appear here.",
+                text = stringResource(R.string.not_enough_hourly_data),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -755,11 +761,24 @@ fun PeakHoursChart(
         }
     }
 
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
     var tappedIdx by remember { mutableStateOf<Int?>(null) }
     val barCount = hours.size
     val maxAmount = hours.maxOfOrNull { it.amount } ?: 1.0
     val anchorIndices = if (barCount <= 5) hours.indices.toList()
         else listOf(0, barCount / 4, barCount / 2, 3 * barCount / 4, barCount - 1)
+
+    val morningStr = stringResource(R.string.morning)
+    val afternoonStr = stringResource(R.string.afternoon)
+    val eveningStr = stringResource(R.string.evening)
+    val nightStr = stringResource(R.string.night)
+    fun localizeHourLabel(l: String): String = when (l.lowercase()) {
+        "morning" -> morningStr
+        "afternoon" -> afternoonStr
+        "evening" -> eveningStr
+        "night" -> nightStr
+        else -> l
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
@@ -875,7 +894,7 @@ fun PeakHoursChart(
                     val data = hours.getOrNull(idx) ?: return@forEach
                     val xPx = chartPadL + idx * slotW + slotW / 2f
                     val measured = textMeasurer.measure(
-                        data.label,
+                        localizeHourLabel(data.label),
                         TextStyle(color = onSurfaceVariant.copy(alpha = 0.65f), fontSize = 9.sp, fontWeight = FontWeight.Normal)
                     )
                     drawText(
@@ -895,11 +914,11 @@ fun PeakHoursChart(
                     val barTopY = chartPadT + plotH - plotH * intensity * animProgress.value
 
                     val amtMeasured = textMeasurer.measure(
-                        "$currencySymbol${data.amount.toInt()}",
+                        com.masum.cipher.core.util.AppFormatters.formatCurrency(data.amount, currencySymbol, locale),
                         TextStyle(color = onSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     )
                     val lblMeasured = textMeasurer.measure(
-                        data.label,
+                        localizeHourLabel(data.label),
                         TextStyle(color = onSurfaceVariant, fontSize = 9.sp, fontWeight = FontWeight.Normal)
                     )
                     val pH = with(density) { 10.dp.toPx() }
@@ -958,7 +977,7 @@ fun CalendarHeatmap(
                 }
             }
             Text(
-                text = java.text.SimpleDateFormat("MMMM yyyy", locale).format(visibleMonthCal.time),
+                text = com.masum.cipher.core.util.AppFormatters.getMonthYearFormat(locale).format(visibleMonthCal.time),
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -993,11 +1012,19 @@ fun CalendarHeatmap(
             }
         }
 
+        val weekdays = remember(locale) {
+            val symbols = java.text.DateFormatSymbols(locale).shortWeekdays
+            (Calendar.SUNDAY..Calendar.SATURDAY).map { dayIndex ->
+                val name = symbols[dayIndex]
+                if (name.length > 2) name.substring(0, 2) else name
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            listOf("S", "M", "T", "W", "T", "F", "S").forEach { day ->
+            weekdays.forEach { day ->
                 Text(
                     text = day,
                     style = MaterialTheme.typography.labelMedium,

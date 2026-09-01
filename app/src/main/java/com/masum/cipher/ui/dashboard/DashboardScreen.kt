@@ -74,6 +74,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,6 +83,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.BuildConfig
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.TransactionCategory
@@ -349,7 +351,7 @@ fun DashboardScreen(
 
             val groupedTransactions = remember(state.transactions, locale) {
                 state.transactions.groupBy {
-                    SimpleDateFormat("MMMM yyyy", locale).format(Date(it.timestamp))
+                    AppFormatters.getMonthYearFormat(locale).format(Date(it.timestamp))
                 }
             }
 
@@ -479,7 +481,7 @@ fun DashboardScreen(
                                         modifier = Modifier.size(14.dp)
                                     )
                                     Text(
-                                        text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol),
+                                        text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol, locale = locale),
                                         style = Typography.labelMedium.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -1324,14 +1326,16 @@ private fun DashboardHero(
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(13.dp)
                                 )
+                                val context = androidx.compose.ui.platform.LocalContext.current
                                 val periodLabel = if (selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
                                     val sdf = SimpleDateFormat("MMM d", locale)
                                     "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
                                 } else {
-                                    AppFormatters.getPeriodLabel(selectedPeriod, transactions)
+                                    AppFormatters.getPeriodLabel(selectedPeriod, transactions, context = context, locale = locale)
                                 }
+                                val balanceLabel = stringResource(R.string.balance_label)
                                 Text(
-                                    text = "$periodLabel BALANCE".uppercase(),
+                                    text = "$periodLabel $balanceLabel".uppercase(),
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
                                         fontSize = 11.sp,
@@ -1345,7 +1349,7 @@ private fun DashboardHero(
                             if (expenseComparisonPercent != null && kotlin.math.abs(expenseComparisonPercent) >= 0.5) {
                                 val isLess = expenseComparisonPercent < 0.0
                                 val badgeColor = if (isLess) EmeraldIncome else RoseExpense
-                                val labelSuffix = if (isLess) "less" else "more"
+                                val labelSuffix = if (isLess) stringResource(R.string.less) else stringResource(R.string.more)
                                 val percentFormatted = if (kotlin.math.abs(expenseComparisonPercent) > 999) {
                                     ">999"
                                 } else {
@@ -1391,10 +1395,10 @@ private fun DashboardHero(
                                     selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
                                     selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
                                 val (badgeText, badgeColor) = when {
-                                    netSaved > 0 -> Pair("Positive Flow", EmeraldIncome)
-                                    expense > 0 && isPastPeriod -> Pair("Summary", MaterialTheme.colorScheme.primary)
-                                    expense > 0 -> Pair("Active Flow", MaterialTheme.colorScheme.primary)
-                                    else -> Pair("No Activity", MaterialTheme.colorScheme.onSurfaceVariant)
+                                    netSaved > 0 -> Pair(stringResource(R.string.positive_flow), EmeraldIncome)
+                                    expense > 0 && isPastPeriod -> Pair(stringResource(R.string.dashboard_cash_flow), MaterialTheme.colorScheme.primary)
+                                    expense > 0 -> Pair(stringResource(R.string.active_flow), MaterialTheme.colorScheme.primary)
+                                    else -> Pair(stringResource(R.string.no_activity), MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 Row(
                                     modifier = Modifier
@@ -1433,16 +1437,7 @@ private fun DashboardHero(
                         }
 
                         val formattedBalance = remember(totalBalance, currencySymbol, locale) {
-                            val absVal = kotlin.math.abs(totalBalance)
-                            val sign = if (totalBalance < 0) "-" else ""
-                            when {
-                                absVal >= 1_000_000_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fQ", absVal / 1_000_000_000_000_000.0).replace(".00Q", "Q")
-                                absVal >= 1_000_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fT", absVal / 1_000_000_000_000.0).replace(".00T", "T")
-                                absVal >= 1_000_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fB", absVal / 1_000_000_000.0).replace(".00B", "B")
-                                absVal >= 1_000_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.2fM", absVal / 1_000_000.0).replace(".00M", "M")
-                                absVal >= 100_000.0 -> "$currencySymbol$sign" + String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-                                else -> "$currencySymbol$sign" + String.format(locale, "%,.0f", absVal)
-                            }
+                            AppFormatters.formatCompactCurrency(totalBalance, currencySymbol, locale)
                         }
 
                         val balanceFontSize = remember(formattedBalance.length) {
@@ -1454,6 +1449,7 @@ private fun DashboardHero(
                             }
                         }
 
+                        val isSuffix = AppFormatters.isSuffixCurrency(currencySymbol, locale)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.graphicsLayer {
@@ -1464,7 +1460,7 @@ private fun DashboardHero(
                         ) {
                             if (privacyMode) {
                                 Text(
-                                    text = "$currencySymbol••••••",
+                                    text = if (isSuffix) "•••••• $currencySymbol" else "$currencySymbol••••••",
                                     style = Typography.displayLarge.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -1497,15 +1493,17 @@ private fun DashboardHero(
                                     }
                                 } else {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = currencySymbol,
-                                            style = Typography.headlineMedium.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(end = 2.dp)
-                                        )
+                                        if (!isSuffix) {
+                                            Text(
+                                                text = currencySymbol,
+                                                style = Typography.headlineMedium.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(end = 2.dp)
+                                            )
+                                        }
                                         if (totalBalance < 0) {
                                             Text(
                                                 text = "-",
@@ -1528,6 +1526,17 @@ private fun DashboardHero(
                                             ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
+                                        if (isSuffix) {
+                                            Text(
+                                                text = currencySymbol,
+                                                style = Typography.headlineMedium.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(start = 4.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -1714,7 +1723,7 @@ private fun DashboardHero(
                             decorationBox = { innerTextField ->
                                 Box(contentAlignment = Alignment.CenterStart) {
                                     if (textFieldValue.text.isEmpty()) {
-                                        Text("Search...", style = Typography.bodyMedium.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text(stringResource(R.string.action_search), style = Typography.bodyMedium.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     innerTextField()
                                 }
@@ -1790,7 +1799,11 @@ private fun DashboardHero(
     }
 }
 
-private fun buildFilterSummary(filter: DashboardFilter, currencySymbol: String = "₹"): String {
+private fun buildFilterSummary(
+    filter: DashboardFilter,
+    currencySymbol: String = "₹",
+    locale: Locale = Locale.getDefault()
+): String {
     val parts = mutableListOf<String>()
     when (filter.type) {
         DashboardContract.FilterType.EXPENSE -> parts.add("Expenses")
@@ -1805,11 +1818,11 @@ private fun buildFilterSummary(filter: DashboardFilter, currencySymbol: String =
         }
     }
     if (filter.minAmount != null && filter.maxAmount != null) {
-        parts.add("$currencySymbol${filter.minAmount.toInt()} – $currencySymbol${filter.maxAmount.toInt()}")
+        parts.add("${AppFormatters.formatCurrency(filter.minAmount.toDouble(), currencySymbol, locale, decimals = 0)} – ${AppFormatters.formatCurrency(filter.maxAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
     } else if (filter.minAmount != null) {
-        parts.add("> $currencySymbol${filter.minAmount.toInt()}")
+        parts.add("> ${AppFormatters.formatCurrency(filter.minAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
     } else if (filter.maxAmount != null) {
-        parts.add("< $currencySymbol${filter.maxAmount.toInt()}")
+        parts.add("< ${AppFormatters.formatCurrency(filter.maxAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
     }
     return parts.joinToString(" • ")
 }
@@ -1878,9 +1891,10 @@ fun TransactionItem(
                 }
             }
 
-            val amountFormatted = String.format(locale, "%,.0f", transaction.amount)
+            val amountFormatted = AppFormatters.formatCurrency(transaction.amount, currencySymbol, locale, decimals = 0)
+            val signedAmount = if (transaction.isIncome) "+$amountFormatted" else "-$amountFormatted"
             Text(
-                text = if (privacyMode) "•••" else "${if (transaction.isIncome) "+$currencySymbol" else "$currencySymbol-"}$amountFormatted",
+                text = if (privacyMode) "•••" else signedAmount,
                 style = Typography.titleMedium.copy(
                     fontFamily = Manrope,
                     fontWeight = FontWeight.Bold
@@ -1976,7 +1990,7 @@ private fun SearchEmptyState(query: String) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No transactions found for '$query'",
+            text = "${stringResource(R.string.no_transactions_found)}: '$query'",
             style = Typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -2000,15 +2014,17 @@ private fun FilterEmptyState(period: com.masum.cipher.core.domain.model.TimePeri
             tint = MaterialTheme.colorScheme.outline
         )
         Spacer(modifier = Modifier.height(16.dp))
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
         Text(
-            text = "No transactions found for ${AppFormatters.getPeriodLabel(period, emptyList()).lowercase()}",
+            text = "${stringResource(R.string.no_transactions_found)}: ${AppFormatters.getPeriodLabel(period, emptyList(), context = context, locale = locale)}",
             style = Typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Try changing the time filter above to see your older data.",
+            text = stringResource(R.string.no_spending_desc),
             style = Typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline,
             textAlign = TextAlign.Center
@@ -2110,7 +2126,7 @@ private fun CashFlowSegmentBar(
                 if (!isCollapsed) {
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "INCOME",
+                        text = stringResource(R.string.income).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
@@ -2122,9 +2138,9 @@ private fun CashFlowSegmentBar(
                 }
                 
                 Spacer(Modifier.width(if (isCollapsed) 4.dp else 6.dp))
-                val formattedIncome = formatAmount(income)
+                val formattedIncome = AppFormatters.formatCompactCurrency(income, currencySymbol, locale)
                 AnimatedContent(
-                    targetState = if (privacyMode) "••••" else "$currencySymbol$formattedIncome",
+                    targetState = if (privacyMode) "••••" else formattedIncome,
                     transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
                     label = "income_fade"
                 ) { targetText ->
@@ -2148,9 +2164,9 @@ private fun CashFlowSegmentBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f, fill = false)
             ) {
-                val formattedExpense = formatAmount(expense)
+                val formattedExpense = AppFormatters.formatCompactCurrency(expense, currencySymbol, locale)
                 AnimatedContent(
-                    targetState = if (privacyMode) "••••" else "$currencySymbol$formattedExpense",
+                    targetState = if (privacyMode) "••••" else formattedExpense,
                     transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
                     label = "expense_fade"
                 ) { targetText ->
@@ -2170,7 +2186,7 @@ private fun CashFlowSegmentBar(
                 if (!isCollapsed) {
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "EXPENSE",
+                        text = stringResource(R.string.expense).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,

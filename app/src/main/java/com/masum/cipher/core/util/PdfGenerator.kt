@@ -130,10 +130,11 @@ object PdfGenerator {
         val itemsFirstPage = 11
         val itemsNextPages = 15
         
-        val dateFormatter = AppFormatters.getFullDate()
-        val rowDateFormatter = AppFormatters.getDay()
+        val locale = Locale.getDefault()
+        val dateFormatter = AppFormatters.getFullDate(locale)
+        val rowDateFormatter = AppFormatters.getDay(locale)
         
-        fun formatMoney(amount: Double): String = String.format(Locale.getDefault(), "%s %,.2f", currencySymbol, amount)
+        fun formatMoney(amount: Double): String = AppFormatters.formatCurrency(amount, currencySymbol, locale, decimals = 2)
 
         if (transactions.isEmpty()) {
             val page = document.startPage(pageInfo)
@@ -217,9 +218,9 @@ object PdfGenerator {
                 val netPaint = if (net >= 0) incomePaint else expensePaint
                 netPaint.textAlign = Paint.Align.LEFT
                 netPaint.textSize = 14f
+                val netStr = formatMoney(kotlin.math.abs(net))
                 val sign = if (net > 0) "+" else if (net < 0) "-" else ""
-                val absNet = kotlin.math.abs(net)
-                canvas.drawText("$sign${formatMoney(absNet)}", netX + 15f, currentY + 45f, netPaint)
+                canvas.drawText("$sign$netStr", netX + 15f, currentY + 45f, netPaint)
                 netPaint.textAlign = Paint.Align.RIGHT
                 netPaint.textSize = 11f
                 

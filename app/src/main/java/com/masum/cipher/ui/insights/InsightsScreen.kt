@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.util.AppFormatters
@@ -160,7 +162,11 @@ fun InsightsScreen(
     }
 
     val pagerState = rememberPagerState(pageCount = { 3 })
-    val tabs = listOf("Spending", "Habits", "Recurring")
+    val tabs = listOf(
+        stringResource(R.string.tab_spending),
+        stringResource(R.string.tab_habits),
+        stringResource(R.string.tab_recurring)
+    )
     val selectedTabIndex = pagerState.currentPage
 
     Scaffold(
@@ -268,7 +274,7 @@ fun InsightsScreen(
                             }
                             
                             item {
-                                SectionLabel("MONTHLY BUDGET")
+                                SectionLabel(stringResource(R.string.dashboard_monthly_budget).uppercase())
                                 com.masum.cipher.ui.components.BudgetHealthCard(
                                     spent = state.monthlySummary.expense,
                                     budget = monthlyBudget,
@@ -285,7 +291,7 @@ fun InsightsScreen(
                             }
 
                             item {
-                                SectionLabel("CASH FLOW TREND")
+                                SectionLabel(stringResource(R.string.cash_flow_trend).uppercase())
                                 SpendingTrendChart(
                                     expensePoints = state.expenseTrendHistory,
                                     incomePoints = state.incomeTrendHistory,
@@ -307,7 +313,7 @@ fun InsightsScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    SectionLabel("SPENDING BY CATEGORY")
+                                    SectionLabel(stringResource(R.string.spending_by_category).uppercase())
                                     androidx.compose.material3.TextButton(
                                         onClick = {
                                             view.performVibrate(isHapticsEnabled, isLongPress = false)
@@ -315,7 +321,7 @@ fun InsightsScreen(
                                         },
                                         modifier = Modifier.padding(top = 20.dp)
                                     ) {
-                                        Text("View Hub")
+                                        Text(stringResource(R.string.view_hub))
                                     }
                                 }
                                 VaultCard(
@@ -335,12 +341,12 @@ fun InsightsScreen(
                             }
 
                             item {
-                                SectionLabel("PEAK SPENDING HOURS")
+                                SectionLabel(stringResource(R.string.peak_spending_hours).uppercase())
                                 PeakHoursChart(hours = state.peakHours, currencySymbol = state.currencySymbol)
                             }
 
                             item {
-                                SectionLabel("ACTIVITY CALENDAR")
+                                SectionLabel(stringResource(R.string.activity_calendar).uppercase())
                                 VaultCard(
                                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -425,7 +431,9 @@ fun InsightsScreen(
 private fun InsightHero(state: InsightsContract.State) {
     val totalSpent = remember(state.categoryBreakdown) { state.categoryBreakdown.sumOf { it.amount } }
     val mostExpensiveCategory = state.categoryBreakdown.maxByOrNull { it.amount }
-    val periodLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+    val periodLabel = AppFormatters.getPeriodLabel(state.selectedTimePeriod, state.allTransactions, context = context, locale = locale)
     
     val daysInRange = remember(state.selectedTimeRange) {
         val now = System.currentTimeMillis()
@@ -463,7 +471,7 @@ private fun InsightHero(state: InsightsContract.State) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "OVERVIEW",
+                    text = stringResource(R.string.overview).uppercase(),
                     style = Typography.labelSmall.copy(
                         fontFamily = Manrope,
                         fontWeight = FontWeight.Bold,
@@ -502,7 +510,7 @@ private fun InsightHero(state: InsightsContract.State) {
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                         Text(
-                            text = "Most spent on ${categoryEnum.displayName}",
+                            text = stringResource(categoryEnum.titleRes),
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -513,7 +521,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount, currencySymbol = state.currencySymbol)} spent · $catPercent% of total spending",
+                            text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount, currencySymbol = state.currencySymbol)} · $catPercent%",
                             style = Typography.bodySmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 12.5.sp
@@ -545,7 +553,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "No spending recorded",
+                        text = stringResource(R.string.no_spending_recorded),
                         style = Typography.titleLarge.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -554,7 +562,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Transactions in this period will appear here.",
+                        text = stringResource(R.string.no_spending_desc),
                         style = Typography.bodySmall.copy(
                             fontFamily = Manrope,
                             fontSize = 12.5.sp
@@ -581,7 +589,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "NO-SPEND STREAK",
+                        text = stringResource(R.string.no_spend_streak).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -592,7 +600,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "${state.noSpendStreak} Days",
+                        text = "${state.noSpendStreak} ${stringResource(R.string.days)}",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -614,7 +622,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "DAILY AVERAGE",
+                        text = stringResource(R.string.daily_average).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -625,7 +633,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "${AppFormatters.formatCompactCurrency(dailyRunRate, currencySymbol = state.currencySymbol)}/day",
+                        text = "${AppFormatters.formatCompactCurrency(dailyRunRate, currencySymbol = state.currencySymbol)}/${stringResource(R.string.day_unit)}",
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -649,7 +657,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "AVG / TXN",
+                        text = stringResource(R.string.avg_txn).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -742,7 +750,7 @@ fun SubscriptionsCard(
                         )
                     }
                     Text(
-                        text = "RECURRING BILLS",
+                        text = stringResource(R.string.recurring_bills_title).uppercase(),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -759,7 +767,7 @@ fun SubscriptionsCard(
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "${subscriptions.size} Active",
+                                text = "${subscriptions.size} ${stringResource(R.string.active_suffix)}",
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Manrope,
                                     fontWeight = FontWeight.SemiBold,
@@ -790,12 +798,12 @@ fun SubscriptionsCard(
                 ) {
                     Icon(
                         imageVector = LucideIcons.Plus,
-                        contentDescription = "Add Subscription",
+                        contentDescription = stringResource(R.string.action_add_transaction),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(13.dp)
                     )
                     Text(
-                        text = "Add",
+                        text = stringResource(R.string.action_add_transaction).substringBefore(" "),
                         style = Typography.labelSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -814,7 +822,7 @@ fun SubscriptionsCard(
                 ) {
                     Column {
                         Text(
-                            text = "MONTHLY COMMITMENT",
+                            text = stringResource(R.string.monthly_commitment).uppercase(),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -825,7 +833,7 @@ fun SubscriptionsCard(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "$currencySymbol${String.format(locale, "%,.0f", totalMonthly)} / mo",
+                            text = "${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalMonthly, currencySymbol, locale)} / mo",
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -835,7 +843,7 @@ fun SubscriptionsCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "≈ $currencySymbol${String.format(locale, "%,.0f", totalAnnual)} / yr projected",
+                            text = "≈ ${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalAnnual, currencySymbol, locale)} / yr projected",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 11.sp
@@ -982,7 +990,7 @@ fun SubscriptionsCard(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = "$currencySymbol${String.format(locale, "%,.0f", sub.amount)}",
+                                    text = com.masum.cipher.core.util.AppFormatters.formatCurrency(sub.amount, currencySymbol, locale),
                                     style = Typography.titleMedium.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
@@ -1035,7 +1043,7 @@ fun SubscriptionsCard(
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "No Recurring Bills Tracked",
+                        text = stringResource(R.string.no_recurring_bills),
                         style = Typography.titleSmall.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -1044,7 +1052,7 @@ fun SubscriptionsCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Cipher automatically detects repeat payments, or tap + Add to track one manually.",
+                        text = stringResource(R.string.no_recurring_bills_desc),
                         style = Typography.bodySmall.copy(
                             fontFamily = Manrope,
                             fontSize = 12.sp,

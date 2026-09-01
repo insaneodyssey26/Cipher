@@ -22,7 +22,7 @@ android {
         versionCode = 27
         versionName = "5.1.0"
         androidResources {
-            localeFilters += listOf("en")
+            localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja")
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

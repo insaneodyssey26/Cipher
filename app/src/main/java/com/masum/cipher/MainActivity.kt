@@ -90,6 +90,16 @@ class MainActivity : AppCompatActivity() {
 
     private val updateReady = MutableStateFlow(false)
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        val lang = com.masum.cipher.core.data.local.pref.UserPreferences(newBase).getCachedLanguageCode()
+        val wrapped = com.masum.cipher.core.util.LocaleHelper.wrapContext(newBase, lang)
+        super.attachBaseContext(wrapped)
+        val config = com.masum.cipher.core.util.LocaleHelper.getOverrideConfiguration(newBase, lang)
+        if (config != null) {
+            applyOverrideConfiguration(config)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         

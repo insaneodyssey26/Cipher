@@ -5,6 +5,8 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -155,6 +157,7 @@ fun SettingsScreen(
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showBudgetDialog by remember { mutableStateOf(false) }
     var showCurrencyDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     var showCrashLogDialog by remember { mutableStateOf(false) }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
     var expandedSection by remember { mutableStateOf<String?>(null) }
@@ -168,11 +171,11 @@ fun SettingsScreen(
     var autoBackupSetupPassword by remember { mutableStateOf("") }
 
     val timeoutOptions = listOf(
-        "Immediately" to 0L,
-        "30 Seconds" to 30_000L,
-        "1 Minute" to 60_000L,
-        "5 Minutes" to 300_000L,
-        "Never" to Long.MAX_VALUE
+        stringResource(R.string.timeout_immediately) to 0L,
+        stringResource(R.string.timeout_30s) to 30_000L,
+        stringResource(R.string.timeout_1m) to 60_000L,
+        stringResource(R.string.timeout_5m) to 300_000L,
+        stringResource(R.string.timeout_never) to Long.MAX_VALUE
     )
 
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
@@ -274,7 +277,7 @@ fun SettingsScreen(
                     .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 12.dp)
             ) {
                 Text(
-                    text = "Settings",
+                    text = stringResource(R.string.settings_title),
                     style = Typography.headlineMedium.copy(
                         fontFamily = Manrope,
                         fontWeight = FontWeight.Bold,
@@ -311,7 +314,7 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = LucideIcons.Search,
-                        contentDescription = "Search",
+                        contentDescription = stringResource(R.string.action_search),
                         tint = if (isFocused || searchQuery.isNotEmpty()) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -335,7 +338,7 @@ fun SettingsScreen(
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
-                                        text = "Search settings, security, backup...",
+                                        text = stringResource(R.string.search_settings_hint),
                                         style = Typography.bodyMedium.copy(
                                             fontFamily = DMSans,
                                             fontSize = 13.5.sp
@@ -384,7 +387,7 @@ fun SettingsScreen(
                 .padding(bottom = 140.dp)
         ) {
             if (matchAppearance) {
-SettingsSection("APPEARANCE", icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
+SettingsSection(stringResource(R.string.settings_appearance), icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
                 if (matchTheme) {
 Row(
                     modifier = Modifier
@@ -394,7 +397,7 @@ Row(
                 ) {
                     ThemeOptionCard(
                         modifier = Modifier.weight(1f),
-                        title = "Light",
+                        title = stringResource(R.string.theme_light),
                         icon = LucideIcons.Sun,
                         isSelected = state.theme == AppTheme.LIGHT,
                         onClick = {
@@ -404,7 +407,7 @@ Row(
                     )
                     ThemeOptionCard(
                         modifier = Modifier.weight(1f),
-                        title = "Dark",
+                        title = stringResource(R.string.theme_dark),
                         icon = LucideIcons.Moon,
                         isSelected = state.theme == AppTheme.DARK,
                         onClick = {
@@ -414,7 +417,7 @@ Row(
                     )
                     ThemeOptionCard(
                         modifier = Modifier.weight(1f),
-                        title = "System",
+                        title = stringResource(R.string.theme_system),
                         icon = LucideIcons.Laptop,
                         isSelected = state.theme == AppTheme.SYSTEM,
                         onClick = {
@@ -451,7 +454,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(
-                                    text = "Accent Color",
+                                    text = stringResource(R.string.accent_color_title),
                                     style = Typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -560,8 +563,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Zap,
-                    title = "Haptic Feedback",
-                    description = "Physical response to touch",
+                    title = stringResource(R.string.haptic_feedback_title),
+                    description = stringResource(R.string.haptic_feedback_desc),
                     checked = state.isHapticsEnabled,
                     onCheckedChange = { 
                         view.performVibrate(it, isLongPress = true)
@@ -574,7 +577,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
 
     if (matchRegion) {
         SettingsSection(
-            "CURRENCY & REGION",
+            stringResource(R.string.settings_currency_region),
             icon = LucideIcons.Globe,
             isHapticsEnabled = state.isHapticsEnabled,
             isExpanded = expandedSection == "CURRENCY & REGION" || query.isNotBlank(),
@@ -583,24 +586,36 @@ Column(modifier = Modifier.fillMaxWidth()) {
             VaultSettingsItem(
                 isHapticsEnabled = state.isHapticsEnabled,
                 icon = LucideIcons.Globe,
-                title = "Preferred Currency",
-                subtitle = "Active currency for dashboard, statistics, and parser rules",
+                title = stringResource(R.string.settings_preferred_currency),
+                subtitle = stringResource(R.string.settings_currency_subtitle),
                 value = "${state.currencyCode} (${state.currencySymbol})",
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                     showCurrencyDialog = true
                 }
             )
+
+            VaultSettingsItem(
+                isHapticsEnabled = state.isHapticsEnabled,
+                icon = LucideIcons.Globe,
+                title = stringResource(R.string.settings_app_language),
+                subtitle = stringResource(R.string.settings_language_subtitle),
+                value = com.masum.cipher.core.domain.model.AppLanguage.fromCode(state.appLanguage).nativeName,
+                onClick = {
+                    view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                    showLanguageDialog = true
+                }
+            )
         }
     }
 
     if (matchSecurity) {
-        SettingsSection("SECURITY & PRIVACY", icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
+        SettingsSection(stringResource(R.string.settings_security_privacy), icon = LucideIcons.Lock, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "SECURITY & PRIVACY" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "SECURITY & PRIVACY") null else "SECURITY & PRIVACY" }) {
                 if (matchBiometric) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.ShieldCheck,
-                    title = "Biometric Lock",
-                    description = "Require authentication to open the app",
+                    title = stringResource(R.string.biometric_lock_title),
+                    description = stringResource(R.string.biometric_lock_desc),
                     checked = state.isBiometricEnabled,
                     onCheckedChange = { isEnabling ->
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -618,13 +633,13 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 if (matchAutoLock) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Timer,
-                    title = "Auto-Lock Timer",
+                    title = stringResource(R.string.auto_lock_timer_title),
                     value = when (state.autoLockTimeout) {
-                        0L -> "Immediately"
-                        30_000L -> "30 Seconds"
-                        60_000L -> "1 Minute"
-                        300_000L -> "5 Minutes"
-                        else -> "Never"
+                        0L -> stringResource(R.string.timeout_immediately)
+                        30_000L -> stringResource(R.string.timeout_30s)
+                        60_000L -> stringResource(R.string.timeout_1m)
+                        300_000L -> stringResource(R.string.timeout_5m)
+                        else -> stringResource(R.string.timeout_never)
                     },
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -634,8 +649,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 if (matchPrivacy) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.EyeOff,
-                    title = "Privacy Mode",
-                    description = "Hide balances on dashboard",
+                    title = stringResource(R.string.privacy_mode_title),
+                    description = stringResource(R.string.privacy_mode_desc),
                     checked = state.isPrivacyModeEnabled,
                     onCheckedChange = { 
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -646,19 +661,19 @@ Column(modifier = Modifier.fillMaxWidth()) {
 
             }
             if (matchAutomation) {
-                SettingsSection("AUTOMATION & TRACKING", icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
+                SettingsSection(stringResource(R.string.settings_automation_tracking), icon = LucideIcons.Activity, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "AUTOMATION & TRACKING" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "AUTOMATION & TRACKING") null else "AUTOMATION & TRACKING" }) {
                     if (matchApps) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Smartphone,
-                        title = "Manage Tracked Apps",
-                        subtitle = "Select which apps to monitor for transactions",
+                        title = stringResource(R.string.manage_tracked_apps_title),
+                        subtitle = stringResource(R.string.manage_tracked_apps_desc),
                         onClick = onNavigateToManageApps
                     )
                     if (matchHealth) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Activity,
-                        title = "Permissions Health",
-                        subtitle = "Check if Cipher is working at its best",
+                        title = stringResource(R.string.permissions_health_title),
+                        subtitle = stringResource(R.string.permissions_health_desc),
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             showPermissionsHealthSheet = true
@@ -668,20 +683,20 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchRules) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.BookOpen,
-                        title = "Manage Category Rules",
-                        subtitle = "View and edit custom merchant categories",
+                        title = stringResource(R.string.manage_category_rules_title),
+                        subtitle = stringResource(R.string.manage_category_rules_desc),
                         onClick = onNavigateToSmartRules
                     )
                 }
             }
 
             if (matchNotifications) {
-                SettingsSection("NOTIFICATIONS", icon = LucideIcons.BellRing, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "NOTIFICATIONS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "NOTIFICATIONS") null else "NOTIFICATIONS" }) {
+                SettingsSection(stringResource(R.string.settings_notifications), icon = LucideIcons.BellRing, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "NOTIFICATIONS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "NOTIFICATIONS") null else "NOTIFICATIONS" }) {
                     if (matchNotifyTx) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.BellRing,
-                        title = "Transaction Alerts",
-                        description = "Interactive alerts with Quick Note & Categorize",
+                        title = stringResource(R.string.notify_transactions_title),
+                        description = stringResource(R.string.notify_transactions_desc),
                         checked = state.notifyAllTransactions,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -691,8 +706,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifyBudget) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Target,
-                        title = "Budget Alerts",
-                        description = "Warnings when reaching 50%, 90%, or 100% of budget",
+                        title = stringResource(R.string.notify_budget_title),
+                        description = stringResource(R.string.notify_budget_desc),
                         checked = state.notifyBudgetAlerts,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -702,8 +717,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifyDaily) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Clock,
-                        title = "Daily Spending Summary",
-                        description = "Evening recap of today's total expenses",
+                        title = stringResource(R.string.notify_daily_title),
+                        description = stringResource(R.string.notify_daily_desc),
                         checked = state.notifyDailySummary,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -713,8 +728,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifyMonthly) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.CalendarClock,
-                        title = "Monthly Wrapped",
-                        description = "Monthly spending recap & insights on 1st of every month",
+                        title = stringResource(R.string.notify_monthly_title),
+                        description = stringResource(R.string.notify_monthly_desc),
                         checked = state.notifyMonthlyWrapped,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -724,8 +739,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifySubs) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.RefreshCw,
-                        title = "Subscription Reminders",
-                        description = "Upcoming renewal dues and auto-log alerts",
+                        title = stringResource(R.string.notify_subs_title),
+                        description = stringResource(R.string.notify_subs_desc),
                         checked = state.notifySubscriptions,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -735,8 +750,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifyUncategorized) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Info,
-                        title = "Uncategorized Reminders",
-                        description = "Nudges to review transactions marked as Others",
+                        title = stringResource(R.string.notify_uncategorized_title),
+                        description = stringResource(R.string.notify_uncategorized_desc),
                         checked = state.notifyUncategorizedReminder,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -746,8 +761,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifyApp) VaultSettingsSwitch(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Smartphone,
-                        title = "New App Suggestions",
-                        description = "Prompt to track newly installed banking or payment apps",
+                        title = stringResource(R.string.notify_new_app_title),
+                        description = stringResource(R.string.notify_new_app_desc),
                         checked = state.notifyNewAppDetected,
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -757,8 +772,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                     if (matchNotifySystem) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.Settings,
-                        title = "System Notification Channels",
-                        subtitle = "Configure system channels and lockscreen visibility",
+                        title = stringResource(R.string.notify_system_title),
+                        subtitle = stringResource(R.string.notify_system_desc),
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             try {
@@ -784,12 +799,12 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 }
             }
 if (matchGoals) {
-SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {
+SettingsSection(stringResource(R.string.settings_financial_goals), icon = LucideIcons.Target, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "FINANCIAL GOALS" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "FINANCIAL GOALS") null else "FINANCIAL GOALS" }) {
                 if (matchBudget) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Wallet,
-                    title = "Monthly Budget",
-                    value = if (state.monthlyBudget > 0) "${state.currencySymbol}${state.monthlyBudget.toInt()} (${if (state.isDynamicBudgetEnabled) "Dynamic" else "Fixed"})" else "No limit set",
+                    title = stringResource(R.string.monthly_budget_title),
+                    value = if (state.monthlyBudget > 0) "${state.currencySymbol}${state.monthlyBudget.toInt()} (${if (state.isDynamicBudgetEnabled) stringResource(R.string.budget_dynamic) else stringResource(R.string.budget_fixed)})" else stringResource(R.string.no_limit_set),
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         showBudgetDialog = true
@@ -799,11 +814,11 @@ SettingsSection("FINANCIAL GOALS", icon = LucideIcons.Target, isHapticsEnabled =
 
             }
 if (matchData) {
-SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA & BACKUP" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "DATA & BACKUP") null else "DATA & BACKUP" }) {
+SettingsSection(stringResource(R.string.settings_data_backup), icon = LucideIcons.Database, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "DATA & BACKUP" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "DATA & BACKUP") null else "DATA & BACKUP" }) {
                 if (matchCsv) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileSpreadsheet,
-                    title = "Export CSV Report",
+                    title = stringResource(R.string.export_csv_title),
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         csvExportLauncher.launch("Cipher_Report_${System.currentTimeMillis()}.csv")
@@ -813,7 +828,7 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                 if (matchPdf) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileText,
-                    title = "Export PDF Statement",
+                    title = stringResource(R.string.export_pdf_title),
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         pdfExportLauncher.launch("Cipher_Statement_${System.currentTimeMillis()}.pdf")
@@ -823,7 +838,7 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                 if (matchBackup) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudUpload,
-                    title = "Backup Vault",
+                    title = stringResource(R.string.backup_vault_title),
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         exportLauncher.launch("Cipher_Backup_${System.currentTimeMillis()}.cipher")
@@ -833,7 +848,7 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                 if (matchRestore) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.CloudDownload,
-                    title = "Restore Vault",
+                    title = stringResource(R.string.restore_vault_title),
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                         importLauncher.launch(arrayOf("application/octet-stream"))
@@ -843,7 +858,7 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                 if (matchClear) VaultSettingsItem(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Trash2,
-                    title = "Clear All Data",
+                    title = stringResource(R.string.clear_all_data_title),
                     titleColor = RoseExpense,
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -854,8 +869,8 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                 if (matchAutoBackup) VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FolderSync,
-                    title = "Enable Auto-Backup",
-                    description = "Silently backup your vault locally",
+                    title = stringResource(R.string.enable_auto_backup_title),
+                    description = stringResource(R.string.enable_auto_backup_desc),
                     checked = state.autoBackupEnabled,
                     onCheckedChange = { 
                         if (it) {
@@ -866,11 +881,17 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                     }
                 )
                 if (state.autoBackupEnabled) {
+                    val freqLabel = when (state.autoBackupFrequency) {
+                        AutoBackupFrequency.NEVER -> stringResource(R.string.freq_never)
+                        AutoBackupFrequency.EVERY_CHANGE -> stringResource(R.string.freq_every_change)
+                        AutoBackupFrequency.DAILY -> stringResource(R.string.freq_daily)
+                        AutoBackupFrequency.WEEKLY -> stringResource(R.string.freq_weekly)
+                    }
                     if (matchFreq) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.CalendarClock,
-                        title = "Backup Frequency",
-                        value = state.autoBackupFrequency.label,
+                        title = stringResource(R.string.backup_frequency_title),
+                        value = freqLabel,
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             showFrequencyDialog = true
@@ -879,17 +900,17 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
                     if (matchLoc) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.FolderDown,
-                        title = "Backup Location",
+                        title = stringResource(R.string.backup_location_title),
                         subtitle = if (state.autoBackupUri != null) {
-                            try {
+                            val readablePath = try {
                                 val decodedPath = Uri.decode(state.autoBackupUri)
-                                val readablePath = decodedPath.substringAfter("tree/", decodedPath)
+                                decodedPath.substringAfter("tree/", decodedPath)
                                     .replace("primary:", "Internal Storage/")
-                                "Selected: $readablePath"
                             } catch (_: Exception) {
-                                "Folder Selected"
+                                ""
                             }
-                        } else "Tap to select folder",
+                            stringResource(R.string.folder_selected_prefix, readablePath)
+                        } else stringResource(R.string.tap_select_folder),
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             autoBackupFolderLauncher.launch(null)
@@ -900,11 +921,11 @@ SettingsSection("DATA & BACKUP", icon = LucideIcons.Database, isHapticsEnabled =
 
             }
 if (matchAbout) {
-SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT & SUPPORT" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "ABOUT & SUPPORT") null else "ABOUT & SUPPORT" }) {
+SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIcons.Info, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "ABOUT & SUPPORT" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "ABOUT & SUPPORT") null else "ABOUT & SUPPORT" }) {
                 if (matchRate) VaultSettingsItem(
                     icon = LucideIcons.Star,
-                    title = "Rate on Google Play",
-                    subtitle = "Enjoying Cipher? Leave a review!",
+                    title = stringResource(R.string.rate_play_store_title),
+                    subtitle = stringResource(R.string.rate_play_store_desc),
                     onClick = {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
@@ -918,7 +939,7 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                 )
                 if (matchFeedback) VaultSettingsItem(
                     icon = LucideIcons.MessagesSquare,
-                    title = "Feedback & Feature Requests",
+                    title = stringResource(R.string.feedback_title),
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW, "https://tally.so/r/gDz7NK".toUri())
                         context.startActivity(intent)
@@ -926,8 +947,8 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                 )
                 if (matchUpdate) VaultSettingsItem(
                     icon = LucideIcons.RefreshCw,
-                    title = "Check for Updates",
-                    subtitle = "Look for the latest version on Play Store",
+                    title = stringResource(R.string.check_updates_title),
+                    subtitle = stringResource(R.string.check_updates_desc),
                     onClick = {
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
@@ -938,13 +959,13 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                 )
                 if (matchCrash) VaultSettingsItem(
                     icon = LucideIcons.Bug,
-                    title = "App Diagnostics",
-                    subtitle = "View and copy crash logs",
+                    title = stringResource(R.string.diagnostics_title),
+                    subtitle = stringResource(R.string.diagnostics_desc),
                     onClick = { showCrashLogDialog = true }
                 )
                 if (matchContact) VaultSettingsItem(
                     icon = LucideIcons.Mail,
-                    title = "Contact Developer",
+                    title = stringResource(R.string.contact_dev_title),
                     subtitle = "masumali262006@gmail.com",
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -957,7 +978,7 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
             
                 if (matchSource) VaultSettingsItem(
                     icon = LucideIcons.Github,
-                    title = "Open Source",
+                    title = stringResource(R.string.open_source_title),
                     subtitle = "github.com/insaneodyssey26/cipher",
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW,
@@ -967,12 +988,12 @@ SettingsSection("ABOUT & SUPPORT", icon = LucideIcons.Info, isHapticsEnabled = s
                 )
                 if (matchPrivacyPol) VaultSettingsItem(
                     icon = LucideIcons.Info,
-                    title = "Privacy Policy",
+                    title = stringResource(R.string.privacy_policy_title),
                     onClick = onNavigateToPrivacy
                 )
                 if (matchSupportDev) VaultSettingsItem(
                     icon = LucideIcons.Coffee,
-                    title = "Support Development",
+                    title = stringResource(R.string.support_dev_title),
                     subtitle = "ko-fi.com/insane_odyssey",
                     onClick = {
                         val intent = Intent(Intent.ACTION_VIEW,
@@ -1113,14 +1134,20 @@ Spacer(modifier = Modifier.weight(1f))
     }
     if (showFrequencyDialog) {
         VaultSettingsDialog(
-            title = "Auto-Backup Frequency",
+            title = stringResource(R.string.backup_frequency_title),
             onDismiss = { showFrequencyDialog = false },
-            confirmText = "Close",
+            confirmText = stringResource(R.string.action_close),
             showDismissButton = false,
             onConfirm = { showFrequencyDialog = false }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 AutoBackupFrequency.entries.forEach { freq ->
+                    val label = when (freq) {
+                        AutoBackupFrequency.NEVER -> stringResource(R.string.freq_never)
+                        AutoBackupFrequency.EVERY_CHANGE -> stringResource(R.string.freq_every_change)
+                        AutoBackupFrequency.DAILY -> stringResource(R.string.freq_daily)
+                        AutoBackupFrequency.WEEKLY -> stringResource(R.string.freq_weekly)
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1133,7 +1160,7 @@ Spacer(modifier = Modifier.weight(1f))
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = freq.label, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                        Text(text = label, style = Typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
                         if (state.autoBackupFrequency == freq) {
                             Icon(LucideIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                         }
@@ -1144,10 +1171,11 @@ Spacer(modifier = Modifier.weight(1f))
     }
 
     if (showBackupPasswordDialog != null) {
+        val isExport = showBackupPasswordDialog == BackupAction.EXPORT
         VaultSettingsDialog(
-            title = if (showBackupPasswordDialog == BackupAction.EXPORT) "Set Backup Password" else "Enter Backup Password",
+            title = if (isExport) stringResource(R.string.set_backup_password_title) else stringResource(R.string.enter_backup_password_title),
             onDismiss = { showBackupPasswordDialog = null; backupPassword = "" },
-            confirmText = if (showBackupPasswordDialog == BackupAction.EXPORT) "Export" else "Import",
+            confirmText = if (isExport) stringResource(R.string.action_export) else stringResource(R.string.action_import),
             onConfirm = {
                 val uri = pendingUri
                 if (uri != null && backupPassword.isNotBlank()) {
@@ -1163,9 +1191,9 @@ Spacer(modifier = Modifier.weight(1f))
         ) {
             Column {
                 Text(
-                    text = if (showBackupPasswordDialog == BackupAction.EXPORT) 
-                        "This password will be used to encrypt your backup. You will need it to restore your data." 
-                        else "Enter the password used to encrypt this backup file.",
+                    text = if (isExport) 
+                        stringResource(R.string.backup_password_export_desc) 
+                        else stringResource(R.string.backup_password_import_desc),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -1173,7 +1201,7 @@ Spacer(modifier = Modifier.weight(1f))
                 OutlinedTextField(
                     value = backupPassword,
                     onValueChange = { backupPassword = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password_label)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -1191,9 +1219,9 @@ Spacer(modifier = Modifier.weight(1f))
 
     if (showTimeoutDialog) {
         VaultSettingsDialog(
-            title = "Auto-Lock",
+            title = stringResource(R.string.auto_lock_timer_title),
             onDismiss = { showTimeoutDialog = false },
-            confirmText = "Close",
+            confirmText = stringResource(R.string.action_close),
             showDismissButton = false,
             onConfirm = { showTimeoutDialog = false }
         ) {
@@ -1217,27 +1245,27 @@ Spacer(modifier = Modifier.weight(1f))
 
     if (showDeleteDialog) {
         VaultSettingsDialog(
-            title = "Delete all data?",
+            title = stringResource(R.string.delete_all_data_dialog_title),
             onDismiss = { showDeleteDialog = false },
-            confirmText = "Clear Everything",
+            confirmText = stringResource(R.string.action_clear_everything),
             confirmColor = RoseExpense,
             onConfirm = {
                 viewModel.handleIntent(SettingsContract.Intent.ClearAllData)
                 showDeleteDialog = false
             }
         ) {
-            Text("This action is permanent and cannot be undone.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.delete_all_data_dialog_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 
     if (showAutoBackupPasswordSetupDialog) {
         VaultSettingsDialog(
-            title = "Auto-Backup Password",
+            title = stringResource(R.string.auto_backup_password_title),
             onDismiss = { 
                 showAutoBackupPasswordSetupDialog = false 
                 autoBackupSetupPassword = ""
             },
-            confirmText = "Enable",
+            confirmText = stringResource(R.string.action_enable),
             onConfirm = {
                 if (autoBackupSetupPassword.length >= 4) {
                     viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(autoBackupSetupPassword))
@@ -1249,7 +1277,7 @@ Spacer(modifier = Modifier.weight(1f))
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Enter a password to encrypt your automatic backups. You will need this to restore your data on a new device.",
+                    text = stringResource(R.string.auto_backup_password_desc),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -1258,7 +1286,7 @@ Spacer(modifier = Modifier.weight(1f))
                     value = autoBackupSetupPassword,
                     onValueChange = { autoBackupSetupPassword = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Backup Password") },
+                    placeholder = { Text(stringResource(R.string.backup_password_placeholder)) },
                     singleLine = true,
                     textStyle = Typography.bodyLarge,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -1286,6 +1314,17 @@ Spacer(modifier = Modifier.weight(1f))
                 viewModel.handleIntent(SettingsContract.Intent.SetCurrency(code, symbol))
             },
             onDismiss = { showCurrencyDialog = false }
+        )
+    }
+
+    if (showLanguageDialog) {
+        com.masum.cipher.ui.components.LanguageSelectionDialog(
+            currentLanguageCode = state.appLanguage,
+            isHapticsEnabled = state.isHapticsEnabled,
+            onLanguageSelected = { code ->
+                viewModel.handleIntent(SettingsContract.Intent.SetAppLanguage(code))
+            },
+            onDismiss = { showLanguageDialog = false }
         )
     }
 }
@@ -1476,7 +1515,7 @@ private fun VaultSettingsDialog(
             }
         },
         dismissButton = if (showDismissButton) {
-            { TextButton(onClick = onDismiss) { Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+            { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant) } }
         } else null
     )
 }
@@ -1587,22 +1626,22 @@ private fun PermissionsHealthSheet(
                 .padding(bottom = 32.dp)
         ) {
             Text(
-                text = "Permissions Health",
+                text = stringResource(R.string.permissions_health_title),
                 style = Typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Ensure Cipher has the necessary permissions to provide the best experience.",
+                text = stringResource(R.string.permissions_health_subtitle),
                 style = Typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(24.dp))
 
             HealthItemCard(
-                title = "Notification Access",
-                description = "Required to automatically parse transactions from your tracked apps.",
+                title = stringResource(R.string.perm_notification_access_title),
+                description = stringResource(R.string.perm_notification_access_desc),
                 isGranted = hasNotificationAccess,
                 icon = LucideIcons.BellRing,
                 onFixClick = {
@@ -1614,8 +1653,8 @@ private fun PermissionsHealthSheet(
             Spacer(modifier = Modifier.height(16.dp))
             
             HealthItemCard(
-                title = "Read SMS",
-                description = "Required to securely capture transactions from banking SMS messages.",
+                title = stringResource(R.string.perm_sms_access_title),
+                description = stringResource(R.string.perm_sms_access_desc),
                 isGranted = hasSmsPermission,
                 icon = LucideIcons.MessageSquare,
                 onFixClick = {
@@ -1628,8 +1667,8 @@ private fun PermissionsHealthSheet(
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 HealthItemCard(
-                    title = "App Notifications",
-                    description = "Required to send you budget alerts and important updates.",
+                    title = stringResource(R.string.perm_app_notifications_title),
+                    description = stringResource(R.string.perm_app_notifications_desc),
                     isGranted = hasPostNotifications,
                     icon = LucideIcons.MessageSquare,
                     onFixClick = {
@@ -1646,7 +1685,7 @@ private fun PermissionsHealthSheet(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Done", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+                Text(stringResource(R.string.action_done), style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
@@ -1690,7 +1729,7 @@ private fun HealthItemCard(
             if (isGranted) {
                 Icon(
                     imageVector = LucideIcons.Check,
-                    contentDescription = "Granted",
+                    contentDescription = stringResource(R.string.status_granted),
                     tint = MaterialTheme.colorScheme.primary
                 )
             } else {
@@ -1699,7 +1738,7 @@ private fun HealthItemCard(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text("Fix", color = MaterialTheme.colorScheme.onError, style = Typography.labelMedium)
+                    Text(stringResource(R.string.action_fix), color = MaterialTheme.colorScheme.onError, style = Typography.labelMedium)
                 }
             }
         }

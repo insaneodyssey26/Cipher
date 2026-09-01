@@ -22,6 +22,8 @@ data class AppCurrency(
             AppCurrency("EUR", "€", "Euro", "EU"),
             AppCurrency("GBP", "£", "British Pound", "GB"),
             AppCurrency("INR", "₹", "Indian Rupee", "IN"),
+            AppCurrency("JPY", "¥", "Japanese Yen", "JP"),
+            AppCurrency("BDT", "৳", "Bangladeshi Taka", "BD"),
             AppCurrency("CAD", "$", "Canadian Dollar", "CA"),
             AppCurrency("AUD", "$", "Australian Dollar", "AU"),
             AppCurrency("AED", "AED", "UAE Dirham", "AE"),

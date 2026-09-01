@@ -49,11 +49,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.MathEvaluator
@@ -88,6 +90,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
+import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.theme.Manrope
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -167,10 +170,12 @@ fun TransactionDetailsSheet(
             val target = Calendar.getInstance().apply { timeInMillis = selectedTimestamp }
             val isToday = now.get(Calendar.YEAR) == target.get(Calendar.YEAR) &&
                     now.get(Calendar.DAY_OF_YEAR) == target.get(Calendar.DAY_OF_YEAR)
+            val todayStr = stringResource(R.string.today)
+            val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
             val dateLabel = if (isToday) {
-                "Today, " + SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(selectedTimestamp))
+                "$todayStr, " + AppFormatters.getDay(locale).format(Date(selectedTimestamp))
             } else {
-                SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(selectedTimestamp))
+                AppFormatters.getFullDate(locale).format(Date(selectedTimestamp))
             }
             
             Row(
@@ -179,7 +184,7 @@ fun TransactionDetailsSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isEditing) "Transaction details" else "Add transaction",
+                    text = if (isEditing) stringResource(R.string.tx_details_title) else stringResource(R.string.tx_new_title),
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -192,7 +197,7 @@ fun TransactionDetailsSheet(
                         },
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(LucideIcons.Trash2, "Delete", tint = RoseExpense, modifier = Modifier.size(20.dp))
+                        Icon(LucideIcons.Trash2, stringResource(R.string.action_delete), tint = RoseExpense, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -220,14 +225,14 @@ fun TransactionDetailsSheet(
                                 showDatePicker = false
                             }
                         ) {
-                            Text("Select", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.action_select), fontWeight = FontWeight.Bold)
                         }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = { showDatePicker = false }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.action_cancel))
                         }
                     }
                 ) {
@@ -246,7 +251,7 @@ fun TransactionDetailsSheet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 TypeToggleButton(
-                    label = "EXPENSE",
+                    label = stringResource(R.string.expense).uppercase(),
                     selected = !isIncome,
                     activeColor = RoseExpense,
                     modifier = Modifier.weight(1f),
@@ -256,7 +261,7 @@ fun TransactionDetailsSheet(
                     }
                 )
                 TypeToggleButton(
-                    label = "INCOME",
+                    label = stringResource(R.string.income).uppercase(),
                     selected = isIncome,
                     activeColor = EmeraldIncome,
                     modifier = Modifier.weight(1f),
@@ -282,7 +287,7 @@ fun TransactionDetailsSheet(
                     VaultSheetTextField(
                         value = merchant,
                         onValueChange = { merchant = it },
-                        label = "MERCHANT"
+                        label = stringResource(R.string.merchant).uppercase()
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
@@ -317,13 +322,13 @@ fun TransactionDetailsSheet(
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {
                                         Text(
-                                            text = "CATEGORY",
+                                            text = stringResource(R.string.category).uppercase(),
                                             style = Typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Spacer(Modifier.height(4.dp))
                                         Text(
-                                            text = selectedCategory.name.lowercase().replaceFirstChar { it.uppercase() },
+                                            text = stringResource(selectedCategory.titleRes),
                                             style = Typography.titleSmall,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
@@ -364,11 +369,11 @@ fun TransactionDetailsSheet(
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                text = category.name.lowercase().replaceFirstChar { it.uppercase() },
+                                                text = stringResource(category.titleRes),
                                                 style = Typography.bodyMedium.copy(
                                                     fontWeight = if (category == selectedCategory) FontWeight.Bold else FontWeight.Normal
                                                 ),
-                                                color = if (category == selectedCategory) category.color else MaterialTheme.colorScheme.onSurface
+                                                color = if (category == selectedCategory) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                             )
                                         },
                                         onClick = {
@@ -428,12 +433,12 @@ fun TransactionDetailsSheet(
                     ) {
                         Icon(
                             imageVector = LucideIcons.Plus,
-                            contentDescription = "Add Note",
+                            contentDescription = stringResource(R.string.action_add_note),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(13.dp)
                         )
                         Text(
-                            text = "Add note",
+                            text = stringResource(R.string.action_add_note),
                             style = Typography.labelMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.SemiBold,
@@ -486,7 +491,7 @@ fun TransactionDetailsSheet(
                 VaultSheetTextField(
                     value = note,
                     onValueChange = { if (it.length <= 150) note = it },
-                    label = "NOTE (OPTIONAL)",
+                    label = stringResource(R.string.note).uppercase(),
                     showClearButton = true
                 )
             }
@@ -520,7 +525,7 @@ fun TransactionDetailsSheet(
                 )
             ) {
                 Text(
-                    text = if (isEditing) "Update transaction" else "Save transaction",
+                    text = if (isEditing) stringResource(R.string.update_transaction) else stringResource(R.string.action_save),
                     style = Typography.titleMedium
                 )
             }
@@ -843,7 +848,7 @@ private fun AmountInputField(
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
-                text = "= $currencySymbol${String.format(locale, "%,.2f", computed)}",
+                text = "= ${com.masum.cipher.core.util.AppFormatters.formatCurrency(computed, currencySymbol, locale, decimals = 2)}",
                 style = Typography.titleMedium,
                 color = color.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
@@ -878,7 +883,7 @@ private fun AmountInputField(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = if (showCalculator) "Use Keyboard" else "Use Calculator",
+                    text = if (showCalculator) stringResource(R.string.use_keyboard) else stringResource(R.string.use_calculator),
                     style = Typography.labelMedium,
                     color = if (showCalculator) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                 )

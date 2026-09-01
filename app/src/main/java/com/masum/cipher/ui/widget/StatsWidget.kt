@@ -143,48 +143,50 @@ class StatsWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.defaultWeight().fillMaxWidth(),
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
+                    val formattedNet = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(net, currencySymbol)
+                    val signedNet = if (netPositive) "+$formattedNet" else "-$formattedNet"
                     Text(
-                    text = "${if (netPositive) "+" else "−"}$currencySymbol${fmt(net)}",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = netColor
-                    )
-                )
-                Spacer(GlanceModifier.height(2.dp))
-                Text(
-                    text = "net this month",
-                    style = TextStyle(
-                        fontSize = 11.sp,
-                        color = textMuted
-                    )
-                )
-
-                Spacer(GlanceModifier.height(8.dp))
-
-                Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    Column(modifier = GlanceModifier.defaultWeight()) {
-                        Text(
-                            text = "↓ $currencySymbol${fmt(income)}",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = emeraldIncome
-                            )
+                        text = signedNet,
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = netColor
                         )
-                    }
-                    Spacer(GlanceModifier.width(4.dp))
-                    Column(modifier = GlanceModifier.defaultWeight()) {
-                        Text(
-                            text = "↑ $currencySymbol${fmt(spent)}",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = roseExpense
-                            )
+                    )
+                    Spacer(GlanceModifier.height(2.dp))
+                    Text(
+                        text = "net this month",
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            color = textMuted
                         )
+                    )
+
+                    Spacer(GlanceModifier.height(8.dp))
+
+                    Row(modifier = GlanceModifier.fillMaxWidth()) {
+                        Column(modifier = GlanceModifier.defaultWeight()) {
+                            Text(
+                                text = "↓ ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(income, currencySymbol)}",
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = emeraldIncome
+                                )
+                            )
+                        }
+                        Spacer(GlanceModifier.width(4.dp))
+                        Column(modifier = GlanceModifier.defaultWeight()) {
+                            Text(
+                                text = "↑ ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(spent, currencySymbol)}",
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = roseExpense
+                                )
+                            )
+                        }
                     }
-                }
             }
         }
     }

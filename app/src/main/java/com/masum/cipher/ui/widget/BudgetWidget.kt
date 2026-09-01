@@ -173,7 +173,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                 } else {
                     Text(
-                        text = "$currencySymbol${fmt(spent)}",
+                        text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(spent, currencySymbol),
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -182,7 +182,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.height(1.dp))
                     Text(
-                        text = "spent of $currencySymbol${fmt(budget)}",
+                        text = "spent of ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(budget, currencySymbol)}",
                         style = TextStyle(
                             fontSize = 10.sp,
                             color = textMuted
@@ -197,7 +197,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.height(6.dp))
                     Text(
-                        text = if (overBudget) "Over by $currencySymbol${fmt(-remaining)}" else "$currencySymbol${fmt(remaining)} remaining",
+                        text = if (overBudget) "Over by ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(-remaining, currencySymbol)}" else "${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(remaining, currencySymbol)} remaining",
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,

@@ -34,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.masum.cipher.R
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -136,7 +138,7 @@ fun CategoriesScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Categories",
+                        text = stringResource(R.string.nav_categories),
                         style = Typography.titleMedium.copy(
                             fontFamily = Manrope,
                             fontWeight = FontWeight.Bold,
@@ -152,7 +154,7 @@ fun CategoriesScreen(
                     }) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.action_close),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -196,7 +198,7 @@ fun CategoriesScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
-                                    text = "TOTAL SPENT",
+                                    text = stringResource(R.string.dashboard_total_spent).uppercase(),
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,
@@ -228,7 +230,7 @@ fun CategoriesScreen(
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = "$activeCount Active",
+                                        text = "$activeCount ${stringResource(R.string.active_suffix)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.Bold,
@@ -325,7 +327,7 @@ fun CategoriesScreen(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = categoryEnum.displayName,
+                                        text = stringResource(categoryEnum.titleRes),
                                         style = Typography.titleMedium.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.Bold,
@@ -339,7 +341,7 @@ fun CategoriesScreen(
                                         text = if (totalExpense > 0 && spent > 0) {
                                             "${String.format(Locale.getDefault(), "%.1f", categoryData.percentage * 100)}% of total"
                                         } else {
-                                            "No spend this period"
+                                            stringResource(R.string.no_spend_this_period)
                                         },
                                         style = Typography.bodySmall.copy(
                                             fontFamily = Manrope,
@@ -429,8 +431,9 @@ fun CategoriesScreen(
                                         }
 
                                         val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
+                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
                                         Text(
-                                            text = "Limit: $currencySymbol${String.format(Locale.getDefault(), "%,.0f", budget)}",
+                                            text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.SemiBold,
@@ -465,11 +468,12 @@ fun CategoriesScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
+                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
                                         Text(
                                             text = if (isOverBudget) {
-                                                "Exceeded by $currencySymbol${String.format(Locale.getDefault(), "%,.0f", spent - budget)}"
+                                                "Exceeded by ${com.masum.cipher.core.util.AppFormatters.formatCurrency(spent - budget, currencySymbol, locale)}"
                                             } else {
-                                                "$currencySymbol${String.format(Locale.getDefault(), "%,.0f", remainingBudget)} left"
+                                                "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} left"
                                             },
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Manrope,
@@ -481,7 +485,7 @@ fun CategoriesScreen(
 
                                         if (!isOverBudget) {
                                             Text(
-                                                text = "Safe: $currencySymbol${String.format(Locale.getDefault(), "%,.0f", safeDaily)}/day",
+                                                text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeDaily, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                                 style = Typography.labelSmall.copy(
                                                     fontFamily = Manrope,
                                                     fontSize = 10.5.sp,
@@ -498,7 +502,7 @@ fun CategoriesScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "No spending limit set",
+                                            text = stringResource(R.string.no_limit_set),
                                             style = Typography.bodySmall.copy(
                                                 fontFamily = Manrope,
                                                 fontSize = 11.5.sp
@@ -506,7 +510,7 @@ fun CategoriesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
-                                            text = "Set Limit",
+                                            text = stringResource(R.string.set_limit),
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Manrope,
                                                 fontWeight = FontWeight.Bold,
@@ -541,7 +545,7 @@ fun CategoriesScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "View Breakdown & Transactions",
+                                        text = stringResource(R.string.view_breakdown_transactions),
                                         style = Typography.labelMedium.copy(
                                             fontFamily = Manrope,
                                             fontWeight = FontWeight.SemiBold,
@@ -566,8 +570,9 @@ fun CategoriesScreen(
 
     showBudgetDialogFor?.let { cat ->
         EditCategoryBudgetDialog(
-            categoryName = cat.displayName,
+            categoryName = stringResource(cat.titleRes),
             currentBudget = categoryBudgets[cat.displayName] ?: categoryBudgets[cat.name] ?: 0.0,
+            currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onDismiss = { showBudgetDialogFor = null },
             onConfirm = { newLimit ->
                 viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(cat.displayName, newLimit))
