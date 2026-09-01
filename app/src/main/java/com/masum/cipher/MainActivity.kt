@@ -344,8 +344,15 @@ class MainActivity : AppCompatActivity() {
 
                         if (state.isOnboardingRequired) {
                             OnboardingScreen(
-                                currentAccentColor = state.settings?.accentColor ?: AccentColor.INDIGO,
+                                currentAccentColor = state.settings?.accentColor ?: com.masum.cipher.core.data.local.pref.AccentColor.INDIGO,
                                 onAccentColorSelected = { color -> mainViewModel.handleIntent(MainContract.Intent.SaveAccentColor(color)) },
+                                currentTheme = state.settings?.theme ?: com.masum.cipher.core.data.local.pref.AppTheme.SYSTEM,
+                                onThemeSelected = { theme -> mainViewModel.handleIntent(MainContract.Intent.SaveTheme(theme)) },
+                                currentLanguageCode = state.settings?.appLanguage ?: "system",
+                                onLanguageSelected = { langCode -> mainViewModel.handleIntent(MainContract.Intent.SaveLanguage(langCode)) },
+                                currentCurrencyCode = state.settings?.currencyCode ?: "USD",
+                                currentCurrencySymbol = state.settings?.currencySymbol ?: "$",
+                                onCurrencySelected = { code, symbol -> mainViewModel.handleIntent(MainContract.Intent.SaveCurrency(code, symbol)) },
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
                             )

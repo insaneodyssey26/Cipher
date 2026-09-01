@@ -49,7 +49,22 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
             is MainContract.Intent.SaveTrackedApps -> saveTrackedApps(intent.apps)
             is MainContract.Intent.SaveAccentColor -> saveAccentColor(intent.color)
+            is MainContract.Intent.SaveTheme -> saveTheme(intent.theme)
+            is MainContract.Intent.SaveLanguage -> saveLanguage(intent.languageCode)
+            is MainContract.Intent.SaveCurrency -> saveCurrency(intent.currencyCode, intent.currencySymbol)
             is MainContract.Intent.UpdateDraftTransaction -> updateState { copy(draftTransaction = intent.transaction) }
+        }
+    }
+
+    private fun saveLanguage(languageCode: String) {
+        viewModelScope.launch {
+            userPreferences.setAppLanguage(languageCode)
+        }
+    }
+
+    private fun saveCurrency(currencyCode: String, currencySymbol: String) {
+        viewModelScope.launch {
+            userPreferences.setCurrency(currencyCode, currencySymbol)
         }
     }
 
@@ -62,6 +77,12 @@ class MainViewModel @Inject constructor(
     private fun saveAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
         viewModelScope.launch {
             userPreferences.setAccentColor(color)
+        }
+    }
+
+    private fun saveTheme(theme: com.masum.cipher.core.data.local.pref.AppTheme) {
+        viewModelScope.launch {
+            userPreferences.setTheme(theme)
         }
     }
 

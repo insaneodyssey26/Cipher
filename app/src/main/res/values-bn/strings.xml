@@ -301,4 +301,62 @@
     <string name="auto_backup_password_title">অটো-ব্যাকআপ পাসওয়ার্ড</string>
     <string name="auto_backup_password_desc">আপনার স্বয়ংক্রিয় ব্যাকআপ এনক্রিপ্ট করার জন্য একটি পাসওয়ার্ড দিন। একটি নতুন ডিভাইসে ডেটা পুনরুদ্ধার করতে আপনার এটি প্রয়োজন হবে।</string>
     <string name="backup_password_placeholder">ব্যাকআপ পাসওয়ার্ড</string>
+
+    <!-- Onboarding Strings -->
+    <string name="onboarding_step_region">ভাষা ও মুদ্রা</string>
+    <string name="onboarding_step_privacy">গোপনীয়তা</string>
+    <string name="onboarding_step_appearance">থিম</string>
+    <string name="onboarding_step_automation">স্বয়ংক্রিয়করণ</string>
+    <string name="onboarding_step_apps">অ্যাপস</string>
+
+    <string name="onboarding_lang_title">ভাষা ও মুদ্রা নির্বাচন করুন</string>
+    <string name="onboarding_lang_subtitle">আপনার ভল্টে সংখ্যা, তারিখ এবং টেক্সট কীভাবে প্রদর্শিত হবে তা নির্বাচন করুন।</string>
+    <string name="onboarding_live_preview_label">লাইভ প্রিভিউ</string>
+    <string name="onboarding_preview_merchant">কফি ও বেকারি</string>
+    <string name="onboarding_preview_category">খাবার ও রেস্তোরাঁ · আজ</string>
+    <string name="onboarding_section_language">অ্যাপের ভাষা</string>
+    <string name="onboarding_section_currency">পছন্দের মুদ্রা</string>
+
+    <string name="onboarding_welcome_badge">১০০% প্রাইভেট ও অফলাইন</string>
+    <string name="onboarding_welcome_brand_greeting">Cipher-এ স্বাগতম</string>
+    <string name="onboarding_welcome_title">আপনার অর্থ, সম্পূর্ণ ব্যক্তিগত ও নিরাপদ।</string>
+    <string name="onboarding_welcome_subtitle">Cipher ক্লাউডে আপনার কোনো ব্যক্তিগত তথ্য আপলোড না করেই আপনার দৈনিক খরচ স্বয়ংক্রিয়ভাবে ট্র্যাক করে। সবকিছু আপনার ডিভাইসেই থাকে।</string>
+    <string name="onboarding_btn_get_started">শুরু করুন</string>
+    <string name="onboarding_feat_offline_title">১০০% অফলাইন ও ব্যক্তিগত</string>
+    <string name="onboarding_feat_offline_desc">কোনো ক্লাউড সার্ভার নেই, অ্যাকাউন্টের প্রয়োজন নেই এবং কোনো ট্র্যাকিং নেই।</string>
+    <string name="onboarding_feat_auto_title">স্বয়ংক্রিয় খরচ ট্র্যাকিং</string>
+    <string name="onboarding_feat_auto_desc">ব্যাংক এসএমএস ও নোটিফিকেশন থেকে তথ্য পড়ে, যাতে আপনাকে ম্যানুয়ালি হিসাব লিখতে না হয়।</string>
+    <string name="onboarding_feat_encryption_title">হার্ডওয়্যার এনক্রিপ্টেড</string>
+    <string name="onboarding_feat_encryption_desc">আপনার ভল্টটি AES-256 এনক্রিপশন এবং বায়োমেট্রিক সুরক্ষায় আপনার ফোনে সুরক্ষিত থাকে।</string>
+
+    <string name="onboarding_theme_title">থিম ও অ্যাকসেন্ট</string>
+    <string name="onboarding_theme_subtitle">আপনার পছন্দের সাথে মানানসই একটি রঙ নির্বাচন করুন।</string>
+    <string name="onboarding_theme_preview_label">প্রিভিউ</string>
+    <string name="onboarding_theme_section_palette">কালার প্যালেট</string>
+
+    <string name="onboarding_auto_title">স্বয়ংক্রিয় ট্র্যাকিং</string>
+    <string name="onboarding_auto_subtitle">Cipher যাতে লেনদেনের সাথে সাথে স্বয়ংক্রিয়ভাবে হিসাব রাখতে পারে তার জন্য প্রয়োজনীয় অনুমতি প্রদান করুন।</string>
+    <string name="onboarding_perm_sms_title">ব্যাংক এসএমএস রিডার</string>
+    <string name="onboarding_perm_sms_desc">ব্যাংক থেকে আসা ডেবিট ও ক্রেডিট এসএমএস স্বয়ংক্রিয়ভাবে ট্র্যাক করে।</string>
+    <string name="onboarding_perm_notif_title">পেমেন্ট অ্যাপ নোটিফিকেশন</string>
+    <string name="onboarding_perm_notif_desc">ডিজিটাল ওয়ালেট ও পেমেন্ট অ্যাপ থেকে লেনদেনের তথ্য সংগ্রহ করে।</string>
+    <string name="onboarding_perm_alerts_title">খরচ ও বাজেট সতর্কতা</string>
+    <string name="onboarding_perm_alerts_desc">দৈনিক খরচের সারাংশ এবং বাজেট সীমার সতর্কবার্তা পাঠায়।</string>
+    <string name="onboarding_status_active">সক্রিয়</string>
+    <string name="onboarding_status_off">নিষ্ক্রিয়</string>
+    <string name="onboarding_take_tour">একটি দ্রুত সফর দেখুন</string>
+    <string name="onboarding_theme_mode_label">চেহারার মোড</string>
+    <string name="onboarding_theme_mode_system">সিস্টেম</string>
+    <string name="onboarding_theme_mode_light">লাইট</string>
+    <string name="onboarding_theme_mode_dark">ডার্ক</string>
+    <string name="onboarding_welcome_tagline">আপনার অর্থ। অন্য কোথাও নয়।</string>
+    <string name="onboarding_welcome_begin">শুরু করুন</string>
+    <string name="onboarding_apps_step_label">ট্র্যাকড অ্যাপস</string>
+    <string name="onboarding_apps_title">আপনি কোন অ্যাপ ব্যবহার করেন?</string>
+    <string name="onboarding_apps_subtitle">Cipher এই অ্যাপগুলির বিজ্ঞপ্তি পর্যবেক্ষণ করে লেনদেন স্বয়ংক্রিয়ভাবে লগ করে। কিছু আপনার ফোন ছাড়ে না।</string>
+    <string name="onboarding_apps_search_hint">খুঁজুন</string>
+    <string name="onboarding_apps_selected_count">%d নির্বাচিত</string>
+    <string name="onboarding_apps_finish">সেটআপ সম্পন্ন করুন</string>
+    <string name="onboarding_apps_loading">ইনস্টল করা অ্যাপ লোড হচ্ছে…</string>
+    <string name="onboarding_perm_intro">এই অনুমতিগুলি কখনো আপনার ডিভাইসের বাইরে ডেটা পাঠায় না। সবকিছু স্থানীয়ভাবে চলে।</string>
 </resources>

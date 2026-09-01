@@ -301,4 +301,62 @@
     <string name="auto_backup_password_title">Passwort für automatisches Backup</string>
     <string name="auto_backup_password_desc">Geben Sie ein Passwort zur Verschlüsselung Ihrer automatischen Backups ein.</string>
     <string name="backup_password_placeholder">Backup-Passwort</string>
+
+    <!-- Onboarding Strings -->
+    <string name="onboarding_step_region">Sprache &amp; Währung</string>
+    <string name="onboarding_step_privacy">Datenschutz</string>
+    <string name="onboarding_step_appearance">Design</string>
+    <string name="onboarding_step_automation">Automatisierung</string>
+    <string name="onboarding_step_apps">Apps</string>
+
+    <string name="onboarding_lang_title">Sprache &amp; Währung wählen</string>
+    <string name="onboarding_lang_subtitle">Legen Sie fest, wie Zahlen, Daten und Texte in Ihrem Tresor angezeigt werden.</string>
+    <string name="onboarding_live_preview_label">LIVE-VORSCHAU</string>
+    <string name="onboarding_preview_merchant">Kaffee &amp; Bäckerei</string>
+    <string name="onboarding_preview_category">Essen &amp; Gastronomie · Heute</string>
+    <string name="onboarding_section_language">APP-SPRACHE</string>
+    <string name="onboarding_section_currency">BEVORZUGTE WÄHRUNG</string>
+
+    <string name="onboarding_welcome_badge">100% PRIVAT &amp; OFFLINE</string>
+    <string name="onboarding_welcome_brand_greeting">Willkommen bei Cipher.</string>
+    <string name="onboarding_welcome_title">Ihre Finanzen, absolut vertraulich.</string>
+    <string name="onboarding_welcome_subtitle">Cipher erfasst Ihre täglichen Ausgaben automatisch, ohne persönliche Daten in die Cloud zu übertragen. Alles verbleibt auf Ihrem Gerät.</string>
+    <string name="onboarding_btn_get_started">Loslegen</string>
+    <string name="onboarding_feat_offline_title">100% Offline &amp; Sicher</string>
+    <string name="onboarding_feat_offline_desc">Keine Cloud-Server, kein Konto erforderlich, kein Tracking.</string>
+    <string name="onboarding_feat_auto_title">Automatische Ausgabenerfassung</string>
+    <string name="onboarding_feat_auto_desc">Liest Bank-SMS und Benachrichtigungen lokal aus, sodass Sie keine Quittungen manuell eingeben müssen.</string>
+    <string name="onboarding_feat_encryption_title">Hardware-Verschlüsselung</string>
+    <string name="onboarding_feat_encryption_desc">Ihr Tresor ist auf dem Gerät mit AES-256-Verschlüsselung und Biometrie geschützt.</string>
+
+    <string name="onboarding_theme_title">Design &amp; Akzentfarbe</string>
+    <string name="onboarding_theme_subtitle">Wählen Sie eine Akzentfarbe, die zu Ihnen passt.</string>
+    <string name="onboarding_theme_preview_label">VORSCHAU</string>
+    <string name="onboarding_theme_section_palette">FARBPALETTEN</string>
+
+    <string name="onboarding_auto_title">Automatische Erfassung</string>
+    <string name="onboarding_auto_subtitle">Aktivieren Sie lokale Berechtigungen, damit Cipher Transaktionen in Echtzeit erfassen kann.</string>
+    <string name="onboarding_perm_sms_title">Bank-SMS-Erkennung</string>
+    <string name="onboarding_perm_sms_desc">Erfasst Abbuchungs- und Gutschrift-SMS Ihrer Banken.</string>
+    <string name="onboarding_perm_notif_title">Zahlungs-App-Benachrichtigungen</string>
+    <string name="onboarding_perm_notif_desc">Liest Transaktionen aus Wallet- und Zahlungs-Apps aus.</string>
+    <string name="onboarding_perm_alerts_title">Ausgaben- &amp; Budgetwarnungen</string>
+    <string name="onboarding_perm_alerts_desc">Sendet tägliche Zusammenfassungen und Budgetgrenzen-Warnungen.</string>
+    <string name="onboarding_status_active">AKTIV</string>
+    <string name="onboarding_status_off">DEAKTIVIERT</string>
+    <string name="onboarding_take_tour">Kurze Tour ansehen</string>
+    <string name="onboarding_theme_mode_label">DARSTELLUNGSMODUS</string>
+    <string name="onboarding_theme_mode_system">System</string>
+    <string name="onboarding_theme_mode_light">Hell</string>
+    <string name="onboarding_theme_mode_dark">Dunkel</string>
+    <string name="onboarding_welcome_tagline">Ihr Geld. Nirgendwo sonst.</string>
+    <string name="onboarding_welcome_begin">Loslegen</string>
+    <string name="onboarding_apps_step_label">VERFOLGTE APPS</string>
+    <string name="onboarding_apps_title">Welche Apps nutzen Sie?</string>
+    <string name="onboarding_apps_subtitle">Cipher überwacht die Benachrichtigungen dieser Apps und protokolliert Transaktionen automatisch. Nichts verlässt Ihr Telefon.</string>
+    <string name="onboarding_apps_search_hint">Suchen</string>
+    <string name="onboarding_apps_selected_count">%d ausgewählt</string>
+    <string name="onboarding_apps_finish">Einrichtung abschließen</string>
+    <string name="onboarding_apps_loading">Installierte Apps werden geladen…</string>
+    <string name="onboarding_perm_intro">Diese Berechtigungen senden niemals Daten außerhalb Ihres Geräts. Alles läuft lokal.</string>
 </resources>

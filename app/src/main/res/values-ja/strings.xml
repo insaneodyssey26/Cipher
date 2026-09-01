@@ -301,4 +301,62 @@
     <string name="auto_backup_password_title">自動バックアップパスワード</string>
     <string name="auto_backup_password_desc">自動バックアップを暗号化するためのパスワードを入力してください。</string>
     <string name="backup_password_placeholder">バックアップパスワード</string>
+
+    <!-- Onboarding Strings -->
+    <string name="onboarding_step_region">言語と通貨</string>
+    <string name="onboarding_step_privacy">プライバシー</string>
+    <string name="onboarding_step_appearance">テーマ</string>
+    <string name="onboarding_step_automation">自動化</string>
+    <string name="onboarding_step_apps">アプリ</string>
+
+    <string name="onboarding_lang_title">言語と通貨の選択</string>
+    <string name="onboarding_lang_subtitle">数字、日付、テキストの表示形式を設定します。</string>
+    <string name="onboarding_live_preview_label">プレビュー</string>
+    <string name="onboarding_preview_merchant">カフェ＆ベーカリー</string>
+    <string name="onboarding_preview_category">飲食 · 今日</string>
+    <string name="onboarding_section_language">アプリ言語</string>
+    <string name="onboarding_section_currency">使用通貨</string>
+
+    <string name="onboarding_welcome_badge">100% プライベート＆オフライン</string>
+    <string name="onboarding_welcome_brand_greeting">Cipher へようこそ</string>
+    <string name="onboarding_welcome_title">お金の管理を、完全なプライバシーで。</string>
+    <string name="onboarding_welcome_subtitle">Cipherは個人データをクラウドに送信することなく、日々の支出を自動的に追跡します。すべてのデータはお使いの端末内にのみ保存されます。</string>
+    <string name="onboarding_btn_get_started">はじめる</string>
+    <string name="onboarding_feat_offline_title">100% オフライン＆プライベート</string>
+    <string name="onboarding_feat_offline_desc">クラウドサーバーなし、アカウント不要、トラッキングゼロ。</string>
+    <string name="onboarding_feat_auto_title">支出の自動記録</string>
+    <string name="onboarding_feat_auto_desc">銀行SMSや通知を端末内で読み取るため、レシートを手入力する必要はありません。</string>
+    <string name="onboarding_feat_encryption_title">ハードウェア暗号化</string>
+    <string name="onboarding_feat_encryption_desc">生体認証とAES-256暗号化によって、大切なデータが端末内で保護されます。</string>
+
+    <string name="onboarding_theme_title">テーマとアクセントカラー</string>
+    <string name="onboarding_theme_subtitle">お好みのアクセントカラーをお選びください。</string>
+    <string name="onboarding_theme_preview_label">プレビュー</string>
+    <string name="onboarding_theme_section_palette">カラーパレット</string>
+
+    <string name="onboarding_auto_title">自動記録の設定</string>
+    <string name="onboarding_auto_subtitle">支出が発生した際に自動で記録できるよう、必要な権限を有効にしてください。</string>
+    <string name="onboarding_perm_sms_title">銀行SMSリーダー</string>
+    <string name="onboarding_perm_sms_desc">銀行からの出入金SMS通知を自動的に取得します。</string>
+    <string name="onboarding_perm_notif_title">決済アプリの通知</string>
+    <string name="onboarding_perm_notif_desc">電子マネーや決済アプリの通知から取引を記録します。</string>
+    <string name="onboarding_perm_alerts_title">支出・予算アラート</string>
+    <string name="onboarding_perm_alerts_desc">毎日の支出まとめや予算オーバーの警告をお知らせします。</string>
+    <string name="onboarding_status_active">有効</string>
+    <string name="onboarding_status_off">無効</string>
+    <string name="onboarding_take_tour">機能ツアーを見る</string>
+    <string name="onboarding_theme_mode_label">外観モード</string>
+    <string name="onboarding_theme_mode_system">システム</string>
+    <string name="onboarding_theme_mode_light">ライト</string>
+    <string name="onboarding_theme_mode_dark">ダーク</string>
+    <string name="onboarding_welcome_tagline">あなたのお金。他のどこにもない。</string>
+    <string name="onboarding_welcome_begin">はじめる</string>
+    <string name="onboarding_apps_step_label">追跡アプリ</string>
+    <string name="onboarding_apps_title">どのアプリを使っていますか？</string>
+    <string name="onboarding_apps_subtitle">Cipherはこれらのアプリの通知を監視し、取引を自動的に記録します。データは端末の外に出ません。</string>
+    <string name="onboarding_apps_search_hint">検索</string>
+    <string name="onboarding_apps_selected_count">%d個選択済み</string>
+    <string name="onboarding_apps_finish">セットアップ完了</string>
+    <string name="onboarding_apps_loading">インストール済みアプリを読み込み中…</string>
+    <string name="onboarding_perm_intro">これらの権限はデバイス外にデータを送信しません。すべてローカルで動作します。</string>
 </resources>

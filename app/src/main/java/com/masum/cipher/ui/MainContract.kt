@@ -14,6 +14,9 @@ class MainContract {
         data class AddTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) : Intent()
         data class SaveTrackedApps(val apps: Set<String>) : Intent()
         data class SaveAccentColor(val color: com.masum.cipher.core.data.local.pref.AccentColor) : Intent()
+        data class SaveTheme(val theme: com.masum.cipher.core.data.local.pref.AppTheme) : Intent()
+        data class SaveLanguage(val languageCode: String) : Intent()
+        data class SaveCurrency(val currencyCode: String, val currencySymbol: String) : Intent()
         data class UpdateDraftTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity?) : Intent()
     }
 
