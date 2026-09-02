@@ -8,19 +8,21 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +33,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -51,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,16 +64,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -106,7 +116,6 @@ import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Sun
 import compose.icons.lucideicons.SunMoon
 import compose.icons.lucideicons.Wallet
-import compose.icons.lucideicons.WifiOff
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -130,6 +139,9 @@ fun OnboardingScreen(
     var page by rememberSaveable { mutableIntStateOf(0) }
     val totalPages = 6
     var showQuickLangDialog by remember { mutableStateOf(false) }
+
+    var showCompletionDialog by remember { mutableStateOf(false) }
+    var completedSelectedApps by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     Box(
         modifier = Modifier
@@ -158,24 +170,24 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
+                    .clipToBounds()
             ) {
                 AnimatedContent(
                     targetState = page,
                     transitionSpec = {
-                        val entering = targetState > initialState
-                        if (entering) {
-                            (fadeIn(tween(320)) + slideInVertically(tween(320, easing = FastOutSlowInEasing)) { it / 10 })
-                                .togetherWith(fadeOut(tween(200)))
+                        val isForward = targetState > initialState
+                        if (isForward) {
+                            (slideInHorizontally(animationSpec = spring(stiffness = 380f, dampingRatio = 0.85f)) { (it * 0.28f).toInt() } + fadeIn(tween(240)))
+                                .togetherWith(slideOutHorizontally(animationSpec = spring(stiffness = 380f, dampingRatio = 0.85f)) { -(it * 0.28f).toInt() } + fadeOut(tween(180)))
                         } else {
-                            fadeIn(tween(280)) togetherWith fadeOut(tween(180))
-                        }
+                            (slideInHorizontally(animationSpec = spring(stiffness = 380f, dampingRatio = 0.85f)) { -(it * 0.28f).toInt() } + fadeIn(tween(240)))
+                                .togetherWith(slideOutHorizontally(animationSpec = spring(stiffness = 380f, dampingRatio = 0.85f)) { (it * 0.28f).toInt() } + fadeOut(tween(180)))
+                        }.using(SizeTransform(clip = true))
                     },
                     label = "onboarding_page"
                 ) { currentPage ->
                     when (currentPage) {
                         0 -> WelcomePage(
-                            currentLanguageCode = currentLanguageCode,
-                            onOpenLanguagePicker = { showQuickLangDialog = true },
                             onNext = { page = 1 }
                         )
                         1 -> ThemeSelectionPage(
@@ -202,8 +214,9 @@ fun OnboardingScreen(
                         else -> AppSelectionScreen(
                             initialSelectedApps = emptySet(),
                             onComplete = { apps ->
+                                completedSelectedApps = apps
                                 onSaveApps(apps)
-                                onComplete()
+                                showCompletionDialog = true
                             }
                         )
                     }
@@ -224,6 +237,15 @@ fun OnboardingScreen(
             onDismiss = { showQuickLangDialog = false }
         )
     }
+
+    if (showCompletionDialog) {
+        OnboardingWelcomeCompleteModal(
+            onEnterVault = {
+                showCompletionDialog = false
+                onComplete()
+            }
+        )
+    }
 }
 
 @Composable
@@ -240,11 +262,11 @@ private fun OnboardingTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .padding(top = 12.dp, bottom = 4.dp),
+            .padding(top = 10.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.width(72.dp),
+            modifier = Modifier.width(52.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             if (currentPage > 0) {
@@ -271,38 +293,53 @@ private fun OnboardingTopBar(
         }
 
         Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (currentPage > 0) {
                 repeat(totalPages) { idx ->
-                    val isFilled = idx < currentPage
-                    val isActive = idx == currentPage
-                    val colorAlpha = when {
-                        isActive -> 1f
-                        isFilled -> 0.38f
-                        else -> 0.12f
-                    }
-                    val dotWidth by animateFloatAsState(
-                        targetValue = if (isActive) 20f else 6f,
-                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                        label = "dot_w_$idx"
+                    val isCompleted = idx < currentPage
+                    val isCurrent = idx == currentPage
+                    val progressFraction by animateFloatAsState(
+                        targetValue = when {
+                            isCompleted -> 1f
+                            isCurrent -> 1f
+                            else -> 0f
+                        },
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "prog_step_$idx"
                     )
-                    Spacer(modifier = Modifier.width(3.dp))
+
                     Box(
                         modifier = Modifier
-                            .size(width = dotWidth.dp, height = 6.dp)
+                            .weight(1f)
+                            .height(3.5.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = colorAlpha))
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progressFraction)
+                                .height(3.5.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isCurrent) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                )
+                        )
+                    }
                 }
             }
         }
 
         Box(
-            modifier = Modifier.width(72.dp),
+            modifier = Modifier.width(68.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
             Box(
@@ -357,120 +394,108 @@ private fun OnboardingTopBar(
 
 @Composable
 private fun WelcomePage(
-    currentLanguageCode: String,
-    onOpenLanguagePicker: () -> Unit,
     onNext: () -> Unit
 ) {
     val view = LocalView.current
 
-    val greetings = listOf("Hello", "নমস্কার", "नमस्ते", "こんにちは", "Hola", "Bonjour", "Hallo")
-    var greetingIndex by remember { mutableIntStateOf(0) }
-
-    val contentAlpha = remember { Animatable(0f) }
-    val contentOffset = remember { Animatable(20f) }
-
-    LaunchedEffect(Unit) {
-        launch { contentOffset.animateTo(0f, spring(stiffness = 200f, dampingRatio = Spring.DampingRatioMediumBouncy)) }
-        contentAlpha.animateTo(1f, tween(500))
-    }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(2800.milliseconds)
-            greetingIndex = (greetingIndex + 1) % greetings.size
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 28.dp),
+            .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 28.dp)
-                .graphicsLayer {
-                    alpha = contentAlpha.value
-                    translationY = contentOffset.value
-                },
+                .padding(top = 16.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            AnimatedContent(
-                targetState = greetings[greetingIndex],
-                transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(280)) },
-                label = "greeting"
-            ) { greeting ->
-                Text(
-                    text = greeting,
-                    style = Typography.bodyLarge.copy(
-                        fontFamily = Manrope,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 17.sp,
-                        letterSpacing = 0.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = "cipher.",
                 style = Typography.displayLarge.copy(
                     fontFamily = DMSans,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 52.sp,
-                    letterSpacing = (-2.5).sp,
-                    lineHeight = 56.sp
+                    fontSize = 44.sp,
+                    letterSpacing = ((-2).sp),
+                    lineHeight = 46.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = stringResource(R.string.onboarding_welcome_tagline),
-                style = Typography.titleMedium.copy(
+                text = stringResource(R.string.onboarding_welcome_greet_lead),
+                style = Typography.headlineSmall.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                    letterSpacing = (-0.4).sp
+                ),
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.onboarding_welcome_tagline_simple),
+                style = Typography.bodyMedium.copy(
                     fontFamily = Manrope,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp,
-                    lineHeight = 23.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.5.sp,
+                    lineHeight = 21.sp,
                     letterSpacing = (-0.1).sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
             )
         }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer { alpha = contentAlpha.value },
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                    RoundedCornerShape(20.dp)
+                )
+                .padding(horizontal = 18.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            WelcomeFeatureItem(
-                icon = LucideIcons.WifiOff,
-                title = stringResource(R.string.onboarding_feat_offline_title),
-                description = stringResource(R.string.onboarding_feat_offline_desc)
-            )
-            WelcomeFeatureItem(
-                icon = LucideIcons.Zap,
-                title = stringResource(R.string.onboarding_feat_auto_title),
-                description = stringResource(R.string.onboarding_feat_auto_desc)
-            )
-            WelcomeFeatureItem(
+            WelcomeFeatureBenefit(
                 icon = LucideIcons.ShieldCheck,
-                title = stringResource(R.string.onboarding_feat_encryption_title),
-                description = stringResource(R.string.onboarding_feat_encryption_desc)
+                title = stringResource(R.string.onboarding_feature_offline_simple_title),
+                description = stringResource(R.string.onboarding_feature_offline_simple_desc)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            )
+            WelcomeFeatureBenefit(
+                icon = LucideIcons.Zap,
+                title = stringResource(R.string.onboarding_feature_auto_simple_title),
+                description = stringResource(R.string.onboarding_feature_auto_simple_desc)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            )
+            WelcomeFeatureBenefit(
+                icon = LucideIcons.ChartBar,
+                title = stringResource(R.string.onboarding_feature_insights_simple_title),
+                description = stringResource(R.string.onboarding_feature_insights_simple_desc)
             )
         }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
-                .graphicsLayer { alpha = contentAlpha.value },
+                .padding(bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PrimaryActionButton(
@@ -485,33 +510,29 @@ private fun WelcomePage(
 }
 
 @Composable
-private fun WelcomeFeatureItem(
+private fun WelcomeFeatureBenefit(
     icon: ImageVector,
     title: String,
     description: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-                    RoundedCornerShape(12.dp)
-                ),
+                .padding(top = 2.dp)
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(19.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -520,20 +541,226 @@ private fun WelcomeFeatureItem(
                 style = Typography.titleSmall.copy(
                     fontFamily = Manrope,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
+                    fontSize = 14.5.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = description,
                 style = Typography.bodySmall.copy(
                     fontFamily = Manrope,
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp
+                    fontSize = 12.2.sp,
+                    lineHeight = 17.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
             )
+        }
+    }
+}
+
+@Composable
+private fun OnboardingWelcomeCompleteModal(
+    onEnterVault: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.65f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                        RoundedCornerShape(24.dp)
+                    )
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {}
+                    )
+                    .padding(24.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.onboarding_ready_title),
+                        style = Typography.headlineSmall.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            letterSpacing = (-0.5).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = stringResource(R.string.onboarding_ready_subtitle),
+                        style = Typography.bodyMedium.copy(
+                            fontFamily = Manrope,
+                            fontSize = 13.5.sp,
+                            lineHeight = 19.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(26.dp))
+
+                    SwipeToConfirmSlider(
+                        hintText = stringResource(R.string.onboarding_ready_slide_hint),
+                        onConfirmed = onEnterVault
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwipeToConfirmSlider(
+    hintText: String,
+    onConfirmed: () -> Unit
+) {
+    val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
+    val dragOffset = remember { Animatable(0f) }
+    var containerWidthPx by remember { mutableFloatStateOf(0f) }
+    var isConfirmed by remember { mutableStateOf(false) }
+
+    val thumbSizeDp = 48.dp
+    val thumbSizePx = with(LocalDensity.current) { thumbSizeDp.toPx() }
+    val horizontalPaddingPx = with(LocalDensity.current) { 4.dp.toPx() }
+
+    val maxDragPx = (containerWidthPx - thumbSizePx - (horizontalPaddingPx * 2)).coerceAtLeast(0f)
+    val progress = if (maxDragPx > 0f) (dragOffset.value / maxDragPx).coerceIn(0f, 1f) else 0f
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                RoundedCornerShape(16.dp)
+            )
+            .onSizeChanged { containerWidthPx = it.width.toFloat() },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress)
+                .height(56.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.40f)
+                        )
+                    )
+                )
+        )
+
+        Text(
+            text = hintText,
+            style = Typography.labelMedium.copy(
+                fontFamily = Manrope,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                letterSpacing = 0.4.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = (1f - progress * 1.5f).coerceIn(0f, 0.75f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 56.dp),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Box(
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .offset { IntOffset(dragOffset.value.toInt(), 0) }
+                .size(thumbSizeDp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .pointerInput(maxDragPx, isConfirmed) {
+                    if (isConfirmed || maxDragPx <= 0f) return@pointerInput
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            if (dragOffset.value >= maxDragPx * 0.72f) {
+                                isConfirmed = true
+                                coroutineScope.launch {
+                                    dragOffset.animateTo(
+                                        maxDragPx,
+                                        spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                    )
+                                    view.performVibrate(true, isLongPress = false)
+                                    onConfirmed()
+                                }
+                            } else {
+                                coroutineScope.launch {
+                                    dragOffset.animateTo(
+                                        0f,
+                                        spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                    )
+                                }
+                            }
+                        },
+                        onHorizontalDrag = { _, dragAmount ->
+                            coroutineScope.launch {
+                                val target = (dragOffset.value + dragAmount).coerceIn(0f, maxDragPx)
+                                dragOffset.snapTo(target)
+                            }
+                        }
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            AnimatedContent(
+                targetState = progress >= 0.95f,
+                transitionSpec = { fadeIn(tween(150)) togetherWith fadeOut(tween(100)) },
+                label = "thumb_icon"
+            ) { confirmed ->
+                if (confirmed) {
+                    Icon(
+                        imageVector = LucideIcons.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Icon(
+                        imageVector = LucideIcons.ArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -556,7 +783,7 @@ private fun ThemeSelectionPage(
     val contentAlpha = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         heroAlpha.animateTo(1f, tween(340))
-        delay(110)
+        delay(110.milliseconds)
         contentAlpha.animateTo(1f, tween(380))
     }
 
@@ -891,7 +1118,7 @@ private fun LanguageSelectionPage(
     val gridAlpha = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         heroAlpha.animateTo(1f, tween(340))
-        delay(120)
+        delay(120.milliseconds)
         gridAlpha.animateTo(1f, tween(360))
     }
 
@@ -1051,9 +1278,9 @@ private fun CurrencySelectionPage(
     val gridAlpha = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         heroAlpha.animateTo(1f, tween(320))
-        delay(80)
+        delay(80.milliseconds)
         previewAlpha.animateTo(1f, tween(340))
-        delay(90)
+        delay(90.milliseconds)
         gridAlpha.animateTo(1f, tween(340))
     }
 
@@ -1290,7 +1517,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
     val cardsAlpha = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         heroAlpha.animateTo(1f, tween(340))
-        delay(130)
+        delay(130.milliseconds)
         cardsAlpha.animateTo(1f, tween(380))
     }
 

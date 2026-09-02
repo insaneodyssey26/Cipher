@@ -104,7 +104,7 @@ object AppFormatters {
         val absVal = kotlin.math.abs(value)
         val sign = if (value < 0) "-" else ""
         val pattern = if (decimals > 0) "%,.${decimals}f" else "%,.0f"
-        val formattedNumber = String.format(locale, pattern, absVal)
+        val formattedNumber = String.format(Locale.US, pattern, absVal)
         return formatAmountWithSymbol(formattedNumber, currencySymbol, locale, sign)
     }
 
@@ -120,34 +120,34 @@ object AppFormatters {
         val formattedNumber: String = if (lang == "ja") {
             when {
                 absVal >= 100_000_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 100_000_000.0).removeSuffix(".0").removeSuffix(",0") + "億"
+                    String.format(Locale.US, "%.1f", absVal / 100_000_000.0).removeSuffix(".0").removeSuffix(",0") + "億"
                 }
                 absVal >= 10_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 10_000.0).removeSuffix(".0").removeSuffix(",0") + "万"
+                    String.format(Locale.US, "%.1f", absVal / 10_000.0).removeSuffix(".0").removeSuffix(",0") + "万"
                 }
                 else -> {
-                    String.format(locale, "%,.0f", absVal)
+                    String.format(Locale.US, "%,.0f", absVal)
                 }
             }
         } else {
             when {
                 absVal >= 1_000_000_000_000_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 1_000_000_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "Q"
+                    String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "Q"
                 }
                 absVal >= 1_000_000_000_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 1_000_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "T"
+                    String.format(Locale.US, "%.1f", absVal / 1_000_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "T"
                 }
                 absVal >= 1_000_000_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 1_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "B"
+                    String.format(Locale.US, "%.1f", absVal / 1_000_000_000.0).removeSuffix(".0").removeSuffix(",0") + "B"
                 }
                 absVal >= 1_000_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 1_000_000.0).removeSuffix(".0").removeSuffix(",0") + "M"
+                    String.format(Locale.US, "%.1f", absVal / 1_000_000.0).removeSuffix(".0").removeSuffix(",0") + "M"
                 }
                 absVal >= 100_000.0 -> {
-                    String.format(locale, "%.1f", absVal / 1000.0).removeSuffix(".0").removeSuffix(",0") + "k"
+                    String.format(Locale.US, "%.1f", absVal / 1000.0).removeSuffix(".0").removeSuffix(",0") + "k"
                 }
                 else -> {
-                    String.format(locale, "%,.0f", absVal)
+                    String.format(Locale.US, "%,.0f", absVal)
                 }
             }
         }

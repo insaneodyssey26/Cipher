@@ -1818,11 +1818,12 @@ private fun buildFilterSummary(
         }
     }
     if (filter.minAmount != null && filter.maxAmount != null) {
-        parts.add("${AppFormatters.formatCurrency(filter.minAmount.toDouble(), currencySymbol, locale, decimals = 0)} – ${AppFormatters.formatCurrency(filter.maxAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
+        parts.add("${AppFormatters.formatCurrency(filter.minAmount, currencySymbol, locale, decimals = 0)} – ${AppFormatters.formatCurrency(
+            filter.maxAmount, currencySymbol, locale, decimals = 0)}")
     } else if (filter.minAmount != null) {
-        parts.add("> ${AppFormatters.formatCurrency(filter.minAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
+        parts.add("> ${AppFormatters.formatCurrency(filter.minAmount, currencySymbol, locale, decimals = 0)}")
     } else if (filter.maxAmount != null) {
-        parts.add("< ${AppFormatters.formatCurrency(filter.maxAmount.toDouble(), currencySymbol, locale, decimals = 0)}")
+        parts.add("< ${AppFormatters.formatCurrency(filter.maxAmount, currencySymbol, locale, decimals = 0)}")
     }
     return parts.joinToString(" • ")
 }
@@ -2015,7 +2016,7 @@ private fun FilterEmptyState(period: com.masum.cipher.core.domain.model.TimePeri
         )
         Spacer(modifier = Modifier.height(16.dp))
         val context = androidx.compose.ui.platform.LocalContext.current
-        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: Locale.getDefault()
         Text(
             text = "${stringResource(R.string.no_transactions_found)}: ${AppFormatters.getPeriodLabel(period, emptyList(), context = context, locale = locale)}",
             style = Typography.bodyLarge,

@@ -833,7 +833,7 @@ fun SubscriptionsCard(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalMonthly, currencySymbol, locale)} / mo",
+                            text = "${AppFormatters.formatCurrency(totalMonthly, currencySymbol, locale)} / mo",
                             style = Typography.titleLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold,
@@ -843,7 +843,7 @@ fun SubscriptionsCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "≈ ${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalAnnual, currencySymbol, locale)} / yr projected",
+                            text = "≈ ${AppFormatters.formatCurrency(totalAnnual, currencySymbol, locale)} / yr projected",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Manrope,
                                 fontSize = 11.sp
@@ -990,7 +990,7 @@ fun SubscriptionsCard(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = com.masum.cipher.core.util.AppFormatters.formatCurrency(sub.amount, currencySymbol, locale),
+                                    text = AppFormatters.formatCurrency(sub.amount, currencySymbol, locale),
                                     style = Typography.titleMedium.copy(
                                         fontFamily = Manrope,
                                         fontWeight = FontWeight.Bold,

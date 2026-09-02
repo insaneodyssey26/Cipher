@@ -516,7 +516,7 @@ fun TimeSelectorDropdown(
                         }
                     ) {
                         Text(
-                            text = "Apply",
+                            text = stringResource(R.string.apply),
                             style = Typography.labelLarge.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold
@@ -528,7 +528,7 @@ fun TimeSelectorDropdown(
                 dismissButton = {
                     TextButton(onClick = { showDateRangePicker = false }) {
                         Text(
-                            text = "Cancel",
+                            text = stringResource(R.string.cancel),
                             style = Typography.labelLarge.copy(fontFamily = Manrope),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -539,7 +539,7 @@ fun TimeSelectorDropdown(
                     state = dateRangePickerState,
                     title = {
                         Text(
-                            text = "Select Date Range",
+                            text = stringResource(R.string.select_date_range),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.Bold
@@ -551,11 +551,13 @@ fun TimeSelectorDropdown(
                         val start = dateRangePickerState.selectedStartDateMillis
                         val end = dateRangePickerState.selectedEndDateMillis
                         val sdf = SimpleDateFormat("MMM d, yyyy", locale)
+                        val startDatePlaceholder = stringResource(R.string.start_date)
+                        val endDatePlaceholder = stringResource(R.string.end_date)
                         val rangeText = if (start != null && end != null) {
                             "${sdf.format(Date(start))} – ${sdf.format(Date(end))}"
                         } else if (start != null) {
-                            "${sdf.format(Date(start))} – End Date"
-                        } else "Start Date – End Date"
+                            "${sdf.format(Date(start))} – $endDatePlaceholder"
+                        } else "$startDatePlaceholder – $endDatePlaceholder"
 
                         Text(
                             text = rangeText,
