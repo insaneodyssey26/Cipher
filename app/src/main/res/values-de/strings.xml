@@ -392,4 +392,14 @@
     <string name="end_date">Enddatum</string>
     <string name="apply">Anwenden</string>
     <string name="cancel">Abbrechen</string>
+    <string name="whats_new_title">Neu in Version %1$s 🎉</string>
+    <string name="whats_new_feature_currency_title">Vollständige Währungsunterstützung</string>
+    <string name="whats_new_feature_currency_desc">Wählen Sie Ihre bevorzugte Währung mit intelligenter Zahlenformatierung und angepasstem PDF-Export.</string>
+    <string name="whats_new_feature_languages_title">Neue Sprachen</string>
+    <string name="whats_new_feature_languages_desc">Cipher ist jetzt neben Englisch auch auf Deutsch, Hindi, Bengalisch, Japanisch, Spanisch und Französisch verfügbar.</string>
+    <string name="whats_new_feature_custom_date_title">Benutzerdefiniertes Datum für Buchungen</string>
+    <string name="whats_new_feature_custom_date_desc">Wählen und bearbeiten Sie das genaue Datum und die Uhrzeit beim Hinzufügen oder Bearbeiten.</string>
+    <string name="whats_new_feature_onboarding_title">Neues Onboarding-Erlebnis</string>
+    <string name="whats_new_feature_onboarding_desc">Ein übersichtlicher Einrichtungsprozess mit Sprachauswahl, Themenvorschau und flüssigen Animationen.</string>
+    <string name="whats_new_setup_tracking_continue">Tracking einrichten &amp; fortfahren</string>
 </resources>

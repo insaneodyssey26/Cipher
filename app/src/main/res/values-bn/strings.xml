@@ -392,4 +392,14 @@
     <string name="end_date">শেষের তারিখ</string>
     <string name="apply">প্রয়োগ করুন</string>
     <string name="cancel">বাতিল</string>
+    <string name="whats_new_title">ভার্সন %1$s-এ নতুন কী আছে 🎉</string>
+    <string name="whats_new_feature_currency_title">সম্পূর্ণ বহু-মুদ্রা সমর্থন</string>
+    <string name="whats_new_feature_currency_desc">স্মার্ট সংখ্যা বিন্যাস, স্থানীয় পার্সিং নিয়ম এবং মুদ্রা-সচেতন PDF রপ্তানিসহ আপনার পছন্দের মুদ্রা নির্বাচন করুন।</string>
+    <string name="whats_new_feature_languages_title">নতুন ভাষাসমূহ</string>
+    <string name="whats_new_feature_languages_desc">সাইফার এখন ইংরেজির পাশাপাশি বাংলা, হিন্দি, জাপানিজ, স্প্যানিশ, ফ্রেঞ্চ এবং জার্মানে উপলব্ধ।</string>
+    <string name="whats_new_feature_custom_date_title">লেনদেনে কাস্টম তারিখ</string>
+    <string name="whats_new_feature_custom_date_desc">লেনদেন যোগ বা সম্পাদনা করার সময় সঠিক তারিখ এবং সময় বেছে নিন।</string>
+    <string name="whats_new_feature_onboarding_title">নতুন অনবোর্ডিং অভিজ্ঞতা</string>
+    <string name="whats_new_feature_onboarding_desc">দ্রুত ভাষা নির্বাচক, থিম প্রিভিউ এবং মসৃণ অ্যানিমেশনসহ একটি পরিচ্ছন্ন সেটআপ।</string>
+    <string name="whats_new_setup_tracking_continue">ট্র্যাকিং সেটআপ করুন ও এগিয়ে যান</string>
 </resources>

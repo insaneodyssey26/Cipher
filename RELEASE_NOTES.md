@@ -1,5 +1,20 @@
 # Release Notes
 
+## [5.2.0]
+
+### Added
+- **Multi-Currency Support**: Full currency personalization across the app. Set custom or regional currencies with automatic thousand/decimal formatting, localized parser rules (US, UK, Europe, UAE, Canada, Australia, Singapore, India, Bangladesh, Japan), and currency-accurate PDF exports.
+- **Multilingual Support**: Fully localized in 7 languages (English, Hindi, Bengali, Japanese, Spanish, French, and German). All dates, months, and UI labels adapt instantly while keeping number digits universally readable.
+- **Custom Transaction Dates**: Select and edit exact dates and times when adding or editing transactions.
+- **Redesigned Onboarding**: Clean, friendly first-time setup flow with language selection right at the start, accent color and theme previews, and a swipe-to-confirm completion slider.
+
+### Changed & Improved
+- **Smooth Page Navigation**: Upgraded screen transitions with spring physics and zero stutter between steps.
+- **Consistent Number Formatting**: Standardized numeric digits to clean Western numerals across all languages, keeping balances and financial calculations crisp and unambiguous.
+- **Localized Date & Time Pickers**: Custom date ranges, headers, and buttons now follow your selected language.
+
+---
+
 ## [5.1.0]
 
 ### Added

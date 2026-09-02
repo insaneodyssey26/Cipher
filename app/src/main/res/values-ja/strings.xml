@@ -392,4 +392,14 @@
     <string name="end_date">終了日</string>
     <string name="apply">適用</string>
     <string name="cancel">キャンセル</string>
+    <string name="whats_new_title">バージョン %1$s の新機能 🎉</string>
+    <string name="whats_new_feature_currency_title">マルチ通貨に完全対応</string>
+    <string name="whats_new_feature_currency_desc">スマートな数値フォーマット、地域ごとの解析ルール、通貨対応PDF出力により、お好みの通貨を選択できます。</string>
+    <string name="whats_new_feature_languages_title">多言語対応</string>
+    <string name="whats_new_feature_languages_desc">英語に加え、日本語、ヒンディー語、ベンガル語、スペイン語、フランス語、ドイツ語に対応しました。</string>
+    <string name="whats_new_feature_custom_date_title">取引の日時指定</string>
+    <string name="whats_new_feature_custom_date_desc">取引の追加・編集時に正確な日付と時間を設定できます。</string>
+    <string name="whats_new_feature_onboarding_title">新しいオンボーディング</string>
+    <string name="whats_new_feature_onboarding_desc">言語のクイック選択、テーマプレビュー、スムーズな画面遷移を備えた初期設定。</string>
+    <string name="whats_new_setup_tracking_continue">トラッキングを設定して続ける</string>
 </resources>

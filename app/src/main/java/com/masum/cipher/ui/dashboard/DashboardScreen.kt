@@ -108,12 +108,14 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
+import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -907,7 +909,7 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "What's New in Version $versionName",
+                    text = stringResource(R.string.whats_new_title, versionName),
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
@@ -920,24 +922,24 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WhatsNewFeatureItem(
-                        title = "Dynamic Monthly Budgets",
-                        description = "Set a fixed spending limit or let your budget increase automatically as income arrives.",
-                        icon = LucideIcons.TrendingUp
+                        title = stringResource(R.string.whats_new_feature_currency_title),
+                        description = stringResource(R.string.whats_new_feature_currency_desc),
+                        icon = LucideIcons.Zap
                     )
                     WhatsNewFeatureItem(
-                        title = "Easier Budget Setup",
-                        description = "Set monthly targets faster with quick-add amounts and a clear breakdown of your limits.",
-                        icon = LucideIcons.SlidersHorizontal
-                    )
-                    WhatsNewFeatureItem(
-                        title = "Smoother Dashboard Scrolling",
-                        description = "Header and balance summary now fold and scroll cleanly with better touch response.",
-                        icon = LucideIcons.ArrowDown
-                    )
-                    WhatsNewFeatureItem(
-                        title = "Clearer Labels & Trends",
-                        description = "Simplified names across transactions, filters, and spending charts so everything is easy to understand.",
+                        title = stringResource(R.string.whats_new_feature_languages_title),
+                        description = stringResource(R.string.whats_new_feature_languages_desc),
                         icon = LucideIcons.Activity
+                    )
+                    WhatsNewFeatureItem(
+                        title = stringResource(R.string.whats_new_feature_custom_date_title),
+                        description = stringResource(R.string.whats_new_feature_custom_date_desc),
+                        icon = LucideIcons.Calendar
+                    )
+                    WhatsNewFeatureItem(
+                        title = stringResource(R.string.whats_new_feature_onboarding_title),
+                        description = stringResource(R.string.whats_new_feature_onboarding_desc),
+                        icon = LucideIcons.Check
                     )
                 }
 
@@ -959,7 +961,7 @@ fun DashboardScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
-                        text = if (!hasSeenV41) "Setup Tracking & Continue" else "Continue",
+                        text = if (!hasSeenV41) stringResource(R.string.whats_new_setup_tracking_continue) else stringResource(R.string.action_continue),
                         style = Typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

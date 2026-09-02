@@ -392,4 +392,14 @@
     <string name="end_date">End Date</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
+    <string name="whats_new_title">What\'s New in Version %1$s 🎉</string>
+    <string name="whats_new_feature_currency_title">Full Multi-Currency Support</string>
+    <string name="whats_new_feature_currency_desc">Choose your preferred currency with smart number formatting, localized parsing rules, and currency-aware PDF exports.</string>
+    <string name="whats_new_feature_languages_title">New Languages</string>
+    <string name="whats_new_feature_languages_desc">Cipher is now available in Hindi, Bengali, Japanese, Spanish, French, and German alongside English.</string>
+    <string name="whats_new_feature_custom_date_title">Custom Date for Transactions</string>
+    <string name="whats_new_feature_custom_date_desc">Pick and edit the exact date and time whenever you add or modify a transaction.</string>
+    <string name="whats_new_feature_onboarding_title">Fresh Onboarding Experience</string>
+    <string name="whats_new_feature_onboarding_desc">A cleaner setup flow with quick language pickers, theme selection, and smoother page transitions.</string>
+    <string name="whats_new_setup_tracking_continue">Setup Tracking &amp; Continue</string>
 </resources>
