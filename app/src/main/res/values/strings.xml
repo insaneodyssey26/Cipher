@@ -13,7 +13,6 @@
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
-    <string name="action_edit">Edit</string>
     <string name="action_done">Done</string>
     <string name="action_search">Search</string>
     <string name="action_close">Close</string>
@@ -21,15 +20,10 @@
     <string name="action_add_transaction">Add Transaction</string>
     <string name="action_show_all">Show All</string>
     <string name="action_select">Select</string>
-    <string name="action_see_all">See all</string>
-    <string name="action_restart">Restart</string>
     <string name="action_back">Back</string>
-    <string name="back">Back</string>
-    <string name="search">Search</string>
 
     <string name="dashboard_total_spent">Total Spending</string>
     <string name="dashboard_monthly_budget">Monthly Budget</string>
-    <string name="dashboard_recent_transactions">Recent Transactions</string>
     <string name="dashboard_cash_flow">Cash Flow</string>
     <string name="balance_label">Balance</string>
     <string name="income">Income</string>
@@ -80,10 +74,8 @@
     <string name="merchant">Merchant</string>
     <string name="category">Category</string>
     <string name="today">Today</string>
-    <string name="yesterday">Yesterday</string>
     <string name="update_transaction">Update transaction</string>
     <string name="note">Note</string>
-    <string name="add_note_hint">Add a note...</string>
 
     <string name="cat_food_dining">Food &amp; Dining</string>
     <string name="cat_shopping">Shopping</string>
@@ -94,7 +86,6 @@
     <string name="cat_investment">Investment</string>
     <string name="cat_income">Income</string>
     <string name="cat_general">General</string>
-    <string name="cat_others">Others</string>
 
     <string name="filter_title">Filter Transactions</string>
     <string name="filter_subtitle">Refine by transaction type, categories &amp; amount</string>
@@ -118,18 +109,11 @@
     <string name="night">Night</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_general">General</string>
     <string name="settings_currency_region">Currency &amp; Region</string>
     <string name="settings_preferred_currency">Preferred Currency</string>
     <string name="settings_app_language">App Language</string>
-    <string name="settings_security">Security</string>
-    <string name="settings_biometric_lock">Biometric Lock</string>
-    <string name="settings_privacy_mode">Privacy Mode</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_data_backup">Data &amp; Backup</string>
-    <string name="settings_export_csv">Export CSV</string>
-    <string name="settings_export_pdf">Export PDF Statement</string>
-    <string name="settings_clear_all">Clear All Data</string>
 
     <string name="timeframe_title">Timeframe</string>
     <string name="timeframe_subtitle">Select active ledger range</string>
@@ -164,7 +148,6 @@
     <string name="net_surplus">Net Surplus</string>
     <string name="net_deficit">Net Deficit</string>
     <string name="active_suffix">Active</string>
-    <string name="action_add">Add</string>
     <string name="set_category_budget">Set Category Budget</string>
     <string name="set_spending_limit_for">Set a spending limit for %1$s</string>
     <string name="percent_of_expenses">%1$s%% of total expenses</string>
@@ -260,8 +243,6 @@
     <string name="smart_rules_title">Smart Rules</string>
     <string name="smart_rules_empty">No custom rules yet.\nRules are created when you edit a transaction\'s category.</string>
     <string name="smart_rules_always_as">Always as %1$s</string>
-    <string name="smart_rules_deleted">Rule deleted</string>
-    <string name="action_undo">UNDO</string>
     <string name="smart_rules_dialog_new">New Rule</string>
     <string name="smart_rules_dialog_edit">Edit Rule</string>
     <string name="merchant_name_label">Merchant Name</string>
@@ -286,9 +267,6 @@
     <string name="privacy_changes_title">Changes</string>
     <string name="privacy_changes_body">If this policy ever changes, the updated version will be shipped with the app release and noted in the changelog.</string>
     <string name="privacy_last_updated">Last updated: July 2026</string>
-    <string name="select_tracked_apps_title">Select Tracked Apps</string>
-    <string name="select_tracked_apps_desc">Choose the finance apps you want Cipher to monitor for transactions via notifications. You can change this later.</string>
-    <string name="search_apps_placeholder">Search apps...</string>
     <string name="action_continue">Continue</string>
     <string name="set_backup_password_title">Set Backup Password</string>
     <string name="enter_backup_password_title">Enter Backup Password</string>
@@ -304,12 +282,9 @@
 
     <!-- Onboarding Strings -->
     <string name="onboarding_step_region">REGION</string>
-    <string name="onboarding_step_privacy">PRIVACY</string>
     <string name="onboarding_step_appearance">THEME</string>
     <string name="onboarding_step_automation">AUTOMATION</string>
-    <string name="onboarding_step_apps">APPS</string>
 
-    <string name="onboarding_lang_title">Language &amp; Currency</string>
     <string name="onboarding_lang_subtitle">Choose how numbers, dates, and text appear in your vault.</string>
     <string name="onboarding_live_preview_label">LIVE PREVIEW</string>
     <string name="onboarding_preview_merchant">Coffee &amp; Bakery</string>
@@ -317,25 +292,12 @@
     <string name="onboarding_section_language">APP LANGUAGE</string>
     <string name="onboarding_section_currency">PREFERRED CURRENCY</string>
 
-    <string name="onboarding_welcome_badge">100% PRIVATE &amp; OFFLINE</string>
-    <string name="onboarding_welcome_brand_greeting">Welcome to Cipher.</string>
-    <string name="onboarding_welcome_title">Your money, kept strictly private.</string>
-    <string name="onboarding_welcome_subtitle">Cipher tracks your daily spending automatically without ever uploading your personal data to the cloud. Everything stays on your phone.</string>
-    <string name="onboarding_btn_get_started">Get Started</string>
-    <string name="onboarding_feat_offline_title">100% Offline &amp; Private</string>
-    <string name="onboarding_feat_offline_desc">No cloud servers, no accounts required, zero telemetry.</string>
-    <string name="onboarding_feat_auto_title">Automatic Expense Tracking</string>
-    <string name="onboarding_feat_auto_desc">Reads transaction SMS and notifications locally so you never have to log receipts manually.</string>
-    <string name="onboarding_feat_encryption_title">Hardware Encrypted</string>
-    <string name="onboarding_feat_encryption_desc">Your vault is protected on-device with AES-256 encryption and biometric access.</string>
 
     <string name="onboarding_theme_title">Theme &amp; Appearance</string>
     <string name="onboarding_theme_subtitle">Select an accent color that suits your style.</string>
     <string name="onboarding_theme_preview_label">PREVIEW</string>
-    <string name="onboarding_theme_section_palette">COLOR PALETTES</string>
 
     <string name="onboarding_auto_title">Automated Tracking</string>
-    <string name="onboarding_auto_subtitle">Enable local permissions so Cipher can capture transactions automatically as they happen.</string>
     <string name="onboarding_perm_sms_title">Bank SMS Stream</string>
     <string name="onboarding_perm_sms_desc">Captures debit and credit SMS notifications from your banks.</string>
     <string name="onboarding_perm_notif_title">Payment App Notifications</string>
@@ -343,13 +305,10 @@
     <string name="onboarding_perm_alerts_title">Spending &amp; Budget Alerts</string>
     <string name="onboarding_perm_alerts_desc">Sends daily spending summaries and budget threshold warnings.</string>
     <string name="onboarding_status_active">ACTIVE</string>
-    <string name="onboarding_status_off">OFFLINE</string>
     <string name="onboarding_take_tour">Take a Quick Tour</string>
-    <string name="onboarding_theme_mode_label">APPEARANCE MODE</string>
     <string name="onboarding_theme_mode_system">System</string>
     <string name="onboarding_theme_mode_light">Light</string>
     <string name="onboarding_theme_mode_dark">Dark</string>
-    <string name="onboarding_welcome_tagline">Your money. Nowhere else.</string>
     <string name="onboarding_welcome_begin">Begin</string>
     <string name="onboarding_apps_step_label">TRACKED APPS</string>
     <string name="onboarding_apps_title">Which apps do you use?</string>
@@ -359,18 +318,9 @@
     <string name="onboarding_apps_finish">Finish Setup</string>
     <string name="onboarding_apps_loading">Loading installed apps…</string>
     <string name="onboarding_perm_intro">These permissions never send data off your device. Everything runs locally.</string>
-    <string name="onboarding_ready_tagline">Your offline private vault is ready.</string>
     <string name="onboarding_ready_title">Setup Complete</string>
     <string name="onboarding_ready_subtitle">Everything is stored locally on this phone.</string>
-    <string name="onboarding_ready_button">Enter Vault</string>
     <string name="onboarding_ready_slide_hint">Slide to open vault</string>
-    <string name="onboarding_welcome_brand_subtitle">Financial clarity with absolute local sovereignty.</string>
-    <string name="onboarding_welcome_hero_statement">Track expenses automatically without sharing your data with anyone.</string>
-    <string name="onboarding_welcome_privacy_title">100% on your device</string>
-    <string name="onboarding_welcome_privacy_desc">No cloud, no accounts, no trackers. Your transactions stay in local encrypted storage.</string>
-    <string name="onboarding_welcome_automate_title">Hands-free tracking</string>
-    <string name="onboarding_welcome_automate_desc">Reads SMS and payment notifications in the background to log expenses instantly.</string>
-    <string name="onboarding_welcome_analytics_title">Clean insights</string>
     <string name="onboarding_welcome_analytics_desc">Budgets, cash flow summaries, and spending breakdown charts without clutter.</string>
     <string name="onboarding_welcome_stat_offline">100%</string>
     <string name="onboarding_welcome_stat_offline_label">Local &amp; Offline</string>
@@ -381,7 +331,7 @@
     <string name="onboarding_welcome_tagline_lead">Private wealth management.</string>
     <string name="onboarding_welcome_greet_lead">Welcome to Cipher</string>
     <string name="onboarding_welcome_tagline_simple">An automatic, private expense tracker that runs completely on your phone.</string>
-    <string name="onboarding_feature_offline_simple_title">100% Offline &amp; Private</string>
+    <string name="onboarding_feature_offline_simple_title">100%% Offline &amp; Private</string>
     <string name="onboarding_feature_offline_simple_desc">Your financial data is encrypted and never leaves this phone. No accounts, no servers.</string>
     <string name="onboarding_feature_auto_simple_title">Automatic Tracking</string>
     <string name="onboarding_feature_auto_simple_desc">Cipher detects bank SMS and payment app notifications to log expenses automatically.</string>

@@ -13,7 +13,6 @@
     <string name="action_save">সংরক্ষণ করুন</string>
     <string name="action_cancel">বাতিল করুন</string>
     <string name="action_delete">মুছুন</string>
-    <string name="action_edit">সম্পাদনা</string>
     <string name="action_done">সম্পন্ন</string>
     <string name="action_search">অনুসন্ধান</string>
     <string name="action_close">বন্ধ করুন</string>
@@ -21,15 +20,10 @@
     <string name="action_add_transaction">লেনদেন যোগ করুন</string>
     <string name="action_show_all">সব দেখান</string>
     <string name="action_select">নির্বাচন করুন</string>
-    <string name="action_see_all">সব দেখুন</string>
-    <string name="action_restart">পুনরায় চালু করুন</string>
     <string name="action_back">পেছনে</string>
-    <string name="back">পেছনে</string>
-    <string name="search">অনুসন্ধান</string>
 
     <string name="dashboard_total_spent">মোট খরচ</string>
     <string name="dashboard_monthly_budget">মাসিক বাজেট</string>
-    <string name="dashboard_recent_transactions">সাম্প্রতিক লেনদেন</string>
     <string name="dashboard_cash_flow">ক্যাশ ফ্লো</string>
     <string name="balance_label">ব্যালেন্স</string>
     <string name="income">আয়</string>
@@ -80,10 +74,8 @@
     <string name="merchant">ব্যবসায়ী</string>
     <string name="category">বিভাগ</string>
     <string name="today">আজ</string>
-    <string name="yesterday">গতকাল</string>
     <string name="update_transaction">লেনদেন আপডেট করুন</string>
     <string name="note">নোট</string>
-    <string name="add_note_hint">নোট যোগ করুন...</string>
 
     <string name="cat_food_dining">খাবার ও পানীয়</string>
     <string name="cat_shopping">কেনাকাটা</string>
@@ -94,7 +86,6 @@
     <string name="cat_investment">বিনিয়োগ</string>
     <string name="cat_income">আয়</string>
     <string name="cat_general">সাধারণ</string>
-    <string name="cat_others">অন্যান্য</string>
 
     <string name="filter_title">লেনদেন ফিল্টার করুন</string>
     <string name="filter_subtitle">লেনদেনের ধরন, বিভাগ ও পরিমাণ অনুযায়ী খুঁজুন</string>
@@ -118,18 +109,11 @@
     <string name="night">রাত</string>
 
     <string name="settings_title">সেটিংস</string>
-    <string name="settings_general">সাধারণ</string>
     <string name="settings_currency_region">মুদ্রা এবং অঞ্চল</string>
     <string name="settings_preferred_currency">পছন্দের মুদ্রা</string>
     <string name="settings_app_language">অ্যাপের ভাষা</string>
-    <string name="settings_security">নিরাপত্তা</string>
-    <string name="settings_biometric_lock">বায়োমেট্রিক লক</string>
-    <string name="settings_privacy_mode">গোপনীয়তা মোড</string>
     <string name="settings_notifications">বিজ্ঞপ্তি</string>
     <string name="settings_data_backup">ডেটা এবং ব্যাকআপ</string>
-    <string name="settings_export_csv">CSV রপ্তানি করুন</string>
-    <string name="settings_export_pdf">PDF বিবরণ রপ্তানি করুন</string>
-    <string name="settings_clear_all">সমস্ত ডেটা মুছুন</string>
 
     <string name="timeframe_title">সময়কাল</string>
     <string name="timeframe_subtitle">সক্রিয় লেজার সীমা নির্বাচন করুন</string>
@@ -164,7 +148,6 @@
     <string name="net_surplus">নীট উদ্বৃত্ত</string>
     <string name="net_deficit">নীট ঘাটতি</string>
     <string name="active_suffix">সক্রিয়</string>
-    <string name="action_add">যোগ করুন</string>
     <string name="set_category_budget">ক্যাটাগরি বাজেট নির্ধারণ</string>
     <string name="set_spending_limit_for">%1$s এর জন্য খরচের সীমা নির্ধারণ করুন</string>
     <string name="percent_of_expenses">মোট ব্যয়ের %1$s%%</string>
@@ -260,8 +243,6 @@
     <string name="smart_rules_title">স্মার্ট নিয়ম</string>
     <string name="smart_rules_empty">এখনও কোনও কাস্টম নিয়ম নেই।\nআপনি যখন কোনও লেনদেনের ক্যাটাগরি সম্পাদনা করবেন তখন নিয়ম তৈরি হবে।</string>
     <string name="smart_rules_always_as">সর্বদা %1$s হিসেবে</string>
-    <string name="smart_rules_deleted">নিয়ম মুছে ফেলা হয়েছে</string>
-    <string name="action_undo">পূর্বাবস্থায় ফেরান</string>
     <string name="smart_rules_dialog_new">নতুন নিয়ম</string>
     <string name="smart_rules_dialog_edit">নিয়ম সম্পাদনা</string>
     <string name="merchant_name_label">মার্চেন্টের নাম</string>
@@ -286,9 +267,6 @@
     <string name="privacy_changes_title">পরিবর্তনসমূহ</string>
     <string name="privacy_changes_body">এই নীতিতে কখনো পরিবর্তন এলে, আপডেট সংস্করণটি অ্যাপ রিলিজের সাথে প্রকাশ করা হবে।</string>
     <string name="privacy_last_updated">সর্বশেষ আপডেট: জুলাই ২০২৬</string>
-    <string name="select_tracked_apps_title">ট্র্যাক করা অ্যাপ নির্বাচন করুন</string>
-    <string name="select_tracked_apps_desc">বিজ্ঞপ্তির মাধ্যমে লেনদেন পর্যবেক্ষণের জন্য আপনি যে ফাইন্যান্স অ্যাপগুলি চান তা চয়ন করুন।</string>
-    <string name="search_apps_placeholder">অ্যাপ অনুসন্ধান করুন...</string>
     <string name="action_continue">চালিয়ে যান</string>
     <string name="set_backup_password_title">ব্যাকআপ পাসওয়ার্ড সেট করুন</string>
     <string name="enter_backup_password_title">ব্যাকআপ পাসওয়ার্ড দিন</string>
@@ -304,12 +282,9 @@
 
     <!-- Onboarding Strings -->
     <string name="onboarding_step_region">ভাষা ও মুদ্রা</string>
-    <string name="onboarding_step_privacy">গোপনীয়তা</string>
     <string name="onboarding_step_appearance">থিম</string>
     <string name="onboarding_step_automation">স্বয়ংক্রিয়করণ</string>
-    <string name="onboarding_step_apps">অ্যাপস</string>
 
-    <string name="onboarding_lang_title">ভাষা ও মুদ্রা নির্বাচন করুন</string>
     <string name="onboarding_lang_subtitle">আপনার ভল্টে সংখ্যা, তারিখ এবং টেক্সট কীভাবে প্রদর্শিত হবে তা নির্বাচন করুন।</string>
     <string name="onboarding_live_preview_label">লাইভ প্রিভিউ</string>
     <string name="onboarding_preview_merchant">কফি ও বেকারি</string>
@@ -317,25 +292,12 @@
     <string name="onboarding_section_language">অ্যাপের ভাষা</string>
     <string name="onboarding_section_currency">পছন্দের মুদ্রা</string>
 
-    <string name="onboarding_welcome_badge">১০০% প্রাইভেট ও অফলাইন</string>
-    <string name="onboarding_welcome_brand_greeting">Cipher-এ স্বাগতম</string>
-    <string name="onboarding_welcome_title">আপনার অর্থ, সম্পূর্ণ ব্যক্তিগত ও নিরাপদ।</string>
-    <string name="onboarding_welcome_subtitle">Cipher ক্লাউডে আপনার কোনো ব্যক্তিগত তথ্য আপলোড না করেই আপনার দৈনিক খরচ স্বয়ংক্রিয়ভাবে ট্র্যাক করে। সবকিছু আপনার ডিভাইসেই থাকে।</string>
-    <string name="onboarding_btn_get_started">শুরু করুন</string>
-    <string name="onboarding_feat_offline_title">১০০% অফলাইন ও ব্যক্তিগত</string>
-    <string name="onboarding_feat_offline_desc">কোনো ক্লাউড সার্ভার নেই, অ্যাকাউন্টের প্রয়োজন নেই এবং কোনো ট্র্যাকিং নেই।</string>
-    <string name="onboarding_feat_auto_title">স্বয়ংক্রিয় খরচ ট্র্যাকিং</string>
-    <string name="onboarding_feat_auto_desc">ব্যাংক এসএমএস ও নোটিফিকেশন থেকে তথ্য পড়ে, যাতে আপনাকে ম্যানুয়ালি হিসাব লিখতে না হয়।</string>
-    <string name="onboarding_feat_encryption_title">হার্ডওয়্যার এনক্রিপ্টেড</string>
-    <string name="onboarding_feat_encryption_desc">আপনার ভল্টটি AES-256 এনক্রিপশন এবং বায়োমেট্রিক সুরক্ষায় আপনার ফোনে সুরক্ষিত থাকে।</string>
 
     <string name="onboarding_theme_title">থিম ও অ্যাকসেন্ট</string>
     <string name="onboarding_theme_subtitle">আপনার পছন্দের সাথে মানানসই একটি রঙ নির্বাচন করুন।</string>
     <string name="onboarding_theme_preview_label">প্রিভিউ</string>
-    <string name="onboarding_theme_section_palette">কালার প্যালেট</string>
 
     <string name="onboarding_auto_title">স্বয়ংক্রিয় ট্র্যাকিং</string>
-    <string name="onboarding_auto_subtitle">Cipher যাতে লেনদেনের সাথে সাথে স্বয়ংক্রিয়ভাবে হিসাব রাখতে পারে তার জন্য প্রয়োজনীয় অনুমতি প্রদান করুন।</string>
     <string name="onboarding_perm_sms_title">ব্যাংক এসএমএস রিডার</string>
     <string name="onboarding_perm_sms_desc">ব্যাংক থেকে আসা ডেবিট ও ক্রেডিট এসএমএস স্বয়ংক্রিয়ভাবে ট্র্যাক করে।</string>
     <string name="onboarding_perm_notif_title">পেমেন্ট অ্যাপ নোটিফিকেশন</string>
@@ -343,13 +305,10 @@
     <string name="onboarding_perm_alerts_title">খরচ ও বাজেট সতর্কতা</string>
     <string name="onboarding_perm_alerts_desc">দৈনিক খরচের সারাংশ এবং বাজেট সীমার সতর্কবার্তা পাঠায়।</string>
     <string name="onboarding_status_active">সক্রিয়</string>
-    <string name="onboarding_status_off">নিষ্ক্রিয়</string>
     <string name="onboarding_take_tour">একটি দ্রুত সফর দেখুন</string>
-    <string name="onboarding_theme_mode_label">চেহারার মোড</string>
     <string name="onboarding_theme_mode_system">সিস্টেম</string>
     <string name="onboarding_theme_mode_light">লাইট</string>
     <string name="onboarding_theme_mode_dark">ডার্ক</string>
-    <string name="onboarding_welcome_tagline">আপনার অর্থ। অন্য কোথাও নয়।</string>
     <string name="onboarding_welcome_begin">শুরু করুন</string>
     <string name="onboarding_apps_step_label">ট্র্যাকড অ্যাপস</string>
     <string name="onboarding_apps_title">আপনি কোন অ্যাপ ব্যবহার করেন?</string>
@@ -359,18 +318,9 @@
     <string name="onboarding_apps_finish">সেটআপ সম্পন্ন করুন</string>
     <string name="onboarding_apps_loading">ইনস্টল করা অ্যাপ লোড হচ্ছে…</string>
     <string name="onboarding_perm_intro">এই অনুমতিগুলি কখনো আপনার ডিভাইসের বাইরে ডেটা পাঠায় না। সবকিছু স্থানীয়ভাবে চলে।</string>
-    <string name="onboarding_ready_tagline">আপনার অফলাইন প্রাইভেট ভল্ট প্রস্তুত।</string>
     <string name="onboarding_ready_title">সেটআপ সম্পন্ন</string>
     <string name="onboarding_ready_subtitle">সমস্ত তথ্য এই ফোনেই নিরাপদে সংরক্ষিত থাকবে।</string>
-    <string name="onboarding_ready_button">ভল্টে প্রবেশ করুন</string>
     <string name="onboarding_ready_slide_hint">ভল্ট খুলতে স্লাইড করুন</string>
-    <string name="onboarding_welcome_brand_subtitle">সম্পূর্ণ স্থানীয় গোপনীয়তার সাথে আর্থিক স্পষ্টতা।</string>
-    <string name="onboarding_welcome_hero_statement">কাউকে তথ্য না দিয়ে স্বয়ংক্রিয়ভাবে আপনার খরচের হিসাব রাখুন।</string>
-    <string name="onboarding_welcome_privacy_title">১০০% আপনার ডিভাইসে</string>
-    <string name="onboarding_welcome_privacy_desc">ক্লাউড বা অ্যাকাউন্ট ছাড়াই সম্পূর্ণ নিরাপদ এনক্রিপ্টেড স্টোরেজ।</string>
-    <string name="onboarding_welcome_automate_title">স্বয়ংক্রিয় লগিং</string>
-    <string name="onboarding_welcome_automate_desc">এসএমএস ও পেমেন্ট নোটিফিকেশন থেকে সরাসরি খরচ যোগ হয়।</string>
-    <string name="onboarding_welcome_analytics_title">সহজ বিশ্লেষণ</string>
     <string name="onboarding_welcome_analytics_desc">বাজেট, ক্যাশ ফ্লো এবং খরচের চার্ট কোনো জটিলতা ছাড়াই।</string>
     <string name="onboarding_welcome_stat_offline">১০০%</string>
     <string name="onboarding_welcome_stat_offline_label">স্থানীয় ও অফলাইন</string>

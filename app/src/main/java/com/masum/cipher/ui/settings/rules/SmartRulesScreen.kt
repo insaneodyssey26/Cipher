@@ -118,7 +118,7 @@ fun SmartRulesScreen(
                     }) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = stringResource(R.string.back),
+                            contentDescription = stringResource(R.string.action_back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }

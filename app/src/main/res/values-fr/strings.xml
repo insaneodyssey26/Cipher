@@ -13,7 +13,6 @@
     <string name="action_save">Enregistrer</string>
     <string name="action_cancel">Annuler</string>
     <string name="action_delete">Supprimer</string>
-    <string name="action_edit">Modifier</string>
     <string name="action_done">Terminé</string>
     <string name="action_search">Rechercher</string>
     <string name="action_close">Fermer</string>
@@ -21,12 +20,9 @@
     <string name="action_add_transaction">Ajouter une transaction</string>
     <string name="action_show_all">Tout afficher</string>
     <string name="action_select">Sélectionner</string>
-    <string name="action_see_all">Voir tout</string>
-    <string name="action_restart">Redémarrer</string>
 
     <string name="dashboard_total_spent">Dépenses Totales</string>
     <string name="dashboard_monthly_budget">Budget Mensuel</string>
-    <string name="dashboard_recent_transactions">Transactions Récentes</string>
     <string name="dashboard_cash_flow">Flux de Trésorerie</string>
     <string name="balance_label">Solde</string>
     <string name="income">Revenus</string>
@@ -77,10 +73,8 @@
     <string name="merchant">Commerçant</string>
     <string name="category">Catégorie</string>
     <string name="today">Aujourd\'hui</string>
-    <string name="yesterday">Hier</string>
     <string name="update_transaction">Mettre à jour</string>
     <string name="note">Note</string>
-    <string name="add_note_hint">Ajouter une note...</string>
 
     <string name="cat_food_dining">Alimentation</string>
     <string name="cat_shopping">Achats</string>
@@ -91,7 +85,6 @@
     <string name="cat_investment">Investissement</string>
     <string name="cat_income">Revenus</string>
     <string name="cat_general">Général</string>
-    <string name="cat_others">Autres</string>
 
     <string name="filter_title">Filtrer les transactions</string>
     <string name="filter_subtitle">Filtrer par type, catégories et montant</string>
@@ -115,18 +108,11 @@
     <string name="night">Nuit</string>
 
     <string name="settings_title">Paramètres</string>
-    <string name="settings_general">Général</string>
     <string name="settings_currency_region">Devise et Région</string>
     <string name="settings_preferred_currency">Devise Préférée</string>
     <string name="settings_app_language">Langue de l\'application</string>
-    <string name="settings_security">Sécurité</string>
-    <string name="settings_biometric_lock">Verrouillage Biométrique</string>
-    <string name="settings_privacy_mode">Mode Confidentialité</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_data_backup">Données et Sauvegarde</string>
-    <string name="settings_export_csv">Exporter en CSV</string>
-    <string name="settings_export_pdf">Exporter le relevé en PDF</string>
-    <string name="settings_clear_all">Effacer toutes les données</string>
 
     <string name="dialog_language_title">Langue de l\'application</string>
     <string name="dialog_language_subtitle">Sélectionnez la langue d\'affichage de Cipher</string>
@@ -164,7 +150,6 @@
     <string name="net_surplus">Surplus Net</string>
     <string name="net_deficit">Déficit Net</string>
     <string name="active_suffix">Actif</string>
-    <string name="action_add">Ajouter</string>
     <string name="set_category_budget">Définir le budget de la catégorie</string>
     <string name="set_spending_limit_for">Définir une limite pour %1$s</string>
     <string name="percent_of_expenses">%1$s%% des dépenses totales</string>
@@ -260,8 +245,6 @@
     <string name="smart_rules_title">Règles intelligentes</string>
     <string name="smart_rules_empty">Aucune règle personnalisée.\nLes règles sont créées lorsque vous modifiez la catégorie d\'une transaction.</string>
     <string name="smart_rules_always_as">Toujours comme %1$s</string>
-    <string name="smart_rules_deleted">Règle supprimée</string>
-    <string name="action_undo">ANNULER</string>
     <string name="smart_rules_dialog_new">Nouvelle règle</string>
     <string name="smart_rules_dialog_edit">Modifier la règle</string>
     <string name="merchant_name_label">Nom du commerçant</string>
@@ -286,9 +269,6 @@
     <string name="privacy_changes_title">Modifications</string>
     <string name="privacy_changes_body">Si cette politique change, la version mise à jour sera fournie avec la nouvelle version de l\'application.</string>
     <string name="privacy_last_updated">Dernière mise à jour : juillet 2026</string>
-    <string name="select_tracked_apps_title">Sélectionner les applications suivies</string>
-    <string name="select_tracked_apps_desc">Choisissez les applications financières que Cipher doit surveiller. Vous pourrez modifier ce choix plus tard.</string>
-    <string name="search_apps_placeholder">Rechercher des applications...</string>
     <string name="action_continue">Continuer</string>
     <string name="set_backup_password_title">Définir le mot de passe de sauvegarde</string>
     <string name="enter_backup_password_title">Entrer le mot de passe de sauvegarde</string>
@@ -304,12 +284,9 @@
 
     <!-- Onboarding Strings -->
     <string name="onboarding_step_region">Langue &amp; Devise</string>
-    <string name="onboarding_step_privacy">Confidentialité</string>
     <string name="onboarding_step_appearance">Thème</string>
     <string name="onboarding_step_automation">Automatisation</string>
-    <string name="onboarding_step_apps">Applications</string>
 
-    <string name="onboarding_lang_title">Choisir la Langue et la Devise</string>
     <string name="onboarding_lang_subtitle">Définissez le format d\'affichage des nombres, des dates et des textes.</string>
     <string name="onboarding_live_preview_label">APERÇU EN DIRECT</string>
     <string name="onboarding_preview_merchant">Café &amp; Boulangerie</string>
@@ -317,25 +294,12 @@
     <string name="onboarding_section_language">LANGUE DE L\'APPLICATION</string>
     <string name="onboarding_section_currency">DEVISE PRINCIPALE</string>
 
-    <string name="onboarding_welcome_badge">100% PRIVÉ ET HORS-LIGNE</string>
-    <string name="onboarding_welcome_brand_greeting">Bienvenue sur Cipher.</string>
-    <string name="onboarding_welcome_title">Vos finances, en toute confidentialité.</string>
-    <string name="onboarding_welcome_subtitle">Cipher suit vos dépenses quotidiennes automatiquement sans jamais envoyer vos données personnelles sur le cloud. Tout reste sur votre appareil.</string>
-    <string name="onboarding_btn_get_started">Commencer</string>
-    <string name="onboarding_feat_offline_title">100%% Hors-ligne &amp; Privé</string>
-    <string name="onboarding_feat_offline_desc">Aucun serveur cloud, aucun compte requis, aucun suivi.</string>
-    <string name="onboarding_feat_auto_title">Suivi Automatique des Dépenses</string>
-    <string name="onboarding_feat_auto_desc">Lit les SMS bancaires et notifications localement pour vous éviter les saisies manuelles.</string>
-    <string name="onboarding_feat_encryption_title">Chiffrement Matériel</string>
-    <string name="onboarding_feat_encryption_desc">Vos données sont protégées par chiffrement AES-256 et accès biométrique sur votre appareil.</string>
 
     <string name="onboarding_theme_title">Thème &amp; Apparence</string>
     <string name="onboarding_theme_subtitle">Sélectionnez une couleur d\'accentuation adaptée à vos préférences.</string>
     <string name="onboarding_theme_preview_label">APERÇU</string>
-    <string name="onboarding_theme_section_palette">PALETTES DE COULEURS</string>
 
     <string name="onboarding_auto_title">Automatisation Locale</string>
-    <string name="onboarding_auto_subtitle">Activez les autorisations pour permettre à Cipher d\'enregistrer vos transactions en temps réel.</string>
     <string name="onboarding_perm_sms_title">Lecteur de SMS Bancaires</string>
     <string name="onboarding_perm_sms_desc">Détecte les notifications de débit et de crédit envoyées par vos banques.</string>
     <string name="onboarding_perm_notif_title">Notifications des Applications de Paiement</string>
@@ -343,13 +307,10 @@
     <string name="onboarding_perm_alerts_title">Alertes de Dépenses &amp; Budget</string>
     <string name="onboarding_perm_alerts_desc">Envoie des récapitulatifs quotidiens et des alertes de dépassement de budget.</string>
     <string name="onboarding_status_active">ACTIF</string>
-    <string name="onboarding_status_off">INACTIF</string>
     <string name="onboarding_take_tour">Découvrir les Fonctionnalités</string>
-    <string name="onboarding_theme_mode_label">MODE D\'APPARENCE</string>
     <string name="onboarding_theme_mode_system">Système</string>
     <string name="onboarding_theme_mode_light">Clair</string>
     <string name="onboarding_theme_mode_dark">Sombre</string>
-    <string name="onboarding_welcome_tagline">Votre argent. Nulle part ailleurs.</string>
     <string name="onboarding_welcome_begin">Commencer</string>
     <string name="onboarding_apps_step_label">APPS SUIVIES</string>
     <string name="onboarding_apps_title">Quelles apps utilisez-vous ?</string>
@@ -359,18 +320,9 @@
     <string name="onboarding_apps_finish">Terminer la configuration</string>
     <string name="onboarding_apps_loading">Chargement des apps installées…</string>
     <string name="onboarding_perm_intro">Ces autorisations n\'envoient jamais de données hors de votre appareil. Tout fonctionne localement.</string>
-    <string name="onboarding_ready_tagline">Votre coffre-fort privé hors ligne est prêt.</string>
     <string name="onboarding_ready_title">Configuration terminée</string>
     <string name="onboarding_ready_subtitle">Toutes vos données restent sur ce téléphone.</string>
-    <string name="onboarding_ready_button">Entrer dans le Coffre</string>
     <string name="onboarding_ready_slide_hint">Glissez pour ouvrir</string>
-    <string name="onboarding_welcome_brand_subtitle">Clarté financière avec une souveraineté locale absolue.</string>
-    <string name="onboarding_welcome_hero_statement">Suivez vos dépenses automatiquement sans partager vos données.</string>
-    <string name="onboarding_welcome_privacy_title">100%% sur votre appareil</string>
-    <string name="onboarding_welcome_privacy_desc">Sans cloud ni compte. Vos données restent chiffrées localement.</string>
-    <string name="onboarding_welcome_automate_title">Suivi automatique</string>
-    <string name="onboarding_welcome_automate_desc">Détecte les notifications de paiement pour enregistrer vos dépenses.</string>
-    <string name="onboarding_welcome_analytics_title">Analyses claires</string>
     <string name="onboarding_welcome_analytics_desc">Budgets et flux de trésorerie en toute simplicité.</string>
     <string name="onboarding_welcome_stat_offline">100%</string>
     <string name="onboarding_welcome_stat_offline_label">Local et Hors Ligne</string>

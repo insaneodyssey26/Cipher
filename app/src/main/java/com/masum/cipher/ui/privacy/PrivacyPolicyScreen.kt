@@ -42,7 +42,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(compose.icons.LucideIcons.ArrowLeft, contentDescription = stringResource(R.string.back))
+                        Icon(compose.icons.LucideIcons.ArrowLeft, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

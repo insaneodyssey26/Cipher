@@ -13,7 +13,6 @@
     <string name="action_save">保存</string>
     <string name="action_cancel">キャンセル</string>
     <string name="action_delete">削除</string>
-    <string name="action_edit">編集</string>
     <string name="action_done">完了</string>
     <string name="action_search">検索</string>
     <string name="action_close">閉じる</string>
@@ -21,12 +20,9 @@
     <string name="action_add_transaction">取引を追加</string>
     <string name="action_show_all">すべて表示</string>
     <string name="action_select">選択</string>
-    <string name="action_see_all">すべて見る</string>
-    <string name="action_restart">再起動</string>
 
     <string name="dashboard_total_spent">総支出</string>
     <string name="dashboard_monthly_budget">今月の予算</string>
-    <string name="dashboard_recent_transactions">最近の取引</string>
     <string name="dashboard_cash_flow">キャッシュフロー</string>
     <string name="balance_label">残高</string>
     <string name="income">収入</string>
@@ -77,10 +73,8 @@
     <string name="merchant">加盟店</string>
     <string name="category">カテゴリー</string>
     <string name="today">今日</string>
-    <string name="yesterday">昨日</string>
     <string name="update_transaction">更新する</string>
     <string name="note">メモ</string>
-    <string name="add_note_hint">メモを追加...</string>
 
     <string name="cat_food_dining">飲食</string>
     <string name="cat_shopping">ショッピング</string>
@@ -91,7 +85,6 @@
     <string name="cat_investment">投資</string>
     <string name="cat_income">収入</string>
     <string name="cat_general">一般</string>
-    <string name="cat_others">その他</string>
 
     <string name="filter_title">取引を絞り込む</string>
     <string name="filter_subtitle">取引タイプ、カテゴリー、金額で絞り込み</string>
@@ -115,18 +108,11 @@
     <string name="night">夜</string>
 
     <string name="settings_title">設定</string>
-    <string name="settings_general">一般</string>
     <string name="settings_currency_region">通貨と地域</string>
     <string name="settings_preferred_currency">優先通貨</string>
     <string name="settings_app_language">アプリの言語</string>
-    <string name="settings_security">セキュリティ</string>
-    <string name="settings_biometric_lock">生体認証ロック</string>
-    <string name="settings_privacy_mode">プライバシーモード</string>
     <string name="settings_notifications">通知</string>
     <string name="settings_data_backup">データとバックアップ</string>
-    <string name="settings_export_csv">CSVをエクスポート</string>
-    <string name="settings_export_pdf">PDF明細書をエクスポート</string>
-    <string name="settings_clear_all">すべてのデータを消去</string>
 
     <string name="dialog_language_title">アプリの言語</string>
     <string name="dialog_language_subtitle">Cipherの表示言語を選択してください</string>
@@ -164,7 +150,6 @@
     <string name="net_surplus">純黒字</string>
     <string name="net_deficit">純赤字</string>
     <string name="active_suffix">有効</string>
-    <string name="action_add">追加</string>
     <string name="set_category_budget">カテゴリー予算を設定</string>
     <string name="set_spending_limit_for">%1$s の支出限度額を設定</string>
     <string name="percent_of_expenses">総支出の %1$s%%</string>
@@ -260,8 +245,6 @@
     <string name="smart_rules_title">スマートルール</string>
     <string name="smart_rules_empty">カスタムルールはまだありません。\n取引のカテゴリーを編集するとルールが作成されます。</string>
     <string name="smart_rules_always_as">常に %1$s として分類</string>
-    <string name="smart_rules_deleted">ルールを削除しました</string>
-    <string name="action_undo">元に戻す</string>
     <string name="smart_rules_dialog_new">新規ルール</string>
     <string name="smart_rules_dialog_edit">ルールを編集</string>
     <string name="merchant_name_label">加盟店名</string>
@@ -286,9 +269,6 @@
     <string name="privacy_changes_title">ポリシーの変更</string>
     <string name="privacy_changes_body">本ポリシーが変更された場合は、アプリアップデートとともに提供されます。</string>
     <string name="privacy_last_updated">最終更新: 2026年7月</string>
-    <string name="select_tracked_apps_title">監視対象アプリを選択</string>
-    <string name="select_tracked_apps_desc">Cipherが通知から取引を監視する金融アプリを選択してください。後から変更可能です。</string>
-    <string name="search_apps_placeholder">アプリを検索...</string>
     <string name="action_continue">続行</string>
     <string name="set_backup_password_title">バックアップパスワードを設定</string>
     <string name="enter_backup_password_title">バックアップパスワードを入力</string>
@@ -304,12 +284,9 @@
 
     <!-- Onboarding Strings -->
     <string name="onboarding_step_region">言語と通貨</string>
-    <string name="onboarding_step_privacy">プライバシー</string>
     <string name="onboarding_step_appearance">テーマ</string>
     <string name="onboarding_step_automation">自動化</string>
-    <string name="onboarding_step_apps">アプリ</string>
 
-    <string name="onboarding_lang_title">言語と通貨の選択</string>
     <string name="onboarding_lang_subtitle">数字、日付、テキストの表示形式を設定します。</string>
     <string name="onboarding_live_preview_label">プレビュー</string>
     <string name="onboarding_preview_merchant">カフェ＆ベーカリー</string>
@@ -317,25 +294,12 @@
     <string name="onboarding_section_language">アプリ言語</string>
     <string name="onboarding_section_currency">使用通貨</string>
 
-    <string name="onboarding_welcome_badge">100% プライベート＆オフライン</string>
-    <string name="onboarding_welcome_brand_greeting">Cipher へようこそ</string>
-    <string name="onboarding_welcome_title">お金の管理を、完全なプライバシーで。</string>
-    <string name="onboarding_welcome_subtitle">Cipherは個人データをクラウドに送信することなく、日々の支出を自動的に追跡します。すべてのデータはお使いの端末内にのみ保存されます。</string>
-    <string name="onboarding_btn_get_started">はじめる</string>
-    <string name="onboarding_feat_offline_title">100% オフライン＆プライベート</string>
-    <string name="onboarding_feat_offline_desc">クラウドサーバーなし、アカウント不要、トラッキングゼロ。</string>
-    <string name="onboarding_feat_auto_title">支出の自動記録</string>
-    <string name="onboarding_feat_auto_desc">銀行SMSや通知を端末内で読み取るため、レシートを手入力する必要はありません。</string>
-    <string name="onboarding_feat_encryption_title">ハードウェア暗号化</string>
-    <string name="onboarding_feat_encryption_desc">生体認証とAES-256暗号化によって、大切なデータが端末内で保護されます。</string>
 
     <string name="onboarding_theme_title">テーマとアクセントカラー</string>
     <string name="onboarding_theme_subtitle">お好みのアクセントカラーをお選びください。</string>
     <string name="onboarding_theme_preview_label">プレビュー</string>
-    <string name="onboarding_theme_section_palette">カラーパレット</string>
 
     <string name="onboarding_auto_title">自動記録の設定</string>
-    <string name="onboarding_auto_subtitle">支出が発生した際に自動で記録できるよう、必要な権限を有効にしてください。</string>
     <string name="onboarding_perm_sms_title">銀行SMSリーダー</string>
     <string name="onboarding_perm_sms_desc">銀行からの出入金SMS通知を自動的に取得します。</string>
     <string name="onboarding_perm_notif_title">決済アプリの通知</string>
@@ -343,13 +307,10 @@
     <string name="onboarding_perm_alerts_title">支出・予算アラート</string>
     <string name="onboarding_perm_alerts_desc">毎日の支出まとめや予算オーバーの警告をお知らせします。</string>
     <string name="onboarding_status_active">有効</string>
-    <string name="onboarding_status_off">無効</string>
     <string name="onboarding_take_tour">機能ツアーを見る</string>
-    <string name="onboarding_theme_mode_label">外観モード</string>
     <string name="onboarding_theme_mode_system">システム</string>
     <string name="onboarding_theme_mode_light">ライト</string>
     <string name="onboarding_theme_mode_dark">ダーク</string>
-    <string name="onboarding_welcome_tagline">あなたのお金。他のどこにもない。</string>
     <string name="onboarding_welcome_begin">はじめる</string>
     <string name="onboarding_apps_step_label">追跡アプリ</string>
     <string name="onboarding_apps_title">どのアプリを使っていますか？</string>
@@ -359,18 +320,9 @@
     <string name="onboarding_apps_finish">セットアップ完了</string>
     <string name="onboarding_apps_loading">インストール済みアプリを読み込み中…</string>
     <string name="onboarding_perm_intro">これらの権限はデバイス外にデータを送信しません。すべてローカルで動作します。</string>
-    <string name="onboarding_ready_tagline">オフラインのプライベート保管庫の準備が整いました。</string>
     <string name="onboarding_ready_title">準備完了</string>
     <string name="onboarding_ready_subtitle">データはすべてこのスマートフォン内に保存されます。</string>
-    <string name="onboarding_ready_button">保管庫を開く</string>
     <string name="onboarding_ready_slide_hint">スライドして開く</string>
-    <string name="onboarding_welcome_brand_subtitle">完全なローカルプライバシーを備えた明瞭な家計管理。</string>
-    <string name="onboarding_welcome_hero_statement">データを外部に送信せず、支出を自動で記録します。</string>
-    <string name="onboarding_welcome_privacy_title">100% デバイス内完結</string>
-    <string name="onboarding_welcome_privacy_desc">クラウドやアカウント不要。データは端末内に暗号化保存されます。</string>
-    <string name="onboarding_welcome_automate_title">自動トラッキング</string>
-    <string name="onboarding_welcome_automate_desc">通知やSMSから支出を自動的に検知して記録します。</string>
-    <string name="onboarding_welcome_analytics_title">見やすい分析</string>
     <string name="onboarding_welcome_analytics_desc">予算やキャッシュフローの推移を分かりやすく可視化します。</string>
     <string name="onboarding_welcome_stat_offline">100%</string>
     <string name="onboarding_welcome_stat_offline_label">完全ローカル保管</string>

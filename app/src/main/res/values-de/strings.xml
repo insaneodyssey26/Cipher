@@ -13,7 +13,6 @@
     <string name="action_save">Speichern</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="action_delete">Löschen</string>
-    <string name="action_edit">Bearbeiten</string>
     <string name="action_done">Fertig</string>
     <string name="action_search">Suchen</string>
     <string name="action_close">Schließen</string>
@@ -21,12 +20,9 @@
     <string name="action_add_transaction">Transaktion hinzufügen</string>
     <string name="action_show_all">Alle anzeigen</string>
     <string name="action_select">Auswählen</string>
-    <string name="action_see_all">Alle anzeigen</string>
-    <string name="action_restart">Neu starten</string>
 
     <string name="dashboard_total_spent">Gesamtausgaben</string>
     <string name="dashboard_monthly_budget">Monatsbudget</string>
-    <string name="dashboard_recent_transactions">Letzte Transaktionen</string>
     <string name="dashboard_cash_flow">Cashflow</string>
     <string name="balance_label">Kontostand</string>
     <string name="income">Einnahmen</string>
@@ -77,10 +73,8 @@
     <string name="merchant">Händler</string>
     <string name="category">Kategorie</string>
     <string name="today">Heute</string>
-    <string name="yesterday">Gestern</string>
     <string name="update_transaction">Aktualisieren</string>
     <string name="note">Notiz</string>
-    <string name="add_note_hint">Notiz hinzufügen...</string>
 
     <string name="cat_food_dining">Essen &amp; Trinken</string>
     <string name="cat_shopping">Einkaufen</string>
@@ -91,7 +85,6 @@
     <string name="cat_investment">Investition</string>
     <string name="cat_income">Einkommen</string>
     <string name="cat_general">Allgemein</string>
-    <string name="cat_others">Sonstiges</string>
 
     <string name="filter_title">Transaktionen filtern</string>
     <string name="filter_subtitle">Nach Typ, Kategorien und Betrag filtern</string>
@@ -115,18 +108,11 @@
     <string name="night">Nacht</string>
 
     <string name="settings_title">Einstellungen</string>
-    <string name="settings_general">Allgemein</string>
     <string name="settings_currency_region">Währung &amp; Region</string>
     <string name="settings_preferred_currency">Bevorzugte Währung</string>
     <string name="settings_app_language">App-Sprache</string>
-    <string name="settings_security">Sicherheit</string>
-    <string name="settings_biometric_lock">Biometrische Sperre</string>
-    <string name="settings_privacy_mode">Datenschutzmodus</string>
     <string name="settings_notifications">Benachrichtigungen</string>
     <string name="settings_data_backup">Daten &amp; Backup</string>
-    <string name="settings_export_csv">CSV exportieren</string>
-    <string name="settings_export_pdf">PDF-Kontoauszug exportieren</string>
-    <string name="settings_clear_all">Alle Daten löschen</string>
 
     <string name="dialog_language_title">App-Sprache</string>
     <string name="dialog_language_subtitle">Wählen Sie die Anzeigesprache für Cipher</string>
@@ -164,7 +150,6 @@
     <string name="net_surplus">Nettoüberschuss</string>
     <string name="net_deficit">Nettodefizit</string>
     <string name="active_suffix">Aktiv</string>
-    <string name="action_add">Hinzufügen</string>
     <string name="set_category_budget">Kategorie-Budget festlegen</string>
     <string name="set_spending_limit_for">Ausgabenlimit festlegen für %1$s</string>
     <string name="percent_of_expenses">%1$s%% der Gesamtausgaben</string>
@@ -260,8 +245,6 @@
     <string name="smart_rules_title">Smarte Regeln</string>
     <string name="smart_rules_empty">Noch keine benutzerdefinierten Regeln.\nRegeln werden erstellt, wenn Sie die Kategorie einer Transaktion bearbeiten.</string>
     <string name="smart_rules_always_as">Immer als %1$s</string>
-    <string name="smart_rules_deleted">Regel gelöscht</string>
-    <string name="action_undo">RÜCKGÄNGIG</string>
     <string name="smart_rules_dialog_new">Neue Regel</string>
     <string name="smart_rules_dialog_edit">Regel bearbeiten</string>
     <string name="merchant_name_label">Händlername</string>
@@ -286,9 +269,6 @@
     <string name="privacy_changes_title">Änderungen</string>
     <string name="privacy_changes_body">Sollte sich diese Richtlinie ändern, wird die aktualisierte Version mit dem App-Release ausgeliefert.</string>
     <string name="privacy_last_updated">Zuletzt aktualisiert: Juli 2026</string>
-    <string name="select_tracked_apps_title">Überwachte Apps auswählen</string>
-    <string name="select_tracked_apps_desc">Wählen Sie die Finanz-Apps, die Cipher überwachen soll. Sie können dies später ändern.</string>
-    <string name="search_apps_placeholder">Apps suchen...</string>
     <string name="action_continue">Weiter</string>
     <string name="set_backup_password_title">Backup-Passwort festlegen</string>
     <string name="enter_backup_password_title">Backup-Passwort eingeben</string>
@@ -304,12 +284,9 @@
 
     <!-- Onboarding Strings -->
     <string name="onboarding_step_region">Sprache &amp; Währung</string>
-    <string name="onboarding_step_privacy">Datenschutz</string>
     <string name="onboarding_step_appearance">Design</string>
     <string name="onboarding_step_automation">Automatisierung</string>
-    <string name="onboarding_step_apps">Apps</string>
 
-    <string name="onboarding_lang_title">Sprache &amp; Währung wählen</string>
     <string name="onboarding_lang_subtitle">Legen Sie fest, wie Zahlen, Daten und Texte in Ihrem Tresor angezeigt werden.</string>
     <string name="onboarding_live_preview_label">LIVE-VORSCHAU</string>
     <string name="onboarding_preview_merchant">Kaffee &amp; Bäckerei</string>
@@ -317,25 +294,12 @@
     <string name="onboarding_section_language">APP-SPRACHE</string>
     <string name="onboarding_section_currency">BEVORZUGTE WÄHRUNG</string>
 
-    <string name="onboarding_welcome_badge">100% PRIVAT &amp; OFFLINE</string>
-    <string name="onboarding_welcome_brand_greeting">Willkommen bei Cipher.</string>
-    <string name="onboarding_welcome_title">Ihre Finanzen, absolut vertraulich.</string>
-    <string name="onboarding_welcome_subtitle">Cipher erfasst Ihre täglichen Ausgaben automatisch, ohne persönliche Daten in die Cloud zu übertragen. Alles verbleibt auf Ihrem Gerät.</string>
-    <string name="onboarding_btn_get_started">Loslegen</string>
-    <string name="onboarding_feat_offline_title">100% Offline &amp; Sicher</string>
-    <string name="onboarding_feat_offline_desc">Keine Cloud-Server, kein Konto erforderlich, kein Tracking.</string>
-    <string name="onboarding_feat_auto_title">Automatische Ausgabenerfassung</string>
-    <string name="onboarding_feat_auto_desc">Liest Bank-SMS und Benachrichtigungen lokal aus, sodass Sie keine Quittungen manuell eingeben müssen.</string>
-    <string name="onboarding_feat_encryption_title">Hardware-Verschlüsselung</string>
-    <string name="onboarding_feat_encryption_desc">Ihr Tresor ist auf dem Gerät mit AES-256-Verschlüsselung und Biometrie geschützt.</string>
 
     <string name="onboarding_theme_title">Design &amp; Akzentfarbe</string>
     <string name="onboarding_theme_subtitle">Wählen Sie eine Akzentfarbe, die zu Ihnen passt.</string>
     <string name="onboarding_theme_preview_label">VORSCHAU</string>
-    <string name="onboarding_theme_section_palette">FARBPALETTEN</string>
 
     <string name="onboarding_auto_title">Automatische Erfassung</string>
-    <string name="onboarding_auto_subtitle">Aktivieren Sie lokale Berechtigungen, damit Cipher Transaktionen in Echtzeit erfassen kann.</string>
     <string name="onboarding_perm_sms_title">Bank-SMS-Erkennung</string>
     <string name="onboarding_perm_sms_desc">Erfasst Abbuchungs- und Gutschrift-SMS Ihrer Banken.</string>
     <string name="onboarding_perm_notif_title">Zahlungs-App-Benachrichtigungen</string>
@@ -343,13 +307,10 @@
     <string name="onboarding_perm_alerts_title">Ausgaben- &amp; Budgetwarnungen</string>
     <string name="onboarding_perm_alerts_desc">Sendet tägliche Zusammenfassungen und Budgetgrenzen-Warnungen.</string>
     <string name="onboarding_status_active">AKTIV</string>
-    <string name="onboarding_status_off">DEAKTIVIERT</string>
     <string name="onboarding_take_tour">Kurze Tour ansehen</string>
-    <string name="onboarding_theme_mode_label">DARSTELLUNGSMODUS</string>
     <string name="onboarding_theme_mode_system">System</string>
     <string name="onboarding_theme_mode_light">Hell</string>
     <string name="onboarding_theme_mode_dark">Dunkel</string>
-    <string name="onboarding_welcome_tagline">Ihr Geld. Nirgendwo sonst.</string>
     <string name="onboarding_welcome_begin">Loslegen</string>
     <string name="onboarding_apps_step_label">VERFOLGTE APPS</string>
     <string name="onboarding_apps_title">Welche Apps nutzen Sie?</string>
@@ -359,18 +320,9 @@
     <string name="onboarding_apps_finish">Einrichtung abschließen</string>
     <string name="onboarding_apps_loading">Installierte Apps werden geladen…</string>
     <string name="onboarding_perm_intro">Diese Berechtigungen senden niemals Daten außerhalb Ihres Geräts. Alles läuft lokal.</string>
-    <string name="onboarding_ready_tagline">Ihr privater Offline-Tresor ist bereit.</string>
     <string name="onboarding_ready_title">Bereit</string>
     <string name="onboarding_ready_subtitle">Alle Daten bleiben sicher auf diesem Smartphone.</string>
-    <string name="onboarding_ready_button">Tresor öffnen</string>
     <string name="onboarding_ready_slide_hint">Wischen zum Öffnen</string>
-    <string name="onboarding_welcome_brand_subtitle">Finanzielle Klarheit mit absoluter lokaler Souveränität.</string>
-    <string name="onboarding_welcome_hero_statement">Erfassen Sie Ausgaben automatisch, ohne Ihre Daten preiszugeben.</string>
-    <string name="onboarding_welcome_privacy_title">100%% auf Ihrem Gerät</string>
-    <string name="onboarding_welcome_privacy_desc">Ohne Cloud oder Konten. Ihre Daten bleiben lokal verschlüsselt.</string>
-    <string name="onboarding_welcome_automate_title">Automatische Erfassung</string>
-    <string name="onboarding_welcome_automate_desc">Erkennt Benachrichtigungen und erfasst Transaktionen sofort.</string>
-    <string name="onboarding_welcome_analytics_title">Klare Übersicht</string>
     <string name="onboarding_welcome_analytics_desc">Budgets und Finanzübersichten ohne Schnickschnack.</string>
     <string name="onboarding_welcome_stat_offline">100%</string>
     <string name="onboarding_welcome_stat_offline_label">Lokal &amp; Offline</string>
@@ -381,7 +333,7 @@
     <string name="onboarding_welcome_tagline_lead">Private Finanzverwaltung.</string>
     <string name="onboarding_welcome_greet_lead">Willkommen bei Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Ein automatischer, privater Ausgaben-Tracker, der vollständig auf Ihrem Smartphone läuft.</string>
-    <string name="onboarding_feature_offline_simple_title">100% Offline &amp; Privat</string>
+    <string name="onboarding_feature_offline_simple_title">100%% Offline &amp; Privat</string>
     <string name="onboarding_feature_offline_simple_desc">Ihre Finanzdaten sind verschlüsselt und verlassen niemals dieses Telefon. Keine Konten, keine Server.</string>
     <string name="onboarding_feature_auto_simple_title">Automatische Erfassung</string>
     <string name="onboarding_feature_auto_simple_desc">Erkennt Bank-SMS und Zahlungsbenachrichtigungen, um Ausgaben automatisch zu speichern.</string>
