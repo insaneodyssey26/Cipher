@@ -11,7 +11,7 @@ import javax.inject.Singleton
 class TransactionParser @Inject constructor() {
 
     fun parse(message: String, preferredCurrency: String? = null): ParsedTransaction? {
-        val cleanMessage = message.replace("\\s+".toRegex(), " ")
+        val cleanMessage = message.replace(MULTI_SPACE_REGEX, " ")
 
         val ruleChain = RegionRuleProvider.getAllRules(preferredCurrency ?: "INR")
 
@@ -68,7 +68,7 @@ class TransactionParser @Inject constructor() {
                 val match = matcher.group(1) ?: matcher.group(0)
                 if (isPartOfAccountNumber(message, matcher.start())) continue
 
-                val numeric = match.replace(",", "").replace(Regex("[^\\d.]"), "")
+                val numeric = match.replace(",", "").replace(NUMERIC_CLEANUP, "")
                 val value = numeric.toDoubleOrNull() ?: continue
 
                 if (value <= 0) continue
@@ -86,6 +86,13 @@ class TransactionParser @Inject constructor() {
             if (matchStart >= matcher.start() && matchStart < matcher.end()) return true
         }
         return false
+    }
+
+    companion object {
+        private val MULTI_SPACE_REGEX = Regex("\\s+")
+        private val MERCHANT_PREFIX_CLEANUP = Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE)
+        private val MERCHANT_TRAILING_CLEANUP = Regex("(?i)\\b(?:using|via|on|ref|vpa|upi|card|with|rrn|txn|id|auth)\\b.*")
+        private val NUMERIC_CLEANUP = Regex("[^\\d.]")
     }
 
     private fun findBrandInText(message: String, rules: RegionParserRules): String? {
@@ -107,9 +114,7 @@ class TransactionParser @Inject constructor() {
                 val lower = raw.lowercase()
                 if (TransactionPatterns.MERCHANT_FALSE_POSITIVE_PREFIXES.any { lower.startsWith(it) }) continue
 
-                val cleaned = raw.replace(
-                    Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE), ""
-                ).trim()
+                val cleaned = raw.replace(MERCHANT_PREFIX_CLEANUP, "").trim()
 
                 if (cleaned.isNotBlank()) return cleaned
             }
@@ -119,7 +124,7 @@ class TransactionParser @Inject constructor() {
 
     private fun sanitizeMerchant(merchant: String): String {
         return merchant
-            .replace(Regex("(?i)\\busing\\b.*|\\bvia\\b.*|\\bon\\b.*|\\bref\\b.*|\\bVPA\\b.*|\\bUPI\\b.*|\\bcard\\b.*|\\bwith\\b.*"), "")
+            .replace(MERCHANT_TRAILING_CLEANUP, "")
             .trim()
             .split(" ")
             .take(2)

@@ -1103,6 +1103,7 @@ fun CalendarHeatmap(
                             
                             val isSelected = selectedTimestamp == time
                             val isToday = time == todayCal.timeInMillis
+                            val isBrightCell = isCurrentMonth && spend > 0 && (0.35f + intensity * 0.65f) >= 0.55f
 
                             Box(
                                 modifier = Modifier
@@ -1111,13 +1112,16 @@ fun CalendarHeatmap(
                                     .padding(2.dp)
                                     .background(
                                         color = if (!isCurrentMonth) Color.Transparent 
-                                                else if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f + intensity * 0.8f) 
-                                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                                else if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f + intensity * 0.65f) 
+                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                                         shape = RoundedCornerShape(10.dp)
                                     )
                                     .border(
-                                        width = if (isSelected || isToday) 2.dp else 0.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) MaterialTheme.colorScheme.outline else Color.Transparent,
+                                        width = if (isSelected || isToday) 2.dp else if (isCurrentMonth && spend == 0.0) 1.dp else 0.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary 
+                                                else if (isToday) MaterialTheme.colorScheme.outline 
+                                                else if (isCurrentMonth && spend == 0.0) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f) 
+                                                else Color.Transparent,
                                         shape = RoundedCornerShape(10.dp)
                                     )
                                     .clickable(
@@ -1131,7 +1135,8 @@ fun CalendarHeatmap(
                                     text = displayDayNum.toString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = if (!isCurrentMonth) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                                            else if (spend > 0) Color(0xFF0D0D1A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            else if (isBrightCell) Color(0xFF0D0D1A) 
+                                            else MaterialTheme.colorScheme.onSurface,
                                     fontWeight = if (isSelected || isToday || spend > 0) FontWeight.Bold else FontWeight.Normal
                                 )
                             }

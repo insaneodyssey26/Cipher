@@ -497,4 +497,38 @@ class TransactionParserTest {
         assertEquals("ZARA", result.merchant)
         assertTrue(!result.isIncome)
     }
+
+    @Test
+    fun `HDFC UPI debit with trailing RRN and reference info`() {
+        val result = parser.parse("INR 450.00 debited from HDFC Bank A/C ending 4321 to Blue Tokai RRN 982374612938 on 03-09-26. Bal: INR 12000.00")
+        assertNotNull(result)
+        assertEquals(450.0, result!!.amount, 0.001)
+        assertEquals("BLUE TOKAI", result.merchant)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `ICICI debit card transaction with Auth code sanitized`() {
+        val result = parser.parse("Dear Customer, your Acct XX9012 is debited for INR 1,299.00 on 02-Sep-26 at Decathlon Auth 827361. Avl Bal: INR 35,000.00")
+        assertNotNull(result)
+        assertEquals(1299.0, result!!.amount, 0.001)
+        assertEquals("DECATHLON", result.merchant)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `US Chase bank alert with card ending indicator`() {
+        val result = parser.parse("Chase: You made a $34.50 transaction with card ending in 7721 at Trader Joe's.", "USD")
+        assertNotNull(result)
+        assertEquals(34.50, result!!.amount, 0.001)
+        assertEquals("TRADER JOE'S", result.merchant)
+        assertEquals("USD", result.currency)
+        assertTrue(!result.isIncome)
+    }
+
+    @Test
+    fun `Zero amount SMS is rejected`() {
+        val result = parser.parse("INR 0.00 debited from account ending 1234 at Test Merchant.")
+        assertNull(result)
+    }
 }

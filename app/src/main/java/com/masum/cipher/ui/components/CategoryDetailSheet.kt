@@ -670,21 +670,21 @@ fun CategoryDetailSheet(
                                         )
                                     }
 
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(6.dp))
 
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(4.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                                            .height(5.dp)
+                                            .clip(RoundedCornerShape(2.5.dp))
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                                     ) {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth(merchantPercent.coerceIn(0f, 1f))
                                                 .fillMaxHeight()
-                                                .clip(RoundedCornerShape(2.dp))
-                                                .background(categoryColor.copy(alpha = 0.8f))
+                                                .clip(RoundedCornerShape(2.5.dp))
+                                                .background(categoryColor.copy(alpha = 0.85f))
                                         )
                                     }
                                 }
