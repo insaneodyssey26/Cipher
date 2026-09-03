@@ -350,8 +350,8 @@ class MainActivity : AppCompatActivity() {
                                 onThemeSelected = { theme -> mainViewModel.handleIntent(MainContract.Intent.SaveTheme(theme)) },
                                 currentLanguageCode = state.settings?.appLanguage ?: "system",
                                 onLanguageSelected = { langCode -> mainViewModel.handleIntent(MainContract.Intent.SaveLanguage(langCode)) },
-                                currentCurrencyCode = state.settings?.currencyCode ?: "USD",
-                                currentCurrencySymbol = state.settings?.currencySymbol ?: "$",
+                                currentCurrencyCode = state.settings?.currencyCode ?: com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
+                                currentCurrencySymbol = state.settings?.currencySymbol ?: com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
                                 onCurrencySelected = { code, symbol -> mainViewModel.handleIntent(MainContract.Intent.SaveCurrency(code, symbol)) },
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }

@@ -1743,7 +1743,7 @@ private fun CapabilityCard(
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = title,
@@ -1752,14 +1752,15 @@ private fun CapabilityCard(
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (isEnabled) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(EmeraldIncome.copy(alpha = 0.13f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .padding(horizontal = 5.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = stringResource(R.string.onboarding_status_active),
@@ -1768,7 +1769,9 @@ private fun CapabilityCard(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 8.5.sp
                                 ),
-                                color = EmeraldIncome
+                                color = EmeraldIncome,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }

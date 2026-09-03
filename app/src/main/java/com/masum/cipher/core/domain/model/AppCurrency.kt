@@ -55,8 +55,27 @@ data class AppCurrency(
 
         fun detectDefault(locale: Locale = Locale.getDefault()): AppCurrency {
             return try {
-                val jCurrency = Currency.getInstance(locale)
-                fromCode(jCurrency.currencyCode, jCurrency.symbol)
+                if (!locale.country.isNullOrBlank()) {
+                    val jCurrency = Currency.getInstance(locale)
+                    if (jCurrency != null) {
+                        return fromCode(jCurrency.currencyCode, jCurrency.symbol)
+                    }
+                }
+                when (locale.language.lowercase(Locale.ROOT)) {
+                    "hi" -> fromCode("INR")
+                    "bn" -> fromCode("BDT")
+                    "ja" -> fromCode("JPY")
+                    "de", "fr", "es" -> fromCode("EUR")
+                    else -> {
+                        val sys = Locale.getDefault()
+                        if (!sys.country.isNullOrBlank()) {
+                            val sysCur = Currency.getInstance(sys)
+                            if (sysCur != null) fromCode(sysCur.currencyCode, sysCur.symbol) else DEFAULT
+                        } else {
+                            DEFAULT
+                        }
+                    }
+                }
             } catch (_: Exception) {
                 DEFAULT
             }
