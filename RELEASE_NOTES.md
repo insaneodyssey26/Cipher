@@ -1,5 +1,14 @@
 # Release Notes
 
+## [5.2.1]
+
+### Fixed
+- **Currency Auto-Detection**: Fixed default currency fallback to properly respect regional settings and locale across fresh installs and device updates.
+- **First Launch Dashboard Flash**: Eliminated the split-second Dashboard screen flicker before the Onboarding welcome screen appears on fresh installs or data reset.
+- **Onboarding Permission Badge Layout**: Fixed letter wrapping and text alignment on the active capability badge across high-DPI and narrow screens.
+
+---
+
 ## [5.2.0]
 
 ### Added
