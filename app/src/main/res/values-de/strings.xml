@@ -366,7 +366,7 @@
     <string name="onboarding_ready_slide_hint">Wischen zum Öffnen</string>
     <string name="onboarding_welcome_brand_subtitle">Finanzielle Klarheit mit absoluter lokaler Souveränität.</string>
     <string name="onboarding_welcome_hero_statement">Erfassen Sie Ausgaben automatisch, ohne Ihre Daten preiszugeben.</string>
-    <string name="onboarding_welcome_privacy_title">100% auf Ihrem Gerät</string>
+    <string name="onboarding_welcome_privacy_title">100%% auf Ihrem Gerät</string>
     <string name="onboarding_welcome_privacy_desc">Ohne Cloud oder Konten. Ihre Daten bleiben lokal verschlüsselt.</string>
     <string name="onboarding_welcome_automate_title">Automatische Erfassung</string>
     <string name="onboarding_welcome_automate_desc">Erkennt Benachrichtigungen und erfasst Transaktionen sofort.</string>

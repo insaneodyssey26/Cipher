@@ -37,10 +37,13 @@ import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Wallet
 
-enum class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-    Dashboard("dashboard", LucideIcons.Wallet, "Home"),
-    Insights("insights", LucideIcons.ChartBar, "Insights"),
-    Settings("settings", LucideIcons.Settings, "Settings")
+import androidx.annotation.StringRes
+import com.masum.cipher.R
+
+enum class BottomNavItem(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
+    Dashboard("dashboard", LucideIcons.Wallet, R.string.nav_spend),
+    Insights("insights", LucideIcons.ChartBar, R.string.nav_insights),
+    Settings("settings", LucideIcons.Settings, R.string.nav_settings)
 }
 
 @Composable
@@ -181,7 +184,7 @@ private fun NavItem(
     ) {
         Icon(
             imageVector = item.icon,
-            contentDescription = item.label,
+            contentDescription = androidx.compose.ui.res.stringResource(item.labelRes),
             tint = color,
             modifier = Modifier
                 .size(22.dp)

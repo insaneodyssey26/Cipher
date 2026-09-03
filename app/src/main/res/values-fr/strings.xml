@@ -322,7 +322,7 @@
     <string name="onboarding_welcome_title">Vos finances, en toute confidentialité.</string>
     <string name="onboarding_welcome_subtitle">Cipher suit vos dépenses quotidiennes automatiquement sans jamais envoyer vos données personnelles sur le cloud. Tout reste sur votre appareil.</string>
     <string name="onboarding_btn_get_started">Commencer</string>
-    <string name="onboarding_feat_offline_title">100% Hors-ligne &amp; Privé</string>
+    <string name="onboarding_feat_offline_title">100%% Hors-ligne &amp; Privé</string>
     <string name="onboarding_feat_offline_desc">Aucun serveur cloud, aucun compte requis, aucun suivi.</string>
     <string name="onboarding_feat_auto_title">Suivi Automatique des Dépenses</string>
     <string name="onboarding_feat_auto_desc">Lit les SMS bancaires et notifications localement pour vous éviter les saisies manuelles.</string>
@@ -366,7 +366,7 @@
     <string name="onboarding_ready_slide_hint">Glissez pour ouvrir</string>
     <string name="onboarding_welcome_brand_subtitle">Clarté financière avec une souveraineté locale absolue.</string>
     <string name="onboarding_welcome_hero_statement">Suivez vos dépenses automatiquement sans partager vos données.</string>
-    <string name="onboarding_welcome_privacy_title">100% sur votre appareil</string>
+    <string name="onboarding_welcome_privacy_title">100%% sur votre appareil</string>
     <string name="onboarding_welcome_privacy_desc">Sans cloud ni compte. Vos données restent chiffrées localement.</string>
     <string name="onboarding_welcome_automate_title">Suivi automatique</string>
     <string name="onboarding_welcome_automate_desc">Détecte les notifications de paiement pour enregistrer vos dépenses.</string>
@@ -381,7 +381,7 @@
     <string name="onboarding_welcome_tagline_lead">Gestion financière privée.</string>
     <string name="onboarding_welcome_greet_lead">Bienvenue sur Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Un suivi des dépenses automatique et privé qui fonctionne entièrement sur votre téléphone.</string>
-    <string name="onboarding_feature_offline_simple_title">100% Hors Ligne et Privé</string>
+    <string name="onboarding_feature_offline_simple_title">100%% Hors Ligne et Privé</string>
     <string name="onboarding_feature_offline_simple_desc">Vos données financières sont chiffrées et ne quittent jamais ce téléphone. Aucun compte ni serveur.</string>
     <string name="onboarding_feature_auto_simple_title">Suivi Automatique</string>
     <string name="onboarding_feature_auto_simple_desc">Détecte les SMS et notifications de paiement pour enregistrer automatiquement vos dépenses.</string>
