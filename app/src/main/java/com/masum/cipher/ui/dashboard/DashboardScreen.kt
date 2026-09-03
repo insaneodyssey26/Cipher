@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -34,6 +35,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -1663,9 +1665,9 @@ private fun DashboardHero(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
                 .align(Alignment.TopCenter)
-                .height(48.dp),
+                .heightIn(min = 48.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -1680,12 +1682,13 @@ private fun DashboardHero(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-1).sp
                     ),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
                 )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     var textFieldValue by remember { 
                         mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(searchQuery)) 
@@ -1701,13 +1704,18 @@ private fun DashboardHero(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .width(135.dp)
+                            .widthIn(min = 120.dp, max = 150.dp)
                             .height(38.dp)
                             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
                             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
                             .padding(horizontal = 10.dp)
                     ) {
-                        Icon(LucideIcons.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
+                        Icon(
+                            imageVector = LucideIcons.Search,
+                            contentDescription = stringResource(R.string.action_search),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(15.dp)
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
                         
                         androidx.compose.foundation.text.BasicTextField(
@@ -1725,7 +1733,12 @@ private fun DashboardHero(
                             decorationBox = { innerTextField ->
                                 Box(contentAlignment = Alignment.CenterStart) {
                                     if (textFieldValue.text.isEmpty()) {
-                                        Text(stringResource(R.string.action_search), style = Typography.bodyMedium.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text(
+                                            text = stringResource(R.string.action_search),
+                                            style = Typography.bodyMedium.copy(fontSize = 13.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
                                     }
                                     innerTextField()
                                 }
@@ -1739,7 +1752,12 @@ private fun DashboardHero(
                                 onSearchQueryChanged("") 
                                 focusManager.clearFocus()
                             }, modifier = Modifier.size(18.dp)) {
-                                Icon(LucideIcons.X, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(13.dp))
+                                Icon(
+                                    imageVector = LucideIcons.X,
+                                    contentDescription = stringResource(R.string.action_close),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(13.dp)
+                                )
                             }
                         }
                     }
@@ -1769,7 +1787,7 @@ private fun DashboardHero(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.SlidersHorizontal,
-                                contentDescription = "Filter",
+                                contentDescription = stringResource(R.string.filter_title),
                                 tint = if (filter.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(15.dp)
                             )

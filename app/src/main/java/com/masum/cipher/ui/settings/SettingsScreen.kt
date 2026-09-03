@@ -1450,8 +1450,10 @@ private fun VaultSettingsItem(
             }
         }
         if (loading) {
+            Spacer(modifier = Modifier.width(16.dp))
             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
         } else if (value != null) {
+            Spacer(modifier = Modifier.width(16.dp))
             Text(text = value, style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Icon(LucideIcons.ChevronRight, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp).padding(start = 4.dp))
         }
@@ -1478,6 +1480,7 @@ private fun VaultSettingsSwitch(
             Text(text = title, style = Typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
             Text(text = description, style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        Spacer(modifier = Modifier.width(16.dp))
         Switch(
             checked = checked,
             onCheckedChange = {
