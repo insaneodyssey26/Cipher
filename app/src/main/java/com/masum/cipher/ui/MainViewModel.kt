@@ -20,7 +20,8 @@ class MainViewModel @Inject constructor(
     private val merchantAliasDao: MerchantAliasDao
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
-        settings = userPreferences.getCachedSettings()
+        settings = userPreferences.getCachedSettings(),
+        isOnboardingRequired = !userPreferences.isCachedOnboardingCompleted()
     )
 ) {
 

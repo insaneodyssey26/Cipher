@@ -39,6 +39,10 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString("cached_app_language", "system") ?: "system"
     }
 
+    fun isCachedOnboardingCompleted(): Boolean {
+        return syncPrefs.getBoolean("cached_onboarding_completed", false)
+    }
+
     fun getCachedSettings(): UserSettings {
         val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
         val curCode = getCachedCurrencyCode()
@@ -55,7 +59,8 @@ class UserPreferences @Inject constructor(
             appLanguage = langCode,
             autoLockTimeout = 0L,
             lastStopTime = 0L,
-            monthlyBudget = 0.0
+            monthlyBudget = 0.0,
+            hasCompletedOnboarding = isCachedOnboardingCompleted()
         )
     }
 
@@ -103,9 +108,11 @@ class UserPreferences @Inject constructor(
         val curCode = preferences[Keys.PREFERRED_CURRENCY_CODE] ?: preferences[Keys.PREFERRED_CURRENCY] ?: defaultCurrency.code
         val curSymbol = preferences[Keys.PREFERRED_CURRENCY_SYMBOL] ?: com.masum.cipher.core.domain.model.AppCurrency.fromCode(curCode).symbol
 
+        val hasOnboarded = preferences[Keys.ONBOARDING_COMPLETED] ?: false
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
             .putString("cached_currency_symbol", curSymbol)
+            .putBoolean("cached_onboarding_completed", hasOnboarded)
             .apply()
 
         UserSettings(
@@ -199,6 +206,7 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
+        syncPrefs.edit().putBoolean("cached_onboarding_completed", completed).apply()
         context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
     }
 
