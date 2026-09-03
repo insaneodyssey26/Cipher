@@ -321,14 +321,6 @@
     <string name="onboarding_ready_title">Setup Complete</string>
     <string name="onboarding_ready_subtitle">Everything is stored locally on this phone.</string>
     <string name="onboarding_ready_slide_hint">Slide to open vault</string>
-    <string name="onboarding_welcome_analytics_desc">Budgets, cash flow summaries, and spending breakdown charts without clutter.</string>
-    <string name="onboarding_welcome_stat_offline">100%</string>
-    <string name="onboarding_welcome_stat_offline_label">Local &amp; Offline</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">Hardware Protected</string>
-    <string name="onboarding_welcome_stat_track">Real-time</string>
-    <string name="onboarding_welcome_stat_track_label">Instant Logging</string>
-    <string name="onboarding_welcome_tagline_lead">Private wealth management.</string>
     <string name="onboarding_welcome_greet_lead">Welcome to Cipher</string>
     <string name="onboarding_welcome_tagline_simple">An automatic, private expense tracker that runs completely on your phone.</string>
     <string name="onboarding_feature_offline_simple_title">100%% Offline &amp; Private</string>

@@ -119,8 +119,6 @@
     <string name="dialog_currency_title">通貨と地域</string>
     <string name="dialog_currency_subtitle">取引およびグラフ用のアクティブな通貨</string>
     <string name="action_back">戻る</string>
-    <string name="back">戻る</string>
-    <string name="search">検索</string>
 
     <string name="timeframe_title">期間</string>
     <string name="timeframe_subtitle">有効な台帳期間を選択</string>
@@ -323,14 +321,6 @@
     <string name="onboarding_ready_title">準備完了</string>
     <string name="onboarding_ready_subtitle">データはすべてこのスマートフォン内に保存されます。</string>
     <string name="onboarding_ready_slide_hint">スライドして開く</string>
-    <string name="onboarding_welcome_analytics_desc">予算やキャッシュフローの推移を分かりやすく可視化します。</string>
-    <string name="onboarding_welcome_stat_offline">100%</string>
-    <string name="onboarding_welcome_stat_offline_label">完全ローカル保管</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">暗号化保護</string>
-    <string name="onboarding_welcome_stat_track">リアルタイム</string>
-    <string name="onboarding_welcome_stat_track_label">自動記録</string>
-    <string name="onboarding_welcome_tagline_lead">プライベートな資産管理。</string>
     <string name="onboarding_welcome_greet_lead">Cipher へようこそ</string>
     <string name="onboarding_welcome_tagline_simple">端末内だけで安全に完結する、自動家計簿アプリです。</string>
     <string name="onboarding_feature_offline_simple_title">100% オフライン＆プライベート</string>

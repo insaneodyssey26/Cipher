@@ -23,11 +23,7 @@ object LocaleHelper {
         val locale = Locale.forLanguageTag(languageCode)
         Locale.setDefault(locale)
         val config = Configuration(context.resources.configuration)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            config.setLocales(android.os.LocaleList(locale))
-        } else {
-            config.setLocale(locale)
-        }
+        config.setLocales(android.os.LocaleList(locale))
         return context.createConfigurationContext(config)
     }
 
@@ -37,11 +33,7 @@ object LocaleHelper {
         }
         val locale = Locale.forLanguageTag(languageCode)
         val config = Configuration(context.resources.configuration)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            config.setLocales(android.os.LocaleList(locale))
-        } else {
-            config.setLocale(locale)
-        }
+        config.setLocales(android.os.LocaleList(locale))
         return config
     }
 }

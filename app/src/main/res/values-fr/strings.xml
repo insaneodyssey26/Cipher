@@ -119,8 +119,6 @@
     <string name="dialog_currency_title">Devise et Région</string>
     <string name="dialog_currency_subtitle">Devise active pour les transactions et graphiques</string>
     <string name="action_back">Retour</string>
-    <string name="back">Retour</string>
-    <string name="search">Rechercher</string>
 
     <string name="timeframe_title">Période</string>
     <string name="timeframe_subtitle">Sélectionner la période active</string>
@@ -323,14 +321,6 @@
     <string name="onboarding_ready_title">Configuration terminée</string>
     <string name="onboarding_ready_subtitle">Toutes vos données restent sur ce téléphone.</string>
     <string name="onboarding_ready_slide_hint">Glissez pour ouvrir</string>
-    <string name="onboarding_welcome_analytics_desc">Budgets et flux de trésorerie en toute simplicité.</string>
-    <string name="onboarding_welcome_stat_offline">100%</string>
-    <string name="onboarding_welcome_stat_offline_label">Local et Hors Ligne</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">Chiffrement Matériel</string>
-    <string name="onboarding_welcome_stat_track">Temps Réel</string>
-    <string name="onboarding_welcome_stat_track_label">Suivi Instantané</string>
-    <string name="onboarding_welcome_tagline_lead">Gestion financière privée.</string>
     <string name="onboarding_welcome_greet_lead">Bienvenue sur Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Un suivi des dépenses automatique et privé qui fonctionne entièrement sur votre téléphone.</string>
     <string name="onboarding_feature_offline_simple_title">100%% Hors Ligne et Privé</string>

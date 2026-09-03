@@ -320,14 +320,6 @@
     <string name="onboarding_ready_title">Configuración lista</string>
     <string name="onboarding_ready_subtitle">Toda tu información permanece en este teléfono.</string>
     <string name="onboarding_ready_slide_hint">Desliza para abrir</string>
-    <string name="onboarding_welcome_analytics_desc">Presupuestos y análisis de flujo de dinero sin complicaciones.</string>
-    <string name="onboarding_welcome_stat_offline">100%</string>
-    <string name="onboarding_welcome_stat_offline_label">Local y Sin Conexión</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">Cifrado por Hardware</string>
-    <string name="onboarding_welcome_stat_track">Tiempo Real</string>
-    <string name="onboarding_welcome_stat_track_label">Registro Instantáneo</string>
-    <string name="onboarding_welcome_tagline_lead">Gestión financiera privada.</string>
     <string name="onboarding_welcome_greet_lead">Bienvenido a Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Un gestor de gastos automático y privado que funciona totalmente en tu teléfono.</string>
     <string name="onboarding_feature_offline_simple_title">100%% Sin Conexión y Privado</string>

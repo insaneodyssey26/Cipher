@@ -321,14 +321,6 @@
     <string name="onboarding_ready_title">সেটআপ সম্পন্ন</string>
     <string name="onboarding_ready_subtitle">সমস্ত তথ্য এই ফোনেই নিরাপদে সংরক্ষিত থাকবে।</string>
     <string name="onboarding_ready_slide_hint">ভল্ট খুলতে স্লাইড করুন</string>
-    <string name="onboarding_welcome_analytics_desc">বাজেট, ক্যাশ ফ্লো এবং খরচের চার্ট কোনো জটিলতা ছাড়াই।</string>
-    <string name="onboarding_welcome_stat_offline">১০০%</string>
-    <string name="onboarding_welcome_stat_offline_label">স্থানীয় ও অফলাইন</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">হার্ডওয়্যার এনক্রিপ্টেড</string>
-    <string name="onboarding_welcome_stat_track">রিয়েল-টাইম</string>
-    <string name="onboarding_welcome_stat_track_label">স্বয়ংক্রিয় লগিং</string>
-    <string name="onboarding_welcome_tagline_lead">নিরাপদ ব্যক্তিগত হিসাব ব্যবস্থাপনা।</string>
     <string name="onboarding_welcome_greet_lead">Cipher-এ স্বাগতম</string>
     <string name="onboarding_welcome_tagline_simple">একটি স্বয়ংক্রিয় ও ব্যক্তিগত খরচ ট্র্যাকার যা সম্পূর্ণ আপনার ফোনে চলে।</string>
     <string name="onboarding_feature_offline_simple_title">১০০% অফলাইন ও নিরাপদ</string>

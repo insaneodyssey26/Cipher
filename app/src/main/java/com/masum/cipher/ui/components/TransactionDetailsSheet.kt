@@ -40,6 +40,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -116,7 +117,7 @@ fun TransactionDetailsSheet(
     var categoryExpanded by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf(transaction.note ?: "") }
     var isNoteExpanded by remember { mutableStateOf(transaction.note?.isNotBlank() == true) }
-    var selectedTimestamp by remember { mutableStateOf(transaction.timestamp) }
+    var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp) {

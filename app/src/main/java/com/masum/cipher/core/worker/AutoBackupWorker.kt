@@ -2,6 +2,7 @@ package com.masum.cipher.core.worker
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.masum.cipher.core.data.local.pref.AutoBackupFrequency
@@ -48,7 +49,7 @@ class AutoBackupWorker(
         val plainPassword = keystoreManager.decrypt(encryptedPassword) ?: return Result.failure()
 
         return try {
-            val directoryUri = Uri.parse(uriString)
+            val directoryUri = uriString.toUri()
             val documentFile = androidx.documentfile.provider.DocumentFile.fromTreeUri(applicationContext, directoryUri)
             
             if (documentFile == null || !documentFile.exists() || !documentFile.isDirectory || !documentFile.canWrite()) {

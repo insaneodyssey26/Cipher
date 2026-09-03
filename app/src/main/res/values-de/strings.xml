@@ -119,8 +119,6 @@
     <string name="dialog_currency_title">Währung &amp; Region</string>
     <string name="dialog_currency_subtitle">Aktive Währung für Transaktionen und Diagramme</string>
     <string name="action_back">Zurück</string>
-    <string name="back">Zurück</string>
-    <string name="search">Suchen</string>
 
     <string name="timeframe_title">Zeitrahmen</string>
     <string name="timeframe_subtitle">Aktiven Buchungsbereich wählen</string>
@@ -323,14 +321,6 @@
     <string name="onboarding_ready_title">Bereit</string>
     <string name="onboarding_ready_subtitle">Alle Daten bleiben sicher auf diesem Smartphone.</string>
     <string name="onboarding_ready_slide_hint">Wischen zum Öffnen</string>
-    <string name="onboarding_welcome_analytics_desc">Budgets und Finanzübersichten ohne Schnickschnack.</string>
-    <string name="onboarding_welcome_stat_offline">100%</string>
-    <string name="onboarding_welcome_stat_offline_label">Lokal &amp; Offline</string>
-    <string name="onboarding_welcome_stat_enc">AES-256</string>
-    <string name="onboarding_welcome_stat_enc_label">Hardware-Verschlüsselt</string>
-    <string name="onboarding_welcome_stat_track">Echtzeit</string>
-    <string name="onboarding_welcome_stat_track_label">Automatische Erfassung</string>
-    <string name="onboarding_welcome_tagline_lead">Private Finanzverwaltung.</string>
     <string name="onboarding_welcome_greet_lead">Willkommen bei Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Ein automatischer, privater Ausgaben-Tracker, der vollständig auf Ihrem Smartphone läuft.</string>
     <string name="onboarding_feature_offline_simple_title">100%% Offline &amp; Privat</string>
