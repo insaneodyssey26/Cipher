@@ -17,7 +17,8 @@ class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val biometricAuthenticator: BiometricAuthenticator,
     private val addTransactionUseCase: AddTransactionUseCase,
-    private val merchantAliasDao: MerchantAliasDao
+    private val merchantAliasDao: MerchantAliasDao,
+    private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
         settings = userPreferences.getCachedSettings(),
@@ -47,7 +48,7 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.OnAppStop -> onStop()
             is MainContract.Intent.SetOnboardingCompleted -> setOnboardingCompleted(intent.completed)
             is MainContract.Intent.Authenticate -> updateState { copy(isAuthenticated = true) }
-            is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction)
+            is MainContract.Intent.AddTransaction -> addTransaction(intent.transaction, intent.splits)
             is MainContract.Intent.SaveTrackedApps -> saveTrackedApps(intent.apps)
             is MainContract.Intent.SaveAccentColor -> saveAccentColor(intent.color)
             is MainContract.Intent.SaveTheme -> saveTheme(intent.theme)
@@ -87,9 +88,21 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun addTransaction(transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) {
+    private fun addTransaction(transaction: com.masum.cipher.core.data.local.entity.TransactionEntity, splits: List<com.masum.cipher.core.domain.model.SplitParticipant> = emptyList()) {
         viewModelScope.launch {
-            addTransactionUseCase(transaction)
+            val savedTx = addTransactionUseCase(transaction)
+            if (savedTx != null && splits.isNotEmpty()) {
+                val entities = splits.map {
+                    com.masum.cipher.core.data.local.entity.TransactionSplitEntity(
+                        transactionId = savedTx.id,
+                        name = it.name,
+                        amount = it.amount,
+                        isPaid = it.isPaid,
+                        isCurrentUser = it.isCurrentUser
+                    )
+                }
+                transactionSplitRepository.saveSplits(savedTx.id, entities)
+            }
         }
     }
 

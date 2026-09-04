@@ -30,6 +30,7 @@ class InsightsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: SubscriptionDao,
+    private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State(
@@ -66,6 +67,22 @@ class InsightsViewModel @Inject constructor(
             }
             is InsightsContract.Intent.SetCategoryBudget -> setCategoryBudget(intent.category, intent.limit)
             is InsightsContract.Intent.SetDynamicBudget -> setDynamicBudget(intent.enabled)
+            is InsightsContract.Intent.SaveTransactionSplits -> saveSplits(intent.transactionId, intent.splits)
+        }
+    }
+
+    private fun saveSplits(transactionId: Long, splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) {
+        viewModelScope.launch {
+            val entities = splits.map {
+                com.masum.cipher.core.data.local.entity.TransactionSplitEntity(
+                    transactionId = transactionId,
+                    name = it.name,
+                    amount = it.amount,
+                    isPaid = it.isPaid,
+                    isCurrentUser = it.isCurrentUser
+                )
+            }
+            transactionSplitRepository.saveSplits(transactionId, entities)
         }
     }
 

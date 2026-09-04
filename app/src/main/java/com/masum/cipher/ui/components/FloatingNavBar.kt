@@ -31,18 +31,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.masum.cipher.core.util.performVibrate
+import androidx.annotation.StringRes
+import com.masum.cipher.R
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.Wallet
-
-import androidx.annotation.StringRes
-import com.masum.cipher.R
 
 enum class BottomNavItem(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
     Dashboard("dashboard", LucideIcons.Wallet, R.string.nav_spend),
     Insights("insights", LucideIcons.ChartBar, R.string.nav_insights),
+    Splits("split_expenses", LucideIcons.Users, R.string.nav_splits),
     Settings("settings", LucideIcons.Settings, R.string.nav_settings)
 }
 
@@ -74,7 +75,7 @@ fun FloatingNavBar(
                 )
             )
             .navigationBarsPadding()
-            .padding(top = 48.dp, bottom = 12.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 48.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
@@ -86,8 +87,8 @@ fun FloatingNavBar(
                     indication = null,
                     onClick = {}
                 )
-                .padding(horizontal = 24.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             NavItem(
@@ -108,10 +109,9 @@ fun FloatingNavBar(
                 }
             )
 
-            // The FAB inside the NavBar
             Box(
                 modifier = Modifier
-                    .size(48.dp) // Make FAB slightly larger than tabs
+                    .size(46.dp)
                     .shadow(elevation = 12.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
@@ -128,6 +128,15 @@ fun FloatingNavBar(
                     modifier = Modifier.size(24.dp)
                 )
             }
+
+            NavItem(
+                item = BottomNavItem.Splits,
+                isSelected = currentRoute == BottomNavItem.Splits.route,
+                onClick = { 
+                    view.performVibrate(isHapticsEnabled)
+                    onNavigate(BottomNavItem.Splits.route) 
+                }
+            )
 
             NavItem(
                 item = BottomNavItem.Settings,

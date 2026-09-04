@@ -6,10 +6,12 @@ import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.dao.TransactionSplitDao
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +33,7 @@ import javax.inject.Singleton
 @Serializable
 data class BackupData(
     val transactions: List<TransactionEntity>,
+    val splits: List<TransactionSplitEntity> = emptyList(),
     val aliases: List<MerchantAliasEntity> = emptyList(),
     val rules: List<CategoryRuleEntity> = emptyList(),
     val subscriptions: List<SubscriptionEntity> = emptyList(),
@@ -60,6 +63,7 @@ data class BackupData(
 class BackupRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val transactionDao: TransactionDao,
+    private val transactionSplitDao: TransactionSplitDao,
     private val merchantAliasDao: MerchantAliasDao,
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: SubscriptionDao,
@@ -80,6 +84,7 @@ class BackupRepository @Inject constructor(
             val settings = userPreferences.settingsFlow.first()
             val data = BackupData(
                 transactions = transactionDao.getAllTransactions().first(),
+                splits = transactionSplitDao.getAllSplits(),
                 aliases = merchantAliasDao.getAllAliases().first(),
                 rules = categoryRuleDao.getAllRules().first(),
                 subscriptions = subscriptionDao.getAllSubscriptions().first(),
@@ -146,6 +151,9 @@ class BackupRepository @Inject constructor(
                 val data = json.decodeFromString<BackupData>(jsonString)
                 
                 data.transactions.forEach { transactionDao.insertTransaction(it) }
+                if (data.splits.isNotEmpty()) {
+                    transactionSplitDao.insertSplits(data.splits)
+                }
                 data.aliases.forEach { merchantAliasDao.insertAlias(it) }
                 data.rules.forEach { categoryRuleDao.insertRule(it) }
                 data.subscriptions.forEach { subscriptionDao.insert(it) }

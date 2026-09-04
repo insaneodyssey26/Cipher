@@ -214,6 +214,9 @@ fun DayDetailScreen(
                 viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             },
+            onSaveSplits = { splits ->
+                viewModel.handleIntent(InsightsContract.Intent.SaveTransactionSplits(transaction.id, splits))
+            },
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null

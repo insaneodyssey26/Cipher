@@ -88,6 +88,7 @@ import com.masum.cipher.BuildConfig
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -95,6 +96,7 @@ import com.masum.cipher.ui.components.AnimatedNumberTicker
 import com.masum.cipher.ui.components.StaggeredEntranceItem
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionDetailsSheet
+import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.components.TransactionListSkeleton
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
@@ -115,7 +117,9 @@ import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
+import compose.icons.lucideicons.TrendingDown
 import compose.icons.lucideicons.TrendingUp
+import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.flow.collectLatest
@@ -130,7 +134,8 @@ import kotlin.time.Duration.Companion.milliseconds
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
-    onNavigateToManageApps: () -> Unit
+    onNavigateToManageApps: () -> Unit,
+    onNavigateToSplitExpenses: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalLocale.current.platformLocale
@@ -145,6 +150,7 @@ fun DashboardScreen(
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
+    var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -218,12 +224,12 @@ fun DashboardScreen(
     }
 
     val mainScale by animateFloatAsState(
-        targetValue = if (showAddSheet || editingTransaction != null) 0.93f else 1f,
+        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null) 0.93f else 1f,
         animationSpec = VaultMotion.LayoutSpring,
         label = "MainScale"
     )
     val mainCorner by animateDpAsState(
-        targetValue = if (showAddSheet || editingTransaction != null) 32.dp else 0.dp,
+        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null) 32.dp else 0.dp,
         animationSpec = spring(dampingRatio = 0.85f, stiffness = 300f),
         label = "MainCorner"
     )
@@ -540,6 +546,7 @@ fun DashboardScreen(
                                     transaction = transaction,
                                     privacyMode = privacyMode,
                                     currencySymbol = state.currencySymbol,
+                                    splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
                                     onClick = {
                                         view.performVibrate(isHapticsEnabled)
                                         editingTransaction = transaction
@@ -591,6 +598,7 @@ fun DashboardScreen(
                     isHapticsEnabled = isHapticsEnabled,
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
+                    onNavigateToSplitExpenses = onNavigateToSplitExpenses,
                     toolbarOffsetHeightPx = animatedToolbarOffset,
                     toolbarHeightRangePx = toolbarHeightRangePx,
                     maxToolbarHeight = maxToolbarHeight
@@ -647,6 +655,12 @@ fun DashboardScreen(
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
                 showAddSheet = false
             },
+            onConfirmWithSplits = { newTransaction, splits ->
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction, splits))
+                viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
+                showAddSheet = false
+            },
             onDraftChange = { updatedDraft ->
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
             },
@@ -655,20 +669,62 @@ fun DashboardScreen(
     }
 
     editingTransaction?.let { transaction ->
+        val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
+        val mappedParticipants = splitsForTx.map {
+            SplitParticipant(
+                id = it.id.toString(),
+                name = it.name,
+                amount = it.amount,
+                percentage = if (transaction.amount > 0) (it.amount / transaction.amount) * 100.0 else 0.0,
+                isPaid = it.isPaid,
+                isCurrentUser = it.isCurrentUser
+            )
+        }
         TransactionDetailsSheet(
             transaction = transaction,
             currencySymbol = state.currencySymbol,
+            existingSplits = mappedParticipants,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             },
+            onConfirmWithSplits = { updated, splits ->
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
+                viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, splits))
+                editingTransaction = null
+            },
+            onSaveSplits = { newSplits ->
+                viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, newSplits))
+            },
             onDelete = {
                 viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
             },
             isHapticsEnabled = isHapticsEnabled
+        )
+    }
+
+    activeSplittingTx?.let { (tx, participants) ->
+        TransactionSplitSheet(
+            expenseName = tx.merchant.ifBlank { "Expense" },
+            totalAmount = tx.amount,
+            currencySymbol = state.currencySymbol,
+            initialParticipants = participants,
+            isHapticsEnabled = isHapticsEnabled,
+            onDismiss = { activeSplittingTx = null },
+            onSaveSplits = { updatedSplits ->
+                if (tx.id != 0L) {
+                    viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(tx))
+                    viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(tx.id, updatedSplits))
+                } else {
+                    viewModel.handleIntent(DashboardContract.Intent.AddTransaction(tx, updatedSplits))
+                    viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
+                }
+                activeSplittingTx = null
+            }
         )
     }
 
@@ -1261,6 +1317,7 @@ private fun DashboardHero(
     isHapticsEnabled: Boolean,
     expenseComparisonPercent: Double? = null,
     onComparisonBadgeClick: () -> Unit = {},
+    onNavigateToSplitExpenses: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
     maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
@@ -1856,6 +1913,7 @@ fun TransactionItem(
     transaction: TransactionEntity,
     privacyMode: Boolean,
     currencySymbol: String = "₹",
+    splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList(),
     onClick: () -> Unit
 ) {
     val locale = LocalLocale.current.platformLocale
@@ -1886,13 +1944,58 @@ fun TransactionItem(
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = transaction.merchant,
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = transaction.merchant,
+                        style = Typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (splits.size > 1) {
+                        val otherSplits = splits.filter { !it.isCurrentUser }
+                        val pendingCount = otherSplits.count { !it.isPaid }
+                        val allSettled = pendingCount == 0
+
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (allSettled) EmeraldIncome.copy(alpha = 0.12f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                )
+                                .border(
+                                    width = 0.5.dp,
+                                    color = if (allSettled) EmeraldIncome.copy(alpha = 0.3f)
+                                    else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .padding(horizontal = 5.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Users,
+                                contentDescription = null,
+                                tint = if (allSettled) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(10.dp)
+                            )
+                            Text(
+                                text = if (allSettled) "${splits.size}" else "$pendingCount/${otherSplits.size}",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Manrope,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ),
+                                color = if (allSettled) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 Text(
                     text = SimpleDateFormat("d MMM, HH:mm", locale).format(Date(transaction.timestamp)),
                     style = Typography.labelMedium,

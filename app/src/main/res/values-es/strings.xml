@@ -8,6 +8,7 @@
     <string name="nav_spend">Gastos</string>
     <string name="nav_categories">Categorías</string>
     <string name="nav_insights">Análisis</string>
+    <string name="nav_splits">Divisiones</string>
     <string name="nav_settings">Ajustes</string>
 
     <string name="action_save">Guardar</string>
@@ -333,7 +334,7 @@
     <string name="end_date">Fecha final</string>
     <string name="apply">Aplicar</string>
     <string name="cancel">Cancelar</string>
-    <string name="whats_new_title">Novedades de la versión %1$s 🎉</string>
+    <string name="whats_new_title">Novedades de la versión %1$s</string>
     <string name="whats_new_feature_currency_title">Soporte multi-moneda completo</string>
     <string name="whats_new_feature_currency_desc">Elige tu moneda preferida con formato numérico inteligente, reglas de análisis locales y exportación a PDF compatible.</string>
     <string name="whats_new_feature_languages_title">Nuevos idiomas</string>
@@ -343,4 +344,32 @@
     <string name="whats_new_feature_onboarding_title">Nueva experiencia inicial</string>
     <string name="whats_new_feature_onboarding_desc">Configuración inicial limpia con selector rápido de idioma, vista previa de temas y transiciones fluidas.</string>
     <string name="whats_new_setup_tracking_continue">Configurar y continuar</string>
+    <string name="split_expense">Dividir gasto</string>
+    <string name="split_title">Dividir gasto</string>
+    <string name="split_mode_equal">Equitativo</string>
+    <string name="split_mode_exact">Cantidad exacta</string>
+    <string name="split_mode_percentage">Porcentaje</string>
+    <string name="split_add_person">Añadir persona</string>
+    <string name="split_person_name_hint">Nombre de la persona</string>
+    <string name="split_you">Tú</string>
+    <string name="split_settled">Saldado</string>
+    <string name="split_pending">Pendiente</string>
+    <string name="split_share_whatsapp">Compartir desglose</string>
+    <string name="split_total_must_match">La división total (%1$s) debe ser igual al monto (%2$s)</string>
+    <string name="split_pct_must_equal_100">Los porcentajes deben sumar 100%%</string>
+    <string name="split_clear">Eliminar división</string>
+    <string name="split_save">Guardar división</string>
+    <string name="split_badge_summary">Dividido con %1$d personas</string>
+    <string name="split_badge_active">Dividido (%1$d)</string>
+    <string name="split_hub_title">Gastos divididos</string>
+    <string name="split_hub_total_lent">Total compartido</string>
+    <string name="split_hub_total_settled">Saldado</string>
+    <string name="split_hub_total_pending">Pendiente</string>
+    <string name="split_hub_empty_title">Sin gastos divididos</string>
+    <string name="split_hub_empty_desc">Divide gastos con amigos desde los detalles de la transacción para controlar pagos y saldos.</string>
+    <string name="split_hub_filter_all">Todos</string>
+    <string name="split_hub_filter_pending">Pendientes</string>
+    <string name="split_hub_filter_settled">Saldados</string>
+    <string name="split_hub_you_paid">Pagaste</string>
+    <string name="split_hub_my_share">Tu parte</string>
 </resources>

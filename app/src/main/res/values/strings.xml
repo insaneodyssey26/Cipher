@@ -8,6 +8,7 @@
     <string name="nav_spend">Spend</string>
     <string name="nav_categories">Categories</string>
     <string name="nav_insights">Insights</string>
+    <string name="nav_splits">Splits</string>
     <string name="nav_settings">Settings</string>
 
     <string name="action_save">Save</string>
@@ -334,7 +335,7 @@
     <string name="end_date">End Date</string>
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
-    <string name="whats_new_title">What\'s New in Version %1$s 🎉</string>
+    <string name="whats_new_title">What\'s New in Version %1$s</string>
     <string name="whats_new_feature_currency_title">Full Multi-Currency Support</string>
     <string name="whats_new_feature_currency_desc">Choose your preferred currency with smart number formatting, localized parsing rules, and currency-aware PDF exports.</string>
     <string name="whats_new_feature_languages_title">New Languages</string>
@@ -344,4 +345,32 @@
     <string name="whats_new_feature_onboarding_title">Fresh Onboarding Experience</string>
     <string name="whats_new_feature_onboarding_desc">A cleaner setup flow with quick language pickers, theme selection, and smoother page transitions.</string>
     <string name="whats_new_setup_tracking_continue">Setup Tracking &amp; Continue</string>
+    <string name="split_expense">Split Expense</string>
+    <string name="split_title">Split</string>
+    <string name="split_mode_equal">Equally</string>
+    <string name="split_mode_exact">Exact Amount</string>
+    <string name="split_mode_percentage">Percentage</string>
+    <string name="split_add_person">Add Person</string>
+    <string name="split_person_name_hint">Person name</string>
+    <string name="split_you">You</string>
+    <string name="split_settled">Settled</string>
+    <string name="split_pending">Pending</string>
+    <string name="split_share_whatsapp">Share Breakdown</string>
+    <string name="split_total_must_match">Total split (%1$s) must equal transaction amount (%2$s)</string>
+    <string name="split_pct_must_equal_100">Total percentages must equal 100%%</string>
+    <string name="split_clear">Remove Split</string>
+    <string name="split_save">Save Split</string>
+    <string name="split_badge_summary">Split with %1$d people</string>
+    <string name="split_badge_active">Split (%1$d)</string>
+    <string name="split_hub_title">Split Expenses</string>
+    <string name="split_hub_total_lent">Total Shared</string>
+    <string name="split_hub_total_settled">Settled</string>
+    <string name="split_hub_total_pending">Pending</string>
+    <string name="split_hub_empty_title">No split expenses yet</string>
+    <string name="split_hub_empty_desc">Split any expense with friends from the transaction details or dashboard to track shares and settlements.</string>
+    <string name="split_hub_filter_all">All</string>
+    <string name="split_hub_filter_pending">Pending</string>
+    <string name="split_hub_filter_settled">Settled</string>
+    <string name="split_hub_you_paid">You paid</string>
+    <string name="split_hub_my_share">Your share</string>
 </resources>

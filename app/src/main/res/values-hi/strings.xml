@@ -8,6 +8,7 @@
     <string name="nav_spend">खर्च</string>
     <string name="nav_categories">श्रेणियाँ</string>
     <string name="nav_insights">विश्लेषण</string>
+    <string name="nav_splits">विभाजन</string>
     <string name="nav_settings">सेटिंग्स</string>
 
     <string name="action_save">सहेजें</string>
@@ -333,7 +334,7 @@
     <string name="end_date">समाप्ति तिथि</string>
     <string name="apply">लागू करें</string>
     <string name="cancel">रद्द करें</string>
-    <string name="whats_new_title">संस्करण %1$s में नया क्या है 🎉</string>
+    <string name="whats_new_title">संस्करण %1$s में नया क्या है</string>
     <string name="whats_new_feature_currency_title">पूर्ण बहु-मुद्रा समर्थन</string>
     <string name="whats_new_feature_currency_desc">स्मार्ट संख्या प्रारूपण, स्थानीय पार्सिंग नियमों और मुद्रा-सचेत PDF निर्यात के साथ अपनी पसंदीदा मुद्रा चुनें।</string>
     <string name="whats_new_feature_languages_title">नई भाषाएं</string>
@@ -343,4 +344,32 @@
     <string name="whats_new_feature_onboarding_title">नया ऑनबोर्डिंग अनुभव</string>
     <string name="whats_new_feature_onboarding_desc">त्वरित भाषा चयनकर्ता, थीम पूर्वावलोकन और आसान नेविगेशन के साथ साफ-सुथरा सेटअप।</string>
     <string name="whats_new_setup_tracking_continue">ट्रैकिंग सेटअप करें और आगे बढ़ें</string>
+    <string name="split_expense">खर्च बाँटें</string>
+    <string name="split_title">खर्च बाँटें</string>
+    <string name="split_mode_equal">बराबर</string>
+    <string name="split_mode_exact">सटीक राशि</string>
+    <string name="split_mode_percentage">प्रतिशत</string>
+    <string name="split_add_person">व्यक्ति जोड़ें</string>
+    <string name="split_person_name_hint">व्यक्ति का नाम</string>
+    <string name="split_you">आप</string>
+    <string name="split_settled">चुकाया गया</string>
+    <string name="split_pending">लंबित</string>
+    <string name="split_share_whatsapp">विवरण साझा करें</string>
+    <string name="split_total_must_match">कुल विभाजन (%1$s) लेन-देन की राशि (%2$s) के बराबर होना चाहिए</string>
+    <string name="split_pct_must_equal_100">कुल प्रतिशत 100%% होना चाहिए</string>
+    <string name="split_clear">विभाजन हटाएं</string>
+    <string name="split_save">विभाजन सहेजें</string>
+    <string name="split_badge_summary">%1$d लोगों के साथ विभाजित</string>
+    <string name="split_badge_active">विभाजित (%1$d)</string>
+    <string name="split_hub_title">विभाजित खर्च</string>
+    <string name="split_hub_total_lent">कुल साझा</string>
+    <string name="split_hub_total_settled">चुकाया गया</string>
+    <string name="split_hub_total_pending">लंबित</string>
+    <string name="split_hub_empty_title">कोई विभाजित खर्च नहीं है</string>
+    <string name="split_hub_empty_desc">दोस्तों के साथ हिसाब रखने के लिए किसी भी खर्च को लेन-देन विवरण से विभाजित करें।</string>
+    <string name="split_hub_filter_all">सभी</string>
+    <string name="split_hub_filter_pending">लंबित</string>
+    <string name="split_hub_filter_settled">चुकाया गया</string>
+    <string name="split_hub_you_paid">आपने दिया</string>
+    <string name="split_hub_my_share">आपका हिस्सा</string>
 </resources>

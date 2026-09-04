@@ -11,7 +11,7 @@ class MainContract {
         object OnAppStop : Intent()
         data class SetOnboardingCompleted(val completed: Boolean) : Intent()
         object Authenticate : Intent()
-        data class AddTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity) : Intent()
+        data class AddTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant> = emptyList()) : Intent()
         data class SaveTrackedApps(val apps: Set<String>) : Intent()
         data class SaveAccentColor(val color: com.masum.cipher.core.data.local.pref.AccentColor) : Intent()
         data class SaveTheme(val theme: com.masum.cipher.core.data.local.pref.AppTheme) : Intent()

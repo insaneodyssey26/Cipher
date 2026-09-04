@@ -25,13 +25,15 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     private val widgetSyncer: WidgetSyncer
 ) {
     suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? {
-        val timeWindow = 60_000L
-        val startTime = transaction.timestamp - timeWindow
-        val endTime = transaction.timestamp + timeWindow
+        if (transaction.rawSms != null) {
+            val timeWindow = 60_000L
+            val startTime = transaction.timestamp - timeWindow
+            val endTime = transaction.timestamp + timeWindow
 
-        val duplicate = transactionDao.findDuplicate(transaction.amount, startTime, endTime)
-        if (duplicate != null) {
-            return null
+            val duplicate = transactionDao.findDuplicate(transaction.amount, startTime, endTime)
+            if (duplicate != null) {
+                return null
+            }
         }
 
         val rawMerchant = transaction.merchant.uppercase().trim()

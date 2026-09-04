@@ -609,6 +609,9 @@ fun CategoriesScreen(
                 viewModel.handleIntent(InsightsContract.Intent.UpdateTransaction(updated))
                 editingTransaction = null
             },
+            onSaveSplits = { splits ->
+                viewModel.handleIntent(InsightsContract.Intent.SaveTransactionSplits(tx.id, splits))
+            },
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(tx))
                 editingTransaction = null

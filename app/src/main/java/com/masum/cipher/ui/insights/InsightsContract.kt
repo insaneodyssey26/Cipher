@@ -24,6 +24,7 @@ class InsightsContract {
         data class RestoreSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class SetCategoryBudget(val category: String, val limit: Double) : Intent()
         data class SetDynamicBudget(val enabled: Boolean) : Intent()
+        data class SaveTransactionSplits(val transactionId: Long, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)

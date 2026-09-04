@@ -12,7 +12,7 @@ class DashboardContract {
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
         data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
-        data class AddTransaction(val transaction: TransactionEntity) : Intent()
+        data class AddTransaction(val transaction: TransactionEntity, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant> = emptyList()) : Intent()
         data class SearchTransactions(val query: String) : Intent()
         data class FilterTransactions(val filter: FilterType) : Intent()
         data class SetDashboardFilter(val filter: DashboardFilter) : Intent()
@@ -24,6 +24,8 @@ class DashboardContract {
         data class ApproveSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class SkipSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class UpdateMonthlyBudget(val budget: Double, val isDynamic: Boolean = false) : Intent()
+        data class SaveTransactionSplits(val transactionId: Long, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) : Intent()
+        data class UpdateSplitPaidStatus(val splitId: Long, val isPaid: Boolean) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
@@ -53,7 +55,8 @@ class DashboardContract {
         val velocity: VelocityData = VelocityData(),
         val categories: List<CategoryData> = emptyList(),
         val draftTransaction: TransactionEntity? = null,
-        val promptCategoryRuleFor: TransactionEntity? = null
+        val promptCategoryRuleFor: TransactionEntity? = null,
+        val splitsByTransactionId: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
     ) : UiState
 
     data class VelocityData(

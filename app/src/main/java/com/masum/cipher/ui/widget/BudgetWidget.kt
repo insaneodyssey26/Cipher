@@ -197,7 +197,7 @@ class BudgetWidget : GlanceAppWidget() {
                     )
                     Spacer(GlanceModifier.height(6.dp))
                     Text(
-                        text = if (overBudget) "Over by ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(-remaining, currencySymbol)}" else "${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(remaining, currencySymbol)} remaining",
+                        text = if (overBudget) "Over by ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(remaining), currencySymbol)}" else "${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(remaining, currencySymbol)} remaining",
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,

@@ -13,9 +13,10 @@ class AddTransactionUseCase @Inject constructor(
     private val userPreferences: UserPreferences,
     private val autoBackupScheduler: AutoBackupScheduler
 ) {
-    suspend operator fun invoke(transaction: TransactionEntity) {
-        repository.insertTransaction(transaction)
+    suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? {
+        val result = repository.insertTransaction(transaction)
         triggerBackupIfRequired(userPreferences, autoBackupScheduler)
+        return result
     }
 }
 

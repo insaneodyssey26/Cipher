@@ -13,6 +13,9 @@ object AppFormatters {
     fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
 
+    fun getShortDate(locale: Locale = Locale.getDefault()): SimpleDateFormat =
+        SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMMd"), locale)
+
     fun getFullDate(locale: Locale = Locale.getDefault()): SimpleDateFormat = 
         SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMMMd"), locale)
 
@@ -91,7 +94,7 @@ object AppFormatters {
         return if (isSuffixCurrency(currencySymbol, locale)) {
             "$sign$amountStr $currencySymbol".trim()
         } else {
-            "$currencySymbol$sign$amountStr"
+            "$sign$currencySymbol$amountStr"
         }
     }
 

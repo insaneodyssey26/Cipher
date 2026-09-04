@@ -26,6 +26,7 @@ class DashboardViewModel @Inject constructor(
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
+    private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
     private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
@@ -52,7 +53,7 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
             is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
-            is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction)
+            is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction, intent.splits)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = _activeFilter.value.copy(type = intent.filter)
             is DashboardContract.Intent.SetDashboardFilter -> _activeFilter.value = intent.filter
@@ -64,6 +65,33 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.ApproveSubscription -> approveSubscription(intent.subscription)
             is DashboardContract.Intent.SkipSubscription -> skipSubscription(intent.subscription)
             is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget, intent.isDynamic)
+            is DashboardContract.Intent.SaveTransactionSplits -> saveSplits(intent.transactionId, intent.splits)
+            is DashboardContract.Intent.UpdateSplitPaidStatus -> updateSplitPaidStatus(intent.splitId, intent.isPaid)
+        }
+    }
+
+    private suspend fun persistSplits(transactionId: Long, splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) {
+        val entities = splits.map {
+            com.masum.cipher.core.data.local.entity.TransactionSplitEntity(
+                transactionId = transactionId,
+                name = it.name,
+                amount = it.amount,
+                isPaid = it.isPaid,
+                isCurrentUser = it.isCurrentUser
+            )
+        }
+        transactionSplitRepository.saveSplits(transactionId, entities)
+    }
+
+    private fun saveSplits(transactionId: Long, splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) {
+        viewModelScope.launch {
+            persistSplits(transactionId, splits)
+        }
+    }
+
+    private fun updateSplitPaidStatus(splitId: Long, isPaid: Boolean) {
+        viewModelScope.launch {
+            transactionSplitRepository.updateSplitPaidStatus(splitId, isPaid)
         }
     }
 
@@ -113,6 +141,8 @@ class DashboardViewModel @Inject constructor(
                 val currentTime = System.currentTimeMillis()
                 val pending = subscriptions.filter { it.nextExpectedDate <= currentTime }
                 state.copy(pendingSubscriptions = pending)
+            }.combine(transactionSplitRepository.getAllSplitsFlow()) { state, allSplits ->
+                state.copy(splitsByTransactionId = allSplits.groupBy { it.transactionId })
             }.collect { newState ->
                 updateState { newState }
             }
@@ -157,9 +187,12 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun addTransaction(transaction: TransactionEntity) {
+    private fun addTransaction(transaction: TransactionEntity, splits: List<com.masum.cipher.core.domain.model.SplitParticipant> = emptyList()) {
         viewModelScope.launch {
-            addTransactionUseCase(transaction)
+            val savedTx = addTransactionUseCase(transaction)
+            if (savedTx != null && splits.isNotEmpty()) {
+                persistSplits(savedTx.id, splits)
+            }
         }
     }
 }

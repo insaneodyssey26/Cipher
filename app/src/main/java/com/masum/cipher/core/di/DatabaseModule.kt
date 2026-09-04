@@ -35,7 +35,12 @@ object DatabaseModule {
             AppDatabase.DATABASE_NAME
         )
             .openHelperFactory(factory)
-            .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
+            .addMigrations(
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5,
+                AppDatabase.MIGRATION_5_6,
+                AppDatabase.MIGRATION_6_7
+            )
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
     }
@@ -43,6 +48,11 @@ object DatabaseModule {
     @Provides
     fun provideTransactionDao(database: AppDatabase): TransactionDao {
         return database.transactionDao()
+    }
+
+    @Provides
+    fun provideTransactionSplitDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.TransactionSplitDao {
+        return database.transactionSplitDao()
     }
 
     @Provides
@@ -65,6 +75,7 @@ object DatabaseModule {
     fun provideBackupRepository(
         @ApplicationContext context: Context,
         transactionDao: TransactionDao,
+        transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
         merchantAliasDao: MerchantAliasDao,
         categoryRuleDao: CategoryRuleDao,
         subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
@@ -73,6 +84,7 @@ object DatabaseModule {
         return BackupRepository(
             context = context,
             transactionDao = transactionDao,
+            transactionSplitDao = transactionSplitDao,
             merchantAliasDao = merchantAliasDao,
             categoryRuleDao = categoryRuleDao,
             subscriptionDao = subscriptionDao,

@@ -1,6 +1,8 @@
 package com.masum.cipher.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -9,17 +11,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -69,6 +76,7 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
@@ -99,13 +107,20 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+import compose.icons.lucideicons.Users
+import com.masum.cipher.core.domain.model.SplitParticipant
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailsSheet(
     transaction: TransactionEntity,
     currencySymbol: String = "₹",
+    existingSplits: List<SplitParticipant> = emptyList(),
     onDismiss: () -> Unit,
     onConfirm: (TransactionEntity) -> Unit,
+    onConfirmWithSplits: ((TransactionEntity, List<SplitParticipant>) -> Unit)? = null,
+    onSaveSplits: ((List<SplitParticipant>) -> Unit)? = null,
+    onOpenSplitSheet: ((TransactionEntity, List<SplitParticipant>) -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     onDraftChange: ((TransactionEntity) -> Unit)? = null,
     isHapticsEnabled: Boolean = true
@@ -119,6 +134,8 @@ fun TransactionDetailsSheet(
     var isNoteExpanded by remember { mutableStateOf(transaction.note?.isNotBlank() == true) }
     var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showSplitSheet by remember { mutableStateOf(false) }
+    var currentSplits by remember { mutableStateOf(existingSplits) }
 
     LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp) {
         if (onDraftChange != null) {
@@ -176,7 +193,7 @@ fun TransactionDetailsSheet(
             val dateLabel = if (isToday) {
                 "$todayStr, " + AppFormatters.getDay(locale).format(Date(selectedTimestamp))
             } else {
-                AppFormatters.getFullDate(locale).format(Date(selectedTimestamp))
+                AppFormatters.getShortDate(locale).format(Date(selectedTimestamp))
             }
             
             Row(
@@ -189,16 +206,21 @@ fun TransactionDetailsSheet(
                     style = Typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 if (isEditing && onDelete != null) {
                     IconButton(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = true)
                             onDelete()
                         },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(LucideIcons.Trash2, stringResource(R.string.action_delete), tint = RoseExpense, modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = LucideIcons.Trash2,
+                            contentDescription = stringResource(R.string.action_delete),
+                            tint = RoseExpense,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }
@@ -244,33 +266,80 @@ fun TransactionDetailsSheet(
                 }
             }
 
-            Row(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(4.dp)
             ) {
-                TypeToggleButton(
-                    label = stringResource(R.string.expense).uppercase(),
-                    selected = !isIncome,
-                    activeColor = RoseExpense,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (isIncome) view.performVibrate(isHapticsEnabled)
-                        isIncome = false
-                    }
+                val tabWidth = maxWidth / 2
+                val selectedTypeIndex = if (isIncome) 1 else 0
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedTypeIndex,
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 350f),
+                    label = "tx_type_offset"
                 )
-                TypeToggleButton(
-                    label = stringResource(R.string.income).uppercase(),
-                    selected = isIncome,
-                    activeColor = EmeraldIncome,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (!isIncome) view.performVibrate(isHapticsEnabled)
-                        isIncome = true
-                    }
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isIncome) EmeraldIncome.copy(alpha = 0.15f) else RoseExpense.copy(alpha = 0.15f))
                 )
+
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                if (isIncome) view.performVibrate(isHapticsEnabled)
+                                isIncome = false
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.expense).uppercase(),
+                            style = Typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = if (!isIncome) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                if (!isIncome) view.performVibrate(isHapticsEnabled)
+                                isIncome = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.income).uppercase(),
+                            style = Typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = if (isIncome) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             AmountInputField(
@@ -306,22 +375,25 @@ fun TransactionDetailsSheet(
                                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
                                 .border(1.dp, White10, RoundedCornerShape(12.dp))
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                .padding(horizontal = 16.dp, vertical = 14.dp)
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     Icon(
                                         imageVector = selectedCategory.icon,
                                         contentDescription = null,
                                         tint = selectedCategory.color,
                                         modifier = Modifier.size(20.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Column {
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column(modifier = Modifier.weight(1f, fill = false)) {
                                         Text(
                                             text = stringResource(R.string.category).uppercase(),
                                             style = Typography.labelSmall,
@@ -330,8 +402,7 @@ fun TransactionDetailsSheet(
                                         Spacer(Modifier.height(4.dp))
                                         Text(
                                             text = stringResource(selectedCategory.titleRes),
-                                            style = Typography.titleSmall,
-                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                                             maxLines = 1,
                                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                         )
@@ -411,26 +482,30 @@ fun TransactionDetailsSheet(
                 }
             }
 
+            val showSplitOption = !isIncome
+            val showNoteOption = !isNoteExpanded
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, White10, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!isNoteExpanded) {
+                if (showNoteOption) {
                     Row(
                         modifier = Modifier
+                            .weight(1f)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, White10, RoundedCornerShape(8.dp))
                             .clickable {
                                 view.performVibrate(isHapticsEnabled)
                                 isNoteExpanded = true
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                            .padding(horizontal = 6.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
                             imageVector = LucideIcons.Plus,
@@ -438,33 +513,96 @@ fun TransactionDetailsSheet(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(13.dp)
                         )
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
-                            text = stringResource(R.string.action_add_note),
+                            text = stringResource(R.string.note),
                             style = Typography.labelMedium.copy(
                                 fontFamily = Manrope,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
                         )
                     }
-                } else {
-                    Spacer(modifier = Modifier.width(1.dp))
+                }
+
+                if (showNoteOption) {
+                    Box(
+                        modifier = Modifier
+                            .height(16.dp)
+                            .width(1.dp)
+                            .background(White10)
+                    )
+                }
+
+                if (showSplitOption) {
+                    val hasSplits = currentSplits.size > 1
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                focusManager.clearFocus()
+                                val evaluatedTotal = MathEvaluator.evaluate(amount) ?: transaction.amount
+                                val currentDraft = transaction.copy(
+                                    merchant = merchant.trim().ifBlank { "Miscellaneous" },
+                                    amount = evaluatedTotal,
+                                    category = selectedCategory.name,
+                                    isIncome = isIncome,
+                                    note = note.ifBlank { null },
+                                    timestamp = selectedTimestamp
+                                )
+                                if (onOpenSplitSheet != null) {
+                                    onOpenSplitSheet(currentDraft, currentSplits)
+                                } else {
+                                    showSplitSheet = true
+                                }
+                            }
+                            .padding(horizontal = 6.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Users,
+                            contentDescription = stringResource(R.string.split_expense),
+                            tint = if (hasSplits) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (hasSplits) "${stringResource(R.string.split_title)} (${currentSplits.size})" else stringResource(R.string.split_title),
+                            style = Typography.labelMedium.copy(
+                                fontFamily = Manrope,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
+                            ),
+                            color = if (hasSplits) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .height(16.dp)
+                            .width(1.dp)
+                            .background(White10)
+                    )
                 }
 
                 Row(
                     modifier = Modifier
+                        .weight(1f)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, White10, RoundedCornerShape(8.dp))
                         .clickable {
                             view.performVibrate(isHapticsEnabled)
                             focusManager.clearFocus()
                             showDatePicker = true
                         }
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .padding(horizontal = 6.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = LucideIcons.Calendar,
@@ -472,6 +610,7 @@ fun TransactionDetailsSheet(
                         tint = if (isToday) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(13.dp)
                     )
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
                         text = dateLabel,
                         style = Typography.labelMedium.copy(
@@ -479,9 +618,27 @@ fun TransactionDetailsSheet(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp
                         ),
-                        color = if (isToday) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary
+                        color = if (isToday) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
+            }
+
+            if (showSplitSheet) {
+                val evaluatedTotal = MathEvaluator.evaluate(amount) ?: transaction.amount
+                TransactionSplitSheet(
+                    expenseName = merchant.ifBlank { "Expense" },
+                    totalAmount = evaluatedTotal,
+                    currencySymbol = currencySymbol,
+                    initialParticipants = currentSplits,
+                    isHapticsEnabled = isHapticsEnabled,
+                    onDismiss = { showSplitSheet = false },
+                    onSaveSplits = { updatedSplits ->
+                        currentSplits = updatedSplits
+                        onSaveSplits?.invoke(updatedSplits)
+                    }
+                )
             }
 
             AnimatedVisibility(
@@ -504,16 +661,22 @@ fun TransactionDetailsSheet(
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
                     val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
                     if (finalAmount > 0) {
-                        onConfirm(
-                            transaction.copy(
-                                merchant = merchant.trim().ifBlank { "Miscellaneous" },
-                                amount = finalAmount,
-                                category = selectedCategory.name,
-                                isIncome = isIncome,
-                                note = note.ifBlank { null },
-                                timestamp = selectedTimestamp
-                            )
+                        val updatedTx = transaction.copy(
+                            merchant = merchant.trim().ifBlank { "Miscellaneous" },
+                            amount = finalAmount,
+                            category = selectedCategory.name,
+                            isIncome = isIncome,
+                            note = note.ifBlank { null },
+                            timestamp = selectedTimestamp
                         )
+                        if (onConfirmWithSplits != null) {
+                            onConfirmWithSplits(updatedTx, currentSplits)
+                        } else {
+                            onConfirm(updatedTx)
+                            if (currentSplits.isNotEmpty()) {
+                                onSaveSplits?.invoke(currentSplits)
+                            }
+                        }
                     }
                 },
                 modifier = Modifier
@@ -534,36 +697,6 @@ fun TransactionDetailsSheet(
     }
 }
 
-@Composable
-private fun TypeToggleButton(
-    label: String,
-    selected: Boolean,
-    activeColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .background(
-                color = if (selected) activeColor.copy(alpha = 0.1f) else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .clip(RoundedCornerShape(10.dp))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            )
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = if (selected) activeColor else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
 
 @Composable
 private fun VaultSheetTextField(

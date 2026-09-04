@@ -16,8 +16,8 @@ class TransactionRepository @Inject constructor(
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
 
-    suspend fun insertTransaction(transaction: TransactionEntity) {
-        processIncomingTransactionUseCase(transaction)
+    suspend fun insertTransaction(transaction: TransactionEntity): TransactionEntity? {
+        return processIncomingTransactionUseCase(transaction)
     }
 
     suspend fun getTransactionById(id: Long): TransactionEntity? {

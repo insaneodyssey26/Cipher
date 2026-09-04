@@ -143,7 +143,7 @@ class StatsWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.defaultWeight().fillMaxWidth(),
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
-                    val formattedNet = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(net, currencySymbol)
+                    val formattedNet = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(net), currencySymbol)
                     val signedNet = if (netPositive) "+$formattedNet" else "-$formattedNet"
                     Text(
                         text = signedNet,

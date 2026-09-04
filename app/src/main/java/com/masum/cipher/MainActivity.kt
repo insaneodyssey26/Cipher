@@ -50,6 +50,7 @@ import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.updates.UpdateManager
 import com.masum.cipher.core.worker.NotificationScheduler
@@ -59,6 +60,7 @@ import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
 import com.masum.cipher.ui.components.LockScreen
 import com.masum.cipher.ui.components.TransactionDetailsSheet
+import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.dashboard.DashboardScreen
 import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.insights.DayDetailScreen
@@ -71,6 +73,7 @@ import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
 import com.masum.cipher.ui.settings.rules.SmartRulesScreen
 import com.masum.cipher.ui.settings.rules.SmartRulesViewModel
+import com.masum.cipher.ui.splits.SplitExpensesScreen
 import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -177,34 +180,34 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        val isTopLevel = currentRoute in listOf("dashboard", "insights", "settings")
+                        val isTopLevel = currentRoute in listOf("dashboard", "insights", "split_expenses", "settings")
 
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
                             enterTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideInHorizontally(initialOffsetX = { it }, animationSpec = navSpec)
                                 }
                             },
                             exitTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideOutHorizontally(targetOffsetX = { -it }, animationSpec = navSpec)
                                 }
                             },
                             popEnterTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideInHorizontally(initialOffsetX = { -it }, animationSpec = navSpec)
                                 }
                             },
                             popExitTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "settings") && initialState.destination.route in listOf("dashboard", "insights", "settings")) {
+                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideOutHorizontally(targetOffsetX = { it }, animationSpec = navSpec)
@@ -216,7 +219,26 @@ class MainActivity : AppCompatActivity() {
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToManageApps = { navController.navigate("manage_apps") }
+                                    onNavigateToManageApps = { navController.navigate("manage_apps") },
+                                    onNavigateToSplitExpenses = { navController.navigate("split_expenses") }
+                                )
+                            }
+                            composable("split_expenses") {
+                                val viewModel: DashboardViewModel = hiltViewModel()
+                                SplitExpensesScreen(
+                                    viewModel = viewModel,
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { 
+                                        if (navController.previousBackStackEntry != null) {
+                                            navController.popBackStack()
+                                        } else {
+                                            navController.navigate("dashboard") {
+                                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    }
                                 )
                             }
                             composable("insights") {
@@ -290,6 +312,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         var showAddSheet by remember { mutableStateOf(false) }
+                        var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
 
                         if (isTopLevel) {
                             FloatingNavBar(
@@ -312,22 +335,48 @@ class MainActivity : AppCompatActivity() {
                                 transaction = state.draftTransaction ?: TransactionEntity(
                                     amount = 0.0,
                                     merchant = "",
-                                    currency = "INR",
+                                    currency = state.settings?.currencyCode ?: "INR",
                                     timestamp = System.currentTimeMillis(),
                                     category = "OTHERS",
                                     rawSms = null,
                                     isIncome = false
                                 ),
+                                currencySymbol = state.settings?.currencySymbol ?: "₹",
                                 onDismiss = { showAddSheet = false },
                                 onConfirm = { newTx ->
                                     mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx))
                                     mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(null))
                                     showAddSheet = false
                                 },
+                                onConfirmWithSplits = { newTx, splits ->
+                                    mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx, splits))
+                                    mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(null))
+                                    showAddSheet = false
+                                },
+                                onOpenSplitSheet = { draftTx, splits ->
+                                    activeSplittingTx = Pair(draftTx, splits)
+                                    showAddSheet = false
+                                },
                                 onDraftChange = { updatedDraft ->
                                     mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(updatedDraft))
                                 },
                                 isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
+                            )
+                        }
+
+                        activeSplittingTx?.let { (tx, participants) ->
+                            TransactionSplitSheet(
+                                expenseName = tx.merchant.ifBlank { "Expense" },
+                                totalAmount = tx.amount,
+                                currencySymbol = state.settings?.currencySymbol ?: "₹",
+                                initialParticipants = participants,
+                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true,
+                                onDismiss = { activeSplittingTx = null },
+                                onSaveSplits = { updatedSplits ->
+                                    mainViewModel.handleIntent(MainContract.Intent.AddTransaction(tx, updatedSplits))
+                                    mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(null))
+                                    activeSplittingTx = null
+                                }
                             )
                         }
 
