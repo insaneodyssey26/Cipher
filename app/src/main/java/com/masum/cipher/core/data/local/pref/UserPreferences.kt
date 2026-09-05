@@ -39,6 +39,19 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString("cached_app_language", "system") ?: "system"
     }
 
+    fun getCachedAccentColor(): AccentColor {
+        val name = syncPrefs.getString("cached_accent_color", AccentColor.INDIGO.name) ?: AccentColor.INDIGO.name
+        return try {
+            AccentColor.valueOf(name)
+        } catch (_: Exception) {
+            AccentColor.INDIGO
+        }
+    }
+
+    fun isCachedNavBarCompressed(): Boolean {
+        return syncPrefs.getBoolean("cached_navbar_compressed", false)
+    }
+
     fun isCachedOnboardingCompleted(): Boolean {
         return syncPrefs.getBoolean("cached_onboarding_completed", false)
     }
@@ -60,7 +73,9 @@ class UserPreferences @Inject constructor(
             autoLockTimeout = 0L,
             lastStopTime = 0L,
             monthlyBudget = 0.0,
-            hasCompletedOnboarding = isCachedOnboardingCompleted()
+            hasCompletedOnboarding = isCachedOnboardingCompleted(),
+            accentColor = getCachedAccentColor(),
+            isNavBarCompressed = isCachedNavBarCompressed()
         )
     }
 
@@ -101,6 +116,7 @@ class UserPreferences @Inject constructor(
         val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
         val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
         val IS_DYNAMIC_BUDGET_ENABLED = booleanPreferencesKey("is_dynamic_budget_enabled")
+        val NAVBAR_COMPRESSED = booleanPreferencesKey("navbar_compressed")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -109,10 +125,19 @@ class UserPreferences @Inject constructor(
         val curSymbol = preferences[Keys.PREFERRED_CURRENCY_SYMBOL] ?: com.masum.cipher.core.domain.model.AppCurrency.fromCode(curCode).symbol
 
         val hasOnboarded = preferences[Keys.ONBOARDING_COMPLETED] ?: false
+        val parsedAccentColor = try {
+            AccentColor.valueOf(preferences[Keys.ACCENT_COLOR] ?: AccentColor.INDIGO.name)
+        } catch (_: Exception) {
+            AccentColor.INDIGO
+        }
+        val isNavCompressed = preferences[Keys.NAVBAR_COMPRESSED] ?: false
+
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
             .putString("cached_currency_symbol", curSymbol)
             .putBoolean("cached_onboarding_completed", hasOnboarded)
+            .putString("cached_accent_color", parsedAccentColor.name)
+            .putBoolean("cached_navbar_compressed", isNavCompressed)
             .apply()
 
         UserSettings(
@@ -130,11 +155,7 @@ class UserPreferences @Inject constructor(
             isDynamicBudgetEnabled = preferences[Keys.IS_DYNAMIC_BUDGET_ENABLED] ?: false,
             hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false,
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
-            accentColor = try {
-                AccentColor.valueOf(preferences[Keys.ACCENT_COLOR] ?: AccentColor.INDIGO.name)
-            } catch (_: Exception) {
-                AccentColor.INDIGO
-            },
+            accentColor = parsedAccentColor,
             hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
             lastSeenWhatsNewVersionCode = preferences[Keys.LAST_SEEN_WHATS_NEW_VERSION_CODE] ?: if (preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] == true) 9 else 0,
             autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
@@ -169,7 +190,8 @@ class UserPreferences @Inject constructor(
                 } catch (_: Exception) {
                     emptyMap()
                 }
-            } ?: emptyMap()
+            } ?: emptyMap(),
+            isNavBarCompressed = isNavCompressed
         )
     }
 
@@ -213,8 +235,15 @@ class UserPreferences @Inject constructor(
     suspend fun setTrackedApps(apps: Set<String>) {
         context.dataStore.edit { it[Keys.TRACKED_APPS] = apps }
     }
+
     suspend fun setAccentColor(accentColor: AccentColor) {
+        syncPrefs.edit().putString("cached_accent_color", accentColor.name).apply()
         context.dataStore.edit { it[Keys.ACCENT_COLOR] = accentColor.name }
+    }
+
+    suspend fun setNavBarCompressed(compressed: Boolean) {
+        syncPrefs.edit().putBoolean("cached_navbar_compressed", compressed).apply()
+        context.dataStore.edit { it[Keys.NAVBAR_COMPRESSED] = compressed }
     }
 
     suspend fun setHasSeenNotificationFeature(seen: Boolean) {
@@ -418,5 +447,6 @@ data class UserSettings(
     val notifyNewAppDetected: Boolean = true,
     val ignoredSubscriptions: Set<String> = emptySet(),
     val categoryBudgets: Map<String, Double> = emptyMap(),
-    val isDynamicBudgetEnabled: Boolean = false
+    val isDynamicBudgetEnabled: Boolean = false,
+    val isNavBarCompressed: Boolean = false
 )

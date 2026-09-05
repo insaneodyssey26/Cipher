@@ -55,6 +55,13 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.SaveLanguage -> saveLanguage(intent.languageCode)
             is MainContract.Intent.SaveCurrency -> saveCurrency(intent.currencyCode, intent.currencySymbol)
             is MainContract.Intent.UpdateDraftTransaction -> updateState { copy(draftTransaction = intent.transaction) }
+            is MainContract.Intent.SetNavBarCompressed -> setNavBarCompressed(intent.compressed)
+        }
+    }
+
+    private fun setNavBarCompressed(compressed: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNavBarCompressed(compressed)
         }
     }
 

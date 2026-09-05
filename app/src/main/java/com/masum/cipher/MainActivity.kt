@@ -326,7 +326,11 @@ class MainActivity : AppCompatActivity() {
                                 },
                                 onAddClick = { showAddSheet = true },
                                 modifier = Modifier.align(Alignment.BottomCenter),
-                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
+                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true,
+                                isCompressed = state.settings?.isNavBarCompressed ?: false,
+                                onToggleCompress = { compressed ->
+                                    mainViewModel.handleIntent(MainContract.Intent.SetNavBarCompressed(compressed))
+                                }
                             )
                         }
 

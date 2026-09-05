@@ -18,6 +18,7 @@ class MainContract {
         data class SaveLanguage(val languageCode: String) : Intent()
         data class SaveCurrency(val currencyCode: String, val currencySymbol: String) : Intent()
         data class UpdateDraftTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity?) : Intent()
+        data class SetNavBarCompressed(val compressed: Boolean) : Intent()
     }
 
     data class State(
