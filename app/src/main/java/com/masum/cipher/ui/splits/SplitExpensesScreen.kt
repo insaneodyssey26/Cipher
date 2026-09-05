@@ -68,6 +68,7 @@ import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.SplitCalculator
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.dashboard.DashboardContract
@@ -215,6 +216,15 @@ fun SplitExpensesScreen(
                     }
                 },
                 actions = {
+                    TimeSelectorDropdown(
+                        selectedPeriod = state.selectedTimePeriod,
+                        selectedTimeRange = state.selectedTimeRange,
+                        onPeriodSelected = { period, start, end ->
+                            viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
+                        },
+                        isHapticsEnabled = isHapticsEnabled,
+                        iconOnly = true
+                    )
                     IconButton(onClick = {
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         showAddSheet = true
