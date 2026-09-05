@@ -164,8 +164,6 @@
     <string name="theme_dark">গাঢ়</string>
     <string name="theme_system">সিস্টেম</string>
     <string name="accent_color_title">অ্যাকসেন্ট রঙ</string>
-    <string name="dynamic_logo_title">ডায়নামিক ব্র্যান্ড লোগো</string>
-    <string name="dynamic_logo_desc">নির্বাচিত অ্যাকসেন্ট রঙের সাথে লোগো মেলান</string>
     <string name="haptic_feedback_title">হ্যাপটিক ফিডব্যাক</string>
     <string name="haptic_feedback_desc">স্পর্শে শারীরিক প্রতিক্রিয়া</string>
     <string name="settings_currency_subtitle">ড্যাশবোর্ড, পরিসংখ্যান ও রুলসের জন্য সক্রিয় মুদ্রা</string>
@@ -283,7 +281,6 @@
     <string name="auto_backup_password_desc">আপনার স্বয়ংক্রিয় ব্যাকআপ এনক্রিপ্ট করার জন্য একটি পাসওয়ার্ড দিন। একটি নতুন ডিভাইসে ডেটা পুনরুদ্ধার করতে আপনার এটি প্রয়োজন হবে।</string>
     <string name="backup_password_placeholder">ব্যাকআপ পাসওয়ার্ড</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">ভাষা ও মুদ্রা</string>
     <string name="onboarding_step_appearance">থিম</string>
     <string name="onboarding_step_automation">স্বয়ংক্রিয়করণ</string>
@@ -294,7 +291,6 @@
     <string name="onboarding_preview_category">খাবার ও রেস্তোরাঁ · আজ</string>
     <string name="onboarding_section_language">অ্যাপের ভাষা</string>
     <string name="onboarding_section_currency">পছন্দের মুদ্রা</string>
-
 
     <string name="onboarding_theme_title">থিম ও অ্যাকসেন্ট</string>
     <string name="onboarding_theme_subtitle">আপনার পছন্দের সাথে মানানসই একটি রঙ নির্বাচন করুন।</string>
@@ -338,14 +334,16 @@
     <string name="apply">প্রয়োগ করুন</string>
     <string name="cancel">বাতিল</string>
     <string name="whats_new_title">ভার্সন %1$s-এ নতুন কী আছে</string>
-    <string name="whats_new_feature_currency_title">সম্পূর্ণ বহু-মুদ্রা সমর্থন</string>
-    <string name="whats_new_feature_currency_desc">স্মার্ট সংখ্যা বিন্যাস, স্থানীয় পার্সিং নিয়ম এবং মুদ্রা-সচেতন PDF রপ্তানিসহ আপনার পছন্দের মুদ্রা নির্বাচন করুন।</string>
-    <string name="whats_new_feature_languages_title">নতুন ভাষাসমূহ</string>
-    <string name="whats_new_feature_languages_desc">সাইফার এখন ইংরেজির পাশাপাশি বাংলা, হিন্দি, জাপানিজ, স্প্যানিশ, ফ্রেঞ্চ এবং জার্মানে উপলব্ধ।</string>
-    <string name="whats_new_feature_custom_date_title">লেনদেনে কাস্টম তারিখ</string>
-    <string name="whats_new_feature_custom_date_desc">লেনদেন যোগ বা সম্পাদনা করার সময় সঠিক তারিখ এবং সময় বেছে নিন।</string>
-    <string name="whats_new_feature_onboarding_title">নতুন অনবোর্ডিং অভিজ্ঞতা</string>
-    <string name="whats_new_feature_onboarding_desc">দ্রুত ভাষা নির্বাচক, থিম প্রিভিউ এবং মসৃণ অ্যানিমেশনসহ একটি পরিচ্ছন্ন সেটআপ।</string>
+    <string name="whats_new_feature_splits_title">স্প্লিট খরচ হাব</string>
+    <string name="whats_new_feature_splits_desc">ভাগ করা বিল ট্র্যাক করুন, সমান বা কাস্টম শেয়ার যোগ করুন এবং সহজে দেনা পরিচালনা করুন।</string>
+    <string name="whats_new_feature_balance_title">ব্যালেন্স সমন্বয়</string>
+    <string name="whats_new_feature_balance_desc">আপনার ড্যাশবোর্ড ব্যালেন্স সহজেই আপনার প্রকৃত ব্যাংক ব্যালেন্সের সাথে মেলাতে পারেন।</string>
+    <string name="whats_new_feature_budget_title">নির্দিষ্ট ও পরিবর্তনশীল বাজেট</string>
+    <string name="whats_new_feature_budget_desc">একটি নির্দিষ্ট খরচের সীমা নির্ধারণ করুন অথবা আয়ের সাথে সাথে খরচ সীমা স্বয়ংক্রিয়ভাবে বৃদ্ধি করুন।</string>
+    <string name="whats_new_feature_backup_title">সম্পূর্ণ ব্যাকআপ ও এক্সপোর্ট</string>
+    <string name="whats_new_feature_backup_desc">স্প্লিটের বিবরণ এবং নোট এখন সম্পূর্ণভাবে ব্যাকআপ, CSV এবং PDF রিপোর্টে সংরক্ষিত হয়।</string>
+    <string name="whats_new_feature_logo_title">নতুন লুক ও অ্যাপ আইকন</string>
+    <string name="whats_new_feature_logo_desc">সাইফারের আধুনিক নতুন পান্না ভল্ট আইডেন্টিটি, পরিমার্জিত ডার্ক থিম এবং থিমযুক্ত আইকন সাপোর্ট।</string>
     <string name="whats_new_setup_tracking_continue">ট্র্যাকিং সেটআপ করুন ও এগিয়ে যান</string>
     <string name="split_expense">খরচ ভাগ করুন</string>
     <string name="split_title">খরচ ভাগ করুন</string>
@@ -358,12 +356,9 @@
     <string name="split_settled">পরিশোধিত</string>
     <string name="split_pending">বকেয়া</string>
     <string name="split_share_whatsapp">বিবরণ শেয়ার করুন</string>
-    <string name="split_total_must_match">মোট ভাগ (%1$s) অবশ্যই লেনদেনের পরিমাণের (%2$s) সমান হতে হবে</string>
-    <string name="split_pct_must_equal_100">মোট শতাংশ ১০০%% হতে হবে</string>
     <string name="split_clear">ভাগ মুছুন</string>
     <string name="split_save">ভাগ সংরক্ষণ করুন</string>
     <string name="split_badge_summary">%1$d জনের সাথে বিভক্ত</string>
-    <string name="split_badge_active">বিভক্ত (%1$d)</string>
     <string name="split_hub_title">বিভক্ত খরচসমূহ</string>
     <string name="split_hub_total_lent">মোট শেয়ারকৃত</string>
     <string name="split_hub_total_settled">পরিশোধিত</string>
@@ -373,7 +368,6 @@
     <string name="split_hub_filter_all">সকল</string>
     <string name="split_hub_filter_pending">বকেয়া</string>
     <string name="split_hub_filter_settled">পরিশোধিত</string>
-    <string name="split_hub_you_paid">আপনি দিয়েছেন</string>
     <string name="split_hub_my_share">আপনার অংশ</string>
     <string name="split_hub_add_split">বিভক্ত খরচ যোগ করুন</string>
     <string name="split_deleted">বিভক্ত খরচ মুছে ফেলা হয়েছে</string>
@@ -403,8 +397,6 @@
     <string name="adjust_balance_subtitle">আপনার আসল ব্যাংক বা নগদ ব্যালেন্সের সাথে মেলাতে ব্যালেন্স আপডেট করুন। সাইফার একটি পরিষ্কার সমন্বয় এন্ট্রি রেকর্ড করবে।</string>
     <string name="adjust_balance_current">বর্তমান ব্যালেন্স</string>
     <string name="adjust_balance_new_label">নতুন আসল ব্যালেন্স</string>
-    <string name="adjust_balance_new_hint">ব্যালেন্স লিখুন</string>
-    <string name="adjust_balance_difference">পার্থক্য</string>
     <string name="adjust_balance_income_added">+%1$s (আয় হিসেবে যুক্ত হবে)</string>
     <string name="adjust_balance_expense_logged">-%1$s (ব্যয় হিসেবে যুক্ত হবে)</string>
     <string name="adjust_balance_no_change">ব্যালেন্স মিলে গেছে (কোনো পরিবর্তনের প্রয়োজন নেই)</string>

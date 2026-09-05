@@ -1,9 +1,7 @@
 package com.masum.cipher.ui.splits
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -83,7 +81,6 @@ import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Check
-import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Share2
 import compose.icons.lucideicons.Trash2
@@ -96,10 +93,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import compose.icons.lucideicons.ChevronDown
@@ -415,7 +409,7 @@ fun SplitExpensesScreen(
                     )
 
                     Row(modifier = Modifier.fillMaxSize()) {
-                        tabs.forEachIndexed { index, (tab, title) ->
+                        tabs.forEachIndexed { _, (tab, title) ->
                             val isSelected = selectedTab == tab
                             Box(
                                 modifier = Modifier
@@ -563,11 +557,13 @@ fun SplitExpensesScreen(
 
     val suggestedParticipants = remember(state.splitsByTransactionId) {
         state.splitsByTransactionId.values
+            .asSequence()
             .flatten()
             .filter { !it.isCurrentUser }
             .map { it.name.trim() }
             .filter { it.isNotBlank() }
             .distinctBy { it.lowercase(Locale.ROOT) }
+            .toList()
     }
 
     if (showAddSheet) {

@@ -112,14 +112,11 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
-import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
-import compose.icons.lucideicons.TrendingDown
-import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
@@ -135,8 +132,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
-    onNavigateToManageApps: () -> Unit,
-    onNavigateToSplitExpenses: () -> Unit = {}
+    onNavigateToManageApps: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalLocale.current.platformLocale
@@ -162,8 +158,12 @@ fun DashboardScreen(
     val currentVersionCode = BuildConfig.VERSION_CODE
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
-    var showWhatsNewSheet by remember(shouldShowWhatsNew) {
-        mutableStateOf(shouldShowWhatsNew)
+    var showWhatsNewSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(shouldShowWhatsNew) {
+        if (shouldShowWhatsNew) {
+            showWhatsNewSheet = true
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -602,7 +602,6 @@ fun DashboardScreen(
                     isHapticsEnabled = isHapticsEnabled,
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
-                    onNavigateToSplitExpenses = onNavigateToSplitExpenses,
                     onAdjustBalanceClick = { showAdjustBalanceSheet = true },
                     toolbarOffsetHeightPx = animatedToolbarOffset,
                     toolbarHeightRangePx = toolbarHeightRangePx,
@@ -683,7 +682,6 @@ fun DashboardScreen(
         AdjustBalanceSheet(
             currentBalance = state.totalBalance,
             currencySymbol = state.currencySymbol,
-            currencyCode = state.currencyCode,
             locale = locale,
             isHapticsEnabled = isHapticsEnabled,
             onDismiss = { showAdjustBalanceSheet = false },
@@ -748,11 +746,13 @@ fun DashboardScreen(
 
     val suggestedParticipants = remember(state.splitsByTransactionId) {
         state.splitsByTransactionId.values
+            .asSequence()
             .flatten()
             .filter { !it.isCurrentUser }
             .map { it.name.trim() }
             .filter { it.isNotBlank() }
             .distinctBy { it.lowercase(Locale.ROOT) }
+            .toList()
     }
 
     activeSplittingTx?.let { (tx, participants) ->
@@ -1029,24 +1029,29 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_currency_title),
-                        description = stringResource(R.string.whats_new_feature_currency_desc),
-                        icon = LucideIcons.Zap
+                        title = stringResource(R.string.whats_new_feature_splits_title),
+                        description = stringResource(R.string.whats_new_feature_splits_desc),
+                        icon = LucideIcons.Users
                     )
                     WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_languages_title),
-                        description = stringResource(R.string.whats_new_feature_languages_desc),
+                        title = stringResource(R.string.whats_new_feature_balance_title),
+                        description = stringResource(R.string.whats_new_feature_balance_desc),
+                        icon = LucideIcons.Pencil
+                    )
+                    WhatsNewFeatureItem(
+                        title = stringResource(R.string.whats_new_feature_budget_title),
+                        description = stringResource(R.string.whats_new_feature_budget_desc),
                         icon = LucideIcons.Activity
                     )
                     WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_custom_date_title),
-                        description = stringResource(R.string.whats_new_feature_custom_date_desc),
-                        icon = LucideIcons.Calendar
+                        title = stringResource(R.string.whats_new_feature_backup_title),
+                        description = stringResource(R.string.whats_new_feature_backup_desc),
+                        icon = LucideIcons.Zap
                     )
                     WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_onboarding_title),
-                        description = stringResource(R.string.whats_new_feature_onboarding_desc),
-                        icon = LucideIcons.Check
+                        title = stringResource(R.string.whats_new_feature_logo_title),
+                        description = stringResource(R.string.whats_new_feature_logo_desc),
+                        icon = LucideIcons.Star
                     )
                 }
 
@@ -1366,7 +1371,6 @@ private fun DashboardHero(
     isHapticsEnabled: Boolean,
     expenseComparisonPercent: Double? = null,
     onComparisonBadgeClick: () -> Unit = {},
-    onNavigateToSplitExpenses: () -> Unit = {},
     onAdjustBalanceClick: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
@@ -2315,18 +2319,6 @@ private fun CashFlowSegmentBar(
         label = "incomeRatio"
     )
     val barHeight = if (isCollapsed) 4.dp else 8.dp
-
-    fun formatAmount(value: Double): String {
-        val absVal = kotlin.math.abs(value)
-        return when {
-            absVal >= 1_000_000_000_000_000.0 -> String.format(Locale.US, "%.1fQ", absVal / 1_000_000_000_000_000.0).replace(".0Q", "Q")
-            absVal >= 1_000_000_000_000.0 -> String.format(Locale.US, "%.1fT", absVal / 1_000_000_000_000.0).replace(".0T", "T")
-            absVal >= 1_000_000_000.0 -> String.format(Locale.US, "%.1fB", absVal / 1_000_000_000.0).replace(".0B", "B")
-            absVal >= 1_000_000.0 -> String.format(Locale.US, "%.1fM", absVal / 1_000_000.0).replace(".0M", "M")
-            absVal >= 100_000.0 -> String.format(Locale.US, "%.1fk", absVal / 1000.0).replace(".0k", "k")
-            else -> String.format(locale, "%,.0f", absVal)
-        }
-    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(

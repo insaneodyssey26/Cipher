@@ -76,7 +76,6 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Calculator
 import compose.icons.lucideicons.ChevronDown
-import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
@@ -101,7 +100,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.ui.theme.Lato
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -189,7 +187,7 @@ fun TransactionDetailsSheet(
             val isToday = now.get(Calendar.YEAR) == target.get(Calendar.YEAR) &&
                     now.get(Calendar.DAY_OF_YEAR) == target.get(Calendar.DAY_OF_YEAR)
             val todayStr = stringResource(R.string.today)
-            val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+            val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: Locale.getDefault()
             val dateLabel = if (isToday) {
                 "$todayStr, " + AppFormatters.getDay(locale).format(Date(selectedTimestamp))
             } else {
@@ -985,7 +983,7 @@ private fun AmountInputField(
         val computed = MathEvaluator.evaluate(textFieldValue.text)
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
-                text = "= ${com.masum.cipher.core.util.AppFormatters.formatCurrency(computed, currencySymbol, locale, decimals = 2)}",
+                text = "= ${AppFormatters.formatCurrency(computed, currencySymbol, locale, decimals = 2)}",
                 style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                 color = color.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)

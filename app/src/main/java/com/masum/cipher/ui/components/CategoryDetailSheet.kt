@@ -351,7 +351,7 @@ fun CategoryDetailSheet(
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
-                                        text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
+                                        text = "${stringResource(R.string.limit_suffix)}: ${AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.SemiBold,
@@ -388,9 +388,9 @@ fun CategoryDetailSheet(
                             ) {
                                 Text(
                                     text = if (isOverBudget) {
-                                        "Exceeded by ${com.masum.cipher.core.util.AppFormatters.formatCurrency(totalSpent - categoryBudget, currencySymbol, locale)}"
+                                        "Exceeded by ${AppFormatters.formatCurrency(totalSpent - categoryBudget, currencySymbol, locale)}"
                                     } else {
-                                        "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} remaining"
+                                        "${AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} remaining"
                                     },
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
@@ -402,7 +402,7 @@ fun CategoryDetailSheet(
 
                                 if (!isOverBudget) {
                                     Text(
-                                        text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
+                                        text = "${stringResource(R.string.safe_daily_spend)}: ${AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontSize = 11.sp,
@@ -657,7 +657,7 @@ fun CategoryDetailSheet(
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = com.masum.cipher.core.util.AppFormatters.formatCurrency(merchant.totalAmount, currencySymbol, locale),
+                                            text = AppFormatters.formatCurrency(merchant.totalAmount, currencySymbol, locale),
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
@@ -752,7 +752,7 @@ fun CategoryDetailSheet(
                         Spacer(Modifier.width(8.dp))
 
                         Text(
-                            text = "-${com.masum.cipher.core.util.AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
+                            text = "-${AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,

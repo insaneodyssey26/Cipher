@@ -163,8 +163,6 @@
     <string name="theme_dark">गहरा</string>
     <string name="theme_system">सिस्टम</string>
     <string name="accent_color_title">एक्सेंट रंग</string>
-    <string name="dynamic_logo_title">डायनामिक ब्रांड लोगो</string>
-    <string name="dynamic_logo_desc">लोगो का रंग चुने गए एक्सेंट से मिलाएं</string>
     <string name="haptic_feedback_title">हैप्टिक फीडबैक</string>
     <string name="haptic_feedback_desc">स्पर्श पर भौतिक प्रतिक्रिया</string>
     <string name="settings_currency_subtitle">डैशबोर्ड, सांख्यिकी और नियमों के लिए सक्रिय मुद्रा</string>
@@ -282,7 +280,6 @@
     <string name="auto_backup_password_desc">अपने स्वचालित बैकअप को एन्क्रिप्ट करने के लिए एक पासवर्ड दर्ज करें। नए डिवाइस पर डेटा पुनर्स्थापित करने के लिए आपको इसकी आवश्यकता होगी।</string>
     <string name="backup_password_placeholder">बैकअप पासवर्ड</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">भाषा और मुद्रा</string>
     <string name="onboarding_step_appearance">थीम</string>
     <string name="onboarding_step_automation">स्वचालन</string>
@@ -293,7 +290,6 @@
     <string name="onboarding_preview_category">भोजन और रेस्टोरेंट · आज</string>
     <string name="onboarding_section_language">ऐप भाषा</string>
     <string name="onboarding_section_currency">पसंदीदा मुद्रा</string>
-
 
     <string name="onboarding_theme_title">थीम और रंग</string>
     <string name="onboarding_theme_subtitle">अपनी पसंद के अनुसार एक एक्सेंट रंग चुनें।</string>
@@ -337,14 +333,16 @@
     <string name="apply">लागू करें</string>
     <string name="cancel">रद्द करें</string>
     <string name="whats_new_title">संस्करण %1$s में नया क्या है</string>
-    <string name="whats_new_feature_currency_title">पूर्ण बहु-मुद्रा समर्थन</string>
-    <string name="whats_new_feature_currency_desc">स्मार्ट संख्या प्रारूपण, स्थानीय पार्सिंग नियमों और मुद्रा-सचेत PDF निर्यात के साथ अपनी पसंदीदा मुद्रा चुनें।</string>
-    <string name="whats_new_feature_languages_title">नई भाषाएं</string>
-    <string name="whats_new_feature_languages_desc">साइफर अब अंग्रेजी के साथ हिंदी, बंगाली, जापानी, स्पेनिश, फ्रेंच और जर्मन में भी उपलब्ध है।</string>
-    <string name="whats_new_feature_custom_date_title">लेन-देन के लिए कस्टम तिथि</string>
-    <string name="whats_new_feature_custom_date_desc">लेन-देन जोड़ते या संपादित करते समय सटीक तिथि और समय चुनें।</string>
-    <string name="whats_new_feature_onboarding_title">नया ऑनबोर्डिंग अनुभव</string>
-    <string name="whats_new_feature_onboarding_desc">त्वरित भाषा चयनकर्ता, थीम पूर्वावलोकन और आसान नेविगेशन के साथ साफ-सुथरा सेटअप।</string>
+    <string name="whats_new_feature_splits_title">खर्च विभाजन हब</string>
+    <string name="whats_new_feature_splits_desc">साझा बिल ट्रैक करें, समान या कस्टम शेयर जोड़ें और बकाया राशि का प्रबंधन आसानी से करें।</string>
+    <string name="whats_new_feature_balance_title">मैन्युअल बैलेंस समायोजन</string>
+    <string name="whats_new_feature_balance_desc">अपने डैशबोर्ड बैलेंस को कभी भी अपने वास्तविक बैंक बैलेंस से आसानी से मिलाएं।</string>
+    <string name="whats_new_feature_budget_title">निश्चित और गतिशील बजट</string>
+    <string name="whats_new_feature_budget_desc">एक सख्त खर्च सीमा निर्धारित करें या आय आने पर अपनी सीमा को स्वचालित रूप से बढ़ाएं।</string>
+    <string name="whats_new_feature_backup_title">पूर्ण वॉल्ट बैकअप और निर्यात</string>
+    <string name="whats_new_feature_backup_desc">विभाजन विवरण, मुद्रा और नोट्स अब बैकअप, CSV और PDF रिपोर्ट में शामिल हैं।</string>
+    <string name="whats_new_feature_logo_title">बिल्कुल नया लुक और ऐप आइकन</string>
+    <string name="whats_new_feature_logo_desc">साइफ़र की आधुनिक नई पन्ना वॉल्ट पहचान, परिष्कृत डार्क थीम और थीम वाले आइकन का अनुभव करें।</string>
     <string name="whats_new_setup_tracking_continue">ट्रैकिंग सेटअप करें और आगे बढ़ें</string>
     <string name="split_expense">खर्च बाँटें</string>
     <string name="split_title">खर्च बाँटें</string>
@@ -357,12 +355,9 @@
     <string name="split_settled">चुकाया गया</string>
     <string name="split_pending">लंबित</string>
     <string name="split_share_whatsapp">विवरण साझा करें</string>
-    <string name="split_total_must_match">कुल विभाजन (%1$s) लेन-देन की राशि (%2$s) के बराबर होना चाहिए</string>
-    <string name="split_pct_must_equal_100">कुल प्रतिशत 100%% होना चाहिए</string>
     <string name="split_clear">विभाजन हटाएं</string>
     <string name="split_save">विभाजन सहेजें</string>
     <string name="split_badge_summary">%1$d लोगों के साथ विभाजित</string>
-    <string name="split_badge_active">विभाजित (%1$d)</string>
     <string name="split_hub_title">विभाजित खर्च</string>
     <string name="split_hub_total_lent">कुल साझा</string>
     <string name="split_hub_total_settled">चुकाया गया</string>
@@ -372,7 +367,6 @@
     <string name="split_hub_filter_all">सभी</string>
     <string name="split_hub_filter_pending">लंबित</string>
     <string name="split_hub_filter_settled">चुकाया गया</string>
-    <string name="split_hub_you_paid">आपने दिया</string>
     <string name="split_hub_my_share">आपका हिस्सा</string>
     <string name="split_hub_add_split">विभाजित खर्च जोड़ें</string>
     <string name="split_deleted">विभाजित खर्च हटा दिया गया</string>
@@ -402,8 +396,6 @@
     <string name="adjust_balance_subtitle">अपने वास्तविक बैंक या नकद बैलेंस से मिलान करने के लिए बैलेंस अपडेट करें। साइफ़र एक स्पष्ट समायोजन प्रविष्टि रिकॉर्ड करेगा।</string>
     <string name="adjust_balance_current">वर्तमान बैलेंस</string>
     <string name="adjust_balance_new_label">नया वास्तविक बैलेंस</string>
-    <string name="adjust_balance_new_hint">बैलेंस दर्ज करें</string>
-    <string name="adjust_balance_difference">अंतर</string>
     <string name="adjust_balance_income_added">+%1$s (आय के रूप में दर्ज होगा)</string>
     <string name="adjust_balance_expense_logged">-%1$s (खर्च के रूप में दर्ज होगा)</string>
     <string name="adjust_balance_no_change">बैलेंस मेल खाता है (किसी समायोजन की आवश्यकता नहीं)</string>

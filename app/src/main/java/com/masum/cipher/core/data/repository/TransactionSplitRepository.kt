@@ -10,14 +10,8 @@ import javax.inject.Singleton
 class TransactionSplitRepository @Inject constructor(
     private val transactionSplitDao: TransactionSplitDao
 ) {
-    fun getSplitsForTransaction(transactionId: Long): Flow<List<TransactionSplitEntity>> =
-        transactionSplitDao.getSplitsForTransaction(transactionId)
-
     suspend fun getSplitsForTransactionSync(transactionId: Long): List<TransactionSplitEntity> =
         transactionSplitDao.getSplitsForTransactionSync(transactionId)
-
-    fun getAllPendingSplits(): Flow<List<TransactionSplitEntity>> =
-        transactionSplitDao.getAllPendingSplits()
 
     fun getAllSplitsFlow(): Flow<List<TransactionSplitEntity>> =
         transactionSplitDao.getAllSplitsFlow()
@@ -32,9 +26,5 @@ class TransactionSplitRepository @Inject constructor(
 
     suspend fun updateSplitPaidStatus(splitId: Long, isPaid: Boolean) {
         transactionSplitDao.updateSplitPaidStatus(splitId, isPaid)
-    }
-
-    suspend fun deleteSplitsForTransaction(transactionId: Long) {
-        transactionSplitDao.deleteSplitsForTransaction(transactionId)
     }
 }

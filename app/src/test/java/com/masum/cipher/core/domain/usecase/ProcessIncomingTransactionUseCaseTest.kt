@@ -7,10 +7,10 @@ import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.UserSettings
-import com.masum.cipher.core.data.local.pref.UserSettingsProvider
 import com.masum.cipher.core.domain.CategorizerEngine
-import com.masum.cipher.core.notifications.TransactionNotifier
+import com.masum.cipher.core.notifications.LocalNotificationManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -26,10 +26,7 @@ class ProcessIncomingTransactionUseCaseTest {
     private lateinit var fakeTransactionDao: FakeTransactionDao
     private lateinit var fakeMerchantAliasDao: FakeMerchantAliasDao
     private lateinit var fakeCategoryRuleDao: FakeCategoryRuleDao
-    private lateinit var categorizerEngine: CategorizerEngine
-    private lateinit var fakeTransactionNotifier: FakeTransactionNotifier
-    private lateinit var fakeUserSettingsProvider: FakeUserSettingsProvider
-    private lateinit var fakeWidgetSyncer: FakeWidgetSyncer
+    private var syncCount = 0
 
     private lateinit var useCase: ProcessIncomingTransactionUseCase
 
@@ -38,20 +35,36 @@ class ProcessIncomingTransactionUseCaseTest {
         fakeTransactionDao = FakeTransactionDao()
         fakeMerchantAliasDao = FakeMerchantAliasDao()
         fakeCategoryRuleDao = FakeCategoryRuleDao()
-        categorizerEngine = CategorizerEngine()
-        fakeTransactionNotifier = FakeTransactionNotifier()
-        fakeUserSettingsProvider = FakeUserSettingsProvider()
-        fakeWidgetSyncer = FakeWidgetSyncer()
+        val categorizerEngine = CategorizerEngine()
+        syncCount = 0
 
         useCase = ProcessIncomingTransactionUseCase(
             fakeTransactionDao.asDao(),
             fakeMerchantAliasDao.asDao(),
             fakeCategoryRuleDao.asDao(),
             categorizerEngine,
-            fakeTransactionNotifier,
-            fakeUserSettingsProvider,
-            fakeWidgetSyncer
-        )
+            null,
+            null,
+            null
+        ).apply {
+            onSyncWidget = { syncCount++ }
+            onGetSettings = {
+                UserSettings(
+                    theme = AppTheme.SYSTEM,
+                    isBiometricEnabled = false,
+                    isPrivacyModeEnabled = false,
+                    isHapticsEnabled = true,
+                    currency = "INR",
+                    currencyCode = "INR",
+                    currencySymbol = "₹",
+                    appLanguage = "en",
+                    autoLockTimeout = 0L,
+                    lastStopTime = 0L,
+                    monthlyBudget = 0.0,
+                    notifyAllTransactions = false
+                )
+            }
+        }
     }
 
     @Test
@@ -81,7 +94,7 @@ class ProcessIncomingTransactionUseCaseTest {
         val result = useCase(incoming)
         assertNull(result)
         assertEquals(0, fakeTransactionDao.insertedTransactions.size)
-        assertEquals(0, fakeWidgetSyncer.syncCount)
+        assertEquals(0, syncCount)
     }
 
     @Test
@@ -103,7 +116,7 @@ class ProcessIncomingTransactionUseCaseTest {
         assertEquals("Amazon", result!!.merchant)
         assertEquals("SHOPPING", result.category)
         assertEquals(1, fakeTransactionDao.insertedTransactions.size)
-        assertEquals(1, fakeWidgetSyncer.syncCount)
+        assertEquals(1, syncCount)
     }
 
     @Test
@@ -124,38 +137,7 @@ class ProcessIncomingTransactionUseCaseTest {
         assertNotNull(result)
         assertEquals("Zomato", result!!.merchant)
         assertEquals("FOOD", result.category)
-        assertEquals(1, fakeWidgetSyncer.syncCount)
-    }
-
-    private class FakeWidgetSyncer : WidgetSyncer {
-        var syncCount = 0
-        override suspend fun syncWidget() {
-            syncCount++
-        }
-    }
-
-    private class FakeTransactionNotifier : TransactionNotifier {
-        override fun showNewTransactionNotification(transaction: TransactionEntity) {}
-        override fun showUncategorizedReminderNotification(count: Int) {}
-        override fun showBudgetAlertNotification(isExceeded: Boolean, amount: Double, threshold: Int) {}
-    }
-
-    private class FakeUserSettingsProvider : UserSettingsProvider {
-        val userSettings = UserSettings(
-            theme = AppTheme.SYSTEM,
-            isBiometricEnabled = false,
-            isPrivacyModeEnabled = false,
-            isHapticsEnabled = true,
-            currency = "INR",
-            currencyCode = "INR",
-            currencySymbol = "₹",
-            appLanguage = "en",
-            autoLockTimeout = 0L,
-            lastStopTime = 0L,
-            monthlyBudget = 0.0,
-            notifyAllTransactions = false
-        )
-        override val settingsFlow: Flow<UserSettings> = flowOf(userSettings)
+        assertEquals(1, syncCount)
     }
 
     private class FakeTransactionDao {

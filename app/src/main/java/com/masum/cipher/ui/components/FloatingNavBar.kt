@@ -1,11 +1,9 @@
 package com.masum.cipher.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,9 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,10 +36,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.masum.cipher.core.util.performVibrate
-import androidx.annotation.StringRes
 import com.masum.cipher.R
-import com.masum.cipher.ui.theme.White10
+import com.masum.cipher.core.util.performVibrate
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.ChevronLeft
@@ -74,7 +68,7 @@ fun FloatingNavBar(
     val backgroundColor = MaterialTheme.colorScheme.background
 
     val activeItem = remember(currentRoute) {
-        BottomNavItem.values().find { it.route == currentRoute } ?: BottomNavItem.Dashboard
+        BottomNavItem.entries.find { it.route == currentRoute } ?: BottomNavItem.Dashboard
     }
 
     Box(

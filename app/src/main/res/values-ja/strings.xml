@@ -164,8 +164,6 @@
     <string name="theme_dark">ダーク</string>
     <string name="theme_system">システム</string>
     <string name="accent_color_title">アクセントカラー</string>
-    <string name="dynamic_logo_title">動的ブランドロゴ</string>
-    <string name="dynamic_logo_desc">選択したアクセントカラーにロゴの色を合わせる</string>
     <string name="haptic_feedback_title">触覚フィードバック</string>
     <string name="haptic_feedback_desc">タップ時の振動応答</string>
     <string name="settings_currency_subtitle">ダッシュボード、統計、ルール用のアクティブな通貨</string>
@@ -283,7 +281,6 @@
     <string name="auto_backup_password_desc">自動バックアップを暗号化するためのパスワードを入力してください。</string>
     <string name="backup_password_placeholder">バックアップパスワード</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">言語と通貨</string>
     <string name="onboarding_step_appearance">テーマ</string>
     <string name="onboarding_step_automation">自動化</string>
@@ -294,7 +291,6 @@
     <string name="onboarding_preview_category">飲食 · 今日</string>
     <string name="onboarding_section_language">アプリ言語</string>
     <string name="onboarding_section_currency">使用通貨</string>
-
 
     <string name="onboarding_theme_title">テーマとアクセントカラー</string>
     <string name="onboarding_theme_subtitle">お好みのアクセントカラーをお選びください。</string>
@@ -338,14 +334,16 @@
     <string name="apply">適用</string>
     <string name="cancel">キャンセル</string>
     <string name="whats_new_title">バージョン %1$s の新機能</string>
-    <string name="whats_new_feature_currency_title">マルチ通貨に完全対応</string>
-    <string name="whats_new_feature_currency_desc">スマートな数値フォーマット、地域ごとの解析ルール、通貨対応PDF出力により、お好みの通貨を選択できます。</string>
-    <string name="whats_new_feature_languages_title">多言語対応</string>
-    <string name="whats_new_feature_languages_desc">英語に加え、日本語、ヒンディー語、ベンガル語、スペイン語、フランス語、ドイツ語に対応しました。</string>
-    <string name="whats_new_feature_custom_date_title">取引の日時指定</string>
-    <string name="whats_new_feature_custom_date_desc">取引の追加・編集時に正確な日付と時間を設定できます。</string>
-    <string name="whats_new_feature_onboarding_title">新しいオンボーディング</string>
-    <string name="whats_new_feature_onboarding_desc">言語のクイック選択、テーマプレビュー、スムーズな画面遷移を備えた初期設定。</string>
+    <string name="whats_new_feature_splits_title">割り勘ハブ</string>
+    <string name="whats_new_feature_splits_desc">割り勘の計算や均等・個別負担の管理、未払い清算をスムーズに行えます。</string>
+    <string name="whats_new_feature_balance_title">残高の手動調整</string>
+    <string name="whats_new_feature_balance_desc">ダッシュボードの残高を実際の銀行口座や現金の残高といつでも簡単に合わせられます。</string>
+    <string name="whats_new_feature_budget_title">固定・動的予算</string>
+    <string name="whats_new_feature_budget_desc">固定の上限を設定するか、収入に応じて月間支出上限が自動的に拡大する動的予算を選択できます。</string>
+    <string name="whats_new_feature_backup_title">完全なバックアップとエクスポート</string>
+    <string name="whats_new_feature_backup_desc">割り勘の詳細やメモが暗号化バックアップ、CSV、PDFエクスポートに完全に反映されます。</string>
+    <string name="whats_new_feature_logo_title">新しいデザインとアプリアイコン</string>
+    <string name="whats_new_feature_logo_desc">Cipherの洗練された新しいエメラルドデザイン、ダークテーマ、Material Youテーマアイコンに対応しました。</string>
     <string name="whats_new_setup_tracking_continue">トラッキングを設定して続ける</string>
     <string name="split_expense">割り勘</string>
     <string name="split_title">支出を分割</string>
@@ -358,12 +356,9 @@
     <string name="split_settled">精算済み</string>
     <string name="split_pending">未精算</string>
     <string name="split_share_whatsapp">内訳を共有</string>
-    <string name="split_total_must_match">合計分割額 (%1$s) は取引額 (%2$s) と一致する必要があります</string>
-    <string name="split_pct_must_equal_100">割合の合計は100%%である必要があります</string>
     <string name="split_clear">分割を解除</string>
     <string name="split_save">分割を保存</string>
     <string name="split_badge_summary">%1$d人で割り勘</string>
-    <string name="split_badge_active">割り勘 (%1$d)</string>
     <string name="split_hub_title">割り勘・共同支出</string>
     <string name="split_hub_total_lent">共有合計</string>
     <string name="split_hub_total_settled">精算済み</string>
@@ -373,7 +368,6 @@
     <string name="split_hub_filter_all">すべて</string>
     <string name="split_hub_filter_pending">未精算</string>
     <string name="split_hub_filter_settled">精算済み</string>
-    <string name="split_hub_you_paid">支払額</string>
     <string name="split_hub_my_share">自己負担額</string>
     <string name="split_hub_add_split">割り勘支出を追加</string>
     <string name="split_deleted">割り勘支出を削除しました</string>
@@ -403,8 +397,6 @@
     <string name="adjust_balance_subtitle">実際の銀行口座や現金の残高に合わせて更新します。Cipherが調整記録を自動作成します。</string>
     <string name="adjust_balance_current">現在の残高</string>
     <string name="adjust_balance_new_label">新しい実際の残高</string>
-    <string name="adjust_balance_new_hint">残高を入力</string>
-    <string name="adjust_balance_difference">差額</string>
     <string name="adjust_balance_income_added">+%1$s (収入として記録されます)</string>
     <string name="adjust_balance_expense_logged">-%1$s (支出として記録されます)</string>
     <string name="adjust_balance_no_change">残高が一致しています (調整不要)</string>

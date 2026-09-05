@@ -3,7 +3,7 @@ package com.masum.cipher.core.data.repository
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.usecase.ProcessIncomingTransactionUseCase
-import com.masum.cipher.core.domain.usecase.WidgetSyncer
+import com.masum.cipher.core.domain.usecase.WidgetSyncManager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 class TransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
     private val processIncomingTransactionUseCase: ProcessIncomingTransactionUseCase,
-    private val widgetSyncer: WidgetSyncer
+    private val widgetSyncManager: WidgetSyncManager
 ) {
     fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
 
@@ -26,12 +26,12 @@ class TransactionRepository @Inject constructor(
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
         transactionDao.insertTransaction(transaction)
-        widgetSyncer.syncWidget()
+        widgetSyncManager.syncWidget()
     }
 
     suspend fun deleteTransaction(transaction: TransactionEntity) {
         transactionDao.deleteTransaction(transaction)
-        widgetSyncer.syncWidget()
+        widgetSyncManager.syncWidget()
     }
 
     fun getTransactionsBetween(startTime: Long, endTime: Long): Flow<List<TransactionEntity>> =
@@ -45,5 +45,5 @@ class TransactionRepository @Inject constructor(
 
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>> = transactionDao.getExpensesSince(startTime)
 
-    suspend fun refreshWidgets() = widgetSyncer.syncWidget()
+    suspend fun refreshWidgets() = widgetSyncManager.syncWidget()
 }

@@ -5,12 +5,11 @@ import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
-import com.masum.cipher.core.data.local.pref.UserSettingsProvider
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.CategorizerEngine
 import com.masum.cipher.core.domain.model.TransactionCategory
-import com.masum.cipher.core.notifications.TransactionNotifier
+import com.masum.cipher.core.notifications.LocalNotificationManager
 import kotlinx.coroutines.flow.first
-import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,10 +19,15 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     private val merchantAliasDao: MerchantAliasDao,
     private val categoryRuleDao: CategoryRuleDao,
     private val categorizerEngine: CategorizerEngine,
-    private val transactionNotifier: TransactionNotifier,
-    private val userSettingsProvider: UserSettingsProvider,
-    private val widgetSyncer: WidgetSyncer
+    private val localNotificationManager: LocalNotificationManager?,
+    private val userPreferences: UserPreferences?,
+    private val widgetSyncManager: WidgetSyncManager?
 ) {
+    internal var onSyncWidget: (suspend () -> Unit)? = null
+    internal var onGetSettings: (suspend () -> com.masum.cipher.core.data.local.pref.UserSettings)? = null
+    internal var onNotifyNewTransaction: ((TransactionEntity) -> Unit)? = null
+    internal var onNotifyUncategorized: ((Int) -> Unit)? = null
+    internal var onNotifyBudgetAlert: ((isExceeded: Boolean, amount: Double, threshold: Int) -> Unit)? = null
     suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? {
         if (transaction.rawSms != null) {
             val timeWindow = 60_000L
@@ -71,17 +75,17 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         val insertedId = transactionDao.insertTransaction(newTx)
         val savedTx = newTx.copy(id = insertedId)
 
-        widgetSyncer.syncWidget()
-        val settings = userSettingsProvider.settingsFlow.first()
-        if (settings.notifyAllTransactions) {
-            transactionNotifier.showNewTransactionNotification(savedTx)
+        onSyncWidget?.invoke() ?: widgetSyncManager?.syncWidget()
+        val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
+        if (settings?.notifyAllTransactions == true) {
+            onNotifyNewTransaction?.invoke(savedTx) ?: localNotificationManager?.showNewTransactionNotification(savedTx)
         }
         checkBudgetAlert(previousSpent)
 
         if (finalCategory == TransactionCategory.OTHERS.name) {
             val count = transactionDao.getUncategorizedCount()
             if (count > 0) {
-                transactionNotifier.showUncategorizedReminderNotification(count)
+                onNotifyUncategorized?.invoke(count) ?: localNotificationManager?.showUncategorizedReminderNotification(count)
             }
         }
 
@@ -89,21 +93,21 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     }
 
     private suspend fun checkBudgetAlert(previousSpent: Double) {
-        val settings = userSettingsProvider.settingsFlow.first()
-        val baseBudget = settings.monthlyBudget
+        val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
+        val baseBudget = settings?.monthlyBudget ?: 0.0
         if (baseBudget <= 0) return
 
         val start = monthStart()
-        val totalIncome = if (settings.isDynamicBudgetEnabled) transactionDao.sumIncomeSince(start) else 0.0
+        val totalIncome = if (settings?.isDynamicBudgetEnabled == true) transactionDao.sumIncomeSince(start) else 0.0
         val budget = baseBudget + totalIncome
         val newSpent = transactionDao.sumExpensesSince(start)
 
         if (budget in previousSpent..<newSpent) {
-            transactionNotifier.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)
+            onNotifyBudgetAlert?.invoke(true, newSpent - budget, 100) ?: localNotificationManager?.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)
         } else if ((budget * 0.9) in previousSpent..<newSpent) {
-            transactionNotifier.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 90)
+            onNotifyBudgetAlert?.invoke(false, budget - newSpent, 90) ?: localNotificationManager?.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 90)
         } else if ((budget * 0.5) in previousSpent..<newSpent) {
-            transactionNotifier.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 50)
+            onNotifyBudgetAlert?.invoke(false, budget - newSpent, 50) ?: localNotificationManager?.showBudgetAlertNotification(isExceeded = false, amount = budget - newSpent, threshold = 50)
         }
     }
 

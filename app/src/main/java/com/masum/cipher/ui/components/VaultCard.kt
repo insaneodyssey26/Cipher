@@ -21,14 +21,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * VaultCard - A premium card component with organic interaction feedback.
- * 
- * Features:
- * - Scale down to 0.97f on press using Spring physics.
- * - Consistent rounding (16dp).
- * - Subtle borderless elevation using surface colors.
- */
+
 @Composable
 fun VaultCard(
     modifier: Modifier = Modifier,

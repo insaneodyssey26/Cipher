@@ -24,7 +24,6 @@ class UpdateSettingsUseCase @Inject constructor(
         userPreferences.setAccentColor(color)
         transactionRepository.refreshWidgets()
     }
-    suspend fun dynamicLogo(enabled: Boolean) = userPreferences.setDynamicLogoEnabled(enabled)
     suspend fun biometric(enabled: Boolean) = userPreferences.setBiometricEnabled(enabled)
     suspend fun privacyMode(enabled: Boolean) = userPreferences.setPrivacyModeEnabled(enabled)
     suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)
@@ -102,7 +101,7 @@ class ExportPdfUseCase @Inject constructor(
     private val transactionDao: TransactionDao,
     private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
     private val backupRepository: BackupRepository,
-    private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
+    private val userPreferences: UserPreferences
 ) {
     suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

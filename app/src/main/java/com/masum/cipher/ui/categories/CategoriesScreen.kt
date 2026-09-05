@@ -430,9 +430,9 @@ fun CategoriesScreen(
                                         }
 
                                         val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
-                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: Locale.getDefault()
                                         Text(
-                                            text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
+                                            text = "${stringResource(R.string.limit_suffix)}: ${AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.SemiBold,
@@ -467,12 +467,12 @@ fun CategoriesScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         val currencySymbol = settings?.currencySymbol ?: state.currencySymbol
-                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+                                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: Locale.getDefault()
                                         Text(
                                             text = if (isOverBudget) {
-                                                "Exceeded by ${com.masum.cipher.core.util.AppFormatters.formatCurrency(spent - budget, currencySymbol, locale)}"
+                                                "Exceeded by ${AppFormatters.formatCurrency(spent - budget, currencySymbol, locale)}"
                                             } else {
-                                                "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} left"
+                                                "${AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} left"
                                             },
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Lato,
@@ -484,7 +484,7 @@ fun CategoriesScreen(
 
                                         if (!isOverBudget) {
                                             Text(
-                                                text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeDaily, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
+                                                text = "${stringResource(R.string.safe_daily_spend)}: ${AppFormatters.formatCurrency(safeDaily, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                                 style = Typography.labelSmall.copy(
                                                     fontFamily = Lato,
                                                     fontSize = 10.5.sp,

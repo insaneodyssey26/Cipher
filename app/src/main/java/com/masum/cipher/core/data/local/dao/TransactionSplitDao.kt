@@ -11,13 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionSplitDao {
     @Query("SELECT * FROM transaction_splits WHERE transactionId = :transactionId ORDER BY isCurrentUser DESC, id ASC")
-    fun getSplitsForTransaction(transactionId: Long): Flow<List<TransactionSplitEntity>>
-
-    @Query("SELECT * FROM transaction_splits WHERE transactionId = :transactionId ORDER BY isCurrentUser DESC, id ASC")
     suspend fun getSplitsForTransactionSync(transactionId: Long): List<TransactionSplitEntity>
-
-    @Query("SELECT * FROM transaction_splits WHERE isPaid = 0 AND isCurrentUser = 0")
-    fun getAllPendingSplits(): Flow<List<TransactionSplitEntity>>
 
     @Query("SELECT * FROM transaction_splits")
     fun getAllSplitsFlow(): Flow<List<TransactionSplitEntity>>

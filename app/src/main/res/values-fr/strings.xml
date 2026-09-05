@@ -164,8 +164,6 @@
     <string name="theme_dark">Sombre</string>
     <string name="theme_system">Système</string>
     <string name="accent_color_title">Couleur d\'accentuation</string>
-    <string name="dynamic_logo_title">Logo de marque dynamique</string>
-    <string name="dynamic_logo_desc">Adapter la couleur du logo à l\'accent sélectionné</string>
     <string name="haptic_feedback_title">Retour haptique</string>
     <string name="haptic_feedback_desc">Réponse tactile aux interactions</string>
     <string name="settings_currency_subtitle">Devise active pour le tableau de bord, statistiques et règles</string>
@@ -283,7 +281,6 @@
     <string name="auto_backup_password_desc">Entrez un mot de passe pour chiffrer vos sauvegardes automatiques.</string>
     <string name="backup_password_placeholder">Mot de passe de sauvegarde</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">Langue &amp; Devise</string>
     <string name="onboarding_step_appearance">Thème</string>
     <string name="onboarding_step_automation">Automatisation</string>
@@ -294,7 +291,6 @@
     <string name="onboarding_preview_category">Restauration · Aujourd\'hui</string>
     <string name="onboarding_section_language">LANGUE DE L\'APPLICATION</string>
     <string name="onboarding_section_currency">DEVISE PRINCIPALE</string>
-
 
     <string name="onboarding_theme_title">Thème &amp; Apparence</string>
     <string name="onboarding_theme_subtitle">Sélectionnez une couleur d\'accentuation adaptée à vos préférences.</string>
@@ -338,14 +334,16 @@
     <string name="apply">Appliquer</string>
     <string name="cancel">Annuler</string>
     <string name="whats_new_title">Nouveautés de la version %1$s</string>
-    <string name="whats_new_feature_currency_title">Prise en charge multi-devises</string>
-    <string name="whats_new_feature_currency_desc">Choisissez votre devise avec formatage intelligent, analyse locale et exportations PDF adaptées.</string>
-    <string name="whats_new_feature_languages_title">Nouvelles langues</string>
-    <string name="whats_new_feature_languages_desc">Cipher est désormais disponible en français, anglais, hindi, bengali, japonais, espagnol et allemand.</string>
-    <string name="whats_new_feature_custom_date_title">Date personnalisée des transactions</string>
-    <string name="whats_new_feature_custom_date_desc">Choisissez et modifiez la date et l\'heure exactes lors de l\'ajout ou de la modification.</string>
-    <string name="whats_new_feature_onboarding_title">Nouvelle expérience d\'accueil</string>
-    <string name="whats_new_feature_onboarding_desc">Configuration simplifiée avec sélecteur de langue rapide, aperçu des thèmes et transitions fluides.</string>
+    <string name="whats_new_feature_splits_title">Centre de Partage des Dépenses</string>
+    <string name="whats_new_feature_splits_desc">Partagez des factures à parts égales ou personnalisées et suivez les remboursements en toute simplicité.</string>
+    <string name="whats_new_feature_balance_title">Ajustement Manuel du Solde</string>
+    <string name="whats_new_feature_balance_desc">Ajustez facilement votre solde principal pour correspondre à votre compte bancaire réel à tout moment.</string>
+    <string name="whats_new_feature_budget_title">Budgets Fixes et Dynamiques</string>
+    <string name="whats_new_feature_budget_desc">Fixez un plafond strict ou laissez vos revenus augmenter automatiquement votre limite mensuelle.</string>
+    <string name="whats_new_feature_backup_title">Sauvegardes et Exportations Complètes</string>
+    <string name="whats_new_feature_backup_desc">Les détails des partages et notes sont maintenant inclus dans les sauvegardes, exports CSV et PDF.</string>
+    <string name="whats_new_feature_logo_title">Nouveau Look et Icône d\'Application</string>
+    <string name="whats_new_feature_logo_desc">Découvrez la nouvelle identité visuelle émeraude de Cipher, un thème sombre épuré et des icônes thématiques.</string>
     <string name="whats_new_setup_tracking_continue">Configurer et continuer</string>
     <string name="split_expense">Partager la dépense</string>
     <string name="split_title">Partager la dépense</string>
@@ -358,12 +356,9 @@
     <string name="split_settled">Réglé</string>
     <string name="split_pending">En attente</string>
     <string name="split_share_whatsapp">Partager le détail</string>
-    <string name="split_total_must_match">Le total partagé (%1$s) doit être égal au montant (%2$s)</string>
-    <string name="split_pct_must_equal_100">Le total des pourcentages doit être de 100%%</string>
     <string name="split_clear">Supprimer le partage</string>
     <string name="split_save">Enregistrer le partage</string>
     <string name="split_badge_summary">Partagé avec %1$d personnes</string>
-    <string name="split_badge_active">Partagé (%1$d)</string>
     <string name="split_hub_title">Dépenses partagées</string>
     <string name="split_hub_total_lent">Total partagé</string>
     <string name="split_hub_total_settled">Réglé</string>
@@ -373,7 +368,6 @@
     <string name="split_hub_filter_all">Tous</string>
     <string name="split_hub_filter_pending">En attente</string>
     <string name="split_hub_filter_settled">Réglés</string>
-    <string name="split_hub_you_paid">Vous avez payé</string>
     <string name="split_hub_my_share">Votre part</string>
     <string name="split_hub_add_split">Ajouter une dépense partagée</string>
     <string name="split_deleted">Dépense partagée supprimée</string>
@@ -403,8 +397,6 @@
     <string name="adjust_balance_subtitle">Mettez à jour votre solde pour qu\'il corresponde à votre solde bancaire ou espèces réel. Cipher enregistrera une écriture d\'ajustement propre.</string>
     <string name="adjust_balance_current">Solde actuel</string>
     <string name="adjust_balance_new_label">Nouveau solde réel</string>
-    <string name="adjust_balance_new_hint">Entrez le solde</string>
-    <string name="adjust_balance_difference">Différence</string>
     <string name="adjust_balance_income_added">+%1$s (Sera enregistré comme revenu)</string>
     <string name="adjust_balance_expense_logged">-%1$s (Sera enregistré comme dépense)</string>
     <string name="adjust_balance_no_change">Les soldes correspondent (aucun ajustement requis)</string>

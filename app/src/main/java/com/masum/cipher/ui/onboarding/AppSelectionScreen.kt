@@ -68,6 +68,7 @@ import compose.icons.lucideicons.Search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 @androidx.compose.runtime.Immutable
 data class InstalledApp(
@@ -130,7 +131,7 @@ fun AppSelectionScreen(
                 isLoading = false
             }
         }
-        delay(120)
+        delay(120.milliseconds)
         gridAlpha.animateTo(1f, tween(380))
     }
 

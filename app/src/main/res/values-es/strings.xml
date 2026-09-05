@@ -163,8 +163,6 @@
     <string name="theme_dark">Oscuro</string>
     <string name="theme_system">Sistema</string>
     <string name="accent_color_title">Color de acento</string>
-    <string name="dynamic_logo_title">Logo dinámico</string>
-    <string name="dynamic_logo_desc">Adaptar el color del logo al acento seleccionado</string>
     <string name="haptic_feedback_title">Respuesta háptica</string>
     <string name="haptic_feedback_desc">Respuesta física al tocar</string>
     <string name="settings_currency_subtitle">Moneda activa para el panel, estadísticas y reglas</string>
@@ -282,7 +280,6 @@
     <string name="auto_backup_password_desc">Introduce una contraseña para cifrar tus copias automáticas. La necesitarás para restaurar tus datos en un nuevo dispositivo.</string>
     <string name="backup_password_placeholder">Contraseña de copia</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">Idioma y Moneda</string>
     <string name="onboarding_step_appearance">Tema</string>
     <string name="onboarding_step_automation">Automatización</string>
@@ -293,7 +290,6 @@
     <string name="onboarding_preview_category">Comida y Restaurantes · Hoy</string>
     <string name="onboarding_section_language">IDIOMA DE LA APP</string>
     <string name="onboarding_section_currency">MONEDA PRINCIPAL</string>
-
 
     <string name="onboarding_theme_title">Tema y Apariencia</string>
     <string name="onboarding_theme_subtitle">Elige un color de acento que refleje tu estilo.</string>
@@ -337,14 +333,16 @@
     <string name="apply">Aplicar</string>
     <string name="cancel">Cancelar</string>
     <string name="whats_new_title">Novedades de la versión %1$s</string>
-    <string name="whats_new_feature_currency_title">Soporte multi-moneda completo</string>
-    <string name="whats_new_feature_currency_desc">Elige tu moneda preferida con formato numérico inteligente, reglas de análisis locales y exportación a PDF compatible.</string>
-    <string name="whats_new_feature_languages_title">Nuevos idiomas</string>
-    <string name="whats_new_feature_languages_desc">Cipher ahora está disponible en español, inglés, hindi, bengalí, japonés, francés y alemán.</string>
-    <string name="whats_new_feature_custom_date_title">Fecha personalizada en transacciones</string>
-    <string name="whats_new_feature_custom_date_desc">Elige y edita la fecha y hora exacta al añadir o modificar una transacción.</string>
-    <string name="whats_new_feature_onboarding_title">Nueva experiencia inicial</string>
-    <string name="whats_new_feature_onboarding_desc">Configuración inicial limpia con selector rápido de idioma, vista previa de temas y transiciones fluidas.</string>
+    <string name="whats_new_feature_splits_title">Centro de Gastos Divididos</string>
+    <string name="whats_new_feature_splits_desc">Divide cuentas compartidas a partes iguales o personalizadas y gestiona los pagos pendientes con facilidad.</string>
+    <string name="whats_new_feature_balance_title">Ajuste Manual de Saldo</string>
+    <string name="whats_new_feature_balance_desc">Ajusta tu saldo en el panel de control para que coincida exactamente con tu saldo bancario real.</string>
+    <string name="whats_new_feature_budget_title">Presupuestos Fijos y Dinámicos</string>
+    <string name="whats_new_feature_budget_desc">Establece un límite de gasto estricto o permite que los ingresos amplíen tu presupuesto automáticamente.</string>
+    <string name="whats_new_feature_backup_title">Copias de Seguridad y Exportaciones</string>
+    <string name="whats_new_feature_backup_desc">Los detalles de división y notas ahora se integran en copias de seguridad cifradas, CSV y PDF.</string>
+    <string name="whats_new_feature_logo_title">Nueva Imagen e Icono de la App</string>
+    <string name="whats_new_feature_logo_desc">Descubre la nueva identidad visual de Cipher, diseño oscuro refinado y soporte para iconos con tema Material You.</string>
     <string name="whats_new_setup_tracking_continue">Configurar y continuar</string>
     <string name="split_expense">Dividir gasto</string>
     <string name="split_title">Dividir gasto</string>
@@ -357,12 +355,9 @@
     <string name="split_settled">Saldado</string>
     <string name="split_pending">Pendiente</string>
     <string name="split_share_whatsapp">Compartir desglose</string>
-    <string name="split_total_must_match">La división total (%1$s) debe ser igual al monto (%2$s)</string>
-    <string name="split_pct_must_equal_100">Los porcentajes deben sumar 100%%</string>
     <string name="split_clear">Eliminar división</string>
     <string name="split_save">Guardar división</string>
     <string name="split_badge_summary">Dividido con %1$d personas</string>
-    <string name="split_badge_active">Dividido (%1$d)</string>
     <string name="split_hub_title">Gastos divididos</string>
     <string name="split_hub_total_lent">Total compartido</string>
     <string name="split_hub_total_settled">Saldado</string>
@@ -372,7 +367,6 @@
     <string name="split_hub_filter_all">Todos</string>
     <string name="split_hub_filter_pending">Pendientes</string>
     <string name="split_hub_filter_settled">Saldados</string>
-    <string name="split_hub_you_paid">Pagaste</string>
     <string name="split_hub_my_share">Tu parte</string>
     <string name="split_hub_add_split">Agregar gasto dividido</string>
     <string name="split_deleted">Gasto dividido eliminado</string>
@@ -402,8 +396,6 @@
     <string name="adjust_balance_subtitle">Actualiza tu saldo para que coincida con tu saldo real del banco o efectivo. Cipher registrará un asiento de ajuste limpio.</string>
     <string name="adjust_balance_current">Saldo actual</string>
     <string name="adjust_balance_new_label">Nuevo saldo real</string>
-    <string name="adjust_balance_new_hint">Introduce el saldo</string>
-    <string name="adjust_balance_difference">Diferencia</string>
     <string name="adjust_balance_income_added">+%1$s (Se registrará como ingreso)</string>
     <string name="adjust_balance_expense_logged">-%1$s (Se registrará como gasto)</string>
     <string name="adjust_balance_no_change">Los saldos coinciden (no se requiere ajuste)</string>

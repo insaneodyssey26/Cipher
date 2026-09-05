@@ -9,21 +9,16 @@ import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.ui.widget.BudgetWidget
 import com.masum.cipher.ui.widget.StatsWidget
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
-
-interface WidgetSyncer {
-    suspend fun syncWidget()
-}
 
 @Singleton
 class WidgetSyncManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val transactionDao: TransactionDao
-) : WidgetSyncer {
+) {
 
-    override suspend fun syncWidget() {
+    suspend fun syncWidget() {
         val start = monthStart()
         val spent = transactionDao.sumExpensesSince(start)
         val income = transactionDao.sumIncomeSince(start)

@@ -2,6 +2,7 @@ package com.masum.cipher
 
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,9 +39,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import android.graphics.Color as AndroidColor
-import androidx.activity.SystemBarStyle
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,7 +46,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.masum.cipher.core.data.local.entity.TransactionEntity
-import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.SplitParticipant
@@ -78,6 +76,7 @@ import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
+import android.graphics.Color as AndroidColor
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -94,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     private val updateReady = MutableStateFlow(false)
 
     override fun attachBaseContext(newBase: android.content.Context) {
-        val lang = com.masum.cipher.core.data.local.pref.UserPreferences(newBase).getCachedLanguageCode()
+        val lang = UserPreferences(newBase).getCachedLanguageCode()
         val wrapped = com.masum.cipher.core.util.LocaleHelper.wrapContext(newBase, lang)
         super.attachBaseContext(wrapped)
         val config = com.masum.cipher.core.util.LocaleHelper.getOverrideConfiguration(newBase, lang)
@@ -219,8 +218,7 @@ class MainActivity : AppCompatActivity() {
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToManageApps = { navController.navigate("manage_apps") },
-                                    onNavigateToSplitExpenses = { navController.navigate("split_expenses") }
+                                    onNavigateToManageApps = { navController.navigate("manage_apps") }
                                 )
                             }
                             composable("split_expenses") {
@@ -399,7 +397,7 @@ class MainActivity : AppCompatActivity() {
                             OnboardingScreen(
                                 currentAccentColor = state.settings?.accentColor ?: com.masum.cipher.core.data.local.pref.AccentColor.INDIGO,
                                 onAccentColorSelected = { color -> mainViewModel.handleIntent(MainContract.Intent.SaveAccentColor(color)) },
-                                currentTheme = state.settings?.theme ?: com.masum.cipher.core.data.local.pref.AppTheme.SYSTEM,
+                                currentTheme = state.settings?.theme ?: AppTheme.SYSTEM,
                                 onThemeSelected = { theme -> mainViewModel.handleIntent(MainContract.Intent.SaveTheme(theme)) },
                                 currentLanguageCode = state.settings?.appLanguage ?: "system",
                                 onLanguageSelected = { langCode -> mainViewModel.handleIntent(MainContract.Intent.SaveLanguage(langCode)) },

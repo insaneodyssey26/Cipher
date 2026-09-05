@@ -59,22 +59,6 @@ import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.X
 import java.util.Locale
 
-@Composable
-fun CurrencySelectionSheet(
-    currentCode: String,
-    currentSymbol: String,
-    isHapticsEnabled: Boolean,
-    onCurrencySelected: (code: String, symbol: String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    CurrencySelectionDialog(
-        currentCode = currentCode,
-        currentSymbol = currentSymbol,
-        isHapticsEnabled = isHapticsEnabled,
-        onCurrencySelected = onCurrencySelected,
-        onDismiss = onDismiss
-    )
-}
 
 @Composable
 fun CurrencySelectionDialog(

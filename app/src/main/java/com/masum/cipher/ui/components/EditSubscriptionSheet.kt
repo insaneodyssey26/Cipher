@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -79,7 +78,6 @@ fun EditSubscriptionSheet(
     var nextExpectedDate by remember { androidx.compose.runtime.mutableLongStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
@@ -122,7 +120,7 @@ fun EditSubscriptionSheet(
                 )
                 
                 if (isEditing && onDelete != null) {
-                    androidx.compose.material3.TextButton(onClick = onDelete) {
+                    TextButton(onClick = onDelete) {
                         Text("Delete", color = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -143,7 +141,7 @@ fun EditSubscriptionSheet(
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Monthly Average", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                "${com.masum.cipher.core.util.AppFormatters.formatCurrency(monthlyEst, currencySymbol)}/mo",
+                                "${AppFormatters.formatCurrency(monthlyEst, currencySymbol)}/mo",
                                 style = MaterialTheme.typography.titleSmall.copy(fontFamily = com.masum.cipher.ui.theme.Lato, fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
                             )

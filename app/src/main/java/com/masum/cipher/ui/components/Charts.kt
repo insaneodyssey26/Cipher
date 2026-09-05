@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -201,7 +200,7 @@ fun CategoryAllocationDonut(
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Text(
-                            text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount, currencySymbol = currencySymbol),
+                            text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount, currencySymbol = currencySymbol, locale = locale),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -273,8 +272,8 @@ fun SpendingTrendChart(
     var selectedMode by rememberSaveable { mutableStateOf(FinancialFlowMode.EXPENSE) }
     val points = when (selectedMode) {
         FinancialFlowMode.EXPENSE -> expensePoints
-        FinancialFlowMode.INCOME -> if (incomePoints.isNotEmpty()) incomePoints else expensePoints
-        FinancialFlowMode.NET_FLOW -> if (netFlowPoints.isNotEmpty()) netFlowPoints else expensePoints
+        FinancialFlowMode.INCOME -> incomePoints.ifEmpty { expensePoints }
+        FinancialFlowMode.NET_FLOW -> netFlowPoints.ifEmpty { expensePoints }
     }
     val view = androidx.compose.ui.platform.LocalView.current
     val locale = LocalLocale.current.platformLocale
@@ -704,20 +703,6 @@ fun SpendingTrendChart(
 }
 
 @Composable
-fun SpendingTrendChart(
-    points: List<DashboardContract.Point>,
-    currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
-) {
-    SpendingTrendChart(
-        expensePoints = points,
-        incomePoints = emptyList(),
-        netFlowPoints = emptyList(),
-        currencySymbol = currencySymbol,
-        isHapticsEnabled = true
-    )
-}
-
-@Composable
 fun PeakHoursChart(
     hours: List<InsightsContract.PeakHourData>,
     currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
@@ -829,7 +814,7 @@ fun PeakHoursChart(
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
                     )
 
-                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal, currencySymbol = currencySymbol)
+                    val labelText = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(yVal, currencySymbol = currencySymbol, locale = locale)
                     val measured = textMeasurer.measure(
                         text = labelText,
                         style = TextStyle(

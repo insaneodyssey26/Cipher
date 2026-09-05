@@ -34,7 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +60,6 @@ import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
-import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalLocale
 import com.masum.cipher.core.util.AppFormatters
 import java.text.SimpleDateFormat
@@ -81,7 +79,6 @@ fun TimeSelectorDropdown(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var showDateRangePicker by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
     val view = androidx.compose.ui.platform.LocalView.current
     val locale = LocalLocale.current.platformLocale
     val rotation by animateFloatAsState(targetValue = if (showDialog) 180f else 0f, label = "caret_rot")
@@ -573,24 +570,6 @@ fun TimeSelectorDropdown(
     }
 }
 
-@Composable
-fun TimeSelectorDropdown(
-    selectedPeriod: TimePeriod,
-    selectedTimeRange: TimeRange? = null,
-    onPeriodSelected: (TimePeriod) -> Unit,
-    modifier: Modifier = Modifier,
-    isHapticsEnabled: Boolean = true,
-    iconOnly: Boolean = false
-) {
-    TimeSelectorDropdown(
-        selectedPeriod = selectedPeriod,
-        selectedTimeRange = selectedTimeRange,
-        onPeriodSelected = { period, _, _ -> onPeriodSelected(period) },
-        modifier = modifier,
-        isHapticsEnabled = isHapticsEnabled,
-        iconOnly = iconOnly
-    )
-}
 
 private fun getPeriodDateSubtitle(period: TimePeriod, context: android.content.Context? = null, locale: Locale = Locale.getDefault()): String {
     val range = TimeRange.from(period)

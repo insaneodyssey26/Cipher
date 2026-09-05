@@ -164,8 +164,6 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System</string>
     <string name="accent_color_title">Accent Color</string>
-    <string name="dynamic_logo_title">Dynamic Brand Logo</string>
-    <string name="dynamic_logo_desc">Adapt logo color to match selected accent</string>
     <string name="haptic_feedback_title">Haptic Feedback</string>
     <string name="haptic_feedback_desc">Physical response to touch</string>
     <string name="settings_currency_subtitle">Active currency for dashboard, statistics, and parser rules</string>
@@ -283,7 +281,6 @@
     <string name="auto_backup_password_desc">Enter a password to encrypt your automatic backups. You will need this to restore your data on a new device.</string>
     <string name="backup_password_placeholder">Backup Password</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">REGION</string>
     <string name="onboarding_step_appearance">THEME</string>
     <string name="onboarding_step_automation">AUTOMATION</string>
@@ -294,7 +291,6 @@
     <string name="onboarding_preview_category">Food &amp; Dining · Today</string>
     <string name="onboarding_section_language">APP LANGUAGE</string>
     <string name="onboarding_section_currency">PREFERRED CURRENCY</string>
-
 
     <string name="onboarding_theme_title">Theme &amp; Appearance</string>
     <string name="onboarding_theme_subtitle">Select an accent color that suits your style.</string>
@@ -338,14 +334,16 @@
     <string name="apply">Apply</string>
     <string name="cancel">Cancel</string>
     <string name="whats_new_title">What\'s New in Version %1$s</string>
-    <string name="whats_new_feature_currency_title">Full Multi-Currency Support</string>
-    <string name="whats_new_feature_currency_desc">Choose your preferred currency with smart number formatting, localized parsing rules, and currency-aware PDF exports.</string>
-    <string name="whats_new_feature_languages_title">New Languages</string>
-    <string name="whats_new_feature_languages_desc">Cipher is now available in Hindi, Bengali, Japanese, Spanish, French, and German alongside English.</string>
-    <string name="whats_new_feature_custom_date_title">Custom Date for Transactions</string>
-    <string name="whats_new_feature_custom_date_desc">Pick and edit the exact date and time whenever you add or modify a transaction.</string>
-    <string name="whats_new_feature_onboarding_title">Fresh Onboarding Experience</string>
-    <string name="whats_new_feature_onboarding_desc">A cleaner setup flow with quick language pickers, theme selection, and smoother page transitions.</string>
+    <string name="whats_new_feature_splits_title">Split Expenses with Friends</string>
+    <string name="whats_new_feature_splits_desc">Easily split bills, track who has paid, and share summaries directly on WhatsApp.</string>
+    <string name="whats_new_feature_balance_title">Edit Total Balance</string>
+    <string name="whats_new_feature_balance_desc">Tap the pencil icon next to your balance anytime to match your actual bank account.</string>
+    <string name="whats_new_feature_budget_title">Flexible Monthly Budgets</string>
+    <string name="whats_new_feature_budget_desc">Set a strict spending limit or let your budget grow automatically when you get paid.</string>
+    <string name="whats_new_feature_backup_title">Better Backups &amp; Exports</string>
+    <string name="whats_new_feature_backup_desc">Split expenses, notes, and currency details are now included in your backups, CSV, and PDF reports.</string>
+    <string name="whats_new_feature_logo_title">Fresh New App Icon</string>
+    <string name="whats_new_feature_logo_desc">A brand new emerald look for Cipher, with support for Android themed icons.</string>
     <string name="whats_new_setup_tracking_continue">Setup Tracking &amp; Continue</string>
     <string name="split_expense">Split Expense</string>
     <string name="split_title">Split</string>
@@ -358,12 +356,9 @@
     <string name="split_settled">Settled</string>
     <string name="split_pending">Pending</string>
     <string name="split_share_whatsapp">Share Breakdown</string>
-    <string name="split_total_must_match">Total split (%1$s) must equal transaction amount (%2$s)</string>
-    <string name="split_pct_must_equal_100">Total percentages must equal 100%%</string>
     <string name="split_clear">Remove Split</string>
     <string name="split_save">Save Split</string>
     <string name="split_badge_summary">Split with %1$d people</string>
-    <string name="split_badge_active">Split (%1$d)</string>
     <string name="split_hub_title">Split Expenses</string>
     <string name="split_hub_total_lent">Total Shared</string>
     <string name="split_hub_total_settled">Settled</string>
@@ -373,7 +368,6 @@
     <string name="split_hub_filter_all">All</string>
     <string name="split_hub_filter_pending">Pending</string>
     <string name="split_hub_filter_settled">Settled</string>
-    <string name="split_hub_you_paid">You paid</string>
     <string name="split_hub_my_share">Your share</string>
     <string name="split_hub_add_split">Add Split Expense</string>
     <string name="split_deleted">Split expense deleted</string>
@@ -404,8 +398,6 @@
     <string name="adjust_balance_subtitle">Update your balance to match your actual bank or cash balance. Cipher will record a clean adjustment entry.</string>
     <string name="adjust_balance_current">Current Balance</string>
     <string name="adjust_balance_new_label">New Actual Balance</string>
-    <string name="adjust_balance_new_hint">Enter balance</string>
-    <string name="adjust_balance_difference">Difference</string>
     <string name="adjust_balance_income_added">+%1$s (Income will be logged)</string>
     <string name="adjust_balance_expense_logged">-%1$s (Expense will be logged)</string>
     <string name="adjust_balance_no_change">Balances match (no adjustment needed)</string>

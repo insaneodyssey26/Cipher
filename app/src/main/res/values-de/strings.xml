@@ -164,8 +164,6 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System</string>
     <string name="accent_color_title">Akzentfarbe</string>
-    <string name="dynamic_logo_title">Dynamisches Markenlogo</string>
-    <string name="dynamic_logo_desc">Logofarbe an gewählte Akzentfarbe anpassen</string>
     <string name="haptic_feedback_title">Haptisches Feedback</string>
     <string name="haptic_feedback_desc">Spürbare Rückmeldung bei Berührung</string>
     <string name="settings_currency_subtitle">Aktive Währung für Dashboard, Statistiken und Regeln</string>
@@ -283,7 +281,6 @@
     <string name="auto_backup_password_desc">Geben Sie ein Passwort zur Verschlüsselung Ihrer automatischen Backups ein.</string>
     <string name="backup_password_placeholder">Backup-Passwort</string>
 
-    <!-- Onboarding Strings -->
     <string name="onboarding_step_region">Sprache &amp; Währung</string>
     <string name="onboarding_step_appearance">Design</string>
     <string name="onboarding_step_automation">Automatisierung</string>
@@ -294,7 +291,6 @@
     <string name="onboarding_preview_category">Essen &amp; Gastronomie · Heute</string>
     <string name="onboarding_section_language">APP-SPRACHE</string>
     <string name="onboarding_section_currency">BEVORZUGTE WÄHRUNG</string>
-
 
     <string name="onboarding_theme_title">Design &amp; Akzentfarbe</string>
     <string name="onboarding_theme_subtitle">Wählen Sie eine Akzentfarbe, die zu Ihnen passt.</string>
@@ -338,14 +334,16 @@
     <string name="apply">Anwenden</string>
     <string name="cancel">Abbrechen</string>
     <string name="whats_new_title">Neu in Version %1$s</string>
-    <string name="whats_new_feature_currency_title">Vollständige Währungsunterstützung</string>
-    <string name="whats_new_feature_currency_desc">Wählen Sie Ihre bevorzugte Währung mit intelligenter Zahlenformatierung und angepasstem PDF-Export.</string>
-    <string name="whats_new_feature_languages_title">Neue Sprachen</string>
-    <string name="whats_new_feature_languages_desc">Cipher ist jetzt neben Englisch auch auf Deutsch, Hindi, Bengalisch, Japanisch, Spanisch und Französisch verfügbar.</string>
-    <string name="whats_new_feature_custom_date_title">Benutzerdefiniertes Datum für Buchungen</string>
-    <string name="whats_new_feature_custom_date_desc">Wählen und bearbeiten Sie das genaue Datum und die Uhrzeit beim Hinzufügen oder Bearbeiten.</string>
-    <string name="whats_new_feature_onboarding_title">Neues Onboarding-Erlebnis</string>
-    <string name="whats_new_feature_onboarding_desc">Ein übersichtlicher Einrichtungsprozess mit Sprachauswahl, Themenvorschau und flüssigen Animationen.</string>
+    <string name="whats_new_feature_splits_title">Ausgaben-Teilungszentrale</string>
+    <string name="whats_new_feature_splits_desc">Gemeinsame Rechnungen gleichmäßig oder individuell aufteilen und offene Beträge einfach verwalten.</string>
+    <string name="whats_new_feature_balance_title">Manuelle Kontostandanpassung</string>
+    <string name="whats_new_feature_balance_desc">Gleichen Sie Ihren Kontostand im Dashboard jederzeit an Ihren tatsächlichen Kontostand an.</string>
+    <string name="whats_new_feature_budget_title">Feste und Dynamische Budgets</string>
+    <string name="whats_new_feature_budget_desc">Legen Sie ein festes Ausgabenlimit fest oder lassen Sie Einnahmen Ihr Monatsbudget automatisch erweitern.</string>
+    <string name="whats_new_feature_backup_title">Vollständige Backups und Exporte</string>
+    <string name="whats_new_feature_backup_desc">Teilungsdetails und Notizen sind jetzt vollständig in Backups, CSV- und PDF-Exporte integriert.</string>
+    <string name="whats_new_feature_logo_title">Neuer Look und Neues App-Icon</string>
+    <string name="whats_new_feature_logo_desc">Entdecken Sie Ciphers moderne neue Smaragd-Identität, verfeinertes Dark Theme und themenbezogene Icons.</string>
     <string name="whats_new_setup_tracking_continue">Tracking einrichten &amp; fortfahren</string>
     <string name="split_expense">Ausgabe teilen</string>
     <string name="split_title">Ausgabe teilen</string>
@@ -358,12 +356,9 @@
     <string name="split_settled">Beglichen</string>
     <string name="split_pending">Ausstehend</string>
     <string name="split_share_whatsapp">Aufteilung teilen</string>
-    <string name="split_total_must_match">Die Gesamtaufteilung (%1$s) muss dem Betrag (%2$s) entsprechen</string>
-    <string name="split_pct_must_equal_100">Die Prozentanteile müssen 100%% ergeben</string>
     <string name="split_clear">Aufteilung löschen</string>
     <string name="split_save">Aufteilung speichern</string>
     <string name="split_badge_summary">Geteilt mit %1$d Personen</string>
-    <string name="split_badge_active">Geteilt (%1$d)</string>
     <string name="split_hub_title">Geteilte Ausgaben</string>
     <string name="split_hub_total_lent">Gesamt geteilt</string>
     <string name="split_hub_total_settled">Beglichen</string>
@@ -373,7 +368,6 @@
     <string name="split_hub_filter_all">Alle</string>
     <string name="split_hub_filter_pending">Ausstehend</string>
     <string name="split_hub_filter_settled">Beglichen</string>
-    <string name="split_hub_you_paid">Du hast bezahlt</string>
     <string name="split_hub_my_share">Dein Anteil</string>
     <string name="split_hub_add_split">Geteilte Ausgabe hinzufügen</string>
     <string name="split_deleted">Geteilte Ausgabe gelöscht</string>
@@ -403,8 +397,6 @@
     <string name="adjust_balance_subtitle">Aktualisieren Sie Ihren Kontostand passend zu Ihrem tatsächlichen Bank- oder Bargeldbestand. Cipher zeichnet eine saubere Anpassungsbuchung auf.</string>
     <string name="adjust_balance_current">Aktueller Kontostand</string>
     <string name="adjust_balance_new_label">Neuer tatsächlicher Kontostand</string>
-    <string name="adjust_balance_new_hint">Kontostand eingeben</string>
-    <string name="adjust_balance_difference">Differenz</string>
     <string name="adjust_balance_income_added">+%1$s (Wird als Einnahme erfasst)</string>
     <string name="adjust_balance_expense_logged">-%1$s (Wird als Ausgabe erfasst)</string>
     <string name="adjust_balance_no_change">Kontostände stimmen überein (keine Anpassung erforderlich)</string>

@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +57,6 @@ import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
-import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Check
@@ -76,23 +74,24 @@ import java.util.Locale
 fun AdjustBalanceSheet(
     currentBalance: Double,
     currencySymbol: String,
-    currencyCode: String,
     locale: Locale,
     isHapticsEnabled: Boolean,
     onDismiss: () -> Unit,
     onConfirmAdjustment: (merchant: String, amount: Double, isIncome: Boolean, timestamp: Long, note: String?) -> Unit
 ) {
     val view = LocalView.current
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val defaultOpeningName = stringResource(R.string.adjust_balance_opening_name)
+    val defaultEntryName = stringResource(R.string.adjust_balance_entry_name)
 
     var newBalanceInput by remember { mutableStateOf("") }
     var noteText by remember {
         mutableStateOf(
             if (currentBalance == 0.0) {
-                context.getString(R.string.adjust_balance_opening_name)
+                defaultOpeningName
             } else {
-                context.getString(R.string.adjust_balance_entry_name)
+                defaultEntryName
             }
         )
     }
@@ -474,9 +473,9 @@ fun AdjustBalanceSheet(
                     val absAmount = kotlin.math.abs(diff)
                     val merchant = noteText.ifBlank {
                         if (isIncome) {
-                            context.getString(R.string.adjust_balance_opening_name)
+                            defaultOpeningName
                         } else {
-                            context.getString(R.string.adjust_balance_entry_name)
+                            defaultEntryName
                         }
                     }
 

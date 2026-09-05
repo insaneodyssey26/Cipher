@@ -209,16 +209,8 @@ class BudgetWidget : GlanceAppWidget() {
         }
     }
 }
-
-    private fun fmt(amount: Double): String {
-        val abs = kotlin.math.abs(amount)
-        return when {
-            abs >= 1_00_000 -> "%.1fL".format(abs / 1_00_000)
-            abs >= 1_000 -> "%.1fK".format(abs / 1_000)
-            else -> "%.0f".format(abs)
-        }
-    }
 }
+
 
 class BudgetRefreshAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
