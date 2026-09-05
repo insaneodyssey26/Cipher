@@ -376,4 +376,25 @@
     <string name="split_hub_add_split">割り勘支出を追加</string>
     <string name="split_deleted">割り勘支出を削除しました</string>
     <string name="action_undo">元に戻す</string>
+
+    <string name="monthly_spending_target">月間支出目標</string>
+    <string name="budget_empty_desc">予算上限を設定して毎日の安全支出ペースを把握し、月間目標を達成しましょう。</string>
+    <string name="set_budget_target">予算目標を設定</string>
+    <string name="set_baseline_budget_subtitle">基本予算と調整ルールを設定します</string>
+    <string name="monthly_base_limit_label">月間基本上限 (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">例: 40,000</string>
+    <string name="budget_behavior_header">予算の動作</string>
+    <string name="fixed_limit_title">固定上限</string>
+    <string name="fixed_limit_desc">厳格な月間上限。収入は加算されません。</string>
+    <string name="dynamic_budget_title">変動予算</string>
+    <string name="dynamic_budget_desc">得られた収入によって月間上限が自動的に拡大します。</string>
+    <string name="total_monthly_budget">月間総予算</string>
+    <string name="fixed_monthly_limit">固定月間上限</string>
+    <string name="dynamic_budget_income_desc">基本 %1$s + 今月の収入 %2$s。</string>
+    <string name="dynamic_budget_no_income_desc">基本 %1$s。収入があると自動的に支出上限が拡大します。</string>
+    <string name="fixed_budget_limit_desc">%1$s の厳格な上限。収入があってもこの上限は増えません。</string>
+    <string name="save_target">目標を保存</string>
+    <string name="action_clear_input">クリア</string>
+    <string name="dynamic_budget_badge_desc">基本 %1$s + 収入から %2$s</string>
+    <string name="action_remove_budget">予算を削除</string>
 </resources>

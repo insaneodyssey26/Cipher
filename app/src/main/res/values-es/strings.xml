@@ -375,4 +375,25 @@
     <string name="split_hub_add_split">Agregar gasto dividido</string>
     <string name="split_deleted">Gasto dividido eliminado</string>
     <string name="action_undo">DESHACER</string>
+
+    <string name="monthly_spending_target">Objetivo de gasto mensual</string>
+    <string name="budget_empty_desc">Establece un límite de presupuesto para controlar el gasto diario seguro y mantenerte al día con tus objetivos mensuales.</string>
+    <string name="set_budget_target">Establecer objetivo de presupuesto</string>
+    <string name="set_baseline_budget_subtitle">Configura tu presupuesto base y reglas de ajuste</string>
+    <string name="monthly_base_limit_label">Límite base mensual (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">ej. 40.000</string>
+    <string name="budget_behavior_header">COMPORTAMIENTO DEL PRESUPUESTO</string>
+    <string name="fixed_limit_title">Límite fijo</string>
+    <string name="fixed_limit_desc">Tope mensual estricto. Los ingresos no se añaden.</string>
+    <string name="dynamic_budget_title">Presupuesto dinámico</string>
+    <string name="dynamic_budget_desc">Los ingresos recibidos amplían tu límite mensual.</string>
+    <string name="total_monthly_budget">Presupuesto mensual total</string>
+    <string name="fixed_monthly_limit">Límite mensual fijo</string>
+    <string name="dynamic_budget_income_desc">Base %1$s + %2$s recibidos este mes.</string>
+    <string name="dynamic_budget_no_income_desc">Base %1$s. Cualquier ingreso recibido ampliará automáticamente tu límite de gasto.</string>
+    <string name="fixed_budget_limit_desc">Tope estricto de %1$s. El dinero recibido no aumenta este límite.</string>
+    <string name="save_target">Guardar objetivo</string>
+    <string name="action_clear_input">Borrar</string>
+    <string name="dynamic_budget_badge_desc">Base %1$s + %2$s de ingresos</string>
+    <string name="action_remove_budget">Eliminar presupuesto</string>
 </resources>

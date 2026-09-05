@@ -396,7 +396,11 @@ fun BudgetHealthCard(
                 if (isDynamicBudget && income > 0) {
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)} + ${com.masum.cipher.core.util.AppFormatters.formatCurrency(income, currencySymbol, locale)} from income",
+                        text = stringResource(
+                            R.string.dynamic_budget_badge_desc,
+                            com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale),
+                            com.masum.cipher.core.util.AppFormatters.formatCurrency(income, currencySymbol, locale)
+                        ),
                         style = Typography.bodySmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,
@@ -493,7 +497,7 @@ fun BudgetHealthCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "Monthly Spending Target",
+                    text = stringResource(R.string.monthly_spending_target),
                     style = Typography.titleMedium.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -505,7 +509,7 @@ fun BudgetHealthCard(
                 Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = "Set a budget limit to track daily safe-spend velocity and stay ahead of your monthly targets.",
+                    text = stringResource(R.string.budget_empty_desc),
                     style = Typography.bodySmall.copy(
                         fontSize = 11.5.sp,
                         lineHeight = 15.sp
@@ -534,7 +538,7 @@ fun BudgetHealthCard(
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
-                            text = "Set Budget Target",
+                            text = stringResource(R.string.set_budget_target),
                             style = Typography.labelMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -616,7 +620,7 @@ fun EditBudgetDialog(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Monthly Spending Target",
+                        text = stringResource(R.string.monthly_spending_target),
                         style = Typography.titleLarge.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -626,7 +630,7 @@ fun EditBudgetDialog(
                     )
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "Set your baseline budget and adjustment rules",
+                        text = stringResource(R.string.set_baseline_budget_subtitle),
                         style = Typography.bodySmall.copy(
                             fontFamily = Lato,
                             fontSize = 12.5.sp
@@ -645,7 +649,7 @@ fun EditBudgetDialog(
                     ) {
                         Icon(
                             imageVector = LucideIcons.Trash2,
-                            contentDescription = "Remove Budget",
+                            contentDescription = stringResource(R.string.action_remove_budget),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(20.dp)
                         )
@@ -661,8 +665,8 @@ fun EditBudgetDialog(
                             budgetInput = input
                         }
                     },
-                    label = { Text("Monthly Base Limit ($currencySymbol)") },
-                    placeholder = { Text("e.g. 40,000") },
+                    label = { Text(stringResource(R.string.monthly_base_limit_label, currencySymbol)) },
+                    placeholder = { Text(stringResource(R.string.monthly_base_limit_placeholder)) },
                     textStyle = Typography.headlineSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -734,7 +738,7 @@ fun EditBudgetDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Clear",
+                                text = stringResource(R.string.action_clear_input),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
@@ -749,7 +753,7 @@ fun EditBudgetDialog(
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "BUDGET BEHAVIOR",
+                    text = stringResource(R.string.budget_behavior_header),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -789,7 +793,7 @@ fun EditBudgetDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Fixed Limit",
+                                    text = stringResource(R.string.fixed_limit_title),
                                     style = Typography.titleSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -807,7 +811,7 @@ fun EditBudgetDialog(
                                 }
                             }
                             Text(
-                                text = "Strict monthly ceiling. Income is not added.",
+                                text = stringResource(R.string.fixed_limit_desc),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontSize = 11.5.sp,
@@ -844,7 +848,7 @@ fun EditBudgetDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Dynamic Budget",
+                                    text = stringResource(R.string.dynamic_budget_title),
                                     style = Typography.titleSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -862,7 +866,7 @@ fun EditBudgetDialog(
                                 }
                             }
                             Text(
-                                text = "Income received expands your monthly limit.",
+                                text = stringResource(R.string.dynamic_budget_desc),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontSize = 11.5.sp,
@@ -890,7 +894,7 @@ fun EditBudgetDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (selectedIsDynamic) "Total Monthly Budget" else "Fixed Monthly Limit",
+                        text = if (selectedIsDynamic) stringResource(R.string.total_monthly_budget) else stringResource(R.string.fixed_monthly_limit),
                         style = Typography.labelMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.SemiBold,
@@ -912,12 +916,22 @@ fun EditBudgetDialog(
                 Text(
                     text = if (selectedIsDynamic) {
                         if (currentMonthIncome > 0) {
-                            "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)} + ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentMonthIncome, currencySymbol, locale)} received this month."
+                            stringResource(
+                                R.string.dynamic_budget_income_desc,
+                                com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale),
+                                com.masum.cipher.core.util.AppFormatters.formatCurrency(currentMonthIncome, currencySymbol, locale)
+                            )
                         } else {
-                            "Base ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)}. Any income received will automatically expand your spending limit."
+                            stringResource(
+                                R.string.dynamic_budget_no_income_desc,
+                                com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)
+                            )
                         }
                     } else {
-                        "Strict ceiling of ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)}. Money received does not increase this limit."
+                        stringResource(
+                            R.string.fixed_budget_limit_desc,
+                            com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)
+                        )
                     },
                     style = Typography.bodySmall.copy(
                         fontFamily = Lato,
@@ -942,7 +956,7 @@ fun EditBudgetDialog(
                     .height(52.dp)
             ) {
                 Text(
-                    text = "Save Target",
+                    text = stringResource(R.string.save_target),
                     style = Typography.labelLarge.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,

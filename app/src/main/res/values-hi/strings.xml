@@ -375,4 +375,25 @@
     <string name="split_hub_add_split">विभाजित खर्च जोड़ें</string>
     <string name="split_deleted">विभाजित खर्च हटा दिया गया</string>
     <string name="action_undo">पूर्ववत करें</string>
+
+    <string name="monthly_spending_target">मासिक खर्च लक्ष्य</string>
+    <string name="budget_empty_desc">दैनिक सुरक्षित खर्च की गति को ट्रैक करने और अपने मासिक लक्ष्यों से आगे रहने के लिए एक बजट सीमा निर्धारित करें।</string>
+    <string name="set_budget_target">बजट लक्ष्य निर्धारित करें</string>
+    <string name="set_baseline_budget_subtitle">अपना आधार बजट और समायोजन नियम सेट करें</string>
+    <string name="monthly_base_limit_label">मासिक आधार सीमा (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">उदा. 40,000</string>
+    <string name="budget_behavior_header">बजट व्यवहार</string>
+    <string name="fixed_limit_title">निश्चित सीमा</string>
+    <string name="fixed_limit_desc">सख्त मासिक सीमा। आय जोड़ी नहीं जाती है।</string>
+    <string name="dynamic_budget_title">डायनामिक बजट</string>
+    <string name="dynamic_budget_desc">प्राप्त आय आपकी मासिक सीमा को बढ़ाती है।</string>
+    <string name="total_monthly_budget">कुल मासिक बजट</string>
+    <string name="fixed_monthly_limit">निश्चित मासिक सीमा</string>
+    <string name="dynamic_budget_income_desc">आधार %1$s + इस महीने प्राप्त %2$s।</string>
+    <string name="dynamic_budget_no_income_desc">आधार %1$s। प्राप्त कोई भी आय स्वचालित रूप से आपकी खर्च सीमा बढ़ा देगी।</string>
+    <string name="fixed_budget_limit_desc">%1$s की सख्त सीमा। प्राप्त राशि इस सीमा को नहीं बढ़ाती है।</string>
+    <string name="save_target">लक्ष्य सहेजें</string>
+    <string name="action_clear_input">साफ़ करें</string>
+    <string name="dynamic_budget_badge_desc">आधार %1$s + आय से %2$s</string>
+    <string name="action_remove_budget">बजट हटाएं</string>
 </resources>

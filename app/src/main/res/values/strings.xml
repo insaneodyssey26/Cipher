@@ -376,4 +376,25 @@
     <string name="split_hub_add_split">Add Split Expense</string>
     <string name="split_deleted">Split expense deleted</string>
     <string name="action_undo">UNDO</string>
+
+    <string name="monthly_spending_target">Monthly Spending Target</string>
+    <string name="budget_empty_desc">Set a budget limit to track daily safe-spend velocity and stay ahead of your monthly targets.</string>
+    <string name="set_budget_target">Set Budget Target</string>
+    <string name="set_baseline_budget_subtitle">Set your baseline budget and adjustment rules</string>
+    <string name="monthly_base_limit_label">Monthly Base Limit (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">e.g. 40,000</string>
+    <string name="budget_behavior_header">BUDGET BEHAVIOR</string>
+    <string name="fixed_limit_title">Fixed Limit</string>
+    <string name="fixed_limit_desc">Strict monthly ceiling. Income is not added.</string>
+    <string name="dynamic_budget_title">Dynamic Budget</string>
+    <string name="dynamic_budget_desc">Income received expands your monthly limit.</string>
+    <string name="total_monthly_budget">Total Monthly Budget</string>
+    <string name="fixed_monthly_limit">Fixed Monthly Limit</string>
+    <string name="dynamic_budget_income_desc">Base %1$s + %2$s received this month.</string>
+    <string name="dynamic_budget_no_income_desc">Base %1$s. Any income received will automatically expand your spending limit.</string>
+    <string name="fixed_budget_limit_desc">Strict ceiling of %1$s. Money received does not increase this limit.</string>
+    <string name="save_target">Save Target</string>
+    <string name="action_clear_input">Clear</string>
+    <string name="dynamic_budget_badge_desc">Base %1$s + %2$s from income</string>
+    <string name="action_remove_budget">Remove Budget</string>
 </resources>

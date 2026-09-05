@@ -376,4 +376,25 @@
     <string name="split_hub_add_split">Geteilte Ausgabe hinzufügen</string>
     <string name="split_deleted">Geteilte Ausgabe gelöscht</string>
     <string name="action_undo">RÜCKGÄNGIG</string>
+
+    <string name="monthly_spending_target">Monatliches Ausgabenziel</string>
+    <string name="budget_empty_desc">Legen Sie ein Budgetlimit fest, um Ihre tägliche Ausgabengeschwindigkeit zu verfolgen und Ihre Monatsziele einzuhalten.</string>
+    <string name="set_budget_target">Budgetziel festlegen</string>
+    <string name="set_baseline_budget_subtitle">Legen Sie Ihr Basisbudget und Ihre Anpassungsregeln fest</string>
+    <string name="monthly_base_limit_label">Monatliches Basislimit (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">z.B. 40.000</string>
+    <string name="budget_behavior_header">BUDGETVERHALTEN</string>
+    <string name="fixed_limit_title">Festes Limit</string>
+    <string name="fixed_limit_desc">Strikte monatliche Obergrenze. Einnahmen werden nicht hinzugefügt.</string>
+    <string name="dynamic_budget_title">Dynamisches Budget</string>
+    <string name="dynamic_budget_desc">Erhaltende Einnahmen erweitern Ihr monatliches Limit.</string>
+    <string name="total_monthly_budget">Gesamtes Monatsbudget</string>
+    <string name="fixed_monthly_limit">Festes Monatslimit</string>
+    <string name="dynamic_budget_income_desc">Basis %1$s + %2$s in diesem Monat erhalten.</string>
+    <string name="dynamic_budget_no_income_desc">Basis %1$s. Jedes erhaltene Einkommen erweitert automatisch Ihr Ausgabenlimit.</string>
+    <string name="fixed_budget_limit_desc">Strikte Obergrenze von %1$s. Erhaltenes Geld erhöht dieses Limit nicht.</string>
+    <string name="save_target">Ziel speichern</string>
+    <string name="action_clear_input">Löschen</string>
+    <string name="dynamic_budget_badge_desc">Basis %1$s + %2$s aus Einnahmen</string>
+    <string name="action_remove_budget">Budget entfernen</string>
 </resources>

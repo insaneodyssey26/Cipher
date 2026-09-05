@@ -376,4 +376,25 @@
     <string name="split_hub_add_split">Ajouter une dépense partagée</string>
     <string name="split_deleted">Dépense partagée supprimée</string>
     <string name="action_undo">ANNULER</string>
+
+    <string name="monthly_spending_target">Objectif de dépenses mensuel</string>
+    <string name="budget_empty_desc">Définissez une limite budgétaire pour suivre votre rythme de dépenses quotidiennes et respecter vos objectifs mensuels.</string>
+    <string name="set_budget_target">Définir l\'objectif budgétaire</string>
+    <string name="set_baseline_budget_subtitle">Définissez votre budget de base et vos règles d\'ajustement</string>
+    <string name="monthly_base_limit_label">Limite de base mensuelle (%1$s)</string>
+    <string name="monthly_base_limit_placeholder">ex. 40 000</string>
+    <string name="budget_behavior_header">COMPORTEMENT DU BUDGET</string>
+    <string name="fixed_limit_title">Limite fixe</string>
+    <string name="fixed_limit_desc">Plafond mensuel strict. Les revenus ne sont pas ajoutés.</string>
+    <string name="dynamic_budget_title">Budget dynamique</string>
+    <string name="dynamic_budget_desc">Les revenus reçus augmentent votre limite mensuelle.</string>
+    <string name="total_monthly_budget">Budget mensuel total</string>
+    <string name="fixed_monthly_limit">Limite mensuelle fixe</string>
+    <string name="dynamic_budget_income_desc">Base %1$s + %2$s reçus ce mois-ci.</string>
+    <string name="dynamic_budget_no_income_desc">Base %1$s. Tout revenu perçu augmentera automatiquement votre limite de dépenses.</string>
+    <string name="fixed_budget_limit_desc">Plafond strict de %1$s. L\'argent reçu n\'augmente pas cette limite.</string>
+    <string name="save_target">Enregistrer l\'objectif</string>
+    <string name="action_clear_input">Effacer</string>
+    <string name="dynamic_budget_badge_desc">Base %1$s + %2$s de revenus</string>
+    <string name="action_remove_budget">Supprimer le budget</string>
 </resources>
