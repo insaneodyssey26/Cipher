@@ -5,6 +5,7 @@ local.properties
 .kotlin/
 .gradle/
 build/
+**/build/
 app/build/
 captures/
 .externalNativeBuild/
@@ -22,6 +23,9 @@ keystore.properties
 
 *.apk
 *.aab
+*.ap_
+release/
+**/release/
 
 *.log
 /.idea/
