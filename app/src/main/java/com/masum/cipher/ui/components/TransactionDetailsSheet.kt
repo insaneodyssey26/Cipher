@@ -532,7 +532,7 @@ fun TransactionDetailsSheet(
                         modifier = Modifier
                             .height(16.dp)
                             .width(1.dp)
-                            .background(White10)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                     )
                 }
 
@@ -587,7 +587,7 @@ fun TransactionDetailsSheet(
                         modifier = Modifier
                             .height(16.dp)
                             .width(1.dp)
-                            .background(White10)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                     )
                 }
 

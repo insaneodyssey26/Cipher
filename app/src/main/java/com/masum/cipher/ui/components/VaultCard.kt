@@ -55,7 +55,7 @@ fun VaultCard(
                 if (onClick != null) {
                     Modifier.clickable(
                         interactionSource = interactionSource,
-                        indication = null, // Custom indication handled by scale
+                        indication = null,
                         onClick = onClick
                     )
                 } else Modifier

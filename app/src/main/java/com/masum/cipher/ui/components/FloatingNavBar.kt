@@ -97,166 +97,174 @@ fun FloatingNavBar(
             .padding(top = 48.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
-        AnimatedContent(
-            targetState = isCompressed,
-            transitionSpec = {
-                (fadeIn(animationSpec = tween(220, delayMillis = 60))) togetherWith
-                (fadeOut(animationSpec = tween(180)))
-            },
-            label = "navbar_compress_transition"
-        ) { compressed ->
-            if (compressed) {
-                Row(
-                    modifier = Modifier
-                        .shadow(elevation = 24.dp, shape = CircleShape, spotColor = Color.Black.copy(alpha = 0.25f))
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
-                        .border(1.dp, White10, CircleShape)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .shadow(elevation = 8.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .clickable {
-                                view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                onAddClick()
-                            },
-                        contentAlignment = Alignment.Center
+        Box(
+            modifier = Modifier
+                .shadow(
+                    elevation = 24.dp,
+                    shape = CircleShape,
+                    spotColor = Color.Black.copy(alpha = 0.2f)
+                )
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surface, CircleShape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+        ) {
+            AnimatedContent(
+                targetState = isCompressed,
+                transitionSpec = {
+                    (fadeIn(animationSpec = tween(200, delayMillis = 40))) togetherWith
+                    (fadeOut(animationSpec = tween(160)))
+                },
+                label = "navbar_compress_transition"
+            ) { compressed ->
+                if (compressed) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = LucideIcons.Plus,
-                            contentDescription = "Add Transaction",
-                            tint = Color.White,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .height(44.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                onToggleCompress(false)
-                            }
-                            .padding(horizontal = 11.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .shadow(elevation = 8.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                    onAddClick()
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = activeItem.icon,
-                                contentDescription = androidx.compose.ui.res.stringResource(activeItem.labelRes),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Icon(
-                                imageVector = LucideIcons.ChevronRight,
-                                contentDescription = "Expand bar",
-                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                modifier = Modifier.size(15.dp)
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = "Add Transaction",
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
-                    }
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .shadow(elevation = 24.dp, shape = CircleShape, spotColor = Color.Black.copy(alpha = 0.2f))
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
-                        .border(1.dp, White10, CircleShape)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    NavItem(
-                        item = BottomNavItem.Dashboard,
-                        isSelected = currentRoute == BottomNavItem.Dashboard.route,
-                        onClick = { 
-                            view.performVibrate(isHapticsEnabled)
-                            onNavigate(BottomNavItem.Dashboard.route) 
-                        }
-                    )
 
-                    NavItem(
-                        item = BottomNavItem.Insights,
-                        isSelected = currentRoute == BottomNavItem.Insights.route,
-                        onClick = { 
-                            view.performVibrate(isHapticsEnabled)
-                            onNavigate(BottomNavItem.Insights.route) 
-                        }
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .shadow(elevation = 12.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .clickable {
-                                view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                onAddClick()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Plus,
-                            contentDescription = "Add Transaction",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    NavItem(
-                        item = BottomNavItem.Splits,
-                        isSelected = currentRoute == BottomNavItem.Splits.route,
-                        onClick = { 
-                            view.performVibrate(isHapticsEnabled)
-                            onNavigate(BottomNavItem.Splits.route) 
-                        }
-                    )
-
-                    NavItem(
-                        item = BottomNavItem.Settings,
-                        isSelected = currentRoute == BottomNavItem.Settings.route,
-                        onClick = { 
-                            view.performVibrate(isHapticsEnabled)
-                            onNavigate(BottomNavItem.Settings.route) 
-                        }
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
+                        Box(
+                            modifier = Modifier
+                                .height(44.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onToggleCompress(false)
+                                }
+                                .padding(horizontal = 11.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                onToggleCompress(true)
-                            },
-                        contentAlignment = Alignment.Center
+                                Icon(
+                                    imageVector = activeItem.icon,
+                                    contentDescription = androidx.compose.ui.res.stringResource(activeItem.labelRes),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Icon(
+                                    imageVector = LucideIcons.ChevronRight,
+                                    contentDescription = "Expand bar",
+                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = LucideIcons.ChevronLeft,
-                            contentDescription = "Collapse bar",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            modifier = Modifier.size(16.dp)
+                        NavItem(
+                            item = BottomNavItem.Dashboard,
+                            isSelected = currentRoute == BottomNavItem.Dashboard.route,
+                            onClick = { 
+                                view.performVibrate(isHapticsEnabled)
+                                onNavigate(BottomNavItem.Dashboard.route) 
+                            }
                         )
+
+                        NavItem(
+                            item = BottomNavItem.Insights,
+                            isSelected = currentRoute == BottomNavItem.Insights.route,
+                            onClick = { 
+                                view.performVibrate(isHapticsEnabled)
+                                onNavigate(BottomNavItem.Insights.route) 
+                            }
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .shadow(elevation = 12.dp, shape = CircleShape, spotColor = MaterialTheme.colorScheme.primary)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                    onAddClick()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = "Add Transaction",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        NavItem(
+                            item = BottomNavItem.Splits,
+                            isSelected = currentRoute == BottomNavItem.Splits.route,
+                            onClick = { 
+                                view.performVibrate(isHapticsEnabled)
+                                onNavigate(BottomNavItem.Splits.route) 
+                            }
+                        )
+
+                        NavItem(
+                            item = BottomNavItem.Settings,
+                            isSelected = currentRoute == BottomNavItem.Settings.route,
+                            onClick = { 
+                                view.performVibrate(isHapticsEnabled)
+                                onNavigate(BottomNavItem.Settings.route) 
+                            }
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onToggleCompress(true)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.ChevronLeft,
+                                contentDescription = "Collapse bar",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }

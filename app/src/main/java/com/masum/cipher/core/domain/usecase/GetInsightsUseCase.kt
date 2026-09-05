@@ -42,7 +42,6 @@ class GetInsightsUseCase @Inject constructor(
             val lastWeekAvg = if (lastWeekExpenses.isNotEmpty()) lastWeekExpenses.sumOf { it.amount } / 7.0 else 0.0
             val trend = if (lastWeekAvg > 0.0) ((currentWeekAvg - lastWeekAvg) / lastWeekAvg) * 100.0 else 0.0
 
-            // Merge detected and manual subscriptions
             val autoDetected = subscriptionDetector.detect(transactions)
             val manualDomainSubscriptions = manualSubscriptions.map { entity ->
                 SubscriptionDetector.Subscription(
@@ -50,9 +49,9 @@ class GetInsightsUseCase @Inject constructor(
                     amount = entity.amount,
                     category = TransactionCategory.fromString(entity.category),
                     frequencyDays = entity.frequencyDays,
-                    lastDate = 0L, // manual might not have a last date
+                    lastDate = 0L,
                     nextExpectedDate = entity.nextExpectedDate,
-                    confidence = 1.0f // 100% confidence for manual
+                    confidence = 1.0f
                 )
             }
             
