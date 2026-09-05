@@ -68,9 +68,11 @@ import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.SplitCalculator
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.ui.components.ShimmerBox
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.components.rememberAccentedShimmerBrush
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.theme.EmeraldIncome
@@ -86,6 +88,8 @@ import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Share2
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.Users
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -94,8 +98,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
+import compose.icons.lucideicons.ChevronDown
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -276,16 +283,25 @@ fun SplitExpensesScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSharedAmount, state.currencySymbol, locale, decimals = 0),
-                                    style = Typography.headlineLarge.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 28.sp,
-                                        letterSpacing = (-0.8).sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                if (state.isLoading && state.transactions.isEmpty()) {
+                                    ShimmerBox(
+                                        modifier = Modifier
+                                            .width(130.dp)
+                                            .height(32.dp),
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSharedAmount, state.currencySymbol, locale, decimals = 0),
+                                        style = Typography.headlineLarge.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 28.sp,
+                                            letterSpacing = (-0.8).sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
                             }
 
                             Box(
@@ -317,11 +333,20 @@ fun SplitExpensesScreen(
                                     style = Typography.labelSmall.copy(fontSize = 11.sp),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Text(
-                                    text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSettledAmount, state.currencySymbol, locale, decimals = 0),
-                                    style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                    color = EmeraldIncome
-                                )
+                                if (state.isLoading && state.transactions.isEmpty()) {
+                                    ShimmerBox(
+                                        modifier = Modifier
+                                            .width(60.dp)
+                                            .height(18.dp),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSettledAmount, state.currencySymbol, locale, decimals = 0),
+                                        style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                        color = EmeraldIncome
+                                    )
+                                }
                             }
 
                             Box(
@@ -337,11 +362,20 @@ fun SplitExpensesScreen(
                                     style = Typography.labelSmall.copy(fontSize = 11.sp),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Text(
-                                    text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalPendingAmount, state.currencySymbol, locale, decimals = 0),
-                                    style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                    color = if (totalPendingAmount > 0) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                if (state.isLoading && state.transactions.isEmpty()) {
+                                    ShimmerBox(
+                                        modifier = Modifier
+                                            .width(60.dp)
+                                            .height(18.dp),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalPendingAmount, state.currencySymbol, locale, decimals = 0),
+                                        style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                        color = if (totalPendingAmount > 0) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -412,8 +446,12 @@ fun SplitExpensesScreen(
                 }
             }
 
-            if (displayedTransactions.isEmpty()) {
-                item {
+            if (state.isLoading && state.transactions.isEmpty()) {
+                item(key = "split_hub_skeleton") {
+                    SplitExpensesListSkeleton()
+                }
+            } else if (displayedTransactions.isEmpty()) {
+                item(key = "split_hub_empty") {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -612,6 +650,8 @@ private fun SplitTransactionCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val view = LocalView.current
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
     val category = TransactionCategory.fromString(transaction.category)
     val myShare = splits.find { it.isCurrentUser }?.amount ?: (transaction.amount / splits.size)
     val otherSplits = splits.filter { !it.isCurrentUser }
@@ -680,82 +720,141 @@ private fun SplitTransactionCard(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(White10)
-            )
+            if (otherSplits.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(White10)
+                )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                otherSplits.forEach { participant ->
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.45f))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                isExpanded = !isExpanded
+                            }
+                            .padding(vertical = 2.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.weight(1f)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f, fill = false)) {
-                                Text(
-                                    text = participant.name,
-                                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = if (participant.isPaid) stringResource(R.string.split_settled) else stringResource(R.string.split_pending),
-                                    style = Typography.labelSmall.copy(fontSize = 10.5.sp),
-                                    color = if (participant.isPaid) EmeraldIncome else RoseExpense
-                                )
-                            }
+                            Icon(
+                                imageVector = LucideIcons.Users,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.split_badge_summary, otherSplits.size + 1),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(
-                                text = if (privacyMode) "•••" else AppFormatters.formatCurrency(participant.amount, currencySymbol, locale, decimals = 2),
-                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        val rotation by animateFloatAsState(
+                            targetValue = if (isExpanded) 180f else 0f,
+                            label = "split_expand_rotation"
+                        )
+                        Icon(
+                            imageVector = LucideIcons.ChevronDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .graphicsLayer { rotationZ = rotation }
+                        )
+                    }
 
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                         if (participant.isPaid) EmeraldIncome else Color.Transparent
-                                     )
-                                    .border(
-                                         width = if (participant.isPaid) 0.dp else 1.5.dp,
-                                         color = if (participant.isPaid) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                                         shape = CircleShape
-                                     )
-                                    .clickable {
-                                         onTogglePaid(participant.id, !participant.isPaid)
-                                     },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (participant.isPaid) {
-                                    Icon(
-                                        imageVector = LucideIcons.Check,
-                                        contentDescription = stringResource(R.string.split_settled),
-                                        tint = Color.White,
-                                        modifier = Modifier.size(12.dp)
-                                    )
+                    AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            otherSplits.forEach { participant ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.45f))
+                                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                                            Text(
+                                                text = participant.name,
+                                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = if (participant.isPaid) stringResource(R.string.split_settled) else stringResource(R.string.split_pending),
+                                                style = Typography.labelSmall.copy(fontSize = 10.5.sp),
+                                                color = if (participant.isPaid) EmeraldIncome else RoseExpense
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Text(
+                                            text = if (privacyMode) "•••" else AppFormatters.formatCurrency(participant.amount, currencySymbol, locale, decimals = 2),
+                                            style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                    if (participant.isPaid) EmeraldIncome else Color.Transparent
+                                                )
+                                                .border(
+                                                    width = if (participant.isPaid) 0.dp else 1.5.dp,
+                                                    color = if (participant.isPaid) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                                                    shape = CircleShape
+                                                )
+                                                .clickable {
+                                                    onTogglePaid(participant.id, !participant.isPaid)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (participant.isPaid) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Check,
+                                                    contentDescription = stringResource(R.string.split_settled),
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(12.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -842,6 +941,124 @@ private fun SplitTransactionCard(
                             ),
                             color = MaterialTheme.colorScheme.primary
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SplitExpensesListSkeleton(
+    modifier: Modifier = Modifier,
+    count: Int = 3
+) {
+    val brush = rememberAccentedShimmerBrush()
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        repeat(count) {
+            VaultCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentPadding = 16.dp
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            ShimmerBox(
+                                modifier = Modifier.size(40.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                brush = brush
+                            )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.weight(1f, fill = false)
+                            ) {
+                                ShimmerBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.55f)
+                                        .height(16.dp),
+                                    shape = RoundedCornerShape(4.dp),
+                                    brush = brush
+                                )
+                                ShimmerBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.35f)
+                                        .height(12.dp),
+                                    shape = RoundedCornerShape(4.dp),
+                                    brush = brush
+                                )
+                            }
+                        }
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            ShimmerBox(
+                                modifier = Modifier
+                                    .width(70.dp)
+                                    .height(16.dp),
+                                shape = RoundedCornerShape(4.dp),
+                                brush = brush
+                            )
+                            ShimmerBox(
+                                modifier = Modifier
+                                    .width(50.dp)
+                                    .height(12.dp),
+                                shape = RoundedCornerShape(4.dp),
+                                brush = brush
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(White10)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ShimmerBox(
+                            modifier = Modifier
+                                .width(60.dp)
+                                .height(14.dp),
+                            shape = RoundedCornerShape(4.dp),
+                            brush = brush
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ShimmerBox(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .height(24.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                brush = brush
+                            )
+                            ShimmerBox(
+                                modifier = Modifier
+                                    .width(60.dp)
+                                    .height(24.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                brush = brush
+                            )
+                        }
                     }
                 }
             }
