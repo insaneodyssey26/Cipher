@@ -56,6 +56,10 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getBoolean("cached_onboarding_completed", false)
     }
 
+    fun isCachedDynamicLogoEnabled(): Boolean {
+        return syncPrefs.getBoolean("cached_dynamic_logo", true)
+    }
+
     fun getCachedSettings(): UserSettings {
         val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
         val curCode = getCachedCurrencyCode()
@@ -75,7 +79,8 @@ class UserPreferences @Inject constructor(
             monthlyBudget = 0.0,
             hasCompletedOnboarding = isCachedOnboardingCompleted(),
             accentColor = getCachedAccentColor(),
-            isNavBarCompressed = isCachedNavBarCompressed()
+            isNavBarCompressed = isCachedNavBarCompressed(),
+            isDynamicLogoEnabled = isCachedDynamicLogoEnabled()
         )
     }
 
@@ -117,6 +122,7 @@ class UserPreferences @Inject constructor(
         val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
         val IS_DYNAMIC_BUDGET_ENABLED = booleanPreferencesKey("is_dynamic_budget_enabled")
         val NAVBAR_COMPRESSED = booleanPreferencesKey("navbar_compressed")
+        val DYNAMIC_LOGO_ENABLED = booleanPreferencesKey("dynamic_logo_enabled")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -131,6 +137,7 @@ class UserPreferences @Inject constructor(
             AccentColor.INDIGO
         }
         val isNavCompressed = preferences[Keys.NAVBAR_COMPRESSED] ?: false
+        val isDynLogo = preferences[Keys.DYNAMIC_LOGO_ENABLED] ?: true
 
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
@@ -138,6 +145,7 @@ class UserPreferences @Inject constructor(
             .putBoolean("cached_onboarding_completed", hasOnboarded)
             .putString("cached_accent_color", parsedAccentColor.name)
             .putBoolean("cached_navbar_compressed", isNavCompressed)
+            .putBoolean("cached_dynamic_logo", isDynLogo)
             .apply()
 
         UserSettings(
@@ -191,12 +199,18 @@ class UserPreferences @Inject constructor(
                     emptyMap()
                 }
             } ?: emptyMap(),
-            isNavBarCompressed = isNavCompressed
+            isNavBarCompressed = isNavCompressed,
+            isDynamicLogoEnabled = isDynLogo
         )
     }
 
     suspend fun setTheme(theme: AppTheme) {
         context.dataStore.edit { it[Keys.APP_THEME] = theme.name }
+    }
+
+    suspend fun setDynamicLogoEnabled(enabled: Boolean) {
+        syncPrefs.edit().putBoolean("cached_dynamic_logo", enabled).apply()
+        context.dataStore.edit { it[Keys.DYNAMIC_LOGO_ENABLED] = enabled }
     }
 
     suspend fun setBiometricEnabled(enabled: Boolean) {
@@ -448,5 +462,6 @@ data class UserSettings(
     val ignoredSubscriptions: Set<String> = emptySet(),
     val categoryBudgets: Map<String, Double> = emptyMap(),
     val isDynamicBudgetEnabled: Boolean = false,
-    val isNavBarCompressed: Boolean = false
+    val isNavBarCompressed: Boolean = false,
+    val isDynamicLogoEnabled: Boolean = true
 )

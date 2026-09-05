@@ -164,6 +164,8 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System</string>
     <string name="accent_color_title">Accent Color</string>
+    <string name="dynamic_logo_title">Dynamic Brand Logo</string>
+    <string name="dynamic_logo_desc">Adapt logo color to match selected accent</string>
     <string name="haptic_feedback_title">Haptic Feedback</string>
     <string name="haptic_feedback_desc">Physical response to touch</string>
     <string name="settings_currency_subtitle">Active currency for dashboard, statistics, and parser rules</string>

@@ -24,6 +24,7 @@ class UpdateSettingsUseCase @Inject constructor(
         userPreferences.setAccentColor(color)
         transactionRepository.refreshWidgets()
     }
+    suspend fun dynamicLogo(enabled: Boolean) = userPreferences.setDynamicLogoEnabled(enabled)
     suspend fun biometric(enabled: Boolean) = userPreferences.setBiometricEnabled(enabled)
     suspend fun privacyMode(enabled: Boolean) = userPreferences.setPrivacyModeEnabled(enabled)
     suspend fun haptics(enabled: Boolean) = userPreferences.setHapticsEnabled(enabled)

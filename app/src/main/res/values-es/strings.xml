@@ -163,6 +163,8 @@
     <string name="theme_dark">Oscuro</string>
     <string name="theme_system">Sistema</string>
     <string name="accent_color_title">Color de acento</string>
+    <string name="dynamic_logo_title">Logo dinámico</string>
+    <string name="dynamic_logo_desc">Adaptar el color del logo al acento seleccionado</string>
     <string name="haptic_feedback_title">Respuesta háptica</string>
     <string name="haptic_feedback_desc">Respuesta física al tocar</string>
     <string name="settings_currency_subtitle">Moneda activa para el panel, estadísticas y reglas</string>

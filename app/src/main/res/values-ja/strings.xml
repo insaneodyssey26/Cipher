@@ -164,6 +164,8 @@
     <string name="theme_dark">ダーク</string>
     <string name="theme_system">システム</string>
     <string name="accent_color_title">アクセントカラー</string>
+    <string name="dynamic_logo_title">動的ブランドロゴ</string>
+    <string name="dynamic_logo_desc">選択したアクセントカラーにロゴの色を合わせる</string>
     <string name="haptic_feedback_title">触覚フィードバック</string>
     <string name="haptic_feedback_desc">タップ時の振動応答</string>
     <string name="settings_currency_subtitle">ダッシュボード、統計、ルール用のアクティブな通貨</string>

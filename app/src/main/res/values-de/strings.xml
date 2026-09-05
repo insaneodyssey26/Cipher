@@ -164,6 +164,8 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System</string>
     <string name="accent_color_title">Akzentfarbe</string>
+    <string name="dynamic_logo_title">Dynamisches Markenlogo</string>
+    <string name="dynamic_logo_desc">Logofarbe an gewählte Akzentfarbe anpassen</string>
     <string name="haptic_feedback_title">Haptisches Feedback</string>
     <string name="haptic_feedback_desc">Spürbare Rückmeldung bei Berührung</string>
     <string name="settings_currency_subtitle">Aktive Währung für Dashboard, Statistiken und Regeln</string>

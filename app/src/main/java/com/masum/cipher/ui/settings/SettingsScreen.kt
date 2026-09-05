@@ -6,10 +6,13 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import com.masum.cipher.R
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -560,6 +563,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
             }
 
             if (matchHaptic) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 VaultSettingsSwitch(
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.Zap,
@@ -1005,30 +1009,62 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
 
             }
 Spacer(modifier = Modifier.weight(1f))
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "cipher.",
-                    style = Typography.headlineLarge.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-1).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                val versionName = try {
-                    context.packageManager.getPackageInfo(context.packageName, 0).versionName
-                } catch (_: Exception) {
-                    "4.1.0"
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                        .border(
+                            width = 0.75.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                            shape = RoundedCornerShape(11.dp)
+                        )
+                        .padding(5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
+                        contentDescription = "Cipher Logo",
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                Text(
-                    text = "Version $versionName",
-                    style = Typography.labelMedium,
-                    color = MaterialTheme.colorScheme.outline,
-                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "cipher.",
+                        style = Typography.titleLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.6).sp,
+                            fontSize = 20.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    val versionName = try {
+                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                    } catch (_: Exception) {
+                        "4.1.0"
+                    }
+                    Text(
+                        text = "Version $versionName",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 11.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
         }

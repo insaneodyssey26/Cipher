@@ -47,6 +47,7 @@ class SettingsViewModel @Inject constructor(
         when (intent) {
             is SettingsContract.Intent.UpdateTheme -> updateTheme(intent.theme)
             is SettingsContract.Intent.UpdateAccentColor -> updateAccentColor(intent.color)
+            is SettingsContract.Intent.SetDynamicLogoEnabled -> updateDynamicLogo(intent.enabled)
             is SettingsContract.Intent.SetBiometricEnabled -> updateBiometric(intent.enabled)
             is SettingsContract.Intent.SetPrivacyModeEnabled -> updatePrivacyMode(intent.enabled)
             is SettingsContract.Intent.SetNotifyAllTransactions -> updateNotifyAllTransactions(intent.enabled)
@@ -90,6 +91,7 @@ class SettingsViewModel @Inject constructor(
                     copy(
                         theme = settings.theme,
                         accentColor = settings.accentColor,
+                        isDynamicLogoEnabled = settings.isDynamicLogoEnabled,
                         isBiometricEnabled = settings.isBiometricEnabled,
                         isPrivacyModeEnabled = settings.isPrivacyModeEnabled,
                         notifyAllTransactions = settings.notifyAllTransactions,
@@ -129,6 +131,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
         viewModelScope.launch { updateSettingsUseCase.accentColor(color) }
+    }
+
+    private fun updateDynamicLogo(enabled: Boolean) {
+        viewModelScope.launch { updateSettingsUseCase.dynamicLogo(enabled) }
     }
 
     private fun updateBiometric(enabled: Boolean) {

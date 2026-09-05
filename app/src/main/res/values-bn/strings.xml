@@ -164,6 +164,8 @@
     <string name="theme_dark">গাঢ়</string>
     <string name="theme_system">সিস্টেম</string>
     <string name="accent_color_title">অ্যাকসেন্ট রঙ</string>
+    <string name="dynamic_logo_title">ডায়নামিক ব্র্যান্ড লোগো</string>
+    <string name="dynamic_logo_desc">নির্বাচিত অ্যাকসেন্ট রঙের সাথে লোগো মেলান</string>
     <string name="haptic_feedback_title">হ্যাপটিক ফিডব্যাক</string>
     <string name="haptic_feedback_desc">স্পর্শে শারীরিক প্রতিক্রিয়া</string>
     <string name="settings_currency_subtitle">ড্যাশবোর্ড, পরিসংখ্যান ও রুলসের জন্য সক্রিয় মুদ্রা</string>

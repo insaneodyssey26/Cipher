@@ -164,6 +164,8 @@
     <string name="theme_dark">Sombre</string>
     <string name="theme_system">Système</string>
     <string name="accent_color_title">Couleur d\'accentuation</string>
+    <string name="dynamic_logo_title">Logo de marque dynamique</string>
+    <string name="dynamic_logo_desc">Adapter la couleur du logo à l\'accent sélectionné</string>
     <string name="haptic_feedback_title">Retour haptique</string>
     <string name="haptic_feedback_desc">Réponse tactile aux interactions</string>
     <string name="settings_currency_subtitle">Devise active pour le tableau de bord, statistiques et règles</string>

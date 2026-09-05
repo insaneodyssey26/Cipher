@@ -163,6 +163,8 @@
     <string name="theme_dark">गहरा</string>
     <string name="theme_system">सिस्टम</string>
     <string name="accent_color_title">एक्सेंट रंग</string>
+    <string name="dynamic_logo_title">डायनामिक ब्रांड लोगो</string>
+    <string name="dynamic_logo_desc">लोगो का रंग चुने गए एक्सेंट से मिलाएं</string>
     <string name="haptic_feedback_title">हैप्टिक फीडबैक</string>
     <string name="haptic_feedback_desc">स्पर्श पर भौतिक प्रतिक्रिया</string>
     <string name="settings_currency_subtitle">डैशबोर्ड, सांख्यिकी और नियमों के लिए सक्रिय मुद्रा</string>
