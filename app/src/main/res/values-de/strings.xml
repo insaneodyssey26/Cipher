@@ -399,4 +399,17 @@
     <string name="action_clear_input">Löschen</string>
     <string name="dynamic_budget_badge_desc">Basis %1$s + %2$s aus Einnahmen</string>
     <string name="action_remove_budget">Budget entfernen</string>
+    <string name="adjust_balance_title">Kontostand anpassen</string>
+    <string name="adjust_balance_subtitle">Aktualisieren Sie Ihren Kontostand passend zu Ihrem tatsächlichen Bank- oder Bargeldbestand. Cipher zeichnet eine saubere Anpassungsbuchung auf.</string>
+    <string name="adjust_balance_current">Aktueller Kontostand</string>
+    <string name="adjust_balance_new_label">Neuer tatsächlicher Kontostand</string>
+    <string name="adjust_balance_new_hint">Kontostand eingeben</string>
+    <string name="adjust_balance_difference">Differenz</string>
+    <string name="adjust_balance_income_added">+%1$s (Wird als Einnahme erfasst)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (Wird als Ausgabe erfasst)</string>
+    <string name="adjust_balance_no_change">Kontostände stimmen überein (keine Anpassung erforderlich)</string>
+    <string name="adjust_balance_entry_name">Saldokorrektur</string>
+    <string name="adjust_balance_opening_name">Eröffnungssaldo</string>
+    <string name="adjust_balance_action_save">Anpassung speichern</string>
+    <string name="adjust_balance_note_label">Beschreibung</string>
 </resources>

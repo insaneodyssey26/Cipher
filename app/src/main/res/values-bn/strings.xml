@@ -399,4 +399,17 @@
     <string name="action_clear_input">মুছুন</string>
     <string name="dynamic_budget_badge_desc">মূল %1$s + আয় থেকে %2$s</string>
     <string name="action_remove_budget">বাজেট মুছুন</string>
+    <string name="adjust_balance_title">ব্যালেন্স সমন্বয়</string>
+    <string name="adjust_balance_subtitle">আপনার আসল ব্যাংক বা নগদ ব্যালেন্সের সাথে মেলাতে ব্যালেন্স আপডেট করুন। সাইফার একটি পরিষ্কার সমন্বয় এন্ট্রি রেকর্ড করবে।</string>
+    <string name="adjust_balance_current">বর্তমান ব্যালেন্স</string>
+    <string name="adjust_balance_new_label">নতুন আসল ব্যালেন্স</string>
+    <string name="adjust_balance_new_hint">ব্যালেন্স লিখুন</string>
+    <string name="adjust_balance_difference">পার্থক্য</string>
+    <string name="adjust_balance_income_added">+%1$s (আয় হিসেবে যুক্ত হবে)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (ব্যয় হিসেবে যুক্ত হবে)</string>
+    <string name="adjust_balance_no_change">ব্যালেন্স মিলে গেছে (কোনো পরিবর্তনের প্রয়োজন নেই)</string>
+    <string name="adjust_balance_entry_name">ব্যালেন্স সমন্বয়</string>
+    <string name="adjust_balance_opening_name">প্রারম্ভিক ব্যালেন্স</string>
+    <string name="adjust_balance_action_save">সমন্বয় সংরক্ষণ করুন</string>
+    <string name="adjust_balance_note_label">বিবরণ</string>
 </resources>

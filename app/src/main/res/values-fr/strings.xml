@@ -399,4 +399,17 @@
     <string name="action_clear_input">Effacer</string>
     <string name="dynamic_budget_badge_desc">Base %1$s + %2$s de revenus</string>
     <string name="action_remove_budget">Supprimer le budget</string>
+    <string name="adjust_balance_title">Ajuster le solde</string>
+    <string name="adjust_balance_subtitle">Mettez à jour votre solde pour qu\'il corresponde à votre solde bancaire ou espèces réel. Cipher enregistrera une écriture d\'ajustement propre.</string>
+    <string name="adjust_balance_current">Solde actuel</string>
+    <string name="adjust_balance_new_label">Nouveau solde réel</string>
+    <string name="adjust_balance_new_hint">Entrez le solde</string>
+    <string name="adjust_balance_difference">Différence</string>
+    <string name="adjust_balance_income_added">+%1$s (Sera enregistré comme revenu)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (Sera enregistré comme dépense)</string>
+    <string name="adjust_balance_no_change">Les soldes correspondent (aucun ajustement requis)</string>
+    <string name="adjust_balance_entry_name">Ajustement du solde</string>
+    <string name="adjust_balance_opening_name">Solde d\'ouverture</string>
+    <string name="adjust_balance_action_save">Enregistrer l\'ajustement</string>
+    <string name="adjust_balance_note_label">Description</string>
 </resources>

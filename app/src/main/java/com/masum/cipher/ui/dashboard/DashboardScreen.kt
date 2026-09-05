@@ -92,6 +92,7 @@ import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.ui.components.AdjustBalanceSheet
 import com.masum.cipher.ui.components.AnimatedNumberTicker
 import com.masum.cipher.ui.components.StaggeredEntranceItem
 import com.masum.cipher.ui.components.TimeSelectorDropdown
@@ -113,6 +114,7 @@ import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Info
+import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
@@ -150,6 +152,7 @@ fun DashboardScreen(
     var draftEditingSplits by remember { mutableStateOf<Map<Long, List<SplitParticipant>>>(emptyMap()) }
     var draftNewSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showAdjustBalanceSheet by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
 
@@ -225,12 +228,12 @@ fun DashboardScreen(
     }
 
     val mainScale by animateFloatAsState(
-        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null) 0.93f else 1f,
+        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null || showAdjustBalanceSheet) 0.93f else 1f,
         animationSpec = VaultMotion.LayoutSpring,
         label = "MainScale"
     )
     val mainCorner by animateDpAsState(
-        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null) 32.dp else 0.dp,
+        targetValue = if (showAddSheet || editingTransaction != null || activeSplittingTx != null || showAdjustBalanceSheet) 32.dp else 0.dp,
         animationSpec = spring(dampingRatio = 0.85f, stiffness = 300f),
         label = "MainCorner"
     )
@@ -600,6 +603,7 @@ fun DashboardScreen(
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
                     onNavigateToSplitExpenses = onNavigateToSplitExpenses,
+                    onAdjustBalanceClick = { showAdjustBalanceSheet = true },
                     toolbarOffsetHeightPx = animatedToolbarOffset,
                     toolbarHeightRangePx = toolbarHeightRangePx,
                     maxToolbarHeight = maxToolbarHeight
@@ -672,6 +676,30 @@ fun DashboardScreen(
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
             },
             isHapticsEnabled = isHapticsEnabled
+        )
+    }
+
+    if (showAdjustBalanceSheet) {
+        AdjustBalanceSheet(
+            currentBalance = state.totalBalance,
+            currencySymbol = state.currencySymbol,
+            currencyCode = state.currencyCode,
+            locale = locale,
+            isHapticsEnabled = isHapticsEnabled,
+            onDismiss = { showAdjustBalanceSheet = false },
+            onConfirmAdjustment = { merchant, amount, isIncome, timestamp, note ->
+                val adjustmentTx = TransactionEntity(
+                    amount = amount,
+                    merchant = merchant,
+                    currency = state.currencyCode,
+                    timestamp = timestamp,
+                    category = if (isIncome) TransactionCategory.INCOME.name else TransactionCategory.OTHERS.name,
+                    rawSms = null,
+                    isIncome = isIncome,
+                    note = note
+                )
+                viewModel.handleIntent(DashboardContract.Intent.AddTransaction(adjustmentTx))
+            }
         )
     }
 
@@ -1339,6 +1367,7 @@ private fun DashboardHero(
     expenseComparisonPercent: Double? = null,
     onComparisonBadgeClick: () -> Unit = {},
     onNavigateToSplitExpenses: () -> Unit = {},
+    onAdjustBalanceClick: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
     maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
@@ -1533,7 +1562,8 @@ private fun DashboardHero(
 
                         val isSuffix = AppFormatters.isSuffixCurrency(currencySymbol, locale)
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.graphicsLayer {
                                 scaleX = balanceScale
                                 scaleY = balanceScale
@@ -1620,6 +1650,39 @@ private fun DashboardHero(
                                             )
                                         }
                                     }
+                                }
+                            }
+
+                            val pencilAlpha = ((scrollProgress - 0.45f) / 0.55f).coerceIn(0f, 1f)
+                            if (pencilAlpha > 0f) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(bottom = 6.dp)
+                                        .size(26.dp)
+                                        .graphicsLayer {
+                                            alpha = pencilAlpha
+                                            scaleX = pencilAlpha
+                                            scaleY = pencilAlpha
+                                        }
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                            shape = CircleShape
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            onAdjustBalanceClick()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Pencil,
+                                        contentDescription = stringResource(R.string.adjust_balance_title),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
                                 }
                             }
                         }

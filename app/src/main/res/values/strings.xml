@@ -397,6 +397,20 @@
     <string name="fixed_budget_limit_desc">Strict ceiling of %1$s. Money received does not increase this limit.</string>
     <string name="save_target">Save Target</string>
     <string name="action_clear_input">Clear</string>
-    <string name="dynamic_budget_badge_desc">Base %1$s + %2$s from income</string>
     <string name="action_remove_budget">Remove Budget</string>
+    <string name="dynamic_budget_badge_desc">Base %1$s + %2$s from income</string>
+    <string name="custom_date_title">Custom Date</string>
+    <string name="adjust_balance_title">Adjust Balance</string>
+    <string name="adjust_balance_subtitle">Update your balance to match your actual bank or cash balance. Cipher will record a clean adjustment entry.</string>
+    <string name="adjust_balance_current">Current Balance</string>
+    <string name="adjust_balance_new_label">New Actual Balance</string>
+    <string name="adjust_balance_new_hint">Enter balance</string>
+    <string name="adjust_balance_difference">Difference</string>
+    <string name="adjust_balance_income_added">+%1$s (Income will be logged)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (Expense will be logged)</string>
+    <string name="adjust_balance_no_change">Balances match (no adjustment needed)</string>
+    <string name="adjust_balance_entry_name">Balance Adjustment</string>
+    <string name="adjust_balance_opening_name">Opening Balance</string>
+    <string name="adjust_balance_action_save">Save Adjustment</string>
+    <string name="adjust_balance_note_label">Description</string>
 </resources>

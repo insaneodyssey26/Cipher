@@ -399,4 +399,17 @@
     <string name="action_clear_input">クリア</string>
     <string name="dynamic_budget_badge_desc">基本 %1$s + 収入から %2$s</string>
     <string name="action_remove_budget">予算を削除</string>
+    <string name="adjust_balance_title">残高を調整</string>
+    <string name="adjust_balance_subtitle">実際の銀行口座や現金の残高に合わせて更新します。Cipherが調整記録を自動作成します。</string>
+    <string name="adjust_balance_current">現在の残高</string>
+    <string name="adjust_balance_new_label">新しい実際の残高</string>
+    <string name="adjust_balance_new_hint">残高を入力</string>
+    <string name="adjust_balance_difference">差額</string>
+    <string name="adjust_balance_income_added">+%1$s (収入として記録されます)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (支出として記録されます)</string>
+    <string name="adjust_balance_no_change">残高が一致しています (調整不要)</string>
+    <string name="adjust_balance_entry_name">残高調整</string>
+    <string name="adjust_balance_opening_name">開始残高</string>
+    <string name="adjust_balance_action_save">調整を保存</string>
+    <string name="adjust_balance_note_label">説明</string>
 </resources>

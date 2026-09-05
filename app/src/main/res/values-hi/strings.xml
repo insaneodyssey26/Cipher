@@ -398,4 +398,17 @@
     <string name="action_clear_input">साफ़ करें</string>
     <string name="dynamic_budget_badge_desc">आधार %1$s + आय से %2$s</string>
     <string name="action_remove_budget">बजट हटाएं</string>
+    <string name="adjust_balance_title">बैलेंस समायोजित करें</string>
+    <string name="adjust_balance_subtitle">अपने वास्तविक बैंक या नकद बैलेंस से मिलान करने के लिए बैलेंस अपडेट करें। साइफ़र एक स्पष्ट समायोजन प्रविष्टि रिकॉर्ड करेगा।</string>
+    <string name="adjust_balance_current">वर्तमान बैलेंस</string>
+    <string name="adjust_balance_new_label">नया वास्तविक बैलेंस</string>
+    <string name="adjust_balance_new_hint">बैलेंस दर्ज करें</string>
+    <string name="adjust_balance_difference">अंतर</string>
+    <string name="adjust_balance_income_added">+%1$s (आय के रूप में दर्ज होगा)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (खर्च के रूप में दर्ज होगा)</string>
+    <string name="adjust_balance_no_change">बैलेंस मेल खाता है (किसी समायोजन की आवश्यकता नहीं)</string>
+    <string name="adjust_balance_entry_name">बैलेंस समायोजन</string>
+    <string name="adjust_balance_opening_name">प्रारंभिक बैलेंस</string>
+    <string name="adjust_balance_action_save">समायोजन सहेजें</string>
+    <string name="adjust_balance_note_label">विवरण</string>
 </resources>

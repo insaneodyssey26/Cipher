@@ -398,4 +398,17 @@
     <string name="action_clear_input">Borrar</string>
     <string name="dynamic_budget_badge_desc">Base %1$s + %2$s de ingresos</string>
     <string name="action_remove_budget">Eliminar presupuesto</string>
+    <string name="adjust_balance_title">Ajustar saldo</string>
+    <string name="adjust_balance_subtitle">Actualiza tu saldo para que coincida con tu saldo real del banco o efectivo. Cipher registrará un asiento de ajuste limpio.</string>
+    <string name="adjust_balance_current">Saldo actual</string>
+    <string name="adjust_balance_new_label">Nuevo saldo real</string>
+    <string name="adjust_balance_new_hint">Introduce el saldo</string>
+    <string name="adjust_balance_difference">Diferencia</string>
+    <string name="adjust_balance_income_added">+%1$s (Se registrará como ingreso)</string>
+    <string name="adjust_balance_expense_logged">-%1$s (Se registrará como gasto)</string>
+    <string name="adjust_balance_no_change">Los saldos coinciden (no se requiere ajuste)</string>
+    <string name="adjust_balance_entry_name">Ajuste de saldo</string>
+    <string name="adjust_balance_opening_name">Saldo inicial</string>
+    <string name="adjust_balance_action_save">Guardar ajuste</string>
+    <string name="adjust_balance_note_label">Descripción</string>
 </resources>

@@ -1,7 +1,5 @@
 package com.masum.cipher.ui.components
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +23,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -33,6 +33,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,10 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
@@ -55,6 +59,7 @@ import com.masum.cipher.core.util.AppFormatters
 import compose.icons.lucideicons.ChevronDown
 import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,21 +77,10 @@ fun EditSubscriptionSheet(
     var categoryExpanded by remember { mutableStateOf(false) }
     
     var nextExpectedDate by remember { androidx.compose.runtime.mutableLongStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
+    var showDatePicker by remember { mutableStateOf(false) }
     
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            val cal = Calendar.getInstance()
-            cal.set(year, month, dayOfMonth)
-            nextExpectedDate = cal.timeInMillis
-        },
-        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.YEAR),
-        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.MONTH),
-        Calendar.getInstance().apply { timeInMillis = nextExpectedDate }.get(Calendar.DAY_OF_MONTH)
-    )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -193,7 +187,7 @@ fun EditSubscriptionSheet(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                    .clickable { datePickerDialog.show() }
+                    .clickable { showDatePicker = true }
                     .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
                 Column {
@@ -210,6 +204,47 @@ fun EditSubscriptionSheet(
                         text = AppFormatters.getDay().format(Date(nextExpectedDate)),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(
+                    initialSelectedDateMillis = nextExpectedDate
+                )
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
+                                    val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                                        timeInMillis = pickedUtcMillis
+                                    }
+                                    val localCal = Calendar.getInstance().apply {
+                                        set(Calendar.YEAR, utcCal.get(Calendar.YEAR))
+                                        set(Calendar.MONTH, utcCal.get(Calendar.MONTH))
+                                        set(Calendar.DAY_OF_MONTH, utcCal.get(Calendar.DAY_OF_MONTH))
+                                    }
+                                    nextExpectedDate = localCal.timeInMillis
+                                }
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.action_select), fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDatePicker = false }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        showModeToggle = false
                     )
                 }
             }
