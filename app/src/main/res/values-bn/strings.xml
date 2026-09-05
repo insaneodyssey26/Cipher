@@ -373,4 +373,7 @@
     <string name="split_hub_filter_settled">পরিশোধিত</string>
     <string name="split_hub_you_paid">আপনি দিয়েছেন</string>
     <string name="split_hub_my_share">আপনার অংশ</string>
+    <string name="split_hub_add_split">বিভক্ত খরচ যোগ করুন</string>
+    <string name="split_deleted">বিভক্ত খরচ মুছে ফেলা হয়েছে</string>
+    <string name="action_undo">পূর্বাবস্থায় ফেরান</string>
 </resources>

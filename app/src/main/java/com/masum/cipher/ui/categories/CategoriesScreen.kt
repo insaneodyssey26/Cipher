@@ -68,7 +68,6 @@ import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.insights.InsightsViewModel
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -140,7 +139,7 @@ fun CategoriesScreen(
                     Text(
                         text = stringResource(R.string.nav_categories),
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         ),
@@ -200,7 +199,7 @@ fun CategoriesScreen(
                                 Text(
                                     text = stringResource(R.string.dashboard_total_spent).uppercase(),
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 10.sp,
                                         letterSpacing = 1.2.sp
@@ -232,7 +231,7 @@ fun CategoriesScreen(
                                     Text(
                                         text = "$activeCount ${stringResource(R.string.active_suffix)}",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         ),
@@ -244,7 +243,7 @@ fun CategoriesScreen(
                                     Text(
                                         text = "$budgetedCount budgeted",
                                         style = Typography.bodySmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontSize = 11.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -329,7 +328,7 @@ fun CategoriesScreen(
                                     Text(
                                         text = stringResource(categoryEnum.titleRes),
                                         style = Typography.titleMedium.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 14.5.sp
                                         ),
@@ -344,7 +343,7 @@ fun CategoriesScreen(
                                             stringResource(R.string.no_spend_this_period)
                                         },
                                         style = Typography.bodySmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontSize = 11.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -364,7 +363,7 @@ fun CategoriesScreen(
                                 Text(
                                     text = AppFormatters.formatCompactCurrency(spent, currencySymbol = state.currencySymbol),
                                     style = Typography.titleLarge.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
                                     ),
@@ -421,7 +420,7 @@ fun CategoriesScreen(
                                             Text(
                                                 text = if (isOverBudget) "OVER LIMIT" else "$percentUsed% OF LIMIT USED",
                                                 style = Typography.labelSmall.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 10.sp,
                                                     letterSpacing = 0.8.sp
@@ -435,7 +434,7 @@ fun CategoriesScreen(
                                         Text(
                                             text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
                                             style = Typography.labelSmall.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.SemiBold,
                                                 fontSize = 11.sp
                                             ),
@@ -476,7 +475,7 @@ fun CategoriesScreen(
                                                 "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} left"
                                             },
                                             style = Typography.labelSmall.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontSize = 10.5.sp,
                                                 fontWeight = FontWeight.Medium
                                             ),
@@ -487,7 +486,7 @@ fun CategoriesScreen(
                                             Text(
                                                 text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeDaily, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                                 style = Typography.labelSmall.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontSize = 10.5.sp,
                                                     fontWeight = FontWeight.SemiBold
                                                 ),
@@ -504,7 +503,7 @@ fun CategoriesScreen(
                                         Text(
                                             text = stringResource(R.string.no_limit_set),
                                             style = Typography.bodySmall.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontSize = 11.5.sp
                                             ),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -512,7 +511,7 @@ fun CategoriesScreen(
                                         Text(
                                             text = stringResource(R.string.set_limit),
                                             style = Typography.labelSmall.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 11.sp
                                             ),
@@ -547,7 +546,7 @@ fun CategoriesScreen(
                                     Text(
                                         text = stringResource(R.string.view_breakdown_transactions),
                                         style = Typography.labelMedium.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 12.sp
                                         ),

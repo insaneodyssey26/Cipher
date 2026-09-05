@@ -19,8 +19,6 @@ val Lato = FontFamily(
     Font(resId = R.font.lato_black, weight = FontWeight.Black)
 )
 
-val Manrope = Lato
-
 @OptIn(ExperimentalTextApi::class)
 val DMSans = FontFamily(
     Font(

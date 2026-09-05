@@ -60,7 +60,7 @@ import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
@@ -154,7 +154,7 @@ fun AppSelectionScreen(
                     Text(
                         text = stringResource(R.string.onboarding_apps_step_label),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                             fontSize = 9.5.sp,
                             letterSpacing = 1.2.sp
@@ -178,7 +178,7 @@ fun AppSelectionScreen(
                 Text(
                     text = stringResource(R.string.onboarding_apps_subtitle),
                     style = Typography.bodyMedium.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontSize = 13.sp,
                         lineHeight = 18.5.sp
                     ),
@@ -216,7 +216,7 @@ fun AppSelectionScreen(
                     if (searchQuery.isEmpty()) {
                         Text(
                             text = stringResource(R.string.onboarding_apps_search_hint),
-                            style = Typography.bodyMedium.copy(fontFamily = Manrope, fontSize = 14.sp),
+                            style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 14.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                         )
                     }
@@ -225,7 +225,7 @@ fun AppSelectionScreen(
                         onValueChange = { searchQuery = it },
                         singleLine = true,
                         textStyle = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         ),
@@ -244,7 +244,7 @@ fun AppSelectionScreen(
                         Text(
                             text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                 fontSize = 10.sp
                             ),
@@ -275,7 +275,7 @@ fun AppSelectionScreen(
                     )
                     Text(
                         text = stringResource(R.string.onboarding_apps_loading),
-                        style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 12.sp),
+                        style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 12.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                 }
@@ -334,7 +334,7 @@ fun AppSelectionScreen(
             Text(
                 text = stringResource(R.string.onboarding_apps_finish),
                 style = Typography.titleMedium.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     fontSize = 15.sp,
                     letterSpacing = (-0.2).sp
@@ -418,7 +418,7 @@ private fun AppGridItem(app: InstalledApp, isSelected: Boolean, onClick: () -> U
         Text(
             text = app.appName,
             style = Typography.labelSmall.copy(
-                fontFamily = Manrope,
+                fontFamily = Lato,
                 fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Medium,
                 fontSize = 10.5.sp,
                 lineHeight = 13.sp

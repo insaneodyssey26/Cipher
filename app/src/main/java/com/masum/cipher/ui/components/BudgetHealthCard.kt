@@ -62,7 +62,6 @@ import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -160,7 +159,7 @@ fun BudgetHealthCard(
                         Text(
                             text = statusText,
                             style = Typography.labelMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             ),
@@ -197,7 +196,7 @@ fun BudgetHealthCard(
                                     Text(
                                         text = stringResource(R.string.fixed),
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = if (!isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
                                             fontSize = 11.sp
                                         ),
@@ -221,7 +220,7 @@ fun BudgetHealthCard(
                                     Text(
                                         text = stringResource(R.string.dynamic),
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = if (isDynamicBudget) FontWeight.Bold else FontWeight.Medium,
                                             fontSize = 11.sp
                                         ),
@@ -233,7 +232,7 @@ fun BudgetHealthCard(
                             Text(
                                 text = if (isDynamicBudget) "${stringResource(R.string.dynamic)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(effectiveBudget, currencySymbol, locale)}" else "${stringResource(R.string.fixed)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(budget, currencySymbol, locale)}",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 11.5.sp
                                 ),
@@ -298,7 +297,7 @@ fun BudgetHealthCard(
                     Text(
                         text = if (isOverBudget) stringResource(R.string.exceeded) else stringResource(R.string.remaining),
                         style = Typography.titleSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
                         ),
@@ -386,7 +385,7 @@ fun BudgetHealthCard(
                     Text(
                         text = "${stringResource(R.string.days_left, daysRemaining)} ($percentDisplay)",
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         ),
@@ -421,7 +420,7 @@ fun BudgetHealthCard(
                         Text(
                             text = stringResource(R.string.safe_daily_spend).uppercase(),
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 9.sp,
                                 letterSpacing = 0.7.sp
@@ -449,7 +448,7 @@ fun BudgetHealthCard(
                         Text(
                             text = stringResource(R.string.daily_average).uppercase(),
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 9.sp,
                                 letterSpacing = 0.7.sp
@@ -496,7 +495,7 @@ fun BudgetHealthCard(
                 Text(
                     text = "Monthly Spending Target",
                     style = Typography.titleMedium.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     ),
@@ -537,7 +536,7 @@ fun BudgetHealthCard(
                         Text(
                             text = "Set Budget Target",
                             style = Typography.labelMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.5.sp
                             ),
@@ -619,7 +618,7 @@ fun EditBudgetDialog(
                     Text(
                         text = "Monthly Spending Target",
                         style = Typography.titleLarge.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         ),
@@ -629,7 +628,7 @@ fun EditBudgetDialog(
                     Text(
                         text = "Set your baseline budget and adjustment rules",
                         style = Typography.bodySmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 12.5.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -713,7 +712,7 @@ fun EditBudgetDialog(
                             Text(
                                 text = "+${preset / 1000}k",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 12.sp
                                 ),
@@ -737,7 +736,7 @@ fun EditBudgetDialog(
                             Text(
                                 text = "Clear",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 12.sp
                                 ),
@@ -752,7 +751,7 @@ fun EditBudgetDialog(
                 Text(
                     text = "BUDGET BEHAVIOR",
                     style = Typography.labelSmall.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.5.sp,
                         letterSpacing = 0.8.sp
@@ -792,7 +791,7 @@ fun EditBudgetDialog(
                                 Text(
                                     text = "Fixed Limit",
                                     style = Typography.titleSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
                                     ),
@@ -810,7 +809,7 @@ fun EditBudgetDialog(
                             Text(
                                 text = "Strict monthly ceiling. Income is not added.",
                                 style = Typography.bodySmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontSize = 11.5.sp,
                                     lineHeight = 15.sp
                                 ),
@@ -847,7 +846,7 @@ fun EditBudgetDialog(
                                 Text(
                                     text = "Dynamic Budget",
                                     style = Typography.titleSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
                                     ),
@@ -865,7 +864,7 @@ fun EditBudgetDialog(
                             Text(
                                 text = "Income received expands your monthly limit.",
                                 style = Typography.bodySmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontSize = 11.5.sp,
                                     lineHeight = 15.sp
                                 ),
@@ -893,7 +892,7 @@ fun EditBudgetDialog(
                     Text(
                         text = if (selectedIsDynamic) "Total Monthly Budget" else "Fixed Monthly Limit",
                         style = Typography.labelMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.5.sp
                         ),
@@ -921,7 +920,7 @@ fun EditBudgetDialog(
                         "Strict ceiling of ${com.masum.cipher.core.util.AppFormatters.formatCurrency(currentAmount, currencySymbol, locale)}. Money received does not increase this limit."
                     },
                     style = Typography.bodySmall.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontSize = 12.sp,
                         lineHeight = 16.sp
                     ),
@@ -945,7 +944,7 @@ fun EditBudgetDialog(
                 Text(
                     text = "Save Target",
                     style = Typography.labelLarge.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     ),

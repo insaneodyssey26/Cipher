@@ -25,15 +25,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +74,6 @@ import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardViewModel
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
@@ -75,7 +81,9 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Clock
+import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Share2
+import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.Users
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -87,6 +95,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.IntOffset
+import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -112,6 +121,30 @@ fun SplitExpensesScreen(
 
     var selectedTab by remember { mutableStateOf(SplitFilterTab.ALL) }
     var editingSplitTx by remember { mutableStateOf<TransactionEntity?>(null) }
+    var showAddSheet by remember { mutableStateOf(false) }
+    var draftStandaloneExpenseName by remember { mutableStateOf("") }
+    var draftStandaloneTotalStr by remember { mutableStateOf("") }
+    var draftStandaloneSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
+    var editingTxSplitsDraft by remember { mutableStateOf<Map<Long, List<SplitParticipant>>>(emptyMap()) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val deletedMessage = stringResource(R.string.split_deleted)
+    val undoLabel = stringResource(R.string.action_undo)
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            if (effect is DashboardContract.Effect.ShowUndoDelete) {
+                val result = snackbarHostState.showSnackbar(
+                    message = deletedMessage,
+                    actionLabel = undoLabel,
+                    duration = SnackbarDuration.Short
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                    viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction, effect.splits))
+                }
+            }
+        }
+    }
 
     val splitTransactions = remember(state.transactions, state.splitsByTransactionId) {
         state.transactions.filter { tx ->
@@ -150,13 +183,19 @@ fun SplitExpensesScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 100.dp)
+            )
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = stringResource(R.string.split_hub_title),
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         ),
@@ -171,6 +210,18 @@ fun SplitExpensesScreen(
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
                             contentDescription = stringResource(R.string.action_close),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        showAddSheet = true
+                    }) {
+                        Icon(
+                            imageVector = LucideIcons.Plus,
+                            contentDescription = stringResource(R.string.split_hub_add_split),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -207,7 +258,7 @@ fun SplitExpensesScreen(
                                 Text(
                                     text = stringResource(R.string.split_hub_total_lent).uppercase(),
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 10.sp,
                                         letterSpacing = 1.2.sp
@@ -339,7 +390,7 @@ fun SplitExpensesScreen(
                                 Text(
                                     text = title,
                                     style = Typography.labelMedium.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         fontSize = 12.5.sp
                                     ),
@@ -358,7 +409,7 @@ fun SplitExpensesScreen(
                             .fillMaxWidth()
                             .padding(vertical = 48.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -385,6 +436,29 @@ fun SplitExpensesScreen(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
+                        Button(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showAddSheet = true
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.split_hub_add_split),
+                                style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
                     }
                 }
             } else {
@@ -428,6 +502,10 @@ fun SplitExpensesScreen(
                         onEdit = {
                             view.performVibrate(isHapticsEnabled)
                             editingSplitTx = transaction
+                        },
+                        onDelete = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                         }
                     )
                 }
@@ -435,9 +513,53 @@ fun SplitExpensesScreen(
         }
     }
 
+    val suggestedParticipants = remember(state.splitsByTransactionId) {
+        state.splitsByTransactionId.values
+            .flatten()
+            .filter { !it.isCurrentUser }
+            .map { it.name.trim() }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase(Locale.ROOT) }
+    }
+
+    if (showAddSheet) {
+        TransactionSplitSheet(
+            expenseName = draftStandaloneExpenseName,
+            totalAmount = draftStandaloneTotalStr.toDoubleOrNull() ?: 0.0,
+            currencySymbol = state.currencySymbol,
+            initialParticipants = draftStandaloneSplits,
+            suggestedParticipants = suggestedParticipants,
+            isHapticsEnabled = isHapticsEnabled,
+            isStandaloneAdd = true,
+            onDismiss = { showAddSheet = false },
+            onDraftStandaloneChange = { name, totalStr, participants ->
+                draftStandaloneExpenseName = name
+                draftStandaloneTotalStr = totalStr
+                draftStandaloneSplits = participants
+            },
+            onSaveNewSplitExpense = { expenseName, totalAmount, splits ->
+                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                val newTx = TransactionEntity(
+                    merchant = expenseName,
+                    amount = totalAmount,
+                    currency = state.currencySymbol,
+                    timestamp = System.currentTimeMillis(),
+                    category = "OTHERS",
+                    rawSms = null,
+                    isIncome = false
+                )
+                viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTx, splits))
+                draftStandaloneExpenseName = ""
+                draftStandaloneTotalStr = ""
+                draftStandaloneSplits = emptyList()
+                showAddSheet = false
+            }
+        )
+    }
+
     editingSplitTx?.let { transaction ->
         val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
-        val mappedParticipants = splitsForTx.map {
+        val mappedParticipants = editingTxSplitsDraft[transaction.id] ?: splitsForTx.map {
             SplitParticipant(
                 id = it.id.toString(),
                 name = it.name,
@@ -452,10 +574,15 @@ fun SplitExpensesScreen(
             totalAmount = transaction.amount,
             currencySymbol = state.currencySymbol,
             initialParticipants = mappedParticipants,
+            suggestedParticipants = suggestedParticipants,
             isHapticsEnabled = isHapticsEnabled,
             onDismiss = { editingSplitTx = null },
+            onDraftChange = { updatedSplits ->
+                editingTxSplitsDraft = editingTxSplitsDraft + (transaction.id to updatedSplits)
+            },
             onSaveSplits = { updatedSplits ->
                 viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, updatedSplits))
+                editingTxSplitsDraft = editingTxSplitsDraft - transaction.id
                 editingSplitTx = null
             }
         )
@@ -472,7 +599,8 @@ private fun SplitTransactionCard(
     isHapticsEnabled: Boolean,
     onTogglePaid: (Long, Boolean) -> Unit,
     onShare: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val category = TransactionCategory.fromString(transaction.category)
     val myShare = splits.find { it.isCurrentUser }?.amount ?: (transaction.amount / splits.size)
@@ -568,22 +696,6 @@ private fun SplitTransactionCard(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (participant.isPaid) EmeraldIncome.copy(alpha = 0.15f)
-                                        else MaterialTheme.colorScheme.surfaceVariant
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = participant.name.take(1).uppercase(Locale.ROOT),
-                                    style = Typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = if (participant.isPaid) EmeraldIncome else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
                             Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = participant.name,
@@ -657,7 +769,7 @@ private fun SplitTransactionCard(
                 Text(
                     text = if (pendingCount == 0) stringResource(R.string.split_settled) else "$pendingCount ${stringResource(R.string.split_pending)}",
                     style = Typography.labelSmall.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Medium,
                         fontSize = 11.5.sp
                     ),
@@ -665,30 +777,62 @@ private fun SplitTransactionCard(
                 )
 
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        .clickable { onShare() }
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = LucideIcons.Share2,
-                        contentDescription = "Share",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Text(
-                        text = "Share",
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(RoseExpense.copy(alpha = 0.1f))
+                            .border(1.dp, RoseExpense.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                            .clickable { onDelete() }
+                            .padding(horizontal = 9.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Trash2,
+                            contentDescription = stringResource(R.string.action_delete),
+                            tint = RoseExpense,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.action_delete),
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            ),
+                            color = RoseExpense
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .clickable { onShare() }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Share2,
+                            contentDescription = "Share",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Text(
+                            text = "Share",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

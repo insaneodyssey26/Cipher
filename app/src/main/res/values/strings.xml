@@ -373,4 +373,7 @@
     <string name="split_hub_filter_settled">Settled</string>
     <string name="split_hub_you_paid">You paid</string>
     <string name="split_hub_my_share">Your share</string>
+    <string name="split_hub_add_split">Add Split Expense</string>
+    <string name="split_deleted">Split expense deleted</string>
+    <string name="action_undo">UNDO</string>
 </resources>

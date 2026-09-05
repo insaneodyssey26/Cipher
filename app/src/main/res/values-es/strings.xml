@@ -372,4 +372,7 @@
     <string name="split_hub_filter_settled">Saldados</string>
     <string name="split_hub_you_paid">Pagaste</string>
     <string name="split_hub_my_share">Tu parte</string>
+    <string name="split_hub_add_split">Agregar gasto dividido</string>
+    <string name="split_deleted">Gasto dividido eliminado</string>
+    <string name="action_undo">DESHACER</string>
 </resources>

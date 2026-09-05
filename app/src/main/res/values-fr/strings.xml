@@ -373,4 +373,7 @@
     <string name="split_hub_filter_settled">Réglés</string>
     <string name="split_hub_you_paid">Vous avez payé</string>
     <string name="split_hub_my_share">Votre part</string>
+    <string name="split_hub_add_split">Ajouter une dépense partagée</string>
+    <string name="split_deleted">Dépense partagée supprimée</string>
+    <string name="action_undo">ANNULER</string>
 </resources>

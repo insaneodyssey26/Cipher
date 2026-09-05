@@ -49,7 +49,7 @@ import com.masum.cipher.core.domain.model.AppCurrency
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
@@ -158,7 +158,7 @@ fun CurrencySelectionDialog(
                             Text(
                                 text = androidx.compose.ui.res.stringResource(com.masum.cipher.R.string.dialog_currency_title),
                                 style = Typography.titleLarge.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
                                     letterSpacing = (-0.3).sp
@@ -231,7 +231,7 @@ fun CurrencySelectionDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = customCurrentCurrency.symbol,
-                                style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                                style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -291,7 +291,7 @@ fun CurrencySelectionDialog(
                         }
                         Text(
                             text = defaultCurrency.symbol,
-                            style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                            style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -364,7 +364,7 @@ fun CurrencySelectionDialog(
                                                 Text(
                                                     text = item.code,
                                                     style = Typography.bodyMedium.copy(
-                                                        fontFamily = Manrope,
+                                                        fontFamily = Lato,
                                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                         fontSize = 13.sp
                                                     ),

@@ -71,7 +71,7 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import com.masum.cipher.ui.theme.EmeraldIncome
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -185,7 +185,7 @@ fun CategoryAllocationDonut(
                         Text(
                             text = categoryEnum.displayName,
                             style = Typography.bodyMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.5.sp
                             ),
@@ -203,7 +203,7 @@ fun CategoryAllocationDonut(
                         Text(
                             text = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(category.amount, currencySymbol = currencySymbol),
                             style = Typography.titleMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
@@ -220,7 +220,7 @@ fun CategoryAllocationDonut(
                             Text(
                                 text = "${(category.percentage * 100).toInt()}%",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 10.5.sp
                                 ),
@@ -366,7 +366,7 @@ fun SpendingTrendChart(
 
                         Text(
                             text = statTitle,
-                            style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold),
+                            style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis

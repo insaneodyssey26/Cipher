@@ -34,7 +34,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.masum.cipher.core.domain.model.AppLanguage
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
@@ -106,7 +106,7 @@ fun LanguageSelectionDialog(
                             Text(
                                 text = androidx.compose.ui.res.stringResource(com.masum.cipher.R.string.dialog_language_title),
                                 style = Typography.titleLarge.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
                                     letterSpacing = (-0.3).sp
@@ -206,7 +206,7 @@ fun LanguageSelectionDialog(
                                             Text(
                                                 text = item.nativeName,
                                                 style = Typography.bodyMedium.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                     fontSize = 12.5.sp
                                                 ),

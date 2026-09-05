@@ -373,4 +373,7 @@
     <string name="split_hub_filter_settled">精算済み</string>
     <string name="split_hub_you_paid">支払額</string>
     <string name="split_hub_my_share">自己負担額</string>
+    <string name="split_hub_add_split">割り勘支出を追加</string>
+    <string name="split_deleted">割り勘支出を削除しました</string>
+    <string name="action_undo">元に戻す</string>
 </resources>

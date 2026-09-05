@@ -100,7 +100,6 @@ import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -440,7 +439,7 @@ private fun WelcomePage(
             Text(
                 text = stringResource(R.string.onboarding_welcome_tagline_simple),
                 style = Typography.bodyMedium.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.5.sp,
                     lineHeight = 21.sp,
@@ -539,7 +538,7 @@ private fun WelcomeFeatureBenefit(
             Text(
                 text = title,
                 style = Typography.titleSmall.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.5.sp
                 ),
@@ -549,7 +548,7 @@ private fun WelcomeFeatureBenefit(
             Text(
                 text = description,
                 style = Typography.bodySmall.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontSize = 12.2.sp,
                     lineHeight = 17.sp
                 ),
@@ -616,7 +615,7 @@ private fun OnboardingWelcomeCompleteModal(
                     Text(
                         text = stringResource(R.string.onboarding_ready_subtitle),
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 13.5.sp,
                             lineHeight = 19.sp
                         ),
@@ -686,7 +685,7 @@ private fun SwipeToConfirmSlider(
         Text(
             text = hintText,
             style = Typography.labelMedium.copy(
-                fontFamily = Manrope,
+                fontFamily = Lato,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
                 letterSpacing = 0.4.sp
@@ -818,7 +817,7 @@ private fun ThemeSelectionPage(
                     Text(
                         text = stringResource(R.string.onboarding_theme_subtitle),
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 13.5.sp,
                             lineHeight = 19.sp
                         ),
@@ -882,7 +881,7 @@ private fun ThemeSelectionPage(
                                 Text(
                                     text = label,
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         fontSize = 11.sp
                                     ),
@@ -907,7 +906,7 @@ private fun ThemeSelectionPage(
                                 Text(
                                     text = stringResource(R.string.onboarding_theme_preview_label),
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 9.sp,
                                         letterSpacing = 0.8.sp
@@ -928,7 +927,7 @@ private fun ThemeSelectionPage(
                                         Text(
                                             text = name,
                                             style = Typography.labelSmall.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 10.sp
                                             ),
@@ -979,12 +978,12 @@ private fun ThemeSelectionPage(
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = "Income",
-                                    style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 11.sp),
+                                    style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                     color = dynamicColor.copy(alpha = 0.75f)
                                 )
                                 Text(
                                     text = "Expenses",
-                                    style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 11.sp),
+                                    style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                     color = RoseExpense.copy(alpha = 0.65f)
                                 )
                             }
@@ -1093,7 +1092,7 @@ private fun ColorTile(
             Text(
                 text = name,
                 style = Typography.titleSmall.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     fontSize = 12.sp
                 ),
@@ -1154,7 +1153,7 @@ private fun LanguageSelectionPage(
                     Text(
                         text = stringResource(R.string.onboarding_lang_subtitle),
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 13.5.sp,
                             lineHeight = 19.sp
                         ),
@@ -1195,7 +1194,7 @@ private fun LanguageSelectionPage(
                                             Text(
                                                 text = lang.nativeName,
                                                 style = Typography.titleSmall.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                     fontSize = 14.sp
                                                 ),
@@ -1203,7 +1202,7 @@ private fun LanguageSelectionPage(
                                             )
                                             Text(
                                                 text = lang.name,
-                                                style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 10.5.sp),
+                                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.5.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                             )
                                         }
@@ -1316,7 +1315,7 @@ private fun CurrencySelectionPage(
                     Text(
                         text = stringResource(R.string.onboarding_lang_subtitle),
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 13.5.sp,
                             lineHeight = 19.sp
                         ),
@@ -1341,7 +1340,7 @@ private fun CurrencySelectionPage(
                             Text(
                                 text = stringResource(R.string.onboarding_live_preview_label),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.8.sp
@@ -1352,7 +1351,7 @@ private fun CurrencySelectionPage(
                             Text(
                                 text = stringResource(R.string.onboarding_preview_merchant),
                                 style = Typography.titleSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 ),
@@ -1360,7 +1359,7 @@ private fun CurrencySelectionPage(
                             )
                             Text(
                                 text = stringResource(R.string.onboarding_preview_category),
-                                style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 11.sp),
+                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
                         }
@@ -1426,7 +1425,7 @@ private fun CurrencySelectionPage(
                                             )
                                             Text(
                                                 text = cur.name,
-                                                style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 10.sp),
+                                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -1552,7 +1551,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                     Text(
                         text = stringResource(R.string.onboarding_perm_intro),
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 13.5.sp,
                             lineHeight = 19.sp
                         ),
@@ -1614,7 +1613,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                 TextButton(onClick = { showTour = true }) {
                     Text(
                         text = stringResource(R.string.onboarding_take_tour),
-                        style = Typography.labelMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                        style = Typography.labelMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
                     )
                 }
@@ -1642,8 +1641,8 @@ private fun PermissionPage(onComplete: () -> Unit) {
     if (showSkipDialog) {
         AlertDialog(
             onDismissRequest = { showSkipDialog = false },
-            title = { Text("Missing Automation Permissions", style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold)) },
-            text = { Text("Cipher relies on local SMS and notification access to log transactions automatically without cloud sync. Without these, transactions must be logged manually.", style = Typography.bodyMedium.copy(fontFamily = Manrope)) },
+            title = { Text("Missing Automation Permissions", style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold)) },
+            text = { Text("Cipher relies on local SMS and notification access to log transactions automatically without cloud sync. Without these, transactions must be logged manually.", style = Typography.bodyMedium.copy(fontFamily = Lato)) },
             confirmButton = {
                 Button(onClick = { showSkipDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                     Text("Grant Permissions", color = MaterialTheme.colorScheme.onPrimary)
@@ -1661,8 +1660,8 @@ private fun PermissionPage(onComplete: () -> Unit) {
     if (showPostNotifDialog) {
         AlertDialog(
             onDismissRequest = { showPostNotifDialog = false },
-            title = { Text("Missing Alert Permissions", style = Typography.titleMedium.copy(fontFamily = Manrope, fontWeight = FontWeight.Bold)) },
-            text = { Text("Without notification permissions, you won't receive daily summaries, subscription alerts, or threshold warnings.", style = Typography.bodyMedium.copy(fontFamily = Manrope)) },
+            title = { Text("Missing Alert Permissions", style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold)) },
+            text = { Text("Without notification permissions, you won't receive daily summaries, subscription alerts, or threshold warnings.", style = Typography.bodyMedium.copy(fontFamily = Lato)) },
             confirmButton = {
                 Button(onClick = { showPostNotifDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                     Text("Grant Permission", color = MaterialTheme.colorScheme.onPrimary)
@@ -1748,7 +1747,7 @@ private fun CapabilityCard(
                     Text(
                         text = title,
                         style = Typography.titleSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp
                         ),
@@ -1765,7 +1764,7 @@ private fun CapabilityCard(
                             Text(
                                 text = stringResource(R.string.onboarding_status_active),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 8.5.sp
                                 ),
@@ -1780,7 +1779,7 @@ private fun CapabilityCard(
                 Text(
                     text = description,
                     style = Typography.bodySmall.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontSize = 11.5.sp,
                         lineHeight = 15.5.sp
                     ),
@@ -1878,7 +1877,7 @@ private fun QuickLanguagePickerModal(
                                             Text(
                                                 text = lang.nativeName,
                                                 style = Typography.titleSmall.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                     fontSize = 13.sp
                                                 ),
@@ -1886,7 +1885,7 @@ private fun QuickLanguagePickerModal(
                                             )
                                             Text(
                                                 text = lang.name,
-                                                style = Typography.bodySmall.copy(fontFamily = Manrope, fontSize = 10.sp),
+                                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                             )
                                         }
@@ -1929,7 +1928,7 @@ private fun StepLabel(text: String) {
         Text(
             text = text,
             style = Typography.labelSmall.copy(
-                fontFamily = Manrope,
+                fontFamily = Lato,
                 fontWeight = FontWeight.Bold,
                 fontSize = 9.5.sp,
                 letterSpacing = 1.2.sp
@@ -1998,7 +1997,7 @@ private fun PrimaryActionButton(label: String, onClick: () -> Unit) {
             Text(
                 text = label,
                 style = Typography.titleMedium.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     letterSpacing = (-0.2).sp
@@ -2143,7 +2142,7 @@ private fun TourSlide(icon: ImageVector, title: String, body: String) {
         Text(
             text = body,
             style = Typography.bodyMedium.copy(
-                fontFamily = Manrope,
+                fontFamily = Lato,
                 fontSize = 12.5.sp,
                 lineHeight = 17.5.sp
             ),

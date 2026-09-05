@@ -71,7 +71,7 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
@@ -172,7 +172,7 @@ fun DashboardFilterSheet(
                         Text(
                             text = stringResource(R.string.filter_title),
                             style = Typography.titleLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp
                             ),
@@ -198,7 +198,7 @@ fun DashboardFilterSheet(
                             Text(
                                 text = stringResource(R.string.action_delete),
                                 style = Typography.labelMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 color = MaterialTheme.colorScheme.error
@@ -213,7 +213,7 @@ fun DashboardFilterSheet(
                     Text(
                         text = stringResource(R.string.tx_type).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 10.sp,
                             letterSpacing = 1.sp
@@ -272,7 +272,7 @@ fun DashboardFilterSheet(
                                     Text(
                                         text = label,
                                         style = Typography.labelMedium.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                             fontSize = 12.5.sp
                                         ),
@@ -295,7 +295,7 @@ fun DashboardFilterSheet(
                         Text(
                             text = "${stringResource(R.string.categories_header).uppercase()} (${draftCategories.size})",
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.sp,
                                 letterSpacing = 1.sp
@@ -307,7 +307,7 @@ fun DashboardFilterSheet(
                             Text(
                                 text = stringResource(R.string.action_cancel),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 11.sp
                                 ),
@@ -379,7 +379,7 @@ fun DashboardFilterSheet(
                                 Text(
                                     text = stringResource(cat.titleRes),
                                     style = Typography.labelMedium.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         fontSize = 12.sp
                                     ),
@@ -396,7 +396,7 @@ fun DashboardFilterSheet(
                     Text(
                         text = stringResource(R.string.amount_range).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 10.sp,
                             letterSpacing = 1.sp
@@ -437,7 +437,7 @@ fun DashboardFilterSheet(
                                 Text(
                                     text = range.label,
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         fontSize = 10.5.sp
                                     ),
@@ -518,7 +518,7 @@ fun DashboardFilterSheet(
                         Text(
                             text = stringResource(R.string.action_cancel),
                             style = Typography.labelLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -546,7 +546,7 @@ fun DashboardFilterSheet(
                         Text(
                             text = if (draftIsActive) stringResource(R.string.action_done) else stringResource(R.string.action_show_all),
                             style = Typography.labelLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold
                             ),
                             color = MaterialTheme.colorScheme.onPrimary

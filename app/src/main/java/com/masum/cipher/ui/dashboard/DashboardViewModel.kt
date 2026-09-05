@@ -52,7 +52,7 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.LoadDashboard -> { }
             is DashboardContract.Intent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardContract.Intent.UpdateTransaction -> updateTransaction(intent.transaction)
-            is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction)
+            is DashboardContract.Intent.RestoreTransaction -> restoreTransaction(intent.transaction, intent.splits)
             is DashboardContract.Intent.AddTransaction -> addTransaction(intent.transaction, intent.splits)
             is DashboardContract.Intent.SearchTransactions -> _searchQuery.value = intent.query
             is DashboardContract.Intent.FilterTransactions -> _activeFilter.value = _activeFilter.value.copy(type = intent.filter)
@@ -151,8 +151,9 @@ class DashboardViewModel @Inject constructor(
 
     private fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
+            val splits = transactionSplitRepository.getSplitsForTransactionSync(transaction.id)
             deleteTransactionUseCase(transaction)
-            emitEffect(DashboardContract.Effect.ShowUndoDelete(transaction))
+            emitEffect(DashboardContract.Effect.ShowUndoDelete(transaction, splits))
         }
     }
 
@@ -181,9 +182,16 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun restoreTransaction(transaction: TransactionEntity) {
+    private fun restoreTransaction(
+        transaction: TransactionEntity,
+        splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList()
+    ) {
         viewModelScope.launch {
-            addTransactionUseCase(transaction)
+            val savedTx = addTransactionUseCase(transaction)
+            if (savedTx != null && splits.isNotEmpty()) {
+                val entities = splits.map { it.copy(id = 0, transactionId = savedTx.id) }
+                transactionSplitRepository.saveSplits(savedTx.id, entities)
+            }
         }
     }
 

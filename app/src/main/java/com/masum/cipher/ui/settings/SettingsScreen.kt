@@ -90,7 +90,7 @@ import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.DMSans
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -279,7 +279,7 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings_title),
                     style = Typography.headlineMedium.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 28.sp,
                         letterSpacing = (-0.8).sp
@@ -966,10 +966,10 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                 if (matchContact) VaultSettingsItem(
                     icon = LucideIcons.Mail,
                     title = stringResource(R.string.contact_dev_title),
-                    subtitle = "masumali262006@gmail.com",
+                    subtitle = "skmasumali.dev@gmail.com",
                     onClick = {
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = "mailto:masumali262006@gmail.com".toUri()
+                            data = "mailto:skmasumali.dev@gmail.com".toUri()
                             putExtra(Intent.EXTRA_SUBJECT, "Hello from Cipher App!")
                         }
                         context.startActivity(Intent.createChooser(intent, "Send Email"))
@@ -1381,7 +1381,7 @@ private fun SettingsSection(
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.5.sp,
                             fontSize = 15.sp

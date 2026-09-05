@@ -45,7 +45,7 @@ import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.dashboard.TransactionItem
 import com.masum.cipher.ui.theme.EmeraldIncome
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -291,7 +291,7 @@ private fun DetailStatCard(
             Text(
                 text = amount,
                 style = Typography.headlineSmall.copy(
-                    fontFamily = Manrope,
+                    fontFamily = Lato,
                     fontWeight = FontWeight.Bold,
                     fontSize = fontSize
                 ),

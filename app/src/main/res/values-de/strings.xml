@@ -373,4 +373,7 @@
     <string name="split_hub_filter_settled">Beglichen</string>
     <string name="split_hub_you_paid">Du hast bezahlt</string>
     <string name="split_hub_my_share">Dein Anteil</string>
+    <string name="split_hub_add_split">Geteilte Ausgabe hinzufügen</string>
+    <string name="split_deleted">Geteilte Ausgabe gelöscht</string>
+    <string name="action_undo">RÜCKGÄNGIG</string>
 </resources>

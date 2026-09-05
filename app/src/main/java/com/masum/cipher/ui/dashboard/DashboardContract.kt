@@ -11,7 +11,7 @@ class DashboardContract {
         object LoadDashboard : Intent()
         data class DeleteTransaction(val transaction: TransactionEntity) : Intent()
         data class UpdateTransaction(val transaction: TransactionEntity) : Intent()
-        data class RestoreTransaction(val transaction: TransactionEntity) : Intent()
+        data class RestoreTransaction(val transaction: TransactionEntity, val splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList()) : Intent()
         data class AddTransaction(val transaction: TransactionEntity, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant> = emptyList()) : Intent()
         data class SearchTransactions(val query: String) : Intent()
         data class FilterTransactions(val filter: FilterType) : Intent()
@@ -76,6 +76,9 @@ class DashboardContract {
     )
 
     sealed class Effect : UiEffect {
-        data class ShowUndoDelete(val transaction: TransactionEntity) : Effect()
+        data class ShowUndoDelete(
+            val transaction: TransactionEntity,
+            val splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList()
+        ) : Effect()
     }
 }

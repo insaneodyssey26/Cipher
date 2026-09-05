@@ -103,7 +103,6 @@ import com.masum.cipher.ui.components.VaultMotion
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -148,6 +147,8 @@ fun DashboardScreen(
 
 
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var draftEditingSplits by remember { mutableStateOf<Map<Long, List<SplitParticipant>>>(emptyMap()) }
+    var draftNewSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
     var showAddSheet by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
     var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
@@ -172,7 +173,7 @@ fun DashboardScreen(
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
-                    viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction))
+                    viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction, effect.splits))
                 }
             }
         }
@@ -439,8 +440,8 @@ fun DashboardScreen(
                                             )
                                             Text(
                                                 text = "Due for $amountStr",
-                                                style = Typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold),
+                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
                                             )
                                         }
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -493,7 +494,7 @@ fun DashboardScreen(
                                     Text(
                                         text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol, locale = locale),
                                         style = Typography.labelMedium.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 12.sp
                                         ),
@@ -506,7 +507,7 @@ fun DashboardScreen(
                                 Text(
                                     text = "Reset",
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 11.sp
                                     ),
@@ -648,18 +649,24 @@ fun DashboardScreen(
                 isIncome = false
             ),
             currencySymbol = state.currencySymbol,
+            existingSplits = draftNewSplits,
             onDismiss = { showAddSheet = false },
             onConfirm = { newTransaction ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
+                draftNewSplits = emptyList()
                 showAddSheet = false
             },
             onConfirmWithSplits = { newTransaction, splits ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction, splits))
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(null))
+                draftNewSplits = emptyList()
                 showAddSheet = false
+            },
+            onSaveSplits = { updatedSplits ->
+                draftNewSplits = updatedSplits
             },
             onDraftChange = { updatedDraft ->
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
@@ -670,7 +677,7 @@ fun DashboardScreen(
 
     editingTransaction?.let { transaction ->
         val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
-        val mappedParticipants = splitsForTx.map {
+        val mappedParticipants = draftEditingSplits[transaction.id] ?: splitsForTx.map {
             SplitParticipant(
                 id = it.id.toString(),
                 name = it.name,
@@ -688,23 +695,36 @@ fun DashboardScreen(
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
+                draftEditingSplits = draftEditingSplits - transaction.id
                 editingTransaction = null
             },
             onConfirmWithSplits = { updated, splits ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
                 viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, splits))
+                draftEditingSplits = draftEditingSplits - transaction.id
                 editingTransaction = null
             },
             onSaveSplits = { newSplits ->
+                draftEditingSplits = draftEditingSplits + (transaction.id to newSplits)
                 viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, newSplits))
             },
             onDelete = {
                 viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
+                draftEditingSplits = draftEditingSplits - transaction.id
                 editingTransaction = null
             },
             isHapticsEnabled = isHapticsEnabled
         )
+    }
+
+    val suggestedParticipants = remember(state.splitsByTransactionId) {
+        state.splitsByTransactionId.values
+            .flatten()
+            .filter { !it.isCurrentUser }
+            .map { it.name.trim() }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase(Locale.ROOT) }
     }
 
     activeSplittingTx?.let { (tx, participants) ->
@@ -713,6 +733,7 @@ fun DashboardScreen(
             totalAmount = tx.amount,
             currencySymbol = state.currencySymbol,
             initialParticipants = participants,
+            suggestedParticipants = suggestedParticipants,
             isHapticsEnabled = isHapticsEnabled,
             onDismiss = { activeSplittingTx = null },
             onSaveSplits = { updatedSplits ->
@@ -1398,7 +1419,7 @@ private fun DashboardHero(
                                 Text(
                                     text = "$periodLabel $balanceLabel".uppercase(),
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.8.sp
@@ -1443,7 +1464,7 @@ private fun DashboardHero(
                                     Text(
                                         text = "$percentFormatted% $labelSuffix",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         ),
@@ -1487,7 +1508,7 @@ private fun DashboardHero(
                                     Text(
                                         text = badgeText,
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         ),
@@ -1987,7 +2008,7 @@ fun TransactionItem(
                             Text(
                                 text = if (allSettled) "${splits.size}" else "$pendingCount/${otherSplits.size}",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 10.sp
                                 ),
@@ -2015,19 +2036,42 @@ fun TransactionItem(
                 }
             }
 
+            val myShare = if (splits.size > 1) {
+                splits.find { it.isCurrentUser }?.amount ?: (transaction.amount / splits.size)
+            } else null
+
             val amountFormatted = AppFormatters.formatCurrency(transaction.amount, currencySymbol, locale, decimals = 0)
             val signedAmount = if (transaction.isIncome) "+$amountFormatted" else "-$amountFormatted"
-            Text(
-                text = if (privacyMode) "•••" else signedAmount,
-                style = Typography.titleMedium.copy(
-                    fontFamily = Manrope,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+
+            Column(
+                horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(start = 8.dp)
-            )
+            ) {
+                Text(
+                    text = if (privacyMode) "•••" else signedAmount,
+                    style = Typography.titleMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (myShare != null) {
+                    val shareFormatted = AppFormatters.formatCurrency(myShare, currencySymbol, locale, decimals = 0)
+                    Text(
+                        text = if (privacyMode) "•••" else "My: -$shareFormatted",
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 11.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }
@@ -2252,6 +2296,7 @@ private fun CashFlowSegmentBar(
                     Text(
                         text = stringResource(R.string.income).uppercase(),
                         style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -2271,6 +2316,7 @@ private fun CashFlowSegmentBar(
                     Text(
                         text = targetText,
                         style = Typography.titleMedium.copy(
+                            fontFamily = Lato,
                             fontSize = if (isCollapsed) 14.5.sp else 16.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
@@ -2297,6 +2343,7 @@ private fun CashFlowSegmentBar(
                     Text(
                         text = targetText,
                         style = Typography.titleMedium.copy(
+                            fontFamily = Lato,
                             fontSize = if (isCollapsed) 14.5.sp else 16.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = (-0.5).sp
@@ -2312,6 +2359,7 @@ private fun CashFlowSegmentBar(
                     Text(
                         text = stringResource(R.string.expense).uppercase(),
                         style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp

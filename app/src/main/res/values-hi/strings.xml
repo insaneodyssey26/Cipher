@@ -372,4 +372,7 @@
     <string name="split_hub_filter_settled">चुकाया गया</string>
     <string name="split_hub_you_paid">आपने दिया</string>
     <string name="split_hub_my_share">आपका हिस्सा</string>
+    <string name="split_hub_add_split">विभाजित खर्च जोड़ें</string>
+    <string name="split_deleted">विभाजित खर्च हटा दिया गया</string>
+    <string name="action_undo">पूर्ववत करें</string>
 </resources>

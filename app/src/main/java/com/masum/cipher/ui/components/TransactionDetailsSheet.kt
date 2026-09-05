@@ -100,7 +100,7 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextLayoutResult
 import com.masum.cipher.core.util.AppFormatters
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -517,7 +517,7 @@ fun TransactionDetailsSheet(
                         Text(
                             text = stringResource(R.string.note),
                             style = Typography.labelMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp
                             ),
@@ -574,7 +574,7 @@ fun TransactionDetailsSheet(
                         Text(
                             text = if (hasSplits) "${stringResource(R.string.split_title)} (${currentSplits.size})" else stringResource(R.string.split_title),
                             style = Typography.labelMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 12.sp
                             ),
@@ -614,7 +614,7 @@ fun TransactionDetailsSheet(
                     Text(
                         text = dateLabel,
                         style = Typography.labelMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp
                         ),
@@ -634,6 +634,9 @@ fun TransactionDetailsSheet(
                     initialParticipants = currentSplits,
                     isHapticsEnabled = isHapticsEnabled,
                     onDismiss = { showSplitSheet = false },
+                    onDraftChange = { updatedSplits ->
+                        currentSplits = updatedSplits
+                    },
                     onSaveSplits = { updatedSplits ->
                         currentSplits = updatedSplits
                         onSaveSplits?.invoke(updatedSplits)
@@ -983,7 +986,7 @@ private fun AmountInputField(
         if (computed != null && textFieldValue.text.any { it in "+-*/" }) {
             Text(
                 text = "= ${com.masum.cipher.core.util.AppFormatters.formatCurrency(computed, currencySymbol, locale, decimals = 2)}",
-                style = Typography.titleMedium,
+                style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                 color = color.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
             )

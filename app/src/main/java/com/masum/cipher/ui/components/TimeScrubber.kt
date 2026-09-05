@@ -50,7 +50,7 @@ import com.masum.cipher.R
 import com.masum.cipher.core.domain.model.TimePeriod
 import com.masum.cipher.core.domain.model.TimeRange
 import com.masum.cipher.core.util.performVibrate
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
@@ -145,7 +145,7 @@ fun TimeSelectorDropdown(
                 Text(
                     text = triggerLabel,
                     style = Typography.labelMedium.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     ),
@@ -215,7 +215,7 @@ fun TimeSelectorDropdown(
                                     Text(
                                         text = stringResource(R.string.timeframe_title),
                                         style = Typography.titleLarge.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold
                                         ),
                                         color = MaterialTheme.colorScheme.onSurface
@@ -331,7 +331,7 @@ fun TimeSelectorDropdown(
                                                         Text(
                                                             text = stringResource(period.labelRes),
                                                             style = Typography.titleSmall.copy(
-                                                                fontFamily = Manrope,
+                                                                fontFamily = Lato,
                                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                                 fontSize = 14.sp
                                                             ),
@@ -412,7 +412,7 @@ fun TimeSelectorDropdown(
                                                 Text(
                                                     text = stringResource(R.string.period_custom_range),
                                                     style = Typography.titleSmall.copy(
-                                                        fontFamily = Manrope,
+                                                        fontFamily = Lato,
                                                         fontWeight = if (isCustomSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                         fontSize = 14.sp
                                                     ),
@@ -518,7 +518,7 @@ fun TimeSelectorDropdown(
                         Text(
                             text = stringResource(R.string.apply),
                             style = Typography.labelLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold
                             ),
                             color = MaterialTheme.colorScheme.primary
@@ -529,7 +529,7 @@ fun TimeSelectorDropdown(
                     TextButton(onClick = { showDateRangePicker = false }) {
                         Text(
                             text = stringResource(R.string.cancel),
-                            style = Typography.labelLarge.copy(fontFamily = Manrope),
+                            style = Typography.labelLarge.copy(fontFamily = Lato),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -541,7 +541,7 @@ fun TimeSelectorDropdown(
                         Text(
                             text = stringResource(R.string.select_date_range),
                             style = Typography.titleMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold
                             ),
                             modifier = Modifier.padding(start = 24.dp, top = 16.dp)

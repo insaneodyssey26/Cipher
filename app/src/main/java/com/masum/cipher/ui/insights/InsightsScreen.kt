@@ -63,7 +63,7 @@ import com.masum.cipher.ui.components.SpendingTrendChart
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.dashboard.DashboardContract
-import com.masum.cipher.ui.theme.Manrope
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
@@ -248,7 +248,7 @@ fun InsightsScreen(
                             Text(
                                 text = title,
                                 style = Typography.labelMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 12.5.sp
                                 ),
@@ -476,7 +476,7 @@ private fun InsightHero(state: InsightsContract.State) {
                 Text(
                     text = stringResource(R.string.overview).uppercase(),
                     style = Typography.labelSmall.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp,
                         letterSpacing = 1.sp
@@ -493,7 +493,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = periodLabel,
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 10.5.sp
                         ),
@@ -515,7 +515,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         Text(
                             text = stringResource(categoryEnum.titleRes),
                             style = Typography.titleLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 letterSpacing = (-0.3).sp
@@ -526,7 +526,7 @@ private fun InsightHero(state: InsightsContract.State) {
                         Text(
                             text = "${AppFormatters.formatCompactCurrency(mostExpensiveCategory.amount, currencySymbol = state.currencySymbol)} · $catPercent%",
                             style = Typography.bodySmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontSize = 12.5.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -558,7 +558,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = stringResource(R.string.no_spending_recorded),
                         style = Typography.titleLarge.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         ),
@@ -567,7 +567,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = stringResource(R.string.no_spending_desc),
                         style = Typography.bodySmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 12.5.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -594,7 +594,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = stringResource(R.string.no_spend_streak).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 9.sp,
                             letterSpacing = 0.5.sp
@@ -605,7 +605,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = "${state.noSpendStreak} ${stringResource(R.string.days)}",
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         ),
@@ -627,7 +627,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = stringResource(R.string.daily_average).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 9.sp,
                             letterSpacing = 0.5.sp
@@ -638,7 +638,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = "${AppFormatters.formatCompactCurrency(dailyRunRate, currencySymbol = state.currencySymbol)}/${stringResource(R.string.day_unit)}",
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         ),
@@ -662,7 +662,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = stringResource(R.string.avg_txn).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 9.sp,
                             letterSpacing = 0.5.sp
@@ -673,7 +673,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     Text(
                         text = AppFormatters.formatCompactCurrency(state.avgTransactionSize, currencySymbol = state.currencySymbol),
                         style = Typography.titleMedium.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
                         ),
@@ -755,7 +755,7 @@ fun SubscriptionsCard(
                     Text(
                         text = stringResource(R.string.recurring_bills_title).uppercase(),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
                             letterSpacing = 1.sp
@@ -772,7 +772,7 @@ fun SubscriptionsCard(
                             Text(
                                 text = "${subscriptions.size} ${stringResource(R.string.active_suffix)}",
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 10.sp
                                 ),
@@ -808,7 +808,7 @@ fun SubscriptionsCard(
                     Text(
                         text = stringResource(R.string.action_add_transaction).substringBefore(" "),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.5.sp
                         ),
@@ -827,7 +827,7 @@ fun SubscriptionsCard(
                         Text(
                             text = stringResource(R.string.monthly_commitment).uppercase(),
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 9.5.sp,
                                 letterSpacing = 0.8.sp
@@ -838,7 +838,7 @@ fun SubscriptionsCard(
                         Text(
                             text = "${AppFormatters.formatCurrency(totalMonthly, currencySymbol, locale)} / mo",
                             style = Typography.titleLarge.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 22.sp,
                                 letterSpacing = (-0.5).sp
@@ -848,7 +848,7 @@ fun SubscriptionsCard(
                         Text(
                             text = "≈ ${AppFormatters.formatCurrency(totalAnnual, currencySymbol, locale)} / yr projected",
                             style = Typography.labelSmall.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontSize = 11.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -885,7 +885,7 @@ fun SubscriptionsCard(
                                 Text(
                                     text = badgeText,
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 11.sp
                                     ),
@@ -947,7 +947,7 @@ fun SubscriptionsCard(
                                 Text(
                                     text = sub.merchant,
                                     style = Typography.titleSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 13.5.sp
                                     ),
@@ -962,7 +962,7 @@ fun SubscriptionsCard(
                                     Text(
                                         text = "$freqLabel • Next: ${AppFormatters.getDay().format(Date(sub.nextExpectedDate))}",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontSize = 11.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -977,7 +977,7 @@ fun SubscriptionsCard(
                                             Text(
                                                 text = if (diffDays == 0) "Today" else "${diffDays}d left",
                                                 style = Typography.labelSmall.copy(
-                                                    fontFamily = Manrope,
+                                                    fontFamily = Lato,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 9.sp
                                                 ),
@@ -995,7 +995,7 @@ fun SubscriptionsCard(
                                 Text(
                                     text = AppFormatters.formatCurrency(sub.amount, currencySymbol, locale),
                                     style = Typography.titleMedium.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.5.sp
                                     ),
@@ -1048,7 +1048,7 @@ fun SubscriptionsCard(
                     Text(
                         text = stringResource(R.string.no_recurring_bills),
                         style = Typography.titleSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         ),
@@ -1057,7 +1057,7 @@ fun SubscriptionsCard(
                     Text(
                         text = stringResource(R.string.no_recurring_bills_desc),
                         style = Typography.bodySmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
                         ),

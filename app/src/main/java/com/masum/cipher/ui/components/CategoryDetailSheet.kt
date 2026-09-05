@@ -66,7 +66,6 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
-import com.masum.cipher.ui.theme.Manrope
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
@@ -228,7 +227,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = stringResource(categoryEnum.titleRes),
                                 style = Typography.titleLarge.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp
                                 ),
@@ -239,7 +238,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = stringResource(R.string.percent_of_expenses, String.format(locale, "%.1f", categoryData.percentage * 100)),
                                 style = Typography.bodySmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontSize = 12.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -332,7 +331,7 @@ fun CategoryDetailSheet(
                                     Text(
                                         text = if (isOverBudget) "OVER LIMIT" else "$percentUsed% OF LIMIT USED",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp,
                                             letterSpacing = 0.8.sp
@@ -354,7 +353,7 @@ fun CategoryDetailSheet(
                                     Text(
                                         text = "${stringResource(R.string.limit_suffix)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 11.sp
                                         ),
@@ -394,7 +393,7 @@ fun CategoryDetailSheet(
                                         "${com.masum.cipher.core.util.AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} remaining"
                                     },
                                     style = Typography.labelSmall.copy(
-                                        fontFamily = Manrope,
+                                        fontFamily = Lato,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium
                                     ),
@@ -405,7 +404,7 @@ fun CategoryDetailSheet(
                                     Text(
                                         text = "${stringResource(R.string.safe_daily_spend)}: ${com.masum.cipher.core.util.AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold
                                         ),
@@ -444,7 +443,7 @@ fun CategoryDetailSheet(
                                     Text(
                                         text = stringResource(R.string.set_category_budget),
                                         style = Typography.titleSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp
                                         ),
@@ -479,7 +478,7 @@ fun CategoryDetailSheet(
                                     Text(
                                         text = stringResource(R.string.set_limit),
                                         style = Typography.labelSmall.copy(
-                                            fontFamily = Manrope,
+                                            fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         ),
@@ -515,7 +514,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = stringResource(R.string.avg_spend_header),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.7.sp
@@ -527,7 +526,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
                                 style = Typography.titleMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 ),
@@ -552,7 +551,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = stringResource(R.string.count_header),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.7.sp
@@ -564,7 +563,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = "$txCount",
                                 style = Typography.titleMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 ),
@@ -589,7 +588,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = stringResource(R.string.largest_header),
                                 style = Typography.labelSmall.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 9.sp,
                                     letterSpacing = 0.7.sp
@@ -601,7 +600,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
                                 style = Typography.titleMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                                 ),
@@ -621,7 +620,7 @@ fun CategoryDetailSheet(
                     Text(
                         text = stringResource(R.string.top_merchants),
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
                             letterSpacing = 1.2.sp
@@ -647,7 +646,7 @@ fun CategoryDetailSheet(
                                         Text(
                                             text = merchant.merchant,
                                             style = Typography.bodyMedium.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.SemiBold,
                                                 fontSize = 13.sp
                                             ),
@@ -660,7 +659,7 @@ fun CategoryDetailSheet(
                                         Text(
                                             text = com.masum.cipher.core.util.AppFormatters.formatCurrency(merchant.totalAmount, currencySymbol, locale),
                                             style = Typography.bodyMedium.copy(
-                                                fontFamily = Manrope,
+                                                fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 13.sp
                                             ),
@@ -701,7 +700,7 @@ fun CategoryDetailSheet(
                     Text(
                         text = "${stringResource(R.string.transactions_header)} (${categoryTransactions.size})",
                         style = Typography.labelSmall.copy(
-                            fontFamily = Manrope,
+                            fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
                             letterSpacing = 1.2.sp
@@ -731,7 +730,7 @@ fun CategoryDetailSheet(
                             Text(
                                 text = tx.merchant.ifEmpty { stringResource(R.string.expense) },
                                 style = Typography.bodyMedium.copy(
-                                    fontFamily = Manrope,
+                                    fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.5.sp
                                 ),
@@ -755,7 +754,7 @@ fun CategoryDetailSheet(
                         Text(
                             text = "-${com.masum.cipher.core.util.AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
                             style = Typography.titleMedium.copy(
-                                fontFamily = Manrope,
+                                fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             ),
@@ -794,7 +793,7 @@ fun EditCategoryBudgetDialog(
                 Text(
                     text = "$categoryName ${stringResource(R.string.limit_suffix)}",
                     style = Typography.titleLarge.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.onSurface
@@ -854,7 +853,7 @@ fun EditCategoryBudgetDialog(
                     ) {
                         Text(
                             text = stringResource(R.string.action_remove_limit),
-                            style = Typography.labelMedium.copy(fontFamily = Manrope),
+                            style = Typography.labelMedium.copy(fontFamily = Lato),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
@@ -874,7 +873,7 @@ fun EditCategoryBudgetDialog(
                 Text(
                     text = stringResource(R.string.action_save),
                     style = Typography.labelLarge.copy(
-                        fontFamily = Manrope,
+                        fontFamily = Lato,
                         fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.onPrimary
@@ -888,7 +887,7 @@ fun EditCategoryBudgetDialog(
             ) {
                 Text(
                     text = stringResource(R.string.action_cancel),
-                    style = Typography.labelLarge.copy(fontFamily = Manrope),
+                    style = Typography.labelLarge.copy(fontFamily = Lato),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
