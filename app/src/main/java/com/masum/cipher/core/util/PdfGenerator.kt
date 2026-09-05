@@ -17,7 +17,8 @@ object PdfGenerator {
         context: Context,
         transactions: List<TransactionEntity>,
         outputStream: OutputStream,
-        currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol
+        currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
+        splitsMap: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
     ) {
         val document = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
@@ -258,20 +259,59 @@ object PdfGenerator {
                 }
                 
                 val date = rowDateFormatter.format(Date(tx.timestamp))
-                val merchant = if (tx.merchant.length > 30) tx.merchant.take(27) + "..." else tx.merchant
+                val merchant = if (tx.merchant.length > 28) tx.merchant.take(25) + "..." else tx.merchant
                 val category = tx.category.uppercase()
-                val textY = currentY + 26f
-                
-                canvas.drawText(date, colDate, textY, rowTextPaint)
-                canvas.drawText(merchant, colMerchant, textY, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
-                rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
-                
-                labelPaint.textAlign = Paint.Align.LEFT
-                canvas.drawText(category, colCategory, textY, labelPaint)
-                
-                val amountStr = formatMoney(tx.amount)
-                val paint = if (tx.isIncome) incomePaint else expensePaint
-                canvas.drawText(amountStr, colAmount, textY, paint)
+                val splits = splitsMap[tx.id]
+                if (splits != null && splits.size > 1) {
+                    val myShare = splits.find { it.isCurrentUser }?.amount ?: tx.amount
+                    val subText = "Split (${splits.size}) · Share: ${formatMoney(myShare)}"
+                    canvas.drawText(date, colDate, currentY + 20f, rowTextPaint)
+                    canvas.drawText(merchant, colMerchant, currentY + 18f, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
+                    rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+                    
+                    val subPaint = Paint(labelPaint).apply {
+                        textSize = 8f
+                        color = colorTextSecondary
+                    }
+                    canvas.drawText(subText, colMerchant, currentY + 32f, subPaint)
+                    
+                    labelPaint.textAlign = Paint.Align.LEFT
+                    canvas.drawText(category, colCategory, currentY + 20f, labelPaint)
+                    
+                    val amountStr = formatMoney(tx.amount)
+                    val paint = if (tx.isIncome) incomePaint else expensePaint
+                    canvas.drawText(amountStr, colAmount, currentY + 20f, paint)
+                } else if (!tx.note.isNullOrBlank()) {
+                    val noteSnippet = if (tx.note.length > 25) tx.note.take(22) + "..." else tx.note
+                    canvas.drawText(date, colDate, currentY + 20f, rowTextPaint)
+                    canvas.drawText(merchant, colMerchant, currentY + 18f, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
+                    rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+                    
+                    val subPaint = Paint(labelPaint).apply {
+                        textSize = 8f
+                        color = colorTextSecondary
+                    }
+                    canvas.drawText(noteSnippet, colMerchant, currentY + 32f, subPaint)
+                    
+                    labelPaint.textAlign = Paint.Align.LEFT
+                    canvas.drawText(category, colCategory, currentY + 20f, labelPaint)
+                    
+                    val amountStr = formatMoney(tx.amount)
+                    val paint = if (tx.isIncome) incomePaint else expensePaint
+                    canvas.drawText(amountStr, colAmount, currentY + 20f, paint)
+                } else {
+                    val textY = currentY + 26f
+                    canvas.drawText(date, colDate, textY, rowTextPaint)
+                    canvas.drawText(merchant, colMerchant, textY, rowTextPaint.apply { typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD) })
+                    rowTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+                    
+                    labelPaint.textAlign = Paint.Align.LEFT
+                    canvas.drawText(category, colCategory, textY, labelPaint)
+                    
+                    val amountStr = formatMoney(tx.amount)
+                    val paint = if (tx.isIncome) incomePaint else expensePaint
+                    canvas.drawText(amountStr, colAmount, textY, paint)
+                }
                 
                 canvas.drawLine(marginX, currentY + rowHeight, rightMargin, currentY + rowHeight, linePaint)
                 currentY += rowHeight

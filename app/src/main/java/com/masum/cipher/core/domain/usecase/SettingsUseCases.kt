@@ -54,17 +54,40 @@ class ClearAllDataUseCase @Inject constructor(
 
 class ExportCsvUseCase @Inject constructor(
     private val transactionDao: TransactionDao,
+    private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
+    private val userPreferences: UserPreferences,
     private val backupRepository: BackupRepository
 ) {
     suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val transactions = transactionDao.getAllTransactions().first()
-            val csvHeader = "ID,Date,Merchant,Amount,Category,Type,Note\n"
+            val allSplits = transactionSplitDao.getAllSplits()
+            val splitsByTx = allSplits.groupBy { it.transactionId }
+            val currencyCode = userPreferences.getCachedCurrencyCode()
+            val currencySymbol = userPreferences.getCachedCurrencySymbol()
+
+            val csvHeader = "ID,Date,Merchant,Amount,Currency,Category,Type,IsSplit,MyShare,SplitDetails,Note\n"
             val csvData = transactions.joinToString("\n") { tx ->
                 val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
                 val type = if (tx.isIncome) "Income" else "Expense"
                 val noteStr = tx.note?.replace("\"", "\"\"") ?: ""
-                "${tx.id},\"$date\",\"${tx.merchant}\",${tx.amount},\"${tx.category}\",\"$type\",\"$noteStr\""
+                val splits = splitsByTx[tx.id]
+                val hasSplits = splits != null && splits.size > 1
+                val isSplit = if (hasSplits) "Yes" else "No"
+                val myShare = if (splits != null && splits.size > 1) {
+                    splits.find { it.isCurrentUser }?.amount ?: tx.amount
+                } else {
+                    tx.amount
+                }
+                val splitDetailsStr = if (splits != null && splits.size > 1) {
+                    splits.joinToString(" | ") { split ->
+                        val status = if (split.isCurrentUser || split.isPaid) "Settled" else "Pending"
+                        "${split.name}: $currencySymbol${String.format(java.util.Locale.US, "%.2f", split.amount)} ($status)"
+                    }.replace("\"", "\"\"")
+                } else {
+                    ""
+                }
+                "${tx.id},\"$date\",\"${tx.merchant.replace("\"", "\"\"")}\",${tx.amount},\"$currencyCode\",\"${tx.category}\",\"$type\",\"$isSplit\",$myShare,\"$splitDetailsStr\",\"$noteStr\""
             }
             
             backupRepository.provideOutputStream(uri)?.use { outputStream ->
@@ -77,16 +100,25 @@ class ExportCsvUseCase @Inject constructor(
 class ExportPdfUseCase @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transactionDao: TransactionDao,
+    private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
     private val backupRepository: BackupRepository,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) {
     suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val transactions = transactionDao.getAllTransactions().first()
+            val allSplits = transactionSplitDao.getAllSplits()
+            val splitsByTx = allSplits.groupBy { it.transactionId }
             val currencySymbol = userPreferences.getCachedCurrencySymbol()
             
             backupRepository.provideOutputStream(uri)?.use { outputStream ->
-                com.masum.cipher.core.util.PdfGenerator.generateStatement(context, transactions, outputStream, currencySymbol)
+                com.masum.cipher.core.util.PdfGenerator.generateStatement(
+                    context = context,
+                    transactions = transactions,
+                    outputStream = outputStream,
+                    currencySymbol = currencySymbol,
+                    splitsMap = splitsByTx
+                )
             } ?: throw Exception("Could not open file for writing")
         }
     }

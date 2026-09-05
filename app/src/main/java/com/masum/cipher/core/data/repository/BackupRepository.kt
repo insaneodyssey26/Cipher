@@ -56,7 +56,8 @@ data class BackupData(
     val notifyMonthlyWrapped: Boolean? = null,
     val notifyUncategorizedReminder: Boolean? = null,
     val notifySubscriptions: Boolean? = null,
-    val notifyNewAppDetected: Boolean? = null
+    val notifyNewAppDetected: Boolean? = null,
+    val appLanguage: String? = null
 )
 
 @Singleton
@@ -107,7 +108,8 @@ class BackupRepository @Inject constructor(
                 notifyMonthlyWrapped = settings.notifyMonthlyWrapped,
                 notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
                 notifySubscriptions = settings.notifySubscriptions,
-                notifyNewAppDetected = settings.notifyNewAppDetected
+                notifyNewAppDetected = settings.notifyNewAppDetected,
+                appLanguage = settings.appLanguage
             )
             val jsonString = json.encodeToString(data)
             
@@ -194,6 +196,7 @@ class BackupRepository @Inject constructor(
                 data.notifyUncategorizedReminder?.let { userPreferences.setNotifyUncategorizedReminder(it) }
                 data.notifySubscriptions?.let { userPreferences.setNotifySubscriptions(it) }
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
+                data.appLanguage?.let { userPreferences.setAppLanguage(it) }
             }
             Result.success(Unit)
         } catch (e: Exception) {
