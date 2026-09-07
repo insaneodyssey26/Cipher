@@ -27,7 +27,9 @@ data class AppCurrency(
             AppCurrency("CAD", "$", "Canadian Dollar", "CA"),
             AppCurrency("AUD", "$", "Australian Dollar", "AU"),
             AppCurrency("AED", "AED", "UAE Dirham", "AE"),
-            AppCurrency("SGD", "S$", "Singapore Dollar", "SG")
+            AppCurrency("SGD", "S$", "Singapore Dollar", "SG"),
+            AppCurrency("MXN", "$", "Mexican Peso", "MX"),
+            AppCurrency("BRL", "R$", "Brazilian Real", "BR")
         )
 
         fun fromCode(code: String, customSymbol: String? = null): AppCurrency {
@@ -65,6 +67,7 @@ data class AppCurrency(
                     "hi" -> fromCode("INR")
                     "bn" -> fromCode("BDT")
                     "ja" -> fromCode("JPY")
+                    "pt" -> fromCode("BRL")
                     "de", "fr", "es" -> fromCode("EUR")
                     else -> {
                         val sys = Locale.getDefault()

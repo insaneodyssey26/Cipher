@@ -373,6 +373,9 @@ fun CurrencySelectionDialog(
                                     }
                                 }
                             }
+                            if (rowPair.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }

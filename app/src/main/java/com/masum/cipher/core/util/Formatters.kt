@@ -81,7 +81,7 @@ object AppFormatters {
         if (cleanSym == "€") {
             return lang != "en"
         }
-        val suffixSymbols = setOf("AED", "kr", "zł", "Kč", "₫", "CHF", "Ft", "lei", "kn", "din", "R$")
+        val suffixSymbols = setOf("AED", "kr", "zł", "Kč", "₫", "CHF", "Ft", "lei", "kn", "din")
         return suffixSymbols.contains(cleanSym)
     }
 
