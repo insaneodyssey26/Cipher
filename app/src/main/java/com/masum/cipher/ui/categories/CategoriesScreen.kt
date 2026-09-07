@@ -587,6 +587,7 @@ fun CategoriesScreen(
             categoryData = catData,
             categoryBudget = categoryBudgets[categoryEnum.displayName] ?: categoryBudgets[categoryEnum.name] ?: 0.0,
             transactions = filteredTransactions,
+            currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onSetCategoryBudget = { newLimit ->
                 viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryEnum.displayName, newLimit))
             },
@@ -602,6 +603,7 @@ fun CategoriesScreen(
     editingTransaction?.let { tx ->
         TransactionDetailsSheet(
             transaction = tx,
+            currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
