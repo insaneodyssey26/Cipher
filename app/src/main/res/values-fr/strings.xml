@@ -342,8 +342,10 @@
     <string name="whats_new_feature_budget_desc">Fixez un plafond strict ou laissez vos revenus augmenter automatiquement votre limite mensuelle.</string>
     <string name="whats_new_feature_backup_title">Sauvegardes et Exportations Complètes</string>
     <string name="whats_new_feature_backup_desc">Les détails des partages et notes sont maintenant inclus dans les sauvegardes, exports CSV et PDF.</string>
-    <string name="whats_new_feature_logo_title">Nouveau Look et Icône d\'Application</string>
-    <string name="whats_new_feature_logo_desc">Découvrez la nouvelle identité visuelle émeraude de Cipher, un thème sombre épuré et des icônes thématiques.</string>
+    <string name="whats_new_feature_currencies_title">Nouvelles Devises</string>
+    <string name="whats_new_feature_currencies_desc">Ajout du Peso mexicain (MXN) et du Real brésilien (BRL).</string>
+    <string name="whats_new_feature_compact_nav_title">Barre de Navigation Compacte</string>
+    <string name="whats_new_feature_compact_nav_desc">Activez une barre de navigation plus petite dans les paramètres.</string>
     <string name="whats_new_setup_tracking_continue">Configurer et continuer</string>
     <string name="split_expense">Partager la dépense</string>
     <string name="split_title">Partager la dépense</string>

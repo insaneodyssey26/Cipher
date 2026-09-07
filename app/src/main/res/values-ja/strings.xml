@@ -342,8 +342,10 @@
     <string name="whats_new_feature_budget_desc">固定の上限を設定するか、収入に応じて月間支出上限が自動的に拡大する動的予算を選択できます。</string>
     <string name="whats_new_feature_backup_title">完全なバックアップとエクスポート</string>
     <string name="whats_new_feature_backup_desc">割り勘の詳細やメモが暗号化バックアップ、CSV、PDFエクスポートに完全に反映されます。</string>
-    <string name="whats_new_feature_logo_title">新しいデザインとアプリアイコン</string>
-    <string name="whats_new_feature_logo_desc">Cipherの洗練された新しいエメラルドデザイン、ダークテーマ、Material Youテーマアイコンに対応しました。</string>
+    <string name="whats_new_feature_currencies_title">新しい通貨のサポート</string>
+    <string name="whats_new_feature_currencies_desc">メキシコ・ペソ（MXN）とブラジル・レアル（BRL）が追加されました。</string>
+    <string name="whats_new_feature_compact_nav_title">コンパクトナビゲーションバー</string>
+    <string name="whats_new_feature_compact_nav_desc">設定からより小さいナビゲーションバーに切り替えて画面を広く使えます。</string>
     <string name="whats_new_setup_tracking_continue">トラッキングを設定して続ける</string>
     <string name="split_expense">割り勘</string>
     <string name="split_title">支出を分割</string>

@@ -341,8 +341,10 @@
     <string name="whats_new_feature_budget_desc">Establece un límite de gasto estricto o permite que los ingresos amplíen tu presupuesto automáticamente.</string>
     <string name="whats_new_feature_backup_title">Copias de Seguridad y Exportaciones</string>
     <string name="whats_new_feature_backup_desc">Los detalles de división y notas ahora se integran en copias de seguridad cifradas, CSV y PDF.</string>
-    <string name="whats_new_feature_logo_title">Nueva Imagen e Icono de la App</string>
-    <string name="whats_new_feature_logo_desc">Descubre la nueva identidad visual de Cipher, diseño oscuro refinado y soporte para iconos con tema Material You.</string>
+    <string name="whats_new_feature_currencies_title">Nuevas Monedas</string>
+    <string name="whats_new_feature_currencies_desc">Se agregaron el Peso Mexicano (MXN) y el Real Brasileño (BRL).</string>
+    <string name="whats_new_feature_compact_nav_title">Barra de Navegación Compacta</string>
+    <string name="whats_new_feature_compact_nav_desc">Activa una barra inferior más pequeña en Ajustes para ganar espacio.</string>
     <string name="whats_new_setup_tracking_continue">Configurar y continuar</string>
     <string name="split_expense">Dividir gasto</string>
     <string name="split_title">Dividir gasto</string>

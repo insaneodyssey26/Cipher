@@ -342,8 +342,10 @@
     <string name="whats_new_feature_budget_desc">একটি নির্দিষ্ট খরচের সীমা নির্ধারণ করুন অথবা আয়ের সাথে সাথে খরচ সীমা স্বয়ংক্রিয়ভাবে বৃদ্ধি করুন।</string>
     <string name="whats_new_feature_backup_title">সম্পূর্ণ ব্যাকআপ ও এক্সপোর্ট</string>
     <string name="whats_new_feature_backup_desc">স্প্লিটের বিবরণ এবং নোট এখন সম্পূর্ণভাবে ব্যাকআপ, CSV এবং PDF রিপোর্টে সংরক্ষিত হয়।</string>
-    <string name="whats_new_feature_logo_title">নতুন লুক ও অ্যাপ আইকন</string>
-    <string name="whats_new_feature_logo_desc">সাইফারের আধুনিক নতুন পান্না ভল্ট আইডেন্টিটি, পরিমার্জিত ডার্ক থিম এবং থিমযুক্ত আইকন সাপোর্ট।</string>
+    <string name="whats_new_feature_currencies_title">নতুন মুদ্রা সমর্থন</string>
+    <string name="whats_new_feature_currencies_desc">মেক্সিকান পেসো (MXN) এবং ব্রাজিলিয়ান রিয়াল (BRL) যুক্ত করা হয়েছে।</string>
+    <string name="whats_new_feature_compact_nav_title">কমপ্যাক্ট নেভিগেশন বার</string>
+    <string name="whats_new_feature_compact_nav_desc">বেশি স্ক্রিন স্পেসের জন্য সেটিংস থেকে ছোট নেভিগেশন বার বেছে নিন।</string>
     <string name="whats_new_setup_tracking_continue">ট্র্যাকিং সেটআপ করুন ও এগিয়ে যান</string>
     <string name="split_expense">খরচ ভাগ করুন</string>
     <string name="split_title">খরচ ভাগ করুন</string>

@@ -341,8 +341,10 @@
     <string name="whats_new_feature_budget_desc">एक सख्त खर्च सीमा निर्धारित करें या आय आने पर अपनी सीमा को स्वचालित रूप से बढ़ाएं।</string>
     <string name="whats_new_feature_backup_title">पूर्ण वॉल्ट बैकअप और निर्यात</string>
     <string name="whats_new_feature_backup_desc">विभाजन विवरण, मुद्रा और नोट्स अब बैकअप, CSV और PDF रिपोर्ट में शामिल हैं।</string>
-    <string name="whats_new_feature_logo_title">बिल्कुल नया लुक और ऐप आइकन</string>
-    <string name="whats_new_feature_logo_desc">साइफ़र की आधुनिक नई पन्ना वॉल्ट पहचान, परिष्कृत डार्क थीम और थीम वाले आइकन का अनुभव करें।</string>
+    <string name="whats_new_feature_currencies_title">नई मुद्राएं</string>
+    <string name="whats_new_feature_currencies_desc">मैक्सिकन पेसो (MXN) और ब्राज़ीलियाई रियल (BRL) जोड़ा गया।</string>
+    <string name="whats_new_feature_compact_nav_title">कॉम्पैक्ट नेविगेशन बार</string>
+    <string name="whats_new_feature_compact_nav_desc">अधिक स्क्रीन स्पेस के लिए सेटिंग्स से छोटा नेविगेशन बार चुनें।</string>
     <string name="whats_new_setup_tracking_continue">ट्रैकिंग सेटअप करें और आगे बढ़ें</string>
     <string name="split_expense">खर्च बाँटें</string>
     <string name="split_title">खर्च बाँटें</string>

@@ -342,8 +342,10 @@
     <string name="whats_new_feature_budget_desc">Set a strict spending limit or let your budget grow automatically when you get paid.</string>
     <string name="whats_new_feature_backup_title">Better Backups &amp; Exports</string>
     <string name="whats_new_feature_backup_desc">Split expenses, notes, and currency details are now included in your backups, CSV, and PDF reports.</string>
-    <string name="whats_new_feature_logo_title">Fresh New App Icon</string>
-    <string name="whats_new_feature_logo_desc">A brand new emerald look for Cipher, with support for Android themed icons.</string>
+    <string name="whats_new_feature_currencies_title">New Currency Support</string>
+    <string name="whats_new_feature_currencies_desc">Added Mexican Peso (MXN) and Brazilian Real (BRL) with fixed currency display.</string>
+    <string name="whats_new_feature_compact_nav_title">Compact Navigation Bar</string>
+    <string name="whats_new_feature_compact_nav_desc">Switch to a smaller navigation bar from Settings to save screen space.</string>
     <string name="whats_new_setup_tracking_continue">Setup Tracking &amp; Continue</string>
     <string name="split_expense">Split Expense</string>
     <string name="split_title">Split</string>

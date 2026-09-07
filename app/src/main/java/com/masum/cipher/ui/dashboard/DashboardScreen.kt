@@ -112,6 +112,7 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
@@ -1039,6 +1040,11 @@ fun DashboardScreen(
                         icon = LucideIcons.Pencil
                     )
                     WhatsNewFeatureItem(
+                        title = stringResource(R.string.whats_new_feature_currencies_title),
+                        description = stringResource(R.string.whats_new_feature_currencies_desc),
+                        icon = LucideIcons.Globe
+                    )
+                    WhatsNewFeatureItem(
                         title = stringResource(R.string.whats_new_feature_budget_title),
                         description = stringResource(R.string.whats_new_feature_budget_desc),
                         icon = LucideIcons.Activity
@@ -1047,11 +1053,6 @@ fun DashboardScreen(
                         title = stringResource(R.string.whats_new_feature_backup_title),
                         description = stringResource(R.string.whats_new_feature_backup_desc),
                         icon = LucideIcons.Zap
-                    )
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_logo_title),
-                        description = stringResource(R.string.whats_new_feature_logo_desc),
-                        icon = LucideIcons.Star
                     )
                 }
 

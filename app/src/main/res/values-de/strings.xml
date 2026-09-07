@@ -342,8 +342,10 @@
     <string name="whats_new_feature_budget_desc">Legen Sie ein festes Ausgabenlimit fest oder lassen Sie Einnahmen Ihr Monatsbudget automatisch erweitern.</string>
     <string name="whats_new_feature_backup_title">Vollständige Backups und Exporte</string>
     <string name="whats_new_feature_backup_desc">Teilungsdetails und Notizen sind jetzt vollständig in Backups, CSV- und PDF-Exporte integriert.</string>
-    <string name="whats_new_feature_logo_title">Neuer Look und Neues App-Icon</string>
-    <string name="whats_new_feature_logo_desc">Entdecken Sie Ciphers moderne neue Smaragd-Identität, verfeinertes Dark Theme und themenbezogene Icons.</string>
+    <string name="whats_new_feature_currencies_title">Neue Währungen</string>
+    <string name="whats_new_feature_currencies_desc">Mexikanischer Peso (MXN) und Brasilianischer Real (BRL) hinzugefügt.</string>
+    <string name="whats_new_feature_compact_nav_title">Kompakte Navigationsleiste</string>
+    <string name="whats_new_feature_compact_nav_desc">Wechseln Sie in den Einstellungen zu einer kleineren Leiste für mehr Platz.</string>
     <string name="whats_new_setup_tracking_continue">Tracking einrichten &amp; fortfahren</string>
     <string name="split_expense">Ausgabe teilen</string>
     <string name="split_title">Ausgabe teilen</string>
