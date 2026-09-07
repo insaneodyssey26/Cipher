@@ -30,7 +30,8 @@ class TransactionParser @Inject constructor() {
 
         val amount = extractAmount(message, rules) ?: return null
 
-        var merchant = findBrandInText(message, rules)
+        var merchant = extractP2PSender(message)
+        if (merchant == null) merchant = findBrandInText(message, rules)
         if (merchant == null) merchant = extractMerchantStructural(message, rules)
 
         val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
@@ -91,8 +92,30 @@ class TransactionParser @Inject constructor() {
     companion object {
         private val MULTI_SPACE_REGEX = Regex("\\s+")
         private val MERCHANT_PREFIX_CLEANUP = Regex("^(?:to|from|payment\\s+to|transfer\\s+to)\\s+", RegexOption.IGNORE_CASE)
-        private val MERCHANT_TRAILING_CLEANUP = Regex("(?i)\\b(?:using|via|on|ref|vpa|upi|card|with|rrn|txn|id|auth)\\b.*")
+        private val MERCHANT_TRAILING_CLEANUP = Regex("(?i)\\b(?:using|via|on|ref|vpa|upi|card|with|rrn|txn|id|auth|deposited|credited|in|into|for|towards|bank|account|a/c)\\b.*")
         private val NUMERIC_CLEANUP = Regex("[^\\d.]")
+        private val P2P_SENDER_PATTERNS = listOf(
+            java.util.regex.Pattern.compile("(?i)^([A-Za-z][A-Za-z0-9\\s&.]{1,40}?)\\s+paid\\s+you"),
+            java.util.regex.Pattern.compile("(?i)^([A-Za-z][A-Za-z0-9\\s&.]{1,40}?)\\s+sent\\s+you"),
+            java.util.regex.Pattern.compile("(?i)^([A-Za-z][A-Za-z0-9\\s&.]{1,40}?)\\s+transferred\\s+you"),
+            java.util.regex.Pattern.compile("(?i)received\\s+(?:(?:rs\\.?|inr|₹)?\\s*[\\d,.]+\\s+)?from\\s+([A-Za-z][A-Za-z0-9\\s&.]{1,40}?)(?=\\s+deposited|\\s+credited|\\s+received|\\s+into|\\s+in\\s+your|\\s+on|\\s+using|\\s+via|\\s+ref|\\s+to|\\s+for|\\s+towards|\\s+a/c|\\s+acc|\\s+account|\\s+bank|\\.|$)")
+        )
+    }
+
+    private fun extractP2PSender(message: String): String? {
+        for (pattern in P2P_SENDER_PATTERNS) {
+            val matcher = pattern.matcher(message)
+            if (matcher.find()) {
+                val raw = matcher.group(1)?.trim() ?: continue
+                if (raw.isNotBlank()) {
+                    val cleaned = raw.replace(MERCHANT_PREFIX_CLEANUP, "").trim()
+                    if (cleaned.isNotBlank() && !TransactionPatterns.MERCHANT_FALSE_POSITIVE_PREFIXES.any { cleaned.lowercase().startsWith(it) }) {
+                        return cleaned
+                    }
+                }
+            }
+        }
+        return null
     }
 
     private fun findBrandInText(message: String, rules: RegionParserRules): String? {
@@ -127,7 +150,8 @@ class TransactionParser @Inject constructor() {
             .replace(MERCHANT_TRAILING_CLEANUP, "")
             .trim()
             .split(" ")
-            .take(2)
+            .filter { it.isNotBlank() }
+            .take(3)
             .joinToString(" ")
             .uppercase()
     }

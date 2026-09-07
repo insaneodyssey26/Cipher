@@ -45,11 +45,20 @@ class TransactionNotificationService : NotificationListenerService() {
         val notification = sbn.notification
         val extras = notification.extras
 
-        val title = extras.getString(android.app.Notification.EXTRA_TITLE) ?: ""
-        val text = extras.getString(android.app.Notification.EXTRA_TEXT) ?: ""
-        val bigText = extras.getString(android.app.Notification.EXTRA_BIG_TEXT) ?: ""
-        
-        val fullMessage = "$title $text $bigText".trim()
+        val title = extras.getCharSequence(android.app.Notification.EXTRA_TITLE)?.toString().orEmpty()
+        val text = extras.getCharSequence(android.app.Notification.EXTRA_TEXT)?.toString().orEmpty()
+        val bigText = extras.getCharSequence(android.app.Notification.EXTRA_BIG_TEXT)?.toString().orEmpty()
+        val titleBig = extras.getCharSequence(android.app.Notification.EXTRA_TITLE_BIG)?.toString().orEmpty()
+        val subText = extras.getCharSequence(android.app.Notification.EXTRA_SUB_TEXT)?.toString().orEmpty()
+        val textLines = extras.getCharSequenceArray(android.app.Notification.EXTRA_TEXT_LINES)?.joinToString(" ").orEmpty()
+        val summaryText = extras.getCharSequence(android.app.Notification.EXTRA_SUMMARY_TEXT)?.toString().orEmpty()
+        val infoText = extras.getCharSequence(android.app.Notification.EXTRA_INFO_TEXT)?.toString().orEmpty()
+
+        val fullMessage = listOf(title, titleBig, text, bigText, subText, textLines, summaryText, infoText)
+            .filter { it.isNotBlank() }
+            .distinct()
+            .joinToString(" ")
+            .trim()
         if (fullMessage.isBlank()) return
 
         serviceScope.launch {

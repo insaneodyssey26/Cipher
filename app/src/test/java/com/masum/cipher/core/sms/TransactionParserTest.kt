@@ -531,4 +531,40 @@ class TransactionParserTest {
         val result = parser.parse("INR 0.00 debited from account ending 1234 at Test Merchant.")
         assertNull(result)
     }
+
+    @Test
+    fun `Paytm received payment notification parse`() {
+        val result = parser.parse("Received ₹1 from Sk Masum Ali Deposited in your State Bank Of India - 6693 on 08 September at 12:03 AM")
+        assertNotNull(result)
+        assertEquals(1.0, result!!.amount, 0.001)
+        assertEquals("SK MASUM ALI", result.merchant)
+        assertTrue(result.isIncome)
+    }
+
+    @Test
+    fun `Paytm received payment with bank name parse`() {
+        val result = parser.parse("Received ₹1 from Mr Gunjan Rajbanshi Deposited in your Slice Small Finance Bank Ltd - 5470 on 07 September at 11:42 PM")
+        assertNotNull(result)
+        assertEquals(1.0, result!!.amount, 0.001)
+        assertEquals("MR GUNJAN RAJBANSHI", result.merchant)
+        assertTrue(result.isIncome)
+    }
+
+    @Test
+    fun `Slice paid you notification parse`() {
+        val result = parser.parse("Mr GUNJAN RAJBANSHI paid you ₹1.00 Payment from slice")
+        assertNotNull(result)
+        assertEquals(1.0, result!!.amount, 0.001)
+        assertEquals("MR GUNJAN RAJBANSHI", result.merchant)
+        assertTrue(result.isIncome)
+    }
+
+    @Test
+    fun `Slice paid you notification with tap to view parse`() {
+        val result = parser.parse("Mr GUNJAN RAJBANSHI paid you ₹1.00 Tap to view.")
+        assertNotNull(result)
+        assertEquals(1.0, result!!.amount, 0.001)
+        assertEquals("MR GUNJAN RAJBANSHI", result.merchant)
+        assertTrue(result.isIncome)
+    }
 }

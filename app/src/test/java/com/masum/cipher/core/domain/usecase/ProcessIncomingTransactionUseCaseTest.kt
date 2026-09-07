@@ -140,6 +140,36 @@ class ProcessIncomingTransactionUseCaseTest {
         assertEquals(1, syncCount)
     }
 
+    @Test
+    fun incomeAndExpenseOfSameAmountWithinWindowAreBothAllowed() = runBlocking {
+        val existingExpense = TransactionEntity(
+            id = 1L,
+            amount = 100.0,
+            merchant = "STORE",
+            currency = "INR",
+            category = "SHOPPING",
+            timestamp = 100_000L,
+            rawSms = "Paid 100",
+            isIncome = false
+        )
+        fakeTransactionDao.duplicateReturn = existingExpense
+
+        val incomingIncome = TransactionEntity(
+            amount = 100.0,
+            merchant = "FRIEND",
+            currency = "INR",
+            category = "",
+            timestamp = 105_000L,
+            rawSms = "Received 100",
+            isIncome = true
+        )
+
+        val result = useCase(incomingIncome)
+        assertNotNull(result)
+        assertEquals(1, fakeTransactionDao.insertedTransactions.size)
+        assertEquals(1, syncCount)
+    }
+
     private class FakeTransactionDao {
         var duplicateReturn: TransactionEntity? = null
         val insertedTransactions = mutableListOf<TransactionEntity>()
@@ -150,7 +180,11 @@ class ProcessIncomingTransactionUseCaseTest {
                 arrayOf(TransactionDao::class.java)
             ) { _, method, args ->
                 when (method.name) {
-                    "findDuplicate" -> duplicateReturn
+                    "findDuplicate" -> {
+                        val amount = args[0] as Double
+                        val isIncome = args[1] as Boolean
+                        duplicateReturn?.takeIf { it.amount == amount && it.isIncome == isIncome }
+                    }
                     "insertTransaction" -> {
                         val tx = args[0] as TransactionEntity
                         val id = (insertedTransactions.size + 1).toLong()

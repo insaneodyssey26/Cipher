@@ -34,7 +34,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
             val startTime = transaction.timestamp - timeWindow
             val endTime = transaction.timestamp + timeWindow
 
-            val duplicate = transactionDao.findDuplicate(transaction.amount, startTime, endTime)
+            val duplicate = transactionDao.findDuplicate(transaction.amount, transaction.isIncome, startTime, endTime)
             if (duplicate != null) {
                 return null
             }
