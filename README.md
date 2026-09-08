@@ -2,6 +2,15 @@
 
 A local-first, privacy-focused personal finance app for Android. cipher reads your bank SMS alerts and app notifications, turning them into a clean, searchable transaction ledger — entirely on-device, with zero cloud dependency.
 
+<p align="left">
+  <a href="https://play.google.com/store/apps/details?id=com.masum.cipher">
+    <img alt="Get it on Google Play" height="80" src="docs/badges/google-play-badge.svg" />
+  </a>
+  <a href="https://github.com/insaneodyssey26/cipher/releases/latest">
+    <img alt="Get it on GitHub" height="80" src="docs/badges/github.svg" />
+  </a>
+</p>
+
 ---
 
 ## Screenshots
@@ -318,9 +327,19 @@ Open in Android Studio (Ladybug or newer). Compile SDK 37 required.
 
 ## Installing
 
-Download the APK from the [Releases page](https://github.com/insaneodyssey26/Cipher/releases).
+<p align="left">
+  <a href="https://play.google.com/store/apps/details?id=com.masum.cipher">
+    <img alt="Get it on Google Play" height="80" src="docs/badges/google-play-badge.svg" />
+  </a>
+  <a href="https://github.com/insaneodyssey26/cipher/releases/latest">
+    <img alt="Get it on GitHub" height="80" src="docs/badges/github.svg" />
+  </a>
+</p>
 
-For step-by-step install instructions including the Android 13+ SMS permission setup, see **[INSTALL.md](INSTALL.md)**.
+- **Google Play**: Install directly from [Google Play Store](https://play.google.com/store/apps/details?id=com.masum.cipher).
+- **GitHub**: Download the latest APK from the [Latest Release page](https://github.com/insaneodyssey26/cipher/releases/latest).
+
+For step-by-step sideloading instructions including the Android 13+ SMS permission setup, see **[INSTALL.md](INSTALL.md)**.
 
 ---
 
