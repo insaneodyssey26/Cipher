@@ -1,5 +1,20 @@
 # Release Notes
 
+## [5.5.0]
+
+### Added
+- **Split Expenses**: Easily split bills with friends, track individual shares, and monitor settled vs unsettled balances with time filters.
+- **Adjust Account Balance**: Tap the edit icon directly next to your hero balance on the dashboard to align your balance with your bank account.
+- **New Currencies**: Added support for Mexican Peso (MXN) and Brazilian Real (BRL) with proper locale formatting.
+- **Compact Navigation Bar**: Optional compact mode in Settings for a smaller navigation bar that gives more vertical screen space.
+
+### Changed & Improved
+- **UPI Push Notification Parsing**: Enhanced parser coverage for incoming and outgoing payment alerts across Paytm, Google Pay.
+- **Transaction Deduplication**: Updated duplicate detection to distinguish incoming credits from outgoing debits when identical amounts occur in the same time window.
+- **Currency Display Fix**: Fixed currency symbol formatting in category sheets.
+
+---
+
 ## [5.2.1]
 
 ### Fixed
