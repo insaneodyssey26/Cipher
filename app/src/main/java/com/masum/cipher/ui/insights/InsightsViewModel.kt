@@ -1,6 +1,7 @@
 package com.masum.cipher.ui.insights
 
 import androidx.lifecycle.viewModelScope
+import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
@@ -29,6 +30,7 @@ class InsightsViewModel @Inject constructor(
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
     private val categoryRuleDao: CategoryRuleDao,
+    private val merchantAliasDao: com.masum.cipher.core.data.local.dao.MerchantAliasDao,
     private val subscriptionDao: SubscriptionDao,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
@@ -41,6 +43,7 @@ class InsightsViewModel @Inject constructor(
 
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
     private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
+    private val _promptMerchantRuleFor = MutableStateFlow<DashboardContract.MerchantRenameRulePrompt?>(null)
 
     init {
         loadInsights()
@@ -59,6 +62,8 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is InsightsContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is InsightsContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
+            is InsightsContract.Intent.SaveMerchantRule -> saveMerchantRule(intent.rawName, intent.cleanName)
+            is InsightsContract.Intent.DismissMerchantRulePrompt -> _promptMerchantRuleFor.value = null
             is InsightsContract.Intent.SaveSubscription -> saveSubscription(intent)
             is InsightsContract.Intent.DeleteSubscription -> deleteSubscription(intent.merchant)
             is InsightsContract.Intent.IgnoreSubscription -> ignoreSubscription(intent.merchant)
@@ -138,6 +143,8 @@ class InsightsViewModel @Inject constructor(
                 state.copy(draftTransaction = draft)
             }.combine(_promptCategoryRuleFor) { state, prompt ->
                 state.copy(promptCategoryRuleFor = prompt)
+            }.combine(_promptMerchantRuleFor) { state, prompt ->
+                state.copy(promptMerchantRuleFor = prompt)
             }.collect { newState ->
                 updateState { 
                     newState.copy(
@@ -159,13 +166,31 @@ class InsightsViewModel @Inject constructor(
     private fun updateTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             val existing = transactionRepository.getTransactionById(transaction.id)
+            val oldMerchant = existing?.merchant?.trim().orEmpty()
+            val newMerchant = transaction.merchant.trim()
+            val merchantChanged = existing != null && oldMerchant.isNotBlank() && newMerchant.isNotBlank() && !oldMerchant.equals(newMerchant, ignoreCase = true)
             val categoryChanged = existing != null && existing.category != transaction.category && existing.merchant == transaction.merchant
             
             updateTransactionUseCase(transaction)
             
-            if (categoryChanged) {
+            if (merchantChanged) {
+                _promptMerchantRuleFor.value = DashboardContract.MerchantRenameRulePrompt(oldMerchant, newMerchant)
+            } else if (categoryChanged) {
                 _promptCategoryRuleFor.value = transaction
             }
+        }
+    }
+
+    private fun saveMerchantRule(rawName: String, cleanName: String) {
+        viewModelScope.launch {
+            merchantAliasDao.insertAlias(
+                com.masum.cipher.core.data.local.entity.MerchantAliasEntity(
+                    rawName = rawName.uppercase().trim(),
+                    cleanName = cleanName.trim(),
+                    isUserDefined = true
+                )
+            )
+            _promptMerchantRuleFor.value = null
         }
     }
 

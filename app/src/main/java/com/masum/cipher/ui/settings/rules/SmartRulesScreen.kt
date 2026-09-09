@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -32,10 +35,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -45,24 +52,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
+import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.theme.Typography
-import androidx.compose.ui.res.stringResource
-import com.masum.cipher.R
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
+import compose.icons.lucideicons.ArrowRight
+import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Plus
+import compose.icons.lucideicons.Store
+import compose.icons.lucideicons.Tag
 import compose.icons.lucideicons.Trash2
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,8 +90,24 @@ fun SmartRulesScreen(
     val view = androidx.compose.ui.platform.LocalView.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var showAddDialog by remember { mutableStateOf(false) }
-    var editRule by remember { mutableStateOf<CategoryRuleEntity?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(initialPage = state.selectedTab) { 2 }
+
+    var showCategoryDialog by remember { mutableStateOf(false) }
+    var editCategoryRule by remember { mutableStateOf<CategoryRuleEntity?>(null) }
+
+    var showMerchantDialog by remember { mutableStateOf(false) }
+    var editMerchantRule by remember { mutableStateOf<MerchantAliasEntity?>(null) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.handleIntent(SmartRulesContract.Intent.SelectTab(pagerState.currentPage))
+    }
+
+    LaunchedEffect(state.selectedTab) {
+        if (pagerState.currentPage != state.selectedTab) {
+            pagerState.animateScrollToPage(state.selectedTab)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -85,14 +115,24 @@ fun SmartRulesScreen(
                 is SmartRulesContract.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
-                is SmartRulesContract.Effect.ShowUndoDelete -> {
+                is SmartRulesContract.Effect.ShowUndoDeleteCategoryRule -> {
                     val result = snackbarHostState.showSnackbar(
                         message = "Rule deleted",
                         actionLabel = "UNDO",
                         duration = SnackbarDuration.Short
                     )
                     if (result == SnackbarResult.ActionPerformed) {
-                        viewModel.handleIntent(SmartRulesContract.Intent.RestoreRule(effect.rule))
+                        viewModel.handleIntent(SmartRulesContract.Intent.RestoreCategoryRule(effect.rule))
+                    }
+                }
+                is SmartRulesContract.Effect.ShowUndoDeleteMerchantRule -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Rule deleted",
+                        actionLabel = "UNDO",
+                        duration = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        viewModel.handleIntent(SmartRulesContract.Intent.RestoreMerchantRule(effect.alias))
                     }
                 }
             }
@@ -132,8 +172,13 @@ fun SmartRulesScreen(
             FloatingActionButton(
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled)
-                    editRule = null
-                    showAddDialog = true
+                    if (pagerState.currentPage == 0) {
+                        editCategoryRule = null
+                        showCategoryDialog = true
+                    } else {
+                        editMerchantRule = null
+                        showMerchantDialog = true
+                    }
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -142,60 +187,180 @@ fun SmartRulesScreen(
             }
         }
     ) { padding ->
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-        } else if (state.rules.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(R.string.smart_rules_empty),
-                    style = Typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            SecondaryTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.primary,
+                indicator = {
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            ) {
+                Tab(
+                    selected = pagerState.currentPage == 0,
+                    onClick = {
+                        view.performVibrate(state.isHapticsEnabled)
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(0)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.smart_rules_tab_categories),
+                            style = Typography.titleSmall.copy(
+                                fontWeight = if (pagerState.currentPage == 0) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (pagerState.currentPage == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = LucideIcons.Tag,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+                Tab(
+                    selected = pagerState.currentPage == 1,
+                    onClick = {
+                        view.performVibrate(state.isHapticsEnabled)
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.smart_rules_tab_merchants),
+                            style = Typography.titleSmall.copy(
+                                fontWeight = if (pagerState.currentPage == 1) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (pagerState.currentPage == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = LucideIcons.Store,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(state.rules, key = { it.merchantName }) { rule ->
-                    RuleItem(
-                        rule = rule,
-                        onClick = {
-                            view.performVibrate(state.isHapticsEnabled)
-                            editRule = rule
-                            showAddDialog = true
-                        },
-                        onDelete = {
-                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                            viewModel.handleIntent(SmartRulesContract.Intent.DeleteRule(rule))
+
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    if (page == 0) {
+                        if (state.categoryRules.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.smart_rules_empty_categories),
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(state.categoryRules, key = { it.merchantName }) { rule ->
+                                    CategoryRuleItem(
+                                        rule = rule,
+                                        onClick = {
+                                            view.performVibrate(state.isHapticsEnabled)
+                                            editCategoryRule = rule
+                                            showCategoryDialog = true
+                                        },
+                                        onDelete = {
+                                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                                            viewModel.handleIntent(SmartRulesContract.Intent.DeleteCategoryRule(rule))
+                                        }
+                                    )
+                                }
+                            }
                         }
-                    )
+                    } else {
+                        if (state.merchantRules.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.smart_rules_empty_merchants),
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(state.merchantRules, key = { it.rawName }) { alias ->
+                                    MerchantRuleItem(
+                                        alias = alias,
+                                        onClick = {
+                                            view.performVibrate(state.isHapticsEnabled)
+                                            editMerchantRule = alias
+                                            showMerchantDialog = true
+                                        },
+                                        onDelete = {
+                                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                                            viewModel.handleIntent(SmartRulesContract.Intent.DeleteMerchantRule(alias))
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    if (showAddDialog) {
-        RuleEditDialog(
-            initialMerchant = editRule?.merchantName ?: "",
-            initialCategory = editRule?.customCategory ?: "OTHERS",
-            onDismiss = { showAddDialog = false },
+    if (showCategoryDialog) {
+        CategoryRuleEditDialog(
+            initialMerchant = editCategoryRule?.merchantName ?: "",
+            initialCategory = editCategoryRule?.customCategory ?: "OTHERS",
+            onDismiss = { showCategoryDialog = false },
             onSave = { merchant, category ->
-                viewModel.handleIntent(SmartRulesContract.Intent.AddOrUpdateRule(merchant, category))
-                showAddDialog = false
+                viewModel.handleIntent(SmartRulesContract.Intent.AddOrUpdateCategoryRule(merchant, category))
+                showCategoryDialog = false
+            }
+        )
+    }
+
+    if (showMerchantDialog) {
+        MerchantRuleEditDialog(
+            initialRawMerchant = editMerchantRule?.rawName ?: "",
+            initialCleanMerchant = editMerchantRule?.cleanName ?: "",
+            onDismiss = { showMerchantDialog = false },
+            onSave = { rawName, cleanName ->
+                viewModel.handleIntent(SmartRulesContract.Intent.AddOrUpdateMerchantRule(rawName, cleanName))
+                showMerchantDialog = false
             }
         )
     }
 }
 
 @Composable
-private fun RuleItem(
+private fun CategoryRuleItem(
     rule: CategoryRuleEntity,
     onClick: () -> Unit,
     onDelete: () -> Unit
@@ -203,7 +368,7 @@ private fun RuleItem(
     val category = TransactionCategory.fromString(rule.customCategory)
     
     VaultCard(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         contentPadding = 12.dp,
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
@@ -260,9 +425,86 @@ private fun RuleItem(
     }
 }
 
+@Composable
+private fun MerchantRuleItem(
+    alias: MerchantAliasEntity,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    VaultCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        contentPadding = 12.dp,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Store,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = alias.rawName,
+                    style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.ArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Text(
+                        text = alias.cleanName,
+                        style = Typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Trash2,
+                    contentDescription = stringResource(R.string.action_delete_rule),
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RuleEditDialog(
+private fun CategoryRuleEditDialog(
     initialMerchant: String,
     initialCategory: String,
     onDismiss: () -> Unit,
@@ -387,6 +629,68 @@ private fun RuleEditDialog(
                     }
                 },
                 enabled = merchantName.isNotBlank()
+            ) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
+    )
+}
+
+@Composable
+private fun MerchantRuleEditDialog(
+    initialRawMerchant: String,
+    initialCleanMerchant: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var rawMerchant by remember { mutableStateOf(initialRawMerchant) }
+    var cleanMerchant by remember { mutableStateOf(initialCleanMerchant) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (initialRawMerchant.isEmpty()) stringResource(R.string.smart_rules_dialog_new) else stringResource(R.string.smart_rules_dialog_edit),
+                style = Typography.titleLarge
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = rawMerchant,
+                    onValueChange = { rawMerchant = it },
+                    label = { Text(stringResource(R.string.smart_rules_raw_merchant_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = initialRawMerchant.isEmpty()
+                )
+
+                OutlinedTextField(
+                    value = cleanMerchant,
+                    onValueChange = { cleanMerchant = it },
+                    label = { Text(stringResource(R.string.smart_rules_clean_merchant_label)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    if (rawMerchant.isNotBlank() && cleanMerchant.isNotBlank()) {
+                        onSave(rawMerchant, cleanMerchant)
+                    }
+                },
+                enabled = rawMerchant.isNotBlank() && cleanMerchant.isNotBlank()
             ) {
                 Text(stringResource(R.string.action_save))
             }

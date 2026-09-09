@@ -21,6 +21,8 @@ class DashboardContract {
         data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
         data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
         object DismissCategoryRulePrompt : Intent()
+        data class SaveMerchantRule(val rawName: String, val cleanName: String) : Intent()
+        object DismissMerchantRulePrompt : Intent()
         data class ApproveSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class SkipSubscription(val subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) : Intent()
         data class UpdateMonthlyBudget(val budget: Double, val isDynamic: Boolean = false) : Intent()
@@ -56,8 +58,14 @@ class DashboardContract {
         val categories: List<CategoryData> = emptyList(),
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null,
+        val promptMerchantRuleFor: MerchantRenameRulePrompt? = null,
         val splitsByTransactionId: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
     ) : UiState
+
+    data class MerchantRenameRulePrompt(
+        val rawMerchant: String,
+        val newMerchant: String
+    )
 
     data class VelocityData(
         val currentWeekAvg: Double = 0.0,

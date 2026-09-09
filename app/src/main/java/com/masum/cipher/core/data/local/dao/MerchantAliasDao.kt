@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MerchantAliasDao {
-    @Query("SELECT * FROM merchant_aliases")
+    @Query("SELECT * FROM merchant_aliases ORDER BY rowid DESC")
     fun getAllAliases(): Flow<List<MerchantAliasEntity>>
 
     @Query("SELECT * FROM merchant_aliases WHERE rawName = :rawName LIMIT 1")

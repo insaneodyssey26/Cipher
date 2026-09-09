@@ -18,6 +18,8 @@ class InsightsContract {
         data class UpdateDraftTransaction(val transaction: TransactionEntity?) : Intent()
         data class SaveCategoryRule(val merchantName: String, val category: String) : Intent()
         object DismissCategoryRulePrompt : Intent()
+        data class SaveMerchantRule(val rawName: String, val cleanName: String) : Intent()
+        object DismissMerchantRulePrompt : Intent()
         data class SaveSubscription(val merchant: String, val amount: Double, val category: String, val frequencyDays: Int, val nextExpectedDate: Long) : Intent()
         data class DeleteSubscription(val merchant: String) : Intent()
         data class IgnoreSubscription(val merchant: String) : Intent()
@@ -55,7 +57,8 @@ class InsightsContract {
         val noSpendStreak: Int = 0,
         val avgTransactionSize: Double = 0.0,
         val draftTransaction: TransactionEntity? = null,
-        val promptCategoryRuleFor: TransactionEntity? = null
+        val promptCategoryRuleFor: TransactionEntity? = null,
+        val promptMerchantRuleFor: DashboardContract.MerchantRenameRulePrompt? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

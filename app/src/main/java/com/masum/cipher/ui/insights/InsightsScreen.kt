@@ -26,12 +26,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -426,6 +430,83 @@ fun InsightsScreen(
                 editingTransaction = null
             },
             isHapticsEnabled = isHapticsEnabled
+        )
+    }
+
+    state.promptMerchantRuleFor?.let { prompt ->
+        AlertDialog(
+            onDismissRequest = { viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt) },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = stringResource(R.string.smart_rules_merchant_dialog_title),
+                    style = com.masum.cipher.ui.theme.Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.smart_rules_merchant_dialog_message, prompt.rawMerchant, prompt.newMerchant),
+                    style = com.masum.cipher.ui.theme.Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.handleIntent(InsightsContract.Intent.SaveMerchantRule(prompt.rawMerchant, prompt.newMerchant))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt)
+                }) {
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
+    state.promptCategoryRuleFor?.let { tx ->
+        AlertDialog(
+            onDismissRequest = { viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt) },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_title),
+                    style = com.masum.cipher.ui.theme.Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                val categoryDisplayName = stringResource(com.masum.cipher.core.domain.model.TransactionCategory.fromString(tx.category).titleRes)
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
+                    style = com.masum.cipher.ui.theme.Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.handleIntent(InsightsContract.Intent.SaveCategoryRule(tx.merchant, tx.category))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt)
+                }) {
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         )
     }
 }

@@ -28,6 +28,7 @@ class DashboardViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val categoryRuleDao: CategoryRuleDao,
+    private val merchantAliasDao: com.masum.cipher.core.data.local.dao.MerchantAliasDao,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
     private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
     userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
@@ -42,6 +43,7 @@ class DashboardViewModel @Inject constructor(
     private val _activeFilter = MutableStateFlow(DashboardFilter())
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
     private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
+    private val _promptMerchantRuleFor = MutableStateFlow<DashboardContract.MerchantRenameRulePrompt?>(null)
 
     init {
         observeDashboardData()
@@ -62,6 +64,8 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.UpdateDraftTransaction -> _draftTransaction.value = intent.transaction
             is DashboardContract.Intent.SaveCategoryRule -> saveCategoryRule(intent.merchantName, intent.category)
             is DashboardContract.Intent.DismissCategoryRulePrompt -> _promptCategoryRuleFor.value = null
+            is DashboardContract.Intent.SaveMerchantRule -> saveMerchantRule(intent.rawName, intent.cleanName)
+            is DashboardContract.Intent.DismissMerchantRulePrompt -> _promptMerchantRuleFor.value = null
             is DashboardContract.Intent.ApproveSubscription -> approveSubscription(intent.subscription)
             is DashboardContract.Intent.SkipSubscription -> skipSubscription(intent.subscription)
             is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget, intent.isDynamic)
@@ -137,6 +141,8 @@ class DashboardViewModel @Inject constructor(
                 state.copy(draftTransaction = draft)
             }.combine(_promptCategoryRuleFor) { state, prompt ->
                 state.copy(promptCategoryRuleFor = prompt)
+            }.combine(_promptMerchantRuleFor) { state, prompt ->
+                state.copy(promptMerchantRuleFor = prompt)
             }.combine(subscriptionDao.getAllSubscriptions()) { state, subscriptions ->
                 val currentTime = System.currentTimeMillis()
                 val pending = subscriptions.filter { it.nextExpectedDate <= currentTime }
@@ -160,13 +166,31 @@ class DashboardViewModel @Inject constructor(
     private fun updateTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             val existing = transactionRepository.getTransactionById(transaction.id)
+            val oldMerchant = existing?.merchant?.trim().orEmpty()
+            val newMerchant = transaction.merchant.trim()
+            val merchantChanged = existing != null && oldMerchant.isNotBlank() && newMerchant.isNotBlank() && !oldMerchant.equals(newMerchant, ignoreCase = true)
             val categoryChanged = existing != null && existing.category != transaction.category && existing.merchant == transaction.merchant
             
             updateTransactionUseCase(transaction)
             
-            if (categoryChanged) {
+            if (merchantChanged) {
+                _promptMerchantRuleFor.value = DashboardContract.MerchantRenameRulePrompt(oldMerchant, newMerchant)
+            } else if (categoryChanged) {
                 _promptCategoryRuleFor.value = transaction
             }
+        }
+    }
+
+    private fun saveMerchantRule(rawName: String, cleanName: String) {
+        viewModelScope.launch {
+            merchantAliasDao.insertAlias(
+                com.masum.cipher.core.data.local.entity.MerchantAliasEntity(
+                    rawName = rawName.uppercase().trim(),
+                    cleanName = cleanName.trim(),
+                    isUserDefined = true
+                )
+            )
+            _promptMerchantRuleFor.value = null
         }
     }
 

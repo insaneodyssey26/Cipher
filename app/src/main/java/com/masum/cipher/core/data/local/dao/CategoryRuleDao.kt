@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryRuleDao {
-    @Query("SELECT * FROM category_rules ORDER BY merchantName ASC")
+    @Query("SELECT * FROM category_rules ORDER BY rowid DESC")
     fun getAllRules(): Flow<List<CategoryRuleEntity>>
 
     @Query("SELECT customCategory FROM category_rules WHERE merchantName = :merchantName COLLATE NOCASE LIMIT 1")

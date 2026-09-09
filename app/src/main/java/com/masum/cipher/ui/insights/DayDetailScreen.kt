@@ -33,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.util.performVibrate
@@ -225,20 +227,59 @@ fun DayDetailScreen(
         )
     }
 
-    state.promptCategoryRuleFor?.let { tx ->
+    state.promptMerchantRuleFor?.let { prompt ->
         AlertDialog(
-            onDismissRequest = { viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt) },
+            onDismissRequest = { viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt) },
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             title = {
                 Text(
-                    text = "Save Category Rule?",
+                    text = stringResource(R.string.smart_rules_merchant_dialog_title),
                     style = Typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             },
             text = {
                 Text(
-                    text = "Do you want to always categorize future transactions from '${tx.merchant}' as '${tx.category}'?",
+                    text = stringResource(R.string.smart_rules_merchant_dialog_message, prompt.rawMerchant, prompt.newMerchant),
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.handleIntent(InsightsContract.Intent.SaveMerchantRule(prompt.rawMerchant, prompt.newMerchant))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt)
+                }) {
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
+    state.promptCategoryRuleFor?.let { tx ->
+        AlertDialog(
+            onDismissRequest = { viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt) },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_title),
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                val categoryDisplayName = stringResource(com.masum.cipher.core.domain.model.TransactionCategory.fromString(tx.category).titleRes)
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -250,14 +291,14 @@ fun DayDetailScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Yes, always", color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
                     viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt)
                 }) {
-                    Text("No, just this once", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         )
