@@ -59,12 +59,12 @@ import androidx.core.graphics.drawable.toBitmap
 import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
-import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Search
+import compose.icons.lucideicons.X
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -128,6 +128,8 @@ fun AppSelectionScreen(
 
             withContext(Dispatchers.Main) {
                 installedApps = apps
+                val installedPackageNames = apps.map { it.packageName }.toSet()
+                selectedApps = selectedApps.intersect(installedPackageNames)
                 isLoading = false
             }
         }
@@ -146,22 +148,53 @@ fun AppSelectionScreen(
 
         Box(modifier = Modifier.graphicsLayer { alpha = heroAlpha.value }) {
             Column {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.onboarding_apps_step_label),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            fontSize = 9.5.sp,
-                            letterSpacing = 1.2.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.onboarding_apps_step_label),
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                fontSize = 9.5.sp,
+                                letterSpacing = 1.2.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    if (!isLoading && selectedApps.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                    RoundedCornerShape(20.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                                    fontSize = 11.sp,
+                                    letterSpacing = 0.2.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -234,22 +267,21 @@ fun AppSelectionScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                if (selectedApps.isNotEmpty()) {
-                    Spacer(modifier = Modifier.width(10.dp))
+                if (searchQuery.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(EmeraldIncome.copy(alpha = 0.12f))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                            .clickable { searchQuery = "" },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 10.sp
-                            ),
-                            color = EmeraldIncome
+                        Icon(
+                            imageVector = LucideIcons.X,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }
