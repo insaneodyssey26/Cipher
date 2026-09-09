@@ -1698,36 +1698,34 @@ private fun DashboardHero(
                             }
 
                             val pencilAlpha = ((scrollProgress - 0.45f) / 0.55f).coerceIn(0f, 1f)
-                            if (pencilAlpha > 0f) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(bottom = 6.dp)
-                                        .size(26.dp)
-                                        .graphicsLayer {
-                                            alpha = pencilAlpha
-                                            scaleX = pencilAlpha
-                                            scaleY = pencilAlpha
-                                        }
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                        .border(
-                                            width = 1.dp,
-                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                            shape = CircleShape
-                                        )
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            onAdjustBalanceClick()
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Pencil,
-                                        contentDescription = stringResource(R.string.adjust_balance_title),
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(12.dp)
+                            Box(
+                                modifier = Modifier
+                                    .padding(bottom = 6.dp)
+                                    .size(26.dp)
+                                    .graphicsLayer {
+                                        alpha = pencilAlpha
+                                        scaleX = pencilAlpha
+                                        scaleY = pencilAlpha
+                                    }
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                        shape = CircleShape
                                     )
-                                }
+                                    .clickable(enabled = pencilAlpha > 0.05f) {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        onAdjustBalanceClick()
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Pencil,
+                                    contentDescription = stringResource(R.string.adjust_balance_title),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(12.dp)
+                                )
                             }
                         }
                         
