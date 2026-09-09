@@ -258,6 +258,9 @@
     <string name="smart_rules_always_as">हमेशा %1$s के रूप में</string>
     <string name="smart_rules_dialog_new">नया नियम</string>
     <string name="smart_rules_dialog_edit">नियम संपादित करें</string>
+    <string name="smart_rules_search_hint">नियम खोजें...</string>
+    <string name="smart_rules_no_search_results">कोई मेल खाता नियम नहीं मिला</string>
+    <string name="smart_rules_case_insensitive_hint">अक्षरों के आकार (छोटा/बड़ा) से कोई फर्क नहीं पड़ता</string>
     <string name="merchant_name_label">व्यापारी का नाम</string>
     <string name="category_label">श्रेणी</string>
     <string name="action_add_rule">नियम जोड़ें</string>

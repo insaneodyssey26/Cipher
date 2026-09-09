@@ -211,7 +211,9 @@ class ProcessIncomingTransactionUseCaseTest {
                 when (method.name) {
                     "getAliasForRawName" -> {
                         val raw = args[0] as String
-                        aliases[raw]?.let { MerchantAliasEntity(raw, it) }
+                        aliases.entries.firstOrNull { it.key.equals(raw, ignoreCase = true) }?.let {
+                            MerchantAliasEntity(it.key, it.value)
+                        }
                     }
                     "insertAlias" -> {
                         val entity = args[0] as MerchantAliasEntity
@@ -233,7 +235,10 @@ class ProcessIncomingTransactionUseCaseTest {
                 arrayOf(CategoryRuleDao::class.java)
             ) { _, method, args ->
                 when (method.name) {
-                    "getCategoryForMerchant" -> rules[args[0] as String]
+                    "getCategoryForMerchant" -> {
+                        val merchant = args[0] as String
+                        rules.entries.firstOrNull { it.key.equals(merchant, ignoreCase = true) }?.value
+                    }
                     "insertRule" -> {
                         val entity = args[0] as CategoryRuleEntity
                         rules[entity.merchantName] = entity.customCategory

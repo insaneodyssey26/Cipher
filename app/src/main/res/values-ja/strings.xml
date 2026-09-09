@@ -257,8 +257,11 @@
     <string name="smart_rules_clean_merchant_label">表示する店舗名</string>
     <string name="smart_rules_renamed_to">%1$s に変更</string>
     <string name="smart_rules_always_as">常に %1$s として分類</string>
-    <string name="smart_rules_dialog_new">新規ルール</string>
+    <string name="smart_rules_dialog_new">新しいルール</string>
     <string name="smart_rules_dialog_edit">ルールを編集</string>
+    <string name="smart_rules_search_hint">ルールを検索...</string>
+    <string name="smart_rules_no_search_results">一致するルールが見つかりません</string>
+    <string name="smart_rules_case_insensitive_hint">大文字と小文字を区別せずに一致します</string>
     <string name="merchant_name_label">加盟店名</string>
     <string name="category_label">カテゴリー</string>
     <string name="action_add_rule">ルールを追加</string>

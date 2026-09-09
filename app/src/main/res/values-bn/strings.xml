@@ -259,6 +259,9 @@
     <string name="smart_rules_always_as">সর্বদা %1$s হিসেবে</string>
     <string name="smart_rules_dialog_new">নতুন নিয়ম</string>
     <string name="smart_rules_dialog_edit">নিয়ম সম্পাদনা</string>
+    <string name="smart_rules_search_hint">রুল খুঁজুন...</string>
+    <string name="smart_rules_no_search_results">কোনো রুল পাওয়া যায়নি</string>
+    <string name="smart_rules_case_insensitive_hint">ছোট বা বড় হাতের অক্ষরের কোনো প্রভাব নেই</string>
     <string name="merchant_name_label">মার্চেন্টের নাম</string>
     <string name="category_label">ক্যাটাগরি</string>
     <string name="action_add_rule">নিয়ম যোগ করুন</string>

@@ -21,6 +21,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,11 +57,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.masum.cipher.R
@@ -75,9 +81,11 @@ import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Plus
+import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Store
 import compose.icons.lucideicons.Tag
 import compose.icons.lucideicons.Trash2
+import compose.icons.lucideicons.X
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,11 +101,25 @@ fun SmartRulesScreen(
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = state.selectedTab) { 2 }
 
+    var isSearchOpen by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
     var showCategoryDialog by remember { mutableStateOf(false) }
     var editCategoryRule by remember { mutableStateOf<CategoryRuleEntity?>(null) }
 
     var showMerchantDialog by remember { mutableStateOf(false) }
     var editMerchantRule by remember { mutableStateOf<MerchantAliasEntity?>(null) }
+
+    BackHandler(enabled = isSearchOpen) {
+        isSearchOpen = false
+        viewModel.handleIntent(SmartRulesContract.Intent.SetSearchQuery(""))
+    }
+
+    LaunchedEffect(isSearchOpen) {
+        if (isSearchOpen) {
+            focusRequester.requestFocus()
+        }
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.handleIntent(SmartRulesContract.Intent.SelectTab(pagerState.currentPage))
@@ -145,22 +167,86 @@ fun SmartRulesScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(
-                        stringResource(R.string.smart_rules_title), 
-                        style = Typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ) 
+                    if (isSearchOpen) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 8.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (state.searchQuery.isEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.smart_rules_search_hint),
+                                    style = Typography.bodyMedium.copy(fontSize = 15.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
+                            }
+                            BasicTextField(
+                                value = state.searchQuery,
+                                onValueChange = { viewModel.handleIntent(SmartRulesContract.Intent.SetSearchQuery(it)) },
+                                singleLine = true,
+                                textStyle = Typography.bodyMedium.copy(
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester)
+                            )
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.smart_rules_title), 
+                            style = Typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         view.performVibrate(state.isHapticsEnabled)
-                        onNavigateBack()
+                        if (isSearchOpen) {
+                            isSearchOpen = false
+                            viewModel.handleIntent(SmartRulesContract.Intent.SetSearchQuery(""))
+                        } else {
+                            onNavigateBack()
+                        }
                     }) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
                             contentDescription = stringResource(R.string.action_back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
+                    }
+                },
+                actions = {
+                    if (isSearchOpen) {
+                        if (state.searchQuery.isNotEmpty()) {
+                            IconButton(onClick = {
+                                view.performVibrate(state.isHapticsEnabled)
+                                viewModel.handleIntent(SmartRulesContract.Intent.SetSearchQuery(""))
+                            }) {
+                                Icon(
+                                    imageVector = LucideIcons.X,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            view.performVibrate(state.isHapticsEnabled)
+                            isSearchOpen = true
+                        }) {
+                            Icon(
+                                imageVector = LucideIcons.Search,
+                                contentDescription = stringResource(R.string.smart_rules_search_hint),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -265,6 +351,7 @@ fun SmartRulesScreen(
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     if (page == 0) {
+                        val categoryRules = state.filteredCategoryRules
                         if (state.categoryRules.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                                 Text(
@@ -274,13 +361,22 @@ fun SmartRulesScreen(
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
+                        } else if (categoryRules.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.smart_rules_no_search_results),
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                items(state.categoryRules, key = { it.merchantName }) { rule ->
+                                items(categoryRules, key = { it.merchantName }) { rule ->
                                     CategoryRuleItem(
                                         rule = rule,
                                         onClick = {
@@ -297,6 +393,7 @@ fun SmartRulesScreen(
                             }
                         }
                     } else {
+                        val merchantRules = state.filteredMerchantRules
                         if (state.merchantRules.isEmpty()) {
                             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                                 Text(
@@ -306,13 +403,22 @@ fun SmartRulesScreen(
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
+                        } else if (merchantRules.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.smart_rules_no_search_results),
+                                    style = Typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                items(state.merchantRules, key = { it.rawName }) { alias ->
+                                items(merchantRules, key = { it.rawName }) { alias ->
                                     MerchantRuleItem(
                                         alias = alias,
                                         onClick = {
@@ -532,6 +638,7 @@ private fun CategoryRuleEditDialog(
                     value = merchantName,
                     onValueChange = { merchantName = it },
                     label = { Text(stringResource(R.string.merchant_name_label)) },
+                    supportingText = { Text(stringResource(R.string.smart_rules_case_insensitive_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = initialMerchant.isEmpty()
@@ -669,6 +776,7 @@ private fun MerchantRuleEditDialog(
                     value = rawMerchant,
                     onValueChange = { rawMerchant = it },
                     label = { Text(stringResource(R.string.smart_rules_raw_merchant_label)) },
+                    supportingText = { Text(stringResource(R.string.smart_rules_case_insensitive_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = initialRawMerchant.isEmpty()

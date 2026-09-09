@@ -259,6 +259,9 @@
     <string name="smart_rules_always_as">Immer als %1$s</string>
     <string name="smart_rules_dialog_new">Neue Regel</string>
     <string name="smart_rules_dialog_edit">Regel bearbeiten</string>
+    <string name="smart_rules_search_hint">Regeln durchsuchen...</string>
+    <string name="smart_rules_no_search_results">Keine passenden Regeln gefunden</string>
+    <string name="smart_rules_case_insensitive_hint">Groß- und Kleinschreibung wird ignoriert</string>
     <string name="merchant_name_label">Händlername</string>
     <string name="category_label">Kategorie</string>
     <string name="action_add_rule">Regel hinzufügen</string>

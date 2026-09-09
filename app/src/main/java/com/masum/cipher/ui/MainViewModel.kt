@@ -1,7 +1,6 @@
 package com.masum.cipher.ui
 
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
@@ -17,7 +16,6 @@ class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val biometricAuthenticator: BiometricAuthenticator,
     private val addTransactionUseCase: AddTransactionUseCase,
-    private val merchantAliasDao: MerchantAliasDao,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
@@ -27,9 +25,6 @@ class MainViewModel @Inject constructor(
 ) {
 
     init {
-        viewModelScope.launch {
-            merchantAliasDao.deleteUserDefinedAliases()
-        }
         userPreferences.settingsFlow
             .onEach { settings ->
                 updateState {

@@ -12,13 +12,13 @@ interface MerchantAliasDao {
     @Query("SELECT * FROM merchant_aliases ORDER BY rowid DESC")
     fun getAllAliases(): Flow<List<MerchantAliasEntity>>
 
-    @Query("SELECT * FROM merchant_aliases WHERE rawName = :rawName LIMIT 1")
+    @Query("SELECT * FROM merchant_aliases WHERE rawName = :rawName COLLATE NOCASE LIMIT 1")
     suspend fun getAliasForRawName(rawName: String): MerchantAliasEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlias(alias: MerchantAliasEntity)
 
-    @Query("DELETE FROM merchant_aliases WHERE rawName = :rawName")
+    @Query("DELETE FROM merchant_aliases WHERE rawName = :rawName COLLATE NOCASE")
     suspend fun deleteAlias(rawName: String)
 
     @Query("DELETE FROM merchant_aliases WHERE isUserDefined = 1")

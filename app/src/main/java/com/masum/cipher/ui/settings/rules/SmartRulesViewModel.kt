@@ -28,6 +28,7 @@ class SmartRulesViewModel @Inject constructor(
         when (intent) {
             is SmartRulesContract.Intent.LoadRules -> observeRules()
             is SmartRulesContract.Intent.SelectTab -> updateState { copy(selectedTab = intent.tabIndex) }
+            is SmartRulesContract.Intent.SetSearchQuery -> updateState { copy(searchQuery = intent.query) }
             is SmartRulesContract.Intent.DeleteCategoryRule -> deleteCategoryRule(intent.rule)
             is SmartRulesContract.Intent.RestoreCategoryRule -> restoreCategoryRule(intent.rule)
             is SmartRulesContract.Intent.AddOrUpdateCategoryRule -> addOrUpdateCategoryRule(intent.merchantName, intent.category)
@@ -93,7 +94,7 @@ class SmartRulesViewModel @Inject constructor(
         viewModelScope.launch {
             merchantAliasDao.insertAlias(
                 MerchantAliasEntity(
-                    rawName = rawName.uppercase().trim(),
+                    rawName = rawName.trim(),
                     cleanName = cleanName.trim(),
                     isUserDefined = true
                 )

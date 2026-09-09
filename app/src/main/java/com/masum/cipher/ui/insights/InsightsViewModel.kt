@@ -185,7 +185,7 @@ class InsightsViewModel @Inject constructor(
         viewModelScope.launch {
             merchantAliasDao.insertAlias(
                 com.masum.cipher.core.data.local.entity.MerchantAliasEntity(
-                    rawName = rawName.uppercase().trim(),
+                    rawName = rawName.trim(),
                     cleanName = cleanName.trim(),
                     isUserDefined = true
                 )

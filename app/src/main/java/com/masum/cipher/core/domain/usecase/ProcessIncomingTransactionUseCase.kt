@@ -40,7 +40,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
             }
         }
 
-        val rawMerchant = transaction.merchant.uppercase().trim()
+        val rawMerchant = transaction.merchant.trim()
         val alias = merchantAliasDao.getAliasForRawName(rawMerchant)
         val finalMerchant: String
         val finalCategory: String

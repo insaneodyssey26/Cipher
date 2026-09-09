@@ -258,6 +258,9 @@
     <string name="smart_rules_always_as">Siempre como %1$s</string>
     <string name="smart_rules_dialog_new">Nueva regla</string>
     <string name="smart_rules_dialog_edit">Editar regla</string>
+    <string name="smart_rules_search_hint">Buscar reglas...</string>
+    <string name="smart_rules_no_search_results">No se encontraron reglas coincidentes</string>
+    <string name="smart_rules_case_insensitive_hint">Coincide sin importar mayúsculas o minúsculas</string>
     <string name="merchant_name_label">Nombre del comercio</string>
     <string name="category_label">Categoría</string>
     <string name="action_add_rule">Añadir regla</string>
