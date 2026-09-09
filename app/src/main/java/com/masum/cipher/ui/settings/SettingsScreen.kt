@@ -63,6 +63,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -164,7 +165,7 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showCrashLogDialog by remember { mutableStateOf(false) }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
-    var expandedSection by remember { mutableStateOf<String?>(null) }
+    var expandedSection by rememberSaveable { mutableStateOf<String?>(null) }
     var showFrequencyDialog by remember { mutableStateOf(false) }
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
