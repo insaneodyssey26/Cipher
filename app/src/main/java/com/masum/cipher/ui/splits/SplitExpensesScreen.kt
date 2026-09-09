@@ -58,9 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
@@ -508,6 +510,7 @@ fun SplitExpensesScreen(
                     val splits = state.splitsByTransactionId[transaction.id] ?: emptyList()
                     SplitTransactionCard(
                         transaction = transaction,
+                        customCategories = state.customCategories,
                         splits = splits,
                         currencySymbol = state.currencySymbol,
                         privacyMode = privacyMode,
@@ -636,6 +639,7 @@ fun SplitExpensesScreen(
 @Composable
 private fun SplitTransactionCard(
     transaction: TransactionEntity,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     splits: List<TransactionSplitEntity>,
     currencySymbol: String,
     privacyMode: Boolean,
@@ -648,7 +652,9 @@ private fun SplitTransactionCard(
 ) {
     val view = LocalView.current
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    val category = TransactionCategory.fromString(transaction.category)
+    val category = remember(transaction.category, customCategories) {
+        CategoryHelper.resolveCategory(transaction.category, customCategories)
+    }
     val myShare = splits.find { it.isCurrentUser }?.amount ?: (transaction.amount / splits.size)
     val otherSplits = splits.filter { !it.isCurrentUser }
 

@@ -28,6 +28,7 @@ class DashboardContract {
         data class UpdateMonthlyBudget(val budget: Double, val isDynamic: Boolean = false) : Intent()
         data class SaveTransactionSplits(val transactionId: Long, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) : Intent()
         data class UpdateSplitPaidStatus(val splitId: Long, val isPaid: Boolean) : Intent()
+        data class CreateCustomCategory(val name: String, val iconName: String, val colorHex: Long) : Intent()
     }
 
     enum class FilterType { ALL, INCOME, EXPENSE }
@@ -59,6 +60,7 @@ class DashboardContract {
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null,
         val promptMerchantRuleFor: MerchantRenameRulePrompt? = null,
+        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
         val splitsByTransactionId: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
     ) : UiState
 

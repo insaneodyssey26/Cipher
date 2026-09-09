@@ -12,7 +12,7 @@ class SubscriptionDetector @Inject constructor() {
     data class Subscription(
         val merchant: String,
         val amount: Double,
-        val category: TransactionCategory,
+        val category: String,
         val frequencyDays: Int,
         val lastDate: Long,
         val nextExpectedDate: Long,
@@ -46,7 +46,7 @@ class SubscriptionDetector @Inject constructor() {
                         Subscription(
                             merchant = lastTx.merchant,
                             amount = lastTx.amount,
-                            category = TransactionCategory.fromString(lastTx.category),
+                            category = lastTx.category,
                             frequencyDays = avgDays,
                             lastDate = lastTx.timestamp,
                             nextExpectedDate = nextDate,

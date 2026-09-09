@@ -421,4 +421,23 @@
     <string name="adjust_balance_opening_name">Saldo inicial</string>
     <string name="adjust_balance_action_save">Guardar ajuste</string>
     <string name="adjust_balance_note_label">Descripción</string>
+
+    <string name="custom_category_new_title">Nueva categoría</string>
+    <string name="custom_category_edit_title">Editar categoría</string>
+    <string name="custom_category_subtitle">Personaliza con icono y color propios</string>
+    <string name="custom_category_name_label">Nombre de la categoría</string>
+    <string name="custom_category_name_placeholder">ej. Gimnasio y Fitness</string>
+    <string name="custom_category_select_icon">SELECCIONAR ICONO</string>
+    <string name="custom_category_select_color">SELECCIONAR COLOR</string>
+    <string name="custom_category_save">Guardar cambios</string>
+    <string name="custom_category_create">Crear categoría</string>
+    <string name="custom_category_delete">Eliminar categoría</string>
+    <string name="custom_category_delete_confirm_title">¿Eliminar %1$s?</string>
+    <string name="custom_category_delete_confirm_desc">Las transacciones existentes en esta categoría se moverán a General.</string>
+    <string name="custom_category_error_empty">El nombre de categoría no puede estar vacío</string>
+    <string name="custom_category_error_exists">Ya existe una categoría con este nombre</string>
+    <string name="custom_category_section_default">Categorías predeterminadas</string>
+    <string name="custom_category_section_custom">Categorías personalizadas</string>
+    <string name="custom_category_add_btn">Añadir categoría</string>
+    <string name="custom_category_badge">Personalizada</string>
 </resources>

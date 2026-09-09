@@ -67,4 +67,7 @@ interface TransactionDao {
 
     @Query("SELECT COUNT(*) FROM transactions WHERE isIncome = 0 AND timestamp >= :startTime")
     suspend fun getExpensesCountSince(startTime: Long): Int
+
+    @Query("UPDATE transactions SET category = :newCategory WHERE category = :oldCategory COLLATE NOCASE")
+    suspend fun reassignCategory(oldCategory: String, newCategory: String)
 }

@@ -83,6 +83,7 @@ import java.util.Calendar
 fun CategoryAllocationDonut(
     categories: List<DashboardContract.CategoryData>,
     categoryBudgets: Map<String, Double> = emptyMap(),
+    customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
     currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
     onCategoryClick: (DashboardContract.CategoryData) -> Unit = {}
 ) {
@@ -131,14 +132,14 @@ fun CategoryAllocationDonut(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             categories.forEach { category ->
-                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(category.category)
+                val categoryItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(category.category, customCategories)
                 val safeWeight = (category.percentage * animProgress.value).coerceAtLeast(0.001f)
                 Box(
                     modifier = Modifier
                         .weight(safeWeight)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(3.dp))
-                        .background(categoryEnum.color)
+                        .background(categoryItem.color)
                 )
             }
         }
@@ -148,8 +149,9 @@ fun CategoryAllocationDonut(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             categories.take(4).forEach { category ->
-                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(category.category)
-                val budget = categoryBudgets[category.category] ?: categoryBudgets[categoryEnum.name] ?: 0.0
+                val categoryItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(category.category, customCategories)
+                val categoryDisplayName = if (categoryItem.titleRes != null) stringResource(categoryItem.titleRes) else categoryItem.displayName
+                val budget = categoryBudgets[category.category] ?: categoryBudgets[categoryItem.name] ?: categoryBudgets[categoryDisplayName] ?: 0.0
                 val isOver = budget > 0 && category.amount > budget
 
                 Row(
@@ -170,19 +172,19 @@ fun CategoryAllocationDonut(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(RoundedCornerShape(9.dp))
-                                .background(categoryEnum.color.copy(alpha = 0.14f)),
+                                .background(categoryItem.color.copy(alpha = 0.14f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = categoryEnum.icon,
+                                imageVector = categoryItem.icon,
                                 contentDescription = null,
-                                tint = categoryEnum.color,
+                                tint = categoryItem.color,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
 
                         Text(
-                            text = categoryEnum.displayName,
+                            text = categoryDisplayName,
                             style = Typography.bodyMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold,
@@ -213,7 +215,7 @@ fun CategoryAllocationDonut(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(categoryEnum.color.copy(alpha = 0.12f))
+                                .background(categoryItem.color.copy(alpha = 0.12f))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
@@ -223,7 +225,7 @@ fun CategoryAllocationDonut(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 10.5.sp
                                 ),
-                                color = categoryEnum.color
+                                color = categoryItem.color
                             )
                         }
                     }

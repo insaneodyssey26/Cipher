@@ -25,4 +25,7 @@ interface SubscriptionDao {
 
     @Delete
     suspend fun delete(subscription: SubscriptionEntity)
+
+    @Query("UPDATE subscriptions SET category = :newCategory WHERE category = :oldCategory COLLATE NOCASE")
+    suspend fun reassignCategory(oldCategory: String, newCategory: String)
 }

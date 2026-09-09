@@ -422,4 +422,23 @@
     <string name="adjust_balance_opening_name">Solde d\'ouverture</string>
     <string name="adjust_balance_action_save">Enregistrer l\'ajustement</string>
     <string name="adjust_balance_note_label">Description</string>
+
+    <string name="custom_category_new_title">Nouvelle catégorie</string>
+    <string name="custom_category_edit_title">Modifier la catégorie</string>
+    <string name="custom_category_subtitle">Personnalisez avec une icône et une couleur</string>
+    <string name="custom_category_name_label">Nom de la catégorie</string>
+    <string name="custom_category_name_placeholder">ex. Salle de sport &amp; Fitness</string>
+    <string name="custom_category_select_icon">CHOISIR UNE ICÔNE</string>
+    <string name="custom_category_select_color">CHOISIR UNE COULEUR</string>
+    <string name="custom_category_save">Enregistrer</string>
+    <string name="custom_category_create">Créer la catégorie</string>
+    <string name="custom_category_delete">Supprimer la catégorie</string>
+    <string name="custom_category_delete_confirm_title">Supprimer %1$s ?</string>
+    <string name="custom_category_delete_confirm_desc">Les transactions existantes dans cette catégorie seront déplacées vers Général.</string>
+    <string name="custom_category_error_empty">Le nom de catégorie ne peut pas être vide</string>
+    <string name="custom_category_error_exists">Une catégorie avec ce nom existe déjà</string>
+    <string name="custom_category_section_default">Catégories par défaut</string>
+    <string name="custom_category_section_custom">Catégories personnalisées</string>
+    <string name="custom_category_add_btn">Ajouter une catégorie</string>
+    <string name="custom_category_badge">Personnalisée</string>
 </resources>

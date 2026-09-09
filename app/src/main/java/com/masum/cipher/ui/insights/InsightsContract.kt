@@ -27,6 +27,9 @@ class InsightsContract {
         data class SetCategoryBudget(val category: String, val limit: Double) : Intent()
         data class SetDynamicBudget(val enabled: Boolean) : Intent()
         data class SaveTransactionSplits(val transactionId: Long, val splits: List<com.masum.cipher.core.domain.model.SplitParticipant>) : Intent()
+        data class CreateCustomCategory(val name: String, val iconName: String, val colorHex: Long) : Intent()
+        data class UpdateCustomCategory(val id: Long, val oldName: String, val newName: String, val iconName: String, val colorHex: Long) : Intent()
+        data class DeleteCustomCategory(val category: com.masum.cipher.core.data.local.entity.CustomCategoryEntity) : Intent()
     }
 
     data class MerchantData(val merchant: String, val amount: Double, val count: Int)
@@ -47,6 +50,7 @@ class InsightsContract {
         val netFlowTrendHistory: List<DashboardContract.Point> = emptyList(),
         val calendarHeatmap: Map<Long, Double> = emptyMap(),
         val categoryBreakdown: List<DashboardContract.CategoryData> = emptyList(),
+        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
         val detectedSubscriptions: List<SubscriptionDetector.Subscription> = emptyList(),
         val allTransactions: List<TransactionEntity> = emptyList(),
         val selectedDayTimestamp: Long? = null,

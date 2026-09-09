@@ -21,4 +21,10 @@ interface CategoryRuleDao {
 
     @Delete
     suspend fun deleteRule(rule: CategoryRuleEntity)
+
+    @Query("UPDATE category_rules SET customCategory = :newCategory WHERE customCategory = :oldCategory COLLATE NOCASE")
+    suspend fun reassignCategoryRules(oldCategory: String, newCategory: String)
+
+    @Query("DELETE FROM category_rules WHERE customCategory = :category COLLATE NOCASE")
+    suspend fun deleteRulesForCategory(category: String)
 }

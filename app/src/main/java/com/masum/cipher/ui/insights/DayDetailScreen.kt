@@ -193,6 +193,7 @@ fun DayDetailScreen(
                     StaggeredEntranceItem(index = index) {
                         TransactionItem(
                             transaction = transaction,
+                            customCategories = state.customCategories,
                             privacyMode = false,
                             currencySymbol = state.currencySymbol,
                             onClick = {
@@ -209,6 +210,7 @@ fun DayDetailScreen(
     editingTransaction?.let { transaction ->
         TransactionDetailsSheet(
             transaction = transaction,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
@@ -222,6 +224,9 @@ fun DayDetailScreen(
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(transaction))
                 editingTransaction = null
+            },
+            onCreateCustomCategory = { name, iconName, colorHex ->
+                viewModel.handleIntent(InsightsContract.Intent.CreateCustomCategory(name, iconName, colorHex))
             },
             isHapticsEnabled = isHapticsEnabled
         )
@@ -277,7 +282,8 @@ fun DayDetailScreen(
                 )
             },
             text = {
-                val categoryDisplayName = stringResource(com.masum.cipher.core.domain.model.TransactionCategory.fromString(tx.category).titleRes)
+                val catItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(tx.category, state.customCategories)
+                val categoryDisplayName = catItem.titleRes?.let { stringResource(it) } ?: catItem.displayName
                 Text(
                     text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
                     style = Typography.bodyMedium,

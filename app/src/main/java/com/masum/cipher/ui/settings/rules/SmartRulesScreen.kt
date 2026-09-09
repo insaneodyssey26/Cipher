@@ -71,7 +71,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.domain.model.CategoryHelper
+import com.masum.cipher.core.domain.model.CategoryItem
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
@@ -379,6 +382,7 @@ fun SmartRulesScreen(
                                 items(categoryRules, key = { it.merchantName }) { rule ->
                                     CategoryRuleItem(
                                         rule = rule,
+                                        customCategories = state.customCategories,
                                         onClick = {
                                             view.performVibrate(state.isHapticsEnabled)
                                             editCategoryRule = rule
@@ -444,6 +448,7 @@ fun SmartRulesScreen(
         CategoryRuleEditDialog(
             initialMerchant = editCategoryRule?.merchantName ?: "",
             initialCategory = editCategoryRule?.customCategory ?: "OTHERS",
+            customCategories = state.customCategories,
             onDismiss = { showCategoryDialog = false },
             onSave = { merchant, category ->
                 viewModel.handleIntent(SmartRulesContract.Intent.AddOrUpdateCategoryRule(merchant, category))
@@ -468,10 +473,13 @@ fun SmartRulesScreen(
 @Composable
 private fun CategoryRuleItem(
     rule: CategoryRuleEntity,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val category = TransactionCategory.fromString(rule.customCategory)
+    val categoryItem = remember(rule.customCategory, customCategories) {
+        CategoryHelper.resolveCategory(rule.customCategory, customCategories)
+    }
     
     VaultCard(
         modifier = Modifier.fillMaxWidth(),
@@ -486,13 +494,13 @@ private fun CategoryRuleItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(category.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                    .background(categoryItem.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = category.icon,
+                    imageVector = categoryItem.icon,
                     contentDescription = null,
-                    tint = category.color,
+                    tint = categoryItem.color,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -507,8 +515,9 @@ private fun CategoryRuleItem(
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
+                val categoryDisplayName = if (categoryItem.titleRes != null) stringResource(categoryItem.titleRes) else categoryItem.displayName
                 Text(
-                    text = stringResource(R.string.smart_rules_always_as, stringResource(category.titleRes)),
+                    text = stringResource(R.string.smart_rules_always_as, categoryDisplayName),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -571,6 +580,7 @@ private fun MerchantRuleItem(
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -613,11 +623,12 @@ private fun MerchantRuleItem(
 private fun CategoryRuleEditDialog(
     initialMerchant: String,
     initialCategory: String,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     onDismiss: () -> Unit,
     onSave: (String, String) -> Unit
 ) {
     var merchantName by remember { mutableStateOf(initialMerchant) }
-    var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(initialCategory)) }
+    var selectedCategory by remember { mutableStateOf(CategoryHelper.resolveCategory(initialCategory, customCategories)) }
     var expanded by remember { mutableStateOf(false) }
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
@@ -651,8 +662,9 @@ private fun CategoryRuleEditDialog(
                         expanded = !expanded 
                     }
                 ) {
+                    val categoryTitle = selectedCategory.titleRes?.let { stringResource(it) } ?: selectedCategory.displayName
                     OutlinedTextField(
-                        value = stringResource(selectedCategory.titleRes),
+                        value = categoryTitle,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.category_label)) },
@@ -690,14 +702,39 @@ private fun CategoryRuleEditDialog(
                                 )
                                 .padding(4.dp)
                         ) {
-                            TransactionCategory.entries.forEach { cat ->
+                            val allCategories = remember(customCategories) {
+                                CategoryHelper.getAllCategories(customCategories, includeIncome = false)
+                            }
+                            allCategories.forEach { cat ->
                                 DropdownMenuItem(
                                     text = { 
-                                        Text(
-                                            text = stringResource(cat.titleRes),
-                                            style = Typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        ) 
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Text(
+                                                text = if (cat.titleRes != null) stringResource(cat.titleRes) else cat.displayName,
+                                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            if (cat.isCustom) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(4.dp))
+                                                        .background(cat.color.copy(alpha = 0.15f))
+                                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.custom_category_badge),
+                                                        style = Typography.labelSmall.copy(
+                                                            fontSize = 9.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        ),
+                                                        color = cat.color
+                                                    )
+                                                }
+                                            }
+                                        }
                                     },
                                     onClick = {
                                         selectedCategory = cat

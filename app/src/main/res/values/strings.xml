@@ -423,4 +423,24 @@
     <string name="adjust_balance_opening_name">Opening Balance</string>
     <string name="adjust_balance_action_save">Save Adjustment</string>
     <string name="adjust_balance_note_label">Description</string>
+
+    <string name="custom_category_new_title">New Category</string>
+    <string name="custom_category_edit_title">Edit Category</string>
+    <string name="custom_category_subtitle">Personalize with custom icon and color</string>
+    <string name="custom_category_name_label">Category Name</string>
+    <string name="custom_category_name_placeholder">e.g. Fitness &amp; Gym</string>
+    <string name="custom_category_select_icon">SELECT ICON</string>
+    <string name="custom_category_select_color">SELECT ACCENT COLOR</string>
+    <string name="custom_category_save">Save Changes</string>
+    <string name="custom_category_create">Create Category</string>
+    <string name="custom_category_delete">Delete Category</string>
+    <string name="custom_category_delete_confirm_title">Delete %1$s?</string>
+    <string name="custom_category_delete_confirm_desc">Any existing transactions in this category will be moved to General.</string>
+    <string name="custom_category_error_empty">Category name cannot be empty</string>
+    <string name="custom_category_error_exists">A category with this name already exists</string>
+    <string name="custom_category_section_default">Default Categories</string>
+    <string name="custom_category_section_custom">Custom Categories</string>
+    <string name="custom_category_add_btn">Add Category</string>
+    <string name="custom_category_new">+ New Category</string>
+    <string name="custom_category_badge">Custom</string>
 </resources>

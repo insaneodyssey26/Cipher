@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,12 +58,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.model.CategoryHelper
+import com.masum.cipher.core.domain.model.CategoryItem
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.CategoryDetailSheet
+import com.masum.cipher.ui.components.CreateCustomCategorySheet
 import com.masum.cipher.ui.components.EditCategoryBudgetDialog
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.TransactionDetailsSheet
@@ -78,6 +83,8 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronRight
+import compose.icons.lucideicons.Pencil
+import compose.icons.lucideicons.Plus
 import java.util.Calendar
 import java.util.Locale
 
@@ -94,9 +101,11 @@ fun CategoriesScreen(
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
     var expandedCategory by remember { mutableStateOf<String?>(null) }
-    var showBudgetDialogFor by remember { mutableStateOf<TransactionCategory?>(null) }
+    var showBudgetDialogFor by remember { mutableStateOf<CategoryItem?>(null) }
     var selectedCategoryForDetail by remember { mutableStateOf<DashboardContract.CategoryData?>(null) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var showCreateCategorySheet by remember { mutableStateOf(false) }
+    var editingCustomCategory by remember { mutableStateOf<CustomCategoryEntity?>(null) }
 
     val categoryBudgets = settings?.categoryBudgets ?: emptyMap()
 
@@ -110,21 +119,22 @@ fun CategoriesScreen(
         filteredTransactions.filter { !it.isIncome }.sumOf { it.amount }
     }
 
-    val allCategoryItems = remember(filteredTransactions, totalExpense) {
+    val allCategoryItems = remember(filteredTransactions, totalExpense, state.customCategories) {
         val expenses = filteredTransactions.filter { !it.isIncome }
-        val categoryTxMap = expenses.groupBy { 
-            TransactionCategory.fromString(it.category)
+        val categoryTxMap = expenses.groupBy { tx ->
+            CategoryHelper.resolveCategory(tx.category, state.customCategories).name
         }
 
-        TransactionCategory.entries.filter { it != TransactionCategory.INCOME }.map { cat ->
-            val txList = categoryTxMap[cat] ?: emptyList()
+        val allCategories = CategoryHelper.getAllCategories(state.customCategories, includeIncome = false)
+        allCategories.map { cat ->
+            val txList = categoryTxMap[cat.name] ?: emptyList()
             val spent = txList.sumOf { it.amount }
             val percentage = if (totalExpense > 0) (spent / totalExpense).toFloat() else 0f
             DashboardContract.CategoryData(
-                category = cat.displayName,
+                category = cat.name,
                 amount = spent,
                 percentage = percentage,
-                color = cat.color.value.toLong()
+                color = cat.colorHex
             )
         }.sortedWith(
             compareByDescending<DashboardContract.CategoryData> { it.amount > 0 }
@@ -260,13 +270,83 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.height(2.dp))
             }
 
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            editingCustomCategory = null
+                            showCreateCategorySheet = true
+                        }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = stringResource(R.string.custom_category_new_title),
+                                style = Typography.titleMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(R.string.custom_category_subtitle),
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Icon(
+                        imageVector = LucideIcons.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
             items(
                 items = allCategoryItems,
                 key = { it.category }
             ) { categoryData ->
-                val categoryEnum = TransactionCategory.fromString(categoryData.category)
-                val categoryColor = categoryEnum.color
-                val budget = categoryBudgets[categoryEnum.displayName] ?: categoryBudgets[categoryEnum.name] ?: 0.0
+                val categoryItem = remember(categoryData.category, state.customCategories) {
+                    CategoryHelper.resolveCategory(categoryData.category, state.customCategories)
+                }
+                val categoryColor = categoryItem.color
+                val budget = categoryBudgets[categoryItem.displayName] ?: categoryBudgets[categoryItem.name] ?: 0.0
                 val spent = categoryData.amount
                 val hasBudget = budget > 0
                 val isOverBudget = hasBudget && spent > budget
@@ -321,7 +401,7 @@ fun CategoriesScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = categoryEnum.icon,
+                                        imageVector = categoryItem.icon,
                                         contentDescription = null,
                                         tint = categoryColor,
                                         modifier = Modifier.size(19.dp)
@@ -329,17 +409,40 @@ fun CategoriesScreen(
                                 }
 
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(categoryEnum.titleRes),
-                                        style = Typography.titleMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 14.5.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = if (categoryItem.titleRes != null) stringResource(categoryItem.titleRes) else categoryItem.displayName,
+                                            style = Typography.titleMedium.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.5.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (categoryItem.isCustom) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(categoryColor.copy(alpha = 0.15f))
+                                                    .padding(horizontal = 5.dp, vertical = 1.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.custom_category_badge),
+                                                    style = Typography.labelSmall.copy(
+                                                        fontFamily = Lato,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 9.sp
+                                                    ),
+                                                    color = categoryColor
+                                                )
+                                            }
+                                        }
+                                    }
                                     Text(
                                         text = if (totalExpense > 0 && spent > 0) {
                                             "${String.format(Locale.getDefault(), "%.1f", categoryData.percentage * 100)}% of total"
@@ -525,7 +628,7 @@ fun CategoriesScreen(
                                                 .background(categoryColor.copy(alpha = 0.12f))
                                                 .clickable {
                                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                                    showBudgetDialogFor = categoryEnum
+                                                    showBudgetDialogFor = categoryItem
                                                 }
                                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                                         )
@@ -535,33 +638,64 @@ fun CategoriesScreen(
                                 Spacer(modifier = Modifier.height(10.dp))
 
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            selectedCategoryForDetail = categoryData
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.view_breakdown_transactions),
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 12.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Icon(
-                                        imageVector = LucideIcons.ChevronRight,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
+                                            .clickable {
+                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                selectedCategoryForDetail = categoryData
+                                            }
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.view_breakdown_transactions),
+                                            style = Typography.labelMedium.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 12.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Icon(
+                                            imageVector = LucideIcons.ChevronRight,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+
+                                    if (categoryItem.isCustom) {
+                                        val customEntity = state.customCategories.find { it.name.equals(categoryItem.name, ignoreCase = true) }
+                                        if (customEntity != null) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
+                                                    .clickable {
+                                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                        editingCustomCategory = customEntity
+                                                        showCreateCategorySheet = true
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Pencil,
+                                                    contentDescription = stringResource(R.string.custom_category_edit_title),
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -572,8 +706,9 @@ fun CategoriesScreen(
     }
 
     showBudgetDialogFor?.let { cat ->
+        val catDisplayName = if (cat.titleRes != null) stringResource(cat.titleRes) else cat.displayName
         EditCategoryBudgetDialog(
-            categoryName = stringResource(cat.titleRes),
+            categoryName = catDisplayName,
             currentBudget = categoryBudgets[cat.displayName] ?: categoryBudgets[cat.name] ?: 0.0,
             currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onDismiss = { showBudgetDialogFor = null },
@@ -586,14 +721,15 @@ fun CategoriesScreen(
     }
 
     selectedCategoryForDetail?.let { catData ->
-        val categoryEnum = TransactionCategory.fromString(catData.category)
+        val catItem = CategoryHelper.resolveCategory(catData.category, state.customCategories)
         CategoryDetailSheet(
             categoryData = catData,
-            categoryBudget = categoryBudgets[categoryEnum.displayName] ?: categoryBudgets[categoryEnum.name] ?: 0.0,
+            categoryBudget = categoryBudgets[catItem.displayName] ?: categoryBudgets[catItem.name] ?: 0.0,
             transactions = filteredTransactions,
+            customCategories = state.customCategories,
             currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onSetCategoryBudget = { newLimit ->
-                viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryEnum.displayName, newLimit))
+                viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(catItem.displayName, newLimit))
             },
             onDismiss = { selectedCategoryForDetail = null },
             onTransactionClick = { tx ->
@@ -607,6 +743,7 @@ fun CategoriesScreen(
     editingTransaction?.let { tx ->
         TransactionDetailsSheet(
             transaction = tx,
+            customCategories = state.customCategories,
             currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
@@ -620,6 +757,9 @@ fun CategoriesScreen(
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(tx))
                 editingTransaction = null
+            },
+            onCreateCustomCategory = { name, iconName, colorHex ->
+                viewModel.handleIntent(InsightsContract.Intent.CreateCustomCategory(name, iconName, colorHex))
             },
             isHapticsEnabled = isHapticsEnabled
         )
@@ -675,7 +815,8 @@ fun CategoriesScreen(
                 )
             },
             text = {
-                val categoryDisplayName = stringResource(TransactionCategory.fromString(tx.category).titleRes)
+                val catItem = CategoryHelper.resolveCategory(tx.category, state.customCategories)
+                val categoryDisplayName = if (catItem.titleRes != null) stringResource(catItem.titleRes) else catItem.displayName
                 Text(
                     text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
                     style = com.masum.cipher.ui.theme.Typography.bodyMedium,
@@ -698,6 +839,47 @@ fun CategoriesScreen(
                 }) {
                     Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+        )
+    }
+
+    if (showCreateCategorySheet) {
+        CreateCustomCategorySheet(
+            existingCategory = editingCustomCategory,
+            existingCustomCategories = state.customCategories,
+            isHapticsEnabled = isHapticsEnabled,
+            onDismiss = {
+                showCreateCategorySheet = false
+                editingCustomCategory = null
+            },
+            onSaveCategory = { name, iconName, colorHex ->
+                val existing = editingCustomCategory
+                if (existing != null) {
+                    viewModel.handleIntent(
+                        InsightsContract.Intent.UpdateCustomCategory(
+                            id = existing.id,
+                            oldName = existing.name,
+                            newName = name,
+                            iconName = iconName,
+                            colorHex = colorHex
+                        )
+                    )
+                } else {
+                    viewModel.handleIntent(
+                        InsightsContract.Intent.CreateCustomCategory(
+                            name = name,
+                            iconName = iconName,
+                            colorHex = colorHex
+                        )
+                    )
+                }
+                showCreateCategorySheet = false
+                editingCustomCategory = null
+            },
+            onDeleteCategory = { entity ->
+                viewModel.handleIntent(InsightsContract.Intent.DeleteCustomCategory(entity))
+                showCreateCategorySheet = false
+                editingCustomCategory = null
             }
         )
     }

@@ -69,6 +69,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.Lato
@@ -97,6 +99,7 @@ private data class QuickAmountRange(
 @Composable
 fun DashboardFilterSheet(
     currentFilter: DashboardFilter,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     currencySymbol: String = "₹",
     onApplyFilter: (DashboardFilter) -> Unit,
     onDismiss: () -> Unit,
@@ -320,13 +323,17 @@ fun DashboardFilterSheet(
                         }
                     }
 
+                    val allCategories = remember(customCategories) {
+                        CategoryHelper.getAllCategories(customCategories, includeIncome = true)
+                    }
+
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        for (cat in TransactionCategory.entries) {
-                            val isSelected = draftCategories.contains(cat.displayName) || draftCategories.contains(cat.name)
+                        for (cat in allCategories) {
+                            val isSelected = draftCategories.contains(cat.name) || draftCategories.contains(cat.displayName)
                             val catColor = cat.color
 
                             val animatedBgColor by animateColorAsState(
@@ -352,9 +359,9 @@ fun DashboardFilterSheet(
                                     .clickable {
                                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                                         draftCategories = if (isSelected) {
-                                            draftCategories - cat.displayName - cat.name
+                                            draftCategories - cat.name - cat.displayName
                                         } else {
-                                            draftCategories + cat.displayName
+                                            draftCategories + cat.name
                                         }
                                     }
                                     .padding(horizontal = 10.dp, vertical = 7.dp),
@@ -377,7 +384,7 @@ fun DashboardFilterSheet(
                                     )
                                 }
                                 Text(
-                                    text = stringResource(cat.titleRes),
+                                    text = if (cat.titleRes != null) stringResource(cat.titleRes) else cat.displayName,
                                     style = Typography.labelMedium.copy(
                                         fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,

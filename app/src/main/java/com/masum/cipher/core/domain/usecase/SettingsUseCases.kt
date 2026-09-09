@@ -141,6 +141,6 @@ class ImportDataUseCase @Inject constructor(
         val inputStream = backupRepository.provideInputStream(uri)
             ?: return@withContext Result.failure(Exception("Could not open file for reading"))
         
-        backupRepository.importData(inputStream, password)
+        backupRepository.restoreData(inputStream, password)
     }
 }

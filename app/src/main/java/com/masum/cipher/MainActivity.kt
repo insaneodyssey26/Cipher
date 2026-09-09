@@ -171,12 +171,13 @@ class MainActivity : AppCompatActivity() {
                         val navSpec = remember { tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing) }
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentRoute = navBackStackEntry?.destination?.route
+                        var showAddSheet by remember { mutableStateOf(false) }
 
                         LaunchedEffect(intent) {
                             if (intent.getStringExtra("navigate_to") == "manage_apps") {
                                 navController.navigate("manage_apps")
-                                intent.removeExtra("navigate_to")
                             }
+                            intent.removeExtra("navigate_to")
                         }
 
                         val isTopLevel = currentRoute in listOf("dashboard", "insights", "split_expenses", "settings")
@@ -280,7 +281,8 @@ class MainActivity : AppCompatActivity() {
                                     biometricAuthenticator = biometricAuthenticator,
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
-                                    onNavigateToSmartRules = { navController.navigate("smart_rules") }
+                                    onNavigateToSmartRules = { navController.navigate("smart_rules") },
+                                    onNavigateToCategories = { navController.navigate("categories") }
                                 )
                             }
                             
@@ -309,7 +311,6 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        var showAddSheet by remember { mutableStateOf(false) }
                         var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
 
                         if (isTopLevel) {
@@ -344,6 +345,7 @@ class MainActivity : AppCompatActivity() {
                                     isIncome = false
                                 ),
                                 currencySymbol = state.settings?.currencySymbol ?: "₹",
+                                customCategories = state.customCategories,
                                 onDismiss = { showAddSheet = false },
                                 onConfirm = { newTx ->
                                     mainViewModel.handleIntent(MainContract.Intent.AddTransaction(newTx))
@@ -361,6 +363,9 @@ class MainActivity : AppCompatActivity() {
                                 },
                                 onDraftChange = { updatedDraft ->
                                     mainViewModel.handleIntent(MainContract.Intent.UpdateDraftTransaction(updatedDraft))
+                                },
+                                onCreateCustomCategory = { name, iconName, colorHex ->
+                                    mainViewModel.handleIntent(MainContract.Intent.CreateCustomCategory(name, iconName, colorHex))
                                 },
                                 isHapticsEnabled = state.settings?.isHapticsEnabled ?: true
                             )

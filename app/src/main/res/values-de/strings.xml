@@ -422,4 +422,23 @@
     <string name="adjust_balance_opening_name">Eröffnungssaldo</string>
     <string name="adjust_balance_action_save">Anpassung speichern</string>
     <string name="adjust_balance_note_label">Beschreibung</string>
+
+    <string name="custom_category_new_title">Neue Kategorie</string>
+    <string name="custom_category_edit_title">Kategorie bearbeiten</string>
+    <string name="custom_category_subtitle">Mit individuellem Symbol und Farbe anpassen</string>
+    <string name="custom_category_name_label">Kategoriename</string>
+    <string name="custom_category_name_placeholder">z.B. Fitness &amp; Gym</string>
+    <string name="custom_category_select_icon">SYMBOL WÄHLEN</string>
+    <string name="custom_category_select_color">FARBE WÄHLEN</string>
+    <string name="custom_category_save">Änderungen speichern</string>
+    <string name="custom_category_create">Kategorie erstellen</string>
+    <string name="custom_category_delete">Kategorie löschen</string>
+    <string name="custom_category_delete_confirm_title">%1$s löschen?</string>
+    <string name="custom_category_delete_confirm_desc">Bestehende Transaktionen in dieser Kategorie werden zu Allgemein verschoben.</string>
+    <string name="custom_category_error_empty">Kategoriename darf nicht leer sein</string>
+    <string name="custom_category_error_exists">Eine Kategorie mit diesem Namen existiert bereits</string>
+    <string name="custom_category_section_default">Standardkategorien</string>
+    <string name="custom_category_section_custom">Benutzerdefinierte Kategorien</string>
+    <string name="custom_category_add_btn">Kategorie hinzufügen</string>
+    <string name="custom_category_badge">Eigene</string>
 </resources>

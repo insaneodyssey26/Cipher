@@ -23,6 +23,7 @@ class SmartRulesContract {
         val isLoading: Boolean = true,
         val categoryRules: List<CategoryRuleEntity> = emptyList(),
         val merchantRules: List<MerchantAliasEntity> = emptyList(),
+        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
         val searchQuery: String = "",
         val selectedTab: Int = 0,
         val isHapticsEnabled: Boolean = true

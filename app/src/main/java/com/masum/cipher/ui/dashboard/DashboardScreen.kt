@@ -86,8 +86,10 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.BuildConfig
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
@@ -549,6 +551,7 @@ fun DashboardScreen(
                             StaggeredEntranceItem(index = index) {
                                 TransactionItem(
                                     transaction = transaction,
+                                    customCategories = state.customCategories,
                                     privacyMode = privacyMode,
                                     currencySymbol = state.currencySymbol,
                                     splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
@@ -652,6 +655,7 @@ fun DashboardScreen(
                 rawSms = null,
                 isIncome = false
             ),
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             existingSplits = draftNewSplits,
             onDismiss = { showAddSheet = false },
@@ -674,6 +678,9 @@ fun DashboardScreen(
             },
             onDraftChange = { updatedDraft ->
                 viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
+            },
+            onCreateCustomCategory = { name, iconName, colorHex ->
+                viewModel.handleIntent(DashboardContract.Intent.CreateCustomCategory(name, iconName, colorHex))
             },
             isHapticsEnabled = isHapticsEnabled
         )
@@ -716,6 +723,7 @@ fun DashboardScreen(
         }
         TransactionDetailsSheet(
             transaction = transaction,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             existingSplits = mappedParticipants,
             onDismiss = { editingTransaction = null },
@@ -740,6 +748,9 @@ fun DashboardScreen(
                 viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                 draftEditingSplits = draftEditingSplits - transaction.id
                 editingTransaction = null
+            },
+            onCreateCustomCategory = { name, iconName, colorHex ->
+                viewModel.handleIntent(DashboardContract.Intent.CreateCustomCategory(name, iconName, colorHex))
             },
             isHapticsEnabled = isHapticsEnabled
         )
@@ -999,7 +1010,8 @@ fun DashboardScreen(
                 )
             },
             text = {
-                val categoryDisplayName = stringResource(com.masum.cipher.core.domain.model.TransactionCategory.fromString(tx.category).titleRes)
+                val catItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(tx.category, state.customCategories)
+                val categoryDisplayName = if (catItem.titleRes != null) stringResource(catItem.titleRes) else catItem.displayName
                 Text(
                     text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
                     style = Typography.bodyMedium,
@@ -1383,6 +1395,7 @@ fun DashboardScreen(
     if (showFilterSheet) {
         DashboardFilterSheet(
             currentFilter = state.filter,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onApplyFilter = { newFilter ->
                 viewModel.handleIntent(DashboardContract.Intent.SetDashboardFilter(newFilter))
@@ -2037,6 +2050,7 @@ private fun buildFilterSummary(
 @Composable
 fun TransactionItem(
     transaction: TransactionEntity,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     privacyMode: Boolean,
     currencySymbol: String = "₹",
     splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList(),
@@ -2054,7 +2068,9 @@ fun TransactionItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            val category = TransactionCategory.fromString(transaction.category)
+            val category = remember(transaction.category, customCategories) {
+                CategoryHelper.resolveCategory(transaction.category, customCategories)
+            }
             Box(
                 modifier = Modifier
                     .size(44.dp)

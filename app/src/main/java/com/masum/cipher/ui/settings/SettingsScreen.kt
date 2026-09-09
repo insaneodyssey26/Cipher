@@ -127,6 +127,7 @@ import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.RefreshCw
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Settings
+import compose.icons.lucideicons.Shapes
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Star
@@ -147,7 +148,8 @@ fun SettingsScreen(
     biometricAuthenticator: BiometricAuthenticator,
     onNavigateToPrivacy: () -> Unit,
     onNavigateToManageApps: () -> Unit,
-    onNavigateToSmartRules: () -> Unit
+    onNavigateToSmartRules: () -> Unit,
+    onNavigateToCategories: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -227,7 +229,8 @@ fun SettingsScreen(
     val matchApps = query.isBlank() || "manage tracked apps".contains(query) || "select which apps to monitor for transactions".contains(query)
     val matchHealth = query.isBlank() || "permissions health".contains(query) || "check if cipher is working at its best".contains(query)
     val matchRules = query.isBlank() || "manage category rules".contains(query) || "view and edit custom merchant categories".contains(query)
-    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchApps || matchHealth || matchRules
+    val matchCategories = query.isBlank() || "categories".contains(query) || "custom categories".contains(query) || "manage categories".contains(query) || "budgets".contains(query)
+    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchApps || matchHealth || matchRules || matchCategories
 
     val matchNotifyTx = query.isBlank() || "transaction alerts".contains(query) || "interactive transaction alerts".contains(query)
     val matchNotifyBudget = query.isBlank() || "budget alerts".contains(query) || "budget warnings".contains(query)
@@ -689,6 +692,14 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         title = stringResource(R.string.manage_category_rules_title),
                         subtitle = stringResource(R.string.manage_category_rules_desc),
                         onClick = onNavigateToSmartRules
+                    )
+
+                    if (matchCategories) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Shapes,
+                        title = stringResource(R.string.nav_categories),
+                        subtitle = stringResource(R.string.custom_category_subtitle),
+                        onClick = onNavigateToCategories
                     )
                 }
             }

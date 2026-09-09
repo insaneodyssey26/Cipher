@@ -3,11 +3,13 @@ package com.masum.cipher.core.data.repository
 import android.content.Context
 import android.net.Uri
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
+import com.masum.cipher.core.data.local.dao.CustomCategoryDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.dao.TransactionSplitDao
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
@@ -37,6 +39,7 @@ data class BackupData(
     val aliases: List<MerchantAliasEntity> = emptyList(),
     val rules: List<CategoryRuleEntity> = emptyList(),
     val subscriptions: List<SubscriptionEntity> = emptyList(),
+    val customCategories: List<CustomCategoryEntity> = emptyList(),
     val monthlyBudget: Double = 0.0,
     val isDynamicBudgetEnabled: Boolean? = null,
     val categoryBudgets: Map<String, Double> = emptyMap(),
@@ -68,6 +71,7 @@ class BackupRepository @Inject constructor(
     private val merchantAliasDao: MerchantAliasDao,
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: SubscriptionDao,
+    private val customCategoryDao: CustomCategoryDao,
     private val userPreferences: UserPreferences
 ) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -89,6 +93,7 @@ class BackupRepository @Inject constructor(
                 aliases = merchantAliasDao.getAllAliases().first(),
                 rules = categoryRuleDao.getAllRules().first(),
                 subscriptions = subscriptionDao.getAllSubscriptions().first(),
+                customCategories = customCategoryDao.getAllCustomCategories(),
                 monthlyBudget = settings.monthlyBudget,
                 isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                 categoryBudgets = settings.categoryBudgets,
@@ -112,20 +117,23 @@ class BackupRepository @Inject constructor(
                 appLanguage = settings.appLanguage
             )
             val jsonString = json.encodeToString(data)
+            val jsonBytes = jsonString.toByteArray(Charsets.UTF_8)
             
             val salt = ByteArray(16).apply { SecureRandom().nextBytes(this) }
             val iv = ByteArray(12).apply { SecureRandom().nextBytes(this) }
             
-            val key = deriveKey(password, salt)
+            val secretKey = deriveKey(password, salt)
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
             
-            val encryptedData = cipher.doFinal(jsonString.toByteArray())
+            val encryptedData = cipher.doFinal(jsonBytes)
             
-            outputStream.use { os ->
-                os.write(salt)
-                os.write(iv)
-                os.write(encryptedData)
+            outputStream.use { out ->
+                out.write("CIPHER_VAULT_V1".toByteArray(Charsets.UTF_8))
+                out.write(salt)
+                out.write(iv)
+                out.write(encryptedData)
+                out.flush()
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -133,20 +141,26 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun importData(inputStream: InputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun restoreData(inputStream: InputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            inputStream.use { isStream ->
+            inputStream.use { stream ->
+                val magicHeader = ByteArray(15)
+                val readHeader = stream.read(magicHeader)
+                if (readHeader != 15 || String(magicHeader) != "CIPHER_VAULT_V1") {
+                    return@withContext Result.failure(IllegalArgumentException("Invalid file format"))
+                }
+                
                 val salt = ByteArray(16)
-                if (isStream.read(salt) != 16) return@withContext Result.failure(Exception("Invalid backup file: Salt missing"))
+                if (stream.read(salt) != 16) return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
                 
                 val iv = ByteArray(12)
-                if (isStream.read(iv) != 12) return@withContext Result.failure(Exception("Invalid backup file: IV missing"))
+                if (stream.read(iv) != 12) return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
                 
-                val encryptedData = isStream.readBytes()
+                val encryptedData = stream.readBytes()
+                val secretKey = deriveKey(password, salt)
                 
-                val key = deriveKey(password, salt)
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
                 
                 val jsonBytes = cipher.doFinal(encryptedData)
                 val jsonString = String(jsonBytes)
@@ -159,6 +173,7 @@ class BackupRepository @Inject constructor(
                 data.aliases.forEach { merchantAliasDao.insertAlias(it) }
                 data.rules.forEach { categoryRuleDao.insertRule(it) }
                 data.subscriptions.forEach { subscriptionDao.insert(it) }
+                data.customCategories.forEach { customCategoryDao.insertCustomCategory(it) }
 
                 if (data.monthlyBudget > 0) {
                     userPreferences.setMonthlyBudget(data.monthlyBudget)

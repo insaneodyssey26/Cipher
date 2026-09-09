@@ -34,10 +34,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,7 +61,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.CategoryHelper
+import com.masum.cipher.core.domain.model.CategoryIconRegistry
+import com.masum.cipher.core.domain.model.CategoryItem
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.MathEvaluator
 import com.masum.cipher.core.util.performVibrate
@@ -112,6 +113,7 @@ import com.masum.cipher.core.domain.model.SplitParticipant
 @Composable
 fun TransactionDetailsSheet(
     transaction: TransactionEntity,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     currencySymbol: String = "₹",
     existingSplits: List<SplitParticipant> = emptyList(),
     onDismiss: () -> Unit,
@@ -121,13 +123,15 @@ fun TransactionDetailsSheet(
     onOpenSplitSheet: ((TransactionEntity, List<SplitParticipant>) -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     onDraftChange: ((TransactionEntity) -> Unit)? = null,
+    onCreateCustomCategory: ((name: String, iconName: String, colorHex: Long) -> Unit)? = null,
     isHapticsEnabled: Boolean = true
 ) {
     var merchant by remember { mutableStateOf(transaction.merchant) }
     var amount by remember { mutableStateOf(if (transaction.amount == 0.0) "" else String.format(Locale.US, "%.2f", transaction.amount)) }
     var isIncome by remember { mutableStateOf(transaction.isIncome) }
-    var selectedCategory by remember { mutableStateOf(TransactionCategory.fromString(transaction.category)) }
+    var selectedCategory by remember { mutableStateOf(CategoryHelper.resolveCategory(transaction.category, customCategories)) }
     var categoryExpanded by remember { mutableStateOf(false) }
+    var showCreateCategorySheet by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf(transaction.note ?: "") }
     var isNoteExpanded by remember { mutableStateOf(transaction.note?.isNotBlank() == true) }
     var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
@@ -359,122 +363,55 @@ fun TransactionDetailsSheet(
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
-                    ExposedDropdownMenuBox(
-                        expanded = categoryExpanded,
-                        onExpandedChange = {
-                            view.performVibrate(isHapticsEnabled)
-                            focusManager.clearFocus()
-                            categoryExpanded = !categoryExpanded
-                        }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                            .border(1.dp, White10, RoundedCornerShape(12.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                focusManager.clearFocus()
+                                categoryExpanded = true
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                                .border(1.dp, White10, RoundedCornerShape(12.dp))
-                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        imageVector = selectedCategory.icon,
-                                        contentDescription = null,
-                                        tint = selectedCategory.color,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Column(modifier = Modifier.weight(1f, fill = false)) {
-                                        Text(
-                                            text = stringResource(R.string.category).uppercase(),
-                                            style = Typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(Modifier.height(4.dp))
-                                        Text(
-                                            text = stringResource(selectedCategory.titleRes),
-                                            style = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                            maxLines = 1,
-                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
                                 Icon(
-                                    imageVector = LucideIcons.ChevronDown,
+                                    imageVector = selectedCategory.icon,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp)
+                                    tint = selectedCategory.color,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                            }
-                        }
-
-                        MaterialTheme(
-                            colorScheme = MaterialTheme.colorScheme.copy(
-                                surface = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            ExposedDropdownMenu(
-                                expanded = categoryExpanded,
-                                onDismissRequest = { categoryExpanded = false },
-                                modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        shape = RoundedCornerShape(16.dp)
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f, fill = false)) {
+                                    Text(
+                                        text = stringResource(R.string.category).uppercase(),
+                                        style = Typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    .border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .padding(4.dp)
-                            ) {
-                                TransactionCategory.entries.forEach { category ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = stringResource(category.titleRes),
-                                                style = Typography.bodyMedium.copy(
-                                                    fontWeight = if (category == selectedCategory) FontWeight.Bold else FontWeight.Normal
-                                                ),
-                                                color = if (category == selectedCategory) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                            )
-                                        },
-                                        onClick = {
-                                            view.performVibrate(isHapticsEnabled)
-                                            selectedCategory = category
-                                            categoryExpanded = false
-                                        },
-                                        leadingIcon = {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(28.dp)
-                                                    .background(
-                                                        category.color.copy(alpha = 0.12f),
-                                                        RoundedCornerShape(8.dp)
-                                                    ),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = category.icon,
-                                                    contentDescription = null,
-                                                    tint = category.color,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = selectedCategory.titleRes?.let { stringResource(it) } ?: selectedCategory.displayName,
+                                        style = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
                                 }
                             }
+                            Icon(
+                                imageVector = LucideIcons.ChevronDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
@@ -638,6 +575,49 @@ fun TransactionDetailsSheet(
                     onSaveSplits = { updatedSplits ->
                         currentSplits = updatedSplits
                         onSaveSplits?.invoke(updatedSplits)
+                    }
+                )
+            }
+
+            if (categoryExpanded) {
+                CategoryPickerSheet(
+                    selectedCategory = selectedCategory,
+                    customCategories = customCategories,
+                    isIncome = isIncome,
+                    isHapticsEnabled = isHapticsEnabled,
+                    onCategorySelected = { category ->
+                        selectedCategory = category
+                        categoryExpanded = false
+                    },
+                    onCreateNewCategory = if (onCreateCustomCategory != null) {
+                        {
+                            categoryExpanded = false
+                            showCreateCategorySheet = true
+                        }
+                    } else null,
+                    onDismiss = { categoryExpanded = false }
+                )
+            }
+
+            if (showCreateCategorySheet && onCreateCustomCategory != null) {
+                CreateCustomCategorySheet(
+                    existingCategory = null,
+                    existingCustomCategories = customCategories,
+                    isHapticsEnabled = isHapticsEnabled,
+                    onDismiss = { showCreateCategorySheet = false },
+                    onSaveCategory = { name, iconName, colorHex ->
+                        onCreateCustomCategory(name, iconName, colorHex)
+                        val newCat = CategoryItem(
+                            name = name,
+                            displayName = name,
+                            icon = CategoryIconRegistry.getIcon(iconName),
+                            iconName = iconName,
+                            color = Color(colorHex.toInt()),
+                            colorHex = colorHex,
+                            isCustom = true
+                        )
+                        selectedCategory = newCat
+                        showCreateCategorySheet = false
                     }
                 )
             }

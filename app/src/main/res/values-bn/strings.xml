@@ -422,4 +422,23 @@
     <string name="adjust_balance_opening_name">প্রারম্ভিক ব্যালেন্স</string>
     <string name="adjust_balance_action_save">সমন্বয় সংরক্ষণ করুন</string>
     <string name="adjust_balance_note_label">বিবরণ</string>
+
+    <string name="custom_category_new_title">নতুন ক্যাটাগরি</string>
+    <string name="custom_category_edit_title">ক্যাটাগরি সম্পাদনা</string>
+    <string name="custom_category_subtitle">আইকন এবং রঙ দিয়ে কাস্টমাইজ করুন</string>
+    <string name="custom_category_name_label">ক্যাটাগরির নাম</string>
+    <string name="custom_category_name_placeholder">যেমন: ফিটনেস ও জিম</string>
+    <string name="custom_category_select_icon">আইকন নির্বাচন করুন</string>
+    <string name="custom_category_select_color">রঙ নির্বাচন করুন</string>
+    <string name="custom_category_save">সংরক্ষণ করুন</string>
+    <string name="custom_category_create">ক্যাটাগরি তৈরি করুন</string>
+    <string name="custom_category_delete">ক্যাটাগরি মুছুন</string>
+    <string name="custom_category_delete_confirm_title">%1$s মুছবেন?</string>
+    <string name="custom_category_delete_confirm_desc">এই ক্যাটাগরির লেনদেনগুলো স্বয়ংক্রিয়ভাবে সাধারণ (General) ক্যাটাগরিতে স্থানান্তরিত হবে।</string>
+    <string name="custom_category_error_empty">ক্যাটাগরির নাম খালি রাখা যাবে না</string>
+    <string name="custom_category_error_exists">এই নামের ক্যাটাগরি ইতিমধ্যে রয়েছে</string>
+    <string name="custom_category_section_default">ডিফল্ট ক্যাটাগরি</string>
+    <string name="custom_category_section_custom">কাস্টম ক্যাটাগরি</string>
+    <string name="custom_category_add_btn">ক্যাটাগরি যুক্ত করুন</string>
+    <string name="custom_category_badge">কাস্টম</string>
 </resources>

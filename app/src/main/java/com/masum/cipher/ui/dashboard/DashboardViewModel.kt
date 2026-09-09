@@ -27,6 +27,7 @@ class DashboardViewModel @Inject constructor(
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
+    private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
     private val categoryRuleDao: CategoryRuleDao,
     private val merchantAliasDao: com.masum.cipher.core.data.local.dao.MerchantAliasDao,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
@@ -71,6 +72,11 @@ class DashboardViewModel @Inject constructor(
             is DashboardContract.Intent.UpdateMonthlyBudget -> updateMonthlyBudget(intent.budget, intent.isDynamic)
             is DashboardContract.Intent.SaveTransactionSplits -> saveSplits(intent.transactionId, intent.splits)
             is DashboardContract.Intent.UpdateSplitPaidStatus -> updateSplitPaidStatus(intent.splitId, intent.isPaid)
+            is DashboardContract.Intent.CreateCustomCategory -> {
+                viewModelScope.launch {
+                    categoryRepository.addCustomCategory(intent.name, intent.iconName, intent.colorHex)
+                }
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 package com.masum.cipher.core.domain.usecase
 
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardFilter
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetDashboardDataUseCase @Inject constructor(
     private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
     private val userPreferences: UserPreferences
 ) {
     operator fun invoke(
@@ -67,7 +70,7 @@ class GetDashboardDataUseCase @Inject constructor(
                 }
             }
 
-            transactionsFlow.combine(repository.getAllTransactions()) { transactions, allTxs ->
+            combine(transactionsFlow, repository.getAllTransactions(), categoryRepository.getAllCustomCategoriesFlow()) { transactions, allTxs, customCats ->
                 val filteredList = transactions.filter { tx ->
                     val matchesType = when (filter.type) {
                         DashboardContract.FilterType.ALL -> true
@@ -77,10 +80,10 @@ class GetDashboardDataUseCase @Inject constructor(
                     if (!matchesType) return@filter false
 
                     if (filter.selectedCategories.isNotEmpty()) {
-                        val categoryEnum = TransactionCategory.fromString(tx.category)
+                        val categoryItem = CategoryHelper.resolveCategory(tx.category, customCats)
                         val matchesCategory = filter.selectedCategories.contains(tx.category) ||
-                                filter.selectedCategories.contains(categoryEnum.displayName) ||
-                                filter.selectedCategories.contains(categoryEnum.name)
+                                filter.selectedCategories.contains(categoryItem.name) ||
+                                filter.selectedCategories.contains(categoryItem.displayName)
                         if (!matchesCategory) return@filter false
                     }
 
@@ -114,7 +117,8 @@ class GetDashboardDataUseCase @Inject constructor(
                     isDynamicBudget = stats.isDynamicBudget,
                     expenseComparisonPercent = stats.deltaPercent,
                     expenseComparisonLabel = stats.compLabel,
-                    previousPeriodExpenses = stats.prevExp
+                    previousPeriodExpenses = stats.prevExp,
+                    customCategories = customCats
                 )
             }
         }

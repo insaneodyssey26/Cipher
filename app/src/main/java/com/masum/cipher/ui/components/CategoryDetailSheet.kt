@@ -59,7 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -88,6 +90,7 @@ fun CategoryDetailSheet(
     categoryData: DashboardContract.CategoryData,
     categoryBudget: Double,
     transactions: List<TransactionEntity>,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     onSetCategoryBudget: (Double) -> Unit,
     currencySymbol: String = "₹",
     onDismiss: () -> Unit,
@@ -98,17 +101,19 @@ fun CategoryDetailSheet(
     val locale = LocalLocale.current.platformLocale
     var showBudgetDialog by remember { mutableStateOf(false) }
 
-    val categoryEnum = remember(categoryData.category) {
-        TransactionCategory.fromString(categoryData.category)
+    val categoryItem = remember(categoryData.category, customCategories) {
+        CategoryHelper.resolveCategory(categoryData.category, customCategories)
     }
-    val categoryColor = categoryEnum.color
+    val categoryColor = categoryItem.color
+    val categoryIcon = categoryItem.icon
+    val categoryTitle = if (categoryItem.titleRes != null) stringResource(categoryItem.titleRes) else categoryItem.displayName
 
-    val categoryTransactions = remember(transactions, categoryData.category) {
+    val categoryTransactions = remember(transactions, categoryData.category, customCategories) {
         transactions.filter {
             !it.isIncome && (
                 it.category.equals(categoryData.category, ignoreCase = true) ||
-                it.category.equals(categoryEnum.name, ignoreCase = true) ||
-                it.category.equals(categoryEnum.displayName, ignoreCase = true)
+                it.category.equals(categoryItem.name, ignoreCase = true) ||
+                it.category.equals(categoryItem.displayName, ignoreCase = true)
             )
         }.sortedByDescending { it.timestamp }
     }
@@ -140,20 +145,22 @@ fun CategoryDetailSheet(
     val daysRemaining = (daysInMonth - currentDay + 1).coerceAtLeast(1)
 
     val remainingBudget = categoryBudget - totalSpent
-    val percentUsed = if (categoryBudget > 0) ((totalSpent / categoryBudget) * 100).toInt() else 0
-    val safeSpendPerDay = if (remainingBudget > 0) remainingBudget / daysRemaining else 0.0
-    val isOverBudget = categoryBudget > 0 && totalSpent > categoryBudget
+    val safeDailySpend = if (remainingBudget > 0) remainingBudget / daysRemaining else 0.0
 
-    val progress = if (categoryBudget > 0) (totalSpent / categoryBudget).toFloat().coerceIn(0f, 1f) else 0f
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
+    val hasBudget = categoryBudget > 0
+    val isOverBudget = hasBudget && totalSpent > categoryBudget
+    val budgetPercent = if (hasBudget) (totalSpent / categoryBudget).toFloat().coerceIn(0f, 1f) else 0f
+    val budgetPercentInt = if (hasBudget) ((totalSpent / categoryBudget) * 100).toInt() else 0
+
+    val animatedBudgetProgress by animateFloatAsState(
+        targetValue = budgetPercent,
         animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
         label = "categoryBudgetProgress"
     )
 
     if (showBudgetDialog) {
         EditCategoryBudgetDialog(
-            categoryName = stringResource(categoryEnum.titleRes),
+            categoryName = categoryTitle,
             currentBudget = categoryBudget,
             currencySymbol = currencySymbol,
             onDismiss = { showBudgetDialog = false },
@@ -216,7 +223,7 @@ fun CategoryDetailSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = categoryEnum.icon,
+                                imageVector = categoryIcon,
                                 contentDescription = null,
                                 tint = categoryColor,
                                 modifier = Modifier.size(22.dp)
@@ -225,7 +232,7 @@ fun CategoryDetailSheet(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(categoryEnum.titleRes),
+                                text = categoryTitle,
                                 style = Typography.titleLarge.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -326,17 +333,17 @@ fun CategoryDetailSheet(
                                         modifier = Modifier
                                             .size(7.dp)
                                             .clip(CircleShape)
-                                            .background(if (isOverBudget) RoseExpense else if (percentUsed >= 85) Color(0xFFF59E0B) else EmeraldIncome)
+                                            .background(if (isOverBudget) RoseExpense else if (budgetPercentInt >= 85) Color(0xFFF59E0B) else EmeraldIncome)
                                     )
                                     Text(
-                                        text = if (isOverBudget) "OVER LIMIT" else "$percentUsed% OF LIMIT USED",
+                                        text = if (isOverBudget) "OVER LIMIT" else "$budgetPercentInt% OF LIMIT USED",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp,
                                             letterSpacing = 0.8.sp
                                         ),
-                                        color = if (isOverBudget) RoseExpense else if (percentUsed >= 85) Color(0xFFF59E0B) else EmeraldIncome
+                                        color = if (isOverBudget) RoseExpense else if (budgetPercentInt >= 85) Color(0xFFF59E0B) else EmeraldIncome
                                     )
                                 }
 
@@ -373,7 +380,7 @@ fun CategoryDetailSheet(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth(animatedProgress)
+                                        .fillMaxWidth(animatedBudgetProgress)
                                         .fillMaxHeight()
                                         .clip(RoundedCornerShape(3.dp))
                                         .background(if (isOverBudget) RoseExpense else categoryColor)
@@ -402,7 +409,7 @@ fun CategoryDetailSheet(
 
                                 if (!isOverBudget) {
                                     Text(
-                                        text = "${stringResource(R.string.safe_daily_spend)}: ${AppFormatters.formatCurrency(safeSpendPerDay, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
+                                        text = "${stringResource(R.string.safe_daily_spend)}: ${AppFormatters.formatCurrency(safeDailySpend, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontSize = 11.sp,
@@ -450,7 +457,7 @@ fun CategoryDetailSheet(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = stringResource(R.string.set_spending_limit_for, stringResource(categoryEnum.titleRes)),
+                                        text = stringResource(R.string.set_spending_limit_for, categoryTitle),
                                         style = Typography.bodySmall.copy(fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

@@ -16,7 +16,8 @@ class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val biometricAuthenticator: BiometricAuthenticator,
     private val addTransactionUseCase: AddTransactionUseCase,
-    private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository
+    private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
+    private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
         settings = userPreferences.getCachedSettings(),
@@ -32,6 +33,14 @@ class MainViewModel @Inject constructor(
                         settings = settings,
                         isOnboardingRequired = !settings.hasCompletedOnboarding
                     )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        categoryRepository.getAllCustomCategoriesFlow()
+            .onEach { customCats ->
+                updateState {
+                    copy(customCategories = customCats)
                 }
             }
             .launchIn(viewModelScope)
@@ -51,6 +60,11 @@ class MainViewModel @Inject constructor(
             is MainContract.Intent.SaveCurrency -> saveCurrency(intent.currencyCode, intent.currencySymbol)
             is MainContract.Intent.UpdateDraftTransaction -> updateState { copy(draftTransaction = intent.transaction) }
             is MainContract.Intent.SetNavBarCompressed -> setNavBarCompressed(intent.compressed)
+            is MainContract.Intent.CreateCustomCategory -> {
+                viewModelScope.launch {
+                    categoryRepository.addCustomCategory(intent.name, intent.iconName, intent.colorHex)
+                }
+            }
         }
     }
 

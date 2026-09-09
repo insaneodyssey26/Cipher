@@ -421,4 +421,23 @@
     <string name="adjust_balance_opening_name">प्रारंभिक बैलेंस</string>
     <string name="adjust_balance_action_save">समायोजन सहेजें</string>
     <string name="adjust_balance_note_label">विवरण</string>
+
+    <string name="custom_category_new_title">नई श्रेणी</string>
+    <string name="custom_category_edit_title">श्रेणी संपादित करें</string>
+    <string name="custom_category_subtitle">कस्टम आइकन और रंग के साथ कस्टमाइज़ करें</string>
+    <string name="custom_category_name_label">श्रेणी का नाम</string>
+    <string name="custom_category_name_placeholder">उदा. फिटनेस और जिम</string>
+    <string name="custom_category_select_icon">आइकन चुनें</string>
+    <string name="custom_category_select_color">रंग चुनें</string>
+    <string name="custom_category_save">बदलाव सहेजें</string>
+    <string name="custom_category_create">श्रेणी बनाएं</string>
+    <string name="custom_category_delete">श्रेणी हटाएं</string>
+    <string name="custom_category_delete_confirm_title">%1$s हटाएं?</string>
+    <string name="custom_category_delete_confirm_desc">इस श्रेणी के सभी मौजूदा लेन-देन सामान्य (General) में स्थानांतरित कर दिए जाएंगे।</string>
+    <string name="custom_category_error_empty">श्रेणी का नाम खाली नहीं हो सकता</string>
+    <string name="custom_category_error_exists">इस नाम की श्रेणी पहले से मौजूद है</string>
+    <string name="custom_category_section_default">डिफ़ॉल्ट श्रेणियां</string>
+    <string name="custom_category_section_custom">कस्टम श्रेणियां</string>
+    <string name="custom_category_add_btn">श्रेणी जोड़ें</string>
+    <string name="custom_category_badge">कस्टम</string>
 </resources>

@@ -2,10 +2,13 @@ package com.masum.cipher.core.domain.usecase
 
 import androidx.compose.ui.graphics.toArgb
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.TimeRange
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
@@ -20,6 +23,7 @@ import javax.inject.Inject
 
 class GetInsightsUseCase @Inject constructor(
     private val repository: TransactionRepository,
+    private val categoryRepository: CategoryRepository,
     private val subscriptionDetector: SubscriptionDetector,
     private val subscriptionDao: SubscriptionDao,
     private val userPreferences: UserPreferences
@@ -28,13 +32,23 @@ class GetInsightsUseCase @Inject constructor(
         val startOfCurrentWeek = getStartOfCurrentWeek()
         val startOfLastWeek = startOfCurrentWeek - TimeUnit.DAYS.toMillis(7)
 
-        return combine(
+        val txStatsFlow = combine(
             repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime),
             repository.getExpensesSince(startOfLastWeek),
-            repository.getAllTransactions(),
+            repository.getAllTransactions()
+        ) { txs, recentExp, allTx ->
+            Triple(txs, recentExp, allTx)
+        }
+
+        val extraDataFlow = combine(
             subscriptionDao.getAllSubscriptions(),
+            categoryRepository.getAllCustomCategoriesFlow(),
             userPreferences.settingsFlow
-        ) { transactions, recentExpenses, allTx, manualSubscriptions, settings ->
+        ) { manualSubs, customCats, settings ->
+            Triple(manualSubs, customCats, settings)
+        }
+
+        return combine(txStatsFlow, extraDataFlow) { (transactions, recentExpenses, allTx), (manualSubscriptions, customCategories, settings) ->
             val currentWeekExpenses = recentExpenses.filter { it.timestamp >= startOfCurrentWeek }
             val lastWeekExpenses = recentExpenses.filter { it.timestamp in startOfLastWeek until startOfCurrentWeek }
 
@@ -47,7 +61,7 @@ class GetInsightsUseCase @Inject constructor(
                 SubscriptionDetector.Subscription(
                     merchant = entity.merchant,
                     amount = entity.amount,
-                    category = TransactionCategory.fromString(entity.category),
+                    category = entity.category,
                     frequencyDays = entity.frequencyDays,
                     lastDate = 0L,
                     nextExpectedDate = entity.nextExpectedDate,
@@ -81,7 +95,8 @@ class GetInsightsUseCase @Inject constructor(
                 incomeTrendHistory = incomeFlow,
                 netFlowTrendHistory = netFlow,
                 calendarHeatmap = calculateHeatmap(allTx),
-                categoryBreakdown = calculateCategories(transactions),
+                categoryBreakdown = calculateCategories(transactions, customCategories),
+                customCategories = customCategories,
                 detectedSubscriptions = allSubscriptions,
                 allTransactions = allTx,
                 topMerchants = calculateTopMerchants(transactions),
@@ -181,7 +196,10 @@ class GetInsightsUseCase @Inject constructor(
         }.mapValues { entry -> entry.value.sumOf { it.amount } }
     }
 
-    private fun calculateCategories(transactions: List<TransactionEntity>): List<DashboardContract.CategoryData> {
+    private fun calculateCategories(
+        transactions: List<TransactionEntity>,
+        customCategories: List<CustomCategoryEntity>
+    ): List<DashboardContract.CategoryData> {
         val expenses = transactions.filter { !it.isIncome }
         val total = expenses.sumOf { it.amount }
         if (total <= 0.0) return emptyList()
@@ -189,12 +207,12 @@ class GetInsightsUseCase @Inject constructor(
         return expenses.groupBy { it.category }
             .map { entry ->
                 val amount = entry.value.sumOf { it.amount }
-                val categoryModel = TransactionCategory.fromString(entry.key)
+                val resolvedCategory = CategoryHelper.resolveCategory(entry.key, customCategories)
                 DashboardContract.CategoryData(
-                    category = categoryModel.displayName,
+                    category = resolvedCategory.displayName,
                     amount = amount,
                     percentage = (amount / total).toFloat(),
-                    color = categoryModel.color.toArgb().toLong()
+                    color = resolvedCategory.color.toArgb().toLong()
                 )
             }.sortedByDescending { it.amount }
     }

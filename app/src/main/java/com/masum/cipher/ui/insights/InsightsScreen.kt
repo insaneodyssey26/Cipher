@@ -101,6 +101,7 @@ fun InsightsScreen(
     if (showAddSubDialog || selectedSubscription != null) {
         com.masum.cipher.ui.components.EditSubscriptionSheet(
             subscription = selectedSubscription,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onDismiss = { 
                 showAddSubDialog = false 
@@ -335,6 +336,7 @@ fun InsightsScreen(
                                     CategoryAllocationDonut(
                                         categories = state.categoryBreakdown,
                                         categoryBudgets = settings?.categoryBudgets ?: emptyMap(),
+                                        customCategories = state.customCategories,
                                         currencySymbol = state.currencySymbol,
                                         onCategoryClick = { catData ->
                                             view.performVibrate(isHapticsEnabled, isLongPress = false)
@@ -376,6 +378,7 @@ fun InsightsScreen(
                             item {
                                 SubscriptionsCard(
                                     subscriptions = state.detectedSubscriptions,
+                                    customCategories = state.customCategories,
                                     currencySymbol = state.currencySymbol,
                                     isHapticsEnabled = isHapticsEnabled,
                                     onAddClick = { showAddSubDialog = true },
@@ -391,17 +394,18 @@ fun InsightsScreen(
     }
 
     selectedCategoryForDetail?.let { catData ->
-        val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(catData.category)
+        val categoryItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(catData.category, state.customCategories)
         val filteredTxs = state.allTransactions.filter { tx ->
             tx.timestamp in state.selectedTimeRange.startTime..state.selectedTimeRange.endTime
         }
         com.masum.cipher.ui.components.CategoryDetailSheet(
             categoryData = catData,
-            categoryBudget = settings?.categoryBudgets?.get(categoryEnum.displayName) ?: settings?.categoryBudgets?.get(categoryEnum.name) ?: 0.0,
+            categoryBudget = settings?.categoryBudgets?.get(categoryItem.displayName) ?: settings?.categoryBudgets?.get(categoryItem.name) ?: settings?.categoryBudgets?.get(catData.category) ?: 0.0,
             transactions = filteredTxs,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onSetCategoryBudget = { newLimit ->
-                viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryEnum.displayName, newLimit))
+                viewModel.handleIntent(InsightsContract.Intent.SetCategoryBudget(categoryItem.name, newLimit))
             },
             onDismiss = { selectedCategoryForDetail = null },
             onTransactionClick = { tx ->
@@ -415,6 +419,7 @@ fun InsightsScreen(
     editingTransaction?.let { tx ->
         com.masum.cipher.ui.components.TransactionDetailsSheet(
             transaction = tx,
+            customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },
             onConfirm = { updated ->
@@ -428,6 +433,9 @@ fun InsightsScreen(
             onDelete = {
                 viewModel.handleIntent(InsightsContract.Intent.DeleteTransaction(tx))
                 editingTransaction = null
+            },
+            onCreateCustomCategory = { name, iconName, colorHex ->
+                viewModel.handleIntent(InsightsContract.Intent.CreateCustomCategory(name, iconName, colorHex))
             },
             isHapticsEnabled = isHapticsEnabled
         )
@@ -483,7 +491,8 @@ fun InsightsScreen(
                 )
             },
             text = {
-                val categoryDisplayName = stringResource(com.masum.cipher.core.domain.model.TransactionCategory.fromString(tx.category).titleRes)
+                val catItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(tx.category, state.customCategories)
+                val categoryDisplayName = catItem.titleRes?.let { stringResource(it) } ?: catItem.displayName
                 Text(
                     text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
                     style = com.masum.cipher.ui.theme.Typography.bodyMedium,
@@ -584,7 +593,8 @@ private fun InsightHero(state: InsightsContract.State) {
             }
 
             if (mostExpensiveCategory != null && totalSpent > 0.0) {
-                val categoryEnum = com.masum.cipher.core.domain.model.TransactionCategory.fromString(mostExpensiveCategory.category)
+                val categoryItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(mostExpensiveCategory.category, state.customCategories)
+                val categoryName = categoryItem.titleRes?.let { stringResource(it) } ?: categoryItem.displayName
                 val catPercent = ((mostExpensiveCategory.amount / totalSpent) * 100.0).toInt().coerceIn(0, 100)
 
                 Row(
@@ -594,7 +604,7 @@ private fun InsightHero(state: InsightsContract.State) {
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                         Text(
-                            text = stringResource(categoryEnum.titleRes),
+                            text = categoryName,
                             style = Typography.titleLarge.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -620,13 +630,13 @@ private fun InsightHero(state: InsightsContract.State) {
                         modifier = Modifier
                             .size(46.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(categoryEnum.color.copy(alpha = 0.15f)),
+                            .background(categoryItem.color.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = categoryEnum.icon,
+                            imageVector = categoryItem.icon,
                             contentDescription = null,
-                            tint = categoryEnum.color,
+                            tint = categoryItem.color,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -785,6 +795,7 @@ private fun SectionLabel(text: String) {
 @Composable
 fun SubscriptionsCard(
     subscriptions: List<SubscriptionDetector.Subscription>,
+    customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
     currencySymbol: String = "₹",
     isHapticsEnabled: Boolean,
     onAddClick: () -> Unit,
@@ -1007,17 +1018,18 @@ fun SubscriptionsCard(
                                 .padding(vertical = 8.dp, horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val catItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(sub.category, customCategories)
                             Box(
                                 modifier = Modifier
                                     .size(38.dp)
                                     .clip(RoundedCornerShape(11.dp))
-                                    .background(sub.category.color.copy(alpha = 0.12f)),
+                                    .background(catItem.color.copy(alpha = 0.12f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = sub.category.icon,
+                                    imageVector = catItem.icon,
                                     contentDescription = null,
-                                    tint = sub.category.color,
+                                    tint = catItem.color,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }

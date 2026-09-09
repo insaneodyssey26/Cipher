@@ -29,6 +29,7 @@ class InsightsViewModel @Inject constructor(
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
     private val transactionRepository: TransactionRepository,
+    private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
     private val categoryRuleDao: CategoryRuleDao,
     private val merchantAliasDao: com.masum.cipher.core.data.local.dao.MerchantAliasDao,
     private val subscriptionDao: SubscriptionDao,
@@ -73,6 +74,21 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.SetCategoryBudget -> setCategoryBudget(intent.category, intent.limit)
             is InsightsContract.Intent.SetDynamicBudget -> setDynamicBudget(intent.enabled)
             is InsightsContract.Intent.SaveTransactionSplits -> saveSplits(intent.transactionId, intent.splits)
+            is InsightsContract.Intent.CreateCustomCategory -> {
+                viewModelScope.launch {
+                    categoryRepository.addCustomCategory(intent.name, intent.iconName, intent.colorHex)
+                }
+            }
+            is InsightsContract.Intent.UpdateCustomCategory -> {
+                viewModelScope.launch {
+                    categoryRepository.updateCustomCategory(intent.id, intent.oldName, intent.newName, intent.iconName, intent.colorHex)
+                }
+            }
+            is InsightsContract.Intent.DeleteCustomCategory -> {
+                viewModelScope.launch {
+                    categoryRepository.deleteCustomCategory(intent.category)
+                }
+            }
         }
     }
 

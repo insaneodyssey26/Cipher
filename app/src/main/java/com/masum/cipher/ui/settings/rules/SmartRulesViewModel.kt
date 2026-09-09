@@ -6,6 +6,7 @@ import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.combine
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class SmartRulesViewModel @Inject constructor(
     private val categoryRuleDao: CategoryRuleDao,
     private val merchantAliasDao: MerchantAliasDao,
+    private val categoryRepository: CategoryRepository,
     private val userPreferences: UserPreferences
 ) : BaseViewModel<SmartRulesContract.State, SmartRulesContract.Intent, SmartRulesContract.Effect>(
     initialState = SmartRulesContract.State()
@@ -43,12 +45,14 @@ class SmartRulesViewModel @Inject constructor(
             combine(
                 categoryRuleDao.getAllRules(),
                 merchantAliasDao.getAllAliases(),
+                categoryRepository.getAllCustomCategoriesFlow(),
                 userPreferences.settingsFlow
-            ) { categoryRules, aliases, settings ->
+            ) { categoryRules, aliases, customCategories, settings ->
                 currentState.copy(
                     isLoading = false,
                     categoryRules = categoryRules,
                     merchantRules = aliases,
+                    customCategories = customCategories,
                     isHapticsEnabled = settings.isHapticsEnabled
                 )
             }.collect { newState ->

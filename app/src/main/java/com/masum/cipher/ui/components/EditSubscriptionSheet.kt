@@ -51,7 +51,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.domain.model.CategoryHelper
+import com.masum.cipher.core.domain.model.CategoryItem
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 
@@ -64,6 +67,7 @@ import java.util.TimeZone
 @Composable
 fun EditSubscriptionSheet(
     subscription: SubscriptionDetector.Subscription?,
+    customCategories: List<CustomCategoryEntity> = emptyList(),
     currencySymbol: String = "₹",
     onDismiss: () -> Unit,
     onConfirm: (merchant: String, amount: Double, category: String, frequencyDays: Int, nextExpectedDate: Long) -> Unit,
@@ -72,7 +76,9 @@ fun EditSubscriptionSheet(
     var merchant by remember { mutableStateOf(subscription?.merchant ?: "") }
     var amountText by remember { mutableStateOf(subscription?.amount?.toString() ?: "") }
     var frequencyDays by remember { mutableStateOf(subscription?.frequencyDays?.toString() ?: "30") }
-    var selectedCategory by remember { mutableStateOf(subscription?.category ?: TransactionCategory.OTHERS) }
+    var selectedCategory by remember(subscription, customCategories) {
+        mutableStateOf(CategoryHelper.resolveCategory(subscription?.category ?: TransactionCategory.OTHERS.name, customCategories))
+    }
     var categoryExpanded by remember { mutableStateOf(false) }
     
     var nextExpectedDate by remember { androidx.compose.runtime.mutableLongStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
@@ -273,12 +279,30 @@ fun EditSubscriptionSheet(
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = selectedCategory.displayName,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+                            Spacer(Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .background(selectedCategory.color.copy(alpha = 0.15f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = selectedCategory.icon,
+                                        contentDescription = null,
+                                        tint = selectedCategory.color,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                                Text(
+                                    text = selectedCategory.titleRes?.let { stringResource(it) } ?: selectedCategory.displayName,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
                         Icon(
                             imageVector = compose.icons.LucideIcons.ChevronDown,
@@ -309,14 +333,44 @@ fun EditSubscriptionSheet(
                             )
                             .padding(4.dp)
                     ) {
-                        TransactionCategory.entries.forEach { category ->
+                        val allCategories = remember(customCategories) {
+                            CategoryHelper.getAllCategories(customCategories, includeIncome = false)
+                        }
+                        allCategories.forEach { category ->
+                            val isSelected = category.name == selectedCategory.name
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        text = category.displayName,
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = if (category.titleRes != null) stringResource(category.titleRes) else category.displayName,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            ),
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        if (category.isCustom) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                                        shape = RoundedCornerShape(4.dp)
+                                                    )
+                                                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.custom_category_badge),
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontSize = 9.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
                                 },
                                 onClick = {
                                     selectedCategory = category
