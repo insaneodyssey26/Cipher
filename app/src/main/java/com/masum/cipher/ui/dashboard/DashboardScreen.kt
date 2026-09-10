@@ -16,6 +16,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1638,32 +1639,44 @@ private fun DashboardHero(
                             val pencilAlpha = ((scrollProgress - 0.45f) / 0.55f).coerceIn(0f, 1f)
                             Box(
                                 modifier = Modifier
-                                    .padding(bottom = 6.dp)
-                                    .size(26.dp)
+                                    .size(40.dp)
                                     .graphicsLayer {
                                         alpha = pencilAlpha
-                                        scaleX = pencilAlpha
-                                        scaleY = pencilAlpha
                                     }
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                    .border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable(enabled = pencilAlpha > 0.05f) {
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                        enabled = pencilAlpha > 0.05f
+                                    ) {
                                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                                         onAdjustBalanceClick()
                                     },
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.BottomCenter
                             ) {
-                                Icon(
-                                    imageVector = LucideIcons.Pencil,
-                                    contentDescription = stringResource(R.string.adjust_balance_title),
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(12.dp)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .padding(bottom = 6.dp)
+                                        .size(26.dp)
+                                        .graphicsLayer {
+                                            scaleX = pencilAlpha
+                                            scaleY = pencilAlpha
+                                        }
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Pencil,
+                                        contentDescription = stringResource(R.string.adjust_balance_title),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
                             }
                         }
                         

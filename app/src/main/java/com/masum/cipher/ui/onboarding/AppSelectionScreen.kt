@@ -36,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.collection.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -73,9 +75,11 @@ import kotlin.time.Duration.Companion.milliseconds
 @androidx.compose.runtime.Immutable
 data class InstalledApp(
     val packageName: String,
-    val appName: String,
-    val icon: androidx.compose.ui.graphics.ImageBitmap
+    val appName: String
 )
+
+private val appIconCache = LruCache<String, ImageBitmap>(200)
+private const val APP_ICON_DECODE_SIZE_PX = 96
 
 @Composable
 fun AppSelectionScreen(
@@ -118,8 +122,7 @@ fun AppSelectionScreen(
                     try {
                         InstalledApp(
                             packageName = info.packageName,
-                            appName = pm.getApplicationLabel(info).toString(),
-                            icon = pm.getApplicationIcon(info).toBitmap().asImageBitmap()
+                            appName = pm.getApplicationLabel(info).toString()
                         )
                     } catch (_: Exception) { null }
                 }
@@ -329,6 +332,7 @@ fun AppSelectionScreen(
                         val isSelected = selectedApps.contains(app.packageName)
                         AppGridItem(
                             app = app,
+                            packageManager = context.packageManager,
                             isSelected = isSelected,
                             onClick = {
                                 view.performVibrate(true, isLongPress = true)
@@ -381,7 +385,12 @@ fun AppSelectionScreen(
 }
 
 @Composable
-private fun AppGridItem(app: InstalledApp, isSelected: Boolean, onClick: () -> Unit) {
+private fun AppGridItem(
+    app: InstalledApp,
+    packageManager: PackageManager,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -389,6 +398,25 @@ private fun AppGridItem(app: InstalledApp, isSelected: Boolean, onClick: () -> U
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "app_item_scale"
     )
+
+    var icon by remember(app.packageName) { mutableStateOf(appIconCache.get(app.packageName)) }
+    LaunchedEffect(app.packageName) {
+        if (icon == null) {
+            val decoded = withContext(Dispatchers.IO) {
+                try {
+                    packageManager.getApplicationIcon(app.packageName)
+                        .toBitmap(APP_ICON_DECODE_SIZE_PX, APP_ICON_DECODE_SIZE_PX)
+                        .asImageBitmap()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            if (decoded != null) {
+                appIconCache.put(app.packageName, decoded)
+                icon = decoded
+            }
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -418,13 +446,15 @@ private fun AppGridItem(app: InstalledApp, isSelected: Boolean, onClick: () -> U
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    bitmap = app.icon,
-                    contentDescription = app.appName,
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                )
+                icon?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap,
+                        contentDescription = app.appName,
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                    )
+                }
             }
 
             if (isSelected) {

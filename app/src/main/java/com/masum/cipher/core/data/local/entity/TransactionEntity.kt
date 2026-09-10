@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "transactions",
-    indices = [Index(value = ["timestamp"])]
+    indices = [Index(value = ["timestamp"]), Index(value = ["category"])]
 )
 @Serializable
 data class TransactionEntity(

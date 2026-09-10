@@ -1,6 +1,6 @@
 # Release Notes
 
-## [5.6.0]
+## [5.6.1]
 
 ### Added
 - **Custom Categories**: Create, edit, and personalize spending categories with custom Lucide icons and vibrant accent colors.
