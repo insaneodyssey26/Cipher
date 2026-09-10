@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +46,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +56,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -103,6 +107,7 @@ import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.components.TransactionListSkeleton
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.VaultMotion
+import com.masum.cipher.ui.components.WhatsNewSheet
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
@@ -114,7 +119,6 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
-import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
@@ -122,7 +126,6 @@ import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.X
-import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -1039,99 +1042,21 @@ fun DashboardScreen(
     }
 
     if (showWhatsNewSheet) {
-        val hasSeenV41 = lastSeenWhatsNewVersionCode >= 9
-        val versionName = BuildConfig.VERSION_NAME
-        ModalBottomSheet(
-            onDismissRequest = {
+        WhatsNewSheet(
+            onDismiss = {
                 coroutineScope.launch {
-                    userPreferences.setHasSeenNotificationFeature(true)
                     userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
                     showWhatsNewSheet = false
                 }
             },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 48.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = LucideIcons.BellRing,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.whats_new_title, versionName),
-                    style = Typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_splits_title),
-                        description = stringResource(R.string.whats_new_feature_splits_desc),
-                        icon = LucideIcons.Users
-                    )
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_balance_title),
-                        description = stringResource(R.string.whats_new_feature_balance_desc),
-                        icon = LucideIcons.Pencil
-                    )
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_currencies_title),
-                        description = stringResource(R.string.whats_new_feature_currencies_desc),
-                        icon = LucideIcons.Globe
-                    )
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_budget_title),
-                        description = stringResource(R.string.whats_new_feature_budget_desc),
-                        icon = LucideIcons.Activity
-                    )
-                    WhatsNewFeatureItem(
-                        title = stringResource(R.string.whats_new_feature_backup_title),
-                        description = stringResource(R.string.whats_new_feature_backup_desc),
-                        icon = LucideIcons.Zap
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
-                            showWhatsNewSheet = false
-                            if (!hasSeenV41) {
-                                onNavigateToManageApps()
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(
-                        text = if (!hasSeenV41) stringResource(R.string.whats_new_setup_tracking_continue) else stringResource(R.string.action_continue),
-                        style = Typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+            onContinue = {
+                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                coroutineScope.launch {
+                    userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
+                    showWhatsNewSheet = false
                 }
             }
-        }
+        )
     }
 
     if (showComparisonExplanation) {
@@ -2322,32 +2247,117 @@ private fun FilterEmptyState(period: com.masum.cipher.core.domain.model.TimePeri
 }
 
 @Composable
+private fun WhatsNewVersionCard(
+    versionTitle: String,
+    isLatest: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = if (isLatest) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isLatest) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = versionTitle,
+                    style = Typography.titleMedium.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (isLatest) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.whats_new_badge_latest),
+                            style = Typography.labelSmall.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                thickness = 1.dp
+            )
+            content()
+        }
+    }
+}
+
+@Composable
 fun WhatsNewFeatureItem(
     title: String,
     description: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    accentColor: Color = MaterialTheme.colorScheme.primary
 ) {
-    Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(top = 2.dp).size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 1.dp)
+                .size(32.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(accentColor.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = accentColor,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             Text(
                 text = title,
-                style = Typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold
+                style = Typography.bodyMedium.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.5.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
-                style = Typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 20.sp
+                style = Typography.bodySmall.copy(
+                    fontFamily = Lato,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

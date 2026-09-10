@@ -55,9 +55,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
@@ -66,7 +70,6 @@ import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.CategoryIconRegistry
 import com.masum.cipher.core.domain.model.CategoryItem
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.MathEvaluator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.EmeraldIncome
@@ -161,6 +164,36 @@ fun TransactionDetailsSheet(
 
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
+    val consumeOverscrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (available.y < 0f) {
+                    return Offset(0f, available.y)
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                return Velocity.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (available.y < 0f) {
+                    return Velocity(0f, available.y)
+                }
+                return Velocity.Zero
+            }
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -180,6 +213,7 @@ fun TransactionDetailsSheet(
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
+                .nestedScroll(consumeOverscrollConnection)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),

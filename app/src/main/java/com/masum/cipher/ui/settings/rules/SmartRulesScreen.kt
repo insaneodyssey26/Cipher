@@ -61,6 +61,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -73,16 +74,16 @@ import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
+import com.masum.cipher.core.domain.model.CategoryColorRegistry
 import com.masum.cipher.core.domain.model.CategoryHelper
-import com.masum.cipher.core.domain.model.CategoryItem
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.theme.DMSans
+import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
-import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Store
@@ -546,6 +547,15 @@ private fun MerchantRuleItem(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val initialLetter = remember(alias.cleanName) {
+        alias.cleanName.trim().firstOrNull { it.isLetterOrDigit() }?.uppercaseChar()?.toString() ?: "M"
+    }
+    val accentColor = remember(alias.cleanName) {
+        val hash = alias.cleanName.trim().lowercase().hashCode()
+        val colorHex = CategoryColorRegistry.COLORS[Math.abs(hash) % CategoryColorRegistry.COLORS.size]
+        Color(colorHex)
+    }
+
     VaultCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
@@ -559,14 +569,17 @@ private fun MerchantRuleItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                    .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = LucideIcons.Store,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                Text(
+                    text = initialLetter,
+                    style = Typography.titleMedium.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    ),
+                    color = accentColor
                 )
             }
             
@@ -588,13 +601,13 @@ private fun MerchantRuleItem(
                     Icon(
                         imageVector = LucideIcons.ArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = accentColor,
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
                         text = alias.cleanName,
                         style = Typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = accentColor,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )

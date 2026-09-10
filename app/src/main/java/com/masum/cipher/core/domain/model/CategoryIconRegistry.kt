@@ -18,7 +18,6 @@ import compose.icons.lucideicons.Heart
 import compose.icons.lucideicons.Laptop
 import compose.icons.lucideicons.Luggage
 import compose.icons.lucideicons.Music
-import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.PawPrint
 import compose.icons.lucideicons.Plane
 import compose.icons.lucideicons.ReceiptText

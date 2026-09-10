@@ -10,7 +10,6 @@ import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.TimeRange
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
 import kotlinx.coroutines.Dispatchers

@@ -62,7 +62,6 @@ import androidx.compose.ui.window.DialogProperties
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.CategoryHelper
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract

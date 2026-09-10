@@ -4,7 +4,6 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.model.CategoryHelper
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi

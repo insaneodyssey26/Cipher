@@ -92,6 +92,7 @@ import com.masum.cipher.core.data.local.pref.AutoBackupFrequency
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
+import com.masum.cipher.ui.components.WhatsNewSheet
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
@@ -165,6 +166,7 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showCrashLogDialog by remember { mutableStateOf(false) }
     var showPermissionsHealthSheet by remember { mutableStateOf(false) }
+    var showWhatsNewSheet by remember { mutableStateOf(false) }
     var expandedSection by rememberSaveable { mutableStateOf<String?>(null) }
     var showFrequencyDialog by remember { mutableStateOf(false) }
     
@@ -1027,58 +1029,95 @@ Spacer(modifier = Modifier.weight(1f))
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                        .border(
-                            width = 0.75.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                            shape = RoundedCornerShape(11.dp)
-                        )
-                        .padding(5.dp),
-                    contentAlignment = Alignment.Center
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                            showWhatsNewSheet = true
+                        }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
-                        contentDescription = "Cipher Logo",
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = "cipher.",
-                        style = Typography.titleLarge.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.6).sp,
-                            fontSize = 20.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    val versionName = try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).versionName
-                    } catch (_: Exception) {
-                        "4.1.0"
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                            .border(
+                                width = 0.75.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                shape = RoundedCornerShape(11.dp)
+                            )
+                            .padding(5.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
+                            contentDescription = "Cipher Logo",
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
-                    Text(
-                        text = "Version $versionName",
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontSize = 11.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.outline,
-                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = "cipher.",
+                            style = Typography.titleLarge.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = (-0.6).sp,
+                                fontSize = 20.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        val versionName = try {
+                            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                        } catch (_: Exception) {
+                            "4.1.0"
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Version $versionName",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(3.dp)
+                                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), CircleShape)
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_tap_for_whats_new),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
         }
+    }
+
+    if (showWhatsNewSheet) {
+        WhatsNewSheet(
+            onDismiss = { showWhatsNewSheet = false },
+            onContinue = { showWhatsNewSheet = false }
+        )
     }
 
     if (showCrashLogDialog) {

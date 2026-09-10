@@ -1,5 +1,20 @@
 # Release Notes
 
+## [5.6.0]
+
+### Added
+- **Custom Categories**: Create, edit, and personalize spending categories with custom Lucide icons and vibrant accent colors.
+- **Quick Category Creation**: Add new custom categories on the fly directly inside the transaction and subscription sheets without losing your draft.
+- **Smart Rules for Clean Merchant Names & Categories**: Automatically rename cryptic bank/SMS merchant names into clean, readable names and auto-assign them to your preferred categories.
+- **Category Budgets & Breakdown**: Set monthly budgets for individual categories and view color-coordinated allocation charts and merchant breakdowns in Insights.
+
+### Changed & Improved
+- **Encrypted Backup & Export Integration**: Custom categories and smart rules are fully preserved in encrypted `.cipher` vault backups, CSV spreadsheets, and PDF statements.
+- **Category Picker Redesign**: Redesigned category selection sheets with edge-to-edge support, compact layout, and direct quick-add buttons.
+- **Persistent Settings State**: Retained expanded sections when navigating between Settings and sub-screens.
+
+---
+
 ## [5.5.0]
 
 ### Added

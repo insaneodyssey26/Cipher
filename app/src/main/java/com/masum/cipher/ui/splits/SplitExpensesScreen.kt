@@ -64,7 +64,6 @@ import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.domain.model.SplitParticipant
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.SplitCalculator
 import com.masum.cipher.core.util.performVibrate

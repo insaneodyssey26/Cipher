@@ -71,7 +71,6 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.domain.model.CategoryHelper
-import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
