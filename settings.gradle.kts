@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Cipher Spend"
 include(":app")
+include(":baselineprofile")

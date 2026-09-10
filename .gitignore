@@ -26,6 +26,8 @@ keystore.properties
 *.ap_
 release/
 **/release/
+!app/src/release/
+!app/src/release/**
 
 *.log
 /.idea/
