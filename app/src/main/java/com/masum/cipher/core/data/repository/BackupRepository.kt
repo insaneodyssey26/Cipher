@@ -76,6 +76,10 @@ class BackupRepository @Inject constructor(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
+    companion object {
+        private const val BACKUP_HEADER = "CIPHER_VAULT_V1"
+    }
+
     fun provideOutputStream(uri: Uri): OutputStream? {
         return context.contentResolver.openOutputStream(uri)
     }
@@ -129,7 +133,7 @@ class BackupRepository @Inject constructor(
             val encryptedData = cipher.doFinal(jsonBytes)
             
             outputStream.use { out ->
-                out.write("CIPHER_VAULT_V1".toByteArray(Charsets.UTF_8))
+                out.write(BACKUP_HEADER.toByteArray(Charsets.UTF_8))
                 out.write(salt)
                 out.write(iv)
                 out.write(encryptedData)
@@ -144,28 +148,27 @@ class BackupRepository @Inject constructor(
     suspend fun restoreData(inputStream: InputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             inputStream.use { stream ->
-                val magicHeader = ByteArray(15)
-                val readHeader = stream.read(magicHeader)
-                if (readHeader != 15 || String(magicHeader) != "CIPHER_VAULT_V1") {
-                    return@withContext Result.failure(IllegalArgumentException("Invalid file format"))
+                val bytes = stream.readBytes()
+                val header = BACKUP_HEADER.toByteArray(Charsets.UTF_8)
+                val hasHeader = bytes.size >= header.size && bytes.copyOfRange(0, header.size).contentEquals(header)
+                val offset = if (hasHeader) header.size else 0
+
+                if (bytes.size < offset + 16 + 12) {
+                    return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
                 }
-                
-                val salt = ByteArray(16)
-                if (stream.read(salt) != 16) return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
-                
-                val iv = ByteArray(12)
-                if (stream.read(iv) != 12) return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
-                
-                val encryptedData = stream.readBytes()
+
+                val salt = bytes.copyOfRange(offset, offset + 16)
+                val iv = bytes.copyOfRange(offset + 16, offset + 28)
+                val encryptedData = bytes.copyOfRange(offset + 28, bytes.size)
                 val secretKey = deriveKey(password, salt)
-                
+
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                 cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
-                
+
                 val jsonBytes = cipher.doFinal(encryptedData)
-                val jsonString = String(jsonBytes)
+                val jsonString = String(jsonBytes, Charsets.UTF_8)
                 val data = json.decodeFromString<BackupData>(jsonString)
-                
+
                 data.transactions.forEach { transactionDao.insertTransaction(it) }
                 if (data.splits.isNotEmpty()) {
                     transactionSplitDao.insertSplits(data.splits)
