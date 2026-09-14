@@ -13,9 +13,6 @@ captures/
 *.iml
 .DS_Store
 
-gradlew
-gradlew.bat
-gradle/wrapper/
 
 *.jks
 *.keystore
