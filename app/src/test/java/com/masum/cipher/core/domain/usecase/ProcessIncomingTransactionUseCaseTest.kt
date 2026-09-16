@@ -141,6 +141,36 @@ class ProcessIncomingTransactionUseCaseTest {
     }
 
     @Test
+    fun differentMerchantsWithSameAmountWithinWindowAreBothAllowed() = runBlocking {
+        val existing = TransactionEntity(
+            id = 1L,
+            amount = 500.0,
+            merchant = "RAMESH",
+            currency = "INR",
+            category = "OTHERS",
+            timestamp = 100_000L,
+            rawSms = "Paid to Ramesh",
+            isIncome = false
+        )
+        fakeTransactionDao.duplicateReturn = existing
+
+        val incoming = TransactionEntity(
+            amount = 500.0,
+            merchant = "SURESH",
+            currency = "INR",
+            category = "",
+            timestamp = 110_000L,
+            rawSms = "Paid to Suresh",
+            isIncome = false
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(1, fakeTransactionDao.insertedTransactions.size)
+        assertEquals(1, syncCount)
+    }
+
+    @Test
     fun incomeAndExpenseOfSameAmountWithinWindowAreBothAllowed() = runBlocking {
         val existingExpense = TransactionEntity(
             id = 1L,
@@ -183,7 +213,10 @@ class ProcessIncomingTransactionUseCaseTest {
                     "findDuplicate" -> {
                         val amount = args[0] as Double
                         val isIncome = args[1] as Boolean
-                        duplicateReturn?.takeIf { it.amount == amount && it.isIncome == isIncome }
+                        val merchant = args[2] as String
+                        duplicateReturn?.takeIf {
+                            it.amount == amount && it.isIncome == isIncome && it.merchant.equals(merchant, ignoreCase = true)
+                        }
                     }
                     "insertTransaction" -> {
                         val tx = args[0] as TransactionEntity
