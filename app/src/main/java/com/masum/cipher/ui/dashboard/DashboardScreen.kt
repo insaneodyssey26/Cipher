@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -407,188 +408,26 @@ fun DashboardScreen(
                         bottom = 140.dp
                     )
                 ) {
-                    if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp)
-                                    .padding(top = 16.dp, bottom = 8.dp)
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
-                                    .padding(20.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(bottom = 12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.BellRing,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
-                                    )
-                                    Text(
-                                        text = "Action Needed",
-                                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                }
-                                
-                                state.pendingSubscriptions.forEach { subscription ->
-                                    val amountStr = "${state.currencySymbol}${String.format(locale, "%.0f", subscription.amount)}"
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = subscription.merchant,
-                                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                                                color = MaterialTheme.colorScheme.onErrorContainer
-                                            )
-                                            Text(
-                                                text = "Due for $amountStr",
-                                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold),
-                                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
-                                            )
-                                        }
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            TextButton(
-                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(subscription)) },
-                                                contentPadding = PaddingValues(horizontal = 12.dp)
-                                            ) {
-                                                Text("Skip", color = MaterialTheme.colorScheme.error)
-                                            }
-                                             Button(
-                                                onClick = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(subscription)) },
-                                                contentPadding = PaddingValues(horizontal = 12.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = MaterialTheme.colorScheme.error
-                                                )
-                                            ) {
-                                                Text("Log", color = MaterialTheme.colorScheme.onError)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    dashboardTransactionListContent(
+                        state = state,
+                        groupedTransactions = groupedTransactions,
+                        privacyMode = privacyMode,
+                        isHapticsEnabled = isHapticsEnabled,
+                        view = view,
+                        shouldShowSkeleton = shouldShowSkeleton,
+                        locale = locale,
+                        onSkipSubscription = { viewModel.handleIntent(DashboardContract.Intent.SkipSubscription(it)) },
+                        onApproveSubscription = { viewModel.handleIntent(DashboardContract.Intent.ApproveSubscription(it)) },
+                        onOpenFilterSheet = { showFilterSheet = true },
+                        onResetFilter = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            viewModel.handleIntent(DashboardContract.Intent.ResetDashboardFilter)
+                        },
+                        onTransactionClick = { transaction ->
+                            view.performVibrate(isHapticsEnabled)
+                            editingTransaction = transaction
                         }
-                    }
-
-                    if (state.filter.isActive) {
-                        item(key = "dashboard_filter_active_bar") {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp, vertical = 6.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-                                    .clickable { showFilterSheet = true }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.SlidersHorizontal,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol, locale = locale),
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 12.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-
-                                Text(
-                                    text = "Reset",
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            viewModel.handleIntent(DashboardContract.Intent.ResetDashboardFilter)
-                                        }
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    if (state.transactions.isNotEmpty()) {
-                        groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
-                        item(key = "header_$monthYear") {
-                            Text(
-                                text = monthYear.uppercase(),
-                                style = Typography.labelSmall.copy(
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 1.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                                modifier = Modifier.padding(start = 24.dp, top = if (groupIndex == 0) 14.dp else 24.dp, bottom = 8.dp)
-                            )
-                        }
-                        itemsIndexed(
-                            items = transactions,
-                            key = { _, t -> t.id }
-                        ) { index, transaction ->
-                            StaggeredEntranceItem(index = index) {
-                                TransactionItem(
-                                    transaction = transaction,
-                                    customCategories = state.customCategories,
-                                    privacyMode = privacyMode,
-                                    currencySymbol = state.currencySymbol,
-                                    splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
-                                    onClick = {
-                                        view.performVibrate(isHapticsEnabled)
-                                        editingTransaction = transaction
-                                    }
-                                )
-                            }
-                        }
-                    }
-                } else if (state.isLoading && shouldShowSkeleton) {
-                    item(key = "dashboard_skeleton_loader") {
-                        TransactionListSkeleton(
-                            count = 6,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                } else if (!state.isLoading) {
-                    if (state.searchQuery.isNotEmpty()) {
-                        item {
-                            SearchEmptyState(query = state.searchQuery)
-                        }
-                    } else if (state.hasAnyTransactions) {
-                        item {
-                            FilterEmptyState(period = state.selectedTimePeriod)
-                        }
-                    } else {
-                        item {
-                            GenesisEmptyState()
-                        }
-                    }
-                }
+                    )
                 }
                 
                 DashboardHero(
@@ -649,20 +488,16 @@ fun DashboardScreen(
     }
 
     if (showAddSheet) {
-        TransactionDetailsSheet(
-            transaction = state.draftTransaction ?: TransactionEntity(
-                amount = 0.0,
-                merchant = "",
-                currency = state.currencyCode,
-                timestamp = System.currentTimeMillis(),
-                category = "OTHERS",
-                rawSms = null,
-                isIncome = false
-            ),
+        AddTransactionSheetHost(
+            draftTransaction = state.draftTransaction,
+            currencyCode = state.currencyCode,
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
-            existingSplits = draftNewSplits,
+            draftSplits = draftNewSplits,
+            isHapticsEnabled = isHapticsEnabled,
             onDismiss = { showAddSheet = false },
+            onSaveSplits = { updatedSplits -> draftNewSplits = updatedSplits },
+            onDraftChange = { updatedDraft -> viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft)) },
             onConfirm = { newTransaction ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTransaction))
@@ -677,16 +512,9 @@ fun DashboardScreen(
                 draftNewSplits = emptyList()
                 showAddSheet = false
             },
-            onSaveSplits = { updatedSplits ->
-                draftNewSplits = updatedSplits
-            },
-            onDraftChange = { updatedDraft ->
-                viewModel.handleIntent(DashboardContract.Intent.UpdateDraftTransaction(updatedDraft))
-            },
             onCreateCustomCategory = { name, iconName, colorHex ->
                 viewModel.handleIntent(DashboardContract.Intent.CreateCustomCategory(name, iconName, colorHex))
-            },
-            isHapticsEnabled = isHapticsEnabled
+            }
         )
     }
 
@@ -714,23 +542,18 @@ fun DashboardScreen(
     }
 
     editingTransaction?.let { transaction ->
-        val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
-        val mappedParticipants = draftEditingSplits[transaction.id] ?: splitsForTx.map {
-            SplitParticipant(
-                id = it.id.toString(),
-                name = it.name,
-                amount = it.amount,
-                percentage = if (transaction.amount > 0) (it.amount / transaction.amount) * 100.0 else 0.0,
-                isPaid = it.isPaid,
-                isCurrentUser = it.isCurrentUser
-            )
-        }
-        TransactionDetailsSheet(
+        EditTransactionSheetHost(
             transaction = transaction,
+            splitsForTransaction = state.splitsByTransactionId[transaction.id] ?: emptyList(),
+            draftSplitsForTransaction = draftEditingSplits[transaction.id],
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
-            existingSplits = mappedParticipants,
+            isHapticsEnabled = isHapticsEnabled,
             onDismiss = { editingTransaction = null },
+            onSaveSplits = { newSplits ->
+                draftEditingSplits = draftEditingSplits + (transaction.id to newSplits)
+                viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, newSplits))
+            },
             onConfirm = { updated ->
                 view.performVibrate(isHapticsEnabled, isLongPress = true)
                 viewModel.handleIntent(DashboardContract.Intent.UpdateTransaction(updated))
@@ -744,10 +567,6 @@ fun DashboardScreen(
                 draftEditingSplits = draftEditingSplits - transaction.id
                 editingTransaction = null
             },
-            onSaveSplits = { newSplits ->
-                draftEditingSplits = draftEditingSplits + (transaction.id to newSplits)
-                viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, newSplits))
-            },
             onDelete = {
                 viewModel.handleIntent(DashboardContract.Intent.DeleteTransaction(transaction))
                 draftEditingSplits = draftEditingSplits - transaction.id
@@ -755,8 +574,7 @@ fun DashboardScreen(
             },
             onCreateCustomCategory = { name, iconName, colorHex ->
                 viewModel.handleIntent(DashboardContract.Intent.CreateCustomCategory(name, iconName, colorHex))
-            },
-            isHapticsEnabled = isHapticsEnabled
+            }
         )
     }
 
@@ -794,253 +612,46 @@ fun DashboardScreen(
     }
 
     if (showRatingDialog) {
-        var animateIn by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            animateIn = true
-        }
-        
-        androidx.compose.ui.window.Dialog(
+        RatingPromptDialog(
             onDismissRequest = {
-                coroutineScope.launch { 
+                coroutineScope.launch {
                     userPreferences.increaseReviewPromptInterval()
-                    userPreferences.resetAppLaunchCount() 
+                    userPreferences.resetAppLaunchCount()
+                }
+                showRatingDialog = false
+            },
+            onDismissIcon = {
+                coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
+                showRatingDialog = false
+            },
+            onRateNow = {
+                coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
+                showRatingDialog = false
+                try {
+                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                } catch (_: android.content.ActivityNotFoundException) {
+                    context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
+                }
+            },
+            onMaybeLater = {
+                coroutineScope.launch {
+                    userPreferences.increaseReviewPromptInterval()
+                    userPreferences.resetAppLaunchCount()
                 }
                 showRatingDialog = false
             }
-        ) {
-            val scale by animateFloatAsState(
-                targetValue = if (animateIn) 1f else 0.8f,
-                animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
-                label = "rating_scale"
-            )
-            val alpha by animateFloatAsState(
-                targetValue = if (animateIn) 1f else 0f,
-                animationSpec = tween(300),
-                label = "rating_alpha"
-            )
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        this.alpha = alpha
-                    }
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(
-                        width = 1.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(28.dp)
-                    )
-                    .padding(24.dp)
-            ) {
-                IconButton(
-                    onClick = {
-                        coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
-                        showRatingDialog = false
-                    },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.X,
-                        contentDescription = "Dismiss",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        "Enjoying Cipher?",
-                        style = Typography.titleLarge.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        "If Cipher helps you manage your spending, please consider leaving a review on the Play Store. Your support means the world!",
-                        style = Typography.bodyMedium.copy(fontFamily = DMSans),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 20.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            coroutineScope.launch { userPreferences.setHasPromptedReview(true) }
-                            showRatingDialog = false
-                            try {
-                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
-                            } catch (_: android.content.ActivityNotFoundException) {
-                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Rate on Google Play",
-                            style = Typography.labelLarge.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    TextButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                userPreferences.increaseReviewPromptInterval()
-                                userPreferences.resetAppLaunchCount()
-                            }
-                            showRatingDialog = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text(
-                            "Maybe later",
-                            style = Typography.labelLarge.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    state.promptMerchantRuleFor?.let { prompt ->
-        AlertDialog(
-            onDismissRequest = { viewModel.handleIntent(DashboardContract.Intent.DismissMerchantRulePrompt) },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            title = {
-                Text(
-                    text = stringResource(R.string.smart_rules_merchant_dialog_title),
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.smart_rules_merchant_dialog_message, prompt.rawMerchant, prompt.newMerchant),
-                    style = Typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.handleIntent(DashboardContract.Intent.SaveMerchantRule(prompt.rawMerchant, prompt.newMerchant))
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.handleIntent(DashboardContract.Intent.DismissMerchantRulePrompt)
-                }) {
-                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
         )
     }
 
-    state.promptCategoryRuleFor?.let { tx ->
-        AlertDialog(
-            onDismissRequest = { viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt) },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            title = {
-                Text(
-                    text = stringResource(R.string.smart_rules_category_dialog_title),
-                    style = Typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            text = {
-                val catItem = com.masum.cipher.core.domain.model.CategoryHelper.resolveCategory(tx.category, state.customCategories)
-                val categoryDisplayName = if (catItem.titleRes != null) stringResource(catItem.titleRes) else catItem.displayName
-                Text(
-                    text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
-                    style = Typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.handleIntent(DashboardContract.Intent.SaveCategoryRule(tx.merchant, tx.category))
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt)
-                }) {
-                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        )
-    }
+    SmartRulePromptDialogs(
+        merchantPrompt = state.promptMerchantRuleFor,
+        categoryPrompt = state.promptCategoryRuleFor,
+        customCategories = state.customCategories,
+        onDismissMerchantPrompt = { viewModel.handleIntent(DashboardContract.Intent.DismissMerchantRulePrompt) },
+        onSaveMerchantRule = { raw, clean -> viewModel.handleIntent(DashboardContract.Intent.SaveMerchantRule(raw, clean)) },
+        onDismissCategoryPrompt = { viewModel.handleIntent(DashboardContract.Intent.DismissCategoryRulePrompt) },
+        onSaveCategoryRule = { merchant, category -> viewModel.handleIntent(DashboardContract.Intent.SaveCategoryRule(merchant, category)) }
+    )
 
     if (showWhatsNewSheet) {
         WhatsNewSheet(
@@ -1061,261 +672,17 @@ fun DashboardScreen(
     }
 
     if (showComparisonExplanation) {
-        val comparisonSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
-            onDismissRequest = { showComparisonExplanation = false },
-            sheetState = comparisonSheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
-            dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 12.dp, bottom = 4.dp)
-                        .size(width = 36.dp, height = 4.dp)
-                        .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
-                )
-            },
-            tonalElevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    val percent = state.expenseComparisonPercent
-                    val isLess = (percent ?: 0.0) < 0.0
-                    val iconTint = if (percent != null) {
-                        if (isLess) EmeraldIncome else RoseExpense
-                    } else MaterialTheme.colorScheme.primary
-
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(iconTint.copy(alpha = 0.12f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isLess) LucideIcons.ArrowDown else LucideIcons.ArrowUp,
-                            contentDescription = null,
-                            tint = iconTint,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "Spending Trend",
-                            style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = state.selectedTimePeriod.label,
-                            style = Typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        val percent = state.expenseComparisonPercent
-                        val prevExp = state.previousPeriodExpenses
-                        val currentExp = state.totalExpenses
-                        val label = state.expenseComparisonLabel ?: "last period"
-
-                        if (percent != null && kotlin.math.abs(percent) >= 0.5 && prevExp != null && prevExp > 0) {
-                            val isLess = percent < 0.0
-                            val diff = kotlin.math.abs(currentExp - prevExp)
-                            val color = if (isLess) EmeraldIncome else RoseExpense
-                            val arrow = if (isLess) "▼" else "▲"
-                            val actionWord = if (isLess) "less" else "more"
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "This period (so far)",
-                                    style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f, fill = false),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = AppFormatters.formatCompactCurrency(currentExp, currencySymbol = state.currencySymbol),
-                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            Spacer(Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Same days $label",
-                                    style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.weight(1f, fill = false),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = AppFormatters.formatCompactCurrency(prevExp, currencySymbol = state.currencySymbol),
-                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            Spacer(Modifier.height(14.dp))
-                            androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                            Spacer(Modifier.height(14.dp))
-
-                            val percentStr = if (kotlin.math.abs(percent) > 9999.0) ">999%" else "${String.format(Locale.US, "%.1f", kotlin.math.abs(
-                                percent
-                            ))}%"
-                            Text(
-                                text = "$arrow ${AppFormatters.formatCompactCurrency(diff, currencySymbol = state.currencySymbol)} $actionWord ($percentStr)",
-                                style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = color,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = if (isLess) {
-                                    "You've spent less compared to the exact same days in $label."
-                                } else {
-                                    "You've spent more compared to the exact same days in $label."
-                                },
-                                style = Typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Total Spent",
-                                    style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "${state.currencySymbol}${String.format(Locale.US, "%.0f", currentExp)}",
-                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-
-                            Spacer(Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Total Income",
-                                    style = Typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "${state.currencySymbol}${String.format(Locale.US, "%.0f", state.totalIncome)}",
-                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = EmeraldIncome
-                                )
-                            }
-
-                            Spacer(Modifier.height(12.dp))
-                            androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                            Spacer(Modifier.height(12.dp))
-
-                            val isPastPeriod = state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH ||
-                                state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
-                                state.selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
-                            Text(
-                                text = if (isPastPeriod) "${state.selectedTimePeriod.label} Summary" else "Active Period Overview",
-                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = if (isPastPeriod) {
-                                    "No transactions found in the preceding period to compare against."
-                                } else {
-                                    "No previous records found to compare against yet."
-                                },
-                                style = Typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Text(
-                        text = "Compares the exact same elapsed days (e.g. Day 1 to today) for a fair comparison.",
-                        style = Typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                    )
-                }
-
-                Spacer(Modifier.height(20.dp))
-
-                Button(
-                    onClick = {
-                        view.performVibrate(isHapticsEnabled)
-                        coroutineScope.launch {
-                            comparisonSheetState.hide()
-                        }.invokeOnCompletion {
-                            if (!comparisonSheetState.isVisible) {
-                                showComparisonExplanation = false
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Got it", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
-                }
-            }
-        }
+        SpendingComparisonSheet(
+            expenseComparisonPercent = state.expenseComparisonPercent,
+            expenseComparisonLabel = state.expenseComparisonLabel,
+            previousPeriodExpenses = state.previousPeriodExpenses,
+            totalExpenses = state.totalExpenses,
+            totalIncome = state.totalIncome,
+            currencySymbol = state.currencySymbol,
+            selectedTimePeriod = state.selectedTimePeriod,
+            isHapticsEnabled = isHapticsEnabled,
+            onDismiss = { showComparisonExplanation = false }
+        )
     }
 
     if (showFilterSheet) {
@@ -1329,6 +696,781 @@ fun DashboardScreen(
             onDismiss = { showFilterSheet = false },
             isHapticsEnabled = isHapticsEnabled
         )
+    }
+}
+
+private fun LazyListScope.dashboardTransactionListContent(
+    state: DashboardContract.State,
+    groupedTransactions: Map<String, List<TransactionEntity>>,
+    privacyMode: Boolean,
+    isHapticsEnabled: Boolean,
+    view: android.view.View,
+    shouldShowSkeleton: Boolean,
+    locale: Locale,
+    onSkipSubscription: (com.masum.cipher.core.data.local.entity.SubscriptionEntity) -> Unit,
+    onApproveSubscription: (com.masum.cipher.core.data.local.entity.SubscriptionEntity) -> Unit,
+    onOpenFilterSheet: () -> Unit,
+    onResetFilter: () -> Unit,
+    onTransactionClick: (TransactionEntity) -> Unit
+) {
+    if (state.pendingSubscriptions.isNotEmpty() && state.searchQuery.isEmpty()) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp, bottom = 8.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                    .padding(20.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.BellRing,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
+                    )
+                    Text(
+                        text = "Action Needed",
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+
+                state.pendingSubscriptions.forEach { subscription ->
+                    val amountStr = "${state.currencySymbol}${String.format(locale, "%.0f", subscription.amount)}"
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = subscription.merchant,
+                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Text(
+                                text = "Due for $amountStr",
+                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(
+                                onClick = { onSkipSubscription(subscription) },
+                                contentPadding = PaddingValues(horizontal = 12.dp)
+                            ) {
+                                Text("Skip", color = MaterialTheme.colorScheme.error)
+                            }
+                            Button(
+                                onClick = { onApproveSubscription(subscription) },
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Text("Log", color = MaterialTheme.colorScheme.onError)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (state.filter.isActive) {
+        item(key = "dashboard_filter_active_bar") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                    .clickable { onOpenFilterSheet() }
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.SlidersHorizontal,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = buildFilterSummary(state.filter, currencySymbol = state.currencySymbol, locale = locale),
+                        style = Typography.labelMedium.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Text(
+                    text = "Reset",
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp
+                    ),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onResetFilter() }
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+        }
+    }
+
+    if (state.transactions.isNotEmpty()) {
+        groupedTransactions.entries.forEachIndexed { groupIndex, (monthYear, transactions) ->
+            item(key = "header_$monthYear") {
+                Text(
+                    text = monthYear.uppercase(),
+                    style = Typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                    modifier = Modifier.padding(start = 24.dp, top = if (groupIndex == 0) 14.dp else 24.dp, bottom = 8.dp)
+                )
+            }
+            itemsIndexed(
+                items = transactions,
+                key = { _, t -> t.id }
+            ) { index, transaction ->
+                StaggeredEntranceItem(index = index) {
+                    TransactionItem(
+                        transaction = transaction,
+                        customCategories = state.customCategories,
+                        privacyMode = privacyMode,
+                        currencySymbol = state.currencySymbol,
+                        splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
+                        onClick = { onTransactionClick(transaction) }
+                    )
+                }
+            }
+        }
+    } else if (state.isLoading && shouldShowSkeleton) {
+        item(key = "dashboard_skeleton_loader") {
+            TransactionListSkeleton(
+                count = 6,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+    } else if (!state.isLoading) {
+        if (state.searchQuery.isNotEmpty()) {
+            item {
+                SearchEmptyState(query = state.searchQuery)
+            }
+        } else if (state.hasAnyTransactions) {
+            item {
+                FilterEmptyState(period = state.selectedTimePeriod)
+            }
+        } else {
+            item {
+                GenesisEmptyState()
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddTransactionSheetHost(
+    draftTransaction: TransactionEntity?,
+    currencyCode: String,
+    customCategories: List<CustomCategoryEntity>,
+    currencySymbol: String,
+    draftSplits: List<SplitParticipant>,
+    isHapticsEnabled: Boolean,
+    onDismiss: () -> Unit,
+    onSaveSplits: (List<SplitParticipant>) -> Unit,
+    onDraftChange: (TransactionEntity?) -> Unit,
+    onConfirm: (TransactionEntity) -> Unit,
+    onConfirmWithSplits: (TransactionEntity, List<SplitParticipant>) -> Unit,
+    onCreateCustomCategory: (String, String, Long) -> Unit
+) {
+    TransactionDetailsSheet(
+        transaction = draftTransaction ?: TransactionEntity(
+            amount = 0.0,
+            merchant = "",
+            currency = currencyCode,
+            timestamp = System.currentTimeMillis(),
+            category = "OTHERS",
+            rawSms = null,
+            isIncome = false
+        ),
+        customCategories = customCategories,
+        currencySymbol = currencySymbol,
+        existingSplits = draftSplits,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        onConfirmWithSplits = onConfirmWithSplits,
+        onSaveSplits = onSaveSplits,
+        onDraftChange = onDraftChange,
+        onCreateCustomCategory = onCreateCustomCategory,
+        isHapticsEnabled = isHapticsEnabled
+    )
+}
+
+@Composable
+private fun EditTransactionSheetHost(
+    transaction: TransactionEntity,
+    splitsForTransaction: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>,
+    draftSplitsForTransaction: List<SplitParticipant>?,
+    customCategories: List<CustomCategoryEntity>,
+    currencySymbol: String,
+    isHapticsEnabled: Boolean,
+    onDismiss: () -> Unit,
+    onSaveSplits: (List<SplitParticipant>) -> Unit,
+    onConfirm: (TransactionEntity) -> Unit,
+    onConfirmWithSplits: (TransactionEntity, List<SplitParticipant>) -> Unit,
+    onDelete: () -> Unit,
+    onCreateCustomCategory: (String, String, Long) -> Unit
+) {
+    val mappedParticipants = draftSplitsForTransaction ?: splitsForTransaction.map {
+        SplitParticipant(
+            id = it.id.toString(),
+            name = it.name,
+            amount = it.amount,
+            percentage = if (transaction.amount > 0) (it.amount / transaction.amount) * 100.0 else 0.0,
+            isPaid = it.isPaid,
+            isCurrentUser = it.isCurrentUser
+        )
+    }
+    TransactionDetailsSheet(
+        transaction = transaction,
+        customCategories = customCategories,
+        currencySymbol = currencySymbol,
+        existingSplits = mappedParticipants,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        onConfirmWithSplits = onConfirmWithSplits,
+        onSaveSplits = onSaveSplits,
+        onDelete = onDelete,
+        onCreateCustomCategory = onCreateCustomCategory,
+        isHapticsEnabled = isHapticsEnabled
+    )
+}
+
+@Composable
+private fun RatingPromptDialog(
+    onDismissRequest: () -> Unit,
+    onDismissIcon: () -> Unit,
+    onRateNow: () -> Unit,
+    onMaybeLater: () -> Unit
+) {
+    var animateIn by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        animateIn = true
+    }
+
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismissRequest) {
+        val scale by animateFloatAsState(
+            targetValue = if (animateIn) 1f else 0.8f,
+            animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+            label = "rating_scale"
+        )
+        val alpha by animateFloatAsState(
+            targetValue = if (animateIn) 1f else 0f,
+            animationSpec = tween(300),
+            label = "rating_alpha"
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    this.alpha = alpha
+                }
+                .clip(RoundedCornerShape(28.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .padding(24.dp)
+        ) {
+            IconButton(
+                onClick = onDismissIcon,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(32.dp)
+            ) {
+                Icon(
+                    imageVector = LucideIcons.X,
+                    contentDescription = "Dismiss",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    "Enjoying Cipher?",
+                    style = Typography.titleLarge.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "If Cipher helps you manage your spending, please consider leaving a review on the Play Store. Your support means the world!",
+                    style = Typography.bodyMedium.copy(fontFamily = DMSans),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = onRateNow,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Rate on Google Play",
+                        style = Typography.labelLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                TextButton(
+                    onClick = onMaybeLater,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(
+                        "Maybe later",
+                        style = Typography.labelLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SmartRulePromptDialogs(
+    merchantPrompt: com.masum.cipher.core.domain.model.MerchantRenameRulePrompt?,
+    categoryPrompt: TransactionEntity?,
+    customCategories: List<CustomCategoryEntity>,
+    onDismissMerchantPrompt: () -> Unit,
+    onSaveMerchantRule: (String, String) -> Unit,
+    onDismissCategoryPrompt: () -> Unit,
+    onSaveCategoryRule: (String, String) -> Unit
+) {
+    merchantPrompt?.let { prompt ->
+        AlertDialog(
+            onDismissRequest = onDismissMerchantPrompt,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = stringResource(R.string.smart_rules_merchant_dialog_title),
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.smart_rules_merchant_dialog_message, prompt.rawMerchant, prompt.newMerchant),
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { onSaveMerchantRule(prompt.rawMerchant, prompt.newMerchant) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissMerchantPrompt) {
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+
+    categoryPrompt?.let { tx ->
+        AlertDialog(
+            onDismissRequest = onDismissCategoryPrompt,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = {
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_title),
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                val catItem = CategoryHelper.resolveCategory(tx.category, customCategories)
+                val categoryDisplayName = if (catItem.titleRes != null) stringResource(catItem.titleRes) else catItem.displayName
+                Text(
+                    text = stringResource(R.string.smart_rules_category_dialog_message, tx.merchant, categoryDisplayName),
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { onSaveCategoryRule(tx.merchant, tx.category) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissCategoryPrompt) {
+                    Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpendingComparisonSheet(
+    expenseComparisonPercent: Double?,
+    expenseComparisonLabel: String?,
+    previousPeriodExpenses: Double?,
+    totalExpenses: Double,
+    totalIncome: Double,
+    currencySymbol: String,
+    selectedTimePeriod: com.masum.cipher.core.domain.model.TimePeriod,
+    isHapticsEnabled: Boolean,
+    onDismiss: () -> Unit
+) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    val coroutineScope = rememberCoroutineScope()
+    val comparisonSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = comparisonSheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 4.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
+            )
+        },
+        tonalElevation = 0.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                val percent = expenseComparisonPercent
+                val isLess = (percent ?: 0.0) < 0.0
+                val iconTint = if (percent != null) {
+                    if (isLess) EmeraldIncome else RoseExpense
+                } else MaterialTheme.colorScheme.primary
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(iconTint.copy(alpha = 0.12f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isLess) LucideIcons.ArrowDown else LucideIcons.ArrowUp,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Column {
+                    Text(
+                        text = "Spending Trend",
+                        style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = selectedTimePeriod.label,
+                        style = Typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            VaultCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    val percent = expenseComparisonPercent
+                    val prevExp = previousPeriodExpenses
+                    val currentExp = totalExpenses
+                    val label = expenseComparisonLabel ?: "last period"
+
+                    if (percent != null && kotlin.math.abs(percent) >= 0.5 && prevExp != null && prevExp > 0) {
+                        val isLess = percent < 0.0
+                        val diff = kotlin.math.abs(currentExp - prevExp)
+                        val color = if (isLess) EmeraldIncome else RoseExpense
+                        val arrow = if (isLess) "▼" else "▲"
+                        val actionWord = if (isLess) "less" else "more"
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "This period (so far)",
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f, fill = false),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = AppFormatters.formatCompactCurrency(currentExp, currencySymbol = currencySymbol),
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        Spacer(Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Same days $label",
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f, fill = false),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = AppFormatters.formatCompactCurrency(prevExp, currencySymbol = currencySymbol),
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        Spacer(Modifier.height(14.dp))
+
+                        val percentStr = if (kotlin.math.abs(percent) > 9999.0) ">999%" else "${String.format(Locale.US, "%.1f", kotlin.math.abs(
+                            percent
+                        ))}%"
+                        Text(
+                            text = "$arrow ${AppFormatters.formatCompactCurrency(diff, currencySymbol = currencySymbol)} $actionWord ($percentStr)",
+                            style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = color,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = if (isLess) {
+                                "You've spent less compared to the exact same days in $label."
+                            } else {
+                                "You've spent more compared to the exact same days in $label."
+                            },
+                            style = Typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total Spent",
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "$currencySymbol${String.format(Locale.US, "%.0f", currentExp)}",
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Spacer(Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total Income",
+                                style = Typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "$currencySymbol${String.format(Locale.US, "%.0f", totalIncome)}",
+                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = EmeraldIncome
+                            )
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        Spacer(Modifier.height(12.dp))
+
+                        val isPastPeriod = selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH ||
+                            selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
+                            selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
+                        Text(
+                            text = if (isPastPeriod) "${selectedTimePeriod.label} Summary" else "Active Period Overview",
+                            style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = if (isPastPeriod) {
+                                "No transactions found in the preceding period to compare against."
+                            } else {
+                                "No previous records found to compare against yet."
+                            },
+                            style = Typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(13.dp)
+                )
+                Text(
+                    text = "Compares the exact same elapsed days (e.g. Day 1 to today) for a fair comparison.",
+                    style = Typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    view.performVibrate(isHapticsEnabled)
+                    coroutineScope.launch {
+                        comparisonSheetState.hide()
+                    }.invokeOnCompletion {
+                        if (!comparisonSheetState.isVisible) {
+                            onDismiss()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Got it", style = Typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
+            }
+        }
     }
 }
 
