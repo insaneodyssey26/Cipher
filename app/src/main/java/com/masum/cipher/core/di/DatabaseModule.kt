@@ -81,6 +81,7 @@ object DatabaseModule {
     @Singleton
     fun provideBackupRepository(
         @ApplicationContext context: Context,
+        appDatabase: AppDatabase,
         transactionDao: TransactionDao,
         transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
         merchantAliasDao: MerchantAliasDao,
@@ -91,6 +92,7 @@ object DatabaseModule {
     ): BackupRepository {
         return BackupRepository(
             context = context,
+            appDatabase = appDatabase,
             transactionDao = transactionDao,
             transactionSplitDao = transactionSplitDao,
             merchantAliasDao = merchantAliasDao,

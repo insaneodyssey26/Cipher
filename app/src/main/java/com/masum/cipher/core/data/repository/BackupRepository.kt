@@ -2,6 +2,8 @@ package com.masum.cipher.core.data.repository
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.withTransaction
+import com.masum.cipher.core.data.local.AppDatabase
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.CustomCategoryDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
@@ -66,6 +68,7 @@ data class BackupData(
 @Singleton
 class BackupRepository @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val appDatabase: AppDatabase,
     private val transactionDao: TransactionDao,
     private val transactionSplitDao: TransactionSplitDao,
     private val merchantAliasDao: MerchantAliasDao,
@@ -169,14 +172,16 @@ class BackupRepository @Inject constructor(
                 val jsonString = String(jsonBytes, Charsets.UTF_8)
                 val data = json.decodeFromString<BackupData>(jsonString)
 
-                data.transactions.forEach { transactionDao.insertTransaction(it) }
-                if (data.splits.isNotEmpty()) {
-                    transactionSplitDao.insertSplits(data.splits)
+                appDatabase.withTransaction {
+                    data.transactions.forEach { transactionDao.insertTransaction(it) }
+                    if (data.splits.isNotEmpty()) {
+                        transactionSplitDao.insertSplits(data.splits)
+                    }
+                    data.aliases.forEach { merchantAliasDao.insertAlias(it) }
+                    data.rules.forEach { categoryRuleDao.insertRule(it) }
+                    data.subscriptions.forEach { subscriptionDao.insert(it) }
+                    data.customCategories.forEach { customCategoryDao.insertCustomCategory(it) }
                 }
-                data.aliases.forEach { merchantAliasDao.insertAlias(it) }
-                data.rules.forEach { categoryRuleDao.insertRule(it) }
-                data.subscriptions.forEach { subscriptionDao.insert(it) }
-                data.customCategories.forEach { customCategoryDao.insertCustomCategory(it) }
 
                 if (data.monthlyBudget > 0) {
                     userPreferences.setMonthlyBudget(data.monthlyBudget)
