@@ -31,6 +31,10 @@ android {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja")
         }
 
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
