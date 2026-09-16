@@ -13,6 +13,8 @@ import com.masum.cipher.core.domain.usecase.TransactionUpdateResult
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -143,9 +145,12 @@ class DashboardViewModel @Inject constructor(
             }.combine(subscriptionDao.getAllSubscriptions()) { state, subscriptions ->
                 val currentTime = System.currentTimeMillis()
                 val pending = subscriptions.filter { it.nextExpectedDate <= currentTime }
-                state.copy(pendingSubscriptions = pending)
+                state.copy(pendingSubscriptions = pending.toPersistentList())
             }.combine(transactionSplitRepository.getAllSplitsFlow()) { state, allSplits ->
-                state.copy(splitsByTransactionId = allSplits.groupBy { it.transactionId })
+                val grouped = allSplits.groupBy { it.transactionId }
+                    .mapValues { (_, splits) -> splits.toPersistentList() }
+                    .toPersistentMap()
+                state.copy(splitsByTransactionId = grouped)
             }.collect { newState ->
                 updateState { newState }
             }

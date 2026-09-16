@@ -5,6 +5,10 @@ import com.masum.cipher.core.domain.model.MerchantRenameRulePrompt
 import com.masum.cipher.core.mvi.UiEffect
 import com.masum.cipher.core.mvi.UiIntent
 import com.masum.cipher.core.mvi.UiState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 class DashboardContract {
 
@@ -36,8 +40,8 @@ class DashboardContract {
 
     data class State(
         val isLoading: Boolean = true,
-        val transactions: List<TransactionEntity> = emptyList(),
-        val pendingSubscriptions: List<com.masum.cipher.core.data.local.entity.SubscriptionEntity> = emptyList(),
+        val transactions: ImmutableList<TransactionEntity> = persistentListOf(),
+        val pendingSubscriptions: ImmutableList<com.masum.cipher.core.data.local.entity.SubscriptionEntity> = persistentListOf(),
         val hasAnyTransactions: Boolean = false,
         val searchQuery: String = "",
         val activeFilter: FilterType = FilterType.ALL,
@@ -61,8 +65,8 @@ class DashboardContract {
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null,
         val promptMerchantRuleFor: MerchantRenameRulePrompt? = null,
-        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
-        val splitsByTransactionId: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
+        val customCategories: ImmutableList<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = persistentListOf(),
+        val splitsByTransactionId: ImmutableMap<Long, ImmutableList<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = persistentMapOf()
     ) : UiState
 
     data class VelocityData(

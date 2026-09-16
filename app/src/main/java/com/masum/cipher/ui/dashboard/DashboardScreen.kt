@@ -544,7 +544,7 @@ fun DashboardScreen(
     editingTransaction?.let { transaction ->
         EditTransactionSheetHost(
             transaction = transaction,
-            splitsForTransaction = state.splitsByTransactionId[transaction.id] ?: emptyList(),
+            splitsForTransaction = state.splitsByTransactionId[transaction.id] ?: kotlinx.collections.immutable.persistentListOf(),
             draftSplitsForTransaction = draftEditingSplits[transaction.id],
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
@@ -895,7 +895,7 @@ private fun LazyListScope.dashboardTransactionListContent(
 private fun AddTransactionSheetHost(
     draftTransaction: TransactionEntity?,
     currencyCode: String,
-    customCategories: List<CustomCategoryEntity>,
+    customCategories: kotlinx.collections.immutable.ImmutableList<CustomCategoryEntity>,
     currencySymbol: String,
     draftSplits: List<SplitParticipant>,
     isHapticsEnabled: Boolean,
@@ -932,9 +932,9 @@ private fun AddTransactionSheetHost(
 @Composable
 private fun EditTransactionSheetHost(
     transaction: TransactionEntity,
-    splitsForTransaction: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>,
+    splitsForTransaction: kotlinx.collections.immutable.ImmutableList<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>,
     draftSplitsForTransaction: List<SplitParticipant>?,
-    customCategories: List<CustomCategoryEntity>,
+    customCategories: kotlinx.collections.immutable.ImmutableList<CustomCategoryEntity>,
     currencySymbol: String,
     isHapticsEnabled: Boolean,
     onDismiss: () -> Unit,
@@ -1125,7 +1125,7 @@ private fun RatingPromptDialog(
 private fun SmartRulePromptDialogs(
     merchantPrompt: com.masum.cipher.core.domain.model.MerchantRenameRulePrompt?,
     categoryPrompt: TransactionEntity?,
-    customCategories: List<CustomCategoryEntity>,
+    customCategories: kotlinx.collections.immutable.ImmutableList<CustomCategoryEntity>,
     onDismissMerchantPrompt: () -> Unit,
     onSaveMerchantRule: (String, String) -> Unit,
     onDismissCategoryPrompt: () -> Unit,
@@ -1482,7 +1482,7 @@ private fun DashboardHero(
     currencySymbol: String = "₹",
     selectedPeriod: com.masum.cipher.core.domain.model.TimePeriod,
     selectedTimeRange: com.masum.cipher.core.domain.model.TimeRange? = null,
-    transactions: List<TransactionEntity>,
+    transactions: kotlinx.collections.immutable.ImmutableList<TransactionEntity>,
     onPeriodSelected: (com.masum.cipher.core.domain.model.TimePeriod, Long?, Long?) -> Unit,
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,

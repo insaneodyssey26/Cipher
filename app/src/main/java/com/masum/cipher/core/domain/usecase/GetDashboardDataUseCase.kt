@@ -6,6 +6,7 @@ import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardFilter
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -98,7 +99,7 @@ class GetDashboardDataUseCase @Inject constructor(
 
                 DashboardContract.State(
                     isLoading = false,
-                    transactions = filteredList,
+                    transactions = filteredList.toPersistentList(),
                     hasAnyTransactions = allTxs.isNotEmpty(),
                     searchQuery = query,
                     activeFilter = filter.type,
@@ -117,7 +118,7 @@ class GetDashboardDataUseCase @Inject constructor(
                     expenseComparisonPercent = stats.deltaPercent,
                     expenseComparisonLabel = stats.compLabel,
                     previousPeriodExpenses = stats.prevExp,
-                    customCategories = customCats
+                    customCategories = customCats.toPersistentList()
                 )
             }
         }
