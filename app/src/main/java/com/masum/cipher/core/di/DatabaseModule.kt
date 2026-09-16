@@ -88,7 +88,8 @@ object DatabaseModule {
         categoryRuleDao: CategoryRuleDao,
         subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
         customCategoryDao: com.masum.cipher.core.data.local.dao.CustomCategoryDao,
-        userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
+        userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
+        backupCrypto: com.masum.cipher.core.security.BackupCrypto
     ): BackupRepository {
         return BackupRepository(
             context = context,
@@ -99,7 +100,8 @@ object DatabaseModule {
             categoryRuleDao = categoryRuleDao,
             subscriptionDao = subscriptionDao,
             customCategoryDao = customCategoryDao,
-            userPreferences = userPreferences
+            userPreferences = userPreferences,
+            backupCrypto = backupCrypto
         )
     }
 }
