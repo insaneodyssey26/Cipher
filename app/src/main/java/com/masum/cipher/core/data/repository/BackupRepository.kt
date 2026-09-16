@@ -22,10 +22,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.SecureRandom
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -33,6 +35,8 @@ import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
+
+class BackupRestoreException(message: String) : Exception(message)
 
 @Serializable
 data class BackupData(
@@ -80,7 +84,10 @@ class BackupRepository @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
 
     companion object {
-        private const val BACKUP_HEADER = "CIPHER_VAULT_V1"
+        private const val BACKUP_HEADER_V1 = "CIPHER_VAULT_V1"
+        private const val BACKUP_HEADER_V2 = "CIPHER_VAULT_V2"
+        private const val LEGACY_KDF_ITERATIONS = 65536
+        private const val CURRENT_KDF_ITERATIONS = 600000
     }
 
     fun provideOutputStream(uri: Uri): OutputStream? {
@@ -128,15 +135,18 @@ class BackupRepository @Inject constructor(
             
             val salt = ByteArray(16).apply { SecureRandom().nextBytes(this) }
             val iv = ByteArray(12).apply { SecureRandom().nextBytes(this) }
-            
-            val secretKey = deriveKey(password, salt)
+
+            val secretKey = deriveKey(password, salt, CURRENT_KDF_ITERATIONS)
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
-            
+
             val encryptedData = cipher.doFinal(jsonBytes)
-            
+
+            val iterationsBytes = java.nio.ByteBuffer.allocate(4).putInt(CURRENT_KDF_ITERATIONS).array()
+
             outputStream.use { out ->
-                out.write(BACKUP_HEADER.toByteArray(Charsets.UTF_8))
+                out.write(BACKUP_HEADER_V2.toByteArray(Charsets.UTF_8))
+                out.write(iterationsBytes)
                 out.write(salt)
                 out.write(iv)
                 out.write(encryptedData)
@@ -152,18 +162,39 @@ class BackupRepository @Inject constructor(
         try {
             inputStream.use { stream ->
                 val bytes = stream.readBytes()
-                val header = BACKUP_HEADER.toByteArray(Charsets.UTF_8)
-                val hasHeader = bytes.size >= header.size && bytes.copyOfRange(0, header.size).contentEquals(header)
-                val offset = if (hasHeader) header.size else 0
+                val headerV2 = BACKUP_HEADER_V2.toByteArray(Charsets.UTF_8)
+                val headerV1 = BACKUP_HEADER_V1.toByteArray(Charsets.UTF_8)
+                val hasHeaderV2 = bytes.size >= headerV2.size && bytes.copyOfRange(0, headerV2.size).contentEquals(headerV2)
+                val hasHeaderV1 = !hasHeaderV2 && bytes.size >= headerV1.size && bytes.copyOfRange(0, headerV1.size).contentEquals(headerV1)
+
+                val iterations: Int
+                val offset: Int
+                when {
+                    hasHeaderV2 -> {
+                        if (bytes.size < headerV2.size + 4) {
+                            return@withContext Result.failure(BackupRestoreException("This backup file appears to be corrupted or invalid."))
+                        }
+                        iterations = java.nio.ByteBuffer.wrap(bytes, headerV2.size, 4).int
+                        offset = headerV2.size + 4
+                    }
+                    hasHeaderV1 -> {
+                        iterations = LEGACY_KDF_ITERATIONS
+                        offset = headerV1.size
+                    }
+                    else -> {
+                        iterations = LEGACY_KDF_ITERATIONS
+                        offset = 0
+                    }
+                }
 
                 if (bytes.size < offset + 16 + 12) {
-                    return@withContext Result.failure(IllegalArgumentException("Corrupted backup file"))
+                    return@withContext Result.failure(BackupRestoreException("This backup file appears to be corrupted or invalid."))
                 }
 
                 val salt = bytes.copyOfRange(offset, offset + 16)
                 val iv = bytes.copyOfRange(offset + 16, offset + 28)
                 val encryptedData = bytes.copyOfRange(offset + 28, bytes.size)
-                val secretKey = deriveKey(password, salt)
+                val secretKey = deriveKey(password, salt, iterations)
 
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                 cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
@@ -222,14 +253,20 @@ class BackupRepository @Inject constructor(
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
             }
             Result.success(Unit)
-        } catch (e: Exception) {
+        } catch (e: BackupRestoreException) {
             Result.failure(e)
+        } catch (e: AEADBadTagException) {
+            Result.failure(BackupRestoreException("Incorrect password. Please try again."))
+        } catch (e: SerializationException) {
+            Result.failure(BackupRestoreException("This doesn't look like a valid Cipher backup file."))
+        } catch (e: Exception) {
+            Result.failure(BackupRestoreException("Restore failed. Please try again."))
         }
     }
 
-    private fun deriveKey(password: CharArray, salt: ByteArray): SecretKeySpec {
+    private fun deriveKey(password: CharArray, salt: ByteArray, iterations: Int): SecretKeySpec {
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val spec = PBEKeySpec(password, salt, 65536, 256)
+        val spec = PBEKeySpec(password, salt, iterations, 256)
         val tmp = factory.generateSecret(spec)
         return SecretKeySpec(tmp.encoded, "AES")
     }
