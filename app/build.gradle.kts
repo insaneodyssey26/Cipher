@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.masum.cipher"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 37
         versionCode = 34
         versionName = "5.6.1"

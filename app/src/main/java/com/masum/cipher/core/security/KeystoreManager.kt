@@ -1,7 +1,9 @@
 package com.masum.cipher.core.security
 
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.security.keystore.StrongBoxUnavailableException
 import android.util.Base64
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -25,19 +27,38 @@ class KeystoreManager @Inject constructor() {
         load(null)
     }
 
+    private fun buildKeyGenParameterSpec(strongBox: Boolean): KeyGenParameterSpec {
+        val builder = KeyGenParameterSpec.Builder(
+            ALIAS_AUTO_BACKUP,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+
+        if (strongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            builder.setIsStrongBoxBacked(true)
+        }
+
+        return builder.build()
+    }
+
+    private fun generateKey() {
+        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            try {
+                keyGenerator.init(buildKeyGenParameterSpec(strongBox = true))
+                keyGenerator.generateKey()
+                return
+            } catch (_: StrongBoxUnavailableException) {
+            }
+        }
+        keyGenerator.init(buildKeyGenParameterSpec(strongBox = false))
+        keyGenerator.generateKey()
+    }
+
     private fun getSecretKey(): SecretKey {
         if (!keyStore.containsAlias(ALIAS_AUTO_BACKUP)) {
-            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
-            val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-                ALIAS_AUTO_BACKUP,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .build()
-            
-            keyGenerator.init(keyGenParameterSpec)
-            keyGenerator.generateKey()
+            generateKey()
         }
         return keyStore.getKey(ALIAS_AUTO_BACKUP, null) as SecretKey
     }
