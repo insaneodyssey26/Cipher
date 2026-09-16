@@ -1,12 +1,14 @@
 package com.masum.cipher.ui.dashboard
 
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
 import com.masum.cipher.core.domain.usecase.GetDashboardDataUseCase
+import com.masum.cipher.core.domain.usecase.SaveCategoryRuleUseCase
+import com.masum.cipher.core.domain.usecase.SaveMerchantRuleUseCase
+import com.masum.cipher.core.domain.usecase.TransactionUpdateResult
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,8 +30,8 @@ class DashboardViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
-    private val categoryRuleDao: CategoryRuleDao,
-    private val merchantAliasDao: com.masum.cipher.core.data.local.dao.MerchantAliasDao,
+    private val saveCategoryRuleUseCase: SaveCategoryRuleUseCase,
+    private val saveMerchantRuleUseCase: SaveMerchantRuleUseCase,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
     private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
     userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
@@ -44,7 +46,7 @@ class DashboardViewModel @Inject constructor(
     private val _activeFilter = MutableStateFlow(DashboardFilter())
     private val _draftTransaction = MutableStateFlow<TransactionEntity?>(null)
     private val _promptCategoryRuleFor = MutableStateFlow<TransactionEntity?>(null)
-    private val _promptMerchantRuleFor = MutableStateFlow<DashboardContract.MerchantRenameRulePrompt?>(null)
+    private val _promptMerchantRuleFor = MutableStateFlow<com.masum.cipher.core.domain.model.MerchantRenameRulePrompt?>(null)
 
     init {
         observeDashboardData()
@@ -171,43 +173,24 @@ class DashboardViewModel @Inject constructor(
 
     private fun updateTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
-            val existing = transactionRepository.getTransactionById(transaction.id)
-            val oldMerchant = existing?.merchant?.trim().orEmpty()
-            val newMerchant = transaction.merchant.trim()
-            val merchantChanged = existing != null && oldMerchant.isNotBlank() && newMerchant.isNotBlank() && !oldMerchant.equals(newMerchant, ignoreCase = true)
-            val categoryChanged = existing != null && existing.category != transaction.category && existing.merchant == transaction.merchant
-            
-            updateTransactionUseCase(transaction)
-            
-            if (merchantChanged) {
-                _promptMerchantRuleFor.value = DashboardContract.MerchantRenameRulePrompt(oldMerchant, newMerchant)
-            } else if (categoryChanged) {
-                _promptCategoryRuleFor.value = transaction
+            when (val result = updateTransactionUseCase(transaction)) {
+                is TransactionUpdateResult.MerchantRenamed -> _promptMerchantRuleFor.value = result.prompt
+                is TransactionUpdateResult.CategoryChanged -> _promptCategoryRuleFor.value = result.transaction
+                TransactionUpdateResult.NoRulePrompt -> {}
             }
         }
     }
 
     private fun saveMerchantRule(rawName: String, cleanName: String) {
         viewModelScope.launch {
-            merchantAliasDao.insertAlias(
-                com.masum.cipher.core.data.local.entity.MerchantAliasEntity(
-                    rawName = rawName.trim(),
-                    cleanName = cleanName.trim(),
-                    isUserDefined = true
-                )
-            )
+            saveMerchantRuleUseCase(rawName, cleanName)
             _promptMerchantRuleFor.value = null
         }
     }
 
     private fun saveCategoryRule(merchantName: String, category: String) {
         viewModelScope.launch {
-            categoryRuleDao.insertRule(
-                com.masum.cipher.core.data.local.entity.CategoryRuleEntity(
-                    merchantName = merchantName.trim(),
-                    customCategory = category
-                )
-            )
+            saveCategoryRuleUseCase(merchantName, category)
             _promptCategoryRuleFor.value = null
         }
     }

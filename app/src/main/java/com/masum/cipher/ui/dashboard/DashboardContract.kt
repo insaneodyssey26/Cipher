@@ -1,6 +1,7 @@
 package com.masum.cipher.ui.dashboard
 
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.MerchantRenameRulePrompt
 import com.masum.cipher.core.mvi.UiEffect
 import com.masum.cipher.core.mvi.UiIntent
 import com.masum.cipher.core.mvi.UiState
@@ -63,11 +64,6 @@ class DashboardContract {
         val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
         val splitsByTransactionId: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
     ) : UiState
-
-    data class MerchantRenameRulePrompt(
-        val rawMerchant: String,
-        val newMerchant: String
-    )
 
     data class VelocityData(
         val currentWeekAvg: Double = 0.0,

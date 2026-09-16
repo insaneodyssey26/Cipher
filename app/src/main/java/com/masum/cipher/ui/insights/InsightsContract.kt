@@ -2,6 +2,7 @@ package com.masum.cipher.ui.insights
 
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.SubscriptionDetector
+import com.masum.cipher.core.domain.model.MerchantRenameRulePrompt
 import com.masum.cipher.core.mvi.UiEffect
 import com.masum.cipher.core.mvi.UiIntent
 import com.masum.cipher.core.mvi.UiState
@@ -62,7 +63,7 @@ class InsightsContract {
         val avgTransactionSize: Double = 0.0,
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null,
-        val promptMerchantRuleFor: DashboardContract.MerchantRenameRulePrompt? = null
+        val promptMerchantRuleFor: MerchantRenameRulePrompt? = null
     ) : UiState
 
     sealed class Effect : UiEffect {
