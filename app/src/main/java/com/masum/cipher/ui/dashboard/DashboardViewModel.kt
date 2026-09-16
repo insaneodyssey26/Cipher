@@ -2,12 +2,13 @@ package com.masum.cipher.ui.dashboard
 
 import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.entity.TransactionEntity
-import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
+import com.masum.cipher.core.domain.usecase.ApproveSubscriptionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
 import com.masum.cipher.core.domain.usecase.GetDashboardDataUseCase
 import com.masum.cipher.core.domain.usecase.SaveCategoryRuleUseCase
 import com.masum.cipher.core.domain.usecase.SaveMerchantRuleUseCase
+import com.masum.cipher.core.domain.usecase.SkipSubscriptionUseCase
 import com.masum.cipher.core.domain.usecase.TransactionUpdateResult
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
@@ -27,11 +28,12 @@ class DashboardViewModel @Inject constructor(
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val sessionManager: com.masum.cipher.core.domain.SessionManager,
-    private val transactionRepository: TransactionRepository,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
     private val saveCategoryRuleUseCase: SaveCategoryRuleUseCase,
     private val saveMerchantRuleUseCase: SaveMerchantRuleUseCase,
+    private val approveSubscriptionUseCase: ApproveSubscriptionUseCase,
+    private val skipSubscriptionUseCase: SkipSubscriptionUseCase,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
     private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
     userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
@@ -116,26 +118,13 @@ class DashboardViewModel @Inject constructor(
 
     private fun approveSubscription(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
         viewModelScope.launch {
-            val newTransaction = TransactionEntity(
-                merchant = subscription.merchant,
-                amount = subscription.amount,
-                currency = "INR",
-                rawSms = null,
-                category = subscription.category,
-                timestamp = System.currentTimeMillis(),
-                isIncome = false,
-                note = "Approved subscription"
-            )
-            transactionRepository.insertTransaction(newTransaction)
-            val intervalMs = java.util.concurrent.TimeUnit.DAYS.toMillis(subscription.frequencyDays.toLong())
-            subscriptionDao.update(subscription.copy(nextExpectedDate = subscription.nextExpectedDate + intervalMs))
+            approveSubscriptionUseCase(subscription)
         }
     }
 
     private fun skipSubscription(subscription: com.masum.cipher.core.data.local.entity.SubscriptionEntity) {
         viewModelScope.launch {
-            val intervalMs = java.util.concurrent.TimeUnit.DAYS.toMillis(subscription.frequencyDays.toLong())
-            subscriptionDao.update(subscription.copy(nextExpectedDate = subscription.nextExpectedDate + intervalMs))
+            skipSubscriptionUseCase(subscription)
         }
     }
 

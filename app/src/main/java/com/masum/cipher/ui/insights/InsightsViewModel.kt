@@ -1,14 +1,15 @@
 package com.masum.cipher.ui.insights
 
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.dao.SubscriptionDao
-import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.usecase.AddTransactionUseCase
+import com.masum.cipher.core.domain.usecase.DeleteSubscriptionUseCase
 import com.masum.cipher.core.domain.usecase.DeleteTransactionUseCase
 import com.masum.cipher.core.domain.usecase.GetInsightsUseCase
+import com.masum.cipher.core.domain.usecase.RestoreSubscriptionUseCase
 import com.masum.cipher.core.domain.usecase.SaveCategoryRuleUseCase
 import com.masum.cipher.core.domain.usecase.SaveMerchantRuleUseCase
+import com.masum.cipher.core.domain.usecase.SaveSubscriptionUseCase
 import com.masum.cipher.core.domain.usecase.TransactionUpdateResult
 import com.masum.cipher.core.domain.usecase.UpdateTransactionUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
@@ -17,7 +18,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +31,9 @@ class InsightsViewModel @Inject constructor(
     private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
     private val saveCategoryRuleUseCase: SaveCategoryRuleUseCase,
     private val saveMerchantRuleUseCase: SaveMerchantRuleUseCase,
-    private val subscriptionDao: SubscriptionDao,
+    private val saveSubscriptionUseCase: SaveSubscriptionUseCase,
+    private val deleteSubscriptionUseCase: DeleteSubscriptionUseCase,
+    private val restoreSubscriptionUseCase: RestoreSubscriptionUseCase,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
@@ -68,7 +70,7 @@ class InsightsViewModel @Inject constructor(
             is InsightsContract.Intent.DeleteSubscription -> deleteSubscription(intent.merchant)
             is InsightsContract.Intent.IgnoreSubscription -> ignoreSubscription(intent.merchant)
             is InsightsContract.Intent.RestoreSubscription -> {
-                viewModelScope.launch { subscriptionDao.insert(intent.subscription) }
+                viewModelScope.launch { restoreSubscriptionUseCase(intent.subscription) }
             }
             is InsightsContract.Intent.SetCategoryBudget -> setCategoryBudget(intent.category, intent.limit)
             is InsightsContract.Intent.SetDynamicBudget -> setDynamicBudget(intent.enabled)
@@ -120,25 +122,21 @@ class InsightsViewModel @Inject constructor(
 
     private fun saveSubscription(intent: InsightsContract.Intent.SaveSubscription) {
         viewModelScope.launch {
-            val existing = subscriptionDao.getAllSubscriptions().firstOrNull()?.find { it.merchant.equals(intent.merchant, ignoreCase = true) }
-            val entity = SubscriptionEntity(
-                id = existing?.id ?: 0,
+            saveSubscriptionUseCase(
                 merchant = intent.merchant,
                 amount = intent.amount,
                 category = intent.category,
                 frequencyDays = intent.frequencyDays,
                 nextExpectedDate = intent.nextExpectedDate
             )
-            subscriptionDao.insert(entity)
         }
     }
 
     private fun deleteSubscription(merchant: String) {
         viewModelScope.launch {
-            val existing = subscriptionDao.getAllSubscriptions().firstOrNull()?.find { it.merchant.equals(merchant, ignoreCase = true) }
-            if (existing != null) {
-                subscriptionDao.delete(existing)
-                emitEffect(InsightsContract.Effect.ShowUndoSubscriptionDelete(existing))
+            val deleted = deleteSubscriptionUseCase(merchant)
+            if (deleted != null) {
+                emitEffect(InsightsContract.Effect.ShowUndoSubscriptionDelete(deleted))
             }
         }
     }
