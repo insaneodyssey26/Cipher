@@ -105,6 +105,9 @@ class ExportPdfUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            if (!userPreferences.isCachedPro()) {
+                throw IllegalStateException("PDF statement export is a Pro feature")
+            }
             val transactions = transactionDao.getAllTransactions().first()
             val allSplits = transactionSplitDao.getAllSplits()
             val splitsByTx = allSplits.groupBy { it.transactionId }

@@ -88,6 +88,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.ui.components.ProFeatureGateSheet
+import com.masum.cipher.ui.components.ProFeaturePerk
 import com.masum.cipher.core.data.local.pref.AutoBackupFrequency
 import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.util.performVibrate
@@ -181,6 +183,7 @@ fun SettingsScreen(
     var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
     var autoBackupSetupPassword by remember { mutableStateOf("") }
     var showProSheet by remember { mutableStateOf(false) }
+    var showPdfUpsellSheet by remember { mutableStateOf(false) }
 
     val timeoutOptions = listOf(
         stringResource(R.string.timeout_immediately) to 0L,
@@ -963,9 +966,36 @@ SettingsSection(stringResource(R.string.settings_data_backup), icon = LucideIcon
                     isHapticsEnabled = state.isHapticsEnabled,
                     icon = LucideIcons.FileText,
                     title = stringResource(R.string.export_pdf_title),
+                    subtitle = if (!state.isPro) "Executive breakdown statement • Pro" else "Executive monthly breakdown statement",
+                    badge = if (!state.isPro) {
+                        {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFFF59E0B).copy(alpha = 0.16f))
+                                    .border(0.8.dp, Color(0xFFF59E0B).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "PRO",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 9.sp,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = Color(0xFFF59E0B)
+                                )
+                            }
+                        }
+                    } else null,
                     onClick = {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                        pdfExportLauncher.launch("Cipher_Statement_${System.currentTimeMillis()}.pdf")
+                        if (state.isPro) {
+                            pdfExportLauncher.launch("Cipher_Statement_${System.currentTimeMillis()}.pdf")
+                        } else {
+                            showPdfUpsellSheet = true
+                        }
                     },
                     loading = state.isExportingPdf
                 )
@@ -1322,6 +1352,36 @@ Spacer(modifier = Modifier.weight(1f))
         )
     }
 
+    if (showPdfUpsellSheet) {
+        ProFeatureGateSheet(
+            featureTitle = "Executive PDF Statements",
+            featureTagline = "Generate high-resolution monthly financial reports with category charts and spend analysis.",
+            featureIcon = LucideIcons.FileText,
+            perks = listOf(
+                ProFeaturePerk(
+                    title = "Category Breakdown Charts",
+                    description = "Visual distribution graphs of your spending across food, bills, shopping, and transfers."
+                ),
+                ProFeaturePerk(
+                    title = "Ready for Records & Taxes",
+                    description = "Clean, professional document formatting for expense filing or accounting."
+                ),
+                ProFeaturePerk(
+                    title = "CSV Export Remains Free",
+                    description = "Standard spreadsheet data export is always available for free anytime."
+                )
+            ),
+            isHapticsEnabled = state.isHapticsEnabled,
+            primaryButtonText = "Get Cipher Pro",
+            secondaryButtonText = "Export as CSV instead",
+            onSecondaryAction = {
+                csvExportLauncher.launch("Cipher_Report_${System.currentTimeMillis()}.csv")
+            },
+            onNavigateToPro = onNavigateToPro,
+            onDismiss = { showPdfUpsellSheet = false }
+        )
+    }
+
     if (showBudgetDialog) {
         com.masum.cipher.ui.components.EditBudgetDialog(
             currentBudget = state.monthlyBudget,
@@ -1646,6 +1706,7 @@ private fun VaultSettingsItem(
     title: String,
     subtitle: String? = null,
     value: String? = null,
+    badge: @Composable (() -> Unit)? = null,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
     loading: Boolean = false,
@@ -1662,7 +1723,13 @@ private fun VaultSettingsItem(
         Icon(icon, null, tint = titleColor.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = Typography.titleSmall, color = titleColor)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(text = title, style = Typography.titleSmall, color = titleColor)
+                badge?.invoke()
+            }
             if (subtitle != null) {
                 Text(text = subtitle, style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
