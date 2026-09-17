@@ -4,6 +4,7 @@ import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
@@ -71,18 +72,12 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         val previousSpent = transactionDao.sumExpensesSince(start)
 
         val resolvedAccountId = transaction.accountId ?: run {
-            var matchedId: Long? = null
-            if (transaction.rawSms != null && accountDao != null) {
-                val pattern = java.util.regex.Pattern.compile("(?i)(?:a/c|acct|account|card|ending|ending with|ending in|xx|x{2,}|[*]{2,})\\s*[:#.-]?\\s*[*xX]*(\\d{3,4})\\b")
-                val matcher = pattern.matcher(transaction.rawSms)
-                if (matcher.find()) {
-                    val digits = matcher.group(1)?.trim()
-                    if (!digits.isNullOrBlank()) {
-                        matchedId = accountDao.getAccountByLast4(digits)?.id
-                    }
-                }
+            if (accountDao != null) {
+                val accounts = accountDao.getAllAccounts()
+                resolveAccount(transaction.rawSms.orEmpty(), accounts)
+            } else {
+                null
             }
-            matchedId ?: accountDao?.getDefaultAccount()?.id
         }
 
         val newTx = transaction.copy(
@@ -130,4 +125,79 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     }
 
     private fun monthStart(): Long = com.masum.cipher.core.util.DateTimeUtils.currentMonthStart()
+
+    private fun resolveAccount(
+        rawMessage: String,
+        accounts: List<AccountEntity>
+    ): Long? {
+        if (accounts.isEmpty()) return null
+
+        val digitPatterns = listOf(
+            java.util.regex.Pattern.compile("(?i)(?:a/c|acct|account|card|ending|ending with|ending in|no\\.?|num|xx|x{2,}|[*]{2,}|\\.{2,})\\s*[:#.-]?\\s*[*xX.]*(\\d{3,4})\\b"),
+            java.util.regex.Pattern.compile("(?i)[*xX]{2,}(\\d{3,4})\\b"),
+            java.util.regex.Pattern.compile("(?i)\\b(\\d{4})\\s*(?:is debited|was debited|is credited|was credited|used at|spent on)")
+        )
+
+        var extractedDigits: String? = null
+        if (rawMessage.isNotBlank()) {
+            for (pattern in digitPatterns) {
+                val matcher = pattern.matcher(rawMessage)
+                if (matcher.find()) {
+                    val candidate = matcher.group(1)?.trim()
+                    if (!candidate.isNullOrBlank()) {
+                        extractedDigits = candidate
+                        break
+                    }
+                }
+            }
+        }
+
+        if (extractedDigits != null) {
+            val matchedByDigits = accounts.firstOrNull { acc ->
+                val accLast4 = acc.accountNumberLast4?.trim()
+                if (accLast4.isNullOrBlank()) false
+                else accLast4 == extractedDigits ||
+                    (accLast4.length >= 3 && extractedDigits.endsWith(accLast4)) ||
+                    (extractedDigits.length >= 3 && accLast4.endsWith(extractedDigits))
+            }
+            if (matchedByDigits != null) {
+                return matchedByDigits.id
+            }
+        }
+
+        if (rawMessage.isNotBlank()) {
+            val isCreditCardText = rawMessage.contains("credit card", ignoreCase = true) ||
+                rawMessage.contains("cc ", ignoreCase = true) ||
+                rawMessage.contains("card ending", ignoreCase = true)
+            val isWalletText = rawMessage.contains("wallet", ignoreCase = true) ||
+                rawMessage.contains("paytm", ignoreCase = true) ||
+                rawMessage.contains("upi", ignoreCase = true)
+
+            val matchedByName = accounts.filter { acc ->
+                val cleanAccName = acc.name.trim().lowercase()
+                if (cleanAccName.length < 2) false
+                else {
+                    val words = cleanAccName.split(" ").filter { it.length >= 3 }
+                    val matchesWhole = rawMessage.contains(cleanAccName, ignoreCase = true)
+                    val matchesWord = words.any { word ->
+                        rawMessage.contains(Regex("(?i)\\b${Regex.escape(word)}\\b"))
+                    }
+                    matchesWhole || matchesWord
+                }
+            }.maxByOrNull { acc ->
+                var score = acc.name.length
+                if (isCreditCardText && acc.type == "CREDIT_CARD") score += 10
+                if (isWalletText && acc.type == "WALLET") score += 10
+                if (acc.isDefault) score += 1
+                score
+            }
+
+            if (matchedByName != null) {
+                return matchedByName.id
+            }
+        }
+
+        val defaultAcc = accounts.firstOrNull { it.isDefault } ?: accounts.firstOrNull()
+        return defaultAcc?.id
+    }
 }

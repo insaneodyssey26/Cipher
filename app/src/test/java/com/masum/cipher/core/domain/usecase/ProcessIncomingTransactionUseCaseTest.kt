@@ -1,8 +1,10 @@
 package com.masum.cipher.core.domain.usecase
 
+import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
@@ -26,6 +28,7 @@ class ProcessIncomingTransactionUseCaseTest {
     private lateinit var fakeTransactionDao: FakeTransactionDao
     private lateinit var fakeMerchantAliasDao: FakeMerchantAliasDao
     private lateinit var fakeCategoryRuleDao: FakeCategoryRuleDao
+    private lateinit var fakeAccountDao: FakeAccountDao
     private var syncCount = 0
 
     private lateinit var useCase: ProcessIncomingTransactionUseCase
@@ -35,6 +38,7 @@ class ProcessIncomingTransactionUseCaseTest {
         fakeTransactionDao = FakeTransactionDao()
         fakeMerchantAliasDao = FakeMerchantAliasDao()
         fakeCategoryRuleDao = FakeCategoryRuleDao()
+        fakeAccountDao = FakeAccountDao()
         val categorizerEngine = CategorizerEngine()
         syncCount = 0
 
@@ -42,6 +46,7 @@ class ProcessIncomingTransactionUseCaseTest {
             fakeTransactionDao.asDao(),
             fakeMerchantAliasDao.asDao(),
             fakeCategoryRuleDao.asDao(),
+            fakeAccountDao.asDao(),
             categorizerEngine,
             null,
             null,
@@ -200,6 +205,111 @@ class ProcessIncomingTransactionUseCaseTest {
         assertEquals(1, syncCount)
     }
 
+    @Test
+    fun incomingSmsWithLast4MatchesAccountWithSameDigits() = runBlocking {
+        val hdfc = AccountEntity(id = 101L, name = "HDFC Savings", type = "BANK", accountNumberLast4 = "4821", isDefault = false)
+        val sbi = AccountEntity(id = 102L, name = "SBI Primary", type = "BANK", accountNumberLast4 = "9012", isDefault = true)
+        fakeAccountDao.accounts.addAll(listOf(hdfc, sbi))
+
+        val incoming = TransactionEntity(
+            amount = 450.0,
+            merchant = "Starbucks",
+            currency = "INR",
+            category = "",
+            timestamp = 400_000L,
+            rawSms = "Rs 450 debited from A/c ending with 4821 at STARBUCKS",
+            isIncome = false
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(101L, result!!.accountId)
+    }
+
+    @Test
+    fun incomingSmsWithMaskedCardMatchesCreditCardAccount() = runBlocking {
+        val amex = AccountEntity(id = 201L, name = "Amex Platinum", type = "CREDIT_CARD", accountNumberLast4 = "1004", isDefault = false)
+        val axis = AccountEntity(id = 202L, name = "Axis Bank", type = "BANK", accountNumberLast4 = "5566", isDefault = true)
+        fakeAccountDao.accounts.addAll(listOf(amex, axis))
+
+        val incoming = TransactionEntity(
+            amount = 3200.0,
+            merchant = "Apple Store",
+            currency = "INR",
+            category = "",
+            timestamp = 500_000L,
+            rawSms = "Spent Rs 3200 on Credit Card ending in 1004",
+            isIncome = false
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(201L, result!!.accountId)
+    }
+
+    @Test
+    fun incomingSmsWithBankNameMatchesAccountWithoutLast4() = runBlocking {
+        val icici = AccountEntity(id = 301L, name = "ICICI Salary", type = "BANK", accountNumberLast4 = null, isDefault = false)
+        val defaultAcc = AccountEntity(id = 302L, name = "Cash Wallet", type = "CASH", accountNumberLast4 = null, isDefault = true)
+        fakeAccountDao.accounts.addAll(listOf(icici, defaultAcc))
+
+        val incoming = TransactionEntity(
+            amount = 1500.0,
+            merchant = "Zomato",
+            currency = "INR",
+            category = "",
+            timestamp = 600_000L,
+            rawSms = "ICICI Bank: Payment of Rs 1500 made at Zomato",
+            isIncome = false
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(301L, result!!.accountId)
+    }
+
+    @Test
+    fun incomingSmsWithoutAccountDetailsFallsBackToDefaultAccount() = runBlocking {
+        val hdfc = AccountEntity(id = 401L, name = "HDFC", type = "BANK", accountNumberLast4 = "1234", isDefault = false)
+        val defaultAcc = AccountEntity(id = 402L, name = "Main Vault", type = "BANK", accountNumberLast4 = "5678", isDefault = true)
+        fakeAccountDao.accounts.addAll(listOf(hdfc, defaultAcc))
+
+        val incoming = TransactionEntity(
+            amount = 200.0,
+            merchant = "Tea Stall",
+            currency = "INR",
+            category = "",
+            timestamp = 700_000L,
+            rawSms = "Paid Rs 200 at Tea Stall via UPI",
+            isIncome = false
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(402L, result!!.accountId)
+    }
+
+    @Test
+    fun explicitAccountIdInTransactionIsPreserved() = runBlocking {
+        val hdfc = AccountEntity(id = 501L, name = "HDFC", type = "BANK", accountNumberLast4 = "1234", isDefault = true)
+        fakeAccountDao.accounts.add(hdfc)
+
+        val incoming = TransactionEntity(
+            amount = 99.0,
+            merchant = "Manual Entry",
+            currency = "INR",
+            category = "FOOD",
+            timestamp = 800_000L,
+            rawSms = null,
+            isIncome = false,
+            accountId = 999L
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(999L, result!!.accountId)
+    }
+
     private class FakeTransactionDao {
         var duplicateReturn: TransactionEntity? = null
         val insertedTransactions = mutableListOf<TransactionEntity>()
@@ -280,6 +390,31 @@ class ProcessIncomingTransactionUseCaseTest {
                     else -> null
                 }
             } as CategoryRuleDao
+        }
+    }
+
+    private class FakeAccountDao {
+        val accounts = mutableListOf<AccountEntity>()
+
+        fun asDao(): AccountDao {
+            return Proxy.newProxyInstance(
+                AccountDao::class.java.classLoader,
+                arrayOf(AccountDao::class.java)
+            ) { _, method, args ->
+                when (method.name) {
+                    "getAllAccounts" -> accounts.toList()
+                    "getDefaultAccount" -> accounts.firstOrNull { it.isDefault } ?: accounts.firstOrNull()
+                    "getAccountByLast4" -> {
+                        val last4 = args[0] as String
+                        accounts.firstOrNull { it.accountNumberLast4 == last4 }
+                    }
+                    "getAccountById" -> {
+                        val id = args[0] as Long
+                        accounts.firstOrNull { it.id == id }
+                    }
+                    else -> null
+                }
+            } as AccountDao
         }
     }
 }
