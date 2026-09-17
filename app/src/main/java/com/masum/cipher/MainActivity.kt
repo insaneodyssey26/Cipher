@@ -54,6 +54,10 @@ import com.masum.cipher.core.updates.UpdateManager
 import com.masum.cipher.core.worker.NotificationScheduler
 import com.masum.cipher.ui.MainContract
 import com.masum.cipher.ui.MainViewModel
+import com.masum.cipher.ui.accounts.AccountsContract
+import com.masum.cipher.ui.accounts.AccountsScreen
+import com.masum.cipher.ui.accounts.AccountsViewModel
+import com.masum.cipher.ui.accounts.CreateEditAccountScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
 import com.masum.cipher.ui.components.LockScreen
@@ -76,6 +80,7 @@ import com.masum.cipher.ui.splits.SplitExpensesScreen
 import com.masum.cipher.ui.theme.CipherTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.Locale
 import javax.inject.Inject
 import android.graphics.Color as AndroidColor
 
@@ -220,7 +225,8 @@ class MainActivity : AppCompatActivity() {
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateToManageApps = { navController.navigate("manage_apps") }
+                                    onNavigateToManageApps = { navController.navigate("manage_apps") },
+                                    onNavigateToAccounts = { navController.navigate("accounts") }
                                 )
                             }
                             composable("split_expenses") {
@@ -247,14 +253,11 @@ class MainActivity : AppCompatActivity() {
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
                                     onNavigateToDayDetail = { timestamp -> navController.navigate("day_detail/$timestamp") },
-                                    onNavigateToCategories = { navController.navigate("categories") }
+                                    onNavigateToCategories = { navController.navigate("categories") },
+                                    onNavigateToAccounts = { navController.navigate("accounts") }
                                 )
                             }
-                            composable(
-                                route = "categories",
-                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                            ) {
+                            composable("categories") {
                                 val viewModel: InsightsViewModel = hiltViewModel()
                                 CategoriesScreen(
                                     viewModel = viewModel,
@@ -284,36 +287,92 @@ class MainActivity : AppCompatActivity() {
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToSmartRules = { navController.navigate("smart_rules") },
                                     onNavigateToCategories = { navController.navigate("categories") },
+                                    onNavigateToAccounts = { navController.navigate("accounts") },
                                     onNavigateToCurrency = { navController.navigate("currency_selection") },
                                     onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
+                            composable("accounts") {
+                                AccountsScreen(
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") },
+                                    onNavigateToCreateAccount = { navController.navigate("create_account") },
+                                    onNavigateToEditAccount = { accountId -> navController.navigate("edit_account/$accountId") }
+                                )
+                            }
+                            composable("create_account") {
+                                val viewModel: AccountsViewModel = hiltViewModel()
+                                val accountsState by viewModel.state.collectAsStateWithLifecycle()
+                                val locale = Locale.getDefault()
+                                CreateEditAccountScreen(
+                                    accountToEdit = null,
+                                    currencySymbol = accountsState.currencySymbol,
+                                    locale = locale,
+                                    isHapticsEnabled = accountsState.isHapticsEnabled,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onSaveAccount = { name, type, initialBalance, colorHex, iconName, isDefault, last4 ->
+                                        viewModel.handleIntent(
+                                            AccountsContract.Intent.SaveAccount(
+                                                accountId = null,
+                                                name = name,
+                                                type = type,
+                                                initialBalance = initialBalance,
+                                                colorHex = colorHex,
+                                                iconName = iconName,
+                                                isDefault = isDefault,
+                                                last4 = last4
+                                            )
+                                        )
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
                             composable(
-                                route = "cipher_pro",
-                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                            ) {
+                                route = "edit_account/{accountId}",
+                                arguments = listOf(navArgument("accountId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val accountId = backStackEntry.arguments?.getLong("accountId") ?: 0L
+                                val viewModel: AccountsViewModel = hiltViewModel()
+                                val accountsState by viewModel.state.collectAsStateWithLifecycle()
+                                val accountToEdit = accountsState.accounts.find { it.id == accountId }?.entity
+                                val locale = Locale.getDefault()
+                                CreateEditAccountScreen(
+                                    accountToEdit = accountToEdit,
+                                    currencySymbol = accountsState.currencySymbol,
+                                    locale = locale,
+                                    isHapticsEnabled = accountsState.isHapticsEnabled,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onSaveAccount = { name, type, initialBalance, colorHex, iconName, isDefault, last4 ->
+                                        viewModel.handleIntent(
+                                            AccountsContract.Intent.SaveAccount(
+                                                accountId = accountId,
+                                                name = name,
+                                                type = type,
+                                                initialBalance = initialBalance,
+                                                colorHex = colorHex,
+                                                iconName = iconName,
+                                                isDefault = isDefault,
+                                                last4 = last4
+                                            )
+                                        )
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable("cipher_pro") {
                                 com.masum.cipher.ui.pro.CipherProScreen(
                                     userPreferences = userPreferences,
                                     onNavigateBack = { navController.popBackStack() }
                                 )
                             }
-                            composable(
-                                route = "currency_selection",
-                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                            ) {
+                            composable("currency_selection") {
                                 CurrencySelectionScreen(
                                     userPreferences = userPreferences,
                                     onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                             
-                            composable(
-                                route = "smart_rules",
-                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                            ) {
+                            composable("smart_rules") {
                                 val viewModel: SmartRulesViewModel = hiltViewModel()
                                 SmartRulesScreen(
                                     viewModel = viewModel,

@@ -156,6 +156,7 @@ fun SettingsScreen(
     onNavigateToManageApps: () -> Unit,
     onNavigateToSmartRules: () -> Unit,
     onNavigateToCategories: () -> Unit = {},
+    onNavigateToAccounts: () -> Unit = {},
     onNavigateToCurrency: () -> Unit = {},
     onNavigateToPro: () -> Unit = {}
 ) {
@@ -241,7 +242,8 @@ fun SettingsScreen(
     val matchHealth = query.isBlank() || "permissions health".contains(query) || "check if cipher is working at its best".contains(query)
     val matchRules = query.isBlank() || "manage category rules".contains(query) || "view and edit custom merchant categories".contains(query)
     val matchCategories = query.isBlank() || "categories".contains(query) || "custom categories".contains(query) || "manage categories".contains(query) || "budgets".contains(query)
-    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchApps || matchHealth || matchRules || matchCategories
+    val matchAccounts = query.isBlank() || "accounts".contains(query) || "wallets".contains(query) || "bank accounts".contains(query) || "cards".contains(query) || "net worth".contains(query)
+    val matchAutomation = query.isBlank() || "automation".contains(query) || "tracking".contains(query) || matchApps || matchHealth || matchRules || matchCategories || matchAccounts
 
     val matchNotifyTx = query.isBlank() || "transaction alerts".contains(query) || "interactive transaction alerts".contains(query)
     val matchNotifyBudget = query.isBlank() || "budget alerts".contains(query) || "budget warnings".contains(query)
@@ -815,6 +817,14 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         title = stringResource(R.string.manage_category_rules_title),
                         subtitle = stringResource(R.string.manage_category_rules_desc),
                         onClick = onNavigateToSmartRules
+                    )
+                    
+                    if (matchAccounts) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Wallet,
+                        title = "Accounts & Wallets",
+                        subtitle = "Manage bank accounts, cash wallets & credit cards",
+                        onClick = onNavigateToAccounts
                     )
 
                     if (matchCategories) VaultSettingsItem(

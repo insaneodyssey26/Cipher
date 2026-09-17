@@ -124,11 +124,17 @@ import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Pencil
+import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.Users
+import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
+import com.masum.cipher.core.domain.model.AccountItem
+import com.masum.cipher.ui.accounts.getAccountIconVector
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -141,7 +147,8 @@ import kotlin.time.Duration.Companion.milliseconds
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
-    onNavigateToManageApps: () -> Unit
+    onNavigateToManageApps: () -> Unit,
+    onNavigateToAccounts: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalLocale.current.platformLocale
@@ -253,7 +260,7 @@ fun DashboardScreen(
     val density = LocalDensity.current
     val maxToolbarHeight = remember(windowInfo.containerSize.height, density) {
         val heightDp = with(density) { windowInfo.containerSize.height.toDp() }
-        (heightDp * 0.32f).coerceIn(240.dp, 300.dp)
+        (heightDp * 0.30f).coerceIn(220.dp, 270.dp)
     }
     val minToolbarHeight = 154.dp
     val toolbarHeightRangePx = with(density) { (maxToolbarHeight - minToolbarHeight).roundToPx().toFloat() }
@@ -1498,7 +1505,7 @@ private fun DashboardHero(
     onAdjustBalanceClick: () -> Unit = {},
     toolbarOffsetHeightPx: Float = 0f,
     toolbarHeightRangePx: Float = 1f,
-    maxToolbarHeight: androidx.compose.ui.unit.Dp = 340.dp
+    maxToolbarHeight: androidx.compose.ui.unit.Dp = 260.dp
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
     val locale = LocalLocale.current.platformLocale
@@ -1555,121 +1562,43 @@ private fun DashboardHero(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.Calendar,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                val context = androidx.compose.ui.platform.LocalContext.current
-                                val periodLabel = if (selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.CUSTOM && selectedTimeRange != null && selectedTimeRange.startTime > 0L) {
-                                    val sdf = SimpleDateFormat("MMM d", locale)
-                                    "${sdf.format(Date(selectedTimeRange.startTime))} – ${sdf.format(Date(selectedTimeRange.endTime))}"
-                                } else {
-                                    AppFormatters.getPeriodLabel(selectedPeriod, transactions, context = context, locale = locale)
-                                }
-                                val balanceLabel = stringResource(R.string.balance_label)
-                                Text(
-                                    text = "$periodLabel $balanceLabel".uppercase(),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 0.8.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
+                            Text(
+                                text = "${selectedPeriod.label} Balance".uppercase(),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.2.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 
                             if (expenseComparisonPercent != null && kotlin.math.abs(expenseComparisonPercent) >= 0.5) {
                                 val isLess = expenseComparisonPercent < 0.0
-                                val badgeColor = if (isLess) EmeraldIncome else RoseExpense
-                                val labelSuffix = if (isLess) stringResource(R.string.less) else stringResource(R.string.more)
-                                val percentFormatted = if (kotlin.math.abs(expenseComparisonPercent) > 999) {
-                                    ">999"
-                                } else {
-                                    String.format(Locale.US, "%.0f", kotlin.math.abs(expenseComparisonPercent))
-                                }
+                                val compColor = if (isLess) EmeraldIncome else RoseExpense
+                                val arrow = if (isLess) "▼" else "▲"
+                                val percentStr = if (kotlin.math.abs(expenseComparisonPercent) > 999.0) ">999%" else "${String.format(locale, "%.0f", kotlin.math.abs(expenseComparisonPercent))}%"
 
                                 Row(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .background(badgeColor.copy(alpha = 0.12f))
-                                        .border(
-                                            width = 1.dp,
-                                            color = badgeColor.copy(alpha = 0.25f),
-                                            shape = RoundedCornerShape(20.dp)
-                                        )
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(compColor.copy(alpha = 0.12f))
+                                        .border(0.8.dp, compColor.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
                                         .clickable {
                                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                                             onComparisonBadgeClick()
                                         }
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                        .padding(horizontal = 8.dp, vertical = 3.dp),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = if (isLess) LucideIcons.ArrowDown else LucideIcons.ArrowUp,
-                                        contentDescription = null,
-                                        tint = badgeColor,
-                                        modifier = Modifier.size(12.dp)
-                                    )
                                     Text(
-                                        text = "$percentFormatted% $labelSuffix",
+                                        text = "$arrow $percentStr",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
+                                            fontSize = 10.5.sp
                                         ),
-                                        color = badgeColor
-                                    )
-                                }
-                            } else {
-                                val netSaved = income - expense
-                                val isPastPeriod = selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH ||
-                                    selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
-                                    selectedPeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
-                                val (badgeText, badgeColor) = when {
-                                    netSaved > 0 -> Pair(stringResource(R.string.positive_flow), EmeraldIncome)
-                                    expense > 0 && isPastPeriod -> Pair(stringResource(R.string.dashboard_cash_flow), MaterialTheme.colorScheme.primary)
-                                    expense > 0 -> Pair(stringResource(R.string.active_flow), MaterialTheme.colorScheme.primary)
-                                    else -> Pair(stringResource(R.string.no_activity), MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                                Row(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .background(badgeColor.copy(alpha = 0.10f))
-                                        .border(
-                                            width = 1.dp,
-                                            color = badgeColor.copy(alpha = 0.20f),
-                                            shape = RoundedCornerShape(20.dp)
-                                        )
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            onComparisonBadgeClick()
-                                        }
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(6.dp)
-                                            .clip(CircleShape)
-                                            .background(badgeColor)
-                                    )
-                                    Text(
-                                        text = badgeText,
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = badgeColor
+                                        color = compColor
                                     )
                                 }
                             }

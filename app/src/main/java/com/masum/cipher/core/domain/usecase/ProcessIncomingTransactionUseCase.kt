@@ -1,5 +1,6 @@
 package com.masum.cipher.core.domain.usecase
 
+import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
@@ -18,6 +19,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     private val transactionDao: TransactionDao,
     private val merchantAliasDao: MerchantAliasDao,
     private val categoryRuleDao: CategoryRuleDao,
+    private val accountDao: AccountDao?,
     private val categorizerEngine: CategorizerEngine,
     private val localNotificationManager: LocalNotificationManager?,
     private val userPreferences: UserPreferences?,
@@ -68,9 +70,25 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         val start = monthStart()
         val previousSpent = transactionDao.sumExpensesSince(start)
 
+        val resolvedAccountId = transaction.accountId ?: run {
+            var matchedId: Long? = null
+            if (transaction.rawSms != null && accountDao != null) {
+                val pattern = java.util.regex.Pattern.compile("(?i)(?:a/c|acct|account|card|ending|ending with|ending in|xx|x{2,}|[*]{2,})\\s*[:#.-]?\\s*[*xX]*(\\d{3,4})\\b")
+                val matcher = pattern.matcher(transaction.rawSms)
+                if (matcher.find()) {
+                    val digits = matcher.group(1)?.trim()
+                    if (!digits.isNullOrBlank()) {
+                        matchedId = accountDao.getAccountByLast4(digits)?.id
+                    }
+                }
+            }
+            matchedId ?: accountDao?.getDefaultAccount()?.id
+        }
+
         val newTx = transaction.copy(
             merchant = finalMerchant,
-            category = finalCategory
+            category = finalCategory,
+            accountId = resolvedAccountId
         )
         val insertedId = transactionDao.insertTransaction(newTx)
         val savedTx = newTx.copy(id = insertedId)

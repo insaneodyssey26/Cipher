@@ -20,5 +20,6 @@ data class TransactionEntity(
     val category: String,
     val rawSms: String?,
     val isIncome: Boolean,
-    val note: String? = null
+    val note: String? = null,
+    val accountId: Long? = null
 )

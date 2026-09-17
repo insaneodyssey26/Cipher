@@ -37,12 +37,14 @@ class TransactionParser @Inject constructor() {
         val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
         val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
         val isIncome = isCredit && !isDebit
+        val accountLast4 = extractAccountLast4(message)
 
         return ParsedTransaction(
             amount = amount,
             merchant = sanitizeMerchant(merchant ?: "Miscellaneous"),
             currency = rules.defaultCurrency,
-            isIncome = isIncome
+            isIncome = isIncome,
+            accountLast4 = accountLast4
         )
     }
 
@@ -141,6 +143,15 @@ class TransactionParser @Inject constructor() {
 
                 if (cleaned.isNotBlank()) return cleaned
             }
+        }
+        return null
+    }
+
+    private fun extractAccountLast4(message: String): String? {
+        val pattern = java.util.regex.Pattern.compile("(?i)(?:a/c|acct|account|card|ending|ending with|ending in|xx|x{2,}|[*]{2,})\\s*[:#.-]?\\s*[*xX]*(\\d{3,4})\\b")
+        val matcher = pattern.matcher(message)
+        if (matcher.find()) {
+            return matcher.group(1)?.trim()
         }
         return null
     }

@@ -37,6 +37,7 @@ class DashboardViewModel @Inject constructor(
     private val approveSubscriptionUseCase: ApproveSubscriptionUseCase,
     private val skipSubscriptionUseCase: SkipSubscriptionUseCase,
     private val subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
+    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository,
     private val updateSettingsUseCase: com.masum.cipher.core.domain.usecase.UpdateSettingsUseCase,
     userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
@@ -151,6 +152,8 @@ class DashboardViewModel @Inject constructor(
                     .mapValues { (_, splits) -> splits.toPersistentList() }
                     .toPersistentMap()
                 state.copy(splitsByTransactionId = grouped)
+            }.combine(accountRepository.getAllAccountsWithBalancesFlow()) { state, accounts ->
+                state.copy(accounts = accounts.toPersistentList())
             }.collect { newState ->
                 updateState { newState }
             }

@@ -12,7 +12,9 @@ import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
+import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.TransactionSplitDao
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 
 @Database(
@@ -22,9 +24,10 @@ import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
         CategoryRuleEntity::class,
         SubscriptionEntity::class,
         TransactionSplitEntity::class,
-        CustomCategoryEntity::class
+        CustomCategoryEntity::class,
+        AccountEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun subscriptionDao(): SubscriptionDao
     abstract fun transactionSplitDao(): TransactionSplitDao
     abstract fun customCategoryDao(): CustomCategoryDao
+    abstract fun accountDao(): AccountDao
 
     companion object {
         const val DATABASE_NAME = "cipher_spend_db"
@@ -73,6 +77,14 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_transactions_category` ON `transactions` (`category`)")
+            }
+        }
+
+        val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `transactions` ADD COLUMN `accountId` INTEGER DEFAULT NULL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `accounts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `initialBalance` REAL NOT NULL, `colorHex` INTEGER NOT NULL, `iconName` TEXT NOT NULL, `isDefault` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `accountNumberLast4` TEXT)")
+                db.execSQL("INSERT OR IGNORE INTO `accounts` (`id`, `name`, `type`, `initialBalance`, `colorHex`, `iconName`, `isDefault`, `createdAt`) VALUES (1, 'Main Account', 'BANK', 0.0, 4283332009, 'Landmark', 1, 1700000000000)")
             }
         }
     }

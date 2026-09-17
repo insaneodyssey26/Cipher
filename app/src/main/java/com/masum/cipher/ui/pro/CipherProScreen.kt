@@ -115,9 +115,9 @@ private data class ProPerkItem(
 
 fun Modifier.dotGridPattern(
     dotColor: Color,
-    dotRadius: Float = 2f,
+    dotRadius: Float = 2.4f,
     spacing: Float = 26f,
-    fadeHeightFraction: Float = 0.55f
+    fadeHeightFraction: Float = 0.60f
 ): Modifier = this.drawBehind {
     val cols = (size.width / spacing).toInt() + 1
     val rows = ((size.height * fadeHeightFraction) / spacing).toInt() + 1
@@ -126,7 +126,7 @@ fun Modifier.dotGridPattern(
             val x = i * spacing
             val y = j * spacing
             val alphaProgress = 1f - (y / (size.height * fadeHeightFraction)).coerceIn(0f, 1f)
-            val currentAlpha = (alphaProgress * 0.28f).coerceAtLeast(0f)
+            val currentAlpha = (alphaProgress * 0.55f).coerceAtLeast(0f)
             if (currentAlpha > 0.01f) {
                 drawCircle(
                     color = dotColor.copy(alpha = currentAlpha),

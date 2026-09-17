@@ -61,6 +61,10 @@ class InsightsContract {
         val peakHours: List<PeakHourData> = emptyList(),
         val noSpendStreak: Int = 0,
         val avgTransactionSize: Double = 0.0,
+        val accounts: List<com.masum.cipher.core.domain.model.AccountItem> = emptyList(),
+        val totalNetWorth: Double = 0.0,
+        val totalLiquidBalance: Double = 0.0,
+        val totalDebt: Double = 0.0,
         val draftTransaction: TransactionEntity? = null,
         val promptCategoryRuleFor: TransactionEntity? = null,
         val promptMerchantRuleFor: MerchantRenameRulePrompt? = null

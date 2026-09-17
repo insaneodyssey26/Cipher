@@ -66,7 +66,8 @@ class DashboardContract {
         val promptCategoryRuleFor: TransactionEntity? = null,
         val promptMerchantRuleFor: MerchantRenameRulePrompt? = null,
         val customCategories: ImmutableList<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = persistentListOf(),
-        val splitsByTransactionId: ImmutableMap<Long, ImmutableList<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = persistentMapOf()
+        val splitsByTransactionId: ImmutableMap<Long, ImmutableList<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = persistentMapOf(),
+        val accounts: ImmutableList<com.masum.cipher.core.domain.model.AccountItem> = persistentListOf()
     ) : UiState
 
     data class VelocityData(

@@ -35,6 +35,7 @@ class InsightsViewModel @Inject constructor(
     private val deleteSubscriptionUseCase: DeleteSubscriptionUseCase,
     private val restoreSubscriptionUseCase: RestoreSubscriptionUseCase,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
+    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository,
     private val userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 ) : BaseViewModel<InsightsContract.State, InsightsContract.Intent, InsightsContract.Effect>(
     initialState = InsightsContract.State(
@@ -152,6 +153,16 @@ class InsightsViewModel @Inject constructor(
         viewModelScope.launch {
             sessionManager.selectedTimeRange.flatMapLatest { timeRange ->
                 getInsightsUseCase(timeRange)
+            }.combine(accountRepository.getAllAccountsWithBalancesFlow()) { state, accounts ->
+                val netWorth = accounts.sumOf { it.currentBalance }
+                val liquid = accounts.filter { it.type != com.masum.cipher.core.domain.model.AccountType.CREDIT_CARD }.sumOf { it.currentBalance }
+                val debt = accounts.filter { it.type == com.masum.cipher.core.domain.model.AccountType.CREDIT_CARD && it.currentBalance < 0 }.sumOf { kotlin.math.abs(it.currentBalance) }
+                state.copy(
+                    accounts = accounts,
+                    totalNetWorth = netWorth,
+                    totalLiquidBalance = liquid,
+                    totalDebt = debt
+                )
             }.combine(_draftTransaction) { state, draft ->
                 state.copy(draftTransaction = draft)
             }.combine(_promptCategoryRuleFor) { state, prompt ->

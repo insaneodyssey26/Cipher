@@ -41,7 +41,8 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_5_6,
                 AppDatabase.MIGRATION_6_7,
                 AppDatabase.MIGRATION_7_8,
-                AppDatabase.MIGRATION_8_9
+                AppDatabase.MIGRATION_8_9,
+                AppDatabase.MIGRATION_9_10
             )
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
@@ -76,6 +77,20 @@ object DatabaseModule {
     fun provideCustomCategoryDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.CustomCategoryDao {
         return database.customCategoryDao()
     }
+
+    @Provides
+    fun provideAccountDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.AccountDao {
+        return database.accountDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAccountRepository(
+        accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
+        transactionDao: TransactionDao
+    ): com.masum.cipher.core.data.repository.AccountRepository {
+        return com.masum.cipher.core.data.repository.AccountRepository(accountDao, transactionDao)
+    }
     
     @Provides
     @Singleton
@@ -88,6 +103,7 @@ object DatabaseModule {
         categoryRuleDao: CategoryRuleDao,
         subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao,
         customCategoryDao: com.masum.cipher.core.data.local.dao.CustomCategoryDao,
+        accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
         userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
         backupCrypto: com.masum.cipher.core.security.BackupCrypto
     ): BackupRepository {
@@ -100,6 +116,7 @@ object DatabaseModule {
             categoryRuleDao = categoryRuleDao,
             subscriptionDao = subscriptionDao,
             customCategoryDao = customCategoryDao,
+            accountDao = accountDao,
             userPreferences = userPreferences,
             backupCrypto = backupCrypto
         )

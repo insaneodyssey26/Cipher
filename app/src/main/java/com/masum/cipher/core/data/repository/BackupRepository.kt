@@ -4,12 +4,14 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.withTransaction
 import com.masum.cipher.core.data.local.AppDatabase
+import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.CustomCategoryDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.dao.TransactionSplitDao
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
@@ -42,6 +44,7 @@ data class BackupData(
     val rules: List<CategoryRuleEntity> = emptyList(),
     val subscriptions: List<SubscriptionEntity> = emptyList(),
     val customCategories: List<CustomCategoryEntity> = emptyList(),
+    val accounts: List<AccountEntity> = emptyList(),
     val monthlyBudget: Double = 0.0,
     val isDynamicBudgetEnabled: Boolean? = null,
     val categoryBudgets: Map<String, Double> = emptyMap(),
@@ -78,6 +81,7 @@ class BackupRepository @Inject constructor(
     private val categoryRuleDao: CategoryRuleDao,
     private val subscriptionDao: SubscriptionDao,
     private val customCategoryDao: CustomCategoryDao,
+    private val accountDao: AccountDao,
     private val userPreferences: UserPreferences,
     private val backupCrypto: BackupCrypto
 ) {
@@ -101,6 +105,7 @@ class BackupRepository @Inject constructor(
                 rules = categoryRuleDao.getAllRules().first(),
                 subscriptions = subscriptionDao.getAllSubscriptions().first(),
                 customCategories = customCategoryDao.getAllCustomCategories(),
+                accounts = accountDao.getAllAccounts(),
                 monthlyBudget = settings.monthlyBudget,
                 isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                 categoryBudgets = settings.categoryBudgets,
@@ -162,6 +167,7 @@ class BackupRepository @Inject constructor(
                     data.rules.forEach { categoryRuleDao.insertRule(it) }
                     data.subscriptions.forEach { subscriptionDao.insert(it) }
                     data.customCategories.forEach { customCategoryDao.insertCustomCategory(it) }
+                    data.accounts.forEach { accountDao.insertAccount(it) }
                 }
 
                 if (data.monthlyBudget > 0) {
