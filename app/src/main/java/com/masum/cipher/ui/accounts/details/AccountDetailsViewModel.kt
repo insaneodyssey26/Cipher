@@ -13,8 +13,14 @@ import com.masum.cipher.core.data.repository.TransactionSplitRepository
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,7 +40,7 @@ class AccountDetailsViewModel @Inject constructor(
 
     init {
         if (currentAccountId != 0L) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 val initialAccount = accountRepository.getAccountById(currentAccountId)
                 if (initialAccount != null) {
                     updateState {
@@ -78,12 +84,14 @@ class AccountDetailsViewModel @Inject constructor(
                 val balance = (targetEntity?.initialBalance ?: 0.0) + net
 
                 val filtered = filterTransactions(accTxs, currentState.searchQuery, currentState.selectedFilter)
+                val grouped = groupTransactionsByDay(filtered, Locale.getDefault())
 
                 currentState.copy(
                     account = targetEntity,
                     accountItem = targetItem,
                     allTransactions = accTxs.toPersistentList(),
                     filteredTransactions = filtered.toPersistentList(),
+                    groupedDays = grouped.toPersistentList(),
                     customCategories = categories.toPersistentList(),
                     splits = splits.toPersistentList(),
                     totalInflow = inflow,
@@ -95,7 +103,9 @@ class AccountDetailsViewModel @Inject constructor(
                     isPrivacyMode = settings.isPrivacyModeEnabled,
                     isLoading = false
                 )
-            }.collect { newState ->
+            }
+            .flowOn(Dispatchers.Default)
+            .collect { newState ->
                 updateState { newState }
             }
         }
@@ -108,11 +118,25 @@ class AccountDetailsViewModel @Inject constructor(
             }
             is AccountDetailsContract.Intent.UpdateSearchQuery -> {
                 val filtered = filterTransactions(currentState.allTransactions, intent.query, currentState.selectedFilter)
-                updateState { copy(searchQuery = intent.query, filteredTransactions = filtered.toPersistentList()) }
+                val grouped = groupTransactionsByDay(filtered, Locale.getDefault())
+                updateState {
+                    copy(
+                        searchQuery = intent.query,
+                        filteredTransactions = filtered.toPersistentList(),
+                        groupedDays = grouped.toPersistentList()
+                    )
+                }
             }
             is AccountDetailsContract.Intent.SelectFilter -> {
                 val filtered = filterTransactions(currentState.allTransactions, currentState.searchQuery, intent.filter)
-                updateState { copy(selectedFilter = intent.filter, filteredTransactions = filtered.toPersistentList()) }
+                val grouped = groupTransactionsByDay(filtered, Locale.getDefault())
+                updateState {
+                    copy(
+                        selectedFilter = intent.filter,
+                        filteredTransactions = filtered.toPersistentList(),
+                        groupedDays = grouped.toPersistentList()
+                    )
+                }
             }
             is AccountDetailsContract.Intent.OpenTransactionDetails -> {
                 updateState { copy(transactionToEdit = intent.transaction) }
@@ -180,6 +204,47 @@ class AccountDetailsViewModel @Inject constructor(
                 tx.category.lowercase().contains(trimmedQuery) ||
                 (tx.note?.lowercase()?.contains(trimmedQuery) == true)
             matchesType && matchesQuery
+        }
+    }
+
+    private fun groupTransactionsByDay(
+        transactions: List<TransactionEntity>,
+        locale: Locale
+    ): List<GroupedDayTransactions> {
+        if (transactions.isEmpty()) return emptyList()
+        val sameYearFormat = SimpleDateFormat("d MMMM", locale)
+        val diffYearFormat = SimpleDateFormat("d MMMM yyyy", locale)
+        val now = Calendar.getInstance()
+        val currentYear = now.get(Calendar.YEAR)
+        val currentDayOfYear = now.get(Calendar.DAY_OF_YEAR)
+        val txCal = Calendar.getInstance()
+        val txDate = Date()
+
+        val grouped = transactions.groupBy { tx ->
+            txCal.timeInMillis = tx.timestamp
+            val txYear = txCal.get(Calendar.YEAR)
+            val txDayOfYear = txCal.get(Calendar.DAY_OF_YEAR)
+            when {
+                txYear == currentYear && txDayOfYear == currentDayOfYear -> "Today"
+                txYear == currentYear && txDayOfYear == currentDayOfYear - 1 -> "Yesterday"
+                txYear == currentYear -> {
+                    txDate.time = tx.timestamp
+                    sameYearFormat.format(txDate)
+                }
+                else -> {
+                    txDate.time = tx.timestamp
+                    diffYearFormat.format(txDate)
+                }
+            }
+        }
+
+        return grouped.map { (dateTitle, txList) ->
+            val dayTotal = txList.sumOf { if (it.isIncome) it.amount else -it.amount }
+            GroupedDayTransactions(
+                title = dateTitle,
+                netTotal = dayTotal,
+                transactions = txList.toPersistentList()
+            )
         }
     }
 }

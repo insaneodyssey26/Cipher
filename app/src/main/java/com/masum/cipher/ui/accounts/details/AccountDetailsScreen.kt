@@ -80,9 +80,6 @@ import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,34 +109,6 @@ fun AccountDetailsScreen(
 
     val account = state.account
     val accountType = account?.let { AccountType.fromKey(it.type) } ?: AccountType.BANK
-
-    val groupedTransactions = remember(state.filteredTransactions, locale) {
-        val sameYearFormat = SimpleDateFormat("d MMMM", locale)
-        val diffYearFormat = SimpleDateFormat("d MMMM yyyy", locale)
-        val now = Calendar.getInstance()
-        val currentYear = now.get(Calendar.YEAR)
-        val currentDayOfYear = now.get(Calendar.DAY_OF_YEAR)
-        val txCal = Calendar.getInstance()
-        val txDate = Date()
-
-        state.filteredTransactions.groupBy { tx ->
-            txCal.timeInMillis = tx.timestamp
-            val txYear = txCal.get(Calendar.YEAR)
-            val txDayOfYear = txCal.get(Calendar.DAY_OF_YEAR)
-            when {
-                txYear == currentYear && txDayOfYear == currentDayOfYear -> "Today"
-                txYear == currentYear && txDayOfYear == currentDayOfYear - 1 -> "Yesterday"
-                txYear == currentYear -> {
-                    txDate.time = tx.timestamp
-                    sameYearFormat.format(txDate)
-                }
-                else -> {
-                    txDate.time = tx.timestamp
-                    diffYearFormat.format(txDate)
-                }
-            }
-        }
-    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -534,8 +503,8 @@ fun AccountDetailsScreen(
                     }
                 }
             } else {
-                groupedTransactions.forEach { (dateGroup, txList) ->
-                    item {
+                state.groupedDays.forEach { dayGroup ->
+                    item(key = "header_${dayGroup.title}") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -544,7 +513,7 @@ fun AccountDetailsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = dateGroup.uppercase(),
+                                text = dayGroup.title.uppercase(),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -553,21 +522,20 @@ fun AccountDetailsScreen(
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            val dayTotal = txList.sumOf { if (it.isIncome) it.amount else -it.amount }
                             Text(
-                                text = if (dayTotal >= 0) "+${AppFormatters.formatCurrency(dayTotal, state.currencySymbol, locale, decimals = 2)}"
-                                else AppFormatters.formatCurrency(dayTotal, state.currencySymbol, locale, decimals = 2),
+                                text = if (dayGroup.netTotal >= 0) "+${AppFormatters.formatCurrency(dayGroup.netTotal, state.currencySymbol, locale, decimals = 2)}"
+                                else AppFormatters.formatCurrency(dayGroup.netTotal, state.currencySymbol, locale, decimals = 2),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = DMSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp
                                 ),
-                                color = if (dayTotal >= 0) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (dayGroup.netTotal >= 0) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
 
-                    items(txList, key = { it.id }) { tx ->
+                    items(dayGroup.transactions, key = { it.id }) { tx ->
                         val txSplits = state.splits.filter { it.transactionId == tx.id }
                         TransactionItem(
                             transaction = tx,

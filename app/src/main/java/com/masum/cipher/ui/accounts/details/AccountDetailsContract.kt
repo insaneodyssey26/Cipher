@@ -18,6 +18,12 @@ enum class AccountTransactionFilter(val label: String) {
     INCOME("Inflow")
 }
 
+data class GroupedDayTransactions(
+    val title: String,
+    val netTotal: Double,
+    val transactions: ImmutableList<TransactionEntity>
+)
+
 object AccountDetailsContract {
 
     data class State(
@@ -25,6 +31,7 @@ object AccountDetailsContract {
         val accountItem: AccountItem? = null,
         val allTransactions: ImmutableList<TransactionEntity> = persistentListOf(),
         val filteredTransactions: ImmutableList<TransactionEntity> = persistentListOf(),
+        val groupedDays: ImmutableList<GroupedDayTransactions> = persistentListOf(),
         val splits: ImmutableList<TransactionSplitEntity> = persistentListOf(),
         val customCategories: ImmutableList<CustomCategoryEntity> = persistentListOf(),
         val searchQuery: String = "",
