@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -51,6 +52,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -60,6 +63,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -161,8 +167,20 @@ fun TransactionDetailsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val view = LocalView.current
-
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val amountFocusRequester = remember { FocusRequester() }
+    val merchantFocusRequester = remember { FocusRequester() }
+    val noteFocusRequester = remember { FocusRequester() }
+    var shouldFocusNoteOnExpand by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isNoteExpanded, shouldFocusNoteOnExpand) {
+        if (isNoteExpanded && shouldFocusNoteOnExpand) {
+            shouldFocusNoteOnExpand = false
+            noteFocusRequester.requestFocus()
+        }
+    }
 
     val consumeOverscrollConnection = remember {
         object : NestedScrollConnection {
@@ -382,7 +400,11 @@ fun TransactionDetailsSheet(
                 value = amount,
                 onValueChange = { if (it.length <= 15) amount = it },
                 currencySymbol = currencySymbol,
-                color = if (isIncome) EmeraldIncome else RoseExpense
+                color = if (isIncome) EmeraldIncome else RoseExpense,
+                focusRequester = amountFocusRequester,
+                onNext = {
+                    merchantFocusRequester.requestFocus()
+                }
             )
 
             Row(
@@ -393,7 +415,25 @@ fun TransactionDetailsSheet(
                     VaultSheetTextField(
                         value = merchant,
                         onValueChange = { merchant = it },
-                        label = stringResource(R.string.merchant).uppercase()
+                        label = stringResource(R.string.merchant).uppercase(),
+                        focusRequester = merchantFocusRequester,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Words,
+                            imeAction = if (isNoteExpanded) ImeAction.Next else ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                if (!isNoteExpanded) {
+                                    isNoteExpanded = true
+                                    shouldFocusNoteOnExpand = true
+                                } else {
+                                    noteFocusRequester.requestFocus()
+                                }
+                            },
+                            onDone = {
+                                focusManager.clearFocus()
+                            }
+                        )
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
@@ -471,6 +511,7 @@ fun TransactionDetailsSheet(
                             .clickable {
                                 view.performVibrate(isHapticsEnabled)
                                 isNoteExpanded = true
+                                shouldFocusNoteOnExpand = true
                             }
                             .padding(horizontal = 6.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -665,7 +706,17 @@ fun TransactionDetailsSheet(
                     value = note,
                     onValueChange = { if (it.length <= 150) note = it },
                     label = stringResource(R.string.note).uppercase(),
-                    showClearButton = true
+                    showClearButton = true,
+                    focusRequester = noteFocusRequester,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                        }
+                    )
                 )
             }
 
@@ -720,14 +771,23 @@ private fun VaultSheetTextField(
     label: String,
     prefix: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     showClearButton: Boolean = false
 ) {
     val view = LocalView.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .border(1.dp, White10, RoundedCornerShape(12.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                focusRequester.requestFocus()
+            }
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Column(
@@ -756,8 +816,11 @@ private fun VaultSheetTextField(
                     textStyle = Typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     singleLine = true,
                     keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     decorationBox = { inner ->
                         if (value.isEmpty()) {
                             Text(
@@ -801,7 +864,9 @@ private fun AmountInputField(
     value: String,
     onValueChange: (String) -> Unit,
     currencySymbol: String = "₹",
-    color: Color
+    color: Color,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    onNext: (() -> Unit)? = null
 ) {
     var textFieldValue by remember {
         mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
@@ -843,7 +908,17 @@ private fun AmountInputField(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (!showCalculator) {
+                        focusRequester.requestFocus()
+                    }
+                },
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -965,7 +1040,13 @@ private fun AmountInputField(
                             onValueChange(newValue.text)
                         }
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = if (onNext != null) ImeAction.Next else ImeAction.Default
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { onNext?.invoke() }
+                    ),
                     textStyle = Typography.displayLarge.copy(
                         color = color,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -975,7 +1056,9 @@ private fun AmountInputField(
                     singleLine = true,
                     readOnly = false,
                     cursorBrush = SolidColor(color),
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .focusRequester(focusRequester),
                     decorationBox = { inner ->
                         if (textFieldValue.text.isEmpty()) {
                             Text(
