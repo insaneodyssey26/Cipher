@@ -108,7 +108,9 @@ class AccountsViewModel @Inject constructor(
     private fun saveAccount(intent: AccountsContract.Intent.SaveAccount) {
         viewModelScope.launch {
             val toEdit = if (intent.accountId != null) {
-                currentState.accounts.find { it.id == intent.accountId }?.entity ?: currentState.accountToEdit
+                currentState.accounts.find { it.id == intent.accountId }?.entity 
+                    ?: accountRepository.getAccountById(intent.accountId)
+                    ?: currentState.accountToEdit
             } else {
                 currentState.accountToEdit
             }

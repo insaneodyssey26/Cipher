@@ -151,20 +151,21 @@ fun CreateEditAccountScreen(
     val colorScrollState = rememberScrollState()
     val iconScrollState = rememberScrollState()
 
-    var name by remember { mutableStateOf(accountToEdit?.name ?: "") }
-    var selectedType by remember { mutableStateOf(accountToEdit?.type?.let { AccountType.fromKey(it) } ?: AccountType.BANK) }
-    var isNegativeBalance by remember { mutableStateOf((accountToEdit?.initialBalance ?: 0.0) < 0.0) }
-    var balanceInput by remember {
+    var name by remember(accountToEdit) { mutableStateOf(accountToEdit?.name ?: "") }
+    var selectedType by remember(accountToEdit) { mutableStateOf(accountToEdit?.type?.let { AccountType.fromKey(it) } ?: AccountType.BANK) }
+    var isNegativeBalance by remember(accountToEdit) { mutableStateOf((accountToEdit?.initialBalance ?: 0.0) < 0.0) }
+    var balanceInput by remember(accountToEdit) {
         mutableStateOf(
             if (accountToEdit != null && accountToEdit.initialBalance != 0.0) {
-                kotlin.math.abs(accountToEdit.initialBalance).toString()
+                val absVal = kotlin.math.abs(accountToEdit.initialBalance)
+                if (absVal % 1.0 == 0.0) absVal.toLong().toString() else absVal.toString()
             } else ""
         )
     }
-    var selectedColor by remember { mutableLongStateOf(accountToEdit?.colorHex ?: AccountPaletteColors.first()) }
-    var selectedIcon by remember { mutableStateOf(accountToEdit?.iconName ?: selectedType.defaultIcon) }
-    var isDefault by remember { mutableStateOf(accountToEdit?.isDefault ?: false) }
-    var last4Input by remember { mutableStateOf(accountToEdit?.accountNumberLast4 ?: "") }
+    var selectedColor by remember(accountToEdit) { mutableLongStateOf(accountToEdit?.colorHex ?: AccountPaletteColors.first()) }
+    var selectedIcon by remember(accountToEdit) { mutableStateOf(accountToEdit?.iconName ?: (accountToEdit?.type?.let { AccountType.fromKey(it) } ?: AccountType.BANK).defaultIcon) }
+    var isDefault by remember(accountToEdit) { mutableStateOf(accountToEdit?.isDefault ?: false) }
+    var last4Input by remember(accountToEdit) { mutableStateOf(accountToEdit?.accountNumberLast4 ?: "") }
 
     var isTypeDropdownExpanded by remember { mutableStateOf(false) }
 

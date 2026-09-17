@@ -75,7 +75,6 @@ import compose.icons.lucideicons.ArrowUpRight
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.FileText
-import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Wallet
@@ -118,7 +117,7 @@ fun AccountDetailsScreen(
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 18.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
@@ -160,27 +159,6 @@ fun AccountDetailsScreen(
                                 fontSize = 11.5.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        )
-                    }
-                }
-
-                if (account != null) {
-                    IconButton(
-                        onClick = {
-                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                            onNavigateToEditAccount(account.id)
-                        },
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Pencil,
-                            contentDescription = "Edit Account",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
