@@ -64,12 +64,26 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getBoolean("cached_onboarding_completed", false)
     }
 
+    fun isCachedPro(): Boolean {
+        return syncPrefs.getBoolean("cached_is_pro", false)
+    }
+
+    fun getCachedProTier(): String {
+        return syncPrefs.getString("cached_pro_tier", "FREE") ?: "FREE"
+    }
+
+    fun getCachedLicenseToken(): String? {
+        return syncPrefs.getString("cached_license_token", null)
+    }
+
     fun getCachedSettings(): UserSettings {
         val curCode = getCachedCurrencyCode()
         val curSymbol = getCachedCurrencySymbol()
         val isSuffix = isCachedCurrencySuffix()
         val hasSpace = isCachedCurrencyHasSpace()
         val langCode = getCachedLanguageCode()
+        val isPro = isCachedPro()
+        val proTier = getCachedProTier()
         com.masum.cipher.core.util.AppFormatters.setActiveCurrencyFormatting(isSuffix, hasSpace)
         return UserSettings(
             theme = AppTheme.SYSTEM,
@@ -87,7 +101,9 @@ class UserPreferences @Inject constructor(
             monthlyBudget = 0.0,
             hasCompletedOnboarding = isCachedOnboardingCompleted(),
             accentColor = getCachedAccentColor(),
-            isNavBarCompressed = isCachedNavBarCompressed()
+            isNavBarCompressed = isCachedNavBarCompressed(),
+            isPro = isPro,
+            proTier = proTier
         )
     }
 
@@ -132,6 +148,10 @@ class UserPreferences @Inject constructor(
         val IS_DYNAMIC_BUDGET_ENABLED = booleanPreferencesKey("is_dynamic_budget_enabled")
         val NAVBAR_COMPRESSED = booleanPreferencesKey("navbar_compressed")
         val CUSTOM_CURRENCIES = stringPreferencesKey("custom_currencies")
+        val PRO_ACTIVATED = booleanPreferencesKey("pro_activated")
+        val PRO_TIER = stringPreferencesKey("pro_tier")
+        val PRO_LICENSE_TOKEN = stringPreferencesKey("pro_license_token")
+        val PRO_ORDER_ID = stringPreferencesKey("pro_order_id")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -236,7 +256,11 @@ class UserPreferences @Inject constructor(
                     emptyList()
                 }
             } ?: emptyList(),
-            isNavBarCompressed = isNavCompressed
+            isNavBarCompressed = isNavCompressed,
+            isPro = preferences[Keys.PRO_ACTIVATED] ?: false,
+            proTier = preferences[Keys.PRO_TIER] ?: "FREE",
+            proLicenseToken = preferences[Keys.PRO_LICENSE_TOKEN],
+            proOrderId = preferences[Keys.PRO_ORDER_ID]
         )
     }
 
@@ -583,6 +607,32 @@ class UserPreferences @Inject constructor(
             preferences[Keys.APP_LANGUAGE] = languageCode
         }
     }
+
+    suspend fun setProStatus(isPro: Boolean, tier: String, token: String?, orderId: String?) {
+        syncPrefs.edit()
+            .putBoolean("cached_is_pro", isPro)
+            .putString("cached_pro_tier", tier)
+            .putString("cached_license_token", token)
+            .apply()
+        context.dataStore.edit { preferences ->
+            preferences[Keys.PRO_ACTIVATED] = isPro
+            preferences[Keys.PRO_TIER] = tier
+            if (token != null) {
+                preferences[Keys.PRO_LICENSE_TOKEN] = token
+            } else {
+                preferences.remove(Keys.PRO_LICENSE_TOKEN)
+            }
+            if (orderId != null) {
+                preferences[Keys.PRO_ORDER_ID] = orderId
+            } else {
+                preferences.remove(Keys.PRO_ORDER_ID)
+            }
+        }
+    }
+
+    suspend fun deactivatePro() {
+        setProStatus(isPro = false, tier = "FREE", token = null, orderId = null)
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -642,5 +692,9 @@ data class UserSettings(
     val categoryBudgets: Map<String, Double> = emptyMap(),
     val customCurrencies: List<com.masum.cipher.core.domain.model.AppCurrency> = emptyList(),
     val isDynamicBudgetEnabled: Boolean = false,
-    val isNavBarCompressed: Boolean = false
+    val isNavBarCompressed: Boolean = false,
+    val isPro: Boolean = false,
+    val proTier: String = "FREE",
+    val proLicenseToken: String? = null,
+    val proOrderId: String? = null
 )

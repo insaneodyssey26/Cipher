@@ -71,6 +71,8 @@ class SettingsContract {
         data class SetAutoBackupFrequency(val frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) : Intent()
         data class SetAutoBackupUri(val uri: String?) : Intent()
         data class SetAutoBackupEncryptedPassword(val password: String?) : Intent()
+        data class ActivatePro(val licenseKey: String, val email: String?) : Intent()
+        data object DeactivatePro : Intent()
     }
 
     data class State(
@@ -101,6 +103,13 @@ class SettingsContract {
         val isImporting: Boolean = false,
         val isExportingCsv: Boolean = false,
         val isExportingPdf: Boolean = false,
+        val isPro: Boolean = false,
+        val proTier: String = "FREE",
+        val proLicenseToken: String? = null,
+        val proOrderId: String? = null,
+        val isActivatingPro: Boolean = false,
+        val proActivationError: String? = null,
+        val proActivationSuccess: Boolean = false,
         val message: String? = null
     ) : UiState
 

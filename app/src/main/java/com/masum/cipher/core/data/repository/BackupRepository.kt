@@ -62,7 +62,10 @@ data class BackupData(
     val notifyUncategorizedReminder: Boolean? = null,
     val notifySubscriptions: Boolean? = null,
     val notifyNewAppDetected: Boolean? = null,
-    val appLanguage: String? = null
+    val appLanguage: String? = null,
+    val proLicenseToken: String? = null,
+    val proTier: String? = null,
+    val proOrderId: String? = null
 )
 
 @Singleton
@@ -118,7 +121,10 @@ class BackupRepository @Inject constructor(
                 notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
                 notifySubscriptions = settings.notifySubscriptions,
                 notifyNewAppDetected = settings.notifyNewAppDetected,
-                appLanguage = settings.appLanguage
+                appLanguage = settings.appLanguage,
+                proLicenseToken = settings.proLicenseToken,
+                proTier = settings.proTier,
+                proOrderId = settings.proOrderId
             )
             val jsonString = json.encodeToString(data)
             val jsonBytes = jsonString.toByteArray(Charsets.UTF_8)
@@ -195,6 +201,14 @@ class BackupRepository @Inject constructor(
                 data.notifySubscriptions?.let { userPreferences.setNotifySubscriptions(it) }
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
+                if (!data.proLicenseToken.isNullOrBlank()) {
+                    userPreferences.setProStatus(
+                        isPro = true,
+                        tier = data.proTier ?: "LIFETIME",
+                        token = data.proLicenseToken,
+                        orderId = data.proOrderId
+                    )
+                }
             }
             Result.success(Unit)
         } catch (e: BackupRestoreException) {

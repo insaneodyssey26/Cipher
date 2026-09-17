@@ -284,7 +284,18 @@ class MainActivity : AppCompatActivity() {
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToSmartRules = { navController.navigate("smart_rules") },
                                     onNavigateToCategories = { navController.navigate("categories") },
-                                    onNavigateToCurrency = { navController.navigate("currency_selection") }
+                                    onNavigateToCurrency = { navController.navigate("currency_selection") },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
+                                )
+                            }
+                            composable(
+                                route = "cipher_pro",
+                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                            ) {
+                                com.masum.cipher.ui.pro.CipherProScreen(
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                             composable(

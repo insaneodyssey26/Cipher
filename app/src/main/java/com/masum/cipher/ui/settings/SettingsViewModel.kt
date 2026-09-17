@@ -31,11 +31,14 @@ class SettingsViewModel @Inject constructor(
     private val localNotificationManager: com.masum.cipher.core.notifications.LocalNotificationManager,
     private val keystoreManager: KeystoreManager,
     private val autoBackupScheduler: AutoBackupScheduler,
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val licenseEngine: com.masum.cipher.core.security.LicenseEngine
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
     initialState = SettingsContract.State(
         currencyCode = userPreferences.getCachedCurrencyCode(),
-        currencySymbol = userPreferences.getCachedCurrencySymbol()
+        currencySymbol = userPreferences.getCachedCurrencySymbol(),
+        isPro = userPreferences.isCachedPro(),
+        proTier = userPreferences.getCachedProTier()
     )
 ) {
 
@@ -70,6 +73,8 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetAutoBackupFrequency -> updateAutoBackupFrequency(intent.frequency)
             is SettingsContract.Intent.SetAutoBackupUri -> updateAutoBackupUri(intent.uri)
             is SettingsContract.Intent.SetAutoBackupEncryptedPassword -> updateAutoBackupPassword(intent.password)
+            is SettingsContract.Intent.ActivatePro -> activatePro(intent.licenseKey, intent.email)
+            is SettingsContract.Intent.DeactivatePro -> deactivatePro()
         }
     }
 
@@ -109,7 +114,11 @@ class SettingsViewModel @Inject constructor(
                         thisMonthIncome = monthIncome,
                         autoBackupEnabled = settings.autoBackupEnabled,
                         autoBackupFrequency = settings.autoBackupFrequency,
-                        autoBackupUri = settings.autoBackupUri
+                        autoBackupUri = settings.autoBackupUri,
+                        isPro = settings.isPro,
+                        proTier = settings.proTier,
+                        proLicenseToken = settings.proLicenseToken,
+                        proOrderId = settings.proOrderId
                     )
                 }
             }
@@ -297,6 +306,34 @@ class SettingsViewModel @Inject constructor(
     private fun updateCurrency(code: String, symbol: String) {
         viewModelScope.launch {
             userPreferences.setCurrency(code, symbol)
+        }
+    }
+
+    private fun activatePro(licenseKey: String, email: String?) {
+        viewModelScope.launch {
+            updateState { copy(isActivatingPro = true, proActivationError = null, proActivationSuccess = false) }
+            val result = licenseEngine.validateLicense(licenseKey, email)
+            if (result.isValid) {
+                userPreferences.setProStatus(
+                    isPro = true,
+                    tier = result.tier.identifier,
+                    token = licenseKey.trim(),
+                    orderId = result.orderId
+                )
+                updateState { copy(isActivatingPro = false, proActivationSuccess = true, proActivationError = null) }
+                emitEffect(SettingsContract.Effect.ShowToast("Cipher Pro successfully activated!"))
+            } else {
+                val errorMsg = result.errorMessage ?: "Invalid license key. Please check and try again."
+                updateState { copy(isActivatingPro = false, proActivationError = errorMsg, proActivationSuccess = false) }
+                emitEffect(SettingsContract.Effect.ShowToast(errorMsg))
+            }
+        }
+    }
+
+    private fun deactivatePro() {
+        viewModelScope.launch {
+            userPreferences.deactivatePro()
+            emitEffect(SettingsContract.Effect.ShowToast("Pro deactivated."))
         }
     }
 }

@@ -108,6 +108,7 @@ import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
+import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.CloudDownload
 import compose.icons.lucideicons.CloudUpload
 import compose.icons.lucideicons.Coffee
@@ -153,7 +154,8 @@ fun SettingsScreen(
     onNavigateToManageApps: () -> Unit,
     onNavigateToSmartRules: () -> Unit,
     onNavigateToCategories: () -> Unit = {},
-    onNavigateToCurrency: () -> Unit = {}
+    onNavigateToCurrency: () -> Unit = {},
+    onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -178,6 +180,7 @@ fun SettingsScreen(
     var isColorPickerExpanded by remember { mutableStateOf(false) }
     var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
     var autoBackupSetupPassword by remember { mutableStateOf("") }
+    var showProSheet by remember { mutableStateOf(false) }
 
     val timeoutOptions = listOf(
         stringResource(R.string.timeout_immediately) to 0L,
@@ -396,6 +399,118 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 140.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        if (state.isPro) {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    EmeraldIncome.copy(alpha = 0.16f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFFF59E0B).copy(alpha = 0.14f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
+                            )
+                        }
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (state.isPro) EmeraldIncome.copy(alpha = 0.4f) else Color(0xFFF59E0B).copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clickable {
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                        onNavigateToPro()
+                    }
+                    .padding(horizontal = 18.dp, vertical = 14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(if (state.isPro) EmeraldIncome.copy(alpha = 0.2f) else Color(0xFFF59E0B).copy(alpha = 0.18f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (state.isPro) LucideIcons.ShieldCheck else LucideIcons.Crown,
+                                contentDescription = "Cipher Pro",
+                                tint = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = if (state.isPro) "CIPHER PRO ACTIVE" else "UPGRADE TO PRO",
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        letterSpacing = 0.6.sp
+                                    ),
+                                    color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(
+                                            if (state.isPro) EmeraldIncome.copy(alpha = 0.2f)
+                                            else Color(0xFFF59E0B).copy(alpha = 0.2f)
+                                        )
+                                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                                ) {
+                                    Text(
+                                        text = if (state.isPro) state.proTier.uppercase() else "LIFETIME",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 8.5.sp
+                                        ),
+                                        color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (state.isPro) "All features & custom categories unlocked" else "Unlimited accounts, rules, PDF exports & widgets",
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = LucideIcons.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             if (matchAppearance) {
 SettingsSection(stringResource(R.string.settings_appearance), icon = LucideIcons.Palette, isHapticsEnabled = state.isHapticsEnabled, isExpanded = expandedSection == "APPEARANCE" || query.isNotBlank(), onToggle = { expandedSection = if (expandedSection == "APPEARANCE") null else "APPEARANCE" }) {
                 if (matchTheme) {
@@ -1413,6 +1528,21 @@ Spacer(modifier = Modifier.weight(1f))
                 viewModel.handleIntent(SettingsContract.Intent.SetAppLanguage(code))
             },
             onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    if (showProSheet) {
+        com.masum.cipher.ui.components.CipherProSheet(
+            isPro = state.isPro,
+            proTier = state.proTier,
+            isActivating = state.isActivatingPro,
+            activationError = state.proActivationError,
+            activationSuccess = state.proActivationSuccess,
+            isHapticsEnabled = state.isHapticsEnabled,
+            onActivateKey = { key, email ->
+                viewModel.handleIntent(SettingsContract.Intent.ActivatePro(key, email))
+            },
+            onDismiss = { showProSheet = false }
         )
     }
 }

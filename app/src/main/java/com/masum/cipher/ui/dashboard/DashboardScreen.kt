@@ -121,6 +121,7 @@ import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowUp
 import compose.icons.lucideicons.BellRing
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Search
@@ -447,6 +448,7 @@ fun DashboardScreen(
                     onOpenFilter = { showFilterSheet = true },
                     privacyMode = privacyMode,
                     isHapticsEnabled = isHapticsEnabled,
+                    isPro = settings?.isPro ?: false,
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
                     onAdjustBalanceClick = { showAdjustBalanceSheet = true },
@@ -1490,6 +1492,7 @@ private fun DashboardHero(
     onOpenFilter: () -> Unit = {},
     privacyMode: Boolean,
     isHapticsEnabled: Boolean,
+    isPro: Boolean = false,
     expenseComparisonPercent: Double? = null,
     onComparisonBadgeClick: () -> Unit = {},
     onAdjustBalanceClick: () -> Unit = {},
@@ -1951,16 +1954,53 @@ private fun DashboardHero(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "cipher.",
-                    style = Typography.titleLarge.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-1).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "cipher.",
+                        style = Typography.titleLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-1).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+                    if (isPro) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFFFD700).copy(alpha = 0.16f))
+                                .border(0.8.dp, Color(0xFFFFD700).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Crown,
+                                    contentDescription = "Cipher Pro Active",
+                                    tint = Color(0xFFFFD700),
+                                    modifier = Modifier.size(10.dp)
+                                )
+                                Text(
+                                    text = "PRO",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 9.sp,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = Color(0xFFFFD700)
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
