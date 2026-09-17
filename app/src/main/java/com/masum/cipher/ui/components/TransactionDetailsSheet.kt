@@ -19,10 +19,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -151,16 +155,17 @@ fun TransactionDetailsSheet(
     LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp) {
         if (onDraftChange != null) {
             val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
-            onDraftChange.invoke(
-                transaction.copy(
-                    merchant = merchant,
-                    amount = finalAmount,
-                    category = selectedCategory.name,
-                    isIncome = isIncome,
-                    note = note.ifBlank { null },
-                    timestamp = selectedTimestamp
-                )
+            val updated = transaction.copy(
+                merchant = merchant,
+                amount = finalAmount,
+                category = selectedCategory.name,
+                isIncome = isIncome,
+                note = note.ifBlank { null },
+                timestamp = selectedTimestamp
             )
+            if (updated != transaction) {
+                onDraftChange.invoke(updated)
+            }
         }
     }
 
@@ -215,7 +220,11 @@ fun TransactionDetailsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(top = 16.dp),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         dragHandle = {
             Box(
                 modifier = Modifier

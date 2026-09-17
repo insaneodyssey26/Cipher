@@ -195,7 +195,7 @@ fun DashboardScreen(
     var showComparisonExplanation by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    LaunchedEffect(state.transactions) {
+    LaunchedEffect(Unit) {
         val activity = context as? android.app.Activity
         val intent = activity?.intent
         if (intent?.getStringExtra("navigate_to") == "transaction_details") {
