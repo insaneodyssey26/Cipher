@@ -41,11 +41,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.R
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.ProFeatureGateSheet
@@ -126,7 +128,7 @@ fun AccountsScreen(
 
                     Column {
                         Text(
-                            text = "Accounts & Wallets",
+                            text = stringResource(R.string.accounts_title),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -135,7 +137,7 @@ fun AccountsScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = if (state.isPro) "Cipher Pro · Unlimited" else "${state.accounts.size}/${state.freeAccountLimit} Free Accounts",
+                            text = if (state.isPro) "${stringResource(R.string.pro_title)} · ${stringResource(R.string.pro_badge_lifetime)}" else "${state.accounts.size}/${state.freeAccountLimit} Free Accounts",
                             style = Typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
                                 color = if (state.isPro) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
@@ -168,7 +170,7 @@ fun AccountsScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Add",
+                        text = stringResource(R.string.custom_category_add_btn),
                         style = Typography.labelMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -211,7 +213,7 @@ fun AccountsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "COMBINED NET WORTH",
+                                        text = stringResource(R.string.accounts_combined_net_worth),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -228,7 +230,7 @@ fun AccountsScreen(
                                             .padding(horizontal = 8.dp, vertical = 3.dp)
                                     ) {
                                         Text(
-                                            text = "${state.accounts.size} Active",
+                                            text = stringResource(R.string.accounts_active_count, state.accounts.size),
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
@@ -255,7 +257,7 @@ fun AccountsScreen(
                                 ) {
                                     Column {
                                         Text(
-                                            text = "Liquid Cash / Banks",
+                                            text = stringResource(R.string.accounts_liquid_cash),
                                             style = Typography.bodySmall.copy(fontSize = 11.sp),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -272,7 +274,7 @@ fun AccountsScreen(
                                     if (state.totalDebt > 0) {
                                         Column {
                                             Text(
-                                                text = "Credit Card Outstandings",
+                                                text = stringResource(R.string.accounts_total_debt),
                                                 style = Typography.bodySmall.copy(fontSize = 11.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -338,7 +340,7 @@ fun AccountsScreen(
 
                                         Column {
                                             Text(
-                                                text = "Free Account Limit Reached (2/2)",
+                                                text = stringResource(R.string.accounts_free_limit_reached, 2, 2),
                                                 style = Typography.labelMedium.copy(
                                                     fontFamily = Lato,
                                                     fontWeight = FontWeight.Bold
@@ -346,7 +348,7 @@ fun AccountsScreen(
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = "Unlock unlimited bank accounts & wallets with Pro",
+                                                text = stringResource(R.string.accounts_free_limit_desc),
                                                 style = Typography.bodySmall.copy(fontSize = 11.sp),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -366,7 +368,7 @@ fun AccountsScreen(
 
                     item {
                         Text(
-                            text = "ACCOUNTS & CARDS",
+                            text = stringResource(R.string.accounts_section_header),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -412,17 +414,17 @@ fun AccountsScreen(
 
     if (state.showProGateSheet) {
         ProFeatureGateSheet(
-            featureTitle = "Unlimited Bank Accounts & Wallets",
-            featureTagline = "Manage all your financial accounts in one unified vault with zero limits.",
+            featureTitle = stringResource(R.string.pro_perk_unlimited_accounts_title),
+            featureTagline = stringResource(R.string.pro_perk_unlimited_accounts_desc),
             featureIcon = LucideIcons.Wallet,
             perks = listOf(
-                ProFeaturePerk("Zero Account Limits", "Add unlimited savings, checking, credit card, cash, and digital wallet accounts."),
-                ProFeaturePerk("Live Net Worth Tracking", "Automatic balance calculation based on real-time transaction flows."),
-                ProFeaturePerk("Account-Specific Analytics", "Filter insights, budgets, and statements by specific accounts."),
-                ProFeaturePerk("Custom Card Themes & Badges", "Personalize each account card with metallic gradients and icons.")
+                ProFeaturePerk(stringResource(R.string.pro_perk_unlimited_accounts_title), stringResource(R.string.pro_perk_unlimited_accounts_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_net_worth_title), stringResource(R.string.pro_perk_net_worth_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_smart_rules_title), stringResource(R.string.pro_perk_smart_rules_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_card_themes_title), stringResource(R.string.pro_perk_card_themes_desc))
             ),
             isHapticsEnabled = state.isHapticsEnabled,
-            primaryButtonText = "Unlock Unlimited Accounts",
+            primaryButtonText = stringResource(R.string.pro_btn_upgrade),
             onNavigateToPro = {
                 viewModel.handleIntent(AccountsContract.Intent.DismissProGate)
                 onNavigateToPro()
@@ -441,7 +443,7 @@ fun AccountsScreen(
             },
             title = {
                 Text(
-                    text = "Delete ${target.name}?",
+                    text = stringResource(R.string.accounts_delete_confirm_title),
                     style = Typography.titleMedium.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold
@@ -450,7 +452,7 @@ fun AccountsScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to delete this account? Any associated transactions will remain safely in your ledger.",
+                    text = stringResource(R.string.accounts_delete_confirm_desc, target.name),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -463,7 +465,7 @@ fun AccountsScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = RoseExpense)
                 ) {
-                    Text("Delete", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -472,7 +474,7 @@ fun AccountsScreen(
                         viewModel.handleIntent(AccountsContract.Intent.DismissDeleteDialog)
                     }
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

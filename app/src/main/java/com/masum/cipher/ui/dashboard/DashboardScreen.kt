@@ -1273,12 +1273,12 @@ private fun SpendingComparisonSheet(
                 }
                 Column {
                     Text(
-                        text = "Spending Trend",
+                        text = stringResource(R.string.dashboard_spending_trend_title),
                         style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = selectedTimePeriod.label,
+                        text = stringResource(selectedTimePeriod.labelRes),
                         style = Typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1295,14 +1295,14 @@ private fun SpendingComparisonSheet(
                     val percent = expenseComparisonPercent
                     val prevExp = previousPeriodExpenses
                     val currentExp = totalExpenses
-                    val label = expenseComparisonLabel ?: "last period"
+                    val label = expenseComparisonLabel ?: stringResource(R.string.period_last_month)
 
                     if (percent != null && kotlin.math.abs(percent) >= 0.5 && prevExp != null && prevExp > 0) {
                         val isLess = percent < 0.0
                         val diff = kotlin.math.abs(currentExp - prevExp)
                         val color = if (isLess) EmeraldIncome else RoseExpense
                         val arrow = if (isLess) "▼" else "▲"
-                        val actionWord = if (isLess) "less" else "more"
+                        val actionWord = if (isLess) stringResource(R.string.less) else stringResource(R.string.more)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1310,7 +1310,7 @@ private fun SpendingComparisonSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "This period (so far)",
+                                text = stringResource(R.string.dashboard_this_period_so_far),
                                 style = Typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f, fill = false),
@@ -1335,7 +1335,7 @@ private fun SpendingComparisonSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Same days $label",
+                                text = stringResource(R.string.dashboard_same_days_prefix, label),
                                 style = Typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(1f, fill = false),
@@ -1369,9 +1369,9 @@ private fun SpendingComparisonSheet(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = if (isLess) {
-                                "You've spent less compared to the exact same days in $label."
+                                stringResource(R.string.dashboard_spending_trend_spent_less, label)
                             } else {
-                                "You've spent more compared to the exact same days in $label."
+                                stringResource(R.string.dashboard_spending_trend_spent_more, label)
                             },
                             style = Typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1383,7 +1383,7 @@ private fun SpendingComparisonSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Total Spent",
+                                text = stringResource(R.string.dashboard_spending_trend_total_spent),
                                 style = Typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1402,7 +1402,7 @@ private fun SpendingComparisonSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Total Income",
+                                text = stringResource(R.string.dashboard_spending_trend_total_income),
                                 style = Typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -1421,16 +1421,16 @@ private fun SpendingComparisonSheet(
                             selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.LAST_WEEK ||
                             selectedTimePeriod == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME
                         Text(
-                            text = if (isPastPeriod) "${selectedTimePeriod.label} Summary" else "Active Period Overview",
+                            text = if (isPastPeriod) stringResource(R.string.dashboard_spending_trend_period_summary, stringResource(selectedTimePeriod.labelRes)) else stringResource(R.string.dashboard_spending_trend_active_overview),
                             style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
                             text = if (isPastPeriod) {
-                                "No transactions found in the preceding period to compare against."
+                                stringResource(R.string.dashboard_spending_trend_no_prev_data)
                             } else {
-                                "No previous records found to compare against yet."
+                                stringResource(R.string.dashboard_spending_trend_no_records)
                             },
                             style = Typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1452,7 +1452,7 @@ private fun SpendingComparisonSheet(
                     modifier = Modifier.size(13.dp)
                 )
                 Text(
-                    text = "Compares the exact same elapsed days (e.g. Day 1 to today) for a fair comparison.",
+                    text = stringResource(R.string.dashboard_spending_trend_footer),
                     style = Typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                 )
@@ -1563,7 +1563,7 @@ private fun DashboardHero(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${selectedPeriod.label} Balance".uppercase(),
+                                text = stringResource(R.string.dashboard_period_balance, stringResource(selectedPeriod.labelRes)),
                                 style = Typography.labelMedium.copy(
                                     fontFamily = DMSans,
                                     fontWeight = FontWeight.Bold,

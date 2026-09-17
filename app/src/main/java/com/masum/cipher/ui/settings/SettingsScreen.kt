@@ -464,7 +464,7 @@ fun SettingsScreen(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = if (state.isPro) "CIPHER PRO ACTIVE" else "UPGRADE TO PRO",
+                                    text = if (state.isPro) stringResource(R.string.settings_pro_active) else stringResource(R.string.settings_pro_upgrade),
                                     style = Typography.titleMedium.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -484,7 +484,7 @@ fun SettingsScreen(
                                         .padding(horizontal = 6.dp, vertical = 1.5.dp)
                                 ) {
                                     Text(
-                                        text = if (state.isPro) state.proTier.uppercase() else "LIFETIME",
+                                        text = if (state.isPro) state.proTier.uppercase() else stringResource(R.string.settings_pro_lifetime_badge),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -496,7 +496,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = if (state.isPro) "All features & custom categories unlocked" else "Unlimited accounts, rules, PDF exports & widgets",
+                                text = if (state.isPro) stringResource(R.string.settings_pro_unlocked_desc) else stringResource(R.string.settings_pro_locked_desc),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = DMSans,
                                     fontSize = 11.5.sp

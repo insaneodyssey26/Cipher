@@ -12,10 +12,13 @@ import com.masum.cipher.core.mvi.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-enum class AccountTransactionFilter(val label: String) {
-    ALL("All Activity"),
-    EXPENSE("Outflow"),
-    INCOME("Inflow")
+import androidx.annotation.StringRes
+import com.masum.cipher.R
+
+enum class AccountTransactionFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.account_details_filter_all),
+    EXPENSE(R.string.account_details_filter_outflow),
+    INCOME(R.string.account_details_filter_inflow)
 }
 
 data class GroupedDayTransactions(

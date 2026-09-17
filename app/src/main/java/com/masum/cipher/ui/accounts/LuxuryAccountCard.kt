@@ -28,11 +28,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.domain.model.AccountType
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -185,7 +187,7 @@ fun LuxuryAccountCard(
                                 .padding(horizontal = 8.dp, vertical = 3.5.dp)
                         ) {
                             Text(
-                                text = "PRIMARY",
+                                text = stringResource(R.string.account_primary_toggle_label),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -200,7 +202,7 @@ fun LuxuryAccountCard(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(Color.White.copy(alpha = 0.08f))
-                                .border(0.8.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
+                                .border(0.6.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                     onSetDefaultClick()
@@ -208,7 +210,7 @@ fun LuxuryAccountCard(
                                 .padding(horizontal = 8.dp, vertical = 3.5.dp)
                         ) {
                             Text(
-                                text = "Make Primary",
+                                text = stringResource(R.string.accounts_set_primary),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Medium,
@@ -229,9 +231,9 @@ fun LuxuryAccountCard(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.Pencil,
-                                contentDescription = "Edit Account",
-                                tint = Color.White.copy(alpha = 0.85f),
-                                modifier = Modifier.size(14.dp)
+                                contentDescription = "Edit Card",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(15.dp)
                             )
                         }
                     }
@@ -246,9 +248,9 @@ fun LuxuryAccountCard(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.Trash2,
-                                contentDescription = "Delete Account",
+                                contentDescription = "Delete Card",
                                 tint = RoseExpense.copy(alpha = 0.85f),
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(15.dp)
                             )
                         }
                     }
@@ -261,7 +263,7 @@ fun LuxuryAccountCard(
                     .padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = if (isDebtAccount) "OUTSTANDING BALANCE" else "AVAILABLE BALANCE",
+                    text = if (isDebtAccount) stringResource(R.string.account_outstanding_balance_label) else stringResource(R.string.balance_label).uppercase(),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -318,7 +320,7 @@ fun LuxuryAccountCard(
                 }
 
                 Text(
-                    text = type.displayName.uppercase(),
+                    text = stringResource(type.labelRes).uppercase(),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,

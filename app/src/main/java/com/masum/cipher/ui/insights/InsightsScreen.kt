@@ -1231,7 +1231,7 @@ private fun NetWorthAccountsCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "NET WORTH",
+                        text = stringResource(R.string.insights_net_worth_title),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -1256,7 +1256,7 @@ private fun NetWorthAccountsCard(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = "${state.accounts.size} Accounts",
+                        text = stringResource(R.string.insights_net_worth_accounts_count, state.accounts.size),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -1294,7 +1294,7 @@ private fun NetWorthAccountsCard(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = "Liquid:",
+                            text = stringResource(R.string.insights_net_worth_liquid),
                             style = Typography.bodySmall.copy(fontSize = 11.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1315,7 +1315,7 @@ private fun NetWorthAccountsCard(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "Debt:",
+                                text = stringResource(R.string.insights_net_worth_debt),
                                 style = Typography.bodySmall.copy(fontSize = 11.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1427,7 +1427,7 @@ private fun NetWorthAccountsCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = "Add Account",
+                            text = stringResource(R.string.insights_net_worth_add_account),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold,

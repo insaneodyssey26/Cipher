@@ -57,11 +57,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.domain.model.AccountType
 import com.masum.cipher.core.util.AppFormatters
@@ -171,6 +173,7 @@ fun CreateEditAccountScreen(
 
     val rawBalanceNumber = balanceInput.replace(",", ".").toDoubleOrNull() ?: 0.0
     val parsedBalance = if (isNegativeBalance) -rawBalanceNumber else rawBalanceNumber
+    val defaultAccountName = stringResource(selectedType.labelRes)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -200,7 +203,7 @@ fun CreateEditAccountScreen(
                     ) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
@@ -208,7 +211,7 @@ fun CreateEditAccountScreen(
 
                     Column {
                         Text(
-                            text = if (accountToEdit == null) "Create Account" else "Edit Account",
+                            text = if (accountToEdit == null) stringResource(R.string.account_create_title) else stringResource(R.string.account_edit_title),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -217,7 +220,7 @@ fun CreateEditAccountScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Customise card theme, balance & details",
+                            text = stringResource(R.string.account_form_subtitle),
                             style = Typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -229,7 +232,7 @@ fun CreateEditAccountScreen(
                 Button(
                     onClick = {
                         view.performVibrate(isHapticsEnabled, isLongPress = true)
-                        val finalName = name.trim().ifBlank { selectedType.displayName }
+                        val finalName = name.trim().ifBlank { defaultAccountName }
                         val finalLast4 = last4Input.trim().take(4).ifBlank { null }
                         onSaveAccount(
                             finalName,
@@ -256,7 +259,7 @@ fun CreateEditAccountScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Save",
+                        text = stringResource(R.string.action_save),
                         style = Typography.labelMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -278,7 +281,7 @@ fun CreateEditAccountScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             LuxuryAccountCard(
-                name = name.ifBlank { selectedType.displayName },
+                name = name.ifBlank { defaultAccountName },
                 type = selectedType,
                 balance = parsedBalance,
                 colorHex = selectedColor,
@@ -306,7 +309,7 @@ fun CreateEditAccountScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (selectedType == AccountType.CREDIT_CARD) "OUTSTANDING / STARTING BALANCE" else "STARTING BALANCE",
+                        text = if (selectedType == AccountType.CREDIT_CARD) stringResource(R.string.account_outstanding_balance_label) else stringResource(R.string.account_starting_balance_label),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -329,7 +332,7 @@ fun CreateEditAccountScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = if (isNegativeBalance) "Negative (-)" else "Positive (+)",
+                            text = if (isNegativeBalance) stringResource(R.string.account_balance_negative) else stringResource(R.string.account_balance_positive),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -389,7 +392,7 @@ fun CreateEditAccountScreen(
                 }
 
                 Text(
-                    text = "Initial starting balance before recorded transactions",
+                    text = stringResource(R.string.account_starting_balance_desc),
                     style = Typography.bodySmall.copy(
                         fontFamily = Lato,
                         fontSize = 11.sp
@@ -408,7 +411,7 @@ fun CreateEditAccountScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "ACCOUNT NAME",
+                    text = stringResource(R.string.account_name_label),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -437,7 +440,7 @@ fun CreateEditAccountScreen(
                     decorationBox = { innerTextField ->
                         if (name.isEmpty()) {
                             Text(
-                                text = "e.g. HDFC Bank, Cash Wallet, Amex",
+                                text = stringResource(R.string.account_name_placeholder),
                                 style = Typography.bodyMedium.copy(
                                     fontFamily = Lato,
                                     fontSize = 14.5.sp,
@@ -460,7 +463,7 @@ fun CreateEditAccountScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "ACCOUNT TYPE",
+                    text = stringResource(R.string.account_type_label),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -507,7 +510,7 @@ fun CreateEditAccountScreen(
                             }
 
                             Text(
-                                text = selectedType.displayName,
+                                text = stringResource(selectedType.labelRes),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -519,7 +522,7 @@ fun CreateEditAccountScreen(
 
                         Icon(
                             imageVector = LucideIcons.ChevronDown,
-                            contentDescription = "Dropdown",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
@@ -556,7 +559,7 @@ fun CreateEditAccountScreen(
                                         }
 
                                         Text(
-                                            text = type.displayName,
+                                            text = stringResource(type.labelRes),
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = if (selectedType == type) FontWeight.Bold else FontWeight.Normal
@@ -590,7 +593,7 @@ fun CreateEditAccountScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "CARD / ACCOUNT DIGITS (LAST 4)",
+                    text = stringResource(R.string.account_last4_label),
                     style = Typography.labelSmall.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,
@@ -625,7 +628,7 @@ fun CreateEditAccountScreen(
                     decorationBox = { innerTextField ->
                         if (last4Input.isEmpty()) {
                             Text(
-                                text = "•••• 4821",
+                                text = stringResource(R.string.account_last4_placeholder),
                                 style = Typography.bodyMedium.copy(
                                     fontFamily = FontFamily.Monospace,
                                     fontSize = 15.sp,
@@ -639,7 +642,7 @@ fun CreateEditAccountScreen(
                 )
 
                 Text(
-                    text = "Matches incoming bank SMS alerts to this account automatically",
+                    text = stringResource(R.string.account_last4_desc),
                     style = Typography.bodySmall.copy(
                         fontFamily = Lato,
                         fontSize = 11.sp
@@ -663,7 +666,7 @@ fun CreateEditAccountScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "CARD THEME & ACCENT",
+                        text = stringResource(R.string.account_theme_accent_label),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -688,7 +691,7 @@ fun CreateEditAccountScreen(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.ChevronLeft,
-                                contentDescription = "Scroll Left",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -705,7 +708,7 @@ fun CreateEditAccountScreen(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.ChevronRight,
-                                contentDescription = "Scroll Right",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -768,7 +771,7 @@ fun CreateEditAccountScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "CARD ICON",
+                        text = stringResource(R.string.account_icon_label),
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -793,7 +796,7 @@ fun CreateEditAccountScreen(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.ChevronLeft,
-                                contentDescription = "Scroll Left",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -810,7 +813,7 @@ fun CreateEditAccountScreen(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.ChevronRight,
-                                contentDescription = "Scroll Right",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -867,7 +870,7 @@ fun CreateEditAccountScreen(
             ) {
                 Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                     Text(
-                        text = "Set as Primary Account",
+                        text = stringResource(R.string.account_set_primary_title),
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -876,7 +879,7 @@ fun CreateEditAccountScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Default account for new transactions & ledger",
+                        text = stringResource(R.string.account_set_primary_desc),
                         style = Typography.bodySmall.copy(fontSize = 11.5.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -900,7 +903,7 @@ fun CreateEditAccountScreen(
             Button(
                 onClick = {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
-                    val finalName = name.trim().ifBlank { selectedType.displayName }
+                    val finalName = name.trim().ifBlank { defaultAccountName }
                     val finalLast4 = last4Input.trim().take(4).ifBlank { null }
                     onSaveAccount(
                         finalName,
@@ -922,7 +925,7 @@ fun CreateEditAccountScreen(
                     .height(52.dp)
             ) {
                 Text(
-                    text = if (accountToEdit == null) "Create Account" else "Save Changes",
+                    text = if (accountToEdit == null) stringResource(R.string.account_create_title) else stringResource(R.string.account_save_changes),
                     style = Typography.titleMedium.copy(
                         fontFamily = Lato,
                         fontWeight = FontWeight.Bold,

@@ -73,6 +73,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -80,6 +82,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.LicenseEngine
 import com.masum.cipher.core.util.performVibrate
@@ -109,8 +112,8 @@ enum class ProTierSelection {
 
 private data class ProPerkItem(
     val icon: ImageVector,
-    val title: String,
-    val description: String
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int
 )
 
 fun Modifier.dotGridPattern(
@@ -181,28 +184,28 @@ fun CipherProScreen(
         listOf(
             ProPerkItem(
                 icon = LucideIcons.Layers,
-                title = "Multi Accounts & Cards",
-                description = "Track unlimited bank accounts, credit cards, debit cards, and cash separately."
+                titleRes = R.string.pro_perk_unlimited_accounts_title,
+                descriptionRes = R.string.pro_perk_unlimited_accounts_desc
             ),
             ProPerkItem(
                 icon = LucideIcons.FileText,
-                title = "Executive PDF Statements",
-                description = "Export monthly reports with category breakdowns and spend charts."
+                titleRes = R.string.pro_perk_export_title,
+                descriptionRes = R.string.pro_perk_export_desc
             ),
             ProPerkItem(
                 icon = LucideIcons.Sparkles,
-                title = "Smart Merchant Rules",
-                description = "Custom regex rules for automatic SMS parsing and auto-categorization."
+                titleRes = R.string.pro_perk_smart_rules_title,
+                descriptionRes = R.string.pro_perk_smart_rules_desc
             ),
             ProPerkItem(
                 icon = LucideIcons.LayoutGrid,
-                title = "Homescreen Widgets Suite",
-                description = "Daily safe-to-spend pace and 1-tap rapid transaction logging."
+                titleRes = R.string.pro_perk_card_themes_title,
+                descriptionRes = R.string.pro_perk_card_themes_desc
             ),
             ProPerkItem(
-                icon = LucideIcons.BellRing,
-                title = "Subscriptions & Bills Hub",
-                description = "Track recurring subscriptions with due date reminders and projected totals."
+                icon = LucideIcons.ShieldCheck,
+                titleRes = R.string.pro_perk_offline_crypto_title,
+                descriptionRes = R.string.pro_perk_offline_crypto_desc
             )
         )
     }
@@ -277,7 +280,7 @@ fun CipherProScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = if (isPro) "Active membership • All features unlocked" else "Unlock all features with zero limits",
+                            text = if (isPro) stringResource(R.string.pro_license_already_active) else stringResource(R.string.pro_subtitle),
                             style = Typography.bodyMedium.copy(
                                 fontFamily = DMSans,
                                 fontWeight = FontWeight.Medium,
@@ -300,7 +303,7 @@ fun CipherProScreen(
                     ) {
                         Icon(
                             imageVector = LucideIcons.X,
-                            contentDescription = "Close",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
@@ -366,7 +369,7 @@ fun CipherProScreen(
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = if (selectedTier == ProTierSelection.LIFETIME) "Pay once, forever" else "₹588 / year",
+                                    text = if (selectedTier == ProTierSelection.LIFETIME) stringResource(R.string.pro_tier_lifetime_desc) else "₹588 / year",
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -381,7 +384,7 @@ fun CipherProScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
-                            text = "Track across all your bank accounts, credit cards, and cash with zero limits.",
+                            text = stringResource(R.string.pro_perk_unlimited_accounts_desc),
                             style = Typography.bodySmall.copy(
                                 fontFamily = DMSans,
                                 fontSize = 12.5.sp,
@@ -398,7 +401,7 @@ fun CipherProScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "What you get with Pro",
+                                text = stringResource(R.string.pro_title),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -445,7 +448,7 @@ fun CipherProScreen(
 
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = perk.title,
+                                                text = stringResource(perk.titleRes),
                                                 style = Typography.titleSmall.copy(
                                                     fontFamily = Lato,
                                                     fontWeight = FontWeight.Bold,
@@ -454,7 +457,7 @@ fun CipherProScreen(
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                text = perk.description,
+                                                text = stringResource(perk.descriptionRes),
                                                 style = Typography.bodySmall.copy(
                                                     fontFamily = DMSans,
                                                     fontSize = 11.5.sp,
@@ -548,7 +551,7 @@ fun CipherProScreen(
                                     }
 
                                     Text(
-                                        text = "Monthly ₹49",
+                                        text = "${stringResource(R.string.pro_tier_monthly)} ₹49",
                                         style = Typography.titleMedium.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -618,7 +621,7 @@ fun CipherProScreen(
                                     }
 
                                     Text(
-                                        text = "Lifetime ₹499",
+                                        text = "${stringResource(R.string.pro_tier_lifetime)} ₹499",
                                         style = Typography.titleMedium.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -699,7 +702,7 @@ fun CipherProScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (selectedTier == ProTierSelection.LIFETIME) "Get Lifetime Access" else "Start Monthly Pass",
+                                text = if (selectedTier == ProTierSelection.LIFETIME) stringResource(R.string.pro_btn_upgrade) else stringResource(R.string.pro_tier_monthly),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -734,7 +737,7 @@ fun CipherProScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (showKeyActivation) "Hide Key Activation" else "Have a License Key or Promo Code?",
+                                text = stringResource(R.string.pro_license_title),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.SemiBold
@@ -765,7 +768,7 @@ fun CipherProScreen(
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                text = "ENTER KEY",
+                                text = stringResource(R.string.pro_license_title),
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -819,9 +822,9 @@ fun CipherProScreen(
                                                         orderId = res.orderId
                                                     )
                                                     view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                                    snackbarHostState.showSnackbar("Cipher Pro Activated Successfully!")
+                                                    snackbarHostState.showSnackbar(context.getString(R.string.pro_license_success))
                                                 } else {
-                                                    activationError = res.errorMessage ?: "Invalid license key"
+                                                    activationError = res.errorMessage ?: context.getString(R.string.pro_license_invalid)
                                                 }
                                                 isActivating = false
                                             }
@@ -831,7 +834,7 @@ fun CipherProScreen(
                                 decorationBox = { innerTextField ->
                                     if (licenseKeyInput.isEmpty()) {
                                         Text(
-                                            text = "CIPHER-VIP-XXXX-XXXX",
+                                            text = stringResource(R.string.pro_license_hint),
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = DMSans,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
@@ -865,9 +868,9 @@ fun CipherProScreen(
                                                 orderId = res.orderId
                                             )
                                             view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                            snackbarHostState.showSnackbar("Cipher Pro Activated Successfully!")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.pro_license_success))
                                         } else {
-                                            activationError = res.errorMessage ?: "Invalid license key"
+                                            activationError = res.errorMessage ?: context.getString(R.string.pro_license_invalid)
                                         }
                                         isActivating = false
                                     }
@@ -890,7 +893,7 @@ fun CipherProScreen(
                                     )
                                 } else {
                                     Text(
-                                        text = "Activate License",
+                                        text = stringResource(R.string.pro_btn_activate),
                                         style = Typography.titleSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold
@@ -946,7 +949,7 @@ fun CipherProScreen(
                                         color = EmeraldIncome
                                     )
                                     Text(
-                                        text = "Cryptographically verified offline",
+                                        text = stringResource(R.string.pro_perk_offline_crypto_desc),
                                         style = Typography.bodySmall.copy(
                                             fontFamily = DMSans,
                                             fontSize = 11.sp

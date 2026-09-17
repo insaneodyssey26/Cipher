@@ -47,12 +47,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.model.AccountType
 import com.masum.cipher.core.domain.model.SplitParticipant
@@ -137,7 +139,7 @@ fun AccountDetailsScreen(
                     ) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
@@ -145,7 +147,7 @@ fun AccountDetailsScreen(
 
                     Column {
                         Text(
-                            text = account?.name ?: "Account Statement",
+                            text = account?.name ?: stringResource(R.string.account_details_statement),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -154,7 +156,7 @@ fun AccountDetailsScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "${accountType.displayName} · Ledger & Statement",
+                            text = stringResource(R.string.account_details_ledger_subtitle, stringResource(accountType.labelRes)),
                             style = Typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -206,7 +208,7 @@ fun AccountDetailsScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
-                            text = "ACCOUNT FLOW OVERVIEW",
+                            text = stringResource(R.string.account_details_flow_overview),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -232,7 +234,7 @@ fun AccountDetailsScreen(
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
-                                        text = "Inflow",
+                                        text = stringResource(R.string.account_details_inflow),
                                         style = Typography.bodySmall.copy(fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -261,7 +263,7 @@ fun AccountDetailsScreen(
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
-                                        text = "Outflow",
+                                        text = stringResource(R.string.account_details_outflow),
                                         style = Typography.bodySmall.copy(fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -280,7 +282,7 @@ fun AccountDetailsScreen(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Net Flow",
+                                    text = stringResource(R.string.account_details_net_flow),
                                     style = Typography.bodySmall.copy(fontSize = 11.sp),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -317,7 +319,7 @@ fun AccountDetailsScreen(
                 ) {
                     Icon(
                         imageVector = LucideIcons.Search,
-                        contentDescription = "Search",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -336,7 +338,7 @@ fun AccountDetailsScreen(
                         decorationBox = { innerTextField ->
                             if (state.searchQuery.isEmpty()) {
                                 Text(
-                                    text = "Search merchant, note, or category...",
+                                    text = stringResource(R.string.account_details_search_hint),
                                     style = Typography.bodyMedium.copy(
                                         fontFamily = Lato,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -358,7 +360,7 @@ fun AccountDetailsScreen(
                         ) {
                             Icon(
                                 imageVector = LucideIcons.X,
-                                contentDescription = "Clear",
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(14.dp)
                             )
@@ -404,7 +406,7 @@ fun AccountDetailsScreen(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = filter.label,
+                                    text = stringResource(filter.labelRes),
                                     style = Typography.labelMedium.copy(
                                         fontFamily = Lato,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -417,7 +419,7 @@ fun AccountDetailsScreen(
                                         .clip(CircleShape)
                                         .background(
                                             if (isSelected) Color.White.copy(alpha = 0.25f)
-                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                                         )
                                         .padding(horizontal = 5.dp, vertical = 1.dp)
                                 ) {
@@ -464,7 +466,7 @@ fun AccountDetailsScreen(
                                 )
                             }
                             Text(
-                                text = if (state.searchQuery.isNotBlank()) "No Matching Records" else "No Transactions Yet",
+                                text = if (state.searchQuery.isNotBlank()) stringResource(R.string.account_details_empty_search_title) else stringResource(R.string.account_details_empty_title),
                                 style = Typography.titleMedium.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -473,7 +475,7 @@ fun AccountDetailsScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = if (state.searchQuery.isNotBlank()) "Try refining your search keyword" else "Transactions logged to this account will appear here.",
+                                text = if (state.searchQuery.isNotBlank()) stringResource(R.string.account_details_empty_search_desc) else stringResource(R.string.account_details_empty_desc),
                                 style = Typography.bodySmall.copy(fontSize = 12.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -588,10 +590,10 @@ fun AccountDetailsScreen(
                 viewModel.handleIntent(AccountDetailsContract.Intent.DismissDeleteDialog)
             },
             title = {
-                Text("Delete Transaction?", style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                Text(stringResource(R.string.account_details_delete_tx_title), style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             },
             text = {
-                Text("Are you sure you want to delete this transaction from this account ledger?", style = Typography.bodyMedium)
+                Text(stringResource(R.string.account_details_delete_tx_desc), style = Typography.bodyMedium)
             },
             confirmButton = {
                 TextButton(
@@ -601,7 +603,7 @@ fun AccountDetailsScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = RoseExpense)
                 ) {
-                    Text("Delete", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -610,7 +612,7 @@ fun AccountDetailsScreen(
                         viewModel.handleIntent(AccountDetailsContract.Intent.DismissDeleteDialog)
                     }
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

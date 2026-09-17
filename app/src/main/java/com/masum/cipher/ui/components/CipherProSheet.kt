@@ -226,7 +226,7 @@ fun CipherProSheet(
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = if (isPro) "CIPHER PRO ACTIVE" else "UPGRADE TO PRO",
+                text = if (isPro) stringResource(R.string.pro_license_already_active) else stringResource(R.string.pro_btn_upgrade),
                 style = Typography.headlineMedium.copy(
                     fontFamily = Lato,
                     fontWeight = FontWeight.Bold,
@@ -240,7 +240,7 @@ fun CipherProSheet(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = if (isPro) "You have unlocked the full sovereign power of Cipher." else "Pure offline financial sovereignty. Lifetime access, 0 ads, 0 trackers.",
+                text = stringResource(R.string.pro_subtitle),
                 style = Typography.bodyMedium.copy(
                     fontFamily = DMSans,
                     fontSize = 13.sp,
@@ -268,28 +268,28 @@ fun CipherProSheet(
             ) {
                 ProFeatureRow(
                     icon = LucideIcons.Palette,
-                    title = "OLED Vault Themes & App Icons",
-                    subtitle = "Exclusive Cyber Emerald, Royal Violet, and stealth icons."
+                    title = stringResource(R.string.pro_perk_card_themes_title),
+                    subtitle = stringResource(R.string.pro_perk_card_themes_desc)
                 )
                 ProFeatureRow(
                     icon = LucideIcons.Wand,
-                    title = "Infinite Smart Parsing Rules",
-                    subtitle = "Unlimited regex SMS rules and automated auto-categorization."
+                    title = stringResource(R.string.pro_perk_smart_rules_title),
+                    subtitle = stringResource(R.string.pro_perk_smart_rules_desc)
                 )
                 ProFeatureRow(
                     icon = LucideIcons.FileSpreadsheet,
-                    title = "Executive PDF & Tax Statements",
-                    subtitle = "High-res branded financial reports with category charts."
+                    title = stringResource(R.string.pro_perk_export_title),
+                    subtitle = stringResource(R.string.pro_perk_export_desc)
                 )
                 ProFeatureRow(
                     icon = LucideIcons.Layers,
-                    title = "Glance Homescreen Widgets Suite",
-                    subtitle = "Real-time Daily Pace, Quick-Dial logging, and Burndown curves."
+                    title = stringResource(R.string.pro_perk_unlimited_accounts_title),
+                    subtitle = stringResource(R.string.pro_perk_unlimited_accounts_desc)
                 )
                 ProFeatureRow(
                     icon = LucideIcons.ShieldCheck,
-                    title = "100% Offline Cryptographic Key",
-                    subtitle = "Never requires internet access. Yours to keep forever."
+                    title = stringResource(R.string.pro_perk_offline_crypto_title),
+                    subtitle = stringResource(R.string.pro_perk_offline_crypto_desc)
                 )
             }
 
@@ -328,7 +328,7 @@ fun CipherProSheet(
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "LIFETIME ACCESS",
+                                    text = stringResource(R.string.pro_badge_lifetime),
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -344,7 +344,7 @@ fun CipherProSheet(
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = "BEST VALUE",
+                                        text = stringResource(R.string.pro_badge_popular),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -356,7 +356,7 @@ fun CipherProSheet(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "One-time payment. All future updates included.",
+                                text = stringResource(R.string.pro_tier_lifetime_desc),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = DMSans,
                                     fontSize = 11.sp
@@ -397,7 +397,7 @@ fun CipherProSheet(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Get Cipher Pro via Dodo Payments",
+                            text = stringResource(R.string.pro_btn_upgrade),
                             style = Typography.titleMedium.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -430,7 +430,7 @@ fun CipherProSheet(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (showKeyInput) "Hide Key Activation" else "Already have a key or Promo code?",
+                            text = stringResource(R.string.pro_license_title),
                             style = Typography.bodySmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold
@@ -460,7 +460,7 @@ fun CipherProSheet(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = "ENTER LICENSE / PROMO KEY",
+                            text = stringResource(R.string.pro_license_title),
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
@@ -506,7 +506,7 @@ fun CipherProSheet(
                             decorationBox = { innerTextField ->
                                 if (licenseKeyInput.isEmpty()) {
                                     Text(
-                                        text = "CIPHER-VIP-XXXX-XXXX",
+                                        text = stringResource(R.string.pro_license_hint),
                                         style = Typography.bodyMedium.copy(
                                             fontFamily = DMSans,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
@@ -549,7 +549,7 @@ fun CipherProSheet(
                                 )
                             } else {
                                 Text(
-                                    text = "Activate License",
+                                    text = stringResource(R.string.pro_btn_activate),
                                     style = Typography.titleSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold
