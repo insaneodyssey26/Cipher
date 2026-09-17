@@ -35,6 +35,14 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString("cached_currency_symbol", default.symbol) ?: default.symbol
     }
 
+    fun isCachedCurrencySuffix(): Boolean {
+        return syncPrefs.getBoolean("cached_currency_is_suffix", false)
+    }
+
+    fun isCachedCurrencyHasSpace(): Boolean {
+        return syncPrefs.getBoolean("cached_currency_has_space", false)
+    }
+
     fun getCachedLanguageCode(): String {
         return syncPrefs.getString("cached_app_language", "system") ?: "system"
     }
@@ -59,7 +67,10 @@ class UserPreferences @Inject constructor(
     fun getCachedSettings(): UserSettings {
         val curCode = getCachedCurrencyCode()
         val curSymbol = getCachedCurrencySymbol()
+        val isSuffix = isCachedCurrencySuffix()
+        val hasSpace = isCachedCurrencyHasSpace()
         val langCode = getCachedLanguageCode()
+        com.masum.cipher.core.util.AppFormatters.setActiveCurrencyFormatting(isSuffix, hasSpace)
         return UserSettings(
             theme = AppTheme.SYSTEM,
             isBiometricEnabled = false,
@@ -68,6 +79,8 @@ class UserPreferences @Inject constructor(
             currency = curCode,
             currencyCode = curCode,
             currencySymbol = curSymbol,
+            isCurrencySuffix = isSuffix,
+            hasCurrencySpace = hasSpace,
             appLanguage = langCode,
             autoLockTimeout = 0L,
             lastStopTime = 0L,
@@ -87,6 +100,8 @@ class UserPreferences @Inject constructor(
         val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
         val PREFERRED_CURRENCY_CODE = stringPreferencesKey("preferred_currency_code")
         val PREFERRED_CURRENCY_SYMBOL = stringPreferencesKey("preferred_currency_symbol")
+        val PREFERRED_CURRENCY_IS_SUFFIX = booleanPreferencesKey("preferred_currency_is_suffix")
+        val PREFERRED_CURRENCY_HAS_SPACE = booleanPreferencesKey("preferred_currency_has_space")
         val AUTO_LOCK_TIMEOUT = longPreferencesKey("auto_lock_timeout")
         val LAST_STOP_TIME = longPreferencesKey("last_stop_time")
         val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
@@ -116,12 +131,17 @@ class UserPreferences @Inject constructor(
         val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
         val IS_DYNAMIC_BUDGET_ENABLED = booleanPreferencesKey("is_dynamic_budget_enabled")
         val NAVBAR_COMPRESSED = booleanPreferencesKey("navbar_compressed")
+        val CUSTOM_CURRENCIES = stringPreferencesKey("custom_currencies")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
         val defaultCurrency = com.masum.cipher.core.domain.model.AppCurrency.detectDefault()
         val curCode = preferences[Keys.PREFERRED_CURRENCY_CODE] ?: preferences[Keys.PREFERRED_CURRENCY] ?: defaultCurrency.code
         val curSymbol = preferences[Keys.PREFERRED_CURRENCY_SYMBOL] ?: com.masum.cipher.core.domain.model.AppCurrency.fromCode(curCode).symbol
+        val isSuffix = preferences[Keys.PREFERRED_CURRENCY_IS_SUFFIX] ?: isCachedCurrencySuffix()
+        val hasSpace = preferences[Keys.PREFERRED_CURRENCY_HAS_SPACE] ?: isCachedCurrencyHasSpace()
+
+        com.masum.cipher.core.util.AppFormatters.setActiveCurrencyFormatting(isSuffix, hasSpace)
 
         val hasOnboarded = preferences[Keys.ONBOARDING_COMPLETED] ?: false
         val parsedAccentColor = try {
@@ -134,6 +154,8 @@ class UserPreferences @Inject constructor(
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
             .putString("cached_currency_symbol", curSymbol)
+            .putBoolean("cached_currency_is_suffix", isSuffix)
+            .putBoolean("cached_currency_has_space", hasSpace)
             .putBoolean("cached_onboarding_completed", hasOnboarded)
             .putString("cached_accent_color", parsedAccentColor.name)
             .putBoolean("cached_navbar_compressed", isNavCompressed)
@@ -147,6 +169,8 @@ class UserPreferences @Inject constructor(
             currency = curCode,
             currencyCode = curCode,
             currencySymbol = curSymbol,
+            isCurrencySuffix = isSuffix,
+            hasCurrencySpace = hasSpace,
             appLanguage = preferences[Keys.APP_LANGUAGE] ?: getCachedLanguageCode(),
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
@@ -190,6 +214,28 @@ class UserPreferences @Inject constructor(
                     emptyMap()
                 }
             } ?: emptyMap(),
+            customCurrencies = preferences[Keys.CUSTOM_CURRENCIES]?.let { jsonStr ->
+                try {
+                    val arr = org.json.JSONArray(jsonStr)
+                    val list = mutableListOf<com.masum.cipher.core.domain.model.AppCurrency>()
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        list.add(
+                            com.masum.cipher.core.domain.model.AppCurrency(
+                                code = obj.getString("code"),
+                                symbol = obj.getString("symbol"),
+                                name = obj.getString("name"),
+                                countryCode = obj.optString("countryCode", "CUSTOM"),
+                                isSuffix = obj.optBoolean("isSuffix", false),
+                                hasSpace = obj.optBoolean("hasSpace", false)
+                            )
+                        )
+                    }
+                    list
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList(),
             isNavBarCompressed = isNavCompressed
         )
     }
@@ -370,15 +416,161 @@ class UserPreferences @Inject constructor(
         }
     }
 
-    suspend fun setCurrency(code: String, symbol: String) {
+    suspend fun setCurrency(code: String, symbol: String, isSuffix: Boolean = false, hasSpace: Boolean = false) {
+        com.masum.cipher.core.util.AppFormatters.setActiveCurrencyFormatting(isSuffix, hasSpace)
         syncPrefs.edit()
             .putString("cached_currency_code", code)
             .putString("cached_currency_symbol", symbol)
+            .putBoolean("cached_currency_is_suffix", isSuffix)
+            .putBoolean("cached_currency_has_space", hasSpace)
             .apply()
         context.dataStore.edit { preferences ->
             preferences[Keys.PREFERRED_CURRENCY] = code
             preferences[Keys.PREFERRED_CURRENCY_CODE] = code
             preferences[Keys.PREFERRED_CURRENCY_SYMBOL] = symbol
+            preferences[Keys.PREFERRED_CURRENCY_IS_SUFFIX] = isSuffix
+            preferences[Keys.PREFERRED_CURRENCY_HAS_SPACE] = hasSpace
+        }
+    }
+
+    suspend fun addCustomCurrency(currency: com.masum.cipher.core.domain.model.AppCurrency) {
+        context.dataStore.edit { preferences ->
+            val currentList = preferences[Keys.CUSTOM_CURRENCIES]?.let { jsonStr ->
+                try {
+                    val arr = org.json.JSONArray(jsonStr)
+                    val list = mutableListOf<com.masum.cipher.core.domain.model.AppCurrency>()
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        list.add(
+                            com.masum.cipher.core.domain.model.AppCurrency(
+                                code = obj.getString("code"),
+                                symbol = obj.getString("symbol"),
+                                name = obj.getString("name"),
+                                countryCode = obj.optString("countryCode", "CUSTOM"),
+                                isSuffix = obj.optBoolean("isSuffix", false),
+                                hasSpace = obj.optBoolean("hasSpace", false)
+                            )
+                        )
+                    }
+                    list
+                } catch (_: Exception) {
+                    mutableListOf()
+                }
+            } ?: mutableListOf()
+
+            val filtered = currentList.filterNot { it.code.equals(currency.code, ignoreCase = true) }
+            val updated = filtered + currency
+            val jsonArr = org.json.JSONArray()
+            updated.forEach { cur ->
+                val obj = org.json.JSONObject()
+                obj.put("code", cur.code)
+                obj.put("symbol", cur.symbol)
+                obj.put("name", cur.name)
+                obj.put("countryCode", cur.countryCode)
+                obj.put("isSuffix", cur.isSuffix)
+                obj.put("hasSpace", cur.hasSpace)
+                jsonArr.put(obj)
+            }
+            preferences[Keys.CUSTOM_CURRENCIES] = jsonArr.toString()
+        }
+    }
+
+    suspend fun updateCustomCurrency(oldCode: String, currency: com.masum.cipher.core.domain.model.AppCurrency) {
+        context.dataStore.edit { preferences ->
+            val currentList = preferences[Keys.CUSTOM_CURRENCIES]?.let { jsonStr ->
+                try {
+                    val arr = org.json.JSONArray(jsonStr)
+                    val list = mutableListOf<com.masum.cipher.core.domain.model.AppCurrency>()
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        list.add(
+                            com.masum.cipher.core.domain.model.AppCurrency(
+                                code = obj.getString("code"),
+                                symbol = obj.getString("symbol"),
+                                name = obj.getString("name"),
+                                countryCode = obj.optString("countryCode", "CUSTOM"),
+                                isSuffix = obj.optBoolean("isSuffix", false),
+                                hasSpace = obj.optBoolean("hasSpace", false)
+                            )
+                        )
+                    }
+                    list
+                } catch (_: Exception) {
+                    mutableListOf()
+                }
+            } ?: mutableListOf()
+
+            val index = currentList.indexOfFirst { it.code.equals(oldCode, ignoreCase = true) }
+            val updated = if (index >= 0) {
+                currentList.toMutableList().apply { set(index, currency) }
+            } else {
+                currentList.filterNot { it.code.equals(currency.code, ignoreCase = true) } + currency
+            }
+
+            val jsonArr = org.json.JSONArray()
+            updated.forEach { cur ->
+                val obj = org.json.JSONObject()
+                obj.put("code", cur.code)
+                obj.put("symbol", cur.symbol)
+                obj.put("name", cur.name)
+                obj.put("countryCode", cur.countryCode)
+                obj.put("isSuffix", cur.isSuffix)
+                obj.put("hasSpace", cur.hasSpace)
+                jsonArr.put(obj)
+            }
+            preferences[Keys.CUSTOM_CURRENCIES] = jsonArr.toString()
+
+            val currentActive = preferences[Keys.PREFERRED_CURRENCY_CODE] ?: preferences[Keys.PREFERRED_CURRENCY]
+            if (currentActive != null && currentActive.equals(oldCode, ignoreCase = true)) {
+                preferences[Keys.PREFERRED_CURRENCY] = currency.code
+                preferences[Keys.PREFERRED_CURRENCY_CODE] = currency.code
+                preferences[Keys.PREFERRED_CURRENCY_SYMBOL] = currency.symbol
+                syncPrefs.edit()
+                    .putString("cached_currency_code", currency.code)
+                    .putString("cached_currency_symbol", currency.symbol)
+                    .apply()
+            }
+        }
+    }
+
+    suspend fun removeCustomCurrency(currencyCode: String) {
+        context.dataStore.edit { preferences ->
+            val currentList = preferences[Keys.CUSTOM_CURRENCIES]?.let { jsonStr ->
+                try {
+                    val arr = org.json.JSONArray(jsonStr)
+                    val list = mutableListOf<com.masum.cipher.core.domain.model.AppCurrency>()
+                    for (i in 0 until arr.length()) {
+                        val obj = arr.getJSONObject(i)
+                        list.add(
+                            com.masum.cipher.core.domain.model.AppCurrency(
+                                code = obj.getString("code"),
+                                symbol = obj.getString("symbol"),
+                                name = obj.getString("name"),
+                                countryCode = obj.optString("countryCode", "CUSTOM"),
+                                isSuffix = obj.optBoolean("isSuffix", false),
+                                hasSpace = obj.optBoolean("hasSpace", false)
+                            )
+                        )
+                    }
+                    list
+                } catch (_: Exception) {
+                    mutableListOf()
+                }
+            } ?: mutableListOf()
+
+            val updated = currentList.filterNot { it.code.equals(currencyCode, ignoreCase = true) }
+            val jsonArr = org.json.JSONArray()
+            updated.forEach { cur ->
+                val obj = org.json.JSONObject()
+                obj.put("code", cur.code)
+                obj.put("symbol", cur.symbol)
+                obj.put("name", cur.name)
+                obj.put("countryCode", cur.countryCode)
+                obj.put("isSuffix", cur.isSuffix)
+                obj.put("hasSpace", cur.hasSpace)
+                jsonArr.put(obj)
+            }
+            preferences[Keys.CUSTOM_CURRENCIES] = jsonArr.toString()
         }
     }
 
@@ -421,6 +613,8 @@ data class UserSettings(
     val currency: String,
     val currencyCode: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
     val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
+    val isCurrencySuffix: Boolean = false,
+    val hasCurrencySpace: Boolean = false,
     val appLanguage: String = "system",
     val autoLockTimeout: Long,
     val lastStopTime: Long,
@@ -446,6 +640,7 @@ data class UserSettings(
     val notifyNewAppDetected: Boolean = true,
     val ignoredSubscriptions: Set<String> = emptySet(),
     val categoryBudgets: Map<String, Double> = emptyMap(),
+    val customCurrencies: List<com.masum.cipher.core.domain.model.AppCurrency> = emptyList(),
     val isDynamicBudgetEnabled: Boolean = false,
     val isNavBarCompressed: Boolean = false
 )

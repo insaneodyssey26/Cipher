@@ -75,7 +75,18 @@ object AppFormatters {
         }
     }
 
+    @Volatile
+    var activeIsSuffix: Boolean = false
+    @Volatile
+    var activeHasSpace: Boolean = false
+
+    fun setActiveCurrencyFormatting(isSuffix: Boolean, hasSpace: Boolean) {
+        activeIsSuffix = isSuffix
+        activeHasSpace = hasSpace
+    }
+
     fun isSuffixCurrency(currencySymbol: String, locale: Locale = Locale.getDefault()): Boolean {
+        if (activeIsSuffix) return true
         val cleanSym = currencySymbol.trim()
         val lang = locale.language.lowercase()
         if (cleanSym == "€") {
@@ -89,12 +100,16 @@ object AppFormatters {
         amountStr: String,
         currencySymbol: String,
         locale: Locale = Locale.getDefault(),
-        sign: String = ""
+        sign: String = "",
+        isSuffix: Boolean? = null,
+        hasSpace: Boolean? = null
     ): String {
-        return if (isSuffixCurrency(currencySymbol, locale)) {
-            "$sign$amountStr $currencySymbol".trim()
+        val suffix = isSuffix ?: (if (activeIsSuffix) true else isSuffixCurrency(currencySymbol, locale))
+        val space = if (hasSpace ?: activeHasSpace) " " else if (suffix && !activeIsSuffix) " " else ""
+        return if (suffix) {
+            "$sign$amountStr$space$currencySymbol".trim()
         } else {
-            "$sign$currencySymbol$amountStr"
+            "$sign$currencySymbol$space$amountStr"
         }
     }
 

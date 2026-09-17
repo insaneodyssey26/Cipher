@@ -21,14 +21,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.shape.CircleShape
@@ -122,7 +127,7 @@ import java.util.TimeZone
 import compose.icons.lucideicons.Users
 import com.masum.cipher.core.domain.model.SplitParticipant
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun TransactionDetailsSheet(
     transaction: TransactionEntity,
@@ -179,11 +184,13 @@ fun TransactionDetailsSheet(
     val merchantFocusRequester = remember { FocusRequester() }
     val noteFocusRequester = remember { FocusRequester() }
     var shouldFocusNoteOnExpand by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(isNoteExpanded, shouldFocusNoteOnExpand) {
         if (isNoteExpanded && shouldFocusNoteOnExpand) {
             shouldFocusNoteOnExpand = false
             noteFocusRequester.requestFocus()
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
@@ -238,10 +245,10 @@ fun TransactionDetailsSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .imePadding()
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                .imeNestedScroll()
                 .nestedScroll(consumeOverscrollConnection)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)

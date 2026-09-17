@@ -67,6 +67,7 @@ import com.masum.cipher.ui.insights.InsightsViewModel
 import com.masum.cipher.ui.onboarding.AppSelectionScreen
 import com.masum.cipher.ui.onboarding.OnboardingScreen
 import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
+import com.masum.cipher.ui.settings.CurrencySelectionScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
 import com.masum.cipher.ui.settings.rules.SmartRulesScreen
@@ -282,7 +283,18 @@ class MainActivity : AppCompatActivity() {
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToSmartRules = { navController.navigate("smart_rules") },
-                                    onNavigateToCategories = { navController.navigate("categories") }
+                                    onNavigateToCategories = { navController.navigate("categories") },
+                                    onNavigateToCurrency = { navController.navigate("currency_selection") }
+                                )
+                            }
+                            composable(
+                                route = "currency_selection",
+                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                            ) {
+                                CurrencySelectionScreen(
+                                    userPreferences = userPreferences,
+                                    onNavigateBack = { navController.popBackStack() }
                                 )
                             }
                             

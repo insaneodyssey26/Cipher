@@ -7,8 +7,20 @@ data class AppCurrency(
     val code: String,
     val symbol: String,
     val name: String,
-    val countryCode: String
+    val countryCode: String,
+    val isSuffix: Boolean = false,
+    val hasSpace: Boolean = false
 ) {
+    fun formatSample(amountStr: String = "1,450.00", sign: String = ""): String {
+        val sym = symbol.ifBlank { code }
+        val space = if (hasSpace) " " else ""
+        return if (isSuffix) {
+            "$sign$amountStr$space$sym".trim()
+        } else {
+            "$sign$sym$space$amountStr"
+        }
+    }
+
     companion object {
         val DEFAULT = AppCurrency(
             code = "INR",
@@ -29,7 +41,29 @@ data class AppCurrency(
             AppCurrency("AED", "AED", "UAE Dirham", "AE"),
             AppCurrency("SGD", "S$", "Singapore Dollar", "SG"),
             AppCurrency("MXN", "$", "Mexican Peso", "MX"),
-            AppCurrency("BRL", "R$", "Brazilian Real", "BR")
+            AppCurrency("BRL", "R$", "Brazilian Real", "BR"),
+            AppCurrency("CHF", "CHF", "Swiss Franc", "CH"),
+            AppCurrency("CNY", "¥", "Chinese Yuan", "CN"),
+            AppCurrency("HKD", "HK$", "Hong Kong Dollar", "HK"),
+            AppCurrency("NZD", "NZ$", "New Zealand Dollar", "NZ"),
+            AppCurrency("KRW", "₩", "South Korean Won", "KR"),
+            AppCurrency("SAR", "SR", "Saudi Riyal", "SA"),
+            AppCurrency("TRY", "₺", "Turkish Lira", "TR"),
+            AppCurrency("RUB", "₽", "Russian Ruble", "RU"),
+            AppCurrency("IDR", "Rp", "Indonesian Rupiah", "ID"),
+            AppCurrency("MYR", "RM", "Malaysian Ringgit", "MY"),
+            AppCurrency("PHP", "₱", "Philippine Peso", "PH"),
+            AppCurrency("THB", "฿", "Thai Baht", "TH"),
+            AppCurrency("VND", "₫", "Vietnamese Dong", "VN"),
+            AppCurrency("PLN", "zł", "Polish Zloty", "PL"),
+            AppCurrency("SEK", "kr", "Swedish Krona", "SE"),
+            AppCurrency("NOK", "kr", "Norwegian Krone", "NO"),
+            AppCurrency("DKK", "kr", "Danish Krone", "DK"),
+            AppCurrency("ZAR", "R", "South African Rand", "ZA"),
+            AppCurrency("PKR", "Rs", "Pakistani Rupee", "PK"),
+            AppCurrency("EGP", "E£", "Egyptian Pound", "EG"),
+            AppCurrency("NGN", "₦", "Nigerian Naira", "NG"),
+            AppCurrency("ILS", "₪", "Israeli New Shekel", "IL")
         )
 
         fun fromCode(code: String, customSymbol: String? = null): AppCurrency {

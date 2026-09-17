@@ -151,13 +151,13 @@ fun DayDetailScreen(
                 ) {
                     DetailStatCard(
                         label = "SPENT",
-                        amount = "${state.currencySymbol}${String.format(locale, "%,.0f", totalSpent)}",
+                        amount = com.masum.cipher.core.util.AppFormatters.formatCurrency(totalSpent, state.currencySymbol, locale, decimals = 0),
                         color = RoseExpense,
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatCard(
                         label = "INCOME",
-                        amount = "${state.currencySymbol}${String.format(locale, "%,.0f", totalIncome)}",
+                        amount = com.masum.cipher.core.util.AppFormatters.formatCurrency(totalIncome, state.currencySymbol, locale, decimals = 0),
                         color = EmeraldIncome,
                         modifier = Modifier.weight(1f)
                     )

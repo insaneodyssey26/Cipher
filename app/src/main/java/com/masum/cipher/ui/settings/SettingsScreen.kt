@@ -94,6 +94,7 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.WhatsNewSheet
 import com.masum.cipher.ui.theme.DMSans
+import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
@@ -151,7 +152,8 @@ fun SettingsScreen(
     onNavigateToPrivacy: () -> Unit,
     onNavigateToManageApps: () -> Unit,
     onNavigateToSmartRules: () -> Unit,
-    onNavigateToCategories: () -> Unit = {}
+    onNavigateToCategories: () -> Unit = {},
+    onNavigateToCurrency: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -600,7 +602,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
                 value = "${state.currencyCode} (${state.currencySymbol})",
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                    showCurrencyDialog = true
+                    onNavigateToCurrency()
                 }
             )
 
