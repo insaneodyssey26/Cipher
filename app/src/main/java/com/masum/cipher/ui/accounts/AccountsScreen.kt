@@ -69,6 +69,7 @@ fun AccountsScreen(
     onNavigateToPro: () -> Unit,
     onNavigateToCreateAccount: () -> Unit,
     onNavigateToEditAccount: (Long) -> Unit,
+    onNavigateToAccountDetails: (Long) -> Unit,
     viewModel: AccountsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -392,7 +393,7 @@ fun AccountsScreen(
                             isHapticsEnabled = state.isHapticsEnabled,
                             onCardClick = {
                                 view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                                onNavigateToEditAccount(item.id)
+                                onNavigateToAccountDetails(item.id)
                             },
                             onEditClick = {
                                 view.performVibrate(state.isHapticsEnabled, isLongPress = false)

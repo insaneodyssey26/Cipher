@@ -58,6 +58,7 @@ import com.masum.cipher.ui.accounts.AccountsContract
 import com.masum.cipher.ui.accounts.AccountsScreen
 import com.masum.cipher.ui.accounts.AccountsViewModel
 import com.masum.cipher.ui.accounts.CreateEditAccountScreen
+import com.masum.cipher.ui.accounts.details.AccountDetailsScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
 import com.masum.cipher.ui.components.LockScreen
@@ -297,7 +298,19 @@ class MainActivity : AppCompatActivity() {
                                     onNavigateBack = { navController.popBackStack() },
                                     onNavigateToPro = { navController.navigate("cipher_pro") },
                                     onNavigateToCreateAccount = { navController.navigate("create_account") },
-                                    onNavigateToEditAccount = { accountId -> navController.navigate("edit_account/$accountId") }
+                                    onNavigateToEditAccount = { accountId -> navController.navigate("edit_account/$accountId") },
+                                    onNavigateToAccountDetails = { accountId -> navController.navigate("account_details/$accountId") }
+                                )
+                            }
+                            composable(
+                                route = "account_details/{accountId}",
+                                arguments = listOf(navArgument("accountId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val accountId = backStackEntry.arguments?.getLong("accountId") ?: 0L
+                                AccountDetailsScreen(
+                                    accountId = accountId,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToEditAccount = { accId -> navController.navigate("edit_account/$accId") }
                                 )
                             }
                             composable("create_account") {

@@ -2103,11 +2103,12 @@ fun TransactionItem(
     privacyMode: Boolean,
     currencySymbol: String = "₹",
     splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList(),
+    modifier: Modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
     onClick: () -> Unit
 ) {
     val locale = LocalLocale.current.platformLocale
     VaultCard(
-        modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+        modifier = modifier,
         onClick = onClick,
         contentPadding = 12.dp,
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant
