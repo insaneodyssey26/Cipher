@@ -17,6 +17,8 @@ class SmartRulesContract {
         data class DeleteMerchantRule(val alias: MerchantAliasEntity) : Intent()
         data class RestoreMerchantRule(val alias: MerchantAliasEntity) : Intent()
         data class AddOrUpdateMerchantRule(val rawName: String, val cleanName: String) : Intent()
+        object ShowProGate : Intent()
+        object DismissProGate : Intent()
     }
 
     data class State(
@@ -26,7 +28,9 @@ class SmartRulesContract {
         val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
         val searchQuery: String = "",
         val selectedTab: Int = 0,
-        val isHapticsEnabled: Boolean = true
+        val isHapticsEnabled: Boolean = true,
+        val isPro: Boolean = false,
+        val showProGateSheet: Boolean = false
     ) : UiState {
         val filteredCategoryRules: List<CategoryRuleEntity>
             get() {

@@ -33,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -87,13 +90,7 @@ fun AccountAnalyticsScreen(
     val view = LocalView.current
     val locale = Locale.getDefault()
 
-    LaunchedEffect(viewModel.effect) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is AccountAnalyticsContract.Effect.NavigateToPro -> onNavigateToPro()
-            }
-        }
-    }
+    var selectedWeekdayIndex by remember { mutableStateOf<Int?>(null) }
 
     val account = state.account
     val accountType = account?.let { AccountType.fromKey(it.type) } ?: AccountType.BANK
@@ -640,25 +637,44 @@ fun AccountAnalyticsScreen(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = LucideIcons.Calendar,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.account_analytics_weekday_trend),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.1.sp,
-                                        fontSize = 11.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Calendar,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.account_analytics_weekday_trend),
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.1.sp,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                val activeDay = selectedWeekdayIndex?.let { state.weekdayBreakdown.getOrNull(it) }
+                                if (activeDay != null) {
+                                    Text(
+                                        text = "${activeDay.dayName}: ${AppFormatters.formatCurrency(activeDay.amount, state.currencySymbol, locale, decimals = 0)}",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
 
                             Row(
@@ -668,21 +684,40 @@ fun AccountAnalyticsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.Bottom
                             ) {
-                                state.weekdayBreakdown.forEach { dayData ->
-                                    val barHeight = (dayData.percentage * 75).coerceIn(4f, 75f).dp
-                                    val barColor = if (dayData.isMax) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                state.weekdayBreakdown.forEachIndexed { index, dayData ->
+                                    val isSelected = selectedWeekdayIndex == index
+                                    val barHeight = (dayData.percentage * 75).coerceIn(6f, 75f).dp
+                                    val barColor = when {
+                                        isSelected -> MaterialTheme.colorScheme.primary
+                                        dayData.isMax -> MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                                        else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                    }
 
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.Bottom,
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                                selectedWeekdayIndex = if (selectedWeekdayIndex == index) null else index
+                                            }
+                                            .padding(vertical = 2.dp)
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .width(18.dp)
+                                                .width(if (isSelected) 20.dp else 18.dp)
                                                 .height(barHeight)
                                                 .clip(RoundedCornerShape(6.dp))
                                                 .background(barColor)
+                                                .then(
+                                                    if (isSelected) {
+                                                        Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                                                    } else {
+                                                        Modifier
+                                                    }
+                                                )
                                         )
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
@@ -690,9 +725,9 @@ fun AccountAnalyticsScreen(
                                             style = Typography.labelSmall.copy(
                                                 fontFamily = Lato,
                                                 fontSize = 10.sp,
-                                                fontWeight = if (dayData.isMax) FontWeight.Bold else FontWeight.Normal
+                                                fontWeight = if (isSelected || dayData.isMax) FontWeight.Bold else FontWeight.Normal
                                             ),
-                                            color = if (dayData.isMax) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = if (isSelected || dayData.isMax) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }

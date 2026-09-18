@@ -37,6 +37,8 @@ class SmartRulesViewModel @Inject constructor(
             is SmartRulesContract.Intent.DeleteMerchantRule -> deleteMerchantRule(intent.alias)
             is SmartRulesContract.Intent.RestoreMerchantRule -> restoreMerchantRule(intent.alias)
             is SmartRulesContract.Intent.AddOrUpdateMerchantRule -> addOrUpdateMerchantRule(intent.rawName, intent.cleanName)
+            is SmartRulesContract.Intent.ShowProGate -> updateState { copy(showProGateSheet = true) }
+            is SmartRulesContract.Intent.DismissProGate -> updateState { copy(showProGateSheet = false) }
         }
     }
 
@@ -53,7 +55,8 @@ class SmartRulesViewModel @Inject constructor(
                     categoryRules = categoryRules,
                     merchantRules = aliases,
                     customCategories = customCategories,
-                    isHapticsEnabled = settings.isHapticsEnabled
+                    isHapticsEnabled = settings.isHapticsEnabled,
+                    isPro = settings.isPro
                 )
             }.collect { newState ->
                 updateState { newState }

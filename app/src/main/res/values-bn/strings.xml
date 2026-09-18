@@ -622,4 +622,8 @@
     <string name="notify_action_switch_account">অ্যাকাউন্ট পরিবর্তন</string>
     <string name="notify_account_updated_title">অ্যাকাউন্ট আপডেট হয়েছে</string>
     <string name="notify_account_updated_desc">%1$s অ্যাকাউন্টে বরাদ্দ করা হয়েছে</string>
+    <string name="pro_gate_custom_categories_title">কাস্টম ক্যাটাগরি সীমা</string>
+    <string name="pro_gate_custom_categories_desc">ফ্রি ব্যবহারকারীরা সর্বোচ্চ ৫টি কাস্টম ক্যাটাগরি তৈরি করতে পারেন। আনলিমিটেড সুবিধার জন্য Cipher Pro-তে আপগ্রেড করুন।</string>
+    <string name="pro_gate_smart_rules_title">স্মার্ট রুলস সীমা</string>
+    <string name="pro_gate_smart_rules_desc">ফ্রি ব্যবহারকারীরা সর্বোচ্চ ৫টি স্মার্ট নিয়ম তৈরি করতে পারেন। আনলিমিটেড অটো-ক্যাটাগরি সুবিধার জন্য Cipher Pro-তে আপগ্রেড করুন।</string>
 </resources>

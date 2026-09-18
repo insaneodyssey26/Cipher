@@ -624,4 +624,8 @@
     <string name="notify_action_switch_account">Switch Account</string>
     <string name="notify_account_updated_title">Account Updated</string>
     <string name="notify_account_updated_desc">Assigned to %1$s</string>
+    <string name="pro_gate_custom_categories_title">Custom Categories Limit</string>
+    <string name="pro_gate_custom_categories_desc">Free users can create up to 5 custom categories. Upgrade to Cipher Pro for unlimited categories.</string>
+    <string name="pro_gate_smart_rules_title">Smart Rules Limit</string>
+    <string name="pro_gate_smart_rules_desc">Free users can create up to 5 smart rules. Upgrade to Cipher Pro for unlimited auto-categorization &amp; rename rules.</string>
 </resources>

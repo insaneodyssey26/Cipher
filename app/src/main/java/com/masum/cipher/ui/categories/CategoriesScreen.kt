@@ -84,6 +84,9 @@ import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Plus
+import com.masum.cipher.ui.components.ProFeatureGateSheet
+import com.masum.cipher.ui.components.ProFeaturePerk
+import compose.icons.lucideicons.Sparkles
 import java.util.Calendar
 import java.util.Locale
 
@@ -92,18 +95,21 @@ import java.util.Locale
 fun CategoriesScreen(
     viewModel: InsightsViewModel,
     userPreferences: UserPreferences,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = LocalView.current
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
+    val isPro = settings?.isPro == true
 
     var expandedCategory by remember { mutableStateOf<String?>(null) }
     var showBudgetDialogFor by remember { mutableStateOf<CategoryItem?>(null) }
     var selectedCategoryForDetail by remember { mutableStateOf<DashboardContract.CategoryData?>(null) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var showCreateCategorySheet by remember { mutableStateOf(false) }
+    var showProGateSheet by remember { mutableStateOf(false) }
     var editingCustomCategory by remember { mutableStateOf<CustomCategoryEntity?>(null) }
 
     val categoryBudgets = settings?.categoryBudgets ?: emptyMap()
@@ -282,8 +288,12 @@ fun CategoriesScreen(
                         )
                         .clickable {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            editingCustomCategory = null
-                            showCreateCategorySheet = true
+                            if (!isPro && state.customCategories.size >= 5) {
+                                showProGateSheet = true
+                            } else {
+                                editingCustomCategory = null
+                                showCreateCategorySheet = true
+                            }
                         }
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -880,6 +890,28 @@ fun CategoriesScreen(
                 viewModel.handleIntent(InsightsContract.Intent.DeleteCustomCategory(entity))
                 showCreateCategorySheet = false
                 editingCustomCategory = null
+            }
+        )
+    }
+
+    if (showProGateSheet) {
+        ProFeatureGateSheet(
+            featureTitle = stringResource(R.string.pro_gate_custom_categories_title),
+            featureTagline = stringResource(R.string.pro_gate_custom_categories_desc),
+            featureIcon = LucideIcons.Sparkles,
+            perks = listOf(
+                ProFeaturePerk(stringResource(R.string.custom_category_badge), stringResource(R.string.settings_pro_unlocked_desc)),
+                ProFeaturePerk(stringResource(R.string.smart_rules_title), stringResource(R.string.pro_perk_smart_rules_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_unlimited_accounts_title), stringResource(R.string.pro_perk_unlimited_accounts_desc))
+            ),
+            isHapticsEnabled = isHapticsEnabled,
+            primaryButtonText = stringResource(R.string.pro_btn_upgrade),
+            onNavigateToPro = {
+                showProGateSheet = false
+                onNavigateToPro()
+            },
+            onDismiss = {
+                showProGateSheet = false
             }
         )
     }

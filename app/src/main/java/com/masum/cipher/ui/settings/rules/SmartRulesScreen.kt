@@ -91,11 +91,16 @@ import compose.icons.lucideicons.Tag
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
 
+import com.masum.cipher.ui.components.ProFeatureGateSheet
+import com.masum.cipher.ui.components.ProFeaturePerk
+import compose.icons.lucideicons.Sparkles
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartRulesScreen(
     viewModel: SmartRulesViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -262,12 +267,17 @@ fun SmartRulesScreen(
             FloatingActionButton(
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled)
-                    if (pagerState.currentPage == 0) {
-                        editCategoryRule = null
-                        showCategoryDialog = true
+                    val totalRules = state.categoryRules.size + state.merchantRules.size
+                    if (!state.isPro && totalRules >= 5) {
+                        viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
                     } else {
-                        editMerchantRule = null
-                        showMerchantDialog = true
+                        if (pagerState.currentPage == 0) {
+                            editCategoryRule = null
+                            showCategoryDialog = true
+                        } else {
+                            editMerchantRule = null
+                            showMerchantDialog = true
+                        }
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -466,6 +476,28 @@ fun SmartRulesScreen(
             onSave = { rawName, cleanName ->
                 viewModel.handleIntent(SmartRulesContract.Intent.AddOrUpdateMerchantRule(rawName, cleanName))
                 showMerchantDialog = false
+            }
+        )
+    }
+
+    if (state.showProGateSheet) {
+        ProFeatureGateSheet(
+            featureTitle = stringResource(R.string.pro_gate_smart_rules_title),
+            featureTagline = stringResource(R.string.pro_gate_smart_rules_desc),
+            featureIcon = LucideIcons.Sparkles,
+            perks = listOf(
+                ProFeaturePerk(stringResource(R.string.smart_rules_title), stringResource(R.string.pro_perk_smart_rules_desc)),
+                ProFeaturePerk(stringResource(R.string.custom_category_badge), stringResource(R.string.settings_pro_unlocked_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_unlimited_accounts_title), stringResource(R.string.pro_perk_unlimited_accounts_desc))
+            ),
+            isHapticsEnabled = state.isHapticsEnabled,
+            primaryButtonText = stringResource(R.string.pro_btn_upgrade),
+            onNavigateToPro = {
+                viewModel.handleIntent(SmartRulesContract.Intent.DismissProGate)
+                onNavigateToPro()
+            },
+            onDismiss = {
+                viewModel.handleIntent(SmartRulesContract.Intent.DismissProGate)
             }
         )
     }

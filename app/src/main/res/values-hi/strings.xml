@@ -621,4 +621,8 @@
     <string name="notify_action_switch_account">खाता बदलें</string>
     <string name="notify_account_updated_title">खाता अपडेट किया गया</string>
     <string name="notify_account_updated_desc">%1$s को सौंपा गया</string>
+    <string name="pro_gate_custom_categories_title">कस्टम श्रेणियाँ सीमा</string>
+    <string name="pro_gate_custom_categories_desc">मुफ़्त उपयोगकर्ता अधिकतम 5 कस्टम श्रेणियाँ बना सकते हैं। असीमित श्रेणियों के लिए Cipher Pro पर अपग्रेड करें।</string>
+    <string name="pro_gate_smart_rules_title">स्मार्ट नियम सीमा</string>
+    <string name="pro_gate_smart_rules_desc">मुफ़्त उपयोगकर्ता अधिकतम 5 स्मार्ट नियम बना सकते हैं। असीमित नियमों के लिए Cipher Pro पर अपग्रेड करें।</string>
 </resources>

@@ -623,4 +623,8 @@
     <string name="notify_action_switch_account">口座を変更</string>
     <string name="notify_account_updated_title">口座を更新しました</string>
     <string name="notify_account_updated_desc">%1$s に割り当てられました</string>
+    <string name="pro_gate_custom_categories_title">カスタムカテゴリの上限</string>
+    <string name="pro_gate_custom_categories_desc">無料版では最大5個のカスタムカテゴリを作成できます。無制限に作成するにはCipher Proへアップグレードしてください。</string>
+    <string name="pro_gate_smart_rules_title">スマート自動ルールの上限</string>
+    <string name="pro_gate_smart_rules_desc">無料版では最大5個のスマートルールを作成できます。無制限に作成するにはCipher Proへアップグレードしてください。</string>
 </resources>

@@ -621,4 +621,8 @@
     <string name="notify_action_switch_account">Cambiar cuenta</string>
     <string name="notify_account_updated_title">Cuenta actualizada</string>
     <string name="notify_account_updated_desc">Asignada a %1$s</string>
+    <string name="pro_gate_custom_categories_title">Límite de categorías personalizadas</string>
+    <string name="pro_gate_custom_categories_desc">Los usuarios gratuitos pueden crear hasta 5 categorías personalizadas. Pásate a Cipher Pro para categorías ilimitadas.</string>
+    <string name="pro_gate_smart_rules_title">Límite de reglas inteligentes</string>
+    <string name="pro_gate_smart_rules_desc">Los usuarios gratuitos pueden crear hasta 5 reglas inteligentes. Pásate a Cipher Pro para reglas ilimitadas.</string>
 </resources>

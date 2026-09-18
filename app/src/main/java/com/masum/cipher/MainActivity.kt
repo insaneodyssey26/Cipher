@@ -264,7 +264,8 @@ class MainActivity : AppCompatActivity() {
                                 CategoriesScreen(
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
-                                    onNavigateBack = { navController.popBackStack() }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
                             composable(
@@ -403,7 +404,8 @@ class MainActivity : AppCompatActivity() {
                                 val viewModel: SmartRulesViewModel = hiltViewModel()
                                 SmartRulesScreen(
                                     viewModel = viewModel,
-                                    onNavigateBack = { navController.popBackStack() }
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
                             composable("manage_apps") {
