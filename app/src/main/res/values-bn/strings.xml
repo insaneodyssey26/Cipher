@@ -594,4 +594,12 @@
     <string name="transaction_account_label">অ্যাকাউন্ট</string>
     <string name="show_pro_badge_title">প্রো ব্যাজ প্রদর্শন করুন</string>
     <string name="show_pro_badge_desc">ড্যাশবোর্ড হেডারে লাক্সারি প্রো ব্যাজ প্রদর্শন করুন</string>
+    <string name="account_export_statement_title">স্টেটমেন্ট এক্সপোর্ট</string>
+    <string name="account_export_statement_desc">এই অ্যাকাউন্টের সার্টিফাইড PDF স্টেটমেন্ট বা CSV রিপোর্ট ডাউনলোড করুন</string>
+    <string name="account_export_csv">CSV রিপোর্ট এক্সপোর্ট করুন</string>
+    <string name="account_export_pdf">PDF স্টেটমেন্ট এক্সপোর্ট করুন</string>
+    <string name="account_export_csv_desc">স্প্রেডশিট ফরম্যাটে র’ ট্রানজ্যাকশন লেজার (ফ্রি)</string>
+    <string name="account_export_pdf_desc">চার্ট ও ব্রেকডাউন সহ এক্সিকিউটিভ সার্টিফাইড স্টেটমেন্ট (প্রো)</string>
+    <string name="account_export_success">স্টেটমেন্ট সফলভাবে এক্সপোর্ট হয়েছে</string>
+    <string name="account_export_error">স্টেটমেন্ট এক্সপোর্ট ব্যর্থ হয়েছে: %1$s</string>
 </resources>

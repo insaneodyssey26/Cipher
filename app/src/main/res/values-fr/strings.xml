@@ -594,4 +594,12 @@
     <string name="transaction_account_label">Compte</string>
     <string name="show_pro_badge_title">Afficher le badge Pro</string>
     <string name="show_pro_badge_desc">Afficher le badge Pro sur l\'en-tête du tableau de bord</string>
+    <string name="account_export_statement_title">Exporter le relevé</string>
+    <string name="account_export_statement_desc">Télécharger le relevé PDF certifié ou le rapport CSV de ce compte</string>
+    <string name="account_export_csv">Exporter le rapport CSV</string>
+    <string name="account_export_pdf">Exporter le relevé PDF</string>
+    <string name="account_export_csv_desc">Livre des transactions au format tableur (Gratuit)</string>
+    <string name="account_export_pdf_desc">Relevé certifié avec graphiques et détails (PRO)</string>
+    <string name="account_export_success">Relevé exporté avec succès</string>
+    <string name="account_export_error">Échec de l\'exportation du relevé : %1$s</string>
 </resources>

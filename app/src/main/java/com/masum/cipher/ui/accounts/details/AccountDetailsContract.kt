@@ -49,7 +49,12 @@ object AccountDetailsContract {
         val isHapticsEnabled: Boolean = true,
         val isPrivacyMode: Boolean = false,
         val isLoading: Boolean = true,
+        val isPro: Boolean = false,
+        val isExportingCsv: Boolean = false,
+        val isExportingPdf: Boolean = false,
         val showTransferSheet: Boolean = false,
+        val showExportSheet: Boolean = false,
+        val showProGateSheet: Boolean = false,
         val transactionToEdit: TransactionEntity? = null,
         val transactionToDelete: TransactionEntity? = null,
         val showDeleteDialog: Boolean = false
@@ -61,6 +66,12 @@ object AccountDetailsContract {
         data class SelectFilter(val filter: AccountTransactionFilter) : Intent
         data object OpenTransferSheet : Intent
         data object DismissTransferSheet : Intent
+        data object OpenExportSheet : Intent
+        data object DismissExportSheet : Intent
+        data class ExportCsv(val uri: android.net.Uri) : Intent
+        data class ExportPdf(val uri: android.net.Uri) : Intent
+        data object OpenProGate : Intent
+        data object DismissProGate : Intent
         data class TransferFunds(
             val fromAccount: AccountEntity,
             val toAccount: AccountEntity,
@@ -82,5 +93,6 @@ object AccountDetailsContract {
 
     sealed interface Effect : UiEffect {
         data class ShowToast(val message: String) : Effect
+        data object NavigateToPro : Effect
     }
 }

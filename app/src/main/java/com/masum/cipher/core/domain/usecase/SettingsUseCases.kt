@@ -1,6 +1,7 @@
 package com.masum.cipher.core.domain.usecase
 
 import android.net.Uri
+import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
@@ -54,12 +55,20 @@ class ClearAllDataUseCase @Inject constructor(
 class ExportCsvUseCase @Inject constructor(
     private val transactionDao: TransactionDao,
     private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
+    private val accountDao: AccountDao,
     private val userPreferences: UserPreferences,
     private val backupRepository: BackupRepository
 ) {
-    suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(uri: Uri, accountId: Long? = null): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            val transactions = transactionDao.getAllTransactions().first()
+            val allTransactions = transactionDao.getAllTransactions().first()
+            val targetAccount = if (accountId != null) accountDao.getAccountById(accountId) else null
+            val isTargetDefault = targetAccount?.isDefault ?: false
+            val transactions = if (accountId != null) {
+                allTransactions.filter { it.accountId == accountId || (it.accountId == null && isTargetDefault) }
+            } else {
+                allTransactions
+            }
             val allSplits = transactionSplitDao.getAllSplits()
             val splitsByTx = allSplits.groupBy { it.transactionId }
             val currencyCode = userPreferences.getCachedCurrencyCode()
@@ -100,15 +109,23 @@ class ExportPdfUseCase @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val transactionDao: TransactionDao,
     private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
+    private val accountDao: AccountDao,
     private val backupRepository: BackupRepository,
     private val userPreferences: UserPreferences
 ) {
-    suspend operator fun invoke(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(uri: Uri, accountId: Long? = null, accountName: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             if (!userPreferences.isCachedPro()) {
                 throw IllegalStateException("PDF statement export is a Pro feature")
             }
-            val transactions = transactionDao.getAllTransactions().first()
+            val allTransactions = transactionDao.getAllTransactions().first()
+            val targetAccount = if (accountId != null) accountDao.getAccountById(accountId) else null
+            val isTargetDefault = targetAccount?.isDefault ?: false
+            val transactions = if (accountId != null) {
+                allTransactions.filter { it.accountId == accountId || (it.accountId == null && isTargetDefault) }
+            } else {
+                allTransactions
+            }
             val allSplits = transactionSplitDao.getAllSplits()
             val splitsByTx = allSplits.groupBy { it.transactionId }
             val currencySymbol = userPreferences.getCachedCurrencySymbol()
@@ -119,7 +136,8 @@ class ExportPdfUseCase @Inject constructor(
                     transactions = transactions,
                     outputStream = outputStream,
                     currencySymbol = currencySymbol,
-                    splitsMap = splitsByTx
+                    splitsMap = splitsByTx,
+                    accountName = accountName ?: targetAccount?.name
                 )
             } ?: throw Exception("Could not open file for writing")
         }

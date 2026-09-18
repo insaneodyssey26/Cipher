@@ -310,7 +310,8 @@ class MainActivity : AppCompatActivity() {
                                 AccountDetailsScreen(
                                     accountId = accountId,
                                     onNavigateBack = { navController.popBackStack() },
-                                    onNavigateToEditAccount = { accId -> navController.navigate("edit_account/$accId") }
+                                    onNavigateToEditAccount = { accId -> navController.navigate("edit_account/$accId") },
+                                    onNavigateToPro = { navController.navigate("pro") }
                                 )
                             }
                             composable("create_account") {

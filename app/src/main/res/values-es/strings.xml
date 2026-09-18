@@ -593,4 +593,12 @@
     <string name="transaction_account_label">Cuenta</string>
     <string name="show_pro_badge_title">Mostrar insignia Pro</string>
     <string name="show_pro_badge_desc">Mostrar la insignia Pro en el encabezado del panel</string>
+    <string name="account_export_statement_title">Exportar extracto</string>
+    <string name="account_export_statement_desc">Descargar extracto PDF certificado o reporte CSV para esta cuenta</string>
+    <string name="account_export_csv">Exportar reporte CSV</string>
+    <string name="account_export_pdf">Exportar extracto PDF</string>
+    <string name="account_export_csv_desc">Libro mayor de transacciones en formato de hoja de cálculo (Gratis)</string>
+    <string name="account_export_pdf_desc">Extracto certificado ejecutivo con gráficos de desglose (PRO)</string>
+    <string name="account_export_success">Extracto exportado con éxito</string>
+    <string name="account_export_error">Error al exportar el extracto: %1$s</string>
 </resources>

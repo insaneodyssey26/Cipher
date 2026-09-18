@@ -594,4 +594,12 @@
     <string name="transaction_account_label">Konto</string>
     <string name="show_pro_badge_title">Pro-Badge anzeigen</string>
     <string name="show_pro_badge_desc">Das elegante Pro-Badge in der Dashboard-Kopfzeile anzeigen</string>
+    <string name="account_export_statement_title">Kontoauszug exportieren</string>
+    <string name="account_export_statement_desc">Zertifizierten PDF-Kontoauszug oder CSV-Bericht für dieses Konto herunterladen</string>
+    <string name="account_export_csv">CSV-Bericht exportieren</string>
+    <string name="account_export_pdf">PDF-Kontoauszug exportieren</string>
+    <string name="account_export_csv_desc">Rohe Transaktionsdaten im Tabellenformat (Kostenlos)</string>
+    <string name="account_export_pdf_desc">Zertifizierter Auszug mit Diagrammen &amp; Details (PRO)</string>
+    <string name="account_export_success">Kontoauszug erfolgreich exportiert</string>
+    <string name="account_export_error">Fehler beim Exportieren des Kontoauszugs: %1$s</string>
 </resources>

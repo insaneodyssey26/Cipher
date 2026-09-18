@@ -10,7 +10,10 @@ import com.masum.cipher.core.data.repository.AccountRepository
 import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.data.repository.TransactionSplitRepository
+import com.masum.cipher.core.domain.usecase.ExportCsvUseCase
+import com.masum.cipher.core.domain.usecase.ExportPdfUseCase
 import com.masum.cipher.core.domain.usecase.TransferFundsUseCase
+import com.masum.cipher.core.notifications.LocalNotificationManager
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -30,12 +33,16 @@ class AccountDetailsViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
     private val transferFundsUseCase: TransferFundsUseCase,
+    private val exportCsvUseCase: ExportCsvUseCase,
+    private val exportPdfUseCase: ExportPdfUseCase,
+    private val localNotificationManager: LocalNotificationManager,
     private val categoryRepository: CategoryRepository,
     private val splitRepository: TransactionSplitRepository,
     private val userPreferences: UserPreferences
 ) : BaseViewModel<AccountDetailsContract.State, AccountDetailsContract.Intent, AccountDetailsContract.Effect>(
     initialState = AccountDetailsContract.State(
-        currencySymbol = userPreferences.getCachedCurrencySymbol()
+        currencySymbol = userPreferences.getCachedCurrencySymbol(),
+        isPro = userPreferences.isCachedPro()
     )
 ) {
     private var currentAccountId: Long = savedStateHandle.get<Long>("accountId") ?: 0L
@@ -104,6 +111,7 @@ class AccountDetailsViewModel @Inject constructor(
                     currencySymbol = settings.currencySymbol,
                     isHapticsEnabled = settings.isHapticsEnabled,
                     isPrivacyMode = settings.isPrivacyModeEnabled,
+                    isPro = settings.isPro,
                     isLoading = false
                 )
             }
@@ -146,6 +154,24 @@ class AccountDetailsViewModel @Inject constructor(
             }
             is AccountDetailsContract.Intent.DismissTransferSheet -> {
                 updateState { copy(showTransferSheet = false) }
+            }
+            is AccountDetailsContract.Intent.OpenExportSheet -> {
+                updateState { copy(showExportSheet = true) }
+            }
+            is AccountDetailsContract.Intent.DismissExportSheet -> {
+                updateState { copy(showExportSheet = false) }
+            }
+            is AccountDetailsContract.Intent.ExportCsv -> {
+                exportCsv(intent.uri)
+            }
+            is AccountDetailsContract.Intent.ExportPdf -> {
+                exportPdf(intent.uri)
+            }
+            is AccountDetailsContract.Intent.OpenProGate -> {
+                updateState { copy(showProGateSheet = true, showExportSheet = false) }
+            }
+            is AccountDetailsContract.Intent.DismissProGate -> {
+                updateState { copy(showProGateSheet = false) }
             }
             is AccountDetailsContract.Intent.TransferFunds -> {
                 viewModelScope.launch {
@@ -206,6 +232,30 @@ class AccountDetailsViewModel @Inject constructor(
             }
             is AccountDetailsContract.Intent.DismissDeleteDialog -> {
                 updateState { copy(transactionToDelete = null, showDeleteDialog = false) }
+            }
+        }
+    }
+
+    private fun exportCsv(uri: android.net.Uri) {
+        viewModelScope.launch {
+            updateState { copy(isExportingCsv = true) }
+            val result = exportCsvUseCase(uri, accountId = currentAccountId)
+            updateState { copy(isExportingCsv = false, showExportSheet = false) }
+            val message = if (result.isSuccess) "CSV Report generated successfully" else "Failed to export CSV: ${result.exceptionOrNull()?.message}"
+            emitEffect(AccountDetailsContract.Effect.ShowToast(message))
+        }
+    }
+
+    private fun exportPdf(uri: android.net.Uri) {
+        viewModelScope.launch {
+            updateState { copy(isExportingPdf = true) }
+            val result = exportPdfUseCase(uri, accountId = currentAccountId, accountName = currentState.account?.name)
+            updateState { copy(isExportingPdf = false, showExportSheet = false) }
+            if (result.isSuccess) {
+                emitEffect(AccountDetailsContract.Effect.ShowToast("PDF Statement generated successfully"))
+                localNotificationManager.showPdfGeneratedNotification(uri)
+            } else {
+                emitEffect(AccountDetailsContract.Effect.ShowToast("Failed to export PDF: ${result.exceptionOrNull()?.message}"))
             }
         }
     }

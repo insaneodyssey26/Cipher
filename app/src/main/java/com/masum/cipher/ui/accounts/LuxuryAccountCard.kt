@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -76,57 +74,37 @@ fun LuxuryAccountCard(
     val isDebtAccount = type == AccountType.CREDIT_CARD
     val formattedBalance = AppFormatters.formatCurrency(balance, currencySymbol, locale, decimals = 2)
 
+    val cardShape = RoundedCornerShape(22.dp)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (isDark) 10.dp else 5.dp,
-                shape = RoundedCornerShape(22.dp),
-                spotColor = if (isDark) baseColor.copy(alpha = 0.35f) else baseColor.copy(alpha = 0.22f),
-                ambientColor = if (isDark) Color.Black.copy(alpha = 0.4f) else Color.Black.copy(alpha = 0.08f)
+                elevation = if (isDark) 10.dp else 4.dp,
+                shape = cardShape,
+                spotColor = if (isDark) baseColor.copy(alpha = 0.35f) else baseColor.copy(alpha = 0.18f),
+                ambientColor = if (isDark) Color.Black.copy(alpha = 0.4f) else Color.Black.copy(alpha = 0.06f)
             )
-            .clip(RoundedCornerShape(22.dp))
+            .clip(cardShape)
             .background(
-                if (isDark) {
+                brush = if (isDark) {
                     Brush.linearGradient(
                         colors = listOf(
                             Color(0xFF1E212A),
                             Color(0xFF14161C),
                             Color(0xFF0F1116)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(900f, 700f)
+                        )
                     )
                 } else {
                     Brush.linearGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                            baseColor.copy(alpha = 0.04f)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(900f, 700f)
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
+                            baseColor.copy(alpha = 0.06f)
+                        )
                     )
-                }
-            )
-            .background(
-                Brush.radialGradient(
-                    colors = if (isDark) {
-                        listOf(
-                            baseColor.copy(alpha = 0.28f),
-                            baseColor.copy(alpha = 0.08f),
-                            Color.Transparent
-                        )
-                    } else {
-                        listOf(
-                            baseColor.copy(alpha = 0.16f),
-                            baseColor.copy(alpha = 0.04f),
-                            Color.Transparent
-                        )
-                    },
-                    center = Offset(750f, 50f),
-                    radius = 650f
-                )
+                },
+                shape = cardShape
             )
             .border(
                 width = 1.dp,
@@ -136,22 +114,18 @@ fun LuxuryAccountCard(
                             baseColor.copy(alpha = 0.65f),
                             Color.White.copy(alpha = 0.15f),
                             Color.White.copy(alpha = 0.04f)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(600f, 600f)
+                        )
                     )
                 } else {
                     Brush.linearGradient(
                         colors = listOf(
-                            baseColor.copy(alpha = 0.45f),
-                            MaterialTheme.colorScheme.outline.copy(alpha = 0.20f),
-                            MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(600f, 600f)
+                            baseColor.copy(alpha = 0.40f),
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.06f)
+                        )
                     )
                 },
-                shape = RoundedCornerShape(22.dp)
+                shape = cardShape
             )
             .then(
                 if (onCardClick != null) {
@@ -181,7 +155,7 @@ fun LuxuryAccountCard(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(baseColor.copy(alpha = 0.20f))
+                            .background(baseColor.copy(alpha = 0.20f), RoundedCornerShape(12.dp))
                             .border(1.dp, baseColor.copy(alpha = 0.45f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -216,7 +190,7 @@ fun LuxuryAccountCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isDark) baseColor.copy(alpha = 0.25f) else baseColor.copy(alpha = 0.14f))
+                                .background(if (isDark) baseColor.copy(alpha = 0.25f) else baseColor.copy(alpha = 0.14f), RoundedCornerShape(8.dp))
                                 .border(0.8.dp, if (isDark) baseColor.copy(alpha = 0.6f) else baseColor.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 3.5.dp)
                         ) {
@@ -235,7 +209,7 @@ fun LuxuryAccountCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isDark) Color.White.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                                .background(if (isDark) Color.White.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                                 .border(0.6.dp, if (isDark) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
@@ -256,12 +230,15 @@ fun LuxuryAccountCard(
                     }
 
                     if (onEditClick != null) {
-                        IconButton(
-                            onClick = {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                onEditClick()
-                            },
-                            modifier = Modifier.size(28.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onEditClick()
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = LucideIcons.Pencil,
@@ -273,12 +250,15 @@ fun LuxuryAccountCard(
                     }
 
                     if (onDeleteClick != null && !isDefault) {
-                        IconButton(
-                            onClick = {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                onDeleteClick()
-                            },
-                            modifier = Modifier.size(28.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    onDeleteClick()
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = LucideIcons.Trash2,
@@ -331,7 +311,7 @@ fun LuxuryAccountCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (isDark) Color.White.copy(alpha = 0.06f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                        .background(if (isDark) Color.White.copy(alpha = 0.06f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
                         .border(0.6.dp, if (isDark) Color.White.copy(alpha = 0.10f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.14f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {

@@ -595,4 +595,12 @@
     <string name="transaction_account_label">口座</string>
     <string name="show_pro_badge_title">Proバッジを表示</string>
     <string name="show_pro_badge_desc">ダッシュボードヘッダーにProバッジを表示します</string>
+    <string name="account_export_statement_title">明細書のエクスポート</string>
+    <string name="account_export_statement_desc">この口座のPDF利用明細またはCSVレポートをダウンロード</string>
+    <string name="account_export_csv">CSVレポートをエクスポート</string>
+    <string name="account_export_pdf">PDF明細書をエクスポート</string>
+    <string name="account_export_csv_desc">表計算形式の取引台帳データ（無料）</string>
+    <string name="account_export_pdf_desc">グラフ付き公式利用明細書（PRO）</string>
+    <string name="account_export_success">明細書が正常にエクスポートされました</string>
+    <string name="account_export_error">明細書のエクスポートに失敗しました: %1$s</string>
 </resources>

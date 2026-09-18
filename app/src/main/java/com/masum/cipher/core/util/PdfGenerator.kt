@@ -29,7 +29,8 @@ object PdfGenerator {
         transactions: List<TransactionEntity>,
         outputStream: OutputStream,
         currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
-        splitsMap: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap()
+        splitsMap: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap(),
+        accountName: String? = null
     ) {
         val document = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
@@ -230,7 +231,8 @@ object PdfGenerator {
 
         dashCanvas.drawText("cipher.", marginX, currentY, logoPaint)
         titlePaint.textAlign = Paint.Align.RIGHT
-        dashCanvas.drawText("EXECUTIVE FINANCIAL REPORT", rightMargin, currentY - 8f, titlePaint)
+        val reportTitle = if (!accountName.isNullOrBlank()) "ACCOUNT STATEMENT — ${accountName.uppercase()}" else "EXECUTIVE FINANCIAL REPORT"
+        dashCanvas.drawText(reportTitle, rightMargin, currentY - 8f, titlePaint)
         titlePaint.textAlign = Paint.Align.LEFT
 
         currentY += 26f

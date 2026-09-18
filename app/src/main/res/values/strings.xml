@@ -596,4 +596,12 @@
     <string name="transaction_account_label">Account</string>
     <string name="show_pro_badge_title">Show Pro Badge</string>
     <string name="show_pro_badge_desc">Display the luxury Pro badge on the dashboard header</string>
+    <string name="account_export_statement_title">Export Statement</string>
+    <string name="account_export_statement_desc">Download certified PDF statement or CSV report for this account</string>
+    <string name="account_export_csv">Export CSV Report</string>
+    <string name="account_export_pdf">Export PDF Statement</string>
+    <string name="account_export_csv_desc">Raw transaction ledger in spreadsheet format (Free)</string>
+    <string name="account_export_pdf_desc">Executive certified statement with breakdown charts (PRO)</string>
+    <string name="account_export_success">Statement exported successfully</string>
+    <string name="account_export_error">Failed to export statement: %1$s</string>
 </resources>

@@ -593,4 +593,12 @@
     <string name="transaction_account_label">खाता</string>
     <string name="show_pro_badge_title">प्रो बैज दिखाएं</string>
     <string name="show_pro_badge_desc">डैशबोर्ड शीर्षलेख पर लक्ज़री प्रो बैज प्रदर्शित करें</string>
+    <string name="account_export_statement_title">स्टेटमेंट एक्सपोर्ट करें</string>
+    <string name="account_export_statement_desc">इस खाते के लिए प्रमाणित PDF स्टेटमेंट या CSV रिपोर्ट डाउनलोड करें</string>
+    <string name="account_export_csv">CSV रिपोर्ट एक्सपोर्ट करें</string>
+    <string name="account_export_pdf">PDF स्टेटमेंट एक्सपोर्ट करें</string>
+    <string name="account_export_csv_desc">स्प्रेडशीट प्रारूप में लेनदेन लेज़र (मुफ़्त)</string>
+    <string name="account_export_pdf_desc">चार्ट और विश्लेषण के साथ कार्यकारी प्रमाणित विवरण (प्रो)</string>
+    <string name="account_export_success">स्टेटमेंट सफलतापूर्वक एक्सपोर्ट हो गया</string>
+    <string name="account_export_error">स्टेटमेंट एक्सपोर्ट विफल: %1$s</string>
 </resources>

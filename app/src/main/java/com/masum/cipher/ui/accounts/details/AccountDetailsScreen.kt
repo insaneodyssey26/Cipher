@@ -1,6 +1,8 @@
 package com.masum.cipher.ui.accounts.details
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,9 +33,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +68,8 @@ import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.accounts.LuxuryAccountCard
 import com.masum.cipher.ui.accounts.getAccountIconVector
+import com.masum.cipher.ui.components.ProFeatureGateSheet
+import com.masum.cipher.ui.components.ProFeaturePerk
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.TransactionSplitSheet
 import com.masum.cipher.ui.components.TransferFundsSheet
@@ -80,9 +86,12 @@ import compose.icons.lucideicons.ArrowLeftRight
 import compose.icons.lucideicons.ArrowUpRight
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Clock
+import compose.icons.lucideicons.Download
+import compose.icons.lucideicons.FileSpreadsheet
 import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
+import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
 import java.util.Locale
@@ -93,6 +102,7 @@ fun AccountDetailsScreen(
     accountId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEditAccount: (Long) -> Unit,
+    onNavigateToPro: () -> Unit = {},
     viewModel: AccountDetailsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -102,11 +112,28 @@ fun AccountDetailsScreen(
 
     var activeSplittingTx by remember { mutableStateOf<Pair<TransactionEntity, List<SplitParticipant>>?>(null) }
 
+    val accountNameSafe = (state.account?.name ?: "Account").replace(" ", "_")
+
+    val csvExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let { viewModel.handleIntent(AccountDetailsContract.Intent.ExportCsv(it)) }
+    }
+
+    val pdfExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri ->
+        uri?.let { viewModel.handleIntent(AccountDetailsContract.Intent.ExportPdf(it)) }
+    }
+
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is AccountDetailsContract.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+                is AccountDetailsContract.Effect.NavigateToPro -> {
+                    onNavigateToPro()
                 }
             }
         }
@@ -173,54 +200,101 @@ fun AccountDetailsScreen(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .shadow(
-                            elevation = 4.dp,
-                            shape = RoundedCornerShape(12.dp),
-                            spotColor = Color(0xFF38BDF8).copy(alpha = 0.25f),
-                            ambientColor = Color.Black.copy(alpha = 0.3f)
-                        )
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.surface,
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(12.dp),
+                                spotColor = Color(0xFF6366F1).copy(alpha = 0.25f),
+                                ambientColor = Color.Black.copy(alpha = 0.3f)
+                            )
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                    )
                                 )
                             )
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF6366F1).copy(alpha = 0.45f),
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                viewModel.handleIntent(AccountDetailsContract.Intent.OpenExportSheet)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Download,
+                            contentDescription = stringResource(R.string.account_export_statement_title),
+                            tint = Color(0xFF6366F1),
+                            modifier = Modifier.size(17.dp)
                         )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.linearGradient(
-                                listOf(
-                                    Color(0xFF38BDF8).copy(alpha = 0.45f),
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(12.dp),
+                                spotColor = Color(0xFF38BDF8).copy(alpha = 0.25f),
+                                ambientColor = Color.Black.copy(alpha = 0.3f)
+                            )
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                    )
                                 )
-                            ),
-                            shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF38BDF8).copy(alpha = 0.45f),
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable {
+                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                if (state.allAccounts.size < 2) {
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.transfer_error_need_min_accounts),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    viewModel.handleIntent(AccountDetailsContract.Intent.OpenTransferSheet)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.ArrowLeftRight,
+                            contentDescription = stringResource(R.string.transfer_btn_label),
+                            tint = Color(0xFF38BDF8),
+                            modifier = Modifier.size(17.dp)
                         )
-                        .clickable {
-                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                            if (state.allAccounts.size < 2) {
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.transfer_error_need_min_accounts),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                viewModel.handleIntent(AccountDetailsContract.Intent.OpenTransferSheet)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.ArrowLeftRight,
-                        contentDescription = stringResource(R.string.transfer_btn_label),
-                        tint = Color(0xFF38BDF8),
-                        modifier = Modifier.size(17.dp)
-                    )
+                    }
                 }
             }
         }
@@ -679,6 +753,51 @@ fun AccountDetailsScreen(
         )
     }
 
+    if (state.showExportSheet) {
+        AccountStatementExportSheet(
+            accountName = state.account?.name ?: "Account",
+            isPro = state.isPro,
+            isExportingCsv = state.isExportingCsv,
+            isExportingPdf = state.isExportingPdf,
+            onExportCsvClick = {
+                csvExportLauncher.launch("Cipher_${accountNameSafe}_Report_${System.currentTimeMillis()}.csv")
+            },
+            onExportPdfClick = {
+                if (state.isPro) {
+                    pdfExportLauncher.launch("Cipher_${accountNameSafe}_Statement_${System.currentTimeMillis()}.pdf")
+                } else {
+                    viewModel.handleIntent(AccountDetailsContract.Intent.OpenProGate)
+                }
+            },
+            onDismiss = {
+                viewModel.handleIntent(AccountDetailsContract.Intent.DismissExportSheet)
+            },
+            isHapticsEnabled = state.isHapticsEnabled
+        )
+    }
+
+    if (state.showProGateSheet) {
+        ProFeatureGateSheet(
+            featureTitle = stringResource(R.string.export_pdf_title),
+            featureTagline = stringResource(R.string.account_export_pdf_desc),
+            featureIcon = LucideIcons.FileText,
+            perks = listOf(
+                ProFeaturePerk(stringResource(R.string.pro_perk_export_title), stringResource(R.string.pro_perk_export_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_unlimited_accounts_title), stringResource(R.string.pro_perk_unlimited_accounts_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_net_worth_title), stringResource(R.string.pro_perk_net_worth_desc))
+            ),
+            isHapticsEnabled = state.isHapticsEnabled,
+            primaryButtonText = stringResource(R.string.pro_btn_upgrade),
+            onNavigateToPro = {
+                viewModel.handleIntent(AccountDetailsContract.Intent.DismissProGate)
+                onNavigateToPro()
+            },
+            onDismiss = {
+                viewModel.handleIntent(AccountDetailsContract.Intent.DismissProGate)
+            }
+        )
+    }
+
     if (state.showDeleteDialog && state.transactionToDelete != null) {
         AlertDialog(
             onDismissRequest = {
@@ -711,5 +830,263 @@ fun AccountDetailsScreen(
                 }
             }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountStatementExportSheet(
+    accountName: String,
+    isPro: Boolean,
+    isExportingCsv: Boolean,
+    isExportingPdf: Boolean,
+    onExportCsvClick: () -> Unit,
+    onExportPdfClick: () -> Unit,
+    onDismiss: () -> Unit,
+    isHapticsEnabled: Boolean
+) {
+    val view = LocalView.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+            )
+        },
+        shape = RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 22.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.account_export_statement_title),
+                        style = Typography.titleLarge.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(R.string.account_export_statement_desc),
+                        style = Typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            onDismiss()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.X,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                    .clickable(enabled = !isExportingCsv) {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        onExportCsvClick()
+                    }
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF10B981).copy(alpha = 0.15f))
+                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.FileSpreadsheet,
+                            contentDescription = null,
+                            tint = Color(0xFF10B981),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.account_export_csv),
+                                style = Typography.titleMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFF10B981).copy(alpha = 0.15f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "FREE",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 8.5.sp,
+                                        color = Color(0xFF10B981)
+                                    )
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.account_export_csv_desc),
+                            style = Typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+
+                    Icon(
+                        imageVector = LucideIcons.Download,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFF6366F1).copy(alpha = 0.12f),
+                                Color(0xFFA855F7).copy(alpha = 0.08f)
+                            )
+                        )
+                    )
+                    .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.28f), RoundedCornerShape(18.dp))
+                    .clickable(enabled = !isExportingPdf) {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        onExportPdfClick()
+                    }
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF6366F1).copy(alpha = 0.20f))
+                            .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.45f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.FileText,
+                            contentDescription = null,
+                            tint = Color(0xFF6366F1),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.account_export_pdf),
+                                style = Typography.titleMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFF6366F1).copy(alpha = 0.20f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "PRO",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 8.5.sp,
+                                        color = Color(0xFF6366F1)
+                                    )
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.account_export_pdf_desc),
+                            style = Typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+
+                    Icon(
+                        imageVector = if (isPro) LucideIcons.Download else LucideIcons.Sparkles,
+                        contentDescription = null,
+                        tint = if (isPro) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFFF59E0B),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
     }
 }
