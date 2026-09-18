@@ -573,4 +573,22 @@
     <string name="insights_net_worth_liquid">Flüssig:</string>
     <string name="insights_net_worth_debt">Schulden:</string>
     <string name="insights_net_worth_add_account">Konto hinzufügen</string>
+
+    <string name="transfer_title">Geld überweisen</string>
+    <string name="transfer_subtitle">Geld nahtlos zwischen Ihren Konten übertragen</string>
+    <string name="transfer_from">QUELLKONTO</string>
+    <string name="transfer_to">ZIELKONTO</string>
+    <string name="transfer_amount_label">ÜBERWEISUNGSBETRAG</string>
+    <string name="transfer_action_btn">Überweisung bestätigen</string>
+    <string name="transfer_note_label">NOTIZ / BESCHREIBUNG (OPTIONAL)</string>
+    <string name="transfer_note_placeholder">z.B. Kreditkartenabrechnung, Monatliches Sparen</string>
+    <string name="transfer_error_same_account">Quell- und Zielkonto müssen unterschiedlich sein</string>
+    <string name="transfer_error_invalid_amount">Bitte geben Sie einen gültigen Betrag ein</string>
+    <string name="transfer_error_insufficient_funds">Unzureichendes Guthaben auf dem Quellkonto</string>
+    <string name="transfer_success_msg">%1$s von %2$s auf %3$s übertragen</string>
+    <string name="transfer_out_merchant">Überweisung an %1$s</string>
+    <string name="transfer_in_merchant">Überweisung von %1$s</string>
+    <string name="transfer_btn_label">Überweisen</string>
+    <string name="transfer_error_need_min_accounts">Fügen Sie mindestens 2 Konten hinzu, um Geld zu überweisen</string>
+    <string name="account_details_filter_transfer">Überweisungen</string>
 </resources>

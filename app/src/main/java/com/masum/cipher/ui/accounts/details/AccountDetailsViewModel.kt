@@ -10,6 +10,7 @@ import com.masum.cipher.core.data.repository.AccountRepository
 import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.data.repository.TransactionSplitRepository
+import com.masum.cipher.core.domain.usecase.TransferFundsUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -28,6 +29,7 @@ class AccountDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
+    private val transferFundsUseCase: TransferFundsUseCase,
     private val categoryRepository: CategoryRepository,
     private val splitRepository: TransactionSplitRepository,
     private val userPreferences: UserPreferences
@@ -89,6 +91,7 @@ class AccountDetailsViewModel @Inject constructor(
                 currentState.copy(
                     account = targetEntity,
                     accountItem = targetItem,
+                    allAccounts = accountItems.toPersistentList(),
                     allTransactions = accTxs.toPersistentList(),
                     filteredTransactions = filtered.toPersistentList(),
                     groupedDays = grouped.toPersistentList(),
@@ -136,6 +139,26 @@ class AccountDetailsViewModel @Inject constructor(
                         filteredTransactions = filtered.toPersistentList(),
                         groupedDays = grouped.toPersistentList()
                     )
+                }
+            }
+            is AccountDetailsContract.Intent.OpenTransferSheet -> {
+                updateState { copy(showTransferSheet = true) }
+            }
+            is AccountDetailsContract.Intent.DismissTransferSheet -> {
+                updateState { copy(showTransferSheet = false) }
+            }
+            is AccountDetailsContract.Intent.TransferFunds -> {
+                viewModelScope.launch {
+                    transferFundsUseCase(
+                        fromAccount = intent.fromAccount,
+                        toAccount = intent.toAccount,
+                        amount = intent.amount,
+                        currency = currentState.currencySymbol,
+                        note = intent.note,
+                        outflowMerchantText = intent.outflowMerchantText,
+                        inflowMerchantText = intent.inflowMerchantText
+                    )
+                    updateState { copy(showTransferSheet = false) }
                 }
             }
             is AccountDetailsContract.Intent.OpenTransactionDetails -> {
@@ -196,8 +219,9 @@ class AccountDetailsViewModel @Inject constructor(
         return list.filter { tx ->
             val matchesType = when (filter) {
                 AccountTransactionFilter.ALL -> true
-                AccountTransactionFilter.EXPENSE -> !tx.isIncome
-                AccountTransactionFilter.INCOME -> tx.isIncome
+                AccountTransactionFilter.EXPENSE -> !tx.isIncome && !tx.category.equals("TRANSFER", ignoreCase = true)
+                AccountTransactionFilter.INCOME -> tx.isIncome && !tx.category.equals("TRANSFER", ignoreCase = true)
+                AccountTransactionFilter.TRANSFER -> tx.category.equals("TRANSFER", ignoreCase = true)
             }
             val matchesQuery = trimmedQuery.isEmpty() ||
                 tx.merchant.lowercase().contains(trimmedQuery) ||

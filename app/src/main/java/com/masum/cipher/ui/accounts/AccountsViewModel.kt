@@ -5,6 +5,7 @@ import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.AccountRepository
 import com.masum.cipher.core.domain.model.AccountType
+import com.masum.cipher.core.domain.usecase.TransferFundsUseCase
 import com.masum.cipher.core.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AccountsViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
+    private val transferFundsUseCase: TransferFundsUseCase,
     private val userPreferences: UserPreferences
 ) : BaseViewModel<AccountsContract.State, AccountsContract.Intent, AccountsContract.Effect>(
     initialState = AccountsContract.State(
@@ -69,6 +71,27 @@ class AccountsViewModel @Inject constructor(
             }
             is AccountsContract.Intent.DismissCreateEditSheet -> {
                 updateState { copy(showCreateEditSheet = false, accountToEdit = null) }
+            }
+            is AccountsContract.Intent.OpenTransferSheet -> {
+                updateState { copy(showTransferSheet = true) }
+            }
+            is AccountsContract.Intent.DismissTransferSheet -> {
+                updateState { copy(showTransferSheet = false) }
+            }
+            is AccountsContract.Intent.TransferFunds -> {
+                viewModelScope.launch {
+                    val settings = userPreferences.settingsFlow
+                    transferFundsUseCase(
+                        fromAccount = intent.fromAccount,
+                        toAccount = intent.toAccount,
+                        amount = intent.amount,
+                        currency = currentState.currencySymbol,
+                        note = intent.note,
+                        outflowMerchantText = intent.outflowMerchantText,
+                        inflowMerchantText = intent.inflowMerchantText
+                    )
+                    updateState { copy(showTransferSheet = false) }
+                }
             }
             is AccountsContract.Intent.DismissProGate -> {
                 updateState { copy(showProGateSheet = false) }

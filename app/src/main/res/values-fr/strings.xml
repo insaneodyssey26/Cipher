@@ -573,4 +573,22 @@
     <string name="insights_net_worth_liquid">Liquidités :</string>
     <string name="insights_net_worth_debt">Dette :</string>
     <string name="insights_net_worth_add_account">Ajouter un compte</string>
+
+    <string name="transfer_title">Transférer des fonds</string>
+    <string name="transfer_subtitle">Transférez de l\'argent entre vos comptes facilement</string>
+    <string name="transfer_from">COMPTE D\'ORIGINE</string>
+    <string name="transfer_to">COMPTE DESTINATAIRE</string>
+    <string name="transfer_amount_label">MONTANT DU TRANSFERT</string>
+    <string name="transfer_action_btn">Confirmer le transfert</string>
+    <string name="transfer_note_label">NOTE / DESCRIPTION (FACULTATIF)</string>
+    <string name="transfer_note_placeholder">ex. Paiement carte de crédit, Épargne mensuelle</string>
+    <string name="transfer_error_same_account">Les comptes d\'origine et de destination doivent être différents</string>
+    <string name="transfer_error_invalid_amount">Veuillez entrer un montant valide</string>
+    <string name="transfer_error_insufficient_funds">Solde insuffisant sur le compte d\'origine</string>
+    <string name="transfer_success_msg">%1$s transféré de %2$s vers %3$s</string>
+    <string name="transfer_out_merchant">Virement vers %1$s</string>
+    <string name="transfer_in_merchant">Virement de %1$s</string>
+    <string name="transfer_btn_label">Transférer</string>
+    <string name="transfer_error_need_min_accounts">Ajoutez au moins 2 comptes pour transférer des fonds</string>
+    <string name="account_details_filter_transfer">Transferts</string>
 </resources>

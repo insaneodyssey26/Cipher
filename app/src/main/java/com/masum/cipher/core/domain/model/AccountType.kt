@@ -13,8 +13,8 @@ enum class AccountType(
     CASH("CASH", "Cash / Physical", "Wallet", R.string.account_type_cash),
     CREDIT_CARD("CREDIT_CARD", "Credit Card", "CreditCard", R.string.account_type_credit_card),
     SAVINGS("SAVINGS", "Savings Account", "PiggyBank", R.string.account_type_savings),
-    INVESTMENT("INVESTMENT", "Investment", "TrendingUp", R.string.account_type_investment),
-    WALLET("WALLET", "Digital Wallet", "Coins", R.string.account_type_wallet),
+    INVESTMENT("INVESTMENT", "Investment", "Briefcase", R.string.account_type_investment),
+    WALLET("WALLET", "Digital Wallet", "Smartphone", R.string.account_type_wallet),
     OTHER("OTHER", "Other Account", "Layers", R.string.account_type_other);
 
     companion object {

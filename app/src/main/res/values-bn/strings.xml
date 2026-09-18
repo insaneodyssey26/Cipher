@@ -573,4 +573,22 @@
     <string name="insights_net_worth_liquid">তরল:</string>
     <string name="insights_net_worth_debt">ঋণ:</string>
     <string name="insights_net_worth_add_account">অ্যাকাউন্ট যোগ করুন</string>
+
+    <string name="transfer_title">অর্থ স্থানান্তর</string>
+    <string name="transfer_subtitle">আপনার অ্যাকাউন্টগুলির মধ্যে সহজে টাকা স্থানান্তর করুন</string>
+    <string name="transfer_from">উৎস অ্যাকাউন্ট (হতে)</string>
+    <string name="transfer_to">গন্তব্য অ্যাকাউন্ট (এ)</string>
+    <string name="transfer_amount_label">স্থানান্তরের পরিমাণ</string>
+    <string name="transfer_action_btn">স্থানান্তর নিশ্চিত করুন</string>
+    <string name="transfer_note_label">স্থানান্তর নোট / বিবরণ (ঐচ্ছিক)</string>
+    <string name="transfer_note_placeholder">যেমন: ক্রেডিট কার্ড বিল পরিশোধ, মাসিক সঞ্চয়</string>
+    <string name="transfer_error_same_account">উৎস ও গন্তব্য অ্যাকাউন্ট ভিন্ন হতে হবে</string>
+    <string name="transfer_error_invalid_amount">সঠিক পরিমাণ উল্লেখ করুন</string>
+    <string name="transfer_error_insufficient_funds">উৎস অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই</string>
+    <string name="transfer_success_msg">%2$s থেকে %3$s-এ %1$s স্থানান্তর করা হয়েছে</string>
+    <string name="transfer_out_merchant">%1$s-এ স্থানান্তর</string>
+    <string name="transfer_in_merchant">%1$s থেকে স্থানান্তর</string>
+    <string name="transfer_btn_label">স্থানান্তর</string>
+    <string name="transfer_error_need_min_accounts">তহবিল স্থানান্তর করতে কমপক্ষে ২টি অ্যাকাউন্ট যুক্ত করুন</string>
+    <string name="account_details_filter_transfer">স্থানান্তর</string>
 </resources>

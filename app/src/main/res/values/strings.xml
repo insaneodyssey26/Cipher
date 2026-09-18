@@ -575,4 +575,22 @@
     <string name="insights_net_worth_liquid">Liquid:</string>
     <string name="insights_net_worth_debt">Debt:</string>
     <string name="insights_net_worth_add_account">Add Account</string>
+
+    <string name="transfer_title">Transfer Funds</string>
+    <string name="transfer_subtitle">Move money between your accounts seamlessly</string>
+    <string name="transfer_from">FROM ACCOUNT</string>
+    <string name="transfer_to">TO ACCOUNT</string>
+    <string name="transfer_amount_label">TRANSFER AMOUNT</string>
+    <string name="transfer_action_btn">Confirm Transfer</string>
+    <string name="transfer_note_label">TRANSFER NOTE / DESCRIPTION (OPTIONAL)</string>
+    <string name="transfer_note_placeholder">e.g. Credit Card Bill Payment, Monthly Savings</string>
+    <string name="transfer_error_same_account">Source and destination accounts must be different</string>
+    <string name="transfer_error_invalid_amount">Please enter a valid transfer amount</string>
+    <string name="transfer_error_insufficient_funds">Insufficient balance in source account</string>
+    <string name="transfer_success_msg">Transferred %1$s from %2$s to %3$s</string>
+    <string name="transfer_out_merchant">Transfer to %1$s</string>
+    <string name="transfer_in_merchant">Transfer from %1$s</string>
+    <string name="transfer_btn_label">Transfer</string>
+    <string name="transfer_error_need_min_accounts">Add at least 2 accounts to transfer funds</string>
+    <string name="account_details_filter_transfer">Transfers</string>
 </resources>

@@ -18,7 +18,8 @@ import com.masum.cipher.R
 enum class AccountTransactionFilter(@StringRes val labelRes: Int) {
     ALL(R.string.account_details_filter_all),
     EXPENSE(R.string.account_details_filter_outflow),
-    INCOME(R.string.account_details_filter_inflow)
+    INCOME(R.string.account_details_filter_inflow),
+    TRANSFER(R.string.account_details_filter_transfer)
 }
 
 data class GroupedDayTransactions(
@@ -32,6 +33,7 @@ object AccountDetailsContract {
     data class State(
         val account: AccountEntity? = null,
         val accountItem: AccountItem? = null,
+        val allAccounts: ImmutableList<AccountItem> = persistentListOf(),
         val allTransactions: ImmutableList<TransactionEntity> = persistentListOf(),
         val filteredTransactions: ImmutableList<TransactionEntity> = persistentListOf(),
         val groupedDays: ImmutableList<GroupedDayTransactions> = persistentListOf(),
@@ -47,6 +49,7 @@ object AccountDetailsContract {
         val isHapticsEnabled: Boolean = true,
         val isPrivacyMode: Boolean = false,
         val isLoading: Boolean = true,
+        val showTransferSheet: Boolean = false,
         val transactionToEdit: TransactionEntity? = null,
         val transactionToDelete: TransactionEntity? = null,
         val showDeleteDialog: Boolean = false
@@ -56,6 +59,16 @@ object AccountDetailsContract {
         data class LoadAccount(val accountId: Long) : Intent
         data class UpdateSearchQuery(val query: String) : Intent
         data class SelectFilter(val filter: AccountTransactionFilter) : Intent
+        data object OpenTransferSheet : Intent
+        data object DismissTransferSheet : Intent
+        data class TransferFunds(
+            val fromAccount: AccountEntity,
+            val toAccount: AccountEntity,
+            val amount: Double,
+            val note: String?,
+            val outflowMerchantText: String,
+            val inflowMerchantText: String
+        ) : Intent
         data class OpenTransactionDetails(val transaction: TransactionEntity) : Intent
         data object DismissTransactionDetails : Intent
         data class SaveTransaction(

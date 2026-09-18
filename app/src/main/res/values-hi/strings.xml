@@ -572,4 +572,22 @@
     <string name="insights_net_worth_liquid">तरल:</string>
     <string name="insights_net_worth_debt">ऋण:</string>
     <string name="insights_net_worth_add_account">खाता जोड़ें</string>
+
+    <string name="transfer_title">धन अंतरण</string>
+    <string name="transfer_subtitle">अपने खातों के बीच आसानी से पैसे स्थानांतरित करें</string>
+    <string name="transfer_from">स्रोत खाता (से)</string>
+    <string name="transfer_to">गंतव्य खाता (को)</string>
+    <string name="transfer_amount_label">अंतरण राशि</string>
+    <string name="transfer_action_btn">अंतरण की पुष्टि करें</string>
+    <string name="transfer_note_label">अंतरण विवरण (वैकल्पिक)</string>
+    <string name="transfer_note_placeholder">उदा. क्रेडिट कार्ड बिल भुगतान, मासिक बचत</string>
+    <string name="transfer_error_same_account">स्रोत और गंतव्य खाते अलग-अलग होने चाहिए</string>
+    <string name="transfer_error_invalid_amount">कृपया एक मान्य राशि दर्ज करें</string>
+    <string name="transfer_error_insufficient_funds">स्रोत खाते में अपर्याप्त शेष राशि</string>
+    <string name="transfer_success_msg">%2$s से %3$s में %1$s का अंतरण सफल</string>
+    <string name="transfer_out_merchant">%1$s को अंतरण</string>
+    <string name="transfer_in_merchant">%1$s से अंतरण</string>
+    <string name="transfer_btn_label">स्थानांतरण</string>
+    <string name="transfer_error_need_min_accounts">धन स्थानांतरित करने के लिए कम से कम 2 खाते जोड़ें</string>
+    <string name="account_details_filter_transfer">स्थानांतरण</string>
 </resources>

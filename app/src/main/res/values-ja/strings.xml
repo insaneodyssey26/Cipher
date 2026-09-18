@@ -574,4 +574,22 @@
     <string name="insights_net_worth_liquid">流動資金:</string>
     <string name="insights_net_worth_debt">負債:</string>
     <string name="insights_net_worth_add_account">口座を追加</string>
+
+    <string name="transfer_title">口座間振替</string>
+    <string name="transfer_subtitle">口座間で資金をスムーズに移動します</string>
+    <string name="transfer_from">振替元口座</string>
+    <string name="transfer_to">振替先口座</string>
+    <string name="transfer_amount_label">振替金額</string>
+    <string name="transfer_action_btn">振替を実行</string>
+    <string name="transfer_note_label">メモ / 説明（任意）</string>
+    <string name="transfer_note_placeholder">例: クレジットカード引き落とし、今月の積立</string>
+    <string name="transfer_error_same_account">振替元と振替先は異なる口座を指定してください</string>
+    <string name="transfer_error_invalid_amount">有効な金額を入力してください</string>
+    <string name="transfer_error_insufficient_funds">振替元口座の残高が不足しています</string>
+    <string name="transfer_success_msg">%2$s から %3$s へ %1$s を振り替えました</string>
+    <string name="transfer_out_merchant">%1$s への振替</string>
+    <string name="transfer_in_merchant">%1$s からの振替</string>
+    <string name="transfer_btn_label">振替</string>
+    <string name="transfer_error_need_min_accounts">送金するには少なくとも2つのアカウントを追加してください</string>
+    <string name="account_details_filter_transfer">口座振替</string>
 </resources>

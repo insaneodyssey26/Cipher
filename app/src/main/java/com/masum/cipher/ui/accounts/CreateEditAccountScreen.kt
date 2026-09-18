@@ -75,19 +75,20 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
+import compose.icons.lucideicons.Briefcase
 import compose.icons.lucideicons.Building2
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
-import compose.icons.lucideicons.CircleDollarSign
-import compose.icons.lucideicons.Coins
 import compose.icons.lucideicons.CreditCard
+import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Landmark
 import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.PiggyBank
 import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.TrendingUp
+import compose.icons.lucideicons.ShieldCheck
+import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Wallet
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.launch
@@ -118,10 +119,13 @@ fun getAccountIconVector(iconName: String): ImageVector {
         "Wallet" -> LucideIcons.Wallet
         "CreditCard" -> LucideIcons.CreditCard
         "PiggyBank" -> LucideIcons.PiggyBank
-        "TrendingUp" -> LucideIcons.TrendingUp
-        "Coins" -> LucideIcons.Coins
+        "Smartphone" -> LucideIcons.Smartphone
+        "Briefcase" -> LucideIcons.Briefcase
         "Building2" -> LucideIcons.Building2
-        "CircleDollarSign" -> LucideIcons.CircleDollarSign
+        "ShieldCheck" -> LucideIcons.ShieldCheck
+        "Globe" -> LucideIcons.Globe
+        "TrendingUp" -> LucideIcons.Briefcase
+        "Coins", "CircleDollarSign" -> LucideIcons.Smartphone
         else -> LucideIcons.Layers
     }
 }
@@ -131,10 +135,11 @@ val AvailableAccountIcons = listOf(
     "Wallet",
     "CreditCard",
     "PiggyBank",
-    "TrendingUp",
-    "Coins",
+    "Smartphone",
+    "Briefcase",
     "Building2",
-    "CircleDollarSign",
+    "ShieldCheck",
+    "Globe",
     "Layers"
 )
 

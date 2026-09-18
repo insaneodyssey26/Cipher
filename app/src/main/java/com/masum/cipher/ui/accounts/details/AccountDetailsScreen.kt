@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -64,6 +66,7 @@ import com.masum.cipher.ui.accounts.LuxuryAccountCard
 import com.masum.cipher.ui.accounts.getAccountIconVector
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.TransactionSplitSheet
+import com.masum.cipher.ui.components.TransferFundsSheet
 import com.masum.cipher.ui.dashboard.TransactionItem
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
@@ -73,6 +76,7 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowDownLeft
 import compose.icons.lucideicons.ArrowLeft
+import compose.icons.lucideicons.ArrowLeftRight
 import compose.icons.lucideicons.ArrowUpRight
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Clock
@@ -119,23 +123,25 @@ fun AccountDetailsScreen(
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 18.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.Start,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
+                    modifier = Modifier.weight(1f, fill = false),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                            onNavigateBack()
-                        },
+                    Box(
                         modifier = Modifier
                             .size(38.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                            .clickable {
+                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                onNavigateBack()
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
@@ -153,16 +159,68 @@ fun AccountDetailsScreen(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
                         )
                         Text(
                             text = stringResource(R.string.account_details_ledger_subtitle, stringResource(accountType.labelRes)),
                             style = Typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            ),
+                            maxLines = 1
                         )
                     }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(12.dp),
+                            spotColor = Color(0xFF38BDF8).copy(alpha = 0.25f),
+                            ambientColor = Color.Black.copy(alpha = 0.3f)
+                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.surface,
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                )
+                            )
+                        )
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    Color(0xFF38BDF8).copy(alpha = 0.45f),
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                            if (state.allAccounts.size < 2) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.transfer_error_need_min_accounts),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                viewModel.handleIntent(AccountDetailsContract.Intent.OpenTransferSheet)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.ArrowLeftRight,
+                        contentDescription = stringResource(R.string.transfer_btn_label),
+                        tint = Color(0xFF38BDF8),
+                        modifier = Modifier.size(17.dp)
+                    )
                 }
             }
         }
@@ -371,7 +429,9 @@ fun AccountDetailsScreen(
 
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -379,8 +439,9 @@ fun AccountDetailsScreen(
                         val isSelected = state.selectedFilter == filter
                         val count = when (filter) {
                             AccountTransactionFilter.ALL -> state.allTransactions.size
-                            AccountTransactionFilter.EXPENSE -> state.allTransactions.count { !it.isIncome }
-                            AccountTransactionFilter.INCOME -> state.allTransactions.count { it.isIncome }
+                            AccountTransactionFilter.EXPENSE -> state.allTransactions.count { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }
+                            AccountTransactionFilter.INCOME -> state.allTransactions.count { it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }
+                            AccountTransactionFilter.TRANSFER -> state.allTransactions.count { it.category.equals("TRANSFER", ignoreCase = true) }
                         }
 
                         Box(
@@ -412,6 +473,8 @@ fun AccountDetailsScreen(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         fontSize = 12.sp
                                     ),
+                                    maxLines = 1,
+                                    softWrap = false,
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                 )
                                 Box(
@@ -430,6 +493,8 @@ fun AccountDetailsScreen(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp
                                         ),
+                                        maxLines = 1,
+                                        softWrap = false,
                                         color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -580,6 +645,35 @@ fun AccountDetailsScreen(
             onSaveSplits = { finalizedSplits ->
                 viewModel.handleIntent(AccountDetailsContract.Intent.SaveTransaction(draftTx, finalizedSplits))
                 activeSplittingTx = null
+            }
+        )
+    }
+
+    if (state.showTransferSheet) {
+        val outflowTpl = stringResource(R.string.transfer_out_merchant)
+        val inflowTpl = stringResource(R.string.transfer_in_merchant)
+        TransferFundsSheet(
+            accounts = state.allAccounts,
+            currencySymbol = state.currencySymbol,
+            locale = locale,
+            isHapticsEnabled = state.isHapticsEnabled,
+            initialSourceAccountId = accountId,
+            onDismiss = {
+                viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransferSheet)
+            },
+            onConfirmTransfer = { fromAcc, toAcc, amount, note ->
+                val outflowMerchant = String.format(locale, outflowTpl, toAcc.name)
+                val inflowMerchant = String.format(locale, inflowTpl, fromAcc.name)
+                viewModel.handleIntent(
+                    AccountDetailsContract.Intent.TransferFunds(
+                        fromAccount = fromAcc,
+                        toAccount = toAcc,
+                        amount = amount,
+                        note = note,
+                        outflowMerchantText = outflowMerchant,
+                        inflowMerchantText = inflowMerchant
+                    )
+                )
             }
         )
     }

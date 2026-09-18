@@ -5,6 +5,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,11 +68,17 @@ import com.masum.cipher.ui.components.PeakHoursChart
 import com.masum.cipher.ui.components.SpendingTrendChart
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.VaultCard
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -1188,6 +1196,8 @@ private fun NetWorthAccountsCard(
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+    val accountsScrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     VaultCard(
         modifier = Modifier
@@ -1243,33 +1253,89 @@ private fun NetWorthAccountsCard(
                 }
 
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-                        .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                        .clickable {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            onNavigateToAccounts()
-                        }
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.insights_net_worth_accounts_count, state.accounts.size),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Icon(
-                        imageVector = LucideIcons.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(12.dp)
-                    )
+                    if (state.accounts.size > 2) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+                                    .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        coroutineScope.launch {
+                                            accountsScrollState.animateScrollBy(-260f)
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.ChevronLeft,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+                                    .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        coroutineScope.launch {
+                                            accountsScrollState.animateScrollBy(260f)
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.ChevronRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+                            .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                onNavigateToAccounts()
+                            }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.insights_net_worth_accounts_count, state.accounts.size),
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                            imageVector = LucideIcons.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
                 }
             }
 
@@ -1337,104 +1403,121 @@ private fun NetWorthAccountsCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(accountsScrollState),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    state.accounts.forEach { accountItem ->
-                        val acc = accountItem.entity
-                        val accColor = androidx.compose.ui.graphics.Color(acc.colorHex)
-                        val formattedAccBalance = AppFormatters.formatCompactCurrency(accountItem.currentBalance, state.currencySymbol, locale)
+                    state.accounts.forEach { accItem ->
+                        val acc = accItem.entity
+                        val accColor = Color(acc.colorHex)
+                        val formattedAccBalance = AppFormatters.formatCurrency(accItem.currentBalance, state.currencySymbol, locale, decimals = 0)
+                        val isPositive = accItem.currentBalance >= 0
 
-                        Row(
+                        Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                                 .border(
-                                    width = if (acc.isDefault) 1.2.dp else 0.8.dp,
-                                    color = if (acc.isDefault) accColor.copy(alpha = 0.55f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
-                                    shape = RoundedCornerShape(14.dp)
+                                    width = 1.dp,
+                                    color = if (acc.isDefault) accColor.copy(alpha = 0.55f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                                    shape = RoundedCornerShape(12.dp)
                                 )
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                     onNavigateToAccounts()
                                 }
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .padding(horizontal = 10.dp, vertical = 7.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(accColor.copy(alpha = 0.18f)),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Icon(
-                                    imageVector = getAccountIconVector(acc.iconName),
-                                    contentDescription = null,
-                                    tint = accColor,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .background(accColor.copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = getAccountIconVector(acc.iconName),
+                                        contentDescription = null,
+                                        tint = accColor,
+                                        modifier = Modifier.size(11.dp)
+                                    )
+                                }
 
-                            Column {
                                 Text(
                                     text = acc.name,
-                                    style = Typography.labelSmall.copy(
+                                    style = Typography.labelMedium.copy(
                                         fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = formattedAccBalance,
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = DMSans,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp
                                     ),
-                                    color = if (accountItem.currentBalance >= 0) MaterialTheme.colorScheme.primary else RoseExpense,
-                                    maxLines = 1
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(if (isPositive) EmeraldIncome.copy(alpha = 0.15f) else RoseExpense.copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                                ) {
+                                    Text(
+                                        text = formattedAccBalance,
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.5.sp
+                                        ),
+                                        color = if (isPositive) EmeraldIncome else RoseExpense,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
                     }
 
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
                             .border(
-                                width = 0.8.dp,
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(14.dp)
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(12.dp)
                             )
                             .clickable {
                                 view.performVibrate(isHapticsEnabled, isLongPress = false)
                                 onNavigateToAccounts()
                             }
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                            .padding(horizontal = 10.dp, vertical = 7.dp)
+                    ) {
+                        Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Plus,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.insights_net_worth_add_account),
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.5.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.insights_net_worth_add_account),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
                 }
             }

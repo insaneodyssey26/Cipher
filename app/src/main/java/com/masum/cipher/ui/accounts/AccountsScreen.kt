@@ -33,6 +33,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +55,7 @@ import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.components.ProFeatureGateSheet
 import com.masum.cipher.ui.components.ProFeaturePerk
+import com.masum.cipher.ui.components.TransferFundsSheet
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
@@ -59,6 +63,9 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
+import compose.icons.lucideicons.ArrowLeftRight
+import compose.icons.lucideicons.ChevronLeft
+import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Sparkles
@@ -92,6 +99,8 @@ fun AccountsScreen(
         }
     }
 
+    var isActionsExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -100,94 +109,180 @@ fun AccountsScreen(
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 18.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    IconButton(
-                        onClick = {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .clickable {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                             onNavigateBack()
                         },
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.ArrowLeft,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
 
-                    Column {
-                        Text(
-                            text = stringResource(R.string.accounts_title),
-                            style = Typography.titleMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = if (state.isPro) "${stringResource(R.string.pro_title)} · ${stringResource(R.string.pro_badge_lifetime)}" else "${state.accounts.size}/${state.freeAccountLimit} Free Accounts",
-                            style = Typography.bodySmall.copy(
-                                fontSize = 11.5.sp,
-                                color = if (state.isPro) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                Column {
+                    Text(
+                        text = stringResource(R.string.accounts_title),
+                        style = Typography.titleMedium.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = if (state.isPro) "${stringResource(R.string.pro_title)} · ${stringResource(R.string.pro_badge_lifetime)}" else "${state.accounts.size}/${state.freeAccountLimit} Free Accounts",
+                        style = Typography.bodySmall.copy(
+                            fontSize = 11.5.sp,
+                            color = if (state.isPro) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        maxLines = 1
+                    )
+                }
+            }
+        },
+        floatingActionButton = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = isActionsExpanded,
+                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandHorizontally(expandFrom = Alignment.End),
+                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkHorizontally(shrinkTowards = Alignment.End)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                                .clickable {
+                                    view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                    isActionsExpanded = false
+                                    if (state.accounts.size < 2) {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.transfer_error_need_min_accounts),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        viewModel.handleIntent(AccountsContract.Intent.OpenTransferSheet)
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.ArrowLeftRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
                             )
-                        )
+                            Text(
+                                text = stringResource(R.string.transfer_btn_label),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                                        )
+                                    )
+                                )
+                                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+                                .clickable {
+                                    view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                    isActionsExpanded = false
+                                    if (!state.isPro && state.accounts.size >= state.freeAccountLimit) {
+                                        viewModel.handleIntent(AccountsContract.Intent.OpenCreateAccountSheet)
+                                    } else {
+                                        onNavigateToCreateAccount()
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(17.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.insights_net_worth_add_account),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
 
-                Button(
-                    onClick = {
-                        view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                        if (!state.isPro && state.accounts.size >= state.freeAccountLimit) {
-                            viewModel.handleIntent(AccountsContract.Intent.OpenCreateAccountSheet)
-                        } else {
-                            onNavigateToCreateAccount()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = RoundedCornerShape(14.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
-                    modifier = Modifier.height(38.dp)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .clickable {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                            isActionsExpanded = !isActionsExpanded
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = LucideIcons.Plus,
+                        imageVector = if (isActionsExpanded) LucideIcons.ChevronRight else LucideIcons.ChevronLeft,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.custom_category_add_btn),
-                        style = Typography.labelMedium.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
         }
     ) { paddingValues ->
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 6.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
                     item {
                         Box(
                             modifier = Modifier
@@ -411,6 +506,38 @@ fun AccountsScreen(
                     }
                 }
             }
+
+    if (state.showTransferSheet) {
+        val outflowTpl = stringResource(R.string.transfer_out_merchant)
+        val inflowTpl = stringResource(R.string.transfer_in_merchant)
+        val transferSuccessTpl = stringResource(R.string.transfer_success_msg)
+        TransferFundsSheet(
+            accounts = state.accounts,
+            currencySymbol = state.currencySymbol,
+            locale = locale,
+            isHapticsEnabled = state.isHapticsEnabled,
+            onDismiss = {
+                viewModel.handleIntent(AccountsContract.Intent.DismissTransferSheet)
+            },
+            onConfirmTransfer = { fromAcc, toAcc, amount, note ->
+                val outflowMerchant = String.format(locale, outflowTpl, toAcc.name)
+                val inflowMerchant = String.format(locale, inflowTpl, fromAcc.name)
+                viewModel.handleIntent(
+                    AccountsContract.Intent.TransferFunds(
+                        fromAccount = fromAcc,
+                        toAccount = toAcc,
+                        amount = amount,
+                        note = note,
+                        outflowMerchantText = outflowMerchant,
+                        inflowMerchantText = inflowMerchant
+                    )
+                )
+                val formattedAmount = AppFormatters.formatCurrency(amount, state.currencySymbol, locale, decimals = 2)
+                val toastMsg = String.format(locale, transferSuccessTpl, formattedAmount, fromAcc.name, toAcc.name)
+                Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
 
     if (state.showProGateSheet) {
         ProFeatureGateSheet(

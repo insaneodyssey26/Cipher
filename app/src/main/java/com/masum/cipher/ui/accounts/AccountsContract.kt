@@ -23,6 +23,7 @@ object AccountsContract {
         val showProGateSheet: Boolean = false,
         val accountToDelete: AccountEntity? = null,
         val showDeleteConfirmDialog: Boolean = false,
+        val showTransferSheet: Boolean = false,
         val isHapticsEnabled: Boolean = true
     ) : UiState
 
@@ -31,6 +32,16 @@ object AccountsContract {
         data object OpenCreateAccountSheet : Intent
         data class OpenEditAccountSheet(val account: AccountEntity) : Intent
         data object DismissCreateEditSheet : Intent
+        data object OpenTransferSheet : Intent
+        data object DismissTransferSheet : Intent
+        data class TransferFunds(
+            val fromAccount: AccountEntity,
+            val toAccount: AccountEntity,
+            val amount: Double,
+            val note: String?,
+            val outflowMerchantText: String,
+            val inflowMerchantText: String
+        ) : Intent
         data class SaveAccount(
             val accountId: Long? = null,
             val name: String,
