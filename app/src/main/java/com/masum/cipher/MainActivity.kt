@@ -1,5 +1,6 @@
 package com.masum.cipher
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -110,6 +111,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -184,8 +190,38 @@ class MainActivity : AppCompatActivity() {
                         LaunchedEffect(intent) {
                             if (intent.getStringExtra("navigate_to") == "manage_apps") {
                                 navController.navigate("manage_apps")
+                                intent.removeExtra("navigate_to")
                             }
-                            intent.removeExtra("navigate_to")
+                            val quickLogCat = intent.getStringExtra("quick_log_category")
+                            if (!quickLogCat.isNullOrBlank()) {
+                                val defaultCurrency = state.settings?.currencyCode ?: "INR"
+                                val mappedCat = when (quickLogCat.uppercase()) {
+                                    "FOOD" -> "FOOD"
+                                    "SHOP", "SHOPPING" -> "SHOPPING"
+                                    "RIDE", "TRANSPORT" -> "TRANSPORT"
+                                    "BILLS", "BILL" -> "BILLS"
+                                    "FUN", "ENTERTAINMENT" -> "ENTERTAINMENT"
+                                    "HEALTH" -> "HEALTH"
+                                    "INVEST", "INVESTMENT" -> "INVESTMENT"
+                                    "MORE", "OTHERS" -> "OTHERS"
+                                    else -> quickLogCat
+                                }
+                                mainViewModel.handleIntent(
+                                    MainContract.Intent.UpdateDraftTransaction(
+                                        TransactionEntity(
+                                            amount = 0.0,
+                                            merchant = "",
+                                            currency = defaultCurrency,
+                                            timestamp = System.currentTimeMillis(),
+                                            category = mappedCat,
+                                            rawSms = null,
+                                            isIncome = false
+                                        )
+                                    )
+                                )
+                                showAddSheet = true
+                                intent.removeExtra("quick_log_category")
+                            }
                         }
 
                         val isTopLevel = currentRoute in listOf("dashboard", "insights", "split_expenses", "settings")

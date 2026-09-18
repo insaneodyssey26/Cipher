@@ -4,6 +4,19 @@
     <string name="widget_budget_description">মাসিক খরচের অগ্রগতি, অবশিষ্ট ব্যালেন্স এবং বাজেট স্থিতি</string>
     <string name="widget_stats_name">মাসিক ওভারভিউ</string>
     <string name="widget_stats_description">রিয়েল-টাইম ক্যাশ ফ্লো, আয় এবং ব্যয়ের সারাংশ</string>
+    <string name="widget_accounts_name">নেট ওয়ার্থ এবং অ্যাকাউন্ট</string>
+    <string name="widget_accounts_description">মোট সম্পদ এবং পৃথক ব্যাংক অ্যাকাউন্টের ব্যালেন্স</string>
+    <string name="widget_quick_log_name">১-ট্যাপ দ্রুত খরচ রেকর্ড</string>
+    <string name="widget_quick_log_description">দ্রুত খরচ রেকর্ড করার জন্য শর্টকাট বোতাম</string>
+    <string name="widget_passbook_name">সাম্প্রতিক পাসবুক</string>
+    <string name="widget_passbook_description">আপনার সাম্প্রতিক লেনদেনের লাইভ তালিকা</string>
+    <string name="widget_daily_allowance_name">দৈনিক নিরাপদ খরচের সীমা</string>
+    <string name="widget_daily_allowance_description">আজকের নিরাপদ খরচের বাজেট এবং নিয়ন্ত্রণ</string>
+    <string name="widget_pro_badge">প্রো</string>
+    <string name="widget_pro_locked_msg">Cipher Pro দিয়ে আনলক করুন</string>
+    <string name="widget_safe_to_spend_title">আজকের নিরাপদ খরচ</string>
+    <string name="widget_net_worth_title">মোট নেট ওয়ার্থ</string>
+    <string name="widget_no_transactions">কোনো সাম্প্রতিক লেনদেন নেই</string>
 
     <string name="nav_spend">খরচ</string>
     <string name="nav_categories">বিভাগ</string>

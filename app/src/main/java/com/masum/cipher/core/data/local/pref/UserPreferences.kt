@@ -76,6 +76,15 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString("cached_license_token", null)
     }
 
+    fun getCachedAppTheme(): AppTheme {
+        val name = syncPrefs.getString("cached_app_theme", AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
+        return try {
+            AppTheme.valueOf(name)
+        } catch (_: Exception) {
+            AppTheme.SYSTEM
+        }
+    }
+
     fun getCachedSettings(): UserSettings {
         val curCode = getCachedCurrencyCode()
         val curSymbol = getCachedCurrencySymbol()
@@ -84,9 +93,10 @@ class UserPreferences @Inject constructor(
         val langCode = getCachedLanguageCode()
         val isPro = isCachedPro()
         val proTier = getCachedProTier()
+        val appTheme = getCachedAppTheme()
         com.masum.cipher.core.util.AppFormatters.setActiveCurrencyFormatting(isSuffix, hasSpace)
         return UserSettings(
-            theme = AppTheme.SYSTEM,
+            theme = appTheme,
             isBiometricEnabled = false,
             isPrivacyModeEnabled = false,
             isHapticsEnabled = true,
@@ -172,6 +182,12 @@ class UserPreferences @Inject constructor(
         }
         val isNavCompressed = preferences[Keys.NAVBAR_COMPRESSED] ?: false
 
+        val parsedTheme = try {
+            AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name)
+        } catch (_: Exception) {
+            AppTheme.SYSTEM
+        }
+
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
             .putString("cached_currency_symbol", curSymbol)
@@ -180,10 +196,11 @@ class UserPreferences @Inject constructor(
             .putBoolean("cached_onboarding_completed", hasOnboarded)
             .putString("cached_accent_color", parsedAccentColor.name)
             .putBoolean("cached_navbar_compressed", isNavCompressed)
+            .putString("cached_app_theme", parsedTheme.name)
             .apply()
 
         UserSettings(
-            theme = AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name),
+            theme = parsedTheme,
             isBiometricEnabled = preferences[Keys.BIOMETRIC_ENABLED] ?: false,
             isPrivacyModeEnabled = preferences[Keys.PRIVACY_MODE] ?: false,
             isHapticsEnabled = preferences[Keys.HAPTICS_ENABLED] ?: true,
@@ -267,6 +284,7 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun setTheme(theme: AppTheme) {
+        syncPrefs.edit().putString("cached_app_theme", theme.name).apply()
         context.dataStore.edit { it[Keys.APP_THEME] = theme.name }
     }
 

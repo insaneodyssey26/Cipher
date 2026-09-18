@@ -4,6 +4,19 @@
     <string name="widget_budget_description">Live monthly spending progress, remaining balance, and budget status</string>
     <string name="widget_stats_name">Monthly Overview</string>
     <string name="widget_stats_description">Real-time net cash flow, income, and spending summary</string>
+    <string name="widget_accounts_name">Net Worth &amp; Accounts</string>
+    <string name="widget_accounts_description">Total net worth and individual bank account balances</string>
+    <string name="widget_quick_log_name">1-Tap Quick Logger</string>
+    <string name="widget_quick_log_description">Fast speed-dial shortcuts to log common expenses instantly</string>
+    <string name="widget_passbook_name">Recent Passbook</string>
+    <string name="widget_passbook_description">Live real-time feed of your most recent transactions</string>
+    <string name="widget_daily_allowance_name">Daily Safe-to-Spend</string>
+    <string name="widget_daily_allowance_description">Dynamic daily spending allowance and impulse budget control</string>
+    <string name="widget_pro_badge">PRO</string>
+    <string name="widget_pro_locked_msg">Unlock with Cipher Pro</string>
+    <string name="widget_safe_to_spend_title">Safe to Spend Today</string>
+    <string name="widget_net_worth_title">Total Net Worth</string>
+    <string name="widget_no_transactions">No recent transactions</string>
 
     <string name="nav_spend">Spend</string>
     <string name="nav_categories">Categories</string>

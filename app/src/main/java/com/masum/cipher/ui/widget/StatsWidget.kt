@@ -69,17 +69,12 @@ class StatsWidget : GlanceAppWidget() {
         val net = income - spent
         val netPositive = net >= 0
 
-        val emeraldIncome = ColorProvider(Color(0xFF10B981))
-        val roseExpense = ColorProvider(Color(0xFFF43F5E))
-        val surfaceBg = GlanceTheme.colors.surface
-        val textMuted = GlanceTheme.colors.onSurfaceVariant
-
-        val netColor = if (netPositive) emeraldIncome else roseExpense
+        val netColor = if (netPositive) WidgetColors.IncomeEmerald else WidgetColors.ExpenseRose
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(surfaceBg)
+                .background(WidgetColors.SurfaceBg)
                 .cornerRadius(24.dp)
                 .clickable(actionStartActivity<MainActivity>())
                 .padding(10.dp),
@@ -103,7 +98,7 @@ class StatsWidget : GlanceAppWidget() {
                         text = "|",
                         style = TextStyle(
                             fontSize = 10.sp,
-                            color = textMuted
+                            color = WidgetColors.TextMuted
                         )
                     )
                     Spacer(GlanceModifier.width(4.dp))
@@ -112,7 +107,7 @@ class StatsWidget : GlanceAppWidget() {
                         style = TextStyle(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
-                            color = textMuted
+                            color = WidgetColors.TextMuted
                         ),
                         maxLines = 1
                     )
@@ -158,7 +153,7 @@ class StatsWidget : GlanceAppWidget() {
                         text = "net this month",
                         style = TextStyle(
                             fontSize = 11.sp,
-                            color = textMuted
+                            color = WidgetColors.TextMuted
                         )
                     )
 
@@ -171,7 +166,7 @@ class StatsWidget : GlanceAppWidget() {
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = emeraldIncome
+                                    color = WidgetColors.IncomeEmerald
                                 )
                             )
                         }
@@ -182,17 +177,16 @@ class StatsWidget : GlanceAppWidget() {
                                 style = TextStyle(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = roseExpense
+                                    color = WidgetColors.ExpenseRose
                                 )
                             )
                         }
                     }
+                }
             }
         }
     }
 }
-}
-
 
 class StatsRefreshAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {

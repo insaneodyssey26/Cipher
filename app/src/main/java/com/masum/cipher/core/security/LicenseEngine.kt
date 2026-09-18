@@ -20,12 +20,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class ProTier(val identifier: String, val displayName: String) {
-    LIFETIME("LIFETIME", "Lifetime Access"),
-    ANNUAL("ANNUAL", "Annual Pass"),
+    LIFETIME("LIFETIME", "Lifetime VIP Pass"),
+    ANNUAL("ANNUAL", "1-Year Annual Pass"),
+    HALF_YEARLY("HALF_YEARLY", "6-Month Pro Pass"),
+    SIX_MONTH("6MONTH", "6-Month Pro Pass"),
     MONTHLY("MONTHLY", "Monthly Pass"),
-    PROMO("PROMO", "VIP Early Bird"),
+    PROMO("PROMO", "VIP Early Bird Pass"),
     DEVELOPER("DEV", "Developer Edition"),
-    FREE("FREE", "Standard")
+    FREE("FREE", "Standard Edition")
 }
 
 data class LicenseValidationResult(

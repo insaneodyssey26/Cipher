@@ -4,6 +4,19 @@
     <string name="widget_budget_description">Monatlicher Ausgabenfortschritt, Restbetrag und Budgetstatus</string>
     <string name="widget_stats_name">Monatsübersicht</string>
     <string name="widget_stats_description">Echtzeit-Cashflow, Einnahmen und Ausgabenübersicht</string>
+    <string name="widget_accounts_name">Nettovermögen &amp; Konten</string>
+    <string name="widget_accounts_description">Gesamtvermögen und Salden der einzelnen Bankkonten</string>
+    <string name="widget_quick_log_name">1-Tipp Schnell-Erfassung</string>
+    <string name="widget_quick_log_description">Schnellwahltasten zur sofortigen Erfassung von Ausgaben</string>
+    <string name="widget_passbook_name">Aktuelles Sparbuch</string>
+    <string name="widget_passbook_description">Live-Feed Ihrer letzten Transaktionen</string>
+    <string name="widget_daily_allowance_name">Tägliches Ausgabenlimit</string>
+    <string name="widget_daily_allowance_description">Dynamisches Tageslimit und Budgetkontrolle</string>
+    <string name="widget_pro_badge">PRO</string>
+    <string name="widget_pro_locked_msg">Mit Cipher Pro freischalten</string>
+    <string name="widget_safe_to_spend_title">Heute sicher auszugeben</string>
+    <string name="widget_net_worth_title">Gesamt-Nettovermögen</string>
+    <string name="widget_no_transactions">Keine aktuellen Transaktionen</string>
 
     <string name="nav_spend">Ausgaben</string>
     <string name="nav_categories">Kategorien</string>

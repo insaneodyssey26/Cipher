@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Cipher</string>
     <string name="widget_budget_name">Progression du Budget</string>
-    <string name="widget_budget_description">Suivi des dépenses mensuelles, solde restant et état du budget</string>
+    <string name="widget_budget_description">Dépenses mensuelles en direct, solde restant et état du budget</string>
     <string name="widget_stats_name">Aperçu Mensuel</string>
     <string name="widget_stats_description">Flux de trésorerie net en temps réel, revenus et dépenses</string>
+    <string name="widget_accounts_name">Valeur Nette et Comptes</string>
+    <string name="widget_accounts_description">Valeur nette totale et soldes de vos comptes bancaires</string>
+    <string name="widget_quick_log_name">Enregistrement Rapide en 1 Clic</string>
+    <string name="widget_quick_log_description">Raccourcis rapides pour enregistrer vos dépenses fréquentes</string>
+    <string name="widget_passbook_name">Relevé Récent</string>
+    <string name="widget_passbook_description">Flux en direct de vos transactions les plus récentes</string>
+    <string name="widget_daily_allowance_name">Dépense Quotidienne Sûre</string>
+    <string name="widget_daily_allowance_description">Allocation quotidienne dynamique et contrôle budgétaire</string>
+    <string name="widget_pro_badge">PRO</string>
+    <string name="widget_pro_locked_msg">Débloquer avec Cipher Pro</string>
+    <string name="widget_safe_to_spend_title">Sûr à dépenser aujourd\'hui</string>
+    <string name="widget_net_worth_title">Valeur Nette Totale</string>
+    <string name="widget_no_transactions">Aucune transaction récente</string>
 
     <string name="nav_spend">Dépenses</string>
     <string name="nav_categories">Catégories</string>

@@ -413,38 +413,59 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 140.dp)
         ) {
+            val proTierDisplayTitle = remember(state.proTier) {
+                when (state.proTier.uppercase()) {
+                    "MONTHLY" -> "Monthly Pro Pass"
+                    "HALF_YEARLY", "6MONTH", "6-MONTH" -> "6-Month Pro Pass"
+                    "ANNUAL", "YEARLY", "1-YEAR", "1YEAR" -> "1-Year Annual Pass"
+                    "LIFETIME" -> "Lifetime VIP Pass"
+                    "PROMO" -> "VIP Early Bird Pass"
+                    "DEV" -> "Developer Edition"
+                    else -> "Cipher Pro Active"
+                }
+            }
+            val proTierBadgeText = remember(state.proTier) {
+                when (state.proTier.uppercase()) {
+                    "LIFETIME" -> "LIFETIME"
+                    "ANNUAL", "YEARLY", "1-YEAR", "1YEAR" -> "ANNUAL"
+                    "HALF_YEARLY", "6MONTH", "6-MONTH" -> "6-MONTH"
+                    "MONTHLY" -> "MONTHLY"
+                    else -> "ACTIVE"
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 6.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(22.dp))
                     .background(
                         if (state.isPro) {
                             Brush.horizontalGradient(
                                 colors = listOf(
-                                    EmeraldIncome.copy(alpha = 0.16f),
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    EmeraldIncome.copy(alpha = 0.18f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 )
                             )
                         } else {
                             Brush.horizontalGradient(
                                 colors = listOf(
-                                    Color(0xFFF59E0B).copy(alpha = 0.14f),
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    Color(0xFFF59E0B).copy(alpha = 0.16f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 )
                             )
                         }
                     )
                     .border(
-                        width = 1.dp,
-                        color = if (state.isPro) EmeraldIncome.copy(alpha = 0.4f) else Color(0xFFF59E0B).copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(20.dp)
+                        width = 1.2.dp,
+                        color = if (state.isPro) EmeraldIncome.copy(alpha = 0.55f) else Color(0xFFF59E0B).copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(22.dp)
                     )
                     .clickable {
                         view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                         onNavigateToPro()
                     }
-                    .padding(horizontal = 18.dp, vertical = 14.dp)
+                    .padding(horizontal = 18.dp, vertical = 15.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -457,47 +478,49 @@ fun SettingsScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(42.dp)
                                 .clip(CircleShape)
-                                .background(if (state.isPro) EmeraldIncome.copy(alpha = 0.2f) else Color(0xFFF59E0B).copy(alpha = 0.18f)),
+                                .background(
+                                    if (state.isPro) EmeraldIncome.copy(alpha = 0.22f) else Color(0xFFF59E0B).copy(alpha = 0.20f)
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = if (state.isPro) LucideIcons.ShieldCheck else LucideIcons.Crown,
                                 contentDescription = "Cipher Pro",
                                 tint = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(14.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = if (state.isPro) stringResource(R.string.settings_pro_active) else stringResource(R.string.settings_pro_upgrade),
+                                    text = if (state.isPro) proTierDisplayTitle else stringResource(R.string.settings_pro_upgrade),
                                     style = Typography.titleMedium.copy(
-                                        fontFamily = Lato,
+                                        fontFamily = DMSans,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
-                                        letterSpacing = 0.6.sp
+                                        fontSize = 15.sp
                                     ),
                                     color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(4.dp))
+                                        .clip(RoundedCornerShape(6.dp))
                                         .background(
-                                            if (state.isPro) EmeraldIncome.copy(alpha = 0.2f)
-                                            else Color(0xFFF59E0B).copy(alpha = 0.2f)
+                                            if (state.isPro) EmeraldIncome.copy(alpha = 0.22f)
+                                            else Color(0xFFF59E0B).copy(alpha = 0.22f)
                                         )
-                                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                                        .padding(horizontal = 7.dp, vertical = 2.dp)
                                 ) {
                                     Text(
-                                        text = if (state.isPro) state.proTier.uppercase() else stringResource(R.string.settings_pro_lifetime_badge),
+                                        text = if (state.isPro) proTierBadgeText else "UPGRADE",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 8.5.sp
+                                            fontSize = 9.sp,
+                                            letterSpacing = 0.5.sp
                                         ),
                                         color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
                                     )
@@ -505,9 +528,9 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = if (state.isPro) stringResource(R.string.settings_pro_unlocked_desc) else stringResource(R.string.settings_pro_locked_desc),
+                                text = if (state.isPro) "All Pro features unlocked • Tap to manage" else "Widgets, smart rules, custom PDF reports & extra themes",
                                 style = Typography.bodySmall.copy(
-                                    fontFamily = DMSans,
+                                    fontFamily = Lato,
                                     fontSize = 11.5.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -518,7 +541,7 @@ fun SettingsScreen(
                         imageVector = LucideIcons.ChevronRight,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

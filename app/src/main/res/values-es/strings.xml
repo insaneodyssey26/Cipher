@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Cipher</string>
-    <string name="widget_budget_name">Progreso del presupuesto</string>
-    <string name="widget_budget_description">Progreso del gasto mensual, saldo restante y estado del presupuesto</string>
-    <string name="widget_stats_name">Resumen mensual</string>
-    <string name="widget_stats_description">Flujo de caja neto en tiempo real, ingresos y resumen de gastos</string>
+    <string name="widget_budget_name">Progreso del Presupuesto</string>
+    <string name="widget_budget_description">Progreso mensual, saldo restante y estado del presupuesto</string>
+    <string name="widget_stats_name">Resumen Mensual</string>
+    <string name="widget_stats_description">Flujo de efectivo en tiempo real, ingresos y gastos</string>
+    <string name="widget_accounts_name">Patrimonio Neto y Cuentas</string>
+    <string name="widget_accounts_description">Patrimonio total y saldos de cuentas bancarias individuales</string>
+    <string name="widget_quick_log_name">Registro Rápido en 1 Toque</string>
+    <string name="widget_quick_log_description">Accesos directos rápidos para registrar gastos frecuentes</string>
+    <string name="widget_passbook_name">Libreta Reciente</string>
+    <string name="widget_passbook_description">Lista en vivo de tus transacciones más recientes</string>
+    <string name="widget_daily_allowance_name">Límite Diario Seguro</string>
+    <string name="widget_daily_allowance_description">Presupuesto diario dinámico y control de gastos</string>
+    <string name="widget_pro_badge">PRO</string>
+    <string name="widget_pro_locked_msg">Desbloquear con Cipher Pro</string>
+    <string name="widget_safe_to_spend_title">Seguro para gastar hoy</string>
+    <string name="widget_net_worth_title">Patrimonio Neto Total</string>
+    <string name="widget_no_transactions">Sin transacciones recientes</string>
 
     <string name="nav_spend">Gastos</string>
     <string name="nav_categories">Categorías</string>

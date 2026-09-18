@@ -1,9 +1,22 @@
  <resources>
     <string name="app_name">Cipher</string>
     <string name="widget_budget_name">बजट प्रगति</string>
-    <string name="widget_budget_description">मासिक खर्च प्रगति, शेष राशि और बजट स्थिति</string>
+    <string name="widget_budget_description">मासिक खर्च प्रगति, शेष बैलेंस और बजट स्थिति</string>
     <string name="widget_stats_name">मासिक अवलोकन</string>
-    <string name="widget_stats_description">वास्तविक समय नकदी प्रवाह, आय और खर्च का विवरण</string>
+    <string name="widget_stats_description">रीयल-टाइम कैश फ्लो, आय और खर्च का सारांश</string>
+    <string name="widget_accounts_name">कुल संपत्ति और खाते</string>
+    <string name="widget_accounts_description">कुल नेट वर्थ और सभी बैंक खातों का लाइव बैलेंस</string>
+    <string name="widget_quick_log_name">1-टैप त्वरित खर्च दर्ज</string>
+    <string name="widget_quick_log_description">अक्सर होने वाले खर्चों को तुरंत दर्ज करने के लिए शॉर्टकट</string>
+    <string name="widget_passbook_name">हालिया पासबुक</string>
+    <string name="widget_passbook_description">आपके सबसे हालिया लेन-देन की लाइव सूची</string>
+    <string name="widget_daily_allowance_name">दैनिक सुरक्षित खर्च सीमा</string>
+    <string name="widget_daily_allowance_description">आज की सुरक्षित खर्च सीमा और बजट नियंत्रण</string>
+    <string name="widget_pro_badge">प्रो</string>
+    <string name="widget_pro_locked_msg">Cipher Pro के साथ अनलॉक करें</string>
+    <string name="widget_safe_to_spend_title">आज खर्च करने के लिए सुरक्षित</string>
+    <string name="widget_net_worth_title">कुल नेट वर्थ</string>
+    <string name="widget_no_transactions">कोई हालिया लेन-देन नहीं</string>
 
     <string name="nav_spend">खर्च</string>
     <string name="nav_categories">श्रेणियाँ</string>

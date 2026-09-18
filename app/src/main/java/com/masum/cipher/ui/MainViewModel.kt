@@ -18,7 +18,8 @@ class MainViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
     private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
-    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository
+    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository,
+    private val widgetSyncManager: com.masum.cipher.core.domain.usecase.WidgetSyncManager
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
         settings = userPreferences.getCachedSettings(),
@@ -27,6 +28,10 @@ class MainViewModel @Inject constructor(
 ) {
 
     init {
+        viewModelScope.launch {
+            widgetSyncManager.syncWidget()
+        }
+
         userPreferences.settingsFlow
             .onEach { settings ->
                 updateState {

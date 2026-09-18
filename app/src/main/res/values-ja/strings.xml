@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Cipher</string>
     <string name="widget_budget_name">予算の進捗状況</string>
-    <string name="widget_budget_description">毎月の支出の進捗、残高、予算状況</string>
+    <string name="widget_budget_description">毎月の支出の進捗、残高、予算ステータス</string>
     <string name="widget_stats_name">月間概要</string>
-    <string name="widget_stats_description">リアルタイムのキャッシュフロー、収入、支出の概要</string>
+    <string name="widget_stats_description">リアルタイムのキャッシュフロー、収入、支出サマリー</string>
+    <string name="widget_accounts_name">純資産と口座一覧</string>
+    <string name="widget_accounts_description">総純資産および各銀行口座・ウォレットの残高</string>
+    <string name="widget_quick_log_name">1タップ高速記録</string>
+    <string name="widget_quick_log_description">よく使う支出を瞬時に記録できるスピードダイヤル</string>
+    <string name="widget_passbook_name">最近の通帳フィード</string>
+    <string name="widget_passbook_description">最新の取引履歴をリアルタイム表示</string>
+    <string name="widget_daily_allowance_name">本日の安全支出可能額</string>
+    <string name="widget_daily_allowance_description">動的な日割り予算と支出コントロール</string>
+    <string name="widget_pro_badge">PRO</string>
+    <string name="widget_pro_locked_msg">Cipher Pro でロック解除</string>
+    <string name="widget_safe_to_spend_title">本日使える予算</string>
+    <string name="widget_net_worth_title">総純資産</string>
+    <string name="widget_no_transactions">最近の取引はありません</string>
 
     <string name="nav_spend">支出</string>
     <string name="nav_categories">カテゴリー</string>

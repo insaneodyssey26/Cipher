@@ -91,6 +91,54 @@
                 android:resource="@xml/stats_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".ui.widget.AccountsWidgetReceiver"
+            android:label="@string/widget_accounts_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/accounts_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".ui.widget.QuickLogWidgetReceiver"
+            android:label="@string/widget_quick_log_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_log_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".ui.widget.PassbookWidgetReceiver"
+            android:label="@string/widget_passbook_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/passbook_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".ui.widget.DailyAllowanceWidgetReceiver"
+            android:label="@string/widget_daily_allowance_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_allowance_widget_info" />
+        </receiver>
+
         <service
             android:name=".core.notifications.TransactionNotificationService"
             android:label="@string/app_name"
