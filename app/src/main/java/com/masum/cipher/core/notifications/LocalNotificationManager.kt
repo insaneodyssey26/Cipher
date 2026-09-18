@@ -14,9 +14,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.core.graphics.toColorInt
 import com.masum.cipher.MainActivity
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.data.repository.AccountRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +31,8 @@ import javax.inject.Singleton
 @Singleton
 class LocalNotificationManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val accountRepository: AccountRepository
 ) {
 
     companion object {
@@ -322,12 +325,44 @@ class LocalNotificationManager @Inject constructor(
                 categorizePendingIntent
             ).build()
 
+            val allAccounts = try {
+                accountRepository.getAllAccountsFlow().first()
+            } catch (e: Exception) {
+                emptyList()
+            }
+
+            val switchAccountAction = if (allAccounts.size > 1) {
+                val switchDialogIntent = Intent(context, com.masum.cipher.ui.dialogs.QuickSwitchAccountActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    putExtra(NotificationActionReceiver.EXTRA_TRANSACTION_ID, transaction.id)
+                    putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+                }
+
+                val switchPendingIntent = PendingIntent.getActivity(
+                    context,
+                    notificationId + 3000,
+                    switchDialogIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                NotificationCompat.Action.Builder(
+                    com.masum.cipher.R.drawable.ic_notification,
+                    context.getString(R.string.notify_action_switch_account),
+                    switchPendingIntent
+                ).build()
+            } else {
+                null
+            }
+
             val currencySymbol = settings.currencySymbol
             val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, currencySymbol, decimals = 0)
+            val currentAccount = allAccounts.find { it.id == transaction.accountId }
+            val accountSuffix = currentAccount?.let { " [${it.name}]" } ?: ""
+
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
-                .setContentTitle(if (transaction.isIncome) "Money Received" else "New Expense")
+                .setContentTitle((if (transaction.isIncome) "Money Received" else "New Expense") + accountSuffix)
                 .setContentText(
                     if (transaction.isIncome) "You received $amountStr from ${transaction.merchant}."
                     else "You spent $amountStr at ${transaction.merchant}."
@@ -336,6 +371,11 @@ class LocalNotificationManager @Inject constructor(
                 .setContentIntent(categorizePendingIntent)
                 .addAction(addNoteAction)
                 .addAction(categorizeAction)
+                .apply {
+                    if (switchAccountAction != null) {
+                        addAction(switchAccountAction)
+                    }
+                }
                 .setAutoCancel(true)
 
             with(NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }

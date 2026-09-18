@@ -44,6 +44,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.dialogs.QuickSwitchAccountActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Cipher.Dialog"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:windowSoftInputMode="stateHidden" />
+
         <receiver
             android:name=".core.sms.SmsReceiver"
             android:enabled="true"

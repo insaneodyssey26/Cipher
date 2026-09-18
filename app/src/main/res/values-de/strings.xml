@@ -602,4 +602,7 @@
     <string name="account_export_pdf_desc">Zertifizierter Auszug mit Diagrammen &amp; Details (PRO)</string>
     <string name="account_export_success">Kontoauszug erfolgreich exportiert</string>
     <string name="account_export_error">Fehler beim Exportieren des Kontoauszugs: %1$s</string>
+    <string name="notify_action_switch_account">Konto wechseln</string>
+    <string name="notify_account_updated_title">Konto aktualisiert</string>
+    <string name="notify_account_updated_desc">Zugewiesen an %1$s</string>
 </resources>

@@ -602,4 +602,7 @@
     <string name="account_export_pdf_desc">Relevé certifié avec graphiques et détails (PRO)</string>
     <string name="account_export_success">Relevé exporté avec succès</string>
     <string name="account_export_error">Échec de l\'exportation du relevé : %1$s</string>
+    <string name="notify_action_switch_account">Changer de compte</string>
+    <string name="notify_account_updated_title">Compte mis à jour</string>
+    <string name="notify_account_updated_desc">Assigné à %1$s</string>
 </resources>

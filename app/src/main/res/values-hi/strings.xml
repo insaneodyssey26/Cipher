@@ -601,4 +601,7 @@
     <string name="account_export_pdf_desc">चार्ट और विश्लेषण के साथ कार्यकारी प्रमाणित विवरण (प्रो)</string>
     <string name="account_export_success">स्टेटमेंट सफलतापूर्वक एक्सपोर्ट हो गया</string>
     <string name="account_export_error">स्टेटमेंट एक्सपोर्ट विफल: %1$s</string>
+    <string name="notify_action_switch_account">खाता बदलें</string>
+    <string name="notify_account_updated_title">खाता अपडेट किया गया</string>
+    <string name="notify_account_updated_desc">%1$s को सौंपा गया</string>
 </resources>

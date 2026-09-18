@@ -603,4 +603,7 @@
     <string name="account_export_pdf_desc">グラフ付き公式利用明細書（PRO）</string>
     <string name="account_export_success">明細書が正常にエクスポートされました</string>
     <string name="account_export_error">明細書のエクスポートに失敗しました: %1$s</string>
+    <string name="notify_action_switch_account">口座を変更</string>
+    <string name="notify_account_updated_title">口座を更新しました</string>
+    <string name="notify_account_updated_desc">%1$s に割り当てられました</string>
 </resources>
