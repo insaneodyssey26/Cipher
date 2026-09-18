@@ -625,4 +625,25 @@
     <string name="pro_gate_custom_categories_desc">Los usuarios gratuitos pueden crear hasta 5 categorías personalizadas. Pásate a Cipher Pro para categorías ilimitadas.</string>
     <string name="pro_gate_smart_rules_title">Límite de reglas inteligentes</string>
     <string name="pro_gate_smart_rules_desc">Los usuarios gratuitos pueden crear hasta 5 reglas inteligentes. Pásate a Cipher Pro para reglas ilimitadas.</string>
+    <string name="account_frozen_badge">CONGELADA</string>
+    <string name="account_frozen_tooltip">Cuenta congelada. El plan gratuito está limitado a 2 cuentas activas. Pásate a Pro para descongelar.</string>
+    <string name="rule_paused_badge">PAUSADA</string>
+    <string name="rule_paused_tooltip">Pausada (límite Pro). El plan gratuito permite hasta 5 reglas activas.</string>
+    <string name="account_frozen_overlay_title">CUENTA CONGELADA</string>
+    <string name="account_frozen_overlay_desc">El plan gratuito incluye 2 cuentas activas. Establece como principal o actualiza a Pro para desbloquear.</string>
+    <string name="account_make_active_btn">Activar</string>
+    <string name="account_make_primary_btn">Hacer principal</string>
+    <string name="rule_make_active_btn">Activar</string>
+    <string name="rule_paused_overlay_desc">El plan gratuito incluye 5 reglas activas. Toca para activar esta regla.</string>
+    <string name="accounts_header_free_count">%1$d/%2$d Cuentas activas</string>
+    <string name="smart_rules_free_banner_title">Plan gratuito: 5 reglas activas</string>
+    <string name="smart_rules_free_banner_desc">El plan gratuito incluye hasta 5 reglas automáticas. Las reglas adicionales permanecen guardadas pero pausadas. Actualiza a Pro para reglas ilimitadas.</string>
+    <string name="categories_free_banner_title">Plan gratuito: 5 categorías personalizadas</string>
+    <string name="categories_free_banner_desc">El plan gratuito incluye hasta 5 categorías personalizadas. Las categorías adicionales permanecen en modo de solo lectura. Actualiza a Pro para categorías ilimitadas.</string>
+    <string name="account_locked_title">CUENTA BLOQUEADA</string>
+    <string name="account_locked_desc">El plan gratuito incluye 2 cuentas activas. Establece como principal o actualiza a Pro para desbloquear.</string>
+    <string name="pro_perk_accent_colors_title">Paletas de Acentos Exclusivas</string>
+    <string name="pro_perk_accent_colors_desc">Desbloquea 12 vibrantes colores de diseñador Pantone y Coolors.</string>
+    <string name="pro_gate_accent_colors_title">Colores de Tema Pro</string>
+    <string name="pro_gate_accent_colors_desc">Desbloquea los 18 temas de acento vibrantes Pantone y de diseñador con Cipher Pro.</string>
 </resources>

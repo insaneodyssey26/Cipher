@@ -3,6 +3,7 @@ package com.masum.cipher.ui.settings.rules
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,6 +85,7 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
+import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Store
@@ -355,6 +357,63 @@ fun SmartRulesScreen(
                 )
             }
 
+            if (!state.isPro) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                        .clickable {
+                            view.performVibrate(state.isHapticsEnabled)
+                            viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
+                        }
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Sparkles,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.smart_rules_free_banner_title),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.smart_rules_free_banner_desc),
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
             if (state.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -391,13 +450,24 @@ fun SmartRulesScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(categoryRules, key = { it.merchantName }) { rule ->
+                                    val originalIndex = state.categoryRules.indexOfFirst { it.merchantName.equals(rule.merchantName, ignoreCase = true) }
+                                    val isPaused = !state.isPro && originalIndex >= 5
                                     CategoryRuleItem(
                                         rule = rule,
                                         customCategories = state.customCategories,
+                                        isPaused = isPaused,
+                                        isHapticsEnabled = state.isHapticsEnabled,
                                         onClick = {
                                             view.performVibrate(state.isHapticsEnabled)
-                                            editCategoryRule = rule
-                                            showCategoryDialog = true
+                                            if (isPaused) {
+                                                viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
+                                            } else {
+                                                editCategoryRule = rule
+                                                showCategoryDialog = true
+                                            }
+                                        },
+                                        onActivate = {
+                                            viewModel.handleIntent(SmartRulesContract.Intent.ActivateCategoryRule(rule))
                                         },
                                         onDelete = {
                                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -434,12 +504,23 @@ fun SmartRulesScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(merchantRules, key = { it.rawName }) { alias ->
+                                    val originalIndex = state.merchantRules.indexOfFirst { it.rawName.equals(alias.rawName, ignoreCase = true) }
+                                    val isPaused = !state.isPro && originalIndex >= 5
                                     MerchantRuleItem(
                                         alias = alias,
+                                        isPaused = isPaused,
+                                        isHapticsEnabled = state.isHapticsEnabled,
                                         onClick = {
                                             view.performVibrate(state.isHapticsEnabled)
-                                            editMerchantRule = alias
-                                            showMerchantDialog = true
+                                            if (isPaused) {
+                                                viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
+                                            } else {
+                                                editMerchantRule = alias
+                                                showMerchantDialog = true
+                                            }
+                                        },
+                                        onActivate = {
+                                            viewModel.handleIntent(SmartRulesContract.Intent.ActivateMerchantRule(alias))
                                         },
                                         onDelete = {
                                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
@@ -507,9 +588,13 @@ fun SmartRulesScreen(
 private fun CategoryRuleItem(
     rule: CategoryRuleEntity,
     customCategories: List<CustomCategoryEntity> = emptyList(),
+    isPaused: Boolean = false,
+    isHapticsEnabled: Boolean = true,
     onClick: () -> Unit,
+    onActivate: (() -> Unit)? = null,
     onDelete: () -> Unit
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     val categoryItem = remember(rule.customCategory, customCategories) {
         CategoryHelper.resolveCategory(rule.customCategory, customCategories)
     }
@@ -518,7 +603,7 @@ private fun CategoryRuleItem(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isPaused) 0.25f else 0.4f)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -527,13 +612,13 @@ private fun CategoryRuleItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(categoryItem.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                    .background(categoryItem.color.copy(alpha = if (isPaused) 0.05f else 0.1f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = categoryItem.icon,
                     contentDescription = null,
-                    tint = categoryItem.color,
+                    tint = if (isPaused) categoryItem.color.copy(alpha = 0.5f) else categoryItem.color,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -541,22 +626,72 @@ private fun CategoryRuleItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = rule.merchantName,
-                    style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = rule.merchantName,
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isPaused) 0.6f else 1f),
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    if (isPaused) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF64748B).copy(alpha = 0.2f))
+                                .border(0.6.dp, Color(0xFF94A3B8).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.rule_paused_badge),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 8.5.sp,
+                                    letterSpacing = 0.6.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 val categoryDisplayName = if (categoryItem.titleRes != null) stringResource(categoryItem.titleRes) else categoryItem.displayName
                 Text(
                     text = stringResource(R.string.smart_rules_always_as, categoryDisplayName),
                     style = Typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isPaused) 0.5f else 1f)
                 )
             }
             
             Spacer(modifier = Modifier.width(8.dp))
+
+            if (isPaused && onActivate != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .border(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled)
+                            onActivate()
+                        }
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.rule_make_active_btn),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             
             IconButton(
                 onClick = onDelete,
@@ -576,9 +711,13 @@ private fun CategoryRuleItem(
 @Composable
 private fun MerchantRuleItem(
     alias: MerchantAliasEntity,
+    isPaused: Boolean = false,
+    isHapticsEnabled: Boolean = true,
     onClick: () -> Unit,
+    onActivate: (() -> Unit)? = null,
     onDelete: () -> Unit
 ) {
+    val view = androidx.compose.ui.platform.LocalView.current
     val initialLetter = remember(alias.cleanName) {
         alias.cleanName.trim().firstOrNull { it.isLetterOrDigit() }?.uppercaseChar()?.toString() ?: "M"
     }
@@ -592,7 +731,7 @@ private fun MerchantRuleItem(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isPaused) 0.25f else 0.4f)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -601,7 +740,7 @@ private fun MerchantRuleItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                    .background(accentColor.copy(alpha = if (isPaused) 0.06f else 0.12f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -611,20 +750,45 @@ private fun MerchantRuleItem(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     ),
-                    color = accentColor
+                    color = if (isPaused) accentColor.copy(alpha = 0.5f) else accentColor
                 )
             }
             
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = alias.rawName,
-                    style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = alias.rawName,
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isPaused) 0.6f else 1f),
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    if (isPaused) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF64748B).copy(alpha = 0.2f))
+                                .border(0.6.dp, Color(0xFF94A3B8).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.rule_paused_badge),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 8.5.sp,
+                                    letterSpacing = 0.6.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -633,13 +797,13 @@ private fun MerchantRuleItem(
                     Icon(
                         imageVector = LucideIcons.ArrowRight,
                         contentDescription = null,
-                        tint = accentColor,
+                        tint = if (isPaused) accentColor.copy(alpha = 0.5f) else accentColor,
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
                         text = alias.cleanName,
                         style = Typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                        color = accentColor,
+                        color = if (isPaused) accentColor.copy(alpha = 0.5f) else accentColor,
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
@@ -647,6 +811,31 @@ private fun MerchantRuleItem(
             }
             
             Spacer(modifier = Modifier.width(8.dp))
+
+            if (isPaused && onActivate != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .border(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled)
+                            onActivate()
+                        }
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.rule_make_active_btn),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             
             IconButton(
                 onClick = onDelete,

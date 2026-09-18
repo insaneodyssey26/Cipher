@@ -287,6 +287,11 @@ fun CipherProSheet(
                     subtitle = stringResource(R.string.pro_perk_unlimited_accounts_desc)
                 )
                 ProFeatureRow(
+                    icon = LucideIcons.Palette,
+                    title = stringResource(R.string.pro_perk_accent_colors_title),
+                    subtitle = stringResource(R.string.pro_perk_accent_colors_desc)
+                )
+                ProFeatureRow(
                     icon = LucideIcons.ShieldCheck,
                     title = stringResource(R.string.pro_perk_offline_crypto_title),
                     subtitle = stringResource(R.string.pro_perk_offline_crypto_desc)

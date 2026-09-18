@@ -628,4 +628,25 @@
     <string name="pro_gate_custom_categories_desc">Free users can create up to 5 custom categories. Upgrade to Cipher Pro for unlimited categories.</string>
     <string name="pro_gate_smart_rules_title">Smart Rules Limit</string>
     <string name="pro_gate_smart_rules_desc">Free users can create up to 5 smart rules. Upgrade to Cipher Pro for unlimited auto-categorization &amp; rename rules.</string>
+    <string name="account_frozen_badge">FROZEN</string>
+    <string name="account_frozen_tooltip">Account frozen. Free tier is limited to 2 active accounts. Upgrade to Pro to unfreeze.</string>
+    <string name="rule_paused_badge">PAUSED</string>
+    <string name="rule_paused_tooltip">Paused (Pro limit). Free tier is limited to 5 active rules.</string>
+    <string name="account_frozen_overlay_title">ACCOUNT FROZEN</string>
+    <string name="account_frozen_overlay_desc">Free plan includes 2 active accounts. Set as primary or upgrade to Pro to unlock.</string>
+    <string name="account_make_active_btn">Make Active</string>
+    <string name="account_make_primary_btn">Make Primary</string>
+    <string name="rule_make_active_btn">Activate</string>
+    <string name="rule_paused_overlay_desc">Free plan includes 5 active rules. Tap to make this rule active.</string>
+    <string name="accounts_header_free_count">%1$d/%2$d Active Accounts</string>
+    <string name="smart_rules_free_banner_title">Free Plan: 5 Active Rules</string>
+    <string name="smart_rules_free_banner_desc">Free plan includes up to 5 automated rules. Extra rules remain saved but are paused. Upgrade to Pro for unlimited rules.</string>
+    <string name="categories_free_banner_title">Free Plan: 5 Custom Categories</string>
+    <string name="categories_free_banner_desc">Free plan includes up to 5 custom categories. Extra custom categories remain saved in read-only mode. Upgrade to Pro for unlimited categories.</string>
+    <string name="account_locked_title">ACCOUNT LOCKED</string>
+    <string name="account_locked_desc">Free plan includes 2 active accounts. Set as primary or upgrade to Pro to unlock.</string>
+    <string name="pro_perk_accent_colors_title">Exclusive Accent Palettes</string>
+    <string name="pro_perk_accent_colors_desc">Unlock 12 vibrant Pantone &amp; Coolors designer theme colors.</string>
+    <string name="pro_gate_accent_colors_title">Pro Theme Colors</string>
+    <string name="pro_gate_accent_colors_desc">Unlock all 18 vibrant Pantone and designer accent themes with Cipher Pro.</string>
 </resources>

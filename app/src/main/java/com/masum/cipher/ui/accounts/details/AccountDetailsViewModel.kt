@@ -78,10 +78,11 @@ class AccountDetailsViewModel @Inject constructor(
                 val targetItem = accountItems.find { it.id == accountId } ?: accountItems.firstOrNull()
                 val targetEntity = targetItem?.entity ?: accountRepository.getAccountById(accountId)
 
-                val isTargetDefault = targetEntity?.isDefault ?: false
+                val rootAccountId = accountItems.minByOrNull { it.entity.createdAt }?.id ?: 1L
+                val isTargetRoot = (targetEntity != null && targetEntity.id == rootAccountId)
                 val accTxs = if (targetEntity != null) {
                     allTxs.filter { tx ->
-                        tx.accountId == targetEntity.id || (tx.accountId == null && isTargetDefault)
+                        tx.accountId == targetEntity.id || (tx.accountId == null && isTargetRoot)
                     }
                 } else {
                     emptyList()

@@ -71,10 +71,20 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         val start = monthStart()
         val previousSpent = transactionDao.sumExpensesSince(start)
 
+        val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
+        val isPro = settings?.isPro == true
+
         val resolvedAccountId = transaction.accountId ?: run {
             if (accountDao != null) {
                 val accounts = accountDao.getAllAccounts()
-                resolveAccount(transaction.rawSms.orEmpty(), accounts)
+                val activeAccounts = if (isPro || accounts.size <= 2) {
+                    accounts
+                } else {
+                    val defaultAcc = accounts.firstOrNull { it.isDefault } ?: accounts.first()
+                    val secondAcc = accounts.firstOrNull { it.id != defaultAcc.id }
+                    listOfNotNull(defaultAcc, secondAcc)
+                }
+                resolveAccount(transaction.rawSms.orEmpty(), activeAccounts)
             } else {
                 null
             }
@@ -89,7 +99,6 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         val savedTx = newTx.copy(id = insertedId)
 
         onSyncWidget?.invoke() ?: widgetSyncManager?.syncWidget()
-        val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
         if (settings?.notifyAllTransactions == true) {
             onNotifyNewTransaction?.invoke(savedTx) ?: localNotificationManager?.showNewTransactionNotification(savedTx)
         }

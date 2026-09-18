@@ -102,7 +102,14 @@ class QuickSwitchAccountActivity : ComponentActivity() {
                 themeMode = settings.theme
                 accentColorHex = settings.accentColor.colorValue
                 transaction = transactionRepository.getTransactionById(transactionId)
-                accounts = accountRepository.getAllAccountsFlow().first()
+                val allAccounts = accountRepository.getAllAccountsFlow().first()
+                accounts = if (settings.isPro || allAccounts.size <= 2) {
+                    allAccounts
+                } else {
+                    val defaultAcc = allAccounts.firstOrNull { it.isDefault } ?: allAccounts.first()
+                    val secondAcc = allAccounts.firstOrNull { it.id != defaultAcc.id }
+                    listOfNotNull(defaultAcc, secondAcc)
+                }
             }
 
             val isSystemDark = isSystemInDarkTheme()

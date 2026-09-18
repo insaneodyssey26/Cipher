@@ -145,7 +145,8 @@ fun TransactionDetailsSheet(
     onDelete: (() -> Unit)? = null,
     onDraftChange: ((TransactionEntity) -> Unit)? = null,
     onCreateCustomCategory: ((name: String, iconName: String, colorHex: Long) -> Unit)? = null,
-    isHapticsEnabled: Boolean = true
+    isHapticsEnabled: Boolean = true,
+    isPro: Boolean = true
 ) {
     var merchant by remember { mutableStateOf(transaction.merchant) }
     var amount by remember { mutableStateOf(if (transaction.amount == 0.0) "" else String.format(Locale.US, "%.2f", transaction.amount)) }
@@ -163,6 +164,22 @@ fun TransactionDetailsSheet(
         ?: accounts.firstOrNull { it.isDefault }?.id
         ?: accounts.firstOrNull()?.id
     var selectedAccountId by remember(transaction.id, transaction.accountId) { mutableStateOf(defaultSelectedAccountId) }
+
+    val visibleAccounts = remember(accounts, isPro, selectedAccountId) {
+        if (isPro || accounts.size <= 2) {
+            accounts
+        } else {
+            val defaultAcc = accounts.firstOrNull { it.isDefault } ?: accounts.first()
+            val secondAcc = accounts.firstOrNull { it.id != defaultAcc.id }
+            val base = listOfNotNull(defaultAcc, secondAcc)
+            if (selectedAccountId != null && base.none { it.id == selectedAccountId }) {
+                val currentSelected = accounts.find { it.id == selectedAccountId }
+                if (currentSelected != null) base + currentSelected else base
+            } else {
+                base
+            }
+        }
+    }
 
     LaunchedEffect(accounts, transaction.accountId) {
         if (selectedAccountId == null) {
@@ -555,12 +572,12 @@ fun TransactionDetailsSheet(
                         }
                     }
 
-                    if (accounts.size <= 3) {
+                    if (visibleAccounts.size <= 3) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            accounts.forEach { acc ->
+                            visibleAccounts.forEach { acc ->
                                 val isSelected = acc.id == selectedAccountId
                                 val accColor = Color(acc.colorHex)
                                 Row(
@@ -620,7 +637,7 @@ fun TransactionDetailsSheet(
                                 .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            accounts.forEach { acc ->
+                            visibleAccounts.forEach { acc ->
                                 val isSelected = acc.id == selectedAccountId
                                 val accColor = Color(acc.colorHex)
                                 Row(

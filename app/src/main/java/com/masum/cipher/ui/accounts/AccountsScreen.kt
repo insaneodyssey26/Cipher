@@ -101,6 +101,16 @@ fun AccountsScreen(
 
     var isActionsExpanded by remember { mutableStateOf(false) }
 
+    val activeIds = remember(state.accounts, state.isPro) {
+        if (state.isPro || state.accounts.size <= state.freeAccountLimit) {
+            state.accounts.map { it.id }.toSet()
+        } else {
+            val defaultAcc = state.accounts.firstOrNull { it.isDefault } ?: state.accounts.first()
+            val secondAcc = state.accounts.firstOrNull { it.id != defaultAcc.id }
+            listOfNotNull(defaultAcc.id, secondAcc?.id).toSet()
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -144,7 +154,7 @@ fun AccountsScreen(
                         maxLines = 1
                     )
                     Text(
-                        text = if (state.isPro) "${stringResource(R.string.pro_title)} · ${stringResource(R.string.pro_badge_lifetime)}" else "${state.accounts.size}/${state.freeAccountLimit} Free Accounts",
+                        text = if (state.isPro) "${stringResource(R.string.pro_title)} · ${stringResource(R.string.pro_badge_lifetime)}" else stringResource(R.string.accounts_header_free_count, activeIds.size, state.freeAccountLimit),
                         style = Typography.bodySmall.copy(
                             fontSize = 11.5.sp,
                             color = if (state.isPro) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
@@ -476,6 +486,7 @@ fun AccountsScreen(
                     }
 
                     items(state.accounts, key = { it.id }) { item ->
+                        val isFrozen = !state.isPro && item.id !in activeIds
                         LuxuryAccountCard(
                             name = item.name,
                             type = item.type,
@@ -487,20 +498,30 @@ fun AccountsScreen(
                             currencySymbol = state.currencySymbol,
                             locale = locale,
                             transactionCount = item.transactionCount,
+                            isFrozen = isFrozen,
                             isHapticsEnabled = state.isHapticsEnabled,
-                            onCardClick = {
-                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                                onNavigateToAccountDetails(item.id)
+                            onCardClick = if (isFrozen) null else {
+                                {
+                                    view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                    onNavigateToAccountDetails(item.id)
+                                }
                             },
-                            onEditClick = {
-                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
-                                onNavigateToEditAccount(item.id)
+                            onEditClick = if (isFrozen) null else {
+                                {
+                                    view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                    onNavigateToEditAccount(item.id)
+                                }
                             },
                             onSetDefaultClick = {
                                 viewModel.handleIntent(AccountsContract.Intent.SetDefaultAccount(item.id))
                             },
-                            onDeleteClick = {
-                                viewModel.handleIntent(AccountsContract.Intent.RequestDeleteAccount(item.entity))
+                            onDeleteClick = if (isFrozen) null else {
+                                {
+                                    viewModel.handleIntent(AccountsContract.Intent.RequestDeleteAccount(item.entity))
+                                }
+                            },
+                            onUpgradeProClick = {
+                                onNavigateToPro()
                             }
                         )
                     }

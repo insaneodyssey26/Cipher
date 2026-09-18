@@ -100,6 +100,7 @@ import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Key
 import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.LayoutGrid
+import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.X
@@ -201,6 +202,11 @@ fun CipherProScreen(
                 icon = LucideIcons.LayoutGrid,
                 titleRes = R.string.pro_perk_card_themes_title,
                 descriptionRes = R.string.pro_perk_card_themes_desc
+            ),
+            ProPerkItem(
+                icon = LucideIcons.Palette,
+                titleRes = R.string.pro_perk_accent_colors_title,
+                descriptionRes = R.string.pro_perk_accent_colors_desc
             ),
             ProPerkItem(
                 icon = LucideIcons.ShieldCheck,

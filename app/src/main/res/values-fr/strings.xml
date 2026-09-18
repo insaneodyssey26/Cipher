@@ -626,4 +626,25 @@
     <string name="pro_gate_custom_categories_desc">Les utilisateurs gratuits peuvent créer jusqu\'à 5 catégories personnalisées. Passez à Cipher Pro pour des catégories illimitées.</string>
     <string name="pro_gate_smart_rules_title">Limite de règles intelligentes</string>
     <string name="pro_gate_smart_rules_desc">Les utilisateurs gratuits peuvent créer jusqu\'à 5 règles intelligentes. Passez à Cipher Pro pour des règles illimitées.</string>
+    <string name="account_frozen_badge">GELÉ</string>
+    <string name="account_frozen_tooltip">Compte gelé. La version gratuite est limitée à 2 comptes actifs. Passez à Pro pour débloquer.</string>
+    <string name="rule_paused_badge">EN PAUSE</string>
+    <string name="rule_paused_tooltip">En pause (limite Pro). La version gratuite est limitée à 5 règles actives.</string>
+    <string name="account_frozen_overlay_title">COMPTE GELÉ</string>
+    <string name="account_frozen_overlay_desc">Le forfait gratuit comprend 2 comptes actifs. Définissez comme principal ou passez à Pro pour déverrouiller.</string>
+    <string name="account_make_active_btn">Activer</string>
+    <string name="account_make_primary_btn">Définir comme principal</string>
+    <string name="rule_make_active_btn">Activer</string>
+    <string name="rule_paused_overlay_desc">L\'offre gratuite comprend 5 règles actives. Touchez pour activer cette règle.</string>
+    <string name="accounts_header_free_count">%1$d/%2$d Comptes actifs</string>
+    <string name="smart_rules_free_banner_title">Forfait gratuit : 5 règles actives</string>
+    <string name="smart_rules_free_banner_desc">Le forfait gratuit comprend jusqu\'à 5 règles automatisées. Les règles supplémentaires restent enregistrées mais en pause. Passez à Pro pour des règles illimitées.</string>
+    <string name="categories_free_banner_title">Forfait gratuit : 5 catégories personnalisées</string>
+    <string name="categories_free_banner_desc">Le forfait gratuit comprend jusqu\'à 5 catégories personnalisées. Les catégories supplémentaires restent enregistrées en lecture seule. Passez à Pro pour des catégories illimitées.</string>
+    <string name="account_locked_title">COMPTE VERROUILLÉ</string>
+    <string name="account_locked_desc">Le forfait gratuit comprend 2 comptes actifs. Définissez comme principal ou passez à Pro pour déverrouiller.</string>
+    <string name="pro_perk_accent_colors_title">Palettes d\'Accents Exclusives</string>
+    <string name="pro_perk_accent_colors_desc">Débloquez 12 couleurs vibrantes de designer Pantone et Coolors.</string>
+    <string name="pro_gate_accent_colors_title">Couleurs de Thème Pro</string>
+    <string name="pro_gate_accent_colors_desc">Débloquez les 18 thèmes d\'accentuation Pantone et designer avec Cipher Pro.</string>
 </resources>

@@ -626,4 +626,25 @@
     <string name="pro_gate_custom_categories_desc">Kostenlose Nutzer können bis zu 5 eigene Kategorien erstellen. Upgrade auf Cipher Pro für unbegrenzte Kategorien.</string>
     <string name="pro_gate_smart_rules_title">Limit für intelligente Regeln</string>
     <string name="pro_gate_smart_rules_desc">Kostenlose Nutzer können bis zu 5 Regeln erstellen. Upgrade auf Cipher Pro für unbegrenzte Regeln.</string>
+    <string name="account_frozen_badge">EINGEFROREN</string>
+    <string name="account_frozen_tooltip">Konto eingefroren. Kostenlose Version ist auf 2 aktive Konten beschränkt. Upgrade auf Pro zum Entsperren.</string>
+    <string name="rule_paused_badge">PAUSIERT</string>
+    <string name="rule_paused_tooltip">Pausiert (Pro-Limit). Die kostenlose Version ist auf 5 aktive Regeln beschränkt.</string>
+    <string name="account_frozen_overlay_title">KONTO EINGEFROREN</string>
+    <string name="account_frozen_overlay_desc">Der kostenlose Plan enthält 2 aktive Konten. Als Hauptkonto festlegen oder auf Pro upgraden zum Entsperren.</string>
+    <string name="account_make_active_btn">Aktivieren</string>
+    <string name="account_make_primary_btn">Als Hauptkonto festlegen</string>
+    <string name="rule_make_active_btn">Aktivieren</string>
+    <string name="rule_paused_overlay_desc">Kostenloser Plan beinhaltet 5 aktive Regeln. Tippen Sie hier, um diese Regel zu aktivieren.</string>
+    <string name="accounts_header_free_count">%1$d/%2$d Aktive Konten</string>
+    <string name="smart_rules_free_banner_title">Kostenloser Plan: 5 aktive Regeln</string>
+    <string name="smart_rules_free_banner_desc">Der kostenlose Plan umfasst bis zu 5 automatisierte Regeln. Zusätzliche Regeln bleiben gespeichert, sind jedoch pausiert. Upgrade auf Pro für unbegrenzte Regeln.</string>
+    <string name="categories_free_banner_title">Kostenloser Plan: 5 benutzerdefinierte Kategorien</string>
+    <string name="categories_free_banner_desc">Der kostenlose Plan umfasst bis zu 5 benutzerdefinierte Kategorien. Zusätzliche Kategorien bleiben schreibgeschützt gespeichert. Upgrade auf Pro für unbegrenzte Kategorien.</string>
+    <string name="account_locked_title">KONTO GESPERRT</string>
+    <string name="account_locked_desc">Der kostenlose Plan enthält 2 aktive Konten. Als Hauptkonto festlegen oder auf Pro upgraden zum Entsperren.</string>
+    <string name="pro_perk_accent_colors_title">Exklusive Akzent-Paletten</string>
+    <string name="pro_perk_accent_colors_desc">12 lebendige Pantone- und Coolors-Designer-Themenfarben freischalten.</string>
+    <string name="pro_gate_accent_colors_title">Pro-Themenfarben</string>
+    <string name="pro_gate_accent_colors_desc">Schalten Sie alle 18 lebendigen Pantone- und Designer-Akzentthemen mit Cipher Pro frei.</string>
 </resources>

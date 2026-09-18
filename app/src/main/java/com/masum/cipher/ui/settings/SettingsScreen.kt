@@ -12,8 +12,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +66,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -75,6 +79,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -108,6 +113,7 @@ import compose.icons.lucideicons.Bug
 import compose.icons.lucideicons.CalendarClock
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Crown
@@ -164,6 +170,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val view = androidx.compose.ui.platform.LocalView.current
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
     
     var searchQuery by remember { mutableStateOf("") }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -185,6 +192,7 @@ fun SettingsScreen(
     var autoBackupSetupPassword by remember { mutableStateOf("") }
     var showProSheet by remember { mutableStateOf(false) }
     var showPdfUpsellSheet by remember { mutableStateOf(false) }
+    var showAccentColorsGateSheet by remember { mutableStateOf(false) }
 
     val timeoutOptions = listOf(
         stringResource(R.string.timeout_immediately) to 0L,
@@ -611,6 +619,7 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         )
                     }
 
+                    val colorScrollState = rememberScrollState()
                     androidx.compose.animation.AnimatedVisibility(
                         visible = isColorPickerExpanded,
                         enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
@@ -619,69 +628,159 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                                .padding(vertical = 10.dp)
                         ) {
-                            AccentColor.entries.chunked(5).forEach { rowColors ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.accent_color_title).uppercase(),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp,
+                                        fontSize = 10.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    rowColors.forEach { color ->
-                                        val isSelected = state.accentColor == color
-                                        val scale by androidx.compose.animation.core.animateFloatAsState(
-                                            targetValue = if (isSelected) 1.1f else 1f,
-                                            animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = 300f),
-                                            label = "color_scale"
-                                        )
-                                        val borderColor by androidx.compose.animation.animateColorAsState(
-                                            targetValue = if (isSelected) Color(color.colorValue) else Color.Transparent,
-                                            animationSpec = androidx.compose.animation.core.tween(300),
-                                            label = "border_color"
-                                        )
-                                        val view = androidx.compose.ui.platform.LocalView.current
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clickable(
-                                                    interactionSource = remember { MutableInteractionSource() },
-                                                    indication = null
-                                                ) {
-                                                    if (!isSelected) {
-                                                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                                                        viewModel.handleIntent(SettingsContract.Intent.UpdateAccentColor(color))
-                                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(26.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
+                                            .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), CircleShape)
+                                            .clickable {
+                                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                                coroutineScope.launch {
+                                                    colorScrollState.animateScrollBy(-240f)
                                                 }
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(48.dp)
-                                                    .scale(scale)
-                                                    .border(2.dp, borderColor, CircleShape)
-                                                    .padding(4.dp)
-                                                    .background(Color(color.colorValue), CircleShape),
-                                                contentAlignment = Alignment.Center
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.ChevronLeft,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(26.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
+                                            .border(0.8.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), CircleShape)
+                                            .clickable {
+                                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                                coroutineScope.launch {
+                                                    colorScrollState.animateScrollBy(240f)
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.ChevronRight,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(colorScrollState)
+                                    .padding(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AccentColor.entries.forEach { color ->
+                                    val isSelected = state.accentColor == color
+                                    val scale by androidx.compose.animation.core.animateFloatAsState(
+                                        targetValue = if (isSelected) 1.12f else 1f,
+                                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = 300f),
+                                        label = "color_scale"
+                                    )
+                                    val borderColor by androidx.compose.animation.animateColorAsState(
+                                        targetValue = if (isSelected) Color(color.colorValue) else Color.Transparent,
+                                        animationSpec = androidx.compose.animation.core.tween(300),
+                                        label = "border_color"
+                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
                                             ) {
-                                                if (isSelected) {
+                                                if (color.isProOnly && !state.isPro) {
+                                                    view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                                    showAccentColorsGateSheet = true
+                                                } else if (!isSelected) {
+                                                    view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                                                    viewModel.handleIntent(SettingsContract.Intent.UpdateAccentColor(color))
+                                                }
+                                            }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(46.dp)
+                                                .scale(scale)
+                                                .border(2.5.dp, borderColor, CircleShape)
+                                                .padding(3.5.dp)
+                                                .background(Color(color.colorValue), CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (isSelected) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Check,
+                                                    contentDescription = null,
+                                                    tint = if (Color(color.colorValue).luminance() > 0.6f) Color.Black else Color.White,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            } else if (color.isProOnly && !state.isPro) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(18.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color.Black.copy(alpha = 0.55f)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
                                                     Icon(
-                                                        imageVector = LucideIcons.Check,
+                                                        imageVector = LucideIcons.Lock,
                                                         contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.surface,
-                                                        modifier = Modifier.size(20.dp)
+                                                        tint = Color(0xFFFBBF24),
+                                                        modifier = Modifier.size(10.dp)
                                                     )
                                                 }
                                             }
-                                            Text(
-                                                text = color.colorName.substringAfter(" "),
-                                                style = Typography.labelSmall.copy(fontSize = 10.sp),
-                                                color = if (isSelected) Color(color.colorValue) else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                textAlign = TextAlign.Center,
-                                                maxLines = 1,
-                                                modifier = Modifier.height(16.dp)
-                                            )
                                         }
+                                        Text(
+                                            text = color.colorName.substringAfter(" "),
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                fontSize = 10.5.sp
+                                            ),
+                                            color = if (isSelected) Color(color.colorValue) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1
+                                        )
                                     }
                                 }
                             }
@@ -1405,6 +1504,35 @@ Spacer(modifier = Modifier.weight(1f))
             },
             onNavigateToPro = onNavigateToPro,
             onDismiss = { showPdfUpsellSheet = false }
+        )
+    }
+
+    if (showAccentColorsGateSheet) {
+        ProFeatureGateSheet(
+            featureTitle = stringResource(R.string.pro_gate_accent_colors_title),
+            featureTagline = stringResource(R.string.pro_gate_accent_colors_desc),
+            featureIcon = LucideIcons.Palette,
+            perks = listOf(
+                ProFeaturePerk(
+                    title = "18 Designer Accent Themes",
+                    description = "Personalize your dashboard and cards with curated Pantone and luxury tones."
+                ),
+                ProFeaturePerk(
+                    title = "Dynamic Material Match",
+                    description = "Rich contrast harmonized for both dark and light AMOLED themes."
+                ),
+                ProFeaturePerk(
+                    title = "Lifetime Access",
+                    description = "Unlock all current and future designer theme palettes permanently."
+                )
+            ),
+            isHapticsEnabled = state.isHapticsEnabled,
+            primaryButtonText = "Unlock with Cipher Pro",
+            onNavigateToPro = {
+                showAccentColorsGateSheet = false
+                onNavigateToPro()
+            },
+            onDismiss = { showAccentColorsGateSheet = false }
         )
     }
 

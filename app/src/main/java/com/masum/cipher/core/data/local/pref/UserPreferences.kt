@@ -641,17 +641,25 @@ class UserPreferences @Inject constructor(
     }
 }
 
-enum class AccentColor(val colorValue: Long, val colorName: String) {
-    INDIGO(0xFF6366F1, "Electric Indigo"),
-    MINT(0xFF10B981, "Midnight Mint"),
-    CHERRY(0xFFF43F5E, "Cherry Blossom"),
-    AMBER(0xFFF59E0B, "Amber Vault"),
-    CYAN(0xFF06B6D4, "Ocean Cyan"),
-    VIOLET(0xFF8B5CF6, "Royal Violet"),
-    ROSE(0xFFE11D48, "Crimson Rose"),
-    OCEAN(0xFF0EA5E9, "Pacific Blue"),
-    SAGE(0xFF84CC16, "Spring Sage"),
-    CORAL(0xFFF97316, "Sunset Coral")
+enum class AccentColor(val colorValue: Long, val colorName: String, val isProOnly: Boolean = false) {
+    INDIGO(0xFF6366F1, "Electric Indigo", false),
+    MINT(0xFF10B981, "Vibrant Mint", false),
+    CHERRY(0xFFF43F5E, "Crimson Cherry", false),
+    AMBER(0xFFF59E0B, "Amber Gold", false),
+    CYAN(0xFF06B6D4, "Neon Cyan", false),
+    VIOLET(0xFF8B5CF6, "Royal Violet", false),
+    SAPPHIRE(0xFF2563EB, "Sapphire Blue", true),
+    MAGENTA(0xFFBE123C, "Viva Magenta", true),
+    EMERALD(0xFF059669, "Emerald Green", true),
+    CORAL(0xFFFF6B6B, "Sunset Coral", true),
+    LAVENDER(0xFFA855F7, "Neon Purple", true),
+    TEAL(0xFF0D9488, "Deep Teal", true),
+    PEACH_FUZZ(0xFFFF7A59, "Peach Fuzz", true),
+    LIME(0xFF84CC16, "Electric Lime", true),
+    OCEAN(0xFF0EA5E9, "Pacific Blue", true),
+    FLAME(0xFFFF5722, "Solar Flame", true),
+    AURORA(0xFF00B4D8, "Aurora Turquoise", true),
+    GOLD(0xFFEAB308, "Imperial Gold", true)
 }
 
 enum class AutoBackupFrequency(val label: String) {

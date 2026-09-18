@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +44,9 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.CreditCard
+import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Pencil
+import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Trash2
 import java.util.Locale
 
@@ -60,11 +63,13 @@ fun LuxuryAccountCard(
     locale: Locale,
     modifier: Modifier = Modifier,
     transactionCount: Int? = null,
+    isFrozen: Boolean = false,
     isHapticsEnabled: Boolean = true,
     onCardClick: (() -> Unit)? = null,
     onEditClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
-    onSetDefaultClick: (() -> Unit)? = null
+    onSetDefaultClick: (() -> Unit)? = null,
+    onUpgradeProClick: (() -> Unit)? = null
 ) {
     val view = LocalView.current
     val baseColor = Color(colorHex)
@@ -135,10 +140,11 @@ fun LuxuryAccountCard(
                     }
                 } else Modifier
             )
-            .padding(18.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
@@ -186,7 +192,26 @@ fun LuxuryAccountCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    if (isDefault) {
+                    if (isFrozen) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF64748B).copy(alpha = 0.22f), RoundedCornerShape(8.dp))
+                                .border(0.8.dp, Color(0xFF94A3B8).copy(alpha = 0.45f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.5.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.account_frozen_badge),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 9.sp,
+                                    letterSpacing = 0.8.sp
+                                ),
+                                color = if (isDark) Color(0xFFCBD5E1) else Color(0xFF475569)
+                            )
+                        }
+                    } else if (isDefault) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
@@ -343,6 +368,136 @@ fun LuxuryAccountCard(
                     ),
                     color = if (isDark) Color.White.copy(alpha = 0.65f) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+
+        if (isFrozen) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(cardShape)
+                    .background(
+                        if (isDark) {
+                            Color(0xF0080B10)
+                        } else {
+                            Color(0xF20F172A)
+                        }
+                    )
+                    .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.4f), cardShape)
+                    .clickable(enabled = false) {}
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Lock,
+                            contentDescription = null,
+                            tint = Color(0xFFF59E0B),
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.account_locked_title),
+                            style = Typography.labelMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                letterSpacing = 1.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(R.string.account_locked_desc),
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 11.5.sp,
+                            lineHeight = 15.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.8f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        if (onSetDefaultClick != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color.White.copy(alpha = 0.14f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(10.dp))
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        onSetDefaultClick()
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 7.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.account_make_primary_btn),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.5.sp
+                                    ),
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                        if (onUpgradeProClick != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                Color(0xFFF59E0B),
+                                                Color(0xFFD97706)
+                                            )
+                                        )
+                                    )
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        onUpgradeProClick()
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 7.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Sparkles,
+                                        contentDescription = null,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.pro_btn_upgrade),
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.5.sp
+                                        ),
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

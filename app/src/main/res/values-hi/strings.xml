@@ -625,4 +625,25 @@
     <string name="pro_gate_custom_categories_desc">मुफ़्त उपयोगकर्ता अधिकतम 5 कस्टम श्रेणियाँ बना सकते हैं। असीमित श्रेणियों के लिए Cipher Pro पर अपग्रेड करें।</string>
     <string name="pro_gate_smart_rules_title">स्मार्ट नियम सीमा</string>
     <string name="pro_gate_smart_rules_desc">मुफ़्त उपयोगकर्ता अधिकतम 5 स्मार्ट नियम बना सकते हैं। असीमित नियमों के लिए Cipher Pro पर अपग्रेड करें।</string>
+    <string name="account_frozen_badge">स्थगित</string>
+    <string name="account_frozen_tooltip">खाता स्थगित है। मुफ़्त संस्करण में अधिकतम 2 सक्रिय खाते अनुमत हैं। अनफ़्रीज़ करने के लिए प्रो में अपग्रेड करें।</string>
+    <string name="rule_paused_badge">रोका गया</string>
+    <string name="rule_paused_tooltip">रोका गया (प्रो सीमा)। मुफ़्त संस्करण में अधिकतम 5 सक्रिय नियम काम करते हैं।</string>
+    <string name="account_frozen_overlay_title">खाता स्थगित</string>
+    <string name="account_frozen_overlay_desc">मुफ़्त प्लान में 2 सक्रिय खाते शामिल हैं। अनलॉक करने के लिए इसे प्राथमिक बनाएं या प्रो में अपग्रेड करें।</string>
+    <string name="account_make_active_btn">सक्रिय करें</string>
+    <string name="account_make_primary_btn">प्राथमिक बनाएं</string>
+    <string name="rule_make_active_btn">सक्रिय करें</string>
+    <string name="rule_paused_overlay_desc">मुफ़्त प्लान में 5 सक्रिय नियम शामिल हैं। इसे सक्रिय करने के लिए टैप करें।</string>
+    <string name="accounts_header_free_count">%1$d/%2$d सक्रिय खाते</string>
+    <string name="smart_rules_free_banner_title">फ्री प्लान: 5 सक्रिय नियम</string>
+    <string name="smart_rules_free_banner_desc">फ्री प्लान में 5 स्वचालित नियम शामिल हैं। अतिरिक्त नियम सहेजे जाते हैं लेकिन रोके जाते हैं। असीमित नियमों के लिए प्रो में अपग्रेड करें।</string>
+    <string name="categories_free_banner_title">फ्री प्लान: 5 कस्टम श्रेणियां</string>
+    <string name="categories_free_banner_desc">फ्री प्लान में 5 कस्टम श्रेणियां शामिल हैं। अतिरिक्त श्रेणियां केवल पढ़ने योग्य मोड में सहेजी जाती हैं। असीमित श्रेणियों के लिए प्रो में अपग्रेड करें।</string>
+    <string name="account_locked_title">खाता लॉक है</string>
+    <string name="account_locked_desc">मुफ़्त प्लान में 2 सक्रिय खाते शामिल हैं। अनलॉक करने के लिए इसे प्राथमिक बनाएं या प्रो में अपग्रेड करें।</string>
+    <string name="pro_perk_accent_colors_title">विशेष एक्सेंट पैलेट</string>
+    <string name="pro_perk_accent_colors_desc">12 जीवंत पैनटोन और कूलर्स डिज़ाइनर थीम रंग अनलॉक करें।</string>
+    <string name="pro_gate_accent_colors_title">प्रो थीम रंग</string>
+    <string name="pro_gate_accent_colors_desc">साइफर प्रो के साथ सभी 18 जीवंत पैनटोन और डिज़ाइनर थीम रंग अनलॉक करें।</string>
 </resources>

@@ -33,10 +33,10 @@ class AccountRepository @Inject constructor(
                 val expense = defaultTxs.filter { !it.isIncome }.sumOf { it.amount }
                 listOf(AccountItem(defaultAcc, income - expense, defaultTxs.size))
             } else {
-                val defaultAccountId = accounts.find { it.isDefault }?.id ?: accounts.first().id
+                val rootAccountId = accounts.minByOrNull { it.createdAt }?.id ?: accounts.first().id
                 accounts.map { account ->
                     val accTxs = transactions.filter {
-                        it.accountId == account.id || (it.accountId == null && account.id == defaultAccountId)
+                        it.accountId == account.id || (it.accountId == null && account.id == rootAccountId)
                     }
                     val income = accTxs.filter { it.isIncome }.sumOf { it.amount }
                     val expense = accTxs.filter { !it.isIncome }.sumOf { it.amount }

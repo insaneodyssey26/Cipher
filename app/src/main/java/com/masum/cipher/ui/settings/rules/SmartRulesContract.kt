@@ -14,9 +14,11 @@ class SmartRulesContract {
         data class DeleteCategoryRule(val rule: CategoryRuleEntity) : Intent()
         data class RestoreCategoryRule(val rule: CategoryRuleEntity) : Intent()
         data class AddOrUpdateCategoryRule(val merchantName: String, val category: String) : Intent()
+        data class ActivateCategoryRule(val rule: CategoryRuleEntity) : Intent()
         data class DeleteMerchantRule(val alias: MerchantAliasEntity) : Intent()
         data class RestoreMerchantRule(val alias: MerchantAliasEntity) : Intent()
         data class AddOrUpdateMerchantRule(val rawName: String, val cleanName: String) : Intent()
+        data class ActivateMerchantRule(val alias: MerchantAliasEntity) : Intent()
         object ShowProGate : Intent()
         object DismissProGate : Intent()
     }

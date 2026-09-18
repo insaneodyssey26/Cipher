@@ -627,4 +627,25 @@
     <string name="pro_gate_custom_categories_desc">無料版では最大5個のカスタムカテゴリを作成できます。無制限に作成するにはCipher Proへアップグレードしてください。</string>
     <string name="pro_gate_smart_rules_title">スマート自動ルールの上限</string>
     <string name="pro_gate_smart_rules_desc">無料版では最大5個のスマートルールを作成できます。無制限に作成するにはCipher Proへアップグレードしてください。</string>
+    <string name="account_frozen_badge">凍結</string>
+    <string name="account_frozen_tooltip">口座が凍結されています。無料版では有効な口座は最大2つまでです。ロックを解除するにはProにアップグレードしてください。</string>
+    <string name="rule_paused_badge">一時停止中</string>
+    <string name="rule_paused_tooltip">一時停止中（Pro上限）。無料版では有効なルールは最大5個までです。</string>
+    <string name="account_frozen_overlay_title">口座が凍結されています</string>
+    <string name="account_frozen_overlay_desc">無料プランには2つの有効口座が含まれます。メイン口座に設定するかProにアップグレードしてロックを解除してください。</string>
+    <string name="account_make_active_btn">有効にする</string>
+    <string name="account_make_primary_btn">メイン口座にする</string>
+    <string name="rule_make_active_btn">有効にする</string>
+    <string name="rule_paused_overlay_desc">無料版では5つのルールが有効です。タップしてこのルールを有効にします。</string>
+    <string name="accounts_header_free_count">%1$d/%2$d 有効口座</string>
+    <string name="smart_rules_free_banner_title">無料プラン：5つのアクティブルール</string>
+    <string name="smart_rules_free_banner_desc">無料プランには最大5つの自動ルールが含まれます。追加のルールは保存されますが一時停止されます。無制限のルールにはProにアップグレードしてください。</string>
+    <string name="categories_free_banner_title">無料プラン：5つのカスタムカテゴリ</string>
+    <string name="categories_free_banner_desc">無料プランには最大5つのカスタムカテゴリが含まれます。追加のカテゴリは読み取り専用モードで保存されます。無制限のカテゴリにはProにアップグレードしてください。</string>
+    <string name="account_locked_title">アカウントがロックされています</string>
+    <string name="account_locked_desc">無料プランには2つの有効口座が含まれます。メイン口座に設定するかProにアップグレードしてロックを解除してください。</string>
+    <string name="pro_perk_accent_colors_title">専用アクセントパレット</string>
+    <string name="pro_perk_accent_colors_desc">12種類の鮮やかなPantone＆Coolorsデザイナーテーマカラーを解放。</string>
+    <string name="pro_gate_accent_colors_title">Proテーマカラー</string>
+    <string name="pro_gate_accent_colors_desc">Cipher Proですべての18種類の鮮やかなPantoneおよびデザイナーアクセントテーマをアンロック。</string>
 </resources>

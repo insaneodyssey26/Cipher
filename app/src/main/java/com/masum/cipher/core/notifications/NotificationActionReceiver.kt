@@ -27,6 +27,9 @@ class NotificationActionReceiver : BroadcastReceiver() {
     @Inject
     lateinit var accountRepository: AccountRepository
 
+    @Inject
+    lateinit var userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -78,10 +81,23 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     emptyList()
                 }
 
+                val isPro = try {
+                    userPreferences.settingsFlow.first().isPro
+                } catch (_: Exception) {
+                    false
+                }
+                val activeAccounts = if (isPro || accountsList.size <= 2) {
+                    accountsList
+                } else {
+                    val defaultAcc = accountsList.firstOrNull { it.isDefault } ?: accountsList.first()
+                    val secondAcc = accountsList.firstOrNull { it.id != defaultAcc.id }
+                    listOfNotNull(defaultAcc, secondAcc)
+                }
+
                 val targetAccount = if (directAccountId > 0) {
-                    accountsList.find { it.id == directAccountId }
+                    activeAccounts.find { it.id == directAccountId }
                 } else if (!selectedChoice.isNullOrBlank()) {
-                    accountsList.find { acc ->
+                    activeAccounts.find { acc ->
                         val label = buildAccountLabel(acc)
                         label == selectedChoice || acc.name.equals(selectedChoice, ignoreCase = true)
                     }

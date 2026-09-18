@@ -34,9 +34,11 @@ class SmartRulesViewModel @Inject constructor(
             is SmartRulesContract.Intent.DeleteCategoryRule -> deleteCategoryRule(intent.rule)
             is SmartRulesContract.Intent.RestoreCategoryRule -> restoreCategoryRule(intent.rule)
             is SmartRulesContract.Intent.AddOrUpdateCategoryRule -> addOrUpdateCategoryRule(intent.merchantName, intent.category)
+            is SmartRulesContract.Intent.ActivateCategoryRule -> activateCategoryRule(intent.rule)
             is SmartRulesContract.Intent.DeleteMerchantRule -> deleteMerchantRule(intent.alias)
             is SmartRulesContract.Intent.RestoreMerchantRule -> restoreMerchantRule(intent.alias)
             is SmartRulesContract.Intent.AddOrUpdateMerchantRule -> addOrUpdateMerchantRule(intent.rawName, intent.cleanName)
+            is SmartRulesContract.Intent.ActivateMerchantRule -> activateMerchantRule(intent.alias)
             is SmartRulesContract.Intent.ShowProGate -> updateState { copy(showProGateSheet = true) }
             is SmartRulesContract.Intent.DismissProGate -> updateState { copy(showProGateSheet = false) }
         }
@@ -84,6 +86,14 @@ class SmartRulesViewModel @Inject constructor(
         }
     }
 
+    private fun activateCategoryRule(rule: CategoryRuleEntity) {
+        viewModelScope.launch {
+            categoryRuleDao.deleteRule(rule)
+            categoryRuleDao.insertRule(rule)
+            emitEffect(SmartRulesContract.Effect.ShowToast("Rule activated"))
+        }
+    }
+
     private fun deleteMerchantRule(alias: MerchantAliasEntity) {
         viewModelScope.launch {
             merchantAliasDao.deleteAlias(alias.rawName)
@@ -107,6 +117,14 @@ class SmartRulesViewModel @Inject constructor(
                 )
             )
             emitEffect(SmartRulesContract.Effect.ShowToast("Rule saved"))
+        }
+    }
+
+    private fun activateMerchantRule(alias: MerchantAliasEntity) {
+        viewModelScope.launch {
+            merchantAliasDao.deleteAlias(alias.rawName)
+            merchantAliasDao.insertAlias(alias)
+            emitEffect(SmartRulesContract.Effect.ShowToast("Rule activated"))
         }
     }
 }

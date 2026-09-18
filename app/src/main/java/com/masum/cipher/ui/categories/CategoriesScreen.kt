@@ -275,6 +275,64 @@ fun CategoriesScreen(
                 Spacer(modifier = Modifier.height(2.dp))
             }
 
+            if (!isPro) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                showProGateSheet = true
+                            }
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Sparkles,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.categories_free_banner_title),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.categories_free_banner_desc),
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 11.sp,
+                                        lineHeight = 14.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 Row(
                     modifier = Modifier
@@ -434,6 +492,9 @@ fun CategoriesScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         if (categoryItem.isCustom) {
+                                            val customIndex = state.customCategories.indexOfFirst { it.name.equals(categoryItem.name, ignoreCase = true) }
+                                            val isCustomPaused = !isPro && customIndex >= 5
+
                                             Box(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(4.dp))
@@ -449,6 +510,27 @@ fun CategoriesScreen(
                                                     ),
                                                     color = categoryColor
                                                 )
+                                            }
+
+                                            if (isCustomPaused) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(4.dp))
+                                                        .background(Color(0xFF64748B).copy(alpha = 0.2f))
+                                                        .border(0.6.dp, Color(0xFF94A3B8).copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.rule_paused_badge),
+                                                        style = Typography.labelSmall.copy(
+                                                            fontFamily = Lato,
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 8.5.sp,
+                                                            letterSpacing = 0.6.sp
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -682,6 +764,8 @@ fun CategoriesScreen(
                                     }
 
                                     if (categoryItem.isCustom) {
+                                        val customIndex = state.customCategories.indexOfFirst { it.name.equals(categoryItem.name, ignoreCase = true) }
+                                        val isCustomPaused = !isPro && customIndex >= 5
                                         val customEntity = state.customCategories.find { it.name.equals(categoryItem.name, ignoreCase = true) }
                                         if (customEntity != null) {
                                             Box(
@@ -691,8 +775,12 @@ fun CategoriesScreen(
                                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
                                                     .clickable {
                                                         view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                                        editingCustomCategory = customEntity
-                                                        showCreateCategorySheet = true
+                                                        if (isCustomPaused) {
+                                                            showProGateSheet = true
+                                                        } else {
+                                                            editingCustomCategory = customEntity
+                                                            showCreateCategorySheet = true
+                                                        }
                                                     },
                                                 contentAlignment = Alignment.Center
                                             ) {
