@@ -1,5 +1,7 @@
 package com.masum.cipher.ui.accounts.details
 
+import androidx.annotation.StringRes
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
@@ -11,9 +13,6 @@ import com.masum.cipher.core.mvi.UiIntent
 import com.masum.cipher.core.mvi.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-
-import androidx.annotation.StringRes
-import com.masum.cipher.R
 
 enum class AccountTransactionFilter(@StringRes val labelRes: Int) {
     ALL(R.string.account_details_filter_all),

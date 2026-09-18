@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,6 +86,7 @@ import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowLeftRight
 import compose.icons.lucideicons.ArrowUpRight
 import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Download
 import compose.icons.lucideicons.FileSpreadsheet
@@ -92,6 +94,7 @@ import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Sparkles
+import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
 import java.util.Locale
@@ -102,6 +105,7 @@ fun AccountDetailsScreen(
     accountId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToEditAccount: (Long) -> Unit,
+    onNavigateToAccountAnalytics: (Long) -> Unit = {},
     onNavigateToPro: () -> Unit = {},
     viewModel: AccountDetailsViewModel = hiltViewModel()
 ) {
@@ -204,6 +208,7 @@ fun AccountDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     Box(
                         modifier = Modifier
                             .size(38.dp)
@@ -439,6 +444,83 @@ fun AccountDetailsScreen(
             }
 
             item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(18.dp), spotColor = Color.Black.copy(alpha = 0.10f))
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.surface,
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                )
+                            )
+                        )
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+                        .clickable {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                            account?.let { onNavigateToAccountAnalytics(it.id) }
+                        }
+                        .padding(horizontal = 16.dp, vertical = 13.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.TrendingUp,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.account_analytics_action_btn),
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.account_analytics_action_desc),
+                                    style = Typography.bodySmall.copy(
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        Icon(
+                            imageVector = LucideIcons.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -518,60 +600,47 @@ fun AccountDetailsScreen(
                             AccountTransactionFilter.TRANSFER -> state.allTransactions.count { it.category.equals("TRANSFER", ignoreCase = true) }
                         }
 
-                        Box(
+                        val bg = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                        val textCol = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        val borderMod = if (isSelected) Modifier else Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+
+                        Row(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(bg)
+                                .then(borderMod)
                                 .clickable {
                                     view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                                     viewModel.handleIntent(AccountDetailsContract.Intent.SelectFilter(filter))
                                 }
-                                .padding(horizontal = 12.dp, vertical = 7.dp)
+                                .padding(horizontal = 12.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            Text(
+                                text = stringResource(filter.labelRes),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = textCol
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                    .padding(horizontal = 5.dp, vertical = 1.dp)
                             ) {
                                 Text(
-                                    text = stringResource(filter.labelRes),
-                                    style = Typography.labelMedium.copy(
+                                    text = count.toString(),
+                                    style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = 12.sp
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Bold
                                     ),
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    color = textCol
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (isSelected) Color.White.copy(alpha = 0.25f)
-                                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                                        )
-                                        .padding(horizontal = 5.dp, vertical = 1.dp)
-                                ) {
-                                    Text(
-                                        text = "$count",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp
-                                        ),
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         }
                     }
@@ -583,78 +652,86 @@ fun AccountDetailsScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 28.dp),
+                            .padding(vertical = 40.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(54.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = LucideIcons.FileText,
+                                    imageVector = if (state.searchQuery.isNotEmpty()) LucideIcons.Search else LucideIcons.Clock,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(24.dp)
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
                             Text(
-                                text = if (state.searchQuery.isNotBlank()) stringResource(R.string.account_details_empty_search_title) else stringResource(R.string.account_details_empty_title),
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                ),
+                                text = if (state.searchQuery.isNotEmpty()) {
+                                    stringResource(R.string.account_details_empty_search_title)
+                                } else {
+                                    stringResource(R.string.account_details_empty_title)
+                                },
+                                style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = if (state.searchQuery.isNotBlank()) stringResource(R.string.account_details_empty_search_desc) else stringResource(R.string.account_details_empty_desc),
-                                style = Typography.bodySmall.copy(fontSize = 12.sp),
+                                text = if (state.searchQuery.isNotEmpty()) {
+                                    stringResource(R.string.account_details_empty_search_desc)
+                                } else {
+                                    stringResource(R.string.account_details_empty_desc)
+                                },
+                                style = Typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
             } else {
-                state.groupedDays.forEach { dayGroup ->
-                    item(key = "header_${dayGroup.title}") {
+                state.groupedDays.forEach { group ->
+                    item(key = "header_${group.title}") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                                .padding(top = 8.dp, bottom = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = dayGroup.title.uppercase(),
+                                text = group.title,
                                 style = Typography.labelSmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp,
+                                    letterSpacing = 0.8.sp,
                                     fontSize = 11.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
                             Text(
-                                text = if (dayGroup.netTotal >= 0) "+${AppFormatters.formatCurrency(dayGroup.netTotal, state.currencySymbol, locale, decimals = 2)}"
-                                else AppFormatters.formatCurrency(dayGroup.netTotal, state.currencySymbol, locale, decimals = 2),
+                                text = if (group.netTotal >= 0) {
+                                    "+${AppFormatters.formatCurrency(group.netTotal, state.currencySymbol, locale, decimals = 2)}"
+                                } else {
+                                    AppFormatters.formatCurrency(group.netTotal, state.currencySymbol, locale, decimals = 2)
+                                },
                                 style = Typography.labelSmall.copy(
                                     fontFamily = DMSans,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp
                                 ),
-                                color = if (dayGroup.netTotal >= 0) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (group.netTotal >= 0) EmeraldIncome else RoseExpense
                             )
                         }
                     }
 
-                    items(dayGroup.transactions, key = { it.id }) { tx ->
+                    items(group.transactions, key = { it.id }) { tx ->
                         val txSplits = state.splits.filter { it.transactionId == tx.id }
                         TransactionItem(
                             transaction = tx,
@@ -673,80 +750,28 @@ fun AccountDetailsScreen(
                     }
                 }
             }
-
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-            }
         }
     }
 
-    if (state.transactionToEdit != null) {
-        val tx = state.transactionToEdit!!
-        TransactionDetailsSheet(
-            transaction = tx,
-            accounts = state.allAccounts,
-            currencySymbol = state.currencySymbol,
-            customCategories = state.customCategories,
-            onDismiss = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransactionDetails)
-            },
-            onConfirm = { updatedTx ->
-                viewModel.handleIntent(AccountDetailsContract.Intent.SaveTransaction(updatedTx))
-            },
-            onConfirmWithSplits = { updatedTx, splits ->
-                viewModel.handleIntent(AccountDetailsContract.Intent.SaveTransaction(updatedTx, splits))
-            },
-            onDelete = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.RequestDeleteTransaction(tx))
-            },
-            onOpenSplitSheet = { draftTx, splits ->
-                activeSplittingTx = Pair(draftTx, splits)
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransactionDetails)
-            }
-        )
-    }
-
-    if (activeSplittingTx != null) {
-        val (draftTx, currentSplits) = activeSplittingTx!!
-        TransactionSplitSheet(
-            expenseName = draftTx.merchant,
-            totalAmount = draftTx.amount,
-            currencySymbol = state.currencySymbol,
-            initialParticipants = currentSplits,
-            isHapticsEnabled = state.isHapticsEnabled,
-            onDismiss = {
-                activeSplittingTx = null
-            },
-            onSaveSplits = { finalizedSplits ->
-                viewModel.handleIntent(AccountDetailsContract.Intent.SaveTransaction(draftTx, finalizedSplits))
-                activeSplittingTx = null
-            }
-        )
-    }
-
     if (state.showTransferSheet) {
-        val outflowTpl = stringResource(R.string.transfer_out_merchant)
-        val inflowTpl = stringResource(R.string.transfer_in_merchant)
+        val outflowMerchantTemplate = stringResource(R.string.transfer_out_merchant, "")
+        val inflowMerchantTemplate = stringResource(R.string.transfer_in_merchant, "")
         TransferFundsSheet(
             accounts = state.allAccounts,
+            initialSourceAccountId = state.account?.id,
             currencySymbol = state.currencySymbol,
             locale = locale,
             isHapticsEnabled = state.isHapticsEnabled,
-            initialSourceAccountId = accountId,
-            onDismiss = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransferSheet)
-            },
-            onConfirmTransfer = { fromAcc, toAcc, amount, note ->
-                val outflowMerchant = String.format(locale, outflowTpl, toAcc.name)
-                val inflowMerchant = String.format(locale, inflowTpl, fromAcc.name)
+            onDismiss = { viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransferSheet) },
+            onConfirmTransfer = { from, to, amount, note ->
                 viewModel.handleIntent(
                     AccountDetailsContract.Intent.TransferFunds(
-                        fromAccount = fromAcc,
-                        toAccount = toAcc,
+                        fromAccount = from,
+                        toAccount = to,
                         amount = amount,
                         note = note,
-                        outflowMerchantText = outflowMerchant,
-                        inflowMerchantText = inflowMerchant
+                        outflowMerchantText = outflowMerchantTemplate,
+                        inflowMerchantText = inflowMerchantTemplate
                     )
                 )
             }
@@ -754,37 +779,33 @@ fun AccountDetailsScreen(
     }
 
     if (state.showExportSheet) {
-        AccountStatementExportSheet(
+        AccountExportBottomSheet(
             accountName = state.account?.name ?: "Account",
             isPro = state.isPro,
-            isExportingCsv = state.isExportingCsv,
-            isExportingPdf = state.isExportingPdf,
-            onExportCsvClick = {
-                csvExportLauncher.launch("Cipher_${accountNameSafe}_Report_${System.currentTimeMillis()}.csv")
+            onDismiss = { viewModel.handleIntent(AccountDetailsContract.Intent.DismissExportSheet) },
+            onExportCsv = {
+                csvExportLauncher.launch("Statement_${accountNameSafe}_${System.currentTimeMillis()}.csv")
             },
-            onExportPdfClick = {
+            onExportPdf = {
                 if (state.isPro) {
-                    pdfExportLauncher.launch("Cipher_${accountNameSafe}_Statement_${System.currentTimeMillis()}.pdf")
+                    pdfExportLauncher.launch("Statement_${accountNameSafe}_${System.currentTimeMillis()}.pdf")
                 } else {
                     viewModel.handleIntent(AccountDetailsContract.Intent.OpenProGate)
                 }
-            },
-            onDismiss = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissExportSheet)
-            },
-            isHapticsEnabled = state.isHapticsEnabled
+            }
         )
     }
 
     if (state.showProGateSheet) {
         ProFeatureGateSheet(
-            featureTitle = stringResource(R.string.export_pdf_title),
+            featureTitle = stringResource(R.string.account_export_pdf),
             featureTagline = stringResource(R.string.account_export_pdf_desc),
             featureIcon = LucideIcons.FileText,
             perks = listOf(
                 ProFeaturePerk(stringResource(R.string.pro_perk_export_title), stringResource(R.string.pro_perk_export_desc)),
                 ProFeaturePerk(stringResource(R.string.pro_perk_unlimited_accounts_title), stringResource(R.string.pro_perk_unlimited_accounts_desc)),
-                ProFeaturePerk(stringResource(R.string.pro_perk_net_worth_title), stringResource(R.string.pro_perk_net_worth_desc))
+                ProFeaturePerk(stringResource(R.string.pro_perk_smart_rules_title), stringResource(R.string.pro_perk_smart_rules_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_perk_card_themes_title), stringResource(R.string.pro_perk_card_themes_desc))
             ),
             isHapticsEnabled = state.isHapticsEnabled,
             primaryButtonText = stringResource(R.string.pro_btn_upgrade),
@@ -792,41 +813,125 @@ fun AccountDetailsScreen(
                 viewModel.handleIntent(AccountDetailsContract.Intent.DismissProGate)
                 onNavigateToPro()
             },
-            onDismiss = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissProGate)
+            onDismiss = { viewModel.handleIntent(AccountDetailsContract.Intent.DismissProGate) }
+        )
+    }
+
+    state.transactionToEdit?.let { txToEdit ->
+        val splits = state.splits.filter { it.transactionId == txToEdit.id }.map {
+            SplitParticipant(
+                id = it.id.toString(),
+                name = it.name,
+                amount = it.amount,
+                percentage = if (txToEdit.amount > 0) (it.amount / txToEdit.amount) * 100.0 else 0.0,
+                isPaid = it.isPaid,
+                isCurrentUser = it.isCurrentUser
+            )
+        }
+        TransactionDetailsSheet(
+            transaction = txToEdit,
+            accounts = state.allAccounts,
+            customCategories = state.customCategories,
+            currencySymbol = state.currencySymbol,
+            existingSplits = splits,
+            onDismiss = { viewModel.handleIntent(AccountDetailsContract.Intent.DismissTransactionDetails) },
+            onConfirm = { updatedTx ->
+                viewModel.handleIntent(
+                    AccountDetailsContract.Intent.SaveTransaction(
+                        transaction = updatedTx,
+                        splits = null
+                    )
+                )
+            },
+            onConfirmWithSplits = { updatedTx, updatedSplits ->
+                viewModel.handleIntent(
+                    AccountDetailsContract.Intent.SaveTransaction(
+                        transaction = updatedTx,
+                        splits = updatedSplits
+                    )
+                )
+            },
+            onSaveSplits = { updatedSplits ->
+                viewModel.handleIntent(
+                    AccountDetailsContract.Intent.SaveTransaction(
+                        transaction = txToEdit,
+                        splits = updatedSplits
+                    )
+                )
+            },
+            onDelete = {
+                viewModel.handleIntent(AccountDetailsContract.Intent.RequestDeleteTransaction(txToEdit))
+            },
+            onOpenSplitSheet = { tx, currentSplits ->
+                activeSplittingTx = Pair(tx, currentSplits)
+            },
+            isHapticsEnabled = state.isHapticsEnabled
+        )
+    }
+
+    activeSplittingTx?.let { (tx, existingParticipants) ->
+        val participants = if (existingParticipants.isEmpty()) {
+            listOf(
+                SplitParticipant(name = "You", amount = tx.amount / 2, isCurrentUser = true),
+                SplitParticipant(name = "Friend", amount = tx.amount / 2, isCurrentUser = false)
+            )
+        } else {
+            existingParticipants
+        }
+
+        TransactionSplitSheet(
+            expenseName = tx.merchant.ifEmpty { "Expense" },
+            totalAmount = tx.amount,
+            currencySymbol = state.currencySymbol,
+            initialParticipants = participants,
+            isHapticsEnabled = state.isHapticsEnabled,
+            onDismiss = { activeSplittingTx = null },
+            onSaveSplits = { newSplits ->
+                viewModel.handleIntent(
+                    AccountDetailsContract.Intent.SaveTransaction(
+                        transaction = tx,
+                        splits = newSplits
+                    )
+                )
+                activeSplittingTx = null
             }
         )
     }
 
     if (state.showDeleteDialog && state.transactionToDelete != null) {
         AlertDialog(
-            onDismissRequest = {
-                viewModel.handleIntent(AccountDetailsContract.Intent.DismissDeleteDialog)
-            },
+            onDismissRequest = { viewModel.handleIntent(AccountDetailsContract.Intent.DismissDeleteDialog) },
             title = {
-                Text(stringResource(R.string.account_details_delete_tx_title), style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                Text(
+                    text = stringResource(R.string.account_details_delete_tx_title),
+                    style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold)
+                )
             },
             text = {
-                Text(stringResource(R.string.account_details_delete_tx_desc), style = Typography.bodyMedium)
+                Text(
+                    text = stringResource(R.string.account_details_delete_tx_desc),
+                    style = Typography.bodyMedium.copy(fontFamily = Lato)
+                )
             },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
-                        view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                         viewModel.handleIntent(AccountDetailsContract.Intent.ConfirmDeleteTransaction)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = RoseExpense)
+                    colors = ButtonDefaults.buttonColors(containerColor = RoseExpense)
                 ) {
-                    Text(stringResource(R.string.action_delete), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.action_delete), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
+                        view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                         viewModel.handleIntent(AccountDetailsContract.Intent.DismissDeleteDialog)
                     }
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
         )
@@ -835,109 +940,66 @@ fun AccountDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountStatementExportSheet(
+private fun AccountExportBottomSheet(
     accountName: String,
     isPro: Boolean,
-    isExportingCsv: Boolean,
-    isExportingPdf: Boolean,
-    onExportCsvClick: () -> Unit,
-    onExportPdfClick: () -> Unit,
     onDismiss: () -> Unit,
-    isHapticsEnabled: Boolean
+    onExportCsv: () -> Unit,
+    onExportPdf: () -> Unit
 ) {
-    val view = LocalView.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 12.dp)
-                    .width(36.dp)
-                    .height(4.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-            )
-        },
-        shape = RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
+        tonalElevation = 8.dp,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp)
+                .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.account_export_statement_title),
-                        style = Typography.titleLarge.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.account_export_statement_title),
+                    style = Typography.titleLarge.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.account_export_statement_desc),
+                    style = Typography.bodySmall.copy(
+                        fontSize = 12.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = stringResource(R.string.account_export_statement_desc),
-                        style = Typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                        .clickable {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            onDismiss()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.X,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
+                )
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
-                    .clickable(enabled = !isExportingCsv) {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        onExportCsvClick()
-                    }
-                    .padding(16.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                        .clickable { onExportCsv() }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0xFF10B981).copy(alpha = 0.15f))
-                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -949,36 +1011,15 @@ private fun AccountStatementExportSheet(
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.account_export_csv),
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFF10B981).copy(alpha = 0.15f))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "FREE",
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 8.5.sp,
-                                        color = Color(0xFF10B981)
-                                    )
-                                )
-                            }
-                        }
+                        Text(
+                            text = stringResource(R.string.account_export_csv),
+                            style = Typography.titleMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = stringResource(R.string.account_export_csv_desc),
@@ -996,37 +1037,27 @@ private fun AccountStatementExportSheet(
                         modifier = Modifier.size(18.dp)
                     )
                 }
-            }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF6366F1).copy(alpha = 0.12f),
-                                Color(0xFFA855F7).copy(alpha = 0.08f)
-                            )
-                        )
-                    )
-                    .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.28f), RoundedCornerShape(18.dp))
-                    .clickable(enabled = !isExportingPdf) {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        onExportPdfClick()
-                    }
-                    .padding(16.dp)
-            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            1.dp,
+                            if (isPro) MaterialTheme.colorScheme.outline.copy(alpha = 0.12f) else Color(0xFF6366F1).copy(alpha = 0.35f),
+                            RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onExportPdf() }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF6366F1).copy(alpha = 0.20f))
+                            .background(Color(0xFF6366F1).copy(alpha = 0.15f))
                             .border(1.dp, Color(0xFF6366F1).copy(alpha = 0.45f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {

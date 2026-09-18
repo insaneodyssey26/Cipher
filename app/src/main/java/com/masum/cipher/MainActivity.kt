@@ -58,6 +58,7 @@ import com.masum.cipher.ui.accounts.AccountsContract
 import com.masum.cipher.ui.accounts.AccountsScreen
 import com.masum.cipher.ui.accounts.AccountsViewModel
 import com.masum.cipher.ui.accounts.CreateEditAccountScreen
+import com.masum.cipher.ui.accounts.analytics.AccountAnalyticsScreen
 import com.masum.cipher.ui.accounts.details.AccountDetailsScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
@@ -311,7 +312,19 @@ class MainActivity : AppCompatActivity() {
                                     accountId = accountId,
                                     onNavigateBack = { navController.popBackStack() },
                                     onNavigateToEditAccount = { accId -> navController.navigate("edit_account/$accId") },
-                                    onNavigateToPro = { navController.navigate("pro") }
+                                    onNavigateToAccountAnalytics = { accId -> navController.navigate("account_analytics/$accId") },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
+                                )
+                            }
+                            composable(
+                                route = "account_analytics/{accountId}",
+                                arguments = listOf(navArgument("accountId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val accountId = backStackEntry.arguments?.getLong("accountId") ?: 0L
+                                AccountAnalyticsScreen(
+                                    accountId = accountId,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
                             composable("create_account") {
