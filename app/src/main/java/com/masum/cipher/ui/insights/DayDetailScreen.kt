@@ -210,6 +210,7 @@ fun DayDetailScreen(
     editingTransaction?.let { transaction ->
         TransactionDetailsSheet(
             transaction = transaction,
+            accounts = state.accounts,
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },

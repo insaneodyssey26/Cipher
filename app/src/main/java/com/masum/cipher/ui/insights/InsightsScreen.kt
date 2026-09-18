@@ -444,6 +444,7 @@ fun InsightsScreen(
     editingTransaction?.let { tx ->
         com.masum.cipher.ui.components.TransactionDetailsSheet(
             transaction = tx,
+            accounts = state.accounts,
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
             onDismiss = { editingTransaction = null },

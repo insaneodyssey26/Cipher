@@ -591,4 +591,7 @@
     <string name="transfer_btn_label">Transférer</string>
     <string name="transfer_error_need_min_accounts">Ajoutez au moins 2 comptes pour transférer des fonds</string>
     <string name="account_details_filter_transfer">Transferts</string>
+    <string name="transaction_account_label">Compte</string>
+    <string name="show_pro_badge_title">Afficher le badge Pro</string>
+    <string name="show_pro_badge_desc">Afficher le badge Pro sur l\'en-tête du tableau de bord</string>
 </resources>

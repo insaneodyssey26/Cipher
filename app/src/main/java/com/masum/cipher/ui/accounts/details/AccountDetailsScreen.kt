@@ -610,6 +610,7 @@ fun AccountDetailsScreen(
         val tx = state.transactionToEdit!!
         TransactionDetailsSheet(
             transaction = tx,
+            accounts = state.allAccounts,
             currencySymbol = state.currencySymbol,
             customCategories = state.customCategories,
             onDismiss = {

@@ -590,4 +590,7 @@
     <string name="transfer_btn_label">स्थानांतरण</string>
     <string name="transfer_error_need_min_accounts">धन स्थानांतरित करने के लिए कम से कम 2 खाते जोड़ें</string>
     <string name="account_details_filter_transfer">स्थानांतरण</string>
+    <string name="transaction_account_label">खाता</string>
+    <string name="show_pro_badge_title">प्रो बैज दिखाएं</string>
+    <string name="show_pro_badge_desc">डैशबोर्ड शीर्षलेख पर लक्ज़री प्रो बैज प्रदर्शित करें</string>
 </resources>

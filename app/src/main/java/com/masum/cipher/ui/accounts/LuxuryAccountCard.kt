@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -69,6 +70,7 @@ fun LuxuryAccountCard(
 ) {
     val view = LocalView.current
     val baseColor = Color(colorHex)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val formattedLast4 = if (!last4.isNullOrBlank()) last4.takeLast(4) else "••••"
 
     val isDebtAccount = type == AccountType.CREDIT_CARD
@@ -78,45 +80,77 @@ fun LuxuryAccountCard(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 10.dp,
+                elevation = if (isDark) 10.dp else 5.dp,
                 shape = RoundedCornerShape(22.dp),
-                spotColor = baseColor.copy(alpha = 0.35f),
-                ambientColor = Color.Black.copy(alpha = 0.4f)
+                spotColor = if (isDark) baseColor.copy(alpha = 0.35f) else baseColor.copy(alpha = 0.22f),
+                ambientColor = if (isDark) Color.Black.copy(alpha = 0.4f) else Color.Black.copy(alpha = 0.08f)
             )
             .clip(RoundedCornerShape(22.dp))
             .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF1E212A),
-                        Color(0xFF14161C),
-                        Color(0xFF0F1116)
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(900f, 700f)
-                )
+                if (isDark) {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF1E212A),
+                            Color(0xFF14161C),
+                            Color(0xFF0F1116)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(900f, 700f)
+                    )
+                } else {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            baseColor.copy(alpha = 0.04f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(900f, 700f)
+                    )
+                }
             )
             .background(
                 Brush.radialGradient(
-                    colors = listOf(
-                        baseColor.copy(alpha = 0.28f),
-                        baseColor.copy(alpha = 0.08f),
-                        Color.Transparent
-                    ),
+                    colors = if (isDark) {
+                        listOf(
+                            baseColor.copy(alpha = 0.28f),
+                            baseColor.copy(alpha = 0.08f),
+                            Color.Transparent
+                        )
+                    } else {
+                        listOf(
+                            baseColor.copy(alpha = 0.16f),
+                            baseColor.copy(alpha = 0.04f),
+                            Color.Transparent
+                        )
+                    },
                     center = Offset(750f, 50f),
                     radius = 650f
                 )
             )
             .border(
                 width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        baseColor.copy(alpha = 0.65f),
-                        Color.White.copy(alpha = 0.15f),
-                        Color.White.copy(alpha = 0.04f)
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(600f, 600f)
-                ),
+                brush = if (isDark) {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            baseColor.copy(alpha = 0.65f),
+                            Color.White.copy(alpha = 0.15f),
+                            Color.White.copy(alpha = 0.04f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(600f, 600f)
+                    )
+                } else {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            baseColor.copy(alpha = 0.45f),
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.20f),
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(600f, 600f)
+                    )
+                },
                 shape = RoundedCornerShape(22.dp)
             )
             .then(
@@ -167,7 +201,7 @@ fun LuxuryAccountCard(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             ),
-                            color = Color.White,
+                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -182,8 +216,8 @@ fun LuxuryAccountCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(baseColor.copy(alpha = 0.25f))
-                                .border(0.8.dp, baseColor.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                                .background(if (isDark) baseColor.copy(alpha = 0.25f) else baseColor.copy(alpha = 0.14f))
+                                .border(0.8.dp, if (isDark) baseColor.copy(alpha = 0.6f) else baseColor.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 3.5.dp)
                         ) {
                             Text(
@@ -194,15 +228,15 @@ fun LuxuryAccountCard(
                                     fontSize = 9.sp,
                                     letterSpacing = 0.8.sp
                                 ),
-                                color = Color.White
+                                color = if (isDark) Color.White else baseColor
                             )
                         }
                     } else if (onSetDefaultClick != null) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.08f))
-                                .border(0.6.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                .background(if (isDark) Color.White.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                                .border(0.6.dp, if (isDark) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled, isLongPress = false)
                                     onSetDefaultClick()
@@ -216,7 +250,7 @@ fun LuxuryAccountCard(
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 9.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.75f)
+                                color = if (isDark) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -232,7 +266,7 @@ fun LuxuryAccountCard(
                             Icon(
                                 imageVector = LucideIcons.Pencil,
                                 contentDescription = "Edit Card",
-                                tint = Color.White.copy(alpha = 0.8f),
+                                tint = if (isDark) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                                 modifier = Modifier.size(15.dp)
                             )
                         }
@@ -270,7 +304,7 @@ fun LuxuryAccountCard(
                         letterSpacing = 1.sp,
                         fontSize = 9.5.sp
                     ),
-                    color = Color.White.copy(alpha = 0.5f)
+                    color = if (isDark) Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -281,7 +315,7 @@ fun LuxuryAccountCard(
                         fontSize = 25.sp,
                         letterSpacing = (-0.5).sp
                     ),
-                    color = if (balance < 0) RoseExpense else Color.White,
+                    color = if (balance < 0) RoseExpense else if (isDark) Color.White else MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -297,14 +331,14 @@ fun LuxuryAccountCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White.copy(alpha = 0.06f))
-                        .border(0.6.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(8.dp))
+                        .background(if (isDark) Color.White.copy(alpha = 0.06f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                        .border(0.6.dp, if (isDark) Color.White.copy(alpha = 0.10f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.14f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Icon(
                         imageVector = LucideIcons.CreditCard,
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.65f),
+                        tint = if (isDark) Color.White.copy(alpha = 0.65f) else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
@@ -315,7 +349,7 @@ fun LuxuryAccountCard(
                             fontSize = 11.5.sp,
                             letterSpacing = 1.sp
                         ),
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = if (isDark) Color.White.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -327,7 +361,7 @@ fun LuxuryAccountCard(
                         fontSize = 11.sp,
                         letterSpacing = 0.8.sp
                     ),
-                    color = Color.White.copy(alpha = 0.65f)
+                    color = if (isDark) Color.White.copy(alpha = 0.65f) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

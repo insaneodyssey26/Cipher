@@ -593,4 +593,7 @@
     <string name="transfer_btn_label">Transfer</string>
     <string name="transfer_error_need_min_accounts">Add at least 2 accounts to transfer funds</string>
     <string name="account_details_filter_transfer">Transfers</string>
+    <string name="transaction_account_label">Account</string>
+    <string name="show_pro_badge_title">Show Pro Badge</string>
+    <string name="show_pro_badge_desc">Display the luxury Pro badge on the dashboard header</string>
 </resources>

@@ -591,4 +591,7 @@
     <string name="transfer_btn_label">Überweisen</string>
     <string name="transfer_error_need_min_accounts">Fügen Sie mindestens 2 Konten hinzu, um Geld zu überweisen</string>
     <string name="account_details_filter_transfer">Überweisungen</string>
+    <string name="transaction_account_label">Konto</string>
+    <string name="show_pro_badge_title">Pro-Badge anzeigen</string>
+    <string name="show_pro_badge_desc">Das elegante Pro-Badge in der Dashboard-Kopfzeile anzeigen</string>
 </resources>

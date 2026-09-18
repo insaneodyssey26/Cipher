@@ -27,7 +27,8 @@ class MainContract {
         val isAuthenticated: Boolean = false,
         val isOnboardingRequired: Boolean = false,
         val draftTransaction: com.masum.cipher.core.data.local.entity.TransactionEntity? = null,
-        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList()
+        val customCategories: List<com.masum.cipher.core.data.local.entity.CustomCategoryEntity> = emptyList(),
+        val accounts: List<com.masum.cipher.core.domain.model.AccountItem> = emptyList()
     ) : UiState
 
     sealed class Effect : UiEffect {

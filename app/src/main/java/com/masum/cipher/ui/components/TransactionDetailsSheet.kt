@@ -126,11 +126,14 @@ import java.util.TimeZone
 
 import compose.icons.lucideicons.Users
 import com.masum.cipher.core.domain.model.SplitParticipant
+import com.masum.cipher.core.domain.model.AccountItem
+import com.masum.cipher.ui.accounts.getAccountIconVector
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun TransactionDetailsSheet(
     transaction: TransactionEntity,
+    accounts: List<AccountItem> = emptyList(),
     customCategories: List<CustomCategoryEntity> = emptyList(),
     currencySymbol: String = "₹",
     existingSplits: List<SplitParticipant> = emptyList(),
@@ -156,8 +159,20 @@ fun TransactionDetailsSheet(
     var showDatePicker by remember { mutableStateOf(false) }
     var showSplitSheet by remember { mutableStateOf(false) }
     var currentSplits by remember { mutableStateOf(existingSplits) }
+    val defaultSelectedAccountId = transaction.accountId
+        ?: accounts.firstOrNull { it.isDefault }?.id
+        ?: accounts.firstOrNull()?.id
+    var selectedAccountId by remember(transaction.id, transaction.accountId) { mutableStateOf(defaultSelectedAccountId) }
 
-    LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp) {
+    LaunchedEffect(accounts, transaction.accountId) {
+        if (selectedAccountId == null) {
+            selectedAccountId = transaction.accountId
+                ?: accounts.firstOrNull { it.isDefault }?.id
+                ?: accounts.firstOrNull()?.id
+        }
+    }
+
+    LaunchedEffect(merchant, amount, isIncome, selectedCategory, note, selectedTimestamp, selectedAccountId) {
         if (onDraftChange != null) {
             val finalAmount = MathEvaluator.evaluate(amount) ?: 0.0
             val updated = transaction.copy(
@@ -166,7 +181,8 @@ fun TransactionDetailsSheet(
                 category = selectedCategory.name,
                 isIncome = isIncome,
                 note = note.ifBlank { null },
-                timestamp = selectedTimestamp
+                timestamp = selectedTimestamp,
+                accountId = selectedAccountId
             )
             if (updated != transaction) {
                 onDraftChange.invoke(updated)
@@ -507,6 +523,159 @@ fun TransactionDetailsSheet(
                 }
             }
 
+            if (accounts.isNotEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.transaction_account_label).uppercase(),
+                            style = Typography.labelSmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        val selectedAccount = accounts.find { it.id == selectedAccountId }
+                        if (selectedAccount != null) {
+                            Text(
+                                text = "${selectedAccount.name}${if (!selectedAccount.accountNumberLast4.isNullOrBlank()) " •••• ${selectedAccount.accountNumberLast4}" else ""}",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color(selectedAccount.colorHex),
+                                maxLines = 1
+                            )
+                        }
+                    }
+
+                    if (accounts.size <= 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            accounts.forEach { acc ->
+                                val isSelected = acc.id == selectedAccountId
+                                val accColor = Color(acc.colorHex)
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            if (isSelected) accColor.copy(alpha = 0.16f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .border(
+                                            width = if (isSelected) 1.5.dp else 1.dp,
+                                            color = if (isSelected) accColor else White10,
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedAccountId = acc.id
+                                        }
+                                        .padding(horizontal = 8.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(CircleShape)
+                                            .background(accColor.copy(alpha = 0.2f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = getAccountIconVector(acc.iconName),
+                                            contentDescription = null,
+                                            tint = accColor,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = acc.name,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            accounts.forEach { acc ->
+                                val isSelected = acc.id == selectedAccountId
+                                val accColor = Color(acc.colorHex)
+                                Row(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(
+                                            if (isSelected) accColor.copy(alpha = 0.16f)
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .border(
+                                            width = if (isSelected) 1.5.dp else 1.dp,
+                                            color = if (isSelected) accColor else White10,
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedAccountId = acc.id
+                                        }
+                                        .padding(horizontal = 12.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(22.dp)
+                                            .clip(CircleShape)
+                                            .background(accColor.copy(alpha = 0.2f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = getAccountIconVector(acc.iconName),
+                                            contentDescription = null,
+                                            tint = accColor,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = acc.name,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             val showSplitOption = !isIncome
             val showNoteOption = !isNoteExpanded
 
@@ -578,7 +747,8 @@ fun TransactionDetailsSheet(
                                     category = selectedCategory.name,
                                     isIncome = isIncome,
                                     note = note.ifBlank { null },
-                                    timestamp = selectedTimestamp
+                                    timestamp = selectedTimestamp,
+                                    accountId = selectedAccountId
                                 )
                                 if (onOpenSplitSheet != null) {
                                     onOpenSplitSheet(currentDraft, currentSplits)
@@ -749,7 +919,8 @@ fun TransactionDetailsSheet(
                             category = selectedCategory.name,
                             isIncome = isIncome,
                             note = note.ifBlank { null },
-                            timestamp = selectedTimestamp
+                            timestamp = selectedTimestamp,
+                            accountId = selectedAccountId
                         )
                         if (onConfirmWithSplits != null) {
                             onConfirmWithSplits(updatedTx, currentSplits)

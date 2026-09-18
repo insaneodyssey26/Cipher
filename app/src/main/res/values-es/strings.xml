@@ -590,4 +590,7 @@
     <string name="transfer_btn_label">Transferir</string>
     <string name="transfer_error_need_min_accounts">Agrega al menos 2 cuentas para transferir fondos</string>
     <string name="account_details_filter_transfer">Transferencias</string>
+    <string name="transaction_account_label">Cuenta</string>
+    <string name="show_pro_badge_title">Mostrar insignia Pro</string>
+    <string name="show_pro_badge_desc">Mostrar la insignia Pro en el encabezado del panel</string>
 </resources>

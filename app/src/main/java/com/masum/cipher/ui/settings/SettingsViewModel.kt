@@ -75,6 +75,13 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetAutoBackupEncryptedPassword -> updateAutoBackupPassword(intent.password)
             is SettingsContract.Intent.ActivatePro -> activatePro(intent.licenseKey, intent.email)
             is SettingsContract.Intent.DeactivatePro -> deactivatePro()
+            is SettingsContract.Intent.SetShowProBadge -> updateShowProBadge(intent.enabled)
+        }
+    }
+
+    private fun updateShowProBadge(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setShowProBadge(enabled)
         }
     }
 
@@ -118,7 +125,8 @@ class SettingsViewModel @Inject constructor(
                         isPro = settings.isPro,
                         proTier = settings.proTier,
                         proLicenseToken = settings.proLicenseToken,
-                        proOrderId = settings.proOrderId
+                        proOrderId = settings.proOrderId,
+                        showProBadge = settings.showProBadge
                     )
                 }
             }

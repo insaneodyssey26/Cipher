@@ -742,6 +742,7 @@ fun CategoriesScreen(
     editingTransaction?.let { tx ->
         TransactionDetailsSheet(
             transaction = tx,
+            accounts = state.accounts,
             customCategories = state.customCategories,
             currencySymbol = settings?.currencySymbol ?: state.currencySymbol,
             onDismiss = { editingTransaction = null },

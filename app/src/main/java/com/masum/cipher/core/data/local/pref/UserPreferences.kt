@@ -152,6 +152,7 @@ class UserPreferences @Inject constructor(
         val PRO_TIER = stringPreferencesKey("pro_tier")
         val PRO_LICENSE_TOKEN = stringPreferencesKey("pro_license_token")
         val PRO_ORDER_ID = stringPreferencesKey("pro_order_id")
+        val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -260,7 +261,8 @@ class UserPreferences @Inject constructor(
             isPro = preferences[Keys.PRO_ACTIVATED] ?: false,
             proTier = preferences[Keys.PRO_TIER] ?: "FREE",
             proLicenseToken = preferences[Keys.PRO_LICENSE_TOKEN],
-            proOrderId = preferences[Keys.PRO_ORDER_ID]
+            proOrderId = preferences[Keys.PRO_ORDER_ID],
+            showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true
         )
     }
 
@@ -633,6 +635,10 @@ class UserPreferences @Inject constructor(
     suspend fun deactivatePro() {
         setProStatus(isPro = false, tier = "FREE", token = null, orderId = null)
     }
+
+    suspend fun setShowProBadge(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
+    }
 }
 
 enum class AccentColor(val colorValue: Long, val colorName: String) {
@@ -696,5 +702,6 @@ data class UserSettings(
     val isPro: Boolean = false,
     val proTier: String = "FREE",
     val proLicenseToken: String? = null,
-    val proOrderId: String? = null
+    val proOrderId: String? = null,
+    val showProBadge: Boolean = true
 )

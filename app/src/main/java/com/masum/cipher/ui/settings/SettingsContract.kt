@@ -73,6 +73,7 @@ class SettingsContract {
         data class SetAutoBackupEncryptedPassword(val password: String?) : Intent()
         data class ActivatePro(val licenseKey: String, val email: String?) : Intent()
         data object DeactivatePro : Intent()
+        data class SetShowProBadge(val enabled: Boolean) : Intent()
     }
 
     data class State(
@@ -107,6 +108,7 @@ class SettingsContract {
         val proTier: String = "FREE",
         val proLicenseToken: String? = null,
         val proOrderId: String? = null,
+        val showProBadge: Boolean = true,
         val isActivatingPro: Boolean = false,
         val proActivationError: String? = null,
         val proActivationSuccess: Boolean = false,

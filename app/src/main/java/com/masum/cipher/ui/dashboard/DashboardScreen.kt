@@ -76,6 +76,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
@@ -455,7 +456,7 @@ fun DashboardScreen(
                     onOpenFilter = { showFilterSheet = true },
                     privacyMode = privacyMode,
                     isHapticsEnabled = isHapticsEnabled,
-                    isPro = settings?.isPro ?: false,
+                    isPro = (settings?.isPro == true) && (settings?.showProBadge != false),
                     expenseComparisonPercent = state.expenseComparisonPercent,
                     onComparisonBadgeClick = { showComparisonExplanation = true },
                     onAdjustBalanceClick = { showAdjustBalanceSheet = true },
@@ -499,6 +500,7 @@ fun DashboardScreen(
     if (showAddSheet) {
         AddTransactionSheetHost(
             draftTransaction = state.draftTransaction,
+            accounts = state.accounts,
             currencyCode = state.currencyCode,
             customCategories = state.customCategories,
             currencySymbol = state.currencySymbol,
@@ -553,6 +555,7 @@ fun DashboardScreen(
     editingTransaction?.let { transaction ->
         EditTransactionSheetHost(
             transaction = transaction,
+            accounts = state.accounts,
             splitsForTransaction = state.splitsByTransactionId[transaction.id] ?: kotlinx.collections.immutable.persistentListOf(),
             draftSplitsForTransaction = draftEditingSplits[transaction.id],
             customCategories = state.customCategories,
@@ -903,6 +906,7 @@ private fun LazyListScope.dashboardTransactionListContent(
 @Composable
 private fun AddTransactionSheetHost(
     draftTransaction: TransactionEntity?,
+    accounts: List<com.masum.cipher.core.domain.model.AccountItem> = emptyList(),
     currencyCode: String,
     customCategories: kotlinx.collections.immutable.ImmutableList<CustomCategoryEntity>,
     currencySymbol: String,
@@ -925,6 +929,7 @@ private fun AddTransactionSheetHost(
             rawSms = null,
             isIncome = false
         ),
+        accounts = accounts,
         customCategories = customCategories,
         currencySymbol = currencySymbol,
         existingSplits = draftSplits,
@@ -941,6 +946,7 @@ private fun AddTransactionSheetHost(
 @Composable
 private fun EditTransactionSheetHost(
     transaction: TransactionEntity,
+    accounts: List<com.masum.cipher.core.domain.model.AccountItem> = emptyList(),
     splitsForTransaction: kotlinx.collections.immutable.ImmutableList<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>,
     draftSplitsForTransaction: List<SplitParticipant>?,
     customCategories: kotlinx.collections.immutable.ImmutableList<CustomCategoryEntity>,
@@ -965,6 +971,7 @@ private fun EditTransactionSheetHost(
     }
     TransactionDetailsSheet(
         transaction = transaction,
+        accounts = accounts,
         customCategories = customCategories,
         currencySymbol = currencySymbol,
         existingSplits = mappedParticipants,
@@ -1898,33 +1905,38 @@ private fun DashboardHero(
                         maxLines = 1
                     )
                     if (isPro) {
+                        val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                        val badgeAccentColor = if (isDarkTheme) Color(0xFFFBBF24) else Color(0xFFB45309)
+                        val badgeBgColor = if (isDarkTheme) Color(0xFFF59E0B).copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.12f)
+                        val badgeBorderColor = if (isDarkTheme) Color(0xFFF59E0B).copy(alpha = 0.35f) else Color(0xFFD97706).copy(alpha = 0.32f)
+
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFFFD700).copy(alpha = 0.16f))
-                                .border(0.8.dp, Color(0xFFFFD700).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                                .background(badgeBgColor)
+                                .border(0.75.dp, badgeBorderColor, RoundedCornerShape(6.dp))
+                                .padding(horizontal = 5.5.dp, vertical = 2.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                horizontalArrangement = Arrangement.spacedBy(2.5.dp)
                             ) {
                                 Icon(
                                     imageVector = LucideIcons.Crown,
                                     contentDescription = "Cipher Pro Active",
-                                    tint = Color(0xFFFFD700),
-                                    modifier = Modifier.size(10.dp)
+                                    tint = badgeAccentColor,
+                                    modifier = Modifier.size(9.5.dp)
                                 )
                                 Text(
                                     text = "PRO",
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 9.sp,
-                                        letterSpacing = 0.5.sp
+                                        fontSize = 8.5.sp,
+                                        letterSpacing = 0.6.sp
                                     ),
-                                    color = Color(0xFFFFD700)
+                                    color = badgeAccentColor
                                 )
                             }
                         }

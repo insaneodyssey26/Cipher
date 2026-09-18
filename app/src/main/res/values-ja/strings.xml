@@ -592,4 +592,7 @@
     <string name="transfer_btn_label">振替</string>
     <string name="transfer_error_need_min_accounts">送金するには少なくとも2つのアカウントを追加してください</string>
     <string name="account_details_filter_transfer">口座振替</string>
+    <string name="transaction_account_label">口座</string>
+    <string name="show_pro_badge_title">Proバッジを表示</string>
+    <string name="show_pro_badge_desc">ダッシュボードヘッダーにProバッジを表示します</string>
 </resources>

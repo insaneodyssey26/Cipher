@@ -439,6 +439,7 @@ class MainActivity : AppCompatActivity() {
                                     rawSms = null,
                                     isIncome = false
                                 ),
+                                accounts = state.accounts,
                                 currencySymbol = state.settings?.currencySymbol ?: "₹",
                                 customCategories = state.customCategories,
                                 onDismiss = { showAddSheet = false },

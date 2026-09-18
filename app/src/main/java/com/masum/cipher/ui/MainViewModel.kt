@@ -17,7 +17,8 @@ class MainViewModel @Inject constructor(
     private val biometricAuthenticator: BiometricAuthenticator,
     private val addTransactionUseCase: AddTransactionUseCase,
     private val transactionSplitRepository: com.masum.cipher.core.data.repository.TransactionSplitRepository,
-    private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository
+    private val categoryRepository: com.masum.cipher.core.data.repository.CategoryRepository,
+    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository
 ) : BaseViewModel<MainContract.State, MainContract.Intent, MainContract.Effect>(
     initialState = MainContract.State(
         settings = userPreferences.getCachedSettings(),
@@ -41,6 +42,14 @@ class MainViewModel @Inject constructor(
             .onEach { customCats ->
                 updateState {
                     copy(customCategories = customCats)
+                }
+            }
+            .launchIn(viewModelScope)
+
+        accountRepository.getAllAccountsWithBalancesFlow()
+            .onEach { accList ->
+                updateState {
+                    copy(accounts = accList)
                 }
             }
             .launchIn(viewModelScope)

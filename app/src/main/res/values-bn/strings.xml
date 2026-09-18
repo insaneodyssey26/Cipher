@@ -591,4 +591,7 @@
     <string name="transfer_btn_label">স্থানান্তর</string>
     <string name="transfer_error_need_min_accounts">তহবিল স্থানান্তর করতে কমপক্ষে ২টি অ্যাকাউন্ট যুক্ত করুন</string>
     <string name="account_details_filter_transfer">স্থানান্তর</string>
+    <string name="transaction_account_label">অ্যাকাউন্ট</string>
+    <string name="show_pro_badge_title">প্রো ব্যাজ প্রদর্শন করুন</string>
+    <string name="show_pro_badge_desc">ড্যাশবোর্ড হেডারে লাক্সারি প্রো ব্যাজ প্রদর্শন করুন</string>
 </resources>
