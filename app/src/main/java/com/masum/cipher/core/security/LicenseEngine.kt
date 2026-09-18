@@ -2,6 +2,14 @@ package com.masum.cipher.core.security
 
 import android.os.Build
 import android.util.Base64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.MessageDigest
@@ -208,4 +216,73 @@ class LicenseEngine @Inject constructor() {
             null
         }
     }
+
+    suspend fun activateLicenseRemote(
+        licenseToken: String,
+        email: String?,
+        deviceId: String,
+        deviceName: String = "${Build.MANUFACTURER} ${Build.MODEL}"
+    ): LicenseValidationResult = withContext(Dispatchers.IO) {
+        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
+        if (sanitized.isBlank()) {
+            return@withContext LicenseValidationResult(isValid = false, errorMessage = "License key is empty")
+        }
+
+        val localCheck = validateLicense(sanitized, email)
+        if (!localCheck.isValid) {
+            return@withContext localCheck
+        }
+
+        try {
+            val endpoint = URL("https://cipher-license-api.skmasumali-main.workers.dev/api/activate")
+            val conn = (endpoint.openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 10000
+                readTimeout = 10000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Accept", "application/json")
+            }
+
+            val jsonBody = JSONObject().apply {
+                put("licenseKey", sanitized)
+                put("email", email ?: "")
+                put("deviceId", deviceId)
+                put("deviceName", deviceName)
+            }
+
+            OutputStreamWriter(conn.outputStream, StandardCharsets.UTF_8).use { writer ->
+                writer.write(jsonBody.toString())
+                writer.flush()
+            }
+
+            val responseCode = conn.responseCode
+            val stream = if (responseCode in 200..299) conn.inputStream else conn.errorStream
+            val responseText = stream?.bufferedReader()?.use(BufferedReader::readText) ?: ""
+
+            if (responseCode in 200..299) {
+                val jsonResponse = JSONObject(responseText)
+                val isSuccess = jsonResponse.optBoolean("success", false)
+                if (isSuccess) {
+                    val tierStr = jsonResponse.optString("tier", localCheck.tier.identifier)
+                    localCheck.copy(
+                        isValid = true,
+                        tier = parseTier(tierStr),
+                        orderId = "DODO-${sanitized.takeLast(6).uppercase()}",
+                        customerEmail = email
+                    )
+                } else {
+                    val errorMsg = jsonResponse.optString("error", "Activation failed")
+                    LicenseValidationResult(isValid = false, errorMessage = errorMsg)
+                }
+            } else {
+                val jsonResponse = runCatching { JSONObject(responseText) }.getOrNull()
+                val errorMsg = jsonResponse?.optString("error") ?: "Server returned error ($responseCode)"
+                LicenseValidationResult(isValid = false, errorMessage = errorMsg)
+            }
+        } catch (_: Exception) {
+            localCheck
+        }
+    }
 }
+

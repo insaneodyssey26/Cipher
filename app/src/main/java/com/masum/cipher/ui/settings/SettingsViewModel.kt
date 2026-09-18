@@ -1,5 +1,7 @@
 package com.masum.cipher.ui.settings
 
+import android.content.Context
+import android.provider.Settings
 import androidx.lifecycle.viewModelScope
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.pref.AppTheme
@@ -14,6 +16,7 @@ import com.masum.cipher.core.mvi.BaseViewModel
 import com.masum.cipher.core.security.KeystoreManager
 import com.masum.cipher.core.worker.AutoBackupScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -21,6 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val userPreferences: UserPreferences,
     private val updateSettingsUseCase: UpdateSettingsUseCase,
     private val clearAllDataUseCase: ClearAllDataUseCase,
@@ -320,7 +324,8 @@ class SettingsViewModel @Inject constructor(
     private fun activatePro(licenseKey: String, email: String?) {
         viewModelScope.launch {
             updateState { copy(isActivatingPro = true, proActivationError = null, proActivationSuccess = false) }
-            val result = licenseEngine.validateLicense(licenseKey, email)
+            val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "DEVICE_${System.currentTimeMillis()}"
+            val result = licenseEngine.activateLicenseRemote(licenseKey, email, deviceId)
             if (result.isValid) {
                 userPreferences.setProStatus(
                     isPro = true,

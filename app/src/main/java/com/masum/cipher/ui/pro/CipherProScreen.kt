@@ -2,6 +2,7 @@ package com.masum.cipher.ui.pro
 
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -147,8 +148,8 @@ fun Modifier.dotGridPattern(
 fun CipherProScreen(
     userPreferences: UserPreferences,
     onNavigateBack: () -> Unit,
-    dodoCheckoutUrlMonthly: String = "https://checkout.dodopayments.com/buy/monthly",
-    dodoCheckoutUrlLifetime: String = "https://checkout.dodopayments.com/buy/lifetime"
+    dodoCheckoutUrlMonthly: String = "https://test.checkout.dodopayments.com/buy/pdt_0NnrurXNQQ9SdcuXSgqzT?quantity=1",
+    dodoCheckoutUrlLifetime: String = "https://test.checkout.dodopayments.com/buy/pdt_0Nnrtp1txcVAsuHEgyyDa?quantity=1"
 ) {
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val context = LocalContext.current
@@ -347,7 +348,7 @@ fun CipherProScreen(
                         ) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
-                                    text = if (selectedTier == ProTierSelection.LIFETIME) "₹499" else "₹49",
+                                    text = if (selectedTier == ProTierSelection.LIFETIME) "₹499" else "₹59",
                                     style = Typography.displaySmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -375,7 +376,7 @@ fun CipherProScreen(
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = if (selectedTier == ProTierSelection.LIFETIME) stringResource(R.string.pro_tier_lifetime_desc) else "₹588 / year",
+                                    text = if (selectedTier == ProTierSelection.LIFETIME) stringResource(R.string.pro_tier_lifetime_desc) else "₹708 / year",
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
                                         fontWeight = FontWeight.Bold,
@@ -557,7 +558,7 @@ fun CipherProScreen(
                                     }
 
                                     Text(
-                                        text = "${stringResource(R.string.pro_tier_monthly)} ₹49",
+                                        text = "${stringResource(R.string.pro_tier_monthly)} ₹59",
                                         style = Typography.titleMedium.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -568,7 +569,7 @@ fun CipherProScreen(
                                 }
 
                                 Text(
-                                    text = "₹588 / year",
+                                    text = "₹708 / year",
                                     style = Typography.bodySmall.copy(
                                         fontFamily = DMSans,
                                         fontWeight = FontWeight.Medium,
@@ -643,9 +644,9 @@ fun CipherProScreen(
                                         .background(EmeraldIncome.copy(alpha = 0.16f))
                                         .border(0.8.dp, EmeraldIncome.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
                                         .padding(horizontal = 7.dp, vertical = 3.dp)
-                                ) {
+                                    ) {
                                     Text(
-                                        text = "Save ₹588/yr forever",
+                                        text = "Save ₹708/yr forever",
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Bold,
@@ -819,7 +820,8 @@ fun CipherProScreen(
                                         if (licenseKeyInput.isNotBlank()) {
                                             isActivating = true
                                             coroutineScope.launch {
-                                                val res = licenseEngine.validateLicense(licenseKeyInput, emailInput.ifBlank { null })
+                                                val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "DEVICE_${System.currentTimeMillis()}"
+                                                val res = licenseEngine.activateLicenseRemote(licenseKeyInput, emailInput.ifBlank { null }, deviceId)
                                                 if (res.isValid) {
                                                     userPreferences.setProStatus(
                                                         isPro = true,
@@ -865,7 +867,8 @@ fun CipherProScreen(
                                     keyboardController?.hide()
                                     isActivating = true
                                     coroutineScope.launch {
-                                        val res = licenseEngine.validateLicense(licenseKeyInput, emailInput.ifBlank { null })
+                                        val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "DEVICE_${System.currentTimeMillis()}"
+                                        val res = licenseEngine.activateLicenseRemote(licenseKeyInput, emailInput.ifBlank { null }, deviceId)
                                         if (res.isValid) {
                                             userPreferences.setProStatus(
                                                 isPro = true,
