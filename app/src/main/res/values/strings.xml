@@ -289,7 +289,7 @@
     <string name="privacy_biometrics_title">Biometrics</string>
     <string name="privacy_biometrics_body">If you enable biometric lock, authentication is handled entirely by your device\'s operating system via Android BiometricPrompt. Cipher never accesses, stores, or processes your biometric data.</string>
     <string name="privacy_network_title">Network Access</string>
-    <string name="privacy_network_body">Cipher does not request internet permission and makes zero network calls. There are no remote servers, analytics SDKs, crash reporters, or ad libraries in this app.</string>
+    <string name="privacy_network_body">All financial calculations, transaction parsing, and database storage run 100% locally and offline on your device. Network access is used strictly to verify cryptographic Pro product license keys. There are no tracking SDKs, analytics, crash reporters, or ads.</string>
     <string name="privacy_exports_title">Exports &amp; Auto Backups</string>
     <string name="privacy_exports_body">When you export a CSV, PDF statement, or configure Auto Backup, the files are saved directly to your selected device storage or cloud-synced folder via Android\'s native Storage Framework. Database backups are encrypted with a password you choose. Cipher does not transmit this data anywhere and has no remote access to where you store these files beyond the folder permissions you explicitly grant.</string>
     <string name="privacy_open_source_title">Open Source</string>

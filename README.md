@@ -186,6 +186,10 @@ flowchart LR
 ### Home screen widgets
 - **BudgetWidget** — monthly spend vs. budget at a glance
 - **StatsWidget** — today's income and expense summary
+- **AccountsWidget** — live multi-account balances & wallet breakdowns
+- **PassbookWidget** — instant recent transaction passbook scroll
+- **DailyAllowanceWidget** — daily spending target & run-rate gauge
+- **QuickLogWidget** — 1-tap instant transaction expense logger
 
 ### Data portability
 - **CSV export** — standard format, opens in any spreadsheet app
@@ -306,7 +310,7 @@ app/
 | Security | BiometricPrompt, androidx.security.crypto |
 | Navigation | Navigation Compose                      |
 | Widgets | Glance (AppWidget)                      |
-| Min SDK | 24 (Android 7.0)                        |
+| Min SDK | 26 (Android 8.0)                        |
 | Target SDK | 37 (Android 17)                         |
 
 ---
@@ -345,7 +349,9 @@ For step-by-step sideloading instructions including the Android 13+ SMS permissi
 
 ## Privacy
 
-cipher requests exactly three permissions: `RECEIVE_SMS`, `BIND_NOTIFICATION_LISTENER_SERVICE` (optional, to read bank app alerts), and `POST_NOTIFICATIONS` (optional, for budget alerts). It has **no INTERNET permission**. There is no telemetry, no analytics SDK, no crash reporter, and no account system. All data — transactions, preferences, backups, and generated PDFs — stays natively on your device.
+Cipher is designed from the ground up as a **100% local-first** financial ledger. All SMS alerts, app notifications, transaction records, accounts, and PDF statements are parsed and stored strictly on your device using AES-256 encrypted storage.
+
+There is zero telemetry, zero analytics trackers, zero advertising SDKs, and zero crash reporters. Network communication is used strictly for optional cryptographic Pro product license verification (allocating your 3-device quota). No financial data is ever transmitted to remote servers.
 
 ---
 

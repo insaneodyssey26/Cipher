@@ -149,7 +149,8 @@ fun DashboardScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
     onNavigateToManageApps: () -> Unit,
-    onNavigateToAccounts: () -> Unit = {}
+    onNavigateToAccounts: () -> Unit = {},
+    onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalLocale.current.platformLocale
@@ -679,7 +680,16 @@ fun DashboardScreen(
                     userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
                     showWhatsNewSheet = false
                 }
-            }
+            },
+            onExplorePro = {
+                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                coroutineScope.launch {
+                    userPreferences.setLastSeenWhatsNewVersionCode(currentVersionCode)
+                    showWhatsNewSheet = false
+                    onNavigateToPro()
+                }
+            },
+            isPro = settings?.isPro == true
         )
     }
 

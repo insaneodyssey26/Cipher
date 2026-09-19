@@ -298,7 +298,8 @@ class MainActivity : AppCompatActivity() {
                                     viewModel = viewModel,
                                     userPreferences = userPreferences,
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
-                                    onNavigateToAccounts = { navController.navigate("accounts") }
+                                    onNavigateToAccounts = { navController.navigate("accounts") },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
                             composable("split_expenses") {
