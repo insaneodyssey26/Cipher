@@ -623,7 +623,7 @@
     <string name="account_details_filter_transfer">Transferts</string>
     <string name="transaction_account_label">Compte</string>
     <string name="show_pro_badge_title">Afficher le badge Pro</string>
-    <string name="show_pro_badge_desc">Afficher le badge Pro sur l\'en-tête du tableau de bord</string>
+    <string name="show_pro_badge_desc">Afficher le badge Pro dans l\'en-tête du tableau de bord</string>
     <string name="account_export_statement_title">Exporter le relevé</string>
     <string name="account_export_statement_desc">Télécharger le relevé PDF certifié ou le rapport CSV de ce compte</string>
     <string name="account_export_csv">Exporter le rapport CSV</string>

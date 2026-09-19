@@ -294,7 +294,7 @@ fun CipherProScreen(
         )
     }
 
-    val pagerState = rememberPagerState(initialPage = 2, pageCount = { plans.size })
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { plans.size })
 
     Scaffold(
         containerColor = screenBg,

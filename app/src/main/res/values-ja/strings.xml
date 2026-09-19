@@ -624,7 +624,7 @@
     <string name="account_details_filter_transfer">口座振替</string>
     <string name="transaction_account_label">口座</string>
     <string name="show_pro_badge_title">Proバッジを表示</string>
-    <string name="show_pro_badge_desc">ダッシュボードヘッダーにProバッジを表示します</string>
+    <string name="show_pro_badge_desc">ダッシュボードヘッダーにProバッジを表示</string>
     <string name="account_export_statement_title">明細書のエクスポート</string>
     <string name="account_export_statement_desc">この口座のPDF利用明細またはCSVレポートをダウンロード</string>
     <string name="account_export_csv">CSVレポートをエクスポート</string>

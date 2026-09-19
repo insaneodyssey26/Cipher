@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Center (54, 54), scale 1.1: circle r=33 -->
+    <!-- Outer circle clockwise: M 54,21 A 33,33 0 1,1 53.99,21 Z -->
+    <!-- Keyhole cutout counter-clockwise: -->
+    <!-- Start at keyhole tip (87.7, 54): -->
+    <!-- Line to top-right slot (87.7, 39.15) -->
+    <!-- Line to slot inner top (50.7, 47.95) -->
+    <!-- Arc along large circle counter-clockwise around (50.7, 54) r=13.75 from angle -60° to +60°: to (50.7, 60.05) -->
+    <!-- Line to bottom-right slot (87.7, 68.85) -->
+    <!-- Line to (87.7, 54) Z -->
+    <!-- Center small pin clockwise at (50.7, 54) r=5.5 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 54,21 A 33,33 0 1,1 53.99,21 Z M 87.7,54 L 87.7,39.15 L 50.7,47.95 A 13.75,13.75 0 1,0 50.7,60.05 L 87.7,68.85 Z M 50.7,48.5 A 5.5,5.5 0 1,1 50.69,48.5 Z" />
+</vector>

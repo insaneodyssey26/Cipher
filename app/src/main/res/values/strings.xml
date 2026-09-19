@@ -637,7 +637,7 @@
     <string name="account_details_filter_transfer">Transfers</string>
     <string name="transaction_account_label">Account</string>
     <string name="show_pro_badge_title">Show Pro Badge</string>
-    <string name="show_pro_badge_desc">Display the luxury Pro badge on the dashboard header</string>
+    <string name="show_pro_badge_desc">Display the Pro badge on the dashboard header</string>
     <string name="account_export_statement_title">Export Statement</string>
     <string name="account_export_statement_desc">Download certified PDF statement or CSV report for this account</string>
     <string name="account_export_csv">Export CSV Report</string>
