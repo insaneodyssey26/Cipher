@@ -812,7 +812,8 @@ private fun OnboardingRestoreLicenseDialog(
                                 isPro = true,
                                 tier = result.tier.identifier,
                                 token = rawKey,
-                                orderId = result.orderId
+                                orderId = result.orderId,
+                                expiresAt = result.expiresAtEpochMs
                             )
                             successTier = result.tier.displayName
                             onActivated()

@@ -316,5 +316,39 @@ class LicenseEngine @Inject constructor() {
             localCheck
         }
     }
+
+    suspend fun deactivateLicenseRemote(
+        licenseToken: String,
+        deviceId: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
+        if (sanitized.isBlank()) return@withContext true
+        try {
+            val endpoint = URL("https://cipher-license-api.skmasumali-main.workers.dev/api/deactivate")
+            val conn = (endpoint.openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 8000
+                readTimeout = 8000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Accept", "application/json")
+            }
+
+            val jsonBody = JSONObject().apply {
+                put("licenseKey", sanitized)
+                put("deviceId", deviceId)
+            }
+
+            OutputStreamWriter(conn.outputStream, StandardCharsets.UTF_8).use { writer ->
+                writer.write(jsonBody.toString())
+                writer.flush()
+            }
+
+            val responseCode = conn.responseCode
+            responseCode in 200..299
+        } catch (_: Exception) {
+            true
+        }
+    }
 }
 

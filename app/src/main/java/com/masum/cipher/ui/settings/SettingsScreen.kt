@@ -434,6 +434,17 @@ fun SettingsScreen(
                 }
             }
 
+            val proSubtitleText = remember(state.isPro, state.proTier, state.proExpiresAtEpochMs) {
+                if (!state.isPro) {
+                    "Widgets, smart rules, custom PDF reports & extra themes"
+                } else if (state.proExpiresAtEpochMs > 0L) {
+                    val formattedDate = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(state.proExpiresAtEpochMs))
+                    "Active until $formattedDate • Tap to manage"
+                } else {
+                    "All Pro features unlocked • Lifetime Access"
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -510,7 +521,7 @@ fun SettingsScreen(
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(
                                             if (state.isPro) EmeraldIncome.copy(alpha = 0.22f)
-                                            else Color(0xFFF59E0B).copy(alpha = 0.22f)
+                                             else Color(0xFFF59E0B).copy(alpha = 0.22f)
                                         )
                                         .padding(horizontal = 7.dp, vertical = 2.dp)
                                 ) {
@@ -528,7 +539,7 @@ fun SettingsScreen(
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = if (state.isPro) "All Pro features unlocked • Tap to manage" else "Widgets, smart rules, custom PDF reports & extra themes",
+                                text = proSubtitleText,
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontSize = 11.5.sp

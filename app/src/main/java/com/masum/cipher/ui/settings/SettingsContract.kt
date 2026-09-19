@@ -106,6 +106,7 @@ class SettingsContract {
         val isExportingPdf: Boolean = false,
         val isPro: Boolean = false,
         val proTier: String = "FREE",
+        val proExpiresAtEpochMs: Long = 0L,
         val proLicenseToken: String? = null,
         val proOrderId: String? = null,
         val showProBadge: Boolean = true,

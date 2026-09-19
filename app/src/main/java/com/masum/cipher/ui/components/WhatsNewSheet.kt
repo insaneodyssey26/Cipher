@@ -150,8 +150,38 @@ fun WhatsNewSheet(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 WhatsNewVersionSection(
-                    versionTitle = "v$versionName",
+                    versionTitle = "v6.0.0",
                     isLatest = true
+                ) {
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v60_widgets_title),
+                        description = stringResource(R.string.whats_new_v60_widgets_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v60_statements_title),
+                        description = stringResource(R.string.whats_new_v60_statements_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v60_analytics_title),
+                        description = stringResource(R.string.whats_new_v60_analytics_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v60_pro_title),
+                        description = stringResource(R.string.whats_new_v60_pro_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v60_onboarding_title),
+                        description = stringResource(R.string.whats_new_v60_onboarding_desc)
+                    )
+                }
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                    thickness = 1.dp
+                )
+
+                WhatsNewVersionSection(
+                    versionTitle = "v5.6.2"
                 ) {
                     WhatsNewFeatureEntry(
                         title = stringResource(R.string.whats_new_feature_custom_categories_title),
@@ -160,6 +190,10 @@ fun WhatsNewSheet(
                     WhatsNewFeatureEntry(
                         title = stringResource(R.string.whats_new_feature_smart_rules_title),
                         description = stringResource(R.string.whats_new_feature_smart_rules_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v56_notification_title),
+                        description = stringResource(R.string.whats_new_v56_notification_desc)
                     )
                 }
 

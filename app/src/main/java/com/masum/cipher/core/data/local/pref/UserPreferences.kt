@@ -73,7 +73,17 @@ class UserPreferences @Inject constructor(
             syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
             return false
         }
+        val expiresAt = syncPrefs.getLong("cached_pro_expiry", 0L)
+        if (expiresAt > 0L && System.currentTimeMillis() > expiresAt) {
+            syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
+            return false
+        }
         return true
+    }
+
+    fun getCachedProExpiresAt(): Long {
+        if (!isCachedPro()) return 0L
+        return syncPrefs.getLong("cached_pro_expiry", 0L)
     }
 
     fun getCachedProTier(): String {
@@ -123,7 +133,8 @@ class UserPreferences @Inject constructor(
             accentColor = getCachedAccentColor(),
             isNavBarCompressed = isCachedNavBarCompressed(),
             isPro = isPro,
-            proTier = proTier
+            proTier = proTier,
+            proExpiresAtEpochMs = getCachedProExpiresAt()
         )
     }
 
@@ -172,6 +183,7 @@ class UserPreferences @Inject constructor(
         val PRO_TIER = stringPreferencesKey("pro_tier")
         val PRO_LICENSE_TOKEN = stringPreferencesKey("pro_license_token")
         val PRO_ORDER_ID = stringPreferencesKey("pro_order_id")
+        val PRO_EXPIRES_AT = longPreferencesKey("pro_expires_at")
         val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
     }
 
@@ -291,7 +303,14 @@ class UserPreferences @Inject constructor(
                 else {
                     val token = preferences[Keys.PRO_LICENSE_TOKEN]
                     if (token.isNullOrBlank()) false
-                    else com.masum.cipher.core.security.LicenseEngine().validateLicense(token).isValid
+                    else {
+                        val validation = com.masum.cipher.core.security.LicenseEngine().validateLicense(token)
+                        if (!validation.isValid) false
+                        else {
+                            val expiresAt = preferences[Keys.PRO_EXPIRES_AT] ?: 0L
+                            expiresAt == 0L || System.currentTimeMillis() <= expiresAt
+                        }
+                    }
                 }
             },
             proTier = run {
@@ -299,11 +318,14 @@ class UserPreferences @Inject constructor(
                 if (token.isNullOrBlank()) "FREE"
                 else {
                     val res = com.masum.cipher.core.security.LicenseEngine().validateLicense(token)
-                    if (res.isValid) res.tier.identifier else "FREE"
+                    val expiresAt = preferences[Keys.PRO_EXPIRES_AT] ?: 0L
+                    val isExpired = expiresAt > 0L && System.currentTimeMillis() > expiresAt
+                    if (res.isValid && !isExpired) res.tier.identifier else "FREE"
                 }
             },
             proLicenseToken = preferences[Keys.PRO_LICENSE_TOKEN],
             proOrderId = preferences[Keys.PRO_ORDER_ID],
+            proExpiresAtEpochMs = preferences[Keys.PRO_EXPIRES_AT] ?: 0L,
             showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true
         )
     }
@@ -653,15 +675,17 @@ class UserPreferences @Inject constructor(
         }
     }
 
-    suspend fun setProStatus(isPro: Boolean, tier: String, token: String?, orderId: String?) {
+    suspend fun setProStatus(isPro: Boolean, tier: String, token: String?, orderId: String?, expiresAt: Long = 0L) {
         syncPrefs.edit()
             .putBoolean("cached_is_pro", isPro)
             .putString("cached_pro_tier", tier)
             .putString("cached_license_token", token)
+            .putLong("cached_pro_expiry", expiresAt)
             .apply()
         context.dataStore.edit { preferences ->
             preferences[Keys.PRO_ACTIVATED] = isPro
             preferences[Keys.PRO_TIER] = tier
+            preferences[Keys.PRO_EXPIRES_AT] = expiresAt
             if (token != null) {
                 preferences[Keys.PRO_LICENSE_TOKEN] = token
             } else {
@@ -676,7 +700,7 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun deactivatePro() {
-        setProStatus(isPro = false, tier = "FREE", token = null, orderId = null)
+        setProStatus(isPro = false, tier = "FREE", token = null, orderId = null, expiresAt = 0L)
     }
 
     suspend fun setShowProBadge(enabled: Boolean) {
@@ -754,5 +778,6 @@ data class UserSettings(
     val proTier: String = "FREE",
     val proLicenseToken: String? = null,
     val proOrderId: String? = null,
+    val proExpiresAtEpochMs: Long = 0L,
     val showProBadge: Boolean = true
 )

@@ -97,6 +97,10 @@ import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Check
@@ -104,7 +108,9 @@ import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.ExternalLink
 import compose.icons.lucideicons.Key
 import compose.icons.lucideicons.ShieldCheck
+import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Sparkles
+import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -141,10 +147,10 @@ private data class PricingCardData(
 fun CipherProScreen(
     userPreferences: UserPreferences,
     onNavigateBack: () -> Unit,
-    dodoCheckoutUrlMonthly: String = "https://test.checkout.dodopayments.com/buy/pdt_0NnrurXNQQ9SdcuXSgqzT?quantity=1",
-    dodoCheckoutUrlHalfYearly: String = "https://test.checkout.dodopayments.com/buy/pdt_0NnrurXNQQ9SdcuXSgqzT?quantity=1",
-    dodoCheckoutUrlYearly: String = "https://test.checkout.dodopayments.com/buy/pdt_0NnrurXNQQ9SdcuXSgqzT?quantity=1",
-    dodoCheckoutUrlLifetime: String = "https://test.checkout.dodopayments.com/buy/pdt_0Nnrtp1txcVAsuHEgyyDa?quantity=1"
+    dodoCheckoutUrlMonthly: String = "https://checkout.dodopayments.com/buy/pdt_0NnvfQxm1f1vLtVQvAiYW?quantity=1",
+    dodoCheckoutUrlHalfYearly: String = "https://checkout.dodopayments.com/buy/pdt_0NnvgNp6Fu53ZP3IZwST8?quantity=1",
+    dodoCheckoutUrlYearly: String = "https://checkout.dodopayments.com/buy/pdt_0Nnvgcewj9JY1Oyrs2kWF?quantity=1",
+    dodoCheckoutUrlLifetime: String = "https://checkout.dodopayments.com/buy/pdt_0NnvgqmXN76K14C90kLjX?quantity=1"
 ) {
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val context = LocalContext.current
@@ -185,6 +191,11 @@ fun CipherProScreen(
     var emailInput by remember { mutableStateOf("") }
     var isActivating by remember { mutableStateOf(false) }
     var activationError by remember { mutableStateOf<String?>(null) }
+    var showBrowsePlans by remember { mutableStateOf(false) }
+    var showDeactivateConfirmDialog by remember { mutableStateOf(false) }
+    var isDeactivatingDevice by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
+    val isAlreadyPro = settings.isPro
 
     val plans = remember(dodoCheckoutUrlMonthly, dodoCheckoutUrlHalfYearly, dodoCheckoutUrlYearly, dodoCheckoutUrlLifetime) {
         listOf(
@@ -207,7 +218,7 @@ fun CipherProScreen(
                     PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
                     PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
                     PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Split Expenses & Group Debts", "Calculate shared payments with automatic settlements"),
+                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
                     PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
                 )
             ),
@@ -230,7 +241,7 @@ fun CipherProScreen(
                     PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
                     PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
                     PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Split Expenses & Group Debts", "Calculate shared payments with automatic settlements"),
+                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
                     PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
                 )
             ),
@@ -242,7 +253,7 @@ fun CipherProScreen(
                 mainPrice = "₹499",
                 periodLabel = "/ year",
                 billedSubtext = "Effective ₹41.58 / month",
-                description = "A full year of uninterrupted financial clarity. Best overall savings for mastering budgets, rules, and group splits.",
+                description = "A full year of uninterrupted financial clarity. Best overall savings for mastering budgets, rules, and categories.",
                 accentColorDark = Color(0xFFE2FF38),
                 accentColorLight = Color(0xFF059669),
                 onAccentColorDark = Color.Black,
@@ -253,7 +264,7 @@ fun CipherProScreen(
                     PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
                     PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
                     PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Split Expenses & Group Debts", "Calculate shared payments with automatic settlements"),
+                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
                     PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
                 )
             ),
@@ -276,7 +287,7 @@ fun CipherProScreen(
                     PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
                     PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
                     PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Split Expenses & Group Debts", "Calculate shared payments with automatic settlements"),
+                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
                     PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
                 )
             )
@@ -290,454 +301,564 @@ fun CipherProScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .statusBarsPadding()
-                .navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled)
-                            onNavigateBack()
-                        },
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.ArrowLeft,
-                            contentDescription = "Back",
-                            tint = textPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(38.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(topPillTrackBg)
-                            .padding(3.dp)
-                    ) {
-                        val tabWidth = maxWidth / plans.size
-                        val indicatorOffset by animateDpAsState(
-                            targetValue = tabWidth * pagerState.currentPage,
-                            animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-                            label = "pro_tab_indicator_offset"
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
-                                .width(tabWidth)
-                                .fillMaxHeight()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(topPillActiveBg)
-                        )
-
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            plans.forEachIndexed { index, plan ->
-                                val isSelected = pagerState.currentPage == index
-                                val tabTitle = plan.title.replace("Pass", "").replace("Pro", "").replace("Annual", "").replace("VIP", "").trim()
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight()
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null
-                                        ) {
-                                            view.performVibrate(isHapticsEnabled)
-                                            coroutineScope.launch {
-                                                pagerState.animateScrollToPage(index)
-                                            }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = tabTitle,
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 11.5.sp
-                                        ),
-                                        color = if (isSelected) textPrimary else textSecondary
-                                    )
-                                }
-                            }
-                        }
+        if (isAlreadyPro && !showBrowsePlans) {
+            ActiveProMembershipContent(
+                settings = settings,
+                isDark = isDark,
+                screenBg = screenBg,
+                cardBg = cardBg,
+                cardBorderDefault = cardBorderDefault,
+                textPrimary = textPrimary,
+                textSecondary = textSecondary,
+                textDescription = textDescription,
+                isHapticsEnabled = isHapticsEnabled,
+                isDeactivatingDevice = isDeactivatingDevice,
+                onNavigateBack = {
+                    view.performVibrate(isHapticsEnabled)
+                    onNavigateBack()
+                },
+                onDeactivateClick = {
+                    view.performVibrate(isHapticsEnabled)
+                    showDeactivateConfirmDialog = true
+                },
+                onBrowsePlansClick = {
+                    view.performVibrate(isHapticsEnabled)
+                    showBrowsePlans = true
+                },
+                onCopyLicense = { key ->
+                    view.performVibrate(isHapticsEnabled)
+                    clipboardManager.setText(AnnotatedString(key))
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("License key copied to clipboard!")
                     }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column {
-                        Text(
-                            text = "Cipher Pro",
-                            style = Typography.displaySmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 28.sp
-                            ),
-                            color = textPrimary
-                        )
-                        Text(
-                            text = "Elevate your offline wealth vault",
-                            style = Typography.bodySmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 12.sp
-                            ),
-                            color = textSecondary
-                        )
-                    }
-
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        plans.indices.forEach { index ->
-                            val isActive = pagerState.currentPage == index
-                            val plan = plans[index]
-                            val planAccent = if (isDark) plan.accentColorDark else plan.accentColorLight
-                            val barWidth = if (isActive) 18.dp else 6.dp
-                            val barColor = if (isActive) planAccent else if (isDark) Color(0xFF334155) else Color(0xFFCBD5E1)
+                        IconButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled)
+                                if (isAlreadyPro && showBrowsePlans) {
+                                    showBrowsePlans = false
+                                } else {
+                                    onNavigateBack()
+                                }
+                            },
+                            modifier = Modifier.size(44.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.ArrowLeft,
+                                contentDescription = "Back",
+                                tint = textPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(38.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(topPillTrackBg)
+                                .padding(3.dp)
+                        ) {
+                            val tabWidth = maxWidth / plans.size
+                            val indicatorOffset by animateDpAsState(
+                                targetValue = tabWidth * pagerState.currentPage,
+                                animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
+                                label = "pro_tab_indicator_offset"
+                            )
 
                             Box(
                                 modifier = Modifier
-                                    .height(4.dp)
-                                    .width(barWidth)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(barColor)
+                                    .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
+                                    .width(tabWidth)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(topPillActiveBg)
                             )
+
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                plans.forEachIndexed { index, plan ->
+                                    val isSelected = pagerState.currentPage == index
+                                    val tabTitle = plan.title.replace("Pass", "").replace("Pro", "").replace("Annual", "").replace("VIP", "").trim()
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) {
+                                                view.performVibrate(isHapticsEnabled)
+                                                coroutineScope.launch {
+                                                    pagerState.animateScrollToPage(index)
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = tabTitle,
+                                            style = Typography.labelMedium.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                fontSize = 11.5.sp
+                                            ),
+                                            color = if (isSelected) textPrimary else textSecondary
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                pageSpacing = 14.dp
-            ) { pageIndex ->
-                val plan = plans[pageIndex]
-                val planAccent = if (isDark) plan.accentColorDark else plan.accentColorLight
-                val planOnAccent = if (isDark) plan.onAccentColorDark else plan.onAccentColorLight
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(cardBg)
-                        .border(
-                            width = 1.5.dp,
-                            color = planAccent,
-                            shape = RoundedCornerShape(28.dp)
-                        )
-                        .padding(horizontal = 22.dp, vertical = 20.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceBetween
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = plan.title,
-                                    style = Typography.titleLarge.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 19.sp
-                                    ),
-                                    color = textPrimary
-                                )
+                        Column {
+                            Text(
+                                text = "Cipher Pro",
+                                style = Typography.displaySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 28.sp
+                                ),
+                                color = textPrimary
+                            )
+                            Text(
+                                text = "Elevate your offline wealth vault",
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp
+                                ),
+                                color = textSecondary
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        ) {
+                            plans.indices.forEach { index ->
+                                val isActive = pagerState.currentPage == index
+                                val plan = plans[index]
+                                val planAccent = if (isDark) plan.accentColorDark else plan.accentColorLight
+                                val barWidth = if (isActive) 18.dp else 6.dp
+                                val barColor = if (isActive) planAccent else if (isDark) Color(0xFF334155) else Color(0xFFCBD5E1)
 
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(planAccent)
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                        .height(4.dp)
+                                        .width(barWidth)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(barColor)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(horizontal = 20.dp),
+                    pageSpacing = 14.dp
+                ) { pageIndex ->
+                    val plan = plans[pageIndex]
+                    val planAccent = if (isDark) plan.accentColorDark else plan.accentColorLight
+                    val planOnAccent = if (isDark) plan.onAccentColorDark else plan.onAccentColorLight
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(cardBg)
+                            .border(
+                                width = 1.5.dp,
+                                color = planAccent,
+                                shape = RoundedCornerShape(28.dp)
+                            )
+                            .padding(horizontal = 22.dp, vertical = 20.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = plan.badge,
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = planOnAccent
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            Row(
-                                verticalAlignment = Alignment.Bottom,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                if (plan.strikePrice != null) {
-                                    Text(
-                                        text = plan.strikePrice,
+                                        text = plan.title,
                                         style = Typography.titleLarge.copy(
                                             fontFamily = DMSans,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 20.sp,
-                                            textDecoration = TextDecoration.LineThrough
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 19.sp
+                                        ),
+                                        color = textPrimary
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(planAccent)
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = plan.badge,
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 11.sp
+                                            ),
+                                            color = planOnAccent
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    if (plan.strikePrice != null) {
+                                        Text(
+                                            text = plan.strikePrice,
+                                            style = Typography.titleLarge.copy(
+                                                fontFamily = DMSans,
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 20.sp,
+                                                textDecoration = TextDecoration.LineThrough
+                                            ),
+                                            color = textSecondary,
+                                            modifier = Modifier.padding(bottom = 2.dp)
+                                        )
+                                    }
+
+                                    Text(
+                                        text = plan.mainPrice,
+                                        style = Typography.displaySmall.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 32.sp
+                                        ),
+                                        color = planAccent
+                                    )
+
+                                    Text(
+                                        text = plan.periodLabel,
+                                        style = Typography.bodyMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 13.sp
                                         ),
                                         color = textSecondary,
-                                        modifier = Modifier.padding(bottom = 2.dp)
+                                        modifier = Modifier.padding(bottom = 4.dp)
                                     )
                                 }
 
                                 Text(
-                                    text = plan.mainPrice,
-                                    style = Typography.displaySmall.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 32.sp
+                                    text = plan.billedSubtext,
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 11.5.sp
                                     ),
                                     color = planAccent
                                 )
 
+                                Spacer(modifier = Modifier.height(6.dp))
+
                                 Text(
-                                    text = plan.periodLabel,
-                                    style = Typography.bodyMedium.copy(
+                                    text = plan.description,
+                                    style = Typography.bodySmall.copy(
                                         fontFamily = Lato,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 13.sp
+                                        fontSize = 12.sp,
+                                        lineHeight = 16.5.sp
                                     ),
-                                    color = textSecondary,
-                                    modifier = Modifier.padding(bottom = 4.dp)
+                                    color = textDescription
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                HorizontalDivider(
+                                    color = cardBorderDefault,
+                                    thickness = 1.dp
                                 )
                             }
 
-                            Text(
-                                text = plan.billedSubtext,
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = planAccent
-                            )
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            Text(
-                                text = plan.description,
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 12.sp,
-                                    lineHeight = 16.5.sp
-                                ),
-                                color = textDescription
-                            )
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            HorizontalDivider(
-                                color = cardBorderDefault,
-                                thickness = 1.dp
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(vertical = 8.dp),
-                            verticalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            plan.features.forEach { feat ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(22.dp)
-                                            .clip(CircleShape)
-                                            .background(planAccent),
-                                        contentAlignment = Alignment.Center
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .padding(vertical = 8.dp),
+                                verticalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                plan.features.forEach { feat ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            imageVector = LucideIcons.Check,
-                                            contentDescription = null,
-                                            tint = planOnAccent,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = feat.title,
-                                            style = Typography.bodyMedium.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 12.5.sp
-                                            ),
-                                            color = textPrimary
-                                        )
-                                        if (feat.subtitle.isNotBlank()) {
-                                            Text(
-                                                text = feat.subtitle,
-                                                style = Typography.bodySmall.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.Normal,
-                                                    fontSize = 10.5.sp,
-                                                    lineHeight = 13.5.sp
-                                                ),
-                                                color = textSecondary
+                                        Box(
+                                            modifier = Modifier
+                                                .size(22.dp)
+                                                .clip(CircleShape)
+                                                .background(planAccent),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = LucideIcons.Check,
+                                                contentDescription = null,
+                                                tint = planOnAccent,
+                                                modifier = Modifier.size(13.dp)
                                             )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(12.dp))
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = feat.title,
+                                                style = Typography.bodyMedium.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 12.5.sp
+                                                ),
+                                                color = textPrimary
+                                            )
+                                            if (feat.subtitle.isNotBlank()) {
+                                                Text(
+                                                    text = feat.subtitle,
+                                                    style = Typography.bodySmall.copy(
+                                                        fontFamily = Lato,
+                                                        fontWeight = FontWeight.Normal,
+                                                        fontSize = 10.5.sp,
+                                                        lineHeight = 13.5.sp
+                                                    ),
+                                                    color = textSecondary
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 8.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.ShieldCheck,
-                                    contentDescription = null,
-                                    tint = textSecondary,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "No cloud servers • 100% offline on device",
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 10.5.sp
-                                    ),
-                                    color = textSecondary
-                                )
-                            }
-
-                            Button(
-                                onClick = {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                    try {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(plan.checkoutUrl))
-                                        context.startActivity(intent)
-                                    } catch (_: Exception) {}
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = ctaButtonBg,
-                                    contentColor = ctaButtonText
-                                )
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        imageVector = LucideIcons.Sparkles,
+                                        imageVector = LucideIcons.ShieldCheck,
                                         contentDescription = null,
-                                        tint = ctaButtonText,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(7.dp))
-                                    Text(
-                                        text = "Get ${plan.title} — ${plan.mainPrice}",
-                                        style = Typography.titleMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 14.sp
-                                        ),
-                                        color = ctaButtonText
-                                    )
-                                    Spacer(modifier = Modifier.width(5.dp))
-                                    Icon(
-                                        imageVector = LucideIcons.ExternalLink,
-                                        contentDescription = null,
-                                        tint = ctaButtonText.copy(alpha = 0.75f),
+                                        tint = textSecondary,
                                         modifier = Modifier.size(13.dp)
                                     )
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        text = "No cloud servers • 100% offline on device",
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 10.5.sp
+                                        ),
+                                        color = textSecondary
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                        try {
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(plan.checkoutUrl))
+                                            context.startActivity(intent)
+                                        } catch (_: Exception) {}
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+                                    shape = CircleShape,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = ctaButtonBg,
+                                        contentColor = ctaButtonText
+                                    )
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Sparkles,
+                                            contentDescription = null,
+                                            tint = ctaButtonText,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(7.dp))
+                                        Text(
+                                            text = "Get ${plan.title} — ${plan.mainPrice}",
+                                            style = Typography.titleMedium.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.sp
+                                            ),
+                                            color = ctaButtonText
+                                        )
+                                        Spacer(modifier = Modifier.width(5.dp))
+                                        Icon(
+                                            imageVector = LucideIcons.ExternalLink,
+                                            contentDescription = null,
+                                            tint = ctaButtonText.copy(alpha = 0.75f),
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-            TextButton(
-                onClick = {
-                    view.performVibrate(isHapticsEnabled)
-                    showKeyActivation = true
-                },
-                modifier = Modifier.padding(bottom = 4.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = LucideIcons.Key,
-                        contentDescription = null,
-                        tint = textSecondary,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.pro_license_title),
-                        style = Typography.bodySmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = textSecondary
-                    )
+                TextButton(
+                    onClick = {
+                        view.performVibrate(isHapticsEnabled)
+                        showKeyActivation = true
+                    },
+                    modifier = Modifier.padding(bottom = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = LucideIcons.Key,
+                            contentDescription = null,
+                            tint = textSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.pro_license_title),
+                            style = Typography.bodySmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = textSecondary
+                        )
+                    }
                 }
             }
         }
+    }
+
+    if (showDeactivateConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeactivateConfirmDialog = false },
+            containerColor = cardBg,
+            title = {
+                Text(
+                    text = "Deactivate on this device?",
+                    style = Typography.titleMedium.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    ),
+                    color = textPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "This will return this device to the free tier and immediately free up 1 of your 3 license slots. You can reactivate anytime using your product key.",
+                    style = Typography.bodyMedium.copy(
+                        fontFamily = Lato,
+                        fontSize = 13.5.sp,
+                        lineHeight = 18.sp
+                    ),
+                    color = textSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeactivateConfirmDialog = false
+                        isDeactivatingDevice = true
+                        coroutineScope.launch {
+                            val deviceId = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.ANDROID_ID) ?: ""
+                            val token = settings.proLicenseToken ?: userPreferences.getCachedLicenseToken() ?: ""
+                            if (token.isNotBlank() && deviceId.isNotBlank()) {
+                                licenseEngine.deactivateLicenseRemote(token, deviceId)
+                            }
+                            userPreferences.deactivatePro()
+                            isDeactivatingDevice = false
+                            view.performVibrate(isHapticsEnabled, isLongPress = true)
+                            snackbarHostState.showSnackbar("Pro deactivated on this device. License slot freed.")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RoseExpense,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "Deactivate & Free Slot",
+                        style = Typography.labelLarge.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeactivateConfirmDialog = false }) {
+                    Text(
+                        text = "Cancel",
+                        style = Typography.labelLarge.copy(
+                            fontFamily = Lato,
+                            color = textSecondary
+                        )
+                    )
+                }
+            }
+        )
     }
 
     if (showKeyActivation) {
@@ -907,7 +1028,8 @@ fun CipherProScreen(
                                     isPro = true,
                                     tier = result.tier.identifier,
                                     token = rawKey,
-                                    orderId = result.orderId
+                                    orderId = result.orderId,
+                                    expiresAt = result.expiresAtEpochMs
                                 )
                                 isActivating = false
                                 showKeyActivation = false
@@ -1255,6 +1377,420 @@ private fun ProConfettiBurst(
                         size = Size(p.size * 1.4f, p.size * 2.8f),
                         cornerRadius = CornerRadius(4f, 4f)
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActiveProMembershipContent(
+    settings: com.masum.cipher.core.data.local.pref.UserSettings,
+    isDark: Boolean,
+    screenBg: Color,
+    cardBg: Color,
+    cardBorderDefault: Color,
+    textPrimary: Color,
+    textSecondary: Color,
+    textDescription: Color,
+    isHapticsEnabled: Boolean,
+    isDeactivatingDevice: Boolean,
+    onNavigateBack: () -> Unit,
+    onDeactivateClick: () -> Unit,
+    onBrowsePlansClick: () -> Unit,
+    onCopyLicense: (String) -> Unit
+) {
+    val scrollState = rememberScrollState()
+    val proTierDisplayTitle = remember(settings.proTier) {
+        when (settings.proTier.uppercase()) {
+            "MONTHLY" -> "Monthly Pro Pass"
+            "HALF_YEARLY", "6MONTH", "6-MONTH" -> "6-Month Pro Pass"
+            "ANNUAL", "YEARLY", "1-YEAR", "1YEAR" -> "1-Year Annual Pass"
+            "LIFETIME" -> "Lifetime VIP Pass"
+            "PROMO" -> "VIP Early Bird Pass"
+            "DEV" -> "Developer Edition"
+            else -> "Cipher Pro Active"
+        }
+    }
+    val isLifetime = settings.proTier.uppercase() == "LIFETIME"
+    val expiryText = remember(settings.proTier, settings.proExpiresAtEpochMs) {
+        if (isLifetime || settings.proExpiresAtEpochMs <= 0L) {
+            "Lifetime Validity • Never expires"
+        } else {
+            val formatted = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(settings.proExpiresAtEpochMs))
+            "Active until $formatted"
+        }
+    }
+    val licenseKey = settings.proLicenseToken ?: settings.proOrderId ?: "CIPHER-PRO-ACTIVE"
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    imageVector = LucideIcons.ArrowLeft,
+                    contentDescription = "Back",
+                    tint = textPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Text(
+                text = "Membership & License",
+                style = Typography.titleMedium.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp
+                ),
+                color = textPrimary
+            )
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(EmeraldIncome.copy(alpha = 0.18f))
+                    .border(1.dp, EmeraldIncome.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = "ACTIVE",
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        letterSpacing = 0.8.sp
+                    ),
+                    color = EmeraldIncome
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                EmeraldIncome.copy(alpha = 0.15f),
+                                cardBg,
+                                if (isDark) Color(0xFF1E2633) else Color(0xFFF1F5F9)
+                            )
+                        )
+                    )
+                    .border(1.5.dp, EmeraldIncome.copy(alpha = 0.55f), RoundedCornerShape(24.dp))
+                    .padding(20.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(46.dp)
+                                    .clip(CircleShape)
+                                    .background(EmeraldIncome.copy(alpha = 0.22f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isLifetime) LucideIcons.Crown else LucideIcons.ShieldCheck,
+                                    contentDescription = null,
+                                    tint = EmeraldIncome,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = proTierDisplayTitle,
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 17.sp
+                                    ),
+                                    color = textPrimary
+                                )
+                                Text(
+                                    text = expiryText,
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 12.sp
+                                    ),
+                                    color = EmeraldIncome
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = cardBorderDefault, thickness = 1.dp)
+
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "PRODUCT LICENSE KEY",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                letterSpacing = 1.sp
+                            ),
+                            color = textSecondary
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(screenBg)
+                                .border(1.dp, cardBorderDefault, RoundedCornerShape(12.dp))
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = licenseKey,
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                ),
+                                color = textPrimary,
+                                maxLines = 1,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(EmeraldIncome)
+                                    .clickable { onCopyLicense(licenseKey) }
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Text(
+                                    text = "COPY",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.5.sp
+                                    ),
+                                    color = Color.Black
+                                )
+                            }
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Smartphone,
+                                contentDescription = null,
+                                tint = textSecondary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "Valid on up to 3 of your personal Android devices",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 10.5.sp
+                                ),
+                                color = textSecondary
+                            )
+                        }
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(cardBg)
+                    .border(1.dp, cardBorderDefault, RoundedCornerShape(24.dp))
+                    .padding(20.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = LucideIcons.Sparkles,
+                            contentDescription = null,
+                            tint = EmeraldIncome,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Unlocked Pro Capabilities",
+                            style = Typography.titleMedium.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            ),
+                            color = textPrimary
+                        )
+                    }
+
+                    val benefits = listOf(
+                        "Unlimited Custom Categories (beyond 5 free limit)",
+                        "Real-Time Home Screen Widgets (Balance & Quick-Add)",
+                        "Financial Statement Importer (PDF, CSV & Excel)",
+                        "Automated Encrypted Device Backups",
+                        "Audit-Ready PDF & CSV Export Breakdowns",
+                        "Smart Rules & Merchant Auto-Categorization",
+                        "All 18 Custom Accent Color Themes"
+                    )
+
+                    benefits.forEach { benefit ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .clip(CircleShape)
+                                    .background(EmeraldIncome.copy(alpha = 0.2f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Check,
+                                    contentDescription = null,
+                                    tint = EmeraldIncome,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = benefit,
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 12.5.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = textPrimary
+                            )
+                        }
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(cardBg)
+                    .border(1.dp, cardBorderDefault, RoundedCornerShape(24.dp))
+                    .padding(20.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Device License Management",
+                        style = Typography.titleMedium.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = textPrimary
+                    )
+
+                    Text(
+                        text = "Need to free up a slot for another device or switching phones? Deactivating Pro on this phone returns it to the free tier and restores 1 slot on your license.",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
+                        ),
+                        color = textDescription
+                    )
+
+                    Button(
+                        onClick = onDeactivateClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = RoseExpense.copy(alpha = 0.14f),
+                            contentColor = RoseExpense
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, RoseExpense.copy(alpha = 0.4f)),
+                        enabled = !isDeactivatingDevice
+                    ) {
+                        if (isDeactivatingDevice) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = RoseExpense,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Trash2,
+                                    contentDescription = null,
+                                    tint = RoseExpense,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Deactivate on this Device",
+                                    style = Typography.labelLarge.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    ),
+                                    color = RoseExpense
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!isLifetime) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(onClick = onBrowsePlansClick) {
+                        Text(
+                            text = "Want Lifetime VIP Access? View upgrade options →",
+                            style = Typography.bodySmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
+                            ),
+                            color = textSecondary
+                        )
+                    }
                 }
             }
         }

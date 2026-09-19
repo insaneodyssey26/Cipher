@@ -42,7 +42,8 @@ class SettingsViewModel @Inject constructor(
         currencyCode = userPreferences.getCachedCurrencyCode(),
         currencySymbol = userPreferences.getCachedCurrencySymbol(),
         isPro = userPreferences.isCachedPro(),
-        proTier = userPreferences.getCachedProTier()
+        proTier = userPreferences.getCachedProTier(),
+        proExpiresAtEpochMs = userPreferences.getCachedProExpiresAt()
     )
 ) {
 
@@ -128,6 +129,7 @@ class SettingsViewModel @Inject constructor(
                         autoBackupUri = settings.autoBackupUri,
                         isPro = settings.isPro,
                         proTier = settings.proTier,
+                        proExpiresAtEpochMs = settings.proExpiresAtEpochMs,
                         proLicenseToken = settings.proLicenseToken,
                         proOrderId = settings.proOrderId,
                         showProBadge = settings.showProBadge
@@ -331,7 +333,8 @@ class SettingsViewModel @Inject constructor(
                     isPro = true,
                     tier = result.tier.identifier,
                     token = licenseKey.trim(),
-                    orderId = result.orderId
+                    orderId = result.orderId,
+                    expiresAt = result.expiresAtEpochMs
                 )
                 updateState { copy(isActivatingPro = false, proActivationSuccess = true, proActivationError = null) }
                 emitEffect(SettingsContract.Effect.ShowToast("Cipher Pro successfully activated!"))
@@ -345,8 +348,15 @@ class SettingsViewModel @Inject constructor(
 
     private fun deactivatePro() {
         viewModelScope.launch {
+            val token = userPreferences.getCachedLicenseToken()
+            val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
+            if (!token.isNullOrBlank() && deviceId.isNotBlank()) {
+                withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    licenseEngine.deactivateLicenseRemote(token, deviceId)
+                }
+            }
             userPreferences.deactivatePro()
-            emitEffect(SettingsContract.Effect.ShowToast("Pro deactivated."))
+            emitEffect(SettingsContract.Effect.ShowToast("Pro deactivated. Device slot freed."))
         }
     }
 }

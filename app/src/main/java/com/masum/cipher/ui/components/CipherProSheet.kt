@@ -118,7 +118,7 @@ fun CipherProSheet(
     isHapticsEnabled: Boolean,
     onActivateKey: (String, String?) -> Unit,
     onDismiss: () -> Unit,
-    dodoCheckoutUrl: String = "https://test.checkout.dodopayments.com/buy/pdt_0Nnrtp1txcVAsuHEgyyDa?quantity=1"
+    dodoCheckoutUrl: String = "https://checkout.dodopayments.com/buy/pdt_0NnvgqmXN76K14C90kLjX?quantity=1"
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
