@@ -38,6 +38,8 @@ data class LicenseValidationResult(
     val issuedAtEpochMs: Long = 0L,
     val expiresAtEpochMs: Long = 0L,
     val isExpired: Boolean = false,
+    val deviceCount: Int = 1,
+    val maxDevices: Int = 3,
     val errorMessage: String? = null
 )
 
@@ -291,11 +293,15 @@ class LicenseEngine @Inject constructor() {
                 val isSuccess = jsonResponse.optBoolean("success", false)
                 if (isSuccess) {
                     val tierStr = jsonResponse.optString("tier", localCheck.tier.identifier)
+                    val devCount = jsonResponse.optInt("deviceCount", 1)
+                    val maxDev = jsonResponse.optInt("maxDevices", 3)
                     localCheck.copy(
                         isValid = true,
                         tier = parseTier(tierStr),
                         orderId = "DODO-${sanitized.takeLast(6).uppercase()}",
-                        customerEmail = email
+                        customerEmail = email,
+                        deviceCount = devCount,
+                        maxDevices = maxDev
                     )
                 } else {
                     val errorMsg = jsonResponse.optString("error", "Activation failed")

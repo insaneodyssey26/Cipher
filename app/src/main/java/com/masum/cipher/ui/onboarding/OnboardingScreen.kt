@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -123,6 +124,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun OnboardingScreen(
+    userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
     currentAccentColor: AccentColor,
     onAccentColorSelected: (AccentColor) -> Unit,
     currentTheme: AppTheme,
@@ -187,6 +189,7 @@ fun OnboardingScreen(
                 ) { currentPage ->
                     when (currentPage) {
                         0 -> WelcomePage(
+                            userPreferences = userPreferences,
                             onNext = { page = 1 }
                         )
                         1 -> ThemeSelectionPage(
@@ -393,13 +396,16 @@ private fun OnboardingTopBar(
 
 @Composable
 private fun WelcomePage(
+    userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
     onNext: () -> Unit
 ) {
     val view = LocalView.current
+    var showRestoreKeyDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -504,8 +510,253 @@ private fun WelcomePage(
                     onNext()
                 }
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            TextButton(
+                onClick = {
+                    view.performVibrate(true, isLongPress = false)
+                    showRestoreKeyDialog = true
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.pro_license_title),
+                    style = Typography.labelMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
+
+    if (showRestoreKeyDialog) {
+        OnboardingRestoreLicenseDialog(
+            userPreferences = userPreferences,
+            onDismiss = { showRestoreKeyDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun OnboardingRestoreLicenseDialog(
+    userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val licenseEngine = remember { com.masum.cipher.core.security.LicenseEngine() }
+    var keyInput by remember { mutableStateOf("") }
+    var emailInput by remember { mutableStateOf("") }
+    var isVerifying by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successTier by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = true),
+        title = {
+            Text(
+                text = stringResource(R.string.pro_license_title),
+                style = Typography.titleMedium.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "Enter your license key from your purchase email to activate Pro on this device.",
+                    style = Typography.bodySmall.copy(
+                        fontFamily = Lato,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
+                BasicTextField(
+                    value = keyInput,
+                    onValueChange = {
+                        keyInput = it.uppercase()
+                        errorMessage = null
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            1.dp,
+                            if (errorMessage != null) RoseExpense else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            RoundedCornerShape(10.dp)
+                        )
+                        .padding(horizontal = 12.dp),
+                    textStyle = Typography.bodyMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = 1.sp
+                    ),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (keyInput.isEmpty()) {
+                                Text(
+                                    text = "CIPHER-XXXX-XXXX-XXXX",
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+
+                BasicTextField(
+                    value = emailInput,
+                    onValueChange = {
+                        emailInput = it
+                        errorMessage = null
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            RoundedCornerShape(10.dp)
+                        )
+                        .padding(horizontal = 12.dp),
+                    textStyle = Typography.bodyMedium.copy(
+                        fontFamily = Lato,
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (emailInput.isEmpty()) {
+                                Text(
+                                    text = "Email address (optional)",
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage ?: "",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            color = RoseExpense,
+                            fontSize = 11.5.sp
+                        )
+                    )
+                }
+
+                if (successTier != null) {
+                    Text(
+                        text = "Cipher Pro ($successTier) unlocked successfully!",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            color = EmeraldIncome,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val rawKey = keyInput.trim()
+                    if (rawKey.isBlank()) {
+                        errorMessage = "Please enter your license key"
+                        return@Button
+                    }
+                    isVerifying = true
+                    errorMessage = null
+                    coroutineScope.launch {
+                        val androidId = android.provider.Settings.Secure.getString(
+                            context.contentResolver,
+                            android.provider.Settings.Secure.ANDROID_ID
+                        ) ?: "device_${System.currentTimeMillis()}"
+
+                        val result = licenseEngine.activateLicenseRemote(
+                            licenseToken = rawKey,
+                            email = emailInput.ifBlank { null },
+                            deviceId = androidId
+                        )
+                        isVerifying = false
+                        if (result.isValid) {
+                            userPreferences.setProStatus(
+                                isPro = true,
+                                tier = result.tier.identifier,
+                                token = rawKey,
+                                orderId = result.orderId
+                            )
+                            successTier = result.tier.displayName
+                            delay(1200)
+                            onDismiss()
+                        } else {
+                            errorMessage = result.errorMessage ?: "Invalid license key"
+                        }
+                    }
+                },
+                enabled = !isVerifying
+            ) {
+                if (isVerifying) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.pro_license_verify),
+                        style = Typography.labelMedium.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "Cancel",
+                    style = Typography.labelMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
+        }
+    )
 }
 
 @Composable

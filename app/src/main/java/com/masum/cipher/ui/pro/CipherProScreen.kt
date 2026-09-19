@@ -179,6 +179,7 @@ fun CipherProScreen(
     var showKeyActivation by remember { mutableStateOf(false) }
     var showCongratulations by remember { mutableStateOf(false) }
     var activatedTierName by remember { mutableStateOf("") }
+    var activatedDeviceQuota by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var licenseKeyInput by remember { mutableStateOf("") }
     var emailInput by remember { mutableStateOf("") }
@@ -891,7 +892,16 @@ fun CipherProScreen(
                         isActivating = true
                         activationError = null
                         coroutineScope.launch {
-                            val result = licenseEngine.validateLicense(rawKey, emailInput.ifBlank { null })
+                            val androidId = android.provider.Settings.Secure.getString(
+                                context.contentResolver,
+                                android.provider.Settings.Secure.ANDROID_ID
+                            ) ?: "device_${System.currentTimeMillis()}"
+
+                            val result = licenseEngine.activateLicenseRemote(
+                                licenseToken = rawKey,
+                                email = emailInput.ifBlank { null },
+                                deviceId = androidId
+                            )
                             if (result.isValid) {
                                 userPreferences.setProStatus(
                                     isPro = true,
@@ -902,6 +912,7 @@ fun CipherProScreen(
                                 isActivating = false
                                 showKeyActivation = false
                                 activatedTierName = result.tier.displayName
+                                activatedDeviceQuota = Pair(result.deviceCount, result.maxDevices)
                                 showCongratulations = true
                             } else {
                                 isActivating = false
@@ -946,6 +957,7 @@ fun CipherProScreen(
         ProCongratulationsDialog(
             isDark = isDark,
             planTitle = activatedTierName,
+            deviceQuota = activatedDeviceQuota,
             onDismiss = {
                 showCongratulations = false
                 onNavigateBack()
@@ -958,6 +970,7 @@ fun CipherProScreen(
 private fun ProCongratulationsDialog(
     isDark: Boolean,
     planTitle: String,
+    deviceQuota: Pair<Int, Int>?,
     onDismiss: () -> Unit
 ) {
     val dialogBg = if (isDark) Color(0xFF181D26) else Color.White
@@ -1043,6 +1056,27 @@ private fun ProCongratulationsDialog(
                             color = if (isDark) Color(0xFFE2FF38) else Color(0xFF059669),
                             textAlign = TextAlign.Center
                         )
+
+                        if (deviceQuota != null) {
+                            val (used, max) = deviceQuota
+                            val remaining = (max - used).coerceAtLeast(0)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isDark) Color(0xFF1E293B) else Color(0xFFE2E8F0))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Active on $used of $max devices ($remaining slot${if (remaining == 1) "" else "s"} remaining)",
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = textSecondary
+                                )
+                            }
+                        }
                     }
 
                     Text(

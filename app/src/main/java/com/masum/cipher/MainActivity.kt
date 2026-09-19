@@ -582,6 +582,7 @@ class MainActivity : AppCompatActivity() {
 
                         if (state.isOnboardingRequired) {
                             OnboardingScreen(
+                                userPreferences = userPreferences,
                                 currentAccentColor = state.settings?.accentColor ?: com.masum.cipher.core.data.local.pref.AccentColor.INDIGO,
                                 onAccentColorSelected = { color -> mainViewModel.handleIntent(MainContract.Intent.SaveAccentColor(color)) },
                                 currentTheme = state.settings?.theme ?: AppTheme.SYSTEM,

@@ -65,14 +65,24 @@ class UserPreferences @Inject constructor(
     }
 
     fun isCachedPro(): Boolean {
-        return syncPrefs.getBoolean("cached_is_pro", false)
+        val isFlagged = syncPrefs.getBoolean("cached_is_pro", false)
+        if (!isFlagged) return false
+        val token = syncPrefs.getString("cached_license_token", null) ?: return false
+        val validation = com.masum.cipher.core.security.LicenseEngine().validateLicense(token)
+        if (!validation.isValid) {
+            syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
+            return false
+        }
+        return true
     }
 
     fun getCachedProTier(): String {
+        if (!isCachedPro()) return "FREE"
         return syncPrefs.getString("cached_pro_tier", "FREE") ?: "FREE"
     }
 
     fun getCachedLicenseToken(): String? {
+        if (!isCachedPro()) return null
         return syncPrefs.getString("cached_license_token", null)
     }
 
@@ -275,8 +285,23 @@ class UserPreferences @Inject constructor(
                 }
             } ?: emptyList(),
             isNavBarCompressed = isNavCompressed,
-            isPro = preferences[Keys.PRO_ACTIVATED] ?: false,
-            proTier = preferences[Keys.PRO_TIER] ?: "FREE",
+            isPro = run {
+                val flagged = preferences[Keys.PRO_ACTIVATED] ?: false
+                if (!flagged) false
+                else {
+                    val token = preferences[Keys.PRO_LICENSE_TOKEN]
+                    if (token.isNullOrBlank()) false
+                    else com.masum.cipher.core.security.LicenseEngine().validateLicense(token).isValid
+                }
+            },
+            proTier = run {
+                val token = preferences[Keys.PRO_LICENSE_TOKEN]
+                if (token.isNullOrBlank()) "FREE"
+                else {
+                    val res = com.masum.cipher.core.security.LicenseEngine().validateLicense(token)
+                    if (res.isValid) res.tier.identifier else "FREE"
+                }
+            },
             proLicenseToken = preferences[Keys.PRO_LICENSE_TOKEN],
             proOrderId = preferences[Keys.PRO_ORDER_ID],
             showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true
