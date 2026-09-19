@@ -662,4 +662,12 @@
     <string name="pro_perk_accent_colors_desc">Unlock 12 vibrant Pantone &amp; Coolors designer theme colors.</string>
     <string name="pro_gate_accent_colors_title">Pro Theme Colors</string>
     <string name="pro_gate_accent_colors_desc">Unlock all 18 vibrant Pantone and designer accent themes with Cipher Pro.</string>
+    <string name="onboarding_rules_tour_step">SMART CATEGORIES</string>
+    <string name="onboarding_rules_tour_title">Auto-Organize Your Spending</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher learns where you spend and automatically puts your expenses in the right categories.</string>
+    <string name="onboarding_rules_free_notice">Free plan includes 5 custom rules &amp; 5 categories</string>
+    <string name="onboarding_capture_tour_step">AUTOMATIC TRACKING</string>
+    <string name="onboarding_capture_tour_title">Spend Normally. Cipher Tracks It.</string>
+    <string name="onboarding_capture_tour_subtitle">Whenever you pay with any bank or UPI app, Cipher instantly records it for you — 100% privately on your phone.</string>
+    <string name="onboarding_capture_tour_badge">100% Private &amp; On Your Phone</string>
 </resources>
