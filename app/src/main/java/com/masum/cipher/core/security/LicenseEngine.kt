@@ -67,7 +67,7 @@ class LicenseEngine @Inject constructor() {
         }
 
         if (isAlgorithmicPromoCode(sanitized)) {
-            val tier = if (sanitized.startsWith("CIPHER-VIP-", ignoreCase = true)) ProTier.PROMO else ProTier.LIFETIME
+            val tier = determineAlgorithmicTier(sanitized)
             return LicenseValidationResult(
                 isValid = true,
                 tier = tier,
@@ -161,7 +161,16 @@ class LicenseEngine @Inject constructor() {
 
     private fun isAlgorithmicPromoCode(token: String): Boolean {
         val uppercase = token.uppercase().trim()
-        val validPrefixes = listOf("CIPHER-LIFETIME-", "CIPHER-PRO-", "CIPHER-VIP-", "CIPHER-EARLY-")
+        val validPrefixes = listOf(
+            "CIPHER-LIFETIME-",
+            "CIPHER-ANNUAL-",
+            "CIPHER-6MONTH-",
+            "CIPHER-HALF-",
+            "CIPHER-MONTHLY-",
+            "CIPHER-PRO-",
+            "CIPHER-VIP-",
+            "CIPHER-EARLY-"
+        )
         val matchedPrefix = validPrefixes.firstOrNull { uppercase.startsWith(it) } ?: return false
         
         val suffix = uppercase.removePrefix(matchedPrefix).replace("-", "")
@@ -172,6 +181,21 @@ class LicenseEngine @Inject constructor() {
         
         val expectedChecksum = computeCheckCode(body)
         return checksum.equals(expectedChecksum, ignoreCase = true)
+    }
+
+    private fun determineAlgorithmicTier(token: String): ProTier {
+        val uppercase = token.uppercase().trim()
+        return when {
+            uppercase.startsWith("CIPHER-LIFETIME-") -> ProTier.LIFETIME
+            uppercase.startsWith("CIPHER-ANNUAL-") -> ProTier.ANNUAL
+            uppercase.startsWith("CIPHER-PRO-") -> ProTier.ANNUAL
+            uppercase.startsWith("CIPHER-6MONTH-") -> ProTier.HALF_YEARLY
+            uppercase.startsWith("CIPHER-HALF-") -> ProTier.HALF_YEARLY
+            uppercase.startsWith("CIPHER-MONTHLY-") -> ProTier.MONTHLY
+            uppercase.startsWith("CIPHER-VIP-") -> ProTier.PROMO
+            uppercase.startsWith("CIPHER-EARLY-") -> ProTier.PROMO
+            else -> ProTier.LIFETIME
+        }
     }
 
     fun computeCheckCode(input: String): String {

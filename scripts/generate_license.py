@@ -28,20 +28,27 @@ def main():
     
     if len(sys.argv) > 1 and sys.argv[1] == "--batch":
         count = int(sys.argv[2]) if len(sys.argv) > 2 else 10
-        print(f"Generating {count} Lifetime Promo Keys:\n")
+        prefix = sys.argv[3] if len(sys.argv) > 3 else "CIPHER-VIP"
+        print(f"Generating {count} Keys for prefix '{prefix}':\n")
         for i in range(1, count + 1):
-            key = generate_key(prefix="CIPHER-VIP")
+            key = generate_key(prefix=prefix)
             print(f"{i:02d}. {key}")
         return
 
-    print("\n[1] Lifetime VIP Key:")
-    print("   ", generate_key(prefix="CIPHER-VIP"))
-    
-    print("\n[2] Standard Lifetime Key:")
+    print("\n[1] Monthly Pass Key:")
+    print("   ", generate_key(prefix="CIPHER-MONTHLY"))
+
+    print("\n[2] 6-Month Pro Pass Key:")
+    print("   ", generate_key(prefix="CIPHER-6MONTH"))
+
+    print("\n[3] 1-Year Annual Pass Key:")
+    print("   ", generate_key(prefix="CIPHER-ANNUAL"))
+
+    print("\n[4] Lifetime VIP Key:")
     print("   ", generate_key(prefix="CIPHER-LIFETIME"))
     
-    print("\n[3] Early Bird Promo Key:")
-    print("   ", generate_key(prefix="CIPHER-EARLY"))
+    print("\n[5] Early Bird Promo Key:")
+    print("   ", generate_key(prefix="CIPHER-VIP"))
     print("\n==========================================")
 
 if __name__ == "__main__":

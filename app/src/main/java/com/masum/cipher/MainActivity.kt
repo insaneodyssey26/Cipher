@@ -99,6 +99,10 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var notificationScheduler: NotificationScheduler
 
+    @Inject
+    lateinit var licenseEngine: com.masum.cipher.core.security.LicenseEngine
+
+    private val currentIntentFlow = MutableStateFlow<Intent?>(null)
     private val updateReady = MutableStateFlow(false)
 
     override fun attachBaseContext(newBase: android.content.Context) {
@@ -114,10 +118,12 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        currentIntentFlow.value = intent
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
         UpdateManager.checkForUpdates(this) {
@@ -187,12 +193,40 @@ class MainActivity : AppCompatActivity() {
                         val currentRoute = navBackStackEntry?.destination?.route
                         var showAddSheet by remember { mutableStateOf(false) }
 
-                        LaunchedEffect(intent) {
-                            if (intent.getStringExtra("navigate_to") == "manage_apps") {
-                                navController.navigate("manage_apps")
-                                intent.removeExtra("navigate_to")
+                        val incomingIntent by currentIntentFlow.collectAsStateWithLifecycle()
+
+                        LaunchedEffect(incomingIntent) {
+                            val activeIntent = incomingIntent ?: return@LaunchedEffect
+                            
+                            val dataUri = activeIntent.data
+                            if (dataUri != null && dataUri.scheme == "cipher") {
+                                if (dataUri.host == "activate") {
+                                    val licenseKey = dataUri.getQueryParameter("key")?.trim()
+                                    val email = dataUri.getQueryParameter("email")?.trim()
+                                    if (!licenseKey.isNullOrBlank()) {
+                                        val validation = licenseEngine.validateLicense(licenseKey, email)
+                                        if (validation.isValid) {
+                                            userPreferences.setProStatus(
+                                                isPro = true,
+                                                tier = validation.tier.identifier,
+                                                token = licenseKey,
+                                                orderId = validation.orderId
+                                            )
+                                        }
+                                    }
+                                } else if (dataUri.host == "open") {
+                                    val targetScreen = dataUri.getQueryParameter("screen")
+                                    if (targetScreen == "pro") {
+                                        navController.navigate("cipher_pro")
+                                    }
+                                }
                             }
-                            val quickLogCat = intent.getStringExtra("quick_log_category")
+
+                            if (activeIntent.getStringExtra("navigate_to") == "manage_apps") {
+                                navController.navigate("manage_apps")
+                                activeIntent.removeExtra("navigate_to")
+                            }
+                            val quickLogCat = activeIntent.getStringExtra("quick_log_category")
                             if (!quickLogCat.isNullOrBlank()) {
                                 val defaultCurrency = state.settings?.currencyCode ?: "INR"
                                 val mappedCat = when (quickLogCat.uppercase()) {
@@ -220,7 +254,7 @@ class MainActivity : AppCompatActivity() {
                                     )
                                 )
                                 showAddSheet = true
-                                intent.removeExtra("quick_log_category")
+                                activeIntent.removeExtra("quick_log_category")
                             }
                         }
 
