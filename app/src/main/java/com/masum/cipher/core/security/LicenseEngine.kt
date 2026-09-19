@@ -2,14 +2,17 @@ package com.masum.cipher.core.security
 
 import android.os.Build
 import android.util.Base64
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.MessageDigest
@@ -30,6 +33,13 @@ enum class ProTier(val identifier: String, val displayName: String) {
     FREE("FREE", "Standard Edition")
 }
 
+data class ActiveDeviceInfo(
+    val deviceId: String,
+    val deviceName: String,
+    val activatedAtEpochMs: Long = 0L,
+    val isCurrentDevice: Boolean = false
+)
+
 data class LicenseValidationResult(
     val isValid: Boolean,
     val tier: ProTier = ProTier.FREE,
@@ -40,6 +50,7 @@ data class LicenseValidationResult(
     val isExpired: Boolean = false,
     val deviceCount: Int = 1,
     val maxDevices: Int = 3,
+    val activeDevices: List<ActiveDeviceInfo> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -119,14 +130,14 @@ class LicenseEngine @Inject constructor() {
 
         val isSignatureValid = verifySignatureWithEccFallback(payloadBytes, signatureBytes)
         if (!isSignatureValid) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Digital signature mismatch or tampered key")
+            return LicenseValidationResult(isValid = false, errorMessage = "Cryptographic signature verification failed")
         }
 
         val issuedAt = timestampStr.toLongOrNull() ?: 0L
         val expiresAt = expiryStr.toLongOrNull() ?: 0L
         val now = System.currentTimeMillis()
-
         val isExpired = expiresAt > 0L && now > expiresAt
+
         if (isExpired) {
             return LicenseValidationResult(
                 isValid = false,
@@ -135,19 +146,8 @@ class LicenseEngine @Inject constructor() {
                 issuedAtEpochMs = issuedAt,
                 expiresAtEpochMs = expiresAt,
                 isExpired = true,
-                errorMessage = "This license subscription has expired"
+                errorMessage = "This license key has expired"
             )
-        }
-
-        if (!expectedEmail.isNullOrBlank() && orderOrEmail.contains("@")) {
-            val normalizedExpected = expectedEmail.trim().lowercase()
-            val normalizedOrder = orderOrEmail.trim().lowercase()
-            if (normalizedExpected != normalizedOrder) {
-                return LicenseValidationResult(
-                    isValid = false,
-                    errorMessage = "License key is assigned to a different email ($orderOrEmail)"
-                )
-            }
         }
 
         return LicenseValidationResult(
@@ -161,9 +161,15 @@ class LicenseEngine @Inject constructor() {
         )
     }
 
-    private fun isAlgorithmicPromoCode(token: String): Boolean {
-        val uppercase = token.uppercase().trim()
-        val validPrefixes = listOf(
+    private val uuidRegex = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+    fun isAlgorithmicPromoCode(token: String): Boolean {
+        val trimmed = token.trim()
+        val uppercase = trimmed.uppercase()
+        if (uuidRegex.matches(trimmed)) {
+            return true
+        }
+        val prefixes = listOf(
             "CIPHER-LIFETIME-",
             "CIPHER-ANNUAL-",
             "CIPHER-6MONTH-",
@@ -173,20 +179,19 @@ class LicenseEngine @Inject constructor() {
             "CIPHER-VIP-",
             "CIPHER-EARLY-"
         )
-        val matchedPrefix = validPrefixes.firstOrNull { uppercase.startsWith(it) } ?: return false
-        
+        val matchedPrefix = prefixes.firstOrNull { uppercase.startsWith(it) } ?: return false
         val suffix = uppercase.removePrefix(matchedPrefix).replace("-", "")
         if (suffix.length < 8) return false
-        
+
         val body = suffix.dropLast(4)
         val checksum = suffix.takeLast(4)
-        
-        val expectedChecksum = computeCheckCode(body)
-        return checksum.equals(expectedChecksum, ignoreCase = true)
+        val expected = computeCheckCode(body)
+        return checksum.equals(expected, ignoreCase = true)
     }
 
     private fun determineAlgorithmicTier(token: String): ProTier {
         val uppercase = token.uppercase().trim()
+        if (uuidRegex.matches(token.trim())) return ProTier.LIFETIME
         return when {
             uppercase.startsWith("CIPHER-LIFETIME-") -> ProTier.LIFETIME
             uppercase.startsWith("CIPHER-ANNUAL-") -> ProTier.ANNUAL
@@ -270,6 +275,7 @@ class LicenseEngine @Inject constructor() {
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
             }
 
             val jsonBody = JSONObject().apply {
@@ -287,6 +293,7 @@ class LicenseEngine @Inject constructor() {
             val responseCode = conn.responseCode
             val stream = if (responseCode in 200..299) conn.inputStream else conn.errorStream
             val responseText = stream?.bufferedReader()?.use(BufferedReader::readText) ?: ""
+            Log.d("LicenseEngine", "activateLicenseRemote responseCode=$responseCode body=$responseText")
 
             if (responseCode in 200..299) {
                 val jsonResponse = JSONObject(responseText)
@@ -295,13 +302,15 @@ class LicenseEngine @Inject constructor() {
                     val tierStr = jsonResponse.optString("tier", localCheck.tier.identifier)
                     val devCount = jsonResponse.optInt("deviceCount", 1)
                     val maxDev = jsonResponse.optInt("maxDevices", 3)
+                    val deviceList = parseActiveDevices(jsonResponse.optJSONArray("devices"), deviceId)
                     localCheck.copy(
                         isValid = true,
                         tier = parseTier(tierStr),
                         orderId = "DODO-${sanitized.takeLast(6).uppercase()}",
                         customerEmail = email,
                         deviceCount = devCount,
-                        maxDevices = maxDev
+                        maxDevices = maxDev,
+                        activeDevices = deviceList
                     )
                 } else {
                     val errorMsg = jsonResponse.optString("error", "Activation failed")
@@ -312,8 +321,111 @@ class LicenseEngine @Inject constructor() {
                 val errorMsg = jsonResponse?.optString("error") ?: "Server returned error ($responseCode)"
                 LicenseValidationResult(isValid = false, errorMessage = errorMsg)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("LicenseEngine", "activateLicenseRemote error: ${e.message}", e)
             localCheck
+        }
+    }
+
+    suspend fun fetchActiveDevicesRemote(
+        licenseToken: String,
+        currentDeviceId: String
+    ): Pair<Int, List<ActiveDeviceInfo>> = withContext(Dispatchers.IO) {
+        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
+        if (sanitized.isBlank()) return@withContext Pair(1, emptyList())
+        try {
+            val encodedKey = URLEncoder.encode(sanitized, "UTF-8")
+            val encodedDev = URLEncoder.encode(currentDeviceId, "UTF-8")
+            val endpoint = URL("https://cipher-license-api.skmasumali-main.workers.dev/api/devices?licenseKey=$encodedKey&deviceId=$encodedDev")
+            val conn = (endpoint.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 8000
+                readTimeout = 8000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+            }
+
+            val responseCode = conn.responseCode
+            if (responseCode in 200..299) {
+                val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
+                Log.d("LicenseEngine", "fetchActiveDevicesRemote body=$text")
+                val json = JSONObject(text)
+                val count = json.optInt("deviceCount", 1)
+                val list = parseActiveDevices(json.optJSONArray("devices"), currentDeviceId)
+                Pair(count, list)
+            } else {
+                Pair(1, emptyList())
+            }
+        } catch (e: Exception) {
+            Log.e("LicenseEngine", "fetchActiveDevicesRemote error: ${e.message}", e)
+            Pair(1, emptyList())
+        }
+    }
+
+    private fun parseActiveDevices(devicesArray: JSONArray?, currentDeviceId: String): List<ActiveDeviceInfo> {
+        if (devicesArray == null) return emptyList()
+        val result = mutableListOf<ActiveDeviceInfo>()
+        for (i in 0 until devicesArray.length()) {
+            val obj = devicesArray.optJSONObject(i) ?: continue
+            val devId = obj.optString("deviceId", "")
+            val devName = obj.optString("deviceName", "Android Device")
+            val activatedAt = obj.optLong("activatedAt", 0L)
+            val isCurrent = obj.optBoolean("isCurrent", devId == currentDeviceId)
+            result.add(
+                ActiveDeviceInfo(
+                    deviceId = devId,
+                    deviceName = devName,
+                    activatedAtEpochMs = activatedAt,
+                    isCurrentDevice = isCurrent
+                )
+            )
+        }
+        return result
+    }
+
+    suspend fun revokeDeviceRemote(
+        licenseToken: String,
+        deviceId: String,
+        currentDeviceId: String = ""
+    ): Pair<Int, List<ActiveDeviceInfo>> = withContext(Dispatchers.IO) {
+        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
+        if (sanitized.isBlank()) return@withContext Pair(0, emptyList())
+        try {
+            val endpoint = URL("https://cipher-license-api.skmasumali-main.workers.dev/api/revoke")
+            val conn = (endpoint.openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 8000
+                readTimeout = 8000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+            }
+
+            val jsonBody = JSONObject().apply {
+                put("licenseKey", sanitized)
+                put("deviceId", deviceId)
+            }
+
+            OutputStreamWriter(conn.outputStream, StandardCharsets.UTF_8).use { writer ->
+                writer.write(jsonBody.toString())
+                writer.flush()
+            }
+
+            val responseCode = conn.responseCode
+            if (responseCode in 200..299) {
+                val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
+                Log.d("LicenseEngine", "revokeDeviceRemote body=$text")
+                val json = JSONObject(text)
+                val count = json.optInt("deviceCount", 0)
+                val list = parseActiveDevices(json.optJSONArray("devices"), currentDeviceId)
+                Pair(count, list)
+            } else {
+                Pair(0, emptyList())
+            }
+        } catch (e: Exception) {
+            Log.e("LicenseEngine", "revokeDeviceRemote error: ${e.message}", e)
+            Pair(0, emptyList())
         }
     }
 
@@ -332,6 +444,7 @@ class LicenseEngine @Inject constructor() {
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
             }
 
             val jsonBody = JSONObject().apply {
@@ -351,4 +464,3 @@ class LicenseEngine @Inject constructor() {
         }
     }
 }
-

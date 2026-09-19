@@ -1901,8 +1901,8 @@ private fun DashboardHero(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = "cipher.",
@@ -1922,10 +1922,11 @@ private fun DashboardHero(
 
                         Box(
                             modifier = Modifier
+                                .padding(bottom = 3.dp)
                                 .clip(RoundedCornerShape(6.dp))
                                 .background(badgeBgColor)
                                 .border(0.75.dp, badgeBorderColor, RoundedCornerShape(6.dp))
-                                .padding(horizontal = 5.5.dp, vertical = 2.dp),
+                                .padding(horizontal = 5.dp, vertical = 2.5.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(

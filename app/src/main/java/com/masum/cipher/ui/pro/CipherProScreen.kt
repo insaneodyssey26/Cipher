@@ -59,6 +59,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,12 +85,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.pref.UserPreferences
+import com.masum.cipher.core.security.ActiveDeviceInfo
 import com.masum.cipher.core.security.LicenseEngine
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
@@ -304,6 +307,9 @@ fun CipherProScreen(
         if (isAlreadyPro && !showBrowsePlans) {
             ActiveProMembershipContent(
                 settings = settings,
+                userPreferences = userPreferences,
+                licenseEngine = licenseEngine,
+                snackbarHostState = snackbarHostState,
                 isDark = isDark,
                 screenBg = screenBg,
                 cardBg = cardBg,
@@ -1386,6 +1392,9 @@ private fun ProConfettiBurst(
 @Composable
 private fun ActiveProMembershipContent(
     settings: com.masum.cipher.core.data.local.pref.UserSettings,
+    userPreferences: UserPreferences,
+    licenseEngine: LicenseEngine,
+    snackbarHostState: SnackbarHostState,
     isDark: Boolean,
     screenBg: Color,
     cardBg: Color,
@@ -1400,7 +1409,18 @@ private fun ActiveProMembershipContent(
     onBrowsePlansClick: () -> Unit,
     onCopyLicense: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+
+    val currentDeviceId = remember {
+        android.provider.Settings.Secure.getString(
+            context.contentResolver,
+            android.provider.Settings.Secure.ANDROID_ID
+        ) ?: ""
+    }
+
     val proTierDisplayTitle = remember(settings.proTier) {
         when (settings.proTier.uppercase()) {
             "MONTHLY" -> "Monthly Pro Pass"
@@ -1421,7 +1441,42 @@ private fun ActiveProMembershipContent(
             "Active until $formatted"
         }
     }
-    val licenseKey = settings.proLicenseToken ?: settings.proOrderId ?: "CIPHER-PRO-ACTIVE"
+    val licenseKey = settings.proLicenseToken ?: userPreferences.getCachedLicenseToken() ?: settings.proOrderId ?: "CIPHER-PRO-ACTIVE"
+
+    var activeDevices by remember { mutableStateOf<List<ActiveDeviceInfo>>(emptyList()) }
+    var deviceCount by remember { mutableStateOf(1) }
+    var maxDevices by remember { mutableStateOf(3) }
+    var isLoadingDevices by remember { mutableStateOf(true) }
+    var deviceToRevoke by remember { mutableStateOf<ActiveDeviceInfo?>(null) }
+    var isRevokingDevice by remember { mutableStateOf(false) }
+
+    LaunchedEffect(licenseKey) {
+        if (licenseKey.isNotBlank() && licenseKey != "CIPHER-PRO-ACTIVE") {
+            val (count, list) = licenseEngine.fetchActiveDevicesRemote(licenseKey, currentDeviceId)
+            val isCurrentAlreadyRegistered = list.any { it.deviceId == currentDeviceId }
+            if (!isCurrentAlreadyRegistered && currentDeviceId.isNotBlank()) {
+                val actResult = licenseEngine.activateLicenseRemote(
+                    licenseToken = licenseKey,
+                    email = null,
+                    deviceId = currentDeviceId
+                )
+                if (actResult.isValid && actResult.activeDevices.isNotEmpty()) {
+                    activeDevices = actResult.activeDevices
+                    deviceCount = actResult.deviceCount.coerceAtLeast(actResult.activeDevices.size).coerceAtLeast(1)
+                    maxDevices = actResult.maxDevices
+                } else {
+                    activeDevices = list
+                    deviceCount = count.coerceAtLeast(list.size).coerceAtLeast(1)
+                }
+            } else {
+                activeDevices = list
+                deviceCount = count.coerceAtLeast(list.size).coerceAtLeast(1)
+            }
+            isLoadingDevices = false
+        } else {
+            isLoadingDevices = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -1706,19 +1761,52 @@ private fun ActiveProMembershipContent(
                     .border(1.dp, cardBorderDefault, RoundedCornerShape(24.dp))
                     .padding(20.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = "Device License Management",
-                        style = Typography.titleMedium.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
-                        ),
-                        color = textPrimary
-                    )
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Device License Slots",
+                                style = Typography.titleMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                ),
+                                color = textPrimary
+                            )
+                            Text(
+                                text = "Active on $deviceCount of $maxDevices allowed devices",
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = textSecondary
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (deviceCount < maxDevices) EmeraldIncome.copy(alpha = 0.15f) else RoseExpense.copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "${(maxDevices - deviceCount).coerceAtLeast(0)} SLOTS LEFT",
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ),
+                                color = if (deviceCount < maxDevices) EmeraldIncome else RoseExpense
+                            )
+                        }
+                    }
 
                     Text(
-                        text = "Need to free up a slot for another device or switching phones? Deactivating Pro on this phone returns it to the free tier and restores 1 slot on your license.",
+                        text = "Your license can be used across 3 personal devices simultaneously. You can manage and revoke active devices at any time.",
                         style = Typography.bodySmall.copy(
                             fontFamily = Lato,
                             fontSize = 12.sp,
@@ -1726,6 +1814,143 @@ private fun ActiveProMembershipContent(
                         ),
                         color = textDescription
                     )
+
+                    if (isLoadingDevices) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = EmeraldIncome,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Checking active devices...",
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 12.sp
+                                ),
+                                color = textSecondary
+                            )
+                        }
+                    } else if (activeDevices.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            activeDevices.forEach { dev ->
+                                val isThisDevice = dev.isCurrentDevice || (dev.deviceId.isNotBlank() && dev.deviceId == currentDeviceId)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(screenBg)
+                                        .border(1.dp, if (isThisDevice) EmeraldIncome.copy(alpha = 0.35f) else cardBorderDefault, RoundedCornerShape(14.dp))
+                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(if (isThisDevice) EmeraldIncome.copy(alpha = 0.18f) else (if (isDark) Color(0xFF262E39) else Color(0xFFE2E8F0))),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = LucideIcons.Smartphone,
+                                                contentDescription = null,
+                                                tint = if (isThisDevice) EmeraldIncome else textSecondary,
+                                                modifier = Modifier.size(17.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Text(
+                                                    text = dev.deviceName,
+                                                    style = Typography.bodyMedium.copy(
+                                                        fontFamily = Lato,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 13.5.sp
+                                                    ),
+                                                    color = textPrimary,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                if (isThisDevice) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .clip(RoundedCornerShape(6.dp))
+                                                            .background(EmeraldIncome.copy(alpha = 0.2f))
+                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = "THIS PHONE",
+                                                            style = Typography.labelSmall.copy(
+                                                                fontFamily = Lato,
+                                                                fontWeight = FontWeight.Bold,
+                                                                fontSize = 9.sp,
+                                                                letterSpacing = 0.5.sp
+                                                            ),
+                                                            color = EmeraldIncome
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            if (dev.activatedAtEpochMs > 0L) {
+                                                val dateStr = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(dev.activatedAtEpochMs))
+                                                Text(
+                                                    text = "Activated $dateStr",
+                                                    style = Typography.bodySmall.copy(
+                                                        fontFamily = Lato,
+                                                        fontSize = 11.sp
+                                                    ),
+                                                    color = textSecondary
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (!isThisDevice) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(RoseExpense.copy(alpha = 0.12f))
+                                                .border(1.dp, RoseExpense.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
+                                                .clickable {
+                                                    view.performVibrate(isHapticsEnabled)
+                                                    deviceToRevoke = dev
+                                                }
+                                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                        ) {
+                                            Text(
+                                                text = "Revoke",
+                                                style = Typography.labelMedium.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 11.5.sp
+                                                ),
+                                                color = RoseExpense
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = cardBorderDefault, thickness = 1.dp)
 
                     Button(
                         onClick = onDeactivateClick,
@@ -1771,6 +1996,92 @@ private fun ActiveProMembershipContent(
                         }
                     }
                 }
+            }
+
+            if (deviceToRevoke != null) {
+                val targetDev = deviceToRevoke!!
+                AlertDialog(
+                    onDismissRequest = { if (!isRevokingDevice) deviceToRevoke = null },
+                    containerColor = cardBg,
+                    title = {
+                        Text(
+                            text = "Revoke ${targetDev.deviceName}?",
+                            style = Typography.titleMedium.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            ),
+                            color = textPrimary
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "This will remove ${targetDev.deviceName} from your Cipher Pro license and immediately free up 1 device slot.",
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontSize = 13.5.sp,
+                                lineHeight = 18.sp
+                            ),
+                            color = textSecondary
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                isRevokingDevice = true
+                                coroutineScope.launch {
+                                    val (newCount, newList) = licenseEngine.revokeDeviceRemote(
+                                        licenseToken = licenseKey,
+                                        deviceId = targetDev.deviceId,
+                                        currentDeviceId = currentDeviceId
+                                    )
+                                    activeDevices = newList
+                                    deviceCount = newCount.coerceAtLeast(newList.size).coerceAtLeast(1)
+                                    isRevokingDevice = false
+                                    deviceToRevoke = null
+                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                    snackbarHostState.showSnackbar("${targetDev.deviceName} revoked. License slot freed.")
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RoseExpense,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            enabled = !isRevokingDevice
+                        ) {
+                            if (isRevokingDevice) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text(
+                                    text = "Revoke Device",
+                                    style = Typography.labelLarge.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { deviceToRevoke = null },
+                            enabled = !isRevokingDevice
+                        ) {
+                            Text(
+                                text = "Cancel",
+                                style = Typography.labelLarge.copy(
+                                    fontFamily = Lato,
+                                    color = textSecondary
+                                )
+                            )
+                        }
+                    }
+                )
             }
 
             if (!isLifetime) {

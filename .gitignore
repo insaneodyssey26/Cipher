@@ -30,3 +30,5 @@ release/
 /.idea/
 
 .claude/
+scripts/
+*.cipher
