@@ -659,4 +659,27 @@
     <string name="pro_perk_accent_colors_desc">Desbloquea 12 vibrantes colores de diseñador Pantone y Coolors.</string>
     <string name="pro_gate_accent_colors_title">Colores de Tema Pro</string>
     <string name="pro_gate_accent_colors_desc">Desbloquea los 18 temas de acento vibrantes Pantone y de diseñador con Cipher Pro.</string>
+
+    <string name="custom_category_new">+ Nueva categoría</string>
+    <string name="custom_date_title">Fecha personalizada</string>
+    <string name="onboarding_capture_tour_badge">100% Privado y en tu dispositivo</string>
+    <string name="onboarding_capture_tour_step">REGISTRO AUTOMÁTICO</string>
+    <string name="onboarding_capture_tour_subtitle">Cada vez que pagas con cualquier banco o app de pago, Cipher lo registra al instante — 100% privado en tu teléfono.</string>
+    <string name="onboarding_capture_tour_title">Gasta con normalidad. Cipher lo registra.</string>
+    <string name="onboarding_rules_free_notice">El plan gratuito incluye 5 reglas y 5 categorías</string>
+    <string name="onboarding_rules_tour_step">CATEGORÍAS INTELIGENTES</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher aprende de tus hábitos y clasifica automáticamente tus gastos en las categorías correctas.</string>
+    <string name="onboarding_rules_tour_title">Organización automática de gastos</string>
+    <string name="whats_new_v56_notification_desc">Cambia de cuenta y confirma transacciones directamente desde las notificaciones.</string>
+    <string name="whats_new_v56_notification_title">Cambio rápido de cuenta directo</string>
+    <string name="whats_new_v60_analytics_desc">Tendencias de flujo de caja, frecuencia de comercios y desglose de gastos por cuenta.</string>
+    <string name="whats_new_v60_analytics_title">Análisis y métricas de cuentas</string>
+    <string name="whats_new_v60_onboarding_desc">Nueva configuración con visualización interactiva de captura automática de transacciones.</string>
+    <string name="whats_new_v60_onboarding_title">Onboarding visual interactivo</string>
+    <string name="whats_new_v60_pro_desc">Planes Mensual, Semestral, Anual y VIP Vitalicio con activación en hasta 3 dispositivos.</string>
+    <string name="whats_new_v60_pro_title">Nuevos planes Pro y multidispositivo</string>
+    <string name="whats_new_v60_statements_desc">Genera y exporta extractos bancarios en PDF con rangos de fechas personalizados.</string>
+    <string name="whats_new_v60_statements_title">Extractos individuales por cuenta</string>
+    <string name="whats_new_v60_widgets_desc">Monitorea balances, presupuesto diario y registra gastos desde tu pantalla de inicio.</string>
+    <string name="whats_new_v60_widgets_title">5 nuevos widgets de pantalla de inicio</string>
 </resources>

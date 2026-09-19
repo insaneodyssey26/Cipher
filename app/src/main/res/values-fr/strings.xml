@@ -660,4 +660,27 @@
     <string name="pro_perk_accent_colors_desc">Débloquez 12 couleurs vibrantes de designer Pantone et Coolors.</string>
     <string name="pro_gate_accent_colors_title">Couleurs de Thème Pro</string>
     <string name="pro_gate_accent_colors_desc">Débloquez les 18 thèmes d\'accentuation Pantone et designer avec Cipher Pro.</string>
+
+    <string name="custom_category_new">+ Nouvelle catégorie</string>
+    <string name="custom_date_title">Date personnalisée</string>
+    <string name="onboarding_capture_tour_badge">100 % privé &amp; sur votre appareil</string>
+    <string name="onboarding_capture_tour_step">SUIVI AUTOMATIQUE</string>
+    <string name="onboarding_capture_tour_subtitle">Chaque fois que vous payez avec une banque ou une application, Cipher l\'enregistre instantanément — 100 % privé sur votre téléphone.</string>
+    <string name="onboarding_capture_tour_title">Dépensez normalement. Cipher s\'occupe du reste.</string>
+    <string name="onboarding_rules_free_notice">Le forfait gratuit comprend 5 règles et 5 catégories</string>
+    <string name="onboarding_rules_tour_step">CATÉGORIES INTELLIGENTES</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher apprend de vos dépenses et classe automatiquement vos transactions dans les bonnes catégories.</string>
+    <string name="onboarding_rules_tour_title">Organisation automatique des dépenses</string>
+    <string name="whats_new_v56_notification_desc">Changez de compte et confirmez les transactions directement depuis la notification.</string>
+    <string name="whats_new_v56_notification_title">Changement rapide de compte</string>
+    <string name="whats_new_v60_analytics_desc">Tendances de flux de trésorerie, marchands fréquents et analyse des dépenses par compte.</string>
+    <string name="whats_new_v60_analytics_title">Analyses et statistiques de comptes</string>
+    <string name="whats_new_v60_onboarding_desc">Nouvelle intégration avec visualisation interactive de la capture automatique de transactions.</string>
+    <string name="whats_new_v60_onboarding_title">Onboarding visuel interactif</string>
+    <string name="whats_new_v60_pro_desc">Forfaits Mensuel, Semestriel, Annuel et VIP à vie avec activation sur 3 appareils.</string>
+    <string name="whats_new_v60_pro_title">Nouveaux forfaits Pro et multi-appareils</string>
+    <string name="whats_new_v60_statements_desc">Générez et exportez des relevés PDF clairs avec plages de dates personnalisées.</string>
+    <string name="whats_new_v60_statements_title">Relevés individuels par compte</string>
+    <string name="whats_new_v60_widgets_desc">Suivez vos soldes, budget quotidien et enregistrez vos dépenses depuis l\'écran d\'accueil.</string>
+    <string name="whats_new_v60_widgets_title">5 nouveaux widgets d\'écran d\'accueil</string>
 </resources>

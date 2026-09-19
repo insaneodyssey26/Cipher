@@ -660,4 +660,27 @@
     <string name="pro_perk_accent_colors_desc">12 lebendige Pantone- und Coolors-Designer-Themenfarben freischalten.</string>
     <string name="pro_gate_accent_colors_title">Pro-Themenfarben</string>
     <string name="pro_gate_accent_colors_desc">Schalten Sie alle 18 lebendigen Pantone- und Designer-Akzentthemen mit Cipher Pro frei.</string>
+
+    <string name="custom_category_new">+ Neue Kategorie</string>
+    <string name="custom_date_title">Benutzerdefiniertes Datum</string>
+    <string name="onboarding_capture_tour_badge">100% Privat &amp; Auf Ihrem Gerät</string>
+    <string name="onboarding_capture_tour_step">AUTOMATISCHE ERFASSUNG</string>
+    <string name="onboarding_capture_tour_subtitle">Wann immer Sie mit einer Bank oder Bezahl-App bezahlen, erfasst Cipher dies sofort — 100% privat auf Ihrem Telefon.</string>
+    <string name="onboarding_capture_tour_title">Ganz normal ausgeben. Cipher erfasst es.</string>
+    <string name="onboarding_rules_free_notice">Kostenloser Plan enthält 5 Regeln &amp; 5 Kategorien</string>
+    <string name="onboarding_rules_tour_step">SMARTE KATEGORIEN</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher lernt Ihr Ausgabeverhalten und ordnet Ihre Ausgaben automatisch den richtigen Kategorien zu.</string>
+    <string name="onboarding_rules_tour_title">Ausgaben automatisch organisieren</string>
+    <string name="whats_new_v56_notification_desc">Konten direkt über das Benachrichtigungsfeld wechseln und Transaktionen bestätigen.</string>
+    <string name="whats_new_v56_notification_title">Direkter Konto-Schnellwechsel</string>
+    <string name="whats_new_v60_analytics_desc">Detaillierte Cashflow-Trends, Händlerstatistiken und Ausgabenanalysen für jedes Konto.</string>
+    <string name="whats_new_v60_analytics_title">Konto-Analysen &amp; Einblicke</string>
+    <string name="whats_new_v60_onboarding_desc">Neu gestaltetes Onboarding mit Live-Smartphone-Visualisierung der automatischen Transaktionserfassung.</string>
+    <string name="whats_new_v60_onboarding_title">Interaktives Visuelles Onboarding</string>
+    <string name="whats_new_v60_pro_desc">Flexible Monats-, 6-Monats-, Jahres- und Lifetime-VIP-Tarife für bis zu 3 Geräte.</string>
+    <string name="whats_new_v60_pro_title">Neue Pro-Tarife &amp; Multi-Device-Schlüssel</string>
+    <string name="whats_new_v60_statements_desc">Erstellen und exportieren Sie saubere PDF-Kontoauszüge mit benutzerdefiniertem Datumsbereich.</string>
+    <string name="whats_new_v60_statements_title">Individuelle Kontoauszüge</string>
+    <string name="whats_new_v60_widgets_desc">Kontostände, Tagesbudget und Schnellaufzeichnung direkt auf Ihrem Startbildschirm.</string>
+    <string name="whats_new_v60_widgets_title">5 neue Startbildschirm-Widgets</string>
 </resources>

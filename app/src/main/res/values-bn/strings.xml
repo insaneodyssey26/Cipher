@@ -660,4 +660,27 @@
     <string name="pro_perk_accent_colors_desc">১২টি প্রাণবন্ত প্যান্টোন ও কুলরস ডিজাইনার থিম রঙ আনলক করুন।</string>
     <string name="pro_gate_accent_colors_title">প্রো থিম কালার</string>
     <string name="pro_gate_accent_colors_desc">সাইফার প্রো-এর সাথে সমস্ত ১৮টি প্রাণবন্ত প্যান্টোন ও ডিজাইনার থিম রঙ আনলক করুন।</string>
+
+    <string name="custom_category_new">+ নতুন বিভাগ</string>
+    <string name="custom_date_title">কাস্টম তারিখ</string>
+    <string name="onboarding_capture_tour_badge">১০০% ব্যক্তিগত ও অন-ডিভাইস</string>
+    <string name="onboarding_capture_tour_step">স্বয়ংক্রিয় ট্র্যাকিং</string>
+    <string name="onboarding_capture_tour_subtitle">যেকোনো ব্যাংক বা UPI অ্যাপ দিয়ে লেনদেন করলে Cipher তাৎক্ষণিকভাবে স্বয়ংক্রিয়ভাবে তা রেকর্ড করে — সম্পূর্ণ গোপনে আপনার ফোনে।</string>
+    <string name="onboarding_capture_tour_title">স্বাভাবিকভাবে খরচ করুন। বাকিটা Cipher দেখবে।</string>
+    <string name="onboarding_rules_free_notice">ফ্রি প্ল্যানে ৫টি কাস্টম রুল ও ৫টি ক্যাটাগরি অন্তর্ভুক্ত</string>
+    <string name="onboarding_rules_tour_step">স্মার্ট ক্যাটাগরি</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher আপনার খরচের অভ্যাস বুঝে নিজে থেকেই সঠিক ক্যাটাগরিতে খরচ সাজিয়ে দেয়।</string>
+    <string name="onboarding_rules_tour_title">খরচ অটো-অর্গানাইজ করুন</string>
+    <string name="whats_new_v56_notification_desc">নোটিফিকেশন প্যানেল থেকে সরাসরি অ্যাকাউন্ট পরিবর্তন ও লেনদেন নিশ্চিত করুন।</string>
+    <string name="whats_new_v56_notification_title">সরাসরি অ্যাকাউন্ট কুইক-সুইচ</string>
+    <string name="whats_new_v60_analytics_desc">প্রতিটি অ্যাকাউন্টের ক্যাশ ফ্লো ট্রেন্ড, মার্চেন্ট ফ্রিকোয়েন্সি এবং বিশদ খরচের বিশ্লেষণ দেখুন।</string>
+    <string name="whats_new_v60_analytics_title">অ্যাকাউন্ট অ্যানালিটিক্স ও ইনসাইটস</string>
+    <string name="whats_new_v60_onboarding_desc">ব্যাংক SMS ও UPI লেনদেন ক্যাপচারের লাইভ স্মার্টফোন ভিজ্যুয়ালাইজেশন সহ নতুন অনবোর্ডিং।</string>
+    <string name="whats_new_v60_onboarding_title">ইন্টারেক্টিভ ভিজ্যুয়াল অনবোর্ডিং</string>
+    <string name="whats_new_v60_pro_desc">মাসিক, ৬-মাস, বার্ষিক এবং লাইফটাইম VIP টিয়ার ও সর্বোচ্চ ৩টি ডিভাইসের তাৎক্ষণিক লাইসেন্স অ্যাক্টিভেশন।</string>
+    <string name="whats_new_v60_pro_title">নতুন প্রো টিয়ার ও মাল্টি-ডিভাইস কি</string>
+    <string name="whats_new_v60_statements_desc">কাস্টম তারিখ নির্বাচন করে প্রতিটি অ্যাকাউন্টের পরিষ্কার ও সার্টিফাইড PDF স্টেটমেন্ট এক্সপোর্ট করুন।</string>
+    <string name="whats_new_v60_statements_title">পৃথক অ্যাকাউন্ট স্টেটমেন্ট</string>
+    <string name="whats_new_v60_widgets_desc">হোম স্ক্রিন থেকেই ব্যালেন্স, দৈনিক বাজেট সীমা ও এক ট্যাপে লেনদেন রেকর্ড করুন।</string>
+    <string name="whats_new_v60_widgets_title">৫টি নতুন হোম স্ক্রিন উইজেট</string>
 </resources>

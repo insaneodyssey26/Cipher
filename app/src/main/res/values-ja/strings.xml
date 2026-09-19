@@ -661,4 +661,26 @@
     <string name="pro_perk_accent_colors_desc">12種類の鮮やかなPantone＆Coolorsデザイナーテーマカラーを解放。</string>
     <string name="pro_gate_accent_colors_title">Proテーマカラー</string>
     <string name="pro_gate_accent_colors_desc">Cipher Proですべての18種類の鮮やかなPantoneおよびデザイナーアクセントテーマをアンロック。</string>
+
+    <string name="custom_date_title">カスタム日付</string>
+    <string name="onboarding_capture_tour_badge">100% プライベート＆端末内処理</string>
+    <string name="onboarding_capture_tour_step">自動トラッキング</string>
+    <string name="onboarding_capture_tour_subtitle">銀行や決済アプリで支払うと、Cipherが端末内で瞬時に安全に記録します。</string>
+    <string name="onboarding_capture_tour_title">いつも通り支払うだけ。Cipherが自動記録。</string>
+    <string name="onboarding_rules_free_notice">無料プランには5つのカスタムルールと5つのカテゴリーが含まれます</string>
+    <string name="onboarding_rules_tour_step">スマートカテゴリー</string>
+    <string name="onboarding_rules_tour_subtitle">支出傾向を自動学習し、適切なカテゴリーへ自動的に分類します。</string>
+    <string name="onboarding_rules_tour_title">支出を自動整理</string>
+    <string name="whats_new_v56_notification_desc">通知パネルから直接口座を切り替え、取引を即座に確定できます。</string>
+    <string name="whats_new_v56_notification_title">口座クイック切り替え</string>
+    <string name="whats_new_v60_analytics_desc">口座ごとのキャッシュフロートレンド、店舗別頻度、支出の内訳を詳細に分析。</string>
+    <string name="whats_new_v60_analytics_title">口座分析＆インサイト</string>
+    <string name="whats_new_v60_onboarding_desc">自動取引キャプチャを視覚的に体験できる新しいオンボーディング。</string>
+    <string name="whats_new_v60_onboarding_title">インタラクティブなオンボーディング</string>
+    <string name="whats_new_v60_pro_desc">月額・6ヶ月・年額・永久VIPプランと最大3台の端末で使えるライセンスキー。</string>
+    <string name="whats_new_v60_pro_title">新Proプラン＆複数端末対応</string>
+    <string name="whats_new_v60_statements_desc">期間を指定して口座ごとの美しいPDF明細書を作成・エクスポート。</string>
+    <string name="whats_new_v60_statements_title">口座別明細書エクスポート</string>
+    <string name="whats_new_v60_widgets_desc">ホーム画面から残高や日割り予算の確認、ワンタップ支出記録が可能。</string>
+    <string name="whats_new_v60_widgets_title">5つの新しいホーム画面ウィジェット</string>
 </resources>

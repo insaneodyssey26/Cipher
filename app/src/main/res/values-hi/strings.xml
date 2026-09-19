@@ -659,4 +659,27 @@
     <string name="pro_perk_accent_colors_desc">12 जीवंत पैनटोन और कूलर्स डिज़ाइनर थीम रंग अनलॉक करें।</string>
     <string name="pro_gate_accent_colors_title">प्रो थीम रंग</string>
     <string name="pro_gate_accent_colors_desc">साइफर प्रो के साथ सभी 18 जीवंत पैनटोन और डिज़ाइनर थीम रंग अनलॉक करें।</string>
+
+    <string name="custom_category_new">+ नई श्रेणी</string>
+    <string name="custom_date_title">कस्टम तिथि</string>
+    <string name="onboarding_capture_tour_badge">100% निजी और आपके फ़ोन पर</string>
+    <string name="onboarding_capture_tour_step">स्वचालित ट्रैकिंग</string>
+    <string name="onboarding_capture_tour_subtitle">जब भी आप किसी बैंक या UPI ऐप से भुगतान करते हैं, Cipher तुरंत इसे रिकॉर्ड करता है — पूरी तरह से आपके फ़ोन पर सुरक्षित।</string>
+    <string name="onboarding_capture_tour_title">सामान्य रूप से खर्च करें। Cipher ट्रैक करेगा।</string>
+    <string name="onboarding_rules_free_notice">मुफ़्त प्लान में 5 कस्टम नियम और 5 श्रेणियां शामिल हैं</string>
+    <string name="onboarding_rules_tour_step">स्मार्ट श्रेणियां</string>
+    <string name="onboarding_rules_tour_subtitle">Cipher आपके खर्च करने की आदतों को समझता है और स्वचालित रूप से आपके खर्चों को सही श्रेणियों में डालता है।</string>
+    <string name="onboarding_rules_tour_title">खर्चों को ऑटो-ऑर्गेनाइज़ करें</string>
+    <string name="whats_new_v56_notification_desc">सीधे नोटिफिकेशन पैनल से खाते बदलें और लेनदेन की पुष्टि करें।</string>
+    <string name="whats_new_v56_notification_title">सीधा खाता त्वरित-बदलें</string>
+    <string name="whats_new_v60_analytics_desc">प्रत्येक अलग खाते के लिए नकदी प्रवाह रुझान, व्यापारी आवृत्ति और खर्च विवरण देखें।</string>
+    <string name="whats_new_v60_analytics_title">खाता एनालिटिक्स और अंतर्दृष्टि</string>
+    <string name="whats_new_v60_onboarding_desc">स्वचालित बैंक SMS और UPI लेनदेन कैप्चर के लाइव स्मार्टफ़ोन विज़ुअलाइज़ेशन के साथ नया ऑनबोर्डिंग।</string>
+    <string name="whats_new_v60_onboarding_title">इंटरएक्टिव विज़ुअल ऑनबोर्डिंग</string>
+    <string name="whats_new_v60_pro_desc">मासिक, 6-महीने, वार्षिक और आजीवन VIP टियर तथा 3 डिवाइस तक तत्काल कुंजी सक्रियण।</string>
+    <string name="whats_new_v60_pro_title">नए प्रो टियर्स और मल्टी-डिवाइस कीज़</string>
+    <string name="whats_new_v60_statements_desc">कस्टम दिनांक सीमाओं के साथ साफ़ PDF खाता विवरण तैयार और निर्यात करें।</string>
+    <string name="whats_new_v60_statements_title">व्यक्तिगत खाता विवरण</string>
+    <string name="whats_new_v60_widgets_desc">अपनी होम स्क्रीन से सीधे शेष राशि, दैनिक खर्च सीमा और त्वरित लेनदेन रिकॉर्ड करें।</string>
+    <string name="whats_new_v60_widgets_title">5 नए होम स्क्रीन विजेट</string>
 </resources>
