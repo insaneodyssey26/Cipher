@@ -55,7 +55,7 @@ Bank sends SMS alert           App sends Notification
   DashboardViewModel ──► UI (Jetpack Compose)
 ```
 
-No network call is made at any point. The SMS or Notification is read, parsed, and written to the encrypted database — all within background scope for reliable execution.
+All financial transactions, parsing, categorization, and database operations run 100% locally and offline on your device. Network access is used solely for Pro license key validation and device seat management. No financial data ever leaves your device.
 
 ---
 

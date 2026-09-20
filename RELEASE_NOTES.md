@@ -3,15 +3,14 @@
 ## [6.0.0]
 
 ### Added
-- **Cipher Pro Membership**: Flexible Monthly, 6-Month, 1-Year, and Lifetime VIP passes to unlock unlimited custom categories, home widgets, bank statement imports, and themes.
-- **Home Screen Widgets Suite**: 5 brand-new live Glance widgets: Accounts Overview, Passbook Recent Transactions, Daily Allowance Gauge, Quick-Log 1-Tap Tracker, and Daily Stats.
-- **Financial Statement Importer**: Import transactions directly from bank and credit card PDF, CSV, and Excel statements with on-device parsing.
+- **Cipher Pro Membership**: Flexible Monthly, 6-Month, 1-Year, and Lifetime VIP passes to unlock unlimited custom categories, Pro home widgets, custom PDF/CSV statement exports, and themes.
+- **Home Screen Widgets Suite**: 6 live Glance widgets (2 free: Budget & Daily Stats; 4 Pro: Accounts Overview, Passbook Recent Transactions, Daily Allowance Gauge, and Quick-Log 1-Tap Tracker).
 - **Advanced Account Analytics**: In-depth burn rate, cash flow velocity, top merchant insights, and category trends per individual account/wallet.
 - **Multi-Account Transfers**: Move funds between savings, credit cards, cash, and vault accounts seamlessly.
 - **Automated Encrypted Backups**: Scheduled background backups with PBKDF2 AES-GCM encryption.
 
 ### Changed & Improved
-- **Optimized Binary Size**: Minified ABI filters to `arm64-v8a` and `armeabi-v7a` for faster downloads and a 60% smaller install footprint.
+- **Optimized Binary Size**: Targeted ABI filters to `arm64-v8a` and `armeabi-v7a` for a lightweight ~14 MB download footprint.
 - **Target SDK 37 & Min SDK 26**: Built for modern Android 17 and Android 8.0+.
 - **Redesigned Onboarding**: Instant zero-friction account setup flow.
 

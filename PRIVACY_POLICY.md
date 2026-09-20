@@ -23,17 +23,17 @@ The SMS messages, notifications, and transactions accessed by Cipher are process
 
 ## 3. Network Access & Licensing
 
-Cipher uses network communication exclusively for:
-*   **License Key Verification**: When you activate or deactivate a Cipher Pro product key, the app contacts our secure license verification endpoint to validate your license and allocate your 3-device quota using an anonymous device identifier. No financial data, account numbers, or personal transaction histories are ever included in this request.
+Cipher requires internet access solely for:
+*   **License Key Verification & Device Management**: When you activate or deactivate a Cipher Pro product key or manage your device activations, the app contacts our secure license verification backend (`https://cipher-license-api.skmasumali-main.workers.dev`).
+*   **Data Transmitted for Licensing**: The request transmits only your license key, a pseudonymous device identifier (derived from device hardware properties and stored securely), your device model name (to help you identify devices on your 3-device seat limit), and your email address if provided during purchase or activation.
+*   **Zero Financial Transmission**: No financial data, bank names, account numbers, transactions, notes, or balances are ever transmitted.
+*   **Zero Trackers & Ads**: Cipher contains zero advertising SDKs, zero third-party telemetry, and zero user profiling trackers.
 
-Cipher contains **zero** third-party analytics trackers, **zero** advertising SDKs, and **zero** user profiling telemetry.
+## 4. License Server Data Retention and Deletion
 
-## 4. Data Retention and Deletion
-
-All financial data is stored locally on your device. You have complete control over your data:
-*   You can edit or delete individual transactions within the app at any time.
-*   You can wipe all data by selecting "Clear All Data" in Settings or clearing app storage via Android Settings.
-*   Uninstalling the app permanently removes all local database records.
+*   **Financial Data**: Stored 100% locally on your device. Uninstalling the app or clearing app storage permanently deletes all database records and encryption keys immediately.
+*   **Licensing Records**: License records (license key, tier, order ID, optional billing email, active device IDs, and activation timestamps) are stored in Cloudflare KV to enforce multi-device limits and preserve your license entitlements across device migrations.
+*   **Data Deletion**: Users may request complete removal of their billing email and device association records at any time by contacting support or opening an issue on GitHub. Revoking a device directly from the app immediately removes that device ID from active license records.
 
 ## 5. Security
 
