@@ -152,7 +152,7 @@ fun WhatsNewSheet(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 WhatsNewVersionSection(
-                    versionTitle = "v6.0.0",
+                    versionTitle = "v$versionName",
                     isLatest = true
                 ) {
                     WhatsNewFeatureEntry(
