@@ -116,11 +116,21 @@ import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.X
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.foundation.layout.navigationBarsPadding
 import com.masum.cipher.core.data.local.pref.AppTheme
+import java.util.Locale
 import kotlinx.coroutines.launch
+
+private data class PricingValues(
+    val monthly: String,
+    val sixMonth: String,
+    val sixMonthStrike: String?,
+    val annual: String,
+    val annualStrike: String?,
+    val lifetime: String
+)
 
 private data class PlanFeatureItem(
     val title: String,
@@ -200,99 +210,179 @@ fun CipherProScreen(
     val clipboardManager = LocalClipboardManager.current
     val isAlreadyPro = settings.isPro
 
-    val plans = remember(dodoCheckoutUrlMonthly, dodoCheckoutUrlHalfYearly, dodoCheckoutUrlYearly, dodoCheckoutUrlLifetime) {
+    val monthlyTitle = stringResource(R.string.pro_tier_monthly_title)
+    val monthlyBadge = stringResource(R.string.pro_tier_badge_standard)
+    val monthlyPeriod = stringResource(R.string.pro_period_monthly)
+    val monthlySubtext = stringResource(R.string.pro_subtext_monthly)
+    val monthlyDesc = stringResource(R.string.pro_desc_monthly)
+
+    val sixMonthTitle = stringResource(R.string.pro_tier_6month_title)
+    val sixMonthBadge = stringResource(R.string.pro_tier_badge_save_16)
+    val sixMonthPeriod = stringResource(R.string.pro_period_6month)
+    val sixMonthSubtext = stringResource(R.string.pro_subtext_6month)
+    val sixMonthDesc = stringResource(R.string.pro_desc_6month)
+
+    val annualTitle = stringResource(R.string.pro_tier_annual_title)
+    val annualBadge = stringResource(R.string.pro_tier_badge_save_29)
+    val annualPeriod = stringResource(R.string.pro_period_annual)
+    val annualSubtext = stringResource(R.string.pro_subtext_annual)
+    val annualDesc = stringResource(R.string.pro_desc_annual)
+
+    val lifetimeTitle = stringResource(R.string.pro_tier_lifetime_title)
+    val lifetimeBadge = stringResource(R.string.pro_tier_badge_best_value) + " •"
+    val lifetimePeriod = stringResource(R.string.pro_period_lifetime)
+    val lifetimeSubtext = stringResource(R.string.pro_subtext_lifetime)
+    val lifetimeDesc = stringResource(R.string.pro_desc_lifetime)
+
+    val featAccounts = PlanFeatureItem(stringResource(R.string.pro_feature_unlimited_accounts), stringResource(R.string.pro_feature_unlimited_accounts_desc))
+    val featRules = PlanFeatureItem(stringResource(R.string.pro_feature_smart_rules), stringResource(R.string.pro_feature_smart_rules_desc))
+    val featWidgets = PlanFeatureItem(stringResource(R.string.pro_feature_widgets), stringResource(R.string.pro_feature_widgets_desc))
+    val featExport = PlanFeatureItem(stringResource(R.string.pro_feature_pdf_export), stringResource(R.string.pro_feature_pdf_export_desc))
+    val featCategories = PlanFeatureItem(stringResource(R.string.pro_feature_unlimited_categories), stringResource(R.string.pro_feature_unlimited_categories_desc))
+    val featTheme = PlanFeatureItem(stringResource(R.string.pro_feature_theme_styling), stringResource(R.string.pro_feature_theme_styling_desc))
+    val commonFeatures = listOf(featAccounts, featRules, featWidgets, featExport, featCategories, featTheme)
+
+    val countryCode = remember {
+        Locale.getDefault().country.uppercase(Locale.ROOT)
+    }
+
+    val pricing = remember(countryCode) {
+        when {
+            countryCode == "IN" -> {
+                PricingValues(
+                    monthly = "₹59",
+                    sixMonth = "₹299",
+                    sixMonthStrike = "₹354",
+                    annual = "₹499",
+                    annualStrike = "₹708",
+                    lifetime = "₹899"
+                )
+            }
+            countryCode == "BD" -> {
+                PricingValues(
+                    monthly = "৳79",
+                    sixMonth = "৳399",
+                    sixMonthStrike = "৳474",
+                    annual = "৳699",
+                    annualStrike = "৳948",
+                    lifetime = "৳1,199"
+                )
+            }
+            countryCode == "JP" -> {
+                PricingValues(
+                    monthly = "¥300",
+                    sixMonth = "¥1,500",
+                    sixMonthStrike = "¥1,800",
+                    annual = "¥2,500",
+                    annualStrike = "¥3,600",
+                    lifetime = "¥4,500"
+                )
+            }
+            countryCode == "GB" || countryCode == "UK" -> {
+                PricingValues(
+                    monthly = "£1.99",
+                    sixMonth = "£9.99",
+                    sixMonthStrike = "£11.94",
+                    annual = "£16.99",
+                    annualStrike = "£23.88",
+                    lifetime = "£29.99"
+                )
+            }
+            countryCode in setOf("DE", "FR", "ES", "IT", "NL", "BE", "AT", "IE", "FI", "PT", "GR", "EE", "LV", "LT", "SK", "SI", "CY", "MT", "LU") -> {
+                PricingValues(
+                    monthly = "€1.99",
+                    sixMonth = "€9.99",
+                    sixMonthStrike = "€11.94",
+                    annual = "€16.99",
+                    annualStrike = "€23.88",
+                    lifetime = "€29.99"
+                )
+            }
+            else -> {
+                PricingValues(
+                    monthly = "$1.99",
+                    sixMonth = "$9.99",
+                    sixMonthStrike = "$11.94",
+                    annual = "$16.99",
+                    annualStrike = "$23.88",
+                    lifetime = "$29.99"
+                )
+            }
+        }
+    }
+
+    val plans = remember(
+        dodoCheckoutUrlMonthly, dodoCheckoutUrlHalfYearly, dodoCheckoutUrlYearly, dodoCheckoutUrlLifetime,
+        monthlyTitle, sixMonthTitle, annualTitle, lifetimeTitle,
+        monthlyDesc, sixMonthDesc, annualDesc, lifetimeDesc,
+        monthlySubtext, sixMonthSubtext, annualSubtext, lifetimeSubtext,
+        monthlyBadge, sixMonthBadge, annualBadge, lifetimeBadge,
+        commonFeatures, pricing
+    ) {
         listOf(
             PricingCardData(
                 planId = "monthly",
-                title = "Monthly Pass",
-                badge = "Standard",
+                title = monthlyTitle,
+                badge = monthlyBadge,
                 strikePrice = null,
-                mainPrice = "₹59",
-                periodLabel = "/ month",
-                billedSubtext = "₹59 billed every month",
-                description = "Full Cipher Pro access on a flexible month-to-month basis. Perfect if you want to try all advanced features.",
+                mainPrice = pricing.monthly,
+                periodLabel = monthlyPeriod,
+                billedSubtext = monthlySubtext,
+                description = monthlyDesc,
                 accentColorDark = Color(0xFF94A3B8),
                 accentColorLight = Color(0xFF64748B),
                 onAccentColorDark = Color(0xFF0F172A),
                 onAccentColorLight = Color.White,
                 checkoutUrl = dodoCheckoutUrlMonthly,
-                features = listOf(
-                    PlanFeatureItem("Unlimited Accounts & Wallets", "Track savings, credit cards, cash & vault balances"),
-                    PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
-                    PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
-                    PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
-                    PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
-                )
+                features = commonFeatures
             ),
             PricingCardData(
                 planId = "6month",
-                title = "6-Month Pro",
-                badge = "Save 16% •",
-                strikePrice = "₹354",
-                mainPrice = "₹299",
-                periodLabel = "/ 6 months",
-                billedSubtext = "Effective ₹49.80 / month",
-                description = "Half a year of seamless offline wealth management. Save 16% compared to the standard monthly pass.",
+                title = sixMonthTitle,
+                badge = sixMonthBadge,
+                strikePrice = pricing.sixMonthStrike,
+                mainPrice = pricing.sixMonth,
+                periodLabel = sixMonthPeriod,
+                billedSubtext = sixMonthSubtext,
+                description = sixMonthDesc,
                 accentColorDark = Color(0xFFFBBF24),
                 accentColorLight = Color(0xFFD97706),
                 onAccentColorDark = Color(0xFF1C1917),
                 onAccentColorLight = Color.White,
                 checkoutUrl = dodoCheckoutUrlHalfYearly,
-                features = listOf(
-                    PlanFeatureItem("Unlimited Accounts & Wallets", "Track savings, credit cards, cash & vault balances"),
-                    PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
-                    PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
-                    PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
-                    PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
-                )
+                features = commonFeatures
             ),
             PricingCardData(
                 planId = "annual",
-                title = "1-Year Annual",
-                badge = "Save 30% •",
-                strikePrice = "₹708",
-                mainPrice = "₹499",
-                periodLabel = "/ year",
-                billedSubtext = "Effective ₹41.58 / month",
-                description = "A full year of uninterrupted financial clarity. Best overall savings for mastering budgets, rules, and categories.",
+                title = annualTitle,
+                badge = annualBadge,
+                strikePrice = pricing.annualStrike,
+                mainPrice = pricing.annual,
+                periodLabel = annualPeriod,
+                billedSubtext = annualSubtext,
+                description = annualDesc,
                 accentColorDark = Color(0xFFE2FF38),
                 accentColorLight = Color(0xFF059669),
                 onAccentColorDark = Color.Black,
                 onAccentColorLight = Color.White,
                 checkoutUrl = dodoCheckoutUrlYearly,
-                features = listOf(
-                    PlanFeatureItem("Unlimited Accounts & Wallets", "Track savings, credit cards, cash & vault balances"),
-                    PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
-                    PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
-                    PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
-                    PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
-                )
+                features = commonFeatures
             ),
             PricingCardData(
                 planId = "lifetime",
-                title = "Lifetime VIP",
-                badge = "Best Deal •",
+                title = lifetimeTitle,
+                badge = lifetimeBadge,
                 strikePrice = null,
-                mainPrice = "₹899",
-                periodLabel = "one-time",
-                billedSubtext = "Pay once, keep forever",
-                description = "Zero recurring subscriptions ever. Complete lifetime ownership of Cipher Pro with all future pro updates included.",
+                mainPrice = pricing.lifetime,
+                periodLabel = lifetimePeriod,
+                billedSubtext = lifetimeSubtext,
+                description = lifetimeDesc,
                 accentColorDark = Color(0xFFA78BFA),
                 accentColorLight = Color(0xFF7C3AED),
                 onAccentColorDark = Color(0xFF1E1B4B),
                 onAccentColorLight = Color.White,
                 checkoutUrl = dodoCheckoutUrlLifetime,
-                features = listOf(
-                    PlanFeatureItem("Unlimited Accounts & Wallets", "Track savings, credit cards, cash & vault balances"),
-                    PlanFeatureItem("Smart Rules & Automation", "Auto-categorize transactions by merchant & note tags"),
-                    PlanFeatureItem("Home Screen Widgets Suite", "Live balance trackers & instant quick-add chips"),
-                    PlanFeatureItem("Custom PDF Statement Exports", "Generate audit-ready breakdowns & financial reports"),
-                    PlanFeatureItem("Unlimited Custom Categories", "Create custom categories beyond the 5 free limit"),
-                    PlanFeatureItem("Theme & Styling Customization", "Exclusive themes and personalized palette options")
-                )
+                features = commonFeatures
             )
         )
     }
@@ -458,7 +548,7 @@ fun CipherProScreen(
                                 color = textPrimary
                             )
                             Text(
-                                text = "Elevate your offline wealth vault",
+                                text = stringResource(R.string.pro_subtitle),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Medium,
@@ -703,7 +793,7 @@ fun CipherProScreen(
                                     )
                                     Spacer(modifier = Modifier.width(5.dp))
                                     Text(
-                                        text = "No cloud servers • 100% offline on device",
+                                        text = stringResource(R.string.pro_perk_offline_crypto_title),
                                         style = Typography.labelSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = FontWeight.Medium,
@@ -763,6 +853,19 @@ fun CipherProScreen(
                         }
                     }
                 }
+
+                Text(
+                    text = stringResource(R.string.pro_pricing_adjust_notice),
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Lato,
+                        fontSize = 11.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    ),
+                    color = textSecondary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 6.dp)
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -1072,6 +1175,39 @@ fun CipherProScreen(
                                 fontWeight = FontWeight.Bold
                             ),
                             color = activePlanOnAccent
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.pro_coupon_notice),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 11.5.sp
+                        ),
+                        color = textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    TextButton(
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://customer.dodopayments.com"))
+                                context.startActivity(intent)
+                            } catch (_: Exception) {}
+                        }
+                    ) {
+                        Text(
+                            text = "${stringResource(R.string.pro_cant_find_key)} ${stringResource(R.string.pro_customer_portal_link)}",
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.SemiBold,
+                                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                            ),
+                            color = textSecondary
                         )
                     }
                 }
