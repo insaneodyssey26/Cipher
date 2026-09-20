@@ -358,3 +358,9 @@ There is zero telemetry, zero analytics trackers, zero advertising SDKs, and zer
 ## Release history
 
 See [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+---
+
+## License
+
+Cipher is licensed under the [GNU General Public License v3.0 (GPL-3.0)](LICENSE).
