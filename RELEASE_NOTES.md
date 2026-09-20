@@ -1,5 +1,15 @@
 # Release Notes
 
+## [6.0.1]
+
+### Fixed & Improved
+- **Paywall Pricing & Localization**: Added locale-aware pricing that automatically adapts currency symbols and baseline amounts (INR, BDT, JPY, GBP, EUR, USD) according to your device's region.
+- **Pro Licensing Sync**: Added background license verification with a 30-day offline grace period so pro features remain active without internet dependency.
+- **Annual Pass Savings Display**: Updated the annual pass discount badge to reflect accurate savings.
+- **Privacy & Compliance**: Updated in-app privacy policy notices to reflect offline ledger and license seat management.
+
+---
+
 ## [6.0.0]
 
 ### Added
