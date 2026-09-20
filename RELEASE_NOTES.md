@@ -1,5 +1,14 @@
 # Release Notes
 
+## [6.0.2]
+
+### Added & Highlighted
+- **Full Polish Language Localization**: Added complete Polish (`pl`) translation covering all 692 string keys across all screens, dialogs, widgets, and onboarding.
+- **Regional Polish Pricing (PLN / zł)**: Configured 50% purchasing power parity (PPP) tier for Poland in Cipher Pro paywall.
+- **In-App Update Safety**: Limited Play Store in-app update checks exclusively to installs from Google Play, keeping sideloaded GitHub releases free from store prompts.
+
+---
+
 ## [6.0.1]
 
 ### Added & Highlighted
