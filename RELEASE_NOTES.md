@@ -2,11 +2,20 @@
 
 ## [6.0.1]
 
+### Added & Highlighted
+- **Cipher Pro Membership**: Flexible Monthly, 6-Month, 1-Year, and Lifetime VIP passes to unlock unlimited custom categories, Pro home widgets, custom PDF/CSV statement exports, and themes.
+- **Home Screen Widgets Suite**: 6 live Glance widgets (2 free: Budget & Daily Stats; 4 Pro: Accounts Overview, Passbook Recent Transactions, Daily Allowance Gauge, and Quick-Log 1-Tap Tracker).
+- **Advanced Account Analytics**: In-depth burn rate, cash flow velocity, top merchant insights, and category trends per individual account/wallet.
+- **Multi-Account Transfers**: Move funds between savings, credit cards, cash, and vault accounts seamlessly.
+- **Automated Encrypted Backups**: Scheduled background backups with PBKDF2 AES-GCM encryption.
+
 ### Fixed & Improved
 - **Paywall Pricing & Localization**: Added locale-aware pricing that automatically adapts currency symbols and baseline amounts (INR, BDT, JPY, GBP, EUR, USD) according to your device's region.
 - **Pro Licensing Sync**: Added background license verification with a 30-day offline grace period so pro features remain active without internet dependency.
 - **Annual Pass Savings Display**: Updated the annual pass discount badge to reflect accurate savings.
-- **Privacy & Compliance**: Updated in-app privacy policy notices to reflect offline ledger and license seat management.
+- **Optimized Binary Size**: Targeted ABI filters to `arm64-v8a` and `armeabi-v7a` for a lightweight download footprint.
+- **Target SDK 37 & Min SDK 26**: Built for modern Android 17 and Android 8.0+.
+- **Redesigned Onboarding**: Instant zero-friction account setup flow.
 
 ---
 
