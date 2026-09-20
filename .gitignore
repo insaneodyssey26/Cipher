@@ -32,3 +32,5 @@ release/
 .claude/
 scripts/
 *.cipher
+node_modules/
+**/node_modules/
