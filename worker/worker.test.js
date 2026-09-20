@@ -81,7 +81,7 @@ describe("Cipher License Worker Security & Endpoints", () => {
   beforeEach(() => {
     env = {
       CIPHER_LICENSES: new MockKV(),
-      DODO_WEBHOOK_SECRET: "whsec_MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE"
+      DODO_WEBHOOK_SECRET: "whsec_dGVzdF9zZWNyZXRfa2V5XzEyMzQ1Njc4OTAxMjM0"
     };
   });
 
