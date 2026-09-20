@@ -185,6 +185,7 @@ class UserPreferences @Inject constructor(
         val PRO_ORDER_ID = stringPreferencesKey("pro_order_id")
         val PRO_EXPIRES_AT = longPreferencesKey("pro_expires_at")
         val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
+        val LAST_LICENSE_SYNC_TIME = longPreferencesKey("last_license_sync_time")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -705,6 +706,15 @@ class UserPreferences @Inject constructor(
 
     suspend fun setShowProBadge(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
+    }
+
+    fun getCachedLastLicenseSyncTime(): Long {
+        return syncPrefs.getLong("cached_last_license_sync_time", 0L)
+    }
+
+    suspend fun setLastLicenseSyncTime(timestamp: Long) {
+        syncPrefs.edit().putLong("cached_last_license_sync_time", timestamp).apply()
+        context.dataStore.edit { it[Keys.LAST_LICENSE_SYNC_TIME] = timestamp }
     }
 }
 

@@ -100,6 +100,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var notificationScheduler: NotificationScheduler
 
     @Inject
+    lateinit var licenseSyncScheduler: com.masum.cipher.core.worker.LicenseSyncScheduler
+
+    @Inject
     lateinit var licenseEngine: com.masum.cipher.core.security.LicenseEngine
 
     private val currentIntentFlow = MutableStateFlow<Intent?>(null)
@@ -126,6 +129,7 @@ class MainActivity : AppCompatActivity() {
         currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
+        licenseSyncScheduler.schedulePeriodicLicenseSync()
         UpdateManager.checkForUpdates(this) {
             updateReady.value = true
         }

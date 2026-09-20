@@ -54,6 +54,14 @@ data class LicenseValidationResult(
     val errorMessage: String? = null
 )
 
+sealed class RemoteLicenseCheckResult {
+    data class Valid(val tier: ProTier, val deviceCount: Int, val maxDevices: Int) : RemoteLicenseCheckResult()
+    data class Revoked(val reason: String) : RemoteLicenseCheckResult()
+    data class Expired(val reason: String) : RemoteLicenseCheckResult()
+    data class NotFound(val message: String) : RemoteLicenseCheckResult()
+    data class NetworkError(val error: String) : RemoteLicenseCheckResult()
+}
+
 @Singleton
 class LicenseEngine @Inject constructor() {
 
@@ -381,6 +389,49 @@ class LicenseEngine @Inject constructor() {
             )
         }
         return result
+    }
+
+    suspend fun checkLicenseRemoteStatus(
+        licenseToken: String,
+        currentDeviceId: String
+    ): RemoteLicenseCheckResult = withContext(Dispatchers.IO) {
+        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
+        if (sanitized.isBlank()) return@withContext RemoteLicenseCheckResult.NotFound("Empty license token")
+        try {
+            val encodedKey = URLEncoder.encode(sanitized, "UTF-8")
+            val encodedDev = URLEncoder.encode(currentDeviceId, "UTF-8")
+            val endpoint = URL("https://cipher-license-api.skmasumali-main.workers.dev/api/devices?licenseKey=$encodedKey&deviceId=$encodedDev")
+            val conn = (endpoint.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 8000
+                readTimeout = 8000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Cipher-Android/6.0.1")
+            }
+
+            val responseCode = conn.responseCode
+            if (responseCode in 200..299) {
+                val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
+                val json = JSONObject(text)
+                val tierStr = json.optString("tier", "LIFETIME")
+                val deviceCount = json.optInt("deviceCount", 1)
+                val maxDevices = json.optInt("maxDevices", 3)
+                RemoteLicenseCheckResult.Valid(parseTier(tierStr), deviceCount, maxDevices)
+            } else {
+                val errText = conn.errorStream?.bufferedReader()?.use(BufferedReader::readText) ?: ""
+                val json = try { JSONObject(errText) } catch (_: Exception) { JSONObject() }
+                val status = json.optString("status", "")
+                val errorMsg = json.optString("error", "Error code $responseCode")
+                when {
+                    responseCode == 403 && status.equals("REVOKED", ignoreCase = true) -> RemoteLicenseCheckResult.Revoked(errorMsg)
+                    responseCode == 403 && status.equals("EXPIRED", ignoreCase = true) -> RemoteLicenseCheckResult.Expired(errorMsg)
+                    responseCode == 404 -> RemoteLicenseCheckResult.NotFound(errorMsg)
+                    else -> RemoteLicenseCheckResult.NetworkError("HTTP $responseCode: $errorMsg")
+                }
+            }
+        } catch (e: Exception) {
+            RemoteLicenseCheckResult.NetworkError(e.message ?: "Network error")
+        }
     }
 
     suspend fun revokeDeviceRemote(
