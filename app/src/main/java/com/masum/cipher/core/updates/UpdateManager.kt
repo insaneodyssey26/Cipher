@@ -1,6 +1,7 @@
 package com.masum.cipher.core.updates
 
 import android.app.Activity
+import android.os.Build
 import android.util.Log
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallStateUpdatedListener
@@ -12,6 +13,22 @@ object UpdateManager {
     private const val UPDATE_REQUEST_CODE = 1001
 
     fun checkForUpdates(activity: Activity, onUpdateDownloaded: (() -> Unit)? = null) {
+        val isInstalledFromPlayStore = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val sourceInfo = activity.packageManager.getInstallSourceInfo(activity.packageName)
+                sourceInfo.installingPackageName == "com.android.vending"
+            } else {
+                @Suppress("DEPRECATION")
+                activity.packageManager.getInstallerPackageName(activity.packageName) == "com.android.vending"
+            }
+        } catch (_: Exception) {
+            false
+        }
+
+        if (!isInstalledFromPlayStore) {
+            return
+        }
+
         val appUpdateManager = AppUpdateManagerFactory.create(activity)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         
