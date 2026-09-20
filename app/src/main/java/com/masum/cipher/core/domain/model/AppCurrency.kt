@@ -101,6 +101,7 @@ data class AppCurrency(
                     "hi" -> fromCode("INR")
                     "bn" -> fromCode("BDT")
                     "ja" -> fromCode("JPY")
+                    "pl" -> fromCode("PLN")
                     "pt" -> fromCode("BRL")
                     "de", "fr", "es" -> fromCode("EUR")
                     else -> {

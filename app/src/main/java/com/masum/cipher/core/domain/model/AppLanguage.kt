@@ -9,6 +9,7 @@ data class AppLanguage(
     companion object {
         val SYSTEM = AppLanguage("system", "System Default", "Default", "SYS")
         val ENGLISH = AppLanguage("en", "English", "English", "EN")
+        val POLISH = AppLanguage("pl", "Polish", "Polski", "PL")
         val HINDI = AppLanguage("hi", "Hindi", "हिन्दी", "HI")
         val BENGALI = AppLanguage("bn", "Bengali", "বাংলা", "BN")
         val SPANISH = AppLanguage("es", "Spanish", "Español", "ES")
@@ -19,6 +20,7 @@ data class AppLanguage(
         val SUPPORTED_LANGUAGES = listOf(
             SYSTEM,
             ENGLISH,
+            POLISH,
             HINDI,
             BENGALI,
             SPANISH,

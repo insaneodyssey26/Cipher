@@ -28,7 +28,7 @@ android {
         versionCode = 37
         versionName = "6.0.1"
         androidResources {
-            localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja")
+            localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
         }
 
         ndk {

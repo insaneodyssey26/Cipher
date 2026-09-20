@@ -1674,7 +1674,74 @@ private fun LanguageSelectionPage(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(9.dp)
                     ) {
-                        AppLanguage.SUPPORTED_LANGUAGES.chunked(2).forEach { rowLangs ->
+                        val systemLang = AppLanguage.SUPPORTED_LANGUAGES.firstOrNull { it.code == "system" }
+                        val otherLanguages = AppLanguage.SUPPORTED_LANGUAGES.filter { it.code != "system" }
+
+                        if (systemLang != null) {
+                            val isSelected = selectedLang.equals(systemLang.code, ignoreCase = true) ||
+                                    (selectedLang.isBlank() && systemLang.code == "system")
+                            SelectionTile(
+                                modifier = Modifier.fillMaxWidth(),
+                                isSelected = isSelected,
+                                onClick = {
+                                    view.performVibrate(true, isLongPress = false)
+                                    selectedLang = systemLang.code
+                                    onLanguageSelected(systemLang.code)
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = systemLang.nativeName,
+                                            style = Typography.titleSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                fontSize = 14.sp
+                                            ),
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = systemLang.name,
+                                            style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.5.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(20.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = LucideIcons.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(11.dp)
+                                            )
+                                        }
+                                    } else {
+                                        Text(
+                                            text = systemLang.countryCode,
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 9.sp,
+                                                letterSpacing = 0.5.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        otherLanguages.chunked(2).forEach { rowLangs ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
@@ -1716,36 +1783,36 @@ private fun LanguageSelectionPage(
                                                     modifier = Modifier
                                                         .size(20.dp)
                                                         .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.primary),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = LucideIcons.Check,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                                    modifier = Modifier.size(11.dp)
+                                                        .background(MaterialTheme.colorScheme.primary),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = LucideIcons.Check,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                                        modifier = Modifier.size(11.dp)
+                                                    )
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = lang.countryCode,
+                                                    style = Typography.labelSmall.copy(
+                                                        fontFamily = Lato,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 9.sp,
+                                                        letterSpacing = 0.5.sp
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                                                 )
                                             }
-                                        } else {
-                                            Text(
-                                                text = lang.countryCode,
-                                                style = Typography.labelSmall.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 9.sp,
-                                                    letterSpacing = 0.5.sp
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                                            )
                                         }
                                     }
                                 }
+                                if (rowLangs.size == 1) Spacer(modifier = Modifier.weight(1f))
                             }
-                            if (rowLangs.size == 1) Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
-            }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -2367,7 +2434,62 @@ private fun QuickLanguagePickerModal(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    AppLanguage.SUPPORTED_LANGUAGES.chunked(2).forEach { rowLangs ->
+                    val systemLang = AppLanguage.SUPPORTED_LANGUAGES.firstOrNull { it.code == "system" }
+                    val otherLanguages = AppLanguage.SUPPORTED_LANGUAGES.filter { it.code != "system" }
+
+                    if (systemLang != null) {
+                        val isSelected = currentLanguageCode.equals(systemLang.code, ignoreCase = true) ||
+                                (currentLanguageCode.isBlank() && systemLang.code == "system")
+                        SelectionTile(
+                            modifier = Modifier.fillMaxWidth(),
+                            isSelected = isSelected,
+                            onClick = {
+                                view.performVibrate(true, isLongPress = false)
+                                onLanguageSelected(systemLang.code)
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(
+                                        text = systemLang.nativeName,
+                                        style = Typography.titleSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                            fontSize = 13.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = systemLang.name,
+                                        style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(18.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.size(10.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    otherLanguages.chunked(2).forEach { rowLangs ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -143,15 +143,99 @@ fun LanguageSelectionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val pairs = languages.chunked(2)
+                    val systemLang = languages.firstOrNull { it.code == "system" }
+                    val otherLanguages = languages.filter { it.code != "system" }
+
+                    if (systemLang != null) {
+                        val isSelected = systemLang.code.equals(currentLanguageCode, ignoreCase = true) ||
+                                (currentLanguageCode.isBlank() && systemLang.code == "system")
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                    else White10,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled)
+                                    onLanguageSelected(systemLang.code)
+                                    onDismiss()
+                                }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(RoundedCornerShape(7.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .border(1.dp, White10, RoundedCornerShape(7.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = systemLang.countryCode,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Column {
+                                    Text(
+                                        text = systemLang.nativeName,
+                                        style = Typography.bodyMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                            fontSize = 12.5.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = systemLang.name,
+                                        style = Typography.labelSmall.copy(fontSize = 10.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                                    )
+                                }
+                            }
+
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = LucideIcons.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    val pairs = otherLanguages.chunked(2)
                     pairs.forEach { rowPair ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             rowPair.forEach { item ->
-                                val isSelected = item.code.equals(currentLanguageCode, ignoreCase = true) ||
-                                        (currentLanguageCode.isBlank() && item.code == "system")
+                                val isSelected = item.code.equals(currentLanguageCode, ignoreCase = true)
 
                                 Row(
                                     modifier = Modifier

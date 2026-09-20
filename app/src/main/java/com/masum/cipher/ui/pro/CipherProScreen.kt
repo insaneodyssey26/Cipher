@@ -288,6 +288,16 @@ fun CipherProScreen(
                     lifetime = "£29.99"
                 )
             }
+            countryCode == "PL" -> {
+                PricingValues(
+                    monthly = "4,99 zł",
+                    sixMonth = "24,99 zł",
+                    sixMonthStrike = "29,94 zł",
+                    annual = "39,99 zł",
+                    annualStrike = "59,88 zł",
+                    lifetime = "69,99 zł"
+                )
+            }
             countryCode in setOf("DE", "FR", "ES", "IT", "NL", "BE", "AT", "IE", "FI", "PT", "GR", "EE", "LV", "LT", "SK", "SI", "CY", "MT", "LU") -> {
                 PricingValues(
                     monthly = "€1.99",
