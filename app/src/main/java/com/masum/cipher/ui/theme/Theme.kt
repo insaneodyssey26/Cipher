@@ -39,8 +39,13 @@ fun CipherTheme(
             onSurface = Slate50,
             surfaceVariant = VaultElevated,
             onSurfaceVariant = Slate400,
+            surfaceContainerLowest = Color(0xFF07070A),
+            surfaceContainerLow = Color(0xFF0D0D13),
+            surfaceContainer = VaultSurface,
+            surfaceContainerHigh = VaultElevated,
+            surfaceContainerHighest = Color(0xFF22222E),
             outline = Slate600,
-            outlineVariant = White10
+            outlineVariant = Color(0x1FFFFFFF)
         )
     } else {
         lightColorScheme(
@@ -66,6 +71,11 @@ fun CipherTheme(
             onSurface = Slate900,
             surfaceVariant = LightElevated,
             onSurfaceVariant = Slate600,
+            surfaceContainerLowest = Color(0xFFFFFFFF),
+            surfaceContainerLow = Color(0xFFF8FAFC),
+            surfaceContainer = Color(0xFFF1F5F9),
+            surfaceContainerHigh = Color(0xFFE8EDF5),
+            surfaceContainerHighest = Color(0xFFDEE5F0),
             outline = Slate400,
             outlineVariant = LightBorder
         )

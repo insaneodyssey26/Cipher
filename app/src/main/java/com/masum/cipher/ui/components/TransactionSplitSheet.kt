@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
@@ -56,10 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -222,6 +221,9 @@ fun TransactionSplitSheet(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.65f))
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -230,14 +232,13 @@ fun TransactionSplitSheet(
                     keyboardController?.hide()
                     onDismiss()
                 }
-                .padding(horizontal = 16.dp, vertical = 20.dp)
-                .imePadding()
-                .navigationBarsPadding(),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             contentAlignment = Alignment.Center
         ) {
             Surface(
                 modifier = Modifier
                     .widthIn(max = 440.dp)
+                    .fillMaxWidth()
                     .heightIn(max = 680.dp)
                     .clip(RoundedCornerShape(26.dp))
                     .clickable(
@@ -247,9 +248,9 @@ fun TransactionSplitSheet(
                         focusManager.clearFocus()
                     },
                 shape = RoundedCornerShape(26.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)),
-                shadowElevation = 12.dp
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                shadowElevation = 16.dp
             ) {
                 Column(
                     modifier = Modifier
@@ -273,17 +274,17 @@ fun TransactionSplitSheet(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(RoundedCornerShape(11.dp))
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(11.dp)),
+                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(12.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.Users,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(19.dp)
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                                 Column(modifier = Modifier.weight(1f, fill = false)) {
@@ -351,7 +352,7 @@ fun TransactionSplitSheet(
                                     modifier = Modifier
                                         .size(32.dp)
                                         .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.X,
@@ -376,27 +377,27 @@ fun TransactionSplitSheet(
                                     },
                                     textStyle = Typography.bodyMedium.copy(
                                         fontFamily = DMSans,
+                                        fontWeight = FontWeight.SemiBold,
                                         fontSize = 14.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                     keyboardOptions = KeyboardOptions(
-                                        capitalization = KeyboardCapitalization.Words,
+                                        capitalization = KeyboardCapitalization.Sentences,
                                         imeAction = ImeAction.Next
                                     ),
                                     decorationBox = { innerTextField ->
-                                        Row(
+                                        Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
-                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
-                                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                                                .padding(horizontal = 12.dp, vertical = 10.dp)
                                         ) {
                                             if (standaloneExpenseName.isBlank()) {
                                                 Text(
-                                                    text = "Expense name",
-                                                    style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.5.sp),
+                                                    text = "Expense description",
+                                                    style = Typography.bodyMedium.copy(fontFamily = Lato),
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                                 )
                                             }
@@ -438,8 +439,8 @@ fun TransactionSplitSheet(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
-                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
@@ -478,20 +479,19 @@ fun TransactionSplitSheet(
                                 .fillMaxWidth()
                                 .height(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainer)
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .padding(3.dp)
                         ) {
                             val tabWidth = maxWidth / modes.size
                             val indicatorOffset by animateDpAsState(
                                 targetValue = tabWidth * selectedModeIndex,
-                                animationSpec = spring(dampingRatio = 0.82f, stiffness = 400f),
-                                label = "split_mode_offset"
+                                animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f),
+                                label = "modeIndicator"
                             )
 
                             Box(
                                 modifier = Modifier
-                                    .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
+                                    .offset { IntOffset(x = indicatorOffset.roundToPx(), y = 0) }
                                     .width(tabWidth)
                                     .fillMaxHeight()
                                     .clip(RoundedCornerShape(9.dp))
@@ -555,8 +555,8 @@ fun TransactionSplitSheet(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(14.dp))
-                                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))
+                                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
                                             .padding(horizontal = 12.dp, vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
@@ -572,7 +572,13 @@ fun TransactionSplitSheet(
                                                     .clip(CircleShape)
                                                     .background(
                                                         if (participant.isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                                        else MaterialTheme.colorScheme.surfaceVariant
+                                                        else MaterialTheme.colorScheme.surface
+                                                    )
+                                                    .border(
+                                                        1.dp,
+                                                        if (participant.isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                                        else MaterialTheme.colorScheme.outlineVariant,
+                                                        CircleShape
                                                     ),
                                                 contentAlignment = Alignment.Center
                                             ) {
@@ -598,24 +604,27 @@ fun TransactionSplitSheet(
                                                             .clip(RoundedCornerShape(6.dp))
                                                             .clickable {
                                                                 view.performVibrate(isHapticsEnabled)
-                                                                val updated = participants.toMutableList()
-                                                                updated[index] = participant.copy(isPaid = !participant.isPaid)
+                                                                val isNowPaid = !participant.isPaid
+                                                                val updated = participants.mapIndexed { i, p ->
+                                                                    if (i == index) p.copy(isPaid = isNowPaid) else p
+                                                                }
                                                                 participants = updated
                                                                 notifyDraftChanged(updated)
                                                             }
-                                                            .padding(vertical = 2.dp)
+                                                            .padding(vertical = 1.dp)
                                                     ) {
                                                         Box(
                                                             modifier = Modifier
                                                                 .size(14.dp)
                                                                 .clip(CircleShape)
                                                                 .background(
-                                                                    if (participant.isPaid) EmeraldIncome else Color.Transparent
+                                                                    if (participant.isPaid) EmeraldIncome.copy(alpha = 0.2f)
+                                                                    else MaterialTheme.colorScheme.surfaceVariant
                                                                 )
                                                                 .border(
-                                                                    width = if (participant.isPaid) 0.dp else 1.2.dp,
-                                                                    color = if (participant.isPaid) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                                                    shape = CircleShape
+                                                                    1.dp,
+                                                                    if (participant.isPaid) EmeraldIncome else MaterialTheme.colorScheme.outlineVariant,
+                                                                    CircleShape
                                                                 ),
                                                             contentAlignment = Alignment.Center
                                                         ) {
@@ -623,15 +632,18 @@ fun TransactionSplitSheet(
                                                                 Icon(
                                                                     imageVector = LucideIcons.Check,
                                                                     contentDescription = null,
-                                                                    tint = Color.White,
+                                                                    tint = EmeraldIncome,
                                                                     modifier = Modifier.size(9.dp)
                                                                 )
                                                             }
                                                         }
-                                                        Spacer(Modifier.width(2.dp))
                                                         Text(
                                                             text = if (participant.isPaid) stringResource(R.string.split_settled) else stringResource(R.string.split_pending),
-                                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
+                                                            style = Typography.labelSmall.copy(
+                                                                fontFamily = Lato,
+                                                                fontSize = 10.5.sp,
+                                                                fontWeight = if (participant.isPaid) FontWeight.Bold else FontWeight.Normal
+                                                            ),
                                                             color = if (participant.isPaid) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
                                                         )
                                                     }
@@ -641,63 +653,64 @@ fun TransactionSplitSheet(
 
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             when (splitMode) {
                                                 SplitMode.EQUAL -> {
                                                     Text(
                                                         text = "${currencySymbol}${String.format(Locale.US, "%.2f", participant.amount)}",
-                                                        style = Typography.titleMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                                                        style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 13.5.sp),
                                                         color = MaterialTheme.colorScheme.onSurface
                                                     )
                                                 }
                                                 SplitMode.EXACT -> {
                                                     BasicTextField(
-                                                        value = exactInputs[participant.id] ?: String.format(Locale.US, "%.2f", participant.amount),
-                                                        onValueChange = { inputStr ->
-                                                            val sanitized = inputStr.filter { it.isDigit() || it == '.' }
+                                                        value = exactInputs[participant.id] ?: "",
+                                                        onValueChange = { str ->
+                                                            val sanitized = str.filter { it.isDigit() || it == '.' }
                                                             exactInputs = exactInputs + (participant.id to sanitized)
                                                             val parsed = sanitized.toDoubleOrNull() ?: 0.0
-                                                            val updated = participants.toMutableList()
-                                                            updated[index] = participant.copy(
-                                                                amount = parsed,
-                                                                percentage = if (currentEffectiveTotal > 0) (parsed / currentEffectiveTotal) * 100.0 else 0.0
-                                                            )
+                                                            val updated = participants.mapIndexed { i, p ->
+                                                                if (i == index) p.copy(amount = parsed, percentage = if (currentEffectiveTotal > 0) (parsed / currentEffectiveTotal) * 100.0 else 0.0)
+                                                                else p
+                                                            }
                                                             participants = updated
-                                                            percentageInputs = percentageInputs + (participant.id to String.format(Locale.US, "%.1f", updated[index].percentage))
                                                             notifyDraftChanged(updated)
                                                         },
-                                                        textStyle = Typography.titleMedium.copy(
+                                                        textStyle = Typography.bodyMedium.copy(
                                                             fontFamily = DMSans,
                                                             fontWeight = FontWeight.Bold,
-                                                            fontSize = 14.5.sp,
-                                                            color = MaterialTheme.colorScheme.onSurface,
-                                                            textAlign = TextAlign.End
-                                                        ),
-                                                        singleLine = true,
-                                                        keyboardOptions = KeyboardOptions(
-                                                            keyboardType = KeyboardType.Decimal,
-                                                            imeAction = ImeAction.Next
+                                                            fontSize = 13.5.sp,
+                                                            textAlign = TextAlign.End,
+                                                            color = MaterialTheme.colorScheme.onSurface
                                                         ),
                                                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                                                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus(); keyboardController?.hide() }),
                                                         decorationBox = { innerTextField ->
                                                             Row(
                                                                 modifier = Modifier
-                                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
-                                                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                                                    .width(96.dp)
+                                                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                                                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                                                                     .padding(horizontal = 8.dp, vertical = 6.dp),
-                                                                verticalAlignment = Alignment.CenterVertically
+                                                                verticalAlignment = Alignment.CenterVertically,
+                                                                horizontalArrangement = Arrangement.End
                                                             ) {
                                                                 Text(
                                                                     text = currencySymbol,
-                                                                    style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                                                    style = Typography.labelSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
                                                                     color = MaterialTheme.colorScheme.primary
                                                                 )
-                                                                Spacer(modifier = Modifier.width(4.dp))
-                                                                Box(
-                                                                    modifier = Modifier.widthIn(min = 55.dp, max = 80.dp),
-                                                                    contentAlignment = Alignment.CenterEnd
-                                                                ) {
+                                                                Spacer(Modifier.width(2.dp))
+                                                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                                                                    if (exactInputs[participant.id].isNullOrBlank()) {
+                                                                        Text(
+                                                                            text = "0.00",
+                                                                            style = Typography.bodyMedium.copy(fontFamily = Lato),
+                                                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                                                        )
+                                                                    }
                                                                     innerTextField()
                                                                 }
                                                             }
@@ -706,52 +719,53 @@ fun TransactionSplitSheet(
                                                 }
                                                 SplitMode.PERCENTAGE -> {
                                                     BasicTextField(
-                                                        value = percentageInputs[participant.id] ?: String.format(Locale.US, "%.1f", participant.percentage),
-                                                        onValueChange = { inputStr ->
-                                                            val sanitized = inputStr.filter { it.isDigit() || it == '.' }
+                                                        value = percentageInputs[participant.id] ?: "",
+                                                        onValueChange = { str ->
+                                                            val sanitized = str.filter { it.isDigit() || it == '.' }
                                                             percentageInputs = percentageInputs + (participant.id to sanitized)
                                                             val parsedPct = sanitized.toDoubleOrNull() ?: 0.0
-                                                            val calculatedAmount = (currentEffectiveTotal * parsedPct) / 100.0
-                                                            val updated = participants.toMutableList()
-                                                            updated[index] = participant.copy(
-                                                                amount = calculatedAmount,
-                                                                percentage = parsedPct
-                                                            )
+                                                            val parsedAmt = (currentEffectiveTotal * parsedPct) / 100.0
+                                                            val updated = participants.mapIndexed { i, p ->
+                                                                if (i == index) p.copy(percentage = parsedPct, amount = parsedAmt)
+                                                                else p
+                                                            }
                                                             participants = updated
-                                                            exactInputs = exactInputs + (participant.id to String.format(Locale.US, "%.2f", calculatedAmount))
                                                             notifyDraftChanged(updated)
                                                         },
-                                                        textStyle = Typography.titleMedium.copy(
+                                                        textStyle = Typography.bodyMedium.copy(
                                                             fontFamily = DMSans,
                                                             fontWeight = FontWeight.Bold,
-                                                            fontSize = 14.5.sp,
-                                                            color = MaterialTheme.colorScheme.onSurface,
-                                                            textAlign = TextAlign.End
-                                                        ),
-                                                        singleLine = true,
-                                                        keyboardOptions = KeyboardOptions(
-                                                            keyboardType = KeyboardType.Decimal,
-                                                            imeAction = ImeAction.Next
+                                                            fontSize = 13.5.sp,
+                                                            textAlign = TextAlign.End,
+                                                            color = MaterialTheme.colorScheme.onSurface
                                                         ),
                                                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                                                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus(); keyboardController?.hide() }),
                                                         decorationBox = { innerTextField ->
                                                             Row(
                                                                 modifier = Modifier
-                                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
-                                                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                                                                    .width(76.dp)
+                                                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                                                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                                                                     .padding(horizontal = 8.dp, vertical = 6.dp),
-                                                                verticalAlignment = Alignment.CenterVertically
+                                                                verticalAlignment = Alignment.CenterVertically,
+                                                                horizontalArrangement = Arrangement.End
                                                             ) {
-                                                                Box(
-                                                                    modifier = Modifier.widthIn(min = 40.dp, max = 60.dp),
-                                                                    contentAlignment = Alignment.CenterEnd
-                                                                ) {
+                                                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                                                                    if (percentageInputs[participant.id].isNullOrBlank()) {
+                                                                        Text(
+                                                                            text = "0",
+                                                                            style = Typography.bodyMedium.copy(fontFamily = Lato),
+                                                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                                                        )
+                                                                    }
                                                                     innerTextField()
                                                                 }
-                                                                Spacer(modifier = Modifier.width(3.dp))
+                                                                Spacer(Modifier.width(2.dp))
                                                                 Text(
                                                                     text = "%",
-                                                                    style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                                                    style = Typography.labelSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
                                                                     color = MaterialTheme.colorScheme.primary
                                                                 )
                                                             }
@@ -760,23 +774,23 @@ fun TransactionSplitSheet(
                                                 }
                                             }
 
-                                            if (!participant.isCurrentUser && participants.size > 1) {
+                                            if (!participant.isCurrentUser) {
                                                 IconButton(
                                                     onClick = {
                                                         view.performVibrate(isHapticsEnabled)
-                                                        val updated = participants.filter { it.id != participant.id }
+                                                        val updated = participants.filterIndexed { i, _ -> i != index }
                                                         val recalculated = recalculateSplits(updated, splitMode, currentEffectiveTotal)
                                                         participants = recalculated
                                                         syncInputMaps(recalculated)
                                                         notifyDraftChanged(recalculated)
                                                     },
-                                                    modifier = Modifier.size(28.dp)
+                                                    modifier = Modifier.size(24.dp)
                                                 ) {
                                                     Icon(
                                                         imageVector = LucideIcons.X,
-                                                        contentDescription = "Remove",
-                                                        tint = RoseExpense.copy(alpha = 0.8f),
-                                                        modifier = Modifier.size(15.dp)
+                                                        contentDescription = stringResource(R.string.action_delete),
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                        modifier = Modifier.size(14.dp)
                                                     )
                                                 }
                                             }
@@ -788,10 +802,9 @@ fun TransactionSplitSheet(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(14.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
-                                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(top = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 BasicTextField(
                                     value = newPersonName,
@@ -802,40 +815,44 @@ fun TransactionSplitSheet(
                                         color = MaterialTheme.colorScheme.onSurface
                                     ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                    keyboardOptions = KeyboardOptions(
-                                        capitalization = KeyboardCapitalization.Words,
-                                        imeAction = ImeAction.Done
-                                    ),
-                                    keyboardActions = KeyboardActions(
-                                        onDone = {
-                                            addParticipantWithName(newPersonName)
-                                            focusManager.clearFocus()
-                                            keyboardController?.hide()
-                                        }
-                                    ),
+                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
+                                    keyboardActions = KeyboardActions(onDone = {
+                                        addParticipantWithName(newPersonName)
+                                        focusManager.clearFocus()
+                                    }),
                                     decorationBox = { innerTextField ->
-                                        if (newPersonName.isBlank()) {
-                                            Text(
-                                                text = stringResource(R.string.split_person_name_hint),
-                                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.5.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                            )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                                        ) {
+                                            if (newPersonName.isBlank()) {
+                                                Text(
+                                                    text = stringResource(R.string.split_person_name_hint),
+                                                    style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.sp),
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                            innerTextField()
                                         }
-                                        innerTextField()
                                     },
                                     modifier = Modifier.weight(1f)
                                 )
 
-                                IconButton(
-                                    onClick = {
-                                        addParticipantWithName(newPersonName)
-                                    },
-                                    enabled = newPersonName.isNotBlank()
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .clickable { addParticipantWithName(newPersonName) },
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.Plus,
                                         contentDescription = stringResource(R.string.split_add_person),
-                                        tint = if (newPersonName.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                        tint = MaterialTheme.colorScheme.onPrimary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -844,59 +861,38 @@ fun TransactionSplitSheet(
                             if (availableSuggestions.isNotEmpty()) {
                                 LazyRow(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    items(availableSuggestions, key = { it }) { suggestion ->
-                                        Row(
+                                    items(availableSuggestions) { name ->
+                                        Box(
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
-                                                .clickable {
-                                                    addParticipantWithName(suggestion)
-                                                }
-                                                .padding(horizontal = 10.dp, vertical = 5.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp))
+                                                .clickable { addParticipantWithName(name) }
+                                                .padding(horizontal = 10.dp, vertical = 5.dp)
                                         ) {
-                                            Icon(
-                                                imageVector = LucideIcons.Plus,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                            Text(
-                                                text = suggestion,
-                                                style = Typography.labelMedium.copy(
-                                                    fontFamily = DMSans,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    fontSize = 12.sp
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Plus,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(11.dp)
+                                                )
+                                                Text(
+                                                    text = name,
+                                                    style = Typography.labelSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp),
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(16.dp)
-                                .align(Alignment.TopCenter)
-                                .graphicsLayer { alpha = if (scrollState.canScrollBackward) 1f else 0f }
-                                .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Transparent)))
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(16.dp)
-                                .align(Alignment.BottomCenter)
-                                .graphicsLayer { alpha = if (scrollState.canScrollForward) 1f else 0f }
-                                .background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.surfaceContainerHigh)))
-                        )
                     }
 
                     Column(
@@ -904,61 +900,53 @@ fun TransactionSplitSheet(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         if (splitMode == SplitMode.EXACT) {
-                            val currentExactSum = participants.sumOf { it.amount }
-                            val exactRemaining = currentEffectiveTotal - currentExactSum
-                            val isExactBalanced = abs(exactRemaining) < 0.02
+                            val currentSum = participants.sumOf { it.amount }
+                            val remaining = currentEffectiveTotal - currentSum
+                            val isBalanced = abs(remaining) < 0.01
 
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceContainer,
-                                        RoundedCornerShape(12.dp)
-                                    )
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                                     .border(
                                         1.dp,
-                                        if (isExactBalanced) EmeraldIncome.copy(alpha = 0.35f)
-                                        else if (exactRemaining > 0) MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                        if (isBalanced) EmeraldIncome.copy(alpha = 0.35f)
+                                        else if (remaining > 0) MaterialTheme.colorScheme.outlineVariant
                                         else RoseExpense.copy(alpha = 0.35f),
                                         RoundedCornerShape(12.dp)
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 9.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
                                     Text(
-                                        text = if (isExactBalanced) "Balanced"
-                                        else if (exactRemaining > 0) "Remaining: ${currencySymbol}${String.format(Locale.US, "%.2f", exactRemaining)}"
-                                        else "Exceeded by: ${currencySymbol}${String.format(Locale.US, "%.2f", abs(exactRemaining))}",
+                                        text = if (isBalanced) "Balanced"
+                                        else if (remaining > 0) "Remaining: ${currencySymbol}${String.format(Locale.US, "%.2f", remaining)}"
+                                        else "Exceeded by: ${currencySymbol}${String.format(Locale.US, "%.2f", abs(remaining))}",
                                         style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
-                                        color = if (isExactBalanced) EmeraldIncome else if (exactRemaining > 0) MaterialTheme.colorScheme.onSurface else RoseExpense
+                                        color = if (isBalanced) EmeraldIncome else if (remaining > 0) MaterialTheme.colorScheme.onSurface else RoseExpense
                                     )
                                     Text(
-                                        text = "Total: ${currencySymbol}${String.format(Locale.US, "%.2f", currentExactSum)} of ${currencySymbol}${String.format(Locale.US, "%.2f", currentEffectiveTotal)}",
+                                        text = "Total: ${currencySymbol}${String.format(Locale.US, "%.2f", currentSum)} of ${currencySymbol}${String.format(Locale.US, "%.2f", currentEffectiveTotal)}",
                                         style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
 
-                                if (!isExactBalanced && participants.any { it.isCurrentUser }) {
+                                if (!isBalanced && remaining > 0 && participants.isNotEmpty()) {
                                     TextButton(
                                         onClick = {
                                             view.performVibrate(isHapticsEnabled)
-                                            val otherSum = participants.filter { !it.isCurrentUser }.sumOf { it.amount }
-                                            val myShare = (currentEffectiveTotal - otherSum).coerceAtLeast(0.0)
-                                            val updated = participants.map {
-                                                if (it.isCurrentUser) it.copy(
-                                                    amount = myShare,
-                                                    percentage = if (currentEffectiveTotal > 0) (myShare / currentEffectiveTotal) * 100.0 else 0.0
-                                                ) else it
+                                            val perPersonExtra = remaining / participants.size
+                                            val updated = participants.map { p ->
+                                                val newAmt = p.amount + perPersonExtra
+                                                p.copy(amount = newAmt, percentage = if (currentEffectiveTotal > 0) (newAmt / currentEffectiveTotal) * 100.0 else 0.0)
                                             }
                                             participants = updated
                                             syncInputMaps(updated)
                                             notifyDraftChanged(updated)
-                                            errorMessage = null
-                                        },
-                                        shape = RoundedCornerShape(8.dp)
+                                        }
                                     ) {
                                         Text(
                                             text = "Auto-balance",
@@ -971,23 +959,20 @@ fun TransactionSplitSheet(
                         } else if (splitMode == SplitMode.PERCENTAGE) {
                             val currentPctSum = participants.sumOf { it.percentage }
                             val pctRemaining = 100.0 - currentPctSum
-                            val isPctBalanced = abs(pctRemaining) < 0.2
+                            val isPctBalanced = abs(pctRemaining) < 0.1
 
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceContainer,
-                                        RoundedCornerShape(12.dp)
-                                    )
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                                     .border(
                                         1.dp,
                                         if (isPctBalanced) EmeraldIncome.copy(alpha = 0.35f)
-                                        else if (pctRemaining > 0) MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                        else if (pctRemaining > 0) MaterialTheme.colorScheme.outlineVariant
                                         else RoseExpense.copy(alpha = 0.35f),
                                         RoundedCornerShape(12.dp)
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 9.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -1006,24 +991,20 @@ fun TransactionSplitSheet(
                                     )
                                 }
 
-                                if (!isPctBalanced && participants.any { it.isCurrentUser }) {
+                                if (!isPctBalanced && pctRemaining > 0 && participants.isNotEmpty()) {
                                     TextButton(
                                         onClick = {
                                             view.performVibrate(isHapticsEnabled)
-                                            val otherPct = participants.filter { !it.isCurrentUser }.sumOf { it.percentage }
-                                            val myPct = (100.0 - otherPct).coerceAtLeast(0.0)
-                                            val updated = participants.map {
-                                                if (it.isCurrentUser) {
-                                                    val share = ((currentEffectiveTotal * myPct) / 100.0 * 100.0).roundToLong() / 100.0
-                                                    it.copy(percentage = myPct, amount = share)
-                                                } else it
+                                            val perPersonExtraPct = pctRemaining / participants.size
+                                            val updated = participants.map { p ->
+                                                val newPct = p.percentage + perPersonExtraPct
+                                                val newAmt = (currentEffectiveTotal * newPct) / 100.0
+                                                p.copy(percentage = newPct, amount = newAmt)
                                             }
                                             participants = updated
                                             syncInputMaps(updated)
                                             notifyDraftChanged(updated)
-                                            errorMessage = null
-                                        },
-                                        shape = RoundedCornerShape(8.dp)
+                                        }
                                     ) {
                                         Text(
                                             text = "Auto-balance",
@@ -1035,11 +1016,7 @@ fun TransactionSplitSheet(
                             }
                         }
 
-                        AnimatedVisibility(
-                            visible = errorMessage != null,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
+                        if (errorMessage != null) {
                             Text(
                                 text = errorMessage.orEmpty(),
                                 style = Typography.labelMedium.copy(fontFamily = Lato),
@@ -1056,19 +1033,27 @@ fun TransactionSplitSheet(
                                 Button(
                                     onClick = {
                                         view.performVibrate(isHapticsEnabled)
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
+                                        val single = listOf(
+                                            SplitParticipant(
+                                                name = "You",
+                                                isCurrentUser = true,
+                                                amount = currentEffectiveTotal,
+                                                percentage = 100.0
+                                            )
+                                        )
+                                        participants = single
                                         onSaveSplits?.invoke(emptyList())
                                         onDismiss()
                                     },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = RoseExpense
-                                    ),
-                                    shape = RoundedCornerShape(14.dp),
                                     modifier = Modifier
                                         .weight(1f)
-                                        .height(48.dp)
+                                        .height(48.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                                 ) {
                                     Text(
                                         text = stringResource(R.string.split_clear),
@@ -1079,88 +1064,55 @@ fun TransactionSplitSheet(
 
                             Button(
                                 onClick = {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                    var currentList = participants
-                                    if (newPersonName.isNotBlank()) {
-                                        val updated = participants + SplitParticipant(name = newPersonName.trim())
-                                        currentList = recalculateSplits(updated, splitMode, currentEffectiveTotal)
-                                        participants = currentList
-                                        newPersonName = ""
-                                    }
-
-                                    fun saveAndDismiss(finalSplits: List<SplitParticipant>) {
-                                        if (isStandaloneAdd) {
-                                            val finalExpenseName = standaloneExpenseName.trim().ifBlank { "Expense" }
-                                            onSaveNewSplitExpense?.invoke(finalExpenseName, currentEffectiveTotal, finalSplits)
-                                        } else {
-                                            onSaveSplits?.invoke(finalSplits)
+                                    view.performVibrate(isHapticsEnabled)
+                                    if (isStandaloneAdd) {
+                                        val validTotal = standaloneTotalStr.toDoubleOrNull() ?: 0.0
+                                        if (validTotal <= 0.0) {
+                                            errorMessage = "Please enter a valid amount"
+                                            return@Button
                                         }
-                                        onDismiss()
+                                        if (standaloneExpenseName.isBlank()) {
+                                            errorMessage = "Please enter an expense title"
+                                            return@Button
+                                        }
                                     }
 
                                     when (splitMode) {
-                                        SplitMode.EQUAL -> {
-                                            val toSave = if (currentList.size > 1) currentList else emptyList()
-                                            saveAndDismiss(toSave)
-                                        }
                                         SplitMode.EXACT -> {
-                                            val sum = currentList.sumOf { it.amount }
-                                            val diff = currentEffectiveTotal - sum
-                                            if (abs(diff) > 0.05) {
-                                                if (currentList.any { it.isCurrentUser }) {
-                                                    val otherSum = currentList.filter { !it.isCurrentUser }.sumOf { it.amount }
-                                                    val myShare = (currentEffectiveTotal - otherSum).coerceAtLeast(0.0)
-                                                    val adjusted = currentList.map {
-                                                        if (it.isCurrentUser) it.copy(
-                                                            amount = myShare,
-                                                            percentage = if (currentEffectiveTotal > 0) (myShare / currentEffectiveTotal) * 100.0 else 0.0
-                                                        ) else it
-                                                    }
-                                                    val toSave = if (adjusted.size > 1) adjusted else emptyList()
-                                                    saveAndDismiss(toSave)
-                                                } else {
-                                                    errorMessage = "Total split (${currencySymbol}${String.format(Locale.US, "%.2f", sum)}) must equal transaction amount (${currencySymbol}${String.format(Locale.US, "%.2f", currentEffectiveTotal)})"
-                                                }
-                                            } else {
-                                                val toSave = if (currentList.size > 1) currentList else emptyList()
-                                                saveAndDismiss(toSave)
+                                            val sum = participants.sumOf { it.amount }
+                                            if (abs(sum - currentEffectiveTotal) > 0.01) {
+                                                errorMessage = "Total split amounts must equal ${currencySymbol}${String.format(Locale.US, "%.2f", currentEffectiveTotal)}"
+                                                return@Button
                                             }
                                         }
                                         SplitMode.PERCENTAGE -> {
-                                            val sumPct = currentList.sumOf { it.percentage }
-                                            val diffPct = 100.0 - sumPct
-                                            if (abs(diffPct) > 0.5) {
-                                                if (currentList.any { it.isCurrentUser }) {
-                                                    val otherPct = currentList.filter { !it.isCurrentUser }.sumOf { it.percentage }
-                                                    val myPct = (100.0 - otherPct).coerceAtLeast(0.0)
-                                                    val adjusted = currentList.map {
-                                                        if (it.isCurrentUser) {
-                                                            val share = ((currentEffectiveTotal * myPct) / 100.0 * 100.0).roundToLong() / 100.0
-                                                            it.copy(percentage = myPct, amount = share)
-                                                        } else it
-                                                    }
-                                                    val toSave = if (adjusted.size > 1) adjusted else emptyList()
-                                                    saveAndDismiss(toSave)
-                                                } else {
-                                                    errorMessage = "Total percentages must equal 100%"
-                                                }
-                                            } else {
-                                                val toSave = if (currentList.size > 1) currentList else emptyList()
-                                                saveAndDismiss(toSave)
+                                            val sumPct = participants.sumOf { it.percentage }
+                                            if (abs(sumPct - 100.0) > 0.1) {
+                                                errorMessage = "Total split percentages must equal 100%"
+                                                return@Button
                                             }
                                         }
+                                        SplitMode.EQUAL -> {
+                                            participants = recalculateSplits(participants, SplitMode.EQUAL, currentEffectiveTotal)
+                                        }
                                     }
+
+                                    if (isStandaloneAdd) {
+                                        val validTotal = standaloneTotalStr.toDoubleOrNull() ?: 0.0
+                                        onSaveNewSplitExpense?.invoke(standaloneExpenseName, validTotal, participants)
+                                    } else {
+                                        onSaveSplits?.invoke(participants)
+                                    }
+                                    onDismiss()
                                 },
+                                modifier = Modifier
+                                    .weight(1.5f)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
                                     contentColor = MaterialTheme.colorScheme.onPrimary
-                                ),
-                                shape = RoundedCornerShape(14.dp),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
+                                )
                             ) {
                                 Text(
                                     text = stringResource(R.string.split_save),
