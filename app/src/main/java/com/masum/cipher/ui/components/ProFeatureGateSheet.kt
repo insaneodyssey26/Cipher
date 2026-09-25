@@ -1,11 +1,5 @@
 package com.masum.cipher.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,15 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
@@ -54,8 +44,8 @@ import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Crown
-import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.X
 import kotlinx.coroutines.launch
 
@@ -82,17 +72,6 @@ fun ProFeatureGateSheet(
     val coroutineScope = rememberCoroutineScope()
     val view = LocalView.current
 
-    val infiniteTransition = rememberInfiniteTransition(label = "glow_rotation")
-    val glowAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "glow_angle"
-    )
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -104,7 +83,7 @@ fun ProFeatureGateSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -118,7 +97,7 @@ fun ProFeatureGateSheet(
                         .width(36.dp)
                         .height(4.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f))
+                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
                 )
                 IconButton(
                     onClick = {
@@ -129,106 +108,108 @@ fun ProFeatureGateSheet(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 ) {
                     Icon(
                         imageVector = LucideIcons.X,
                         contentDescription = "Close",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
 
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF59E0B).copy(alpha = 0.14f))
-                    .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.35f), CircleShape),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = featureIcon,
                     contentDescription = null,
-                    tint = Color(0xFFF59E0B),
-                    modifier = Modifier.size(28.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(26.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xFFF59E0B).copy(alpha = 0.16f))
-                    .border(0.8.dp, Color(0xFFF59E0B).copy(alpha = 0.4f), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 8.dp, vertical = 2.5.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 9.dp, vertical = 3.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Icon(
                         imageVector = LucideIcons.Crown,
                         contentDescription = null,
-                        tint = Color(0xFFF59E0B),
-                        modifier = Modifier.size(11.dp)
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(12.dp)
                     )
                     Text(
-                        text = "CIPHER PRO FEATURE",
+                        text = "CIPHER PRO",
                         style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
+                            fontFamily = DMSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 9.5.sp,
-                            letterSpacing = 0.8.sp
+                            fontSize = 10.sp,
+                            letterSpacing = 0.9.sp
                         ),
-                        color = Color(0xFFF59E0B)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = featureTitle,
                 style = Typography.headlineSmall.copy(
-                    fontFamily = Lato,
+                    fontFamily = DMSans,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    letterSpacing = (-0.4).sp
+                    letterSpacing = (-0.3).sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = featureTagline,
                 style = Typography.bodyMedium.copy(
-                    fontFamily = DMSans,
-                    fontSize = 13.sp,
-                    lineHeight = 17.5.sp
+                    fontFamily = Lato,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(18.dp)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(16.dp)
                     )
                     .padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 perks.forEach { perk ->
                     Row(
@@ -237,27 +218,35 @@ fun ProFeatureGateSheet(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(6.dp)
+                                .size(22.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFF59E0B))
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = perk.title,
                                 style = Typography.titleSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
-                                ),
+                               ),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = perk.description,
                                 style = Typography.bodySmall.copy(
-                                    fontFamily = DMSans,
-                                    fontSize = 11.5.sp,
-                                    lineHeight = 15.sp
+                                    fontFamily = Lato,
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -266,60 +255,41 @@ fun ProFeatureGateSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Box(
+            Button(
+                onClick = {
+                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                    coroutineScope.launch { sheetState.hide() }
+                    onDismiss()
+                    onNavigateToPro()
+                },
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .drawWithContent {
-                        rotate(glowAngle) {
-                            drawCircle(
-                                brush = Brush.sweepGradient(
-                                    listOf(
-                                        Color(0xFF6366F1),
-                                        Color(0xFFFFD700),
-                                        Color(0xFF10B981),
-                                        Color(0xFF06B6D4),
-                                        Color(0xFF6366F1)
-                                    )
-                                ),
-                                radius = size.maxDimension
-                            )
-                        }
-                        drawContent()
-                    }
-                    .padding(1.8.dp)
-                    .clip(RoundedCornerShape(12.2.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable {
-                        view.performVibrate(isHapticsEnabled, isLongPress = true)
-                        coroutineScope.launch { sheetState.hide() }
-                        onDismiss()
-                        onNavigateToPro()
-                    },
-                contentAlignment = Alignment.Center
+                    .height(48.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = LucideIcons.Sparkles,
+                        imageVector = LucideIcons.Crown,
                         contentDescription = null,
-                        tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = primaryButtonText,
                         style = Typography.titleMedium.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 14.5.sp
-                        ),
-                        color = Color.White
+                        )
                     )
                 }
             }
@@ -338,15 +308,15 @@ fun ProFeatureGateSheet(
                     Text(
                         text = secondaryButtonText,
                         style = Typography.bodyMedium.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
