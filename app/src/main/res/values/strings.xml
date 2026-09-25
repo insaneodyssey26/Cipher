@@ -720,4 +720,7 @@
     <string name="onboarding_capture_tour_title">Spend Normally. Cipher Tracks It.</string>
     <string name="onboarding_capture_tour_subtitle">Whenever you pay with any bank or UPI app, Cipher instantly records it for you — 100% privately on your phone.</string>
     <string name="onboarding_capture_tour_badge">100% Private &amp; On Your Phone</string>
+    <string name="original_message_title">Original Message</string>
+    <string name="original_message_copied">Copied</string>
+    <string name="action_copy">Copy</string>
 </resources>

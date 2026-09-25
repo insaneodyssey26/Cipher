@@ -125,6 +125,17 @@ import java.util.Locale
 import java.util.TimeZone
 
 import compose.icons.lucideicons.Users
+import compose.icons.lucideicons.Bell
+import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.Copy
+import compose.icons.lucideicons.Info
+import compose.icons.lucideicons.MessageSquareText
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.delay
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.AccountItem
 import com.masum.cipher.ui.accounts.getAccountIconVector
@@ -159,6 +170,7 @@ fun TransactionDetailsSheet(
     var selectedTimestamp by remember { mutableLongStateOf(transaction.timestamp) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showSplitSheet by remember { mutableStateOf(false) }
+    var showRawMessageDialog by remember { mutableStateOf(false) }
     var currentSplits by remember { mutableStateOf(existingSplits) }
     val defaultSelectedAccountId = transaction.accountId
         ?: accounts.firstOrNull { it.isDefault }?.id
@@ -310,22 +322,55 @@ fun TransactionDetailsSheet(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                if (isEditing && onDelete != null) {
-                    IconButton(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
-                            onDelete()
-                        },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Trash2,
-                            contentDescription = stringResource(R.string.action_delete),
-                            tint = RoseExpense,
-                            modifier = Modifier.size(20.dp)
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (!transaction.rawSms.isNullOrBlank()) {
+                        IconButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled)
+                                showRawMessageDialog = true
+                            },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Info,
+                                contentDescription = stringResource(R.string.original_message_title),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+                    }
+
+                    if (isEditing && onDelete != null) {
+                        IconButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                onDelete()
+                            },
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Trash2,
+                                contentDescription = stringResource(R.string.action_delete),
+                                tint = RoseExpense,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
+            }
+
+            if (showRawMessageDialog && !transaction.rawSms.isNullOrBlank()) {
+                OriginalMessageDialog(
+                    rawMessage = transaction.rawSms,
+                    isHapticsEnabled = isHapticsEnabled,
+                    onDismiss = { showRawMessageDialog = false }
+                )
             }
 
             if (showDatePicker) {
@@ -1343,6 +1388,290 @@ private fun AmountInputField(
                 },
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+        }
+    }
+}
+
+private data class MessageSourceInfo(
+    val type: String,
+    val sourceName: String,
+    val cleanText: String,
+    val isAppNotification: Boolean
+)
+
+private fun parseMessageSource(rawMessage: String): MessageSourceInfo {
+    val bracketMatch = Regex("^\\[([^\\]]+)\\]\\s*(.*)$", RegexOption.DOT_MATCHES_ALL).find(rawMessage)
+    if (bracketMatch != null) {
+        val appName = bracketMatch.groupValues[1].trim()
+        val text = bracketMatch.groupValues[2].trim()
+        return MessageSourceInfo(
+            type = "Notification",
+            sourceName = appName,
+            cleanText = text.ifBlank { rawMessage },
+            isAppNotification = true
+        )
+    }
+
+    val lower = rawMessage.lowercase()
+
+    val knownApps = listOf(
+        Regex("(?i)\\b(?:google\\s*pay|gpay)\\b") to "Google Pay",
+        Regex("(?i)\\bphonepe\\b") to "PhonePe",
+        Regex("(?i)\\bpaytm\\b") to "Paytm",
+        Regex("(?i)\\bcred\\b") to "CRED",
+        Regex("(?i)\\bamazon\\s*pay\\b") to "Amazon Pay",
+        Regex("(?i)\\bbhim\\b") to "BHIM",
+        Regex("(?i)\\bwhatsapp\\b") to "WhatsApp",
+        Regex("(?i)\\bjupiter\\b") to "Jupiter",
+        Regex("(?i)\\bfi\\s*money\\b") to "Fi Money",
+        Regex("(?i)\\bnavi\\b") to "Navi",
+        Regex("(?i)\\bslice\\b") to "Slice",
+        Regex("(?i)\\bsuper\\.?money\\b") to "Super.money",
+        Regex("(?i)\\bmobikwik\\b") to "MobiKwik",
+        Regex("(?i)\\bfreecharge\\b") to "Freecharge",
+        Regex("(?i)\\bfampay\\b") to "FamPay"
+    )
+
+    for ((regex, app) in knownApps) {
+        if (regex.containsMatchIn(rawMessage)) {
+            val isSms = lower.contains("spent on your credit card") || lower.contains("not you? call") ||
+                    lower.contains("a/c") || lower.contains("debited from") || lower.contains("credited to")
+            return MessageSourceInfo(
+                type = if (isSms) "SMS" else "Notification",
+                sourceName = app,
+                cleanText = rawMessage,
+                isAppNotification = !isSms
+            )
+        }
+    }
+
+    val knownBanks = listOf(
+        Regex("(?i)\\bhdfc(?:\\s*bank)?\\b") to "HDFC Bank",
+        Regex("(?i)\\b(?:state\\s*bank\\s*of\\s*india|sbi)\\b") to "State Bank of India",
+        Regex("(?i)\\bicici(?:\\s*bank)?\\b") to "ICICI Bank",
+        Regex("(?i)\\baxis(?:\\s*bank)?\\b") to "Axis Bank",
+        Regex("(?i)\\bkotak(?:\\s*mahindra)?(?:\\s*bank)?\\b") to "Kotak Mahindra Bank",
+        Regex("(?i)\\b(?:punjab\\s*national\\s*bank|pnb)\\b") to "PNB",
+        Regex("(?i)\\b(?:bank\\s*of\\s*baroda|bob)\\b") to "Bank of Baroda",
+        Regex("(?i)\\bcanara(?:\\s*bank)?\\b") to "Canara Bank",
+        Regex("(?i)\\bunion\\s*bank\\b") to "Union Bank",
+        Regex("(?i)\\bidfc(?:\\s*first)?(?:\\s*bank)?\\b") to "IDFC FIRST Bank",
+        Regex("(?i)\\bindusind(?:\\s*bank)?\\b") to "IndusInd Bank",
+        Regex("(?i)\\byes\\s*bank\\b") to "Yes Bank",
+        Regex("(?i)\\bfederal\\s*bank\\b") to "Federal Bank",
+        Regex("(?i)\\brbl(?:\\s*bank)?\\b") to "RBL Bank",
+        Regex("(?i)\\bau\\s*(?:small\\s*finance)?\\s*bank\\b") to "AU Small Finance Bank",
+        Regex("(?i)\\bstandard\\s*chartered\\b") to "Standard Chartered",
+        Regex("(?i)\\bcitibank\\b") to "Citibank"
+    )
+
+    for ((regex, bank) in knownBanks) {
+        if (regex.containsMatchIn(rawMessage)) {
+            return MessageSourceInfo(
+                type = "SMS",
+                sourceName = bank,
+                cleanText = rawMessage,
+                isAppNotification = false
+            )
+        }
+    }
+
+    val isLikelySms = lower.contains("a/c") || lower.contains("acct") || lower.contains("debited") ||
+            lower.contains("credited") || lower.contains("bal:") || lower.contains("avl lmt") ||
+            lower.contains("spent on your") || lower.contains("not you? call")
+
+    val isUpi = lower.contains("upi payment") || lower.contains("payment received") ||
+            lower.contains("money sent") || lower.contains("paid ₹") || lower.contains("received ₹")
+
+    val sourceLabel = when {
+        isLikelySms -> "Bank SMS"
+        isUpi -> "UPI Notification"
+        else -> "App Notification"
+    }
+
+    return MessageSourceInfo(
+        type = if (isLikelySms) "SMS" else "Notification",
+        sourceName = sourceLabel,
+        cleanText = rawMessage,
+        isAppNotification = !isLikelySms
+    )
+}
+
+@Composable
+private fun OriginalMessageDialog(
+    rawMessage: String,
+    isHapticsEnabled: Boolean,
+    onDismiss: () -> Unit
+) {
+    var isCopied by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
+    val view = LocalView.current
+    val sourceInfo = remember(rawMessage) { parseMessageSource(rawMessage) }
+
+    LaunchedEffect(isCopied) {
+        if (isCopied) {
+            delay(2000)
+            isCopied = false
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .clip(RoundedCornerShape(22.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, White10, RoundedCornerShape(22.dp))
+                .padding(20.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.MessageSquareText,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.original_message_title),
+                            style = Typography.titleMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.X,
+                            contentDescription = stringResource(R.string.action_close),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                val badgeText = if (sourceInfo.sourceName == "App Notification" || sourceInfo.sourceName == "Bank SMS" || sourceInfo.sourceName == "UPI Notification") {
+                    sourceInfo.sourceName
+                } else {
+                    "${sourceInfo.type} • ${sourceInfo.sourceName}"
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else EmeraldIncome.copy(alpha = 0.12f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = if (sourceInfo.isAppNotification) LucideIcons.Bell else LucideIcons.MessageSquareText,
+                        contentDescription = null,
+                        tint = if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary else EmeraldIncome,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Text(
+                        text = badgeText,
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        ),
+                        color = if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary else EmeraldIncome
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        .border(1.dp, White10, RoundedCornerShape(14.dp))
+                        .padding(14.dp)
+                ) {
+                    SelectionContainer {
+                        Text(
+                            text = sourceInfo.cleanText,
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontSize = 13.sp,
+                                lineHeight = 19.sp,
+                                letterSpacing = 0.2.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            view.performVibrate(isHapticsEnabled)
+                            clipboardManager.setText(AnnotatedString(sourceInfo.cleanText))
+                            isCopied = true
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isCopied) EmeraldIncome.copy(alpha = 0.15f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            contentColor = if (isCopied) EmeraldIncome else MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isCopied) LucideIcons.Check else LucideIcons.Copy,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = if (isCopied) stringResource(R.string.original_message_copied) else stringResource(R.string.action_copy),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.5.sp
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

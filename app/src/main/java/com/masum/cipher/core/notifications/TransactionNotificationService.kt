@@ -68,13 +68,27 @@ class TransactionNotificationService : NotificationListenerService() {
 
             val parsedTx = transactionParser.parse(fullMessage, settings.currencyCode)
             if (parsedTx != null) {
+                val appLabel = try {
+                    val pm = packageManager
+                    val appInfo = pm.getApplicationInfo(packageName, 0)
+                    pm.getApplicationLabel(appInfo).toString()
+                } catch (e: Exception) {
+                    null
+                }
+
+                val storedMessage = if (!appLabel.isNullOrBlank() && !fullMessage.startsWith("[$appLabel]")) {
+                    "[$appLabel] $fullMessage"
+                } else {
+                    fullMessage
+                }
+
                 val transactionEntity = TransactionEntity(
                     merchant = parsedTx.merchant,
                     amount = parsedTx.amount,
                     currency = parsedTx.currency,
                     category = "",
                     isIncome = parsedTx.isIncome,
-                    rawSms = fullMessage,
+                    rawSms = storedMessage,
                     timestamp = System.currentTimeMillis()
                 )
                 transactionRepository.insertTransaction(transactionEntity)
