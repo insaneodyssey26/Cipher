@@ -130,6 +130,7 @@ class MainActivity : AppCompatActivity() {
         
         notificationScheduler.scheduleDailyNotifications()
         licenseSyncScheduler.schedulePeriodicLicenseSync()
+        licenseSyncScheduler.syncLicenseOnLaunch()
         UpdateManager.checkForUpdates(this) {
             updateReady.value = true
         }
@@ -321,7 +322,8 @@ class MainActivity : AppCompatActivity() {
                                                 restoreState = true
                                             }
                                         }
-                                    }
+                                    },
+                                    onNavigateToPro = { navController.navigate("cipher_pro") }
                                 )
                             }
                             composable("insights") {

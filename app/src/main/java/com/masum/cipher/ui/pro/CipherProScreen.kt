@@ -239,8 +239,9 @@ fun CipherProScreen(
     val featWidgets = PlanFeatureItem(stringResource(R.string.pro_feature_widgets), stringResource(R.string.pro_feature_widgets_desc))
     val featExport = PlanFeatureItem(stringResource(R.string.pro_feature_pdf_export), stringResource(R.string.pro_feature_pdf_export_desc))
     val featCategories = PlanFeatureItem(stringResource(R.string.pro_feature_unlimited_categories), stringResource(R.string.pro_feature_unlimited_categories_desc))
+    val featGoals = PlanFeatureItem(stringResource(R.string.pro_feature_unlimited_goals), stringResource(R.string.pro_feature_unlimited_goals_desc))
     val featTheme = PlanFeatureItem(stringResource(R.string.pro_feature_theme_styling), stringResource(R.string.pro_feature_theme_styling_desc))
-    val commonFeatures = listOf(featAccounts, featRules, featWidgets, featExport, featCategories, featTheme)
+    val commonFeatures = listOf(featAccounts, featGoals, featRules, featWidgets, featExport, featCategories, featTheme)
 
     val countryCode = remember {
         Locale.getDefault().country.uppercase(Locale.ROOT)

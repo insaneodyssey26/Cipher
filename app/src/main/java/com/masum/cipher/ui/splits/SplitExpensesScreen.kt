@@ -119,7 +119,8 @@ enum class SplitFilterTab {
 fun SplitExpensesScreen(
     viewModel: DashboardViewModel,
     userPreferences: UserPreferences,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
@@ -654,7 +655,8 @@ fun SplitExpensesScreen(
     1 -> {
         com.masum.cipher.ui.goals.SavingsGoalsView(
             showCreateSheetExternal = showAddGoalSheet,
-            onDismissCreateSheetExternal = { showAddGoalSheet = false }
+            onDismissCreateSheetExternal = { showAddGoalSheet = false },
+            onNavigateToPro = onNavigateToPro
         )
     }
 }

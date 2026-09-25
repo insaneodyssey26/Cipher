@@ -526,6 +526,8 @@
     <string name="pro_feature_pdf_export_desc">विस्तृत वित्तीय ब्रेकडाउन और ऑडिट रिपोर्ट तैयार करें</string>
     <string name="pro_feature_unlimited_categories">असीमित कस्टम श्रेणियां</string>
     <string name="pro_feature_unlimited_categories_desc">5 की मुफ्त सीमा से परे जितनी चाहें श्रेणियां बनाएं</string>
+    <string name="pro_feature_unlimited_goals">असीमित बचत पॉट और लक्ष्य</string>
+    <string name="pro_feature_unlimited_goals_desc">2 की मुफ्त सीमा से परे असीमित बचत पॉट बनाएं</string>
     <string name="pro_feature_theme_styling">थीम और स्टाइलिंग अनुकूलन</string>
     <string name="pro_feature_theme_styling_desc">विशिष्ट थीम और वैयक्तिकृत रंग पैलेट</string>
     <string name="pro_pricing_adjust_notice">मूल्य आपके देश के अनुसार समायोजित होते हैं। आपका स्थानीय मूल्य चेकआउट पर दिखाई देगा। कर लागू हो सकते हैं।</string>
@@ -756,4 +758,8 @@
     <string name="goals_of_target">%2$s में से %1$s</string>
     <string name="goals_target_label">लक्ष्य: %1$s</string>
     <string name="goals_deleted">बचत पॉट हटा दिया गया</string>
+    <string name="goals_free_limit_reached">मुफ़्त लक्ष्य सीमा समाप्त (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">प्रो के साथ असीमित बचत पॉट और लक्ष्य अनलॉक करें</string>
+    <string name="pro_gate_goals_title">असीमित बचत पॉट</string>
+    <string name="pro_gate_goals_desc">मुफ़्त प्लान में आप अधिकतम 2 बचत पॉट बना सकते हैं। असीमित पॉट और लक्ष्यों के लिए साइफ़र प्रो में अपग्रेड करें।</string>
 </resources>

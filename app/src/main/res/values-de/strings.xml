@@ -527,6 +527,8 @@
     <string name="pro_feature_pdf_export_desc">Erstelle prüffähige Auswertungen und Finanzberichte</string>
     <string name="pro_feature_unlimited_categories">Unbegrenzte eigene Kategorien</string>
     <string name="pro_feature_unlimited_categories_desc">Erstelle eigene Kategorien über das Limit von 5 hinaus</string>
+    <string name="pro_feature_unlimited_goals">Unbegrenzte Spartöpfe &amp; Ziele</string>
+    <string name="pro_feature_unlimited_goals_desc">Erstelle unbegrenzt viele Spartöpfe über das Limit von 2 hinaus</string>
     <string name="pro_feature_theme_styling">Design- &amp; Styling-Anpassung</string>
     <string name="pro_feature_theme_styling_desc">Exklusive Themes und personalisierte Farbpaletten</string>
     <string name="pro_pricing_adjust_notice">Preise passen sich an dein Land an. Dein lokaler Preis wird an der Kasse angezeigt. Steuern können anfallen.</string>
@@ -757,4 +759,8 @@
     <string name="goals_of_target">%1$s von %2$s</string>
     <string name="goals_target_label">Ziel: %1$s</string>
     <string name="goals_deleted">Spartopf gelöscht</string>
+    <string name="goals_free_limit_reached">Kostenloses Ziellimit erreicht (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Schalte mit Pro unbegrenzte Spartöpfe &amp; Sparziele frei</string>
+    <string name="pro_gate_goals_title">Unbegrenzte Spartöpfe</string>
+    <string name="pro_gate_goals_desc">Sie haben das Limit von 2 Spartöpfen im kostenlosen Plan erreicht. Holen Sie sich Cipher Pro für unbegrenzte Sparziele.</string>
 </resources>

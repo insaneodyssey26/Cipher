@@ -62,9 +62,14 @@ import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.ChevronRight
+import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Target
+import com.masum.cipher.ui.components.ProFeatureGateSheet
+import com.masum.cipher.ui.components.ProFeaturePerk
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun SavingsGoalsView(
@@ -72,7 +77,8 @@ fun SavingsGoalsView(
     viewModel: GoalsViewModel = hiltViewModel(),
     onCreateGoalClick: (() -> Unit)? = null,
     showCreateSheetExternal: Boolean = false,
-    onDismissCreateSheetExternal: (() -> Unit)? = null
+    onDismissCreateSheetExternal: (() -> Unit)? = null,
+    onNavigateToPro: () -> Unit = {}
 ) {
     val view = LocalView.current
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -229,6 +235,82 @@ fun SavingsGoalsView(
                 }
             }
 
+            if (!state.isPro && state.goals.size >= state.freeGoalLimit) {
+                item(span = { GridItemSpan(2) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color(0xFFF59E0B).copy(alpha = 0.12f),
+                                        Color(0xFFEC4899).copy(alpha = 0.08f)
+                                    )
+                                )
+                            )
+                            .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.25f), RoundedCornerShape(18.dp))
+                            .clickable {
+                                view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                onNavigateToPro()
+                            }
+                            .padding(14.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFF59E0B).copy(alpha = 0.18f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Crown,
+                                        contentDescription = null,
+                                        tint = Color(0xFFF59E0B),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.goals_free_limit_reached, state.goals.size, state.freeGoalLimit),
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.goals_free_limit_desc),
+                                        style = Typography.bodySmall.copy(
+                                            fontFamily = Lato,
+                                            fontSize = 11.5.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Icon(
+                                imageVector = LucideIcons.ChevronRight,
+                                contentDescription = null,
+                                tint = Color(0xFFF59E0B),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
             if (state.goals.isEmpty()) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
@@ -326,7 +408,16 @@ fun SavingsGoalsView(
             }
         }
 
-        if (showCreateSheet) {
+        val isProLimited = !state.isPro && state.goals.size >= state.freeGoalLimit
+
+        LaunchedEffect(showCreateSheetExternal, isProLimited) {
+            if (showCreateSheetExternal && isProLimited) {
+                onDismissCreateSheetExternal?.invoke()
+                viewModel.handleIntent(GoalsContract.Intent.ShowProGate)
+            }
+        }
+
+        if (showCreateSheet && !isProLimited) {
             CreateEditGoalSheet(
                 goalToEdit = null,
                 currencySymbol = state.currencySymbol,
@@ -404,6 +495,28 @@ fun SavingsGoalsView(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 100.dp)
+        )
+    }
+
+    if (state.showProGateSheet) {
+        ProFeatureGateSheet(
+            featureTitle = stringResource(R.string.pro_gate_goals_title),
+            featureTagline = stringResource(R.string.pro_gate_goals_desc),
+            featureIcon = LucideIcons.Sparkles,
+            perks = listOf(
+                ProFeaturePerk(stringResource(R.string.pro_feature_unlimited_goals), stringResource(R.string.pro_feature_unlimited_goals_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_feature_unlimited_accounts), stringResource(R.string.pro_feature_unlimited_accounts_desc)),
+                ProFeaturePerk(stringResource(R.string.pro_feature_smart_rules), stringResource(R.string.pro_feature_smart_rules_desc))
+            ),
+            isHapticsEnabled = state.isHapticsEnabled,
+            primaryButtonText = stringResource(R.string.pro_btn_upgrade),
+            onNavigateToPro = {
+                viewModel.handleIntent(GoalsContract.Intent.DismissProGate)
+                onNavigateToPro()
+            },
+            onDismiss = {
+                viewModel.handleIntent(GoalsContract.Intent.DismissProGate)
+            }
         )
     }
 }

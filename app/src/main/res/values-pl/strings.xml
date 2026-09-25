@@ -541,6 +541,8 @@
     <string name="pro_feature_pdf_export_desc">Generuj gotowe do audytu zestawienia i raporty finansowe</string>
     <string name="pro_feature_unlimited_categories">Nielimitowane własne kategorie</string>
     <string name="pro_feature_unlimited_categories_desc">Twórz własne kategorie ponad limit 5 darmowych</string>
+    <string name="pro_feature_unlimited_goals">Nielimitowane skarbonki i cele</string>
+    <string name="pro_feature_unlimited_goals_desc">Twórz dowolną liczbę skarbonek ponad limit 2 darmowych</string>
     <string name="pro_feature_theme_styling">Personalizacja motywów i stylu</string>
     <string name="pro_feature_theme_styling_desc">Ekskluzywne motywy i spersonalizowane palety kolorów</string>
     <string name="pro_pricing_adjust_notice">Ceny dostosowują się do Twojego kraju. Lokalna cena pojawi się przy kasie. Mogą obowiązywać podatki.</string>
@@ -756,4 +758,8 @@
     <string name="goals_of_target">%1$s z %2$s</string>
     <string name="goals_target_label">Cel: %1$s</string>
     <string name="goals_deleted">Skarbonka została usunięta</string>
+    <string name="goals_free_limit_reached">Limit darmowych celów osiągnięty (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Odblokuj nielimitowane skarbonki i cele oszczędnościowe z Pro</string>
+    <string name="pro_gate_goals_title">Nielimitowane skarbonki</string>
+    <string name="pro_gate_goals_desc">Osiągnięto limit 2 darmowych skarbonek. Przejdź na Cipher Pro, aby tworzyć nielimitowane cele oszczędnościowe.</string>
 </resources>

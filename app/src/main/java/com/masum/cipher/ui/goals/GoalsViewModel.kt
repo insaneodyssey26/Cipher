@@ -36,7 +36,7 @@ class GoalsViewModel @Inject constructor(
             ) { goals, settings ->
                 val totalSaved = goals.sumOf { it.savedAmount }
                 val totalTarget = goals.sumOf { it.targetAmount }
-                GoalsContract.State(
+                _state.value.copy(
                     goals = goals,
                     totalSaved = totalSaved,
                     totalTarget = totalTarget,
@@ -54,6 +54,12 @@ class GoalsViewModel @Inject constructor(
     fun handleIntent(intent: GoalsContract.Intent) {
         viewModelScope.launch {
             when (intent) {
+                is GoalsContract.Intent.ShowProGate -> {
+                    _state.value = _state.value.copy(showProGateSheet = true)
+                }
+                is GoalsContract.Intent.DismissProGate -> {
+                    _state.value = _state.value.copy(showProGateSheet = false)
+                }
                 is GoalsContract.Intent.CreateGoal -> {
                     goalRepository.createGoal(
                         name = intent.name,

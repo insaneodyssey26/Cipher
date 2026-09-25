@@ -528,6 +528,8 @@
     <string name="pro_feature_pdf_export_desc">監査・確定申告にも使える詳細レポート出力</string>
     <string name="pro_feature_unlimited_categories">カスタムカテゴリ無制限</string>
     <string name="pro_feature_unlimited_categories_desc">無料枠の5件を超えて自由にカテゴリを作成可能</string>
+    <string name="pro_feature_unlimited_goals">貯金ポット・目標無制限</string>
+    <string name="pro_feature_unlimited_goals_desc">無料枠の2件を超えて自由に貯金ポットを作成可能</string>
     <string name="pro_feature_theme_styling">テーマ＆カラーの自由なカスタマイズ</string>
     <string name="pro_feature_theme_styling_desc">専用テーマや個性的なアクセントカラーパレット</string>
     <string name="pro_pricing_adjust_notice">お住まいの国・地域に合わせて価格が調整されます。現地通貨での金額は購入画面でご確認いただけます（税別/税込）。</string>
@@ -757,4 +759,8 @@
     <string name="goals_of_target">%2$s 中 %1$s</string>
     <string name="goals_target_label">目標: %1$s</string>
     <string name="goals_deleted">貯金ポットを削除しました</string>
+    <string name="goals_free_limit_reached">無料枠の目標上限に達しました (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Proにアップグレードして無制限に貯金ポットと目標を作成</string>
+    <string name="pro_gate_goals_title">貯金ポット無制限</string>
+    <string name="pro_gate_goals_desc">無料プランでは最大2個まで貯金ポットを作成できます。Cipher Proにアップグレードして無制限に目標を設定しましょう。</string>
 </resources>

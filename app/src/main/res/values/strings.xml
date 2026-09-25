@@ -547,6 +547,8 @@
     <string name="pro_feature_pdf_export_desc">Generate audit-ready breakdowns &amp; financial reports</string>
     <string name="pro_feature_unlimited_categories">Unlimited Custom Categories</string>
     <string name="pro_feature_unlimited_categories_desc">Create custom categories beyond the 5 free limit</string>
+    <string name="pro_feature_unlimited_goals">Unlimited Savings Pots &amp; Goals</string>
+    <string name="pro_feature_unlimited_goals_desc">Create unlimited savings pots beyond the 2 free limit</string>
     <string name="pro_feature_theme_styling">Theme &amp; Styling Customization</string>
     <string name="pro_feature_theme_styling_desc">Exclusive themes and personalized palette options</string>
     <string name="pro_pricing_adjust_notice">Prices adjust to your country. Your local price appears at checkout. Taxes may apply.</string>
@@ -760,4 +762,8 @@
     <string name="goals_of_target">%1$s of %2$s</string>
     <string name="goals_target_label">Target: %1$s</string>
     <string name="goals_deleted">Savings pot deleted</string>
+    <string name="goals_free_limit_reached">Free Goal Limit Reached (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Unlock unlimited savings pots &amp; visual wealth goals with Pro</string>
+    <string name="pro_gate_goals_title">Unlimited Savings Pots</string>
+    <string name="pro_gate_goals_desc">You\'ve reached the limit of 2 savings pots on the free plan. Upgrade to Cipher Pro to create unlimited goals and pots.</string>
 </resources>

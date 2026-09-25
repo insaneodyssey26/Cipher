@@ -526,6 +526,8 @@
     <string name="pro_feature_pdf_export_desc">Genera resúmenes e informes financieros listos para auditar</string>
     <string name="pro_feature_unlimited_categories">Categorías personalizadas ilimitadas</string>
     <string name="pro_feature_unlimited_categories_desc">Crea todas las categorías que necesites más allá del límite de 5</string>
+    <string name="pro_feature_unlimited_goals">Metas y huchas de ahorro ilimitadas</string>
+    <string name="pro_feature_unlimited_goals_desc">Crea todas las huchas que desees más allá del límite gratuito de 2</string>
     <string name="pro_feature_theme_styling">Personalización de temas y colores</string>
     <string name="pro_feature_theme_styling_desc">Temas exclusivos y paletas de colores personalizadas</string>
     <string name="pro_pricing_adjust_notice">Los precios se adaptan a tu país. Tu precio local aparecerá al pagar. Pueden aplicarse impuestos.</string>
@@ -756,4 +758,8 @@
     <string name="goals_of_target">%1$s de %2$s</string>
     <string name="goals_target_label">Objetivo: %1$s</string>
     <string name="goals_deleted">Hucha de ahorro eliminada</string>
+    <string name="goals_free_limit_reached">Límite de metas gratis alcanzado (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Desbloquea metas y huchas de ahorro ilimitadas con Pro</string>
+    <string name="pro_gate_goals_title">Metas de ahorro ilimitadas</string>
+    <string name="pro_gate_goals_desc">Has alcanzado el límite de 2 huchas de ahorro en el plan gratuito. Pásate a Cipher Pro para crear metas ilimitadas.</string>
 </resources>

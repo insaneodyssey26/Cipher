@@ -527,6 +527,8 @@
     <string name="pro_feature_pdf_export_desc">ডিটেইলড আর্থিক হিসাব ও অডিট রিপোর্ট তৈরি করুন</string>
     <string name="pro_feature_unlimited_categories">আনলিমিটেড কাস্টম ক্যাটাগরি</string>
     <string name="pro_feature_unlimited_categories_desc">৫টি ফ্রি লিমিট ছাড়িয়ে যত ইচ্ছা ক্যাটাগরি তৈরি করুন</string>
+    <string name="pro_feature_unlimited_goals">আনলিমিটেড সঞ্চয় পট ও লক্ষ্য</string>
+    <string name="pro_feature_unlimited_goals_desc">২টি ফ্রি লিমিট ছাড়িয়ে যত ইচ্ছা সঞ্চয় পট তৈরি করুন</string>
     <string name="pro_feature_theme_styling">থিম ও স্টাইলিং কাস্টমাইজেশন</string>
     <string name="pro_feature_theme_styling_desc">এক্সক্লুসিভ থিম এবং ব্যক্তিগতকৃত রঙের প্যালেট</string>
     <string name="pro_pricing_adjust_notice">আপনার দেশ অনুযায়ী মূল্য পরিবর্তিত হতে পারে। চেকআউটে স্থানীয় মূল্য দেখানো হবে। ট্যাক্স প্রযোজ্য হতে পারে।</string>
@@ -757,4 +759,8 @@
     <string name="goals_of_target">%2$s এর মধ্যে %1$s</string>
     <string name="goals_target_label">লক্ষ্য: %1$s</string>
     <string name="goals_deleted">সঞ্চয় লক্ষ্য মুছে ফেলা হয়েছে</string>
+    <string name="goals_free_limit_reached">ফ্রি লক্ষ্যের সীমা পূর্ণ (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">প্রো-এর সাথে আনলিমিটেড সঞ্চয় পট ও লক্ষ্য আনলক করুন</string>
+    <string name="pro_gate_goals_title">আনলিমিটেড সঞ্চয় পট</string>
+    <string name="pro_gate_goals_desc">ফ্রি প্ল্যানে আপনি সর্বোচ্চ ২টি সঞ্চয় পট তৈরি করতে পারেন। সীমাহীন পট ও লক্ষ্যের জন্য সাইফার প্রো-তে আপগ্রেড করুন।</string>
 </resources>

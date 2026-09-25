@@ -10,6 +10,8 @@ object GoalsContract {
         val currencySymbol: String = "₹",
         val isHapticsEnabled: Boolean = true,
         val isPro: Boolean = false,
+        val freeGoalLimit: Int = 2,
+        val showProGateSheet: Boolean = false,
         val isLoading: Boolean = false
     )
 
@@ -18,6 +20,8 @@ object GoalsContract {
     }
 
     sealed interface Intent {
+        data object ShowProGate : Intent
+        data object DismissProGate : Intent
         data class CreateGoal(
             val name: String,
             val targetAmount: Double,

@@ -28,7 +28,7 @@ class LicenseSyncScheduler @Inject constructor(
             .build()
 
         val workRequest = PeriodicWorkRequestBuilder<LicenseSyncWorker>(
-            7L, TimeUnit.DAYS
+            24L, TimeUnit.HOURS
         )
             .setConstraints(constraints)
             .build()
@@ -36,6 +36,24 @@ class LicenseSyncScheduler @Inject constructor(
         workManager.enqueueUniquePeriodicWork(
             WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    fun syncLicenseOnLaunch() {
+        val workManager = WorkManager.getInstance(context)
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = androidx.work.OneTimeWorkRequestBuilder<LicenseSyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "CipherLicenseLaunchSync",
+            androidx.work.ExistingWorkPolicy.REPLACE,
             workRequest
         )
     }

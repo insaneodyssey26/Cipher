@@ -527,6 +527,8 @@
     <string name="pro_feature_pdf_export_desc">Générez des rapports et synthèses financières certifiés</string>
     <string name="pro_feature_unlimited_categories">Catégories personnalisées illimitées</string>
     <string name="pro_feature_unlimited_categories_desc">Créez autant de catégories que vous voulez au-delà de 5</string>
+    <string name="pro_feature_unlimited_goals">Cagnottes et objectifs illimités</string>
+    <string name="pro_feature_unlimited_goals_desc">Créez des cagnottes sans limite au-delà du quota gratuit de 2</string>
     <string name="pro_feature_theme_styling">Personnalisation des thèmes et styles</string>
     <string name="pro_feature_theme_styling_desc">Thèmes exclusifs et palettes de couleurs personnalisées</string>
     <string name="pro_pricing_adjust_notice">Les tarifs s\'adaptent à votre pays. Votre prix local s\'affichera lors du paiement. Des taxes peuvent s\'appliquer.</string>
@@ -757,4 +759,8 @@
     <string name="goals_of_target">%1$s sur %2$s</string>
     <string name="goals_target_label">Objectif : %1$s</string>
     <string name="goals_deleted">Cagnotte d\'épargne supprimée</string>
+    <string name="goals_free_limit_reached">Limite d\'objectifs gratuits atteinte (%1$d/%2$d)</string>
+    <string name="goals_free_limit_desc">Débloquez des cagnottes et objectifs d\'épargne illimités avec Pro</string>
+    <string name="pro_gate_goals_title">Cagnottes d\'épargne illimitées</string>
+    <string name="pro_gate_goals_desc">Vous avez atteint la limite de 2 cagnottes du plan gratuit. Passez à Cipher Pro pour créer des objectifs illimités.</string>
 </resources>
