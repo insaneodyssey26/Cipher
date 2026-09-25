@@ -62,6 +62,7 @@ import com.masum.cipher.ui.accounts.CreateEditAccountScreen
 import com.masum.cipher.ui.accounts.analytics.AccountAnalyticsScreen
 import com.masum.cipher.ui.accounts.details.AccountDetailsScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
+import com.masum.cipher.ui.components.AppSplashScreen
 import com.masum.cipher.ui.components.FloatingNavBar
 import com.masum.cipher.ui.components.LicenseRevokedDialog
 import com.masum.cipher.ui.components.LockScreen
@@ -145,54 +146,56 @@ class MainActivity : AppCompatActivity() {
             val mainViewModel: MainViewModel = hiltViewModel()
             val state by mainViewModel.state.collectAsStateWithLifecycle()
             val showUpdateReady by updateReady.collectAsStateWithLifecycle()
+            var isSplashFinished by remember { mutableStateOf(false) }
             
-            state.settings?.let { userSettings ->
-                val isSystemDark = isSystemInDarkTheme()
-                val darkTheme = when (userSettings.theme) {
-                    AppTheme.LIGHT -> false
-                    AppTheme.DARK -> true
-                    AppTheme.SYSTEM -> isSystemDark
+            val userSettings = state.settings
+            val isSystemDark = isSystemInDarkTheme()
+            val darkTheme = when (userSettings?.theme) {
+                AppTheme.LIGHT -> false
+                AppTheme.DARK -> true
+                AppTheme.SYSTEM, null -> isSystemDark
+            }
+
+            LaunchedEffect(darkTheme) {
+                val style = if (darkTheme) {
+                    SystemBarStyle.dark(AndroidColor.TRANSPARENT)
+                } else {
+                    SystemBarStyle.light(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT)
                 }
+                enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+            }
 
-                LaunchedEffect(darkTheme) {
-                    val style = if (darkTheme) {
-                        SystemBarStyle.dark(AndroidColor.TRANSPARENT)
-                    } else {
-                        SystemBarStyle.light(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT)
-                    }
-                    enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
-                }
-
-                CipherTheme(
-                    darkTheme = darkTheme,
-                    accentColor = Color(userSettings.accentColor.colorValue)
-                ) {
-                    val lifecycleOwner = LocalLifecycleOwner.current
-                    DisposableEffect(lifecycleOwner) {
-                        val observer = LifecycleEventObserver { _, event ->
-                            when (event) {
-                                Lifecycle.Event.ON_START -> mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication)
-                                Lifecycle.Event.ON_STOP -> mainViewModel.handleIntent(MainContract.Intent.OnAppStop)
-                                else -> {}
-                            }
-                        }
-                        lifecycleOwner.lifecycle.addObserver(observer)
-                        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-                    }
-
-                    LaunchedEffect(Unit) {
-                        mainViewModel.effect.collect { effect ->
-                            if (effect is MainContract.Effect.TriggerBiometricPrompt) {
-                                biometricAuthenticator.authenticate(
-                                    activity = this@MainActivity,
-                                    onSuccess = { mainViewModel.handleIntent(MainContract.Intent.Authenticate) },
-                                    onError = { }
-                                )
-                            }
+            CipherTheme(
+                darkTheme = darkTheme,
+                accentColor = Color(userSettings?.accentColor?.colorValue ?: com.masum.cipher.core.data.local.pref.AccentColor.INDIGO.colorValue)
+            ) {
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        when (event) {
+                            Lifecycle.Event.ON_START -> mainViewModel.handleIntent(MainContract.Intent.CheckAuthentication)
+                            Lifecycle.Event.ON_STOP -> mainViewModel.handleIntent(MainContract.Intent.OnAppStop)
+                            else -> {}
                         }
                     }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+                }
 
-                    Box(modifier = Modifier.fillMaxSize()) {
+                LaunchedEffect(Unit) {
+                    mainViewModel.effect.collect { effect ->
+                        if (effect is MainContract.Effect.TriggerBiometricPrompt) {
+                            biometricAuthenticator.authenticate(
+                                activity = this@MainActivity,
+                                onSuccess = { mainViewModel.handleIntent(MainContract.Intent.Authenticate) },
+                                onError = { }
+                            )
+                        }
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (userSettings != null) {
                         val navController = rememberNavController()
                         val navSpec = remember { tween<IntOffset>(durationMillis = 300, easing = FastOutSlowInEasing) }
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -632,6 +635,13 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }
+                    }
+
+                    if (!isSplashFinished) {
+                        AppSplashScreen(
+                            isReady = userSettings != null,
+                            onAnimationComplete = { isSplashFinished = true }
+                        )
                     }
                 }
             }

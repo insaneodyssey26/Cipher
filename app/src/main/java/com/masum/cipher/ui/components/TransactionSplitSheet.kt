@@ -8,6 +8,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -79,11 +80,11 @@ import com.masum.cipher.core.domain.model.SplitMode
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.util.SplitCalculator
 import com.masum.cipher.core.util.performVibrate
+import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
-import com.masum.cipher.ui.theme.White10
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Plus
@@ -220,7 +221,7 @@ fun TransactionSplitSheet(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = 0.65f))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -229,7 +230,7 @@ fun TransactionSplitSheet(
                     keyboardController?.hide()
                     onDismiss()
                 }
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(horizontal = 16.dp, vertical = 20.dp)
                 .imePadding()
                 .navigationBarsPadding(),
             contentAlignment = Alignment.Center
@@ -238,17 +239,17 @@ fun TransactionSplitSheet(
                 modifier = Modifier
                     .widthIn(max = 440.dp)
                     .heightIn(max = 680.dp)
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(26.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
                         focusManager.clearFocus()
                     },
-                shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.background,
-                border = androidx.compose.foundation.BorderStroke(1.dp, White10),
-                shadowElevation = 16.dp
+                shape = RoundedCornerShape(26.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)),
+                shadowElevation = 12.dp
             ) {
                 Column(
                     modifier = Modifier
@@ -258,7 +259,7 @@ fun TransactionSplitSheet(
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -267,32 +268,41 @@ fun TransactionSplitSheet(
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(36.dp)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(11.dp))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(11.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.Users,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(19.dp)
                                     )
                                 }
                                 Column(modifier = Modifier.weight(1f, fill = false)) {
                                     Text(
                                         text = stringResource(R.string.split_title),
-                                        style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        style = Typography.titleLarge.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp
+                                        ),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     if (!isStandaloneAdd) {
                                         Text(
                                             text = "${currencySymbol}${String.format(Locale.US, "%.2f", totalAmount)} • ${expenseName.ifBlank { "Expense" }}",
-                                            style = Typography.labelMedium,
+                                            style = Typography.bodySmall.copy(
+                                                fontFamily = Lato,
+                                                fontSize = 12.sp
+                                            ),
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -320,13 +330,13 @@ fun TransactionSplitSheet(
                                             }
                                             context.startActivity(Intent.createChooser(shareIntent, "Share Split Breakdown"))
                                         },
-                                        modifier = Modifier.size(36.dp)
+                                        modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
                                             imageVector = LucideIcons.Share2,
                                             contentDescription = stringResource(R.string.split_share_whatsapp),
                                             tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
+                                            modifier = Modifier.size(17.dp)
                                         )
                                     }
                                 }
@@ -338,13 +348,16 @@ fun TransactionSplitSheet(
                                         keyboardController?.hide()
                                         onDismiss()
                                     },
-                                    modifier = Modifier.size(36.dp)
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.X,
                                         contentDescription = stringResource(R.string.action_close),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
@@ -361,7 +374,11 @@ fun TransactionSplitSheet(
                                         standaloneExpenseName = it
                                         onDraftStandaloneChange?.invoke(it, standaloneTotalStr, participants)
                                     },
-                                    textStyle = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    textStyle = Typography.bodyMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                     keyboardOptions = KeyboardOptions(
                                         capitalization = KeyboardCapitalization.Words,
@@ -371,16 +388,16 @@ fun TransactionSplitSheet(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                                                .border(1.dp, White10, RoundedCornerShape(12.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
+                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             if (standaloneExpenseName.isBlank()) {
                                                 Text(
                                                     text = "Expense name",
-                                                    style = Typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.5.sp),
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                                 )
                                             }
                                             innerTextField()
@@ -401,8 +418,9 @@ fun TransactionSplitSheet(
                                         onDraftStandaloneChange?.invoke(standaloneExpenseName, sanitized, recalculated)
                                     },
                                     textStyle = Typography.bodyMedium.copy(
-                                        fontFamily = Lato,
+                                        fontFamily = DMSans,
                                         fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
                                         color = MaterialTheme.colorScheme.onSurface
                                     ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -420,15 +438,15 @@ fun TransactionSplitSheet(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                                                .border(1.dp, White10, RoundedCornerShape(12.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
+                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
                                                 text = currencySymbol,
-                                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                style = Typography.bodyMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                             Spacer(Modifier.width(4.dp))
                                             Box(modifier = Modifier.weight(1f)) {
@@ -436,7 +454,7 @@ fun TransactionSplitSheet(
                                                     Text(
                                                         text = "0.00",
                                                         style = Typography.bodyMedium.copy(fontFamily = Lato),
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                                     )
                                                 }
                                                 innerTextField()
@@ -460,14 +478,14 @@ fun TransactionSplitSheet(
                                 .fillMaxWidth()
                                 .height(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                                .border(1.dp, White10, RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                                 .padding(3.dp)
                         ) {
                             val tabWidth = maxWidth / modes.size
                             val indicatorOffset by animateDpAsState(
                                 targetValue = tabWidth * selectedModeIndex,
-                                animationSpec = spring(dampingRatio = 0.8f, stiffness = 350f),
+                                animationSpec = spring(dampingRatio = 0.82f, stiffness = 400f),
                                 label = "split_mode_offset"
                             )
 
@@ -507,8 +525,9 @@ fun TransactionSplitSheet(
                                         Text(
                                             text = label,
                                             style = Typography.labelMedium.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                fontFamily = DMSans,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                fontSize = 12.5.sp
                                             ),
                                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -528,16 +547,16 @@ fun TransactionSplitSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .verticalScroll(scrollState)
-                                .padding(vertical = 4.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                                .padding(vertical = 2.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             participants.forEachIndexed { index, participant ->
                                 androidx.compose.runtime.key(participant.id) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(14.dp))
-                                            .border(1.dp, White10, RoundedCornerShape(14.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(14.dp))
+                                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
                                             .padding(horizontal = 12.dp, vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
@@ -550,23 +569,23 @@ fun TransactionSplitSheet(
                                             Box(
                                                 modifier = Modifier
                                                     .size(34.dp)
+                                                    .clip(CircleShape)
                                                     .background(
                                                         if (participant.isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                                        else MaterialTheme.colorScheme.surfaceVariant,
-                                                        CircleShape
+                                                        else MaterialTheme.colorScheme.surfaceVariant
                                                     ),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
                                                     text = participant.name.take(1).uppercase(Locale.ROOT),
-                                                    style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                    style = Typography.labelMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
                                                     color = if (participant.isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                                 )
                                             }
                                             Column(modifier = Modifier.weight(1f, fill = false)) {
                                                 Text(
                                                     text = if (participant.isCurrentUser) stringResource(R.string.split_you) else participant.name,
-                                                    style = Typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                                    style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp),
                                                     color = MaterialTheme.colorScheme.onSurface,
                                                     maxLines = 1,
                                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -588,7 +607,7 @@ fun TransactionSplitSheet(
                                                     ) {
                                                         Box(
                                                             modifier = Modifier
-                                                                .size(15.dp)
+                                                                .size(14.dp)
                                                                 .clip(CircleShape)
                                                                 .background(
                                                                     if (participant.isPaid) EmeraldIncome else Color.Transparent
@@ -612,7 +631,7 @@ fun TransactionSplitSheet(
                                                         Spacer(Modifier.width(2.dp))
                                                         Text(
                                                             text = if (participant.isPaid) stringResource(R.string.split_settled) else stringResource(R.string.split_pending),
-                                                            style = Typography.labelSmall.copy(fontSize = 11.sp),
+                                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                                             color = if (participant.isPaid) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant
                                                         )
                                                     }
@@ -628,7 +647,7 @@ fun TransactionSplitSheet(
                                                 SplitMode.EQUAL -> {
                                                     Text(
                                                         text = "${currencySymbol}${String.format(Locale.US, "%.2f", participant.amount)}",
-                                                        style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                                        style = Typography.titleMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 15.sp),
                                                         color = MaterialTheme.colorScheme.onSurface
                                                     )
                                                 }
@@ -649,8 +668,9 @@ fun TransactionSplitSheet(
                                                             notifyDraftChanged(updated)
                                                         },
                                                         textStyle = Typography.titleMedium.copy(
-                                                            fontFamily = Lato,
+                                                            fontFamily = DMSans,
                                                             fontWeight = FontWeight.Bold,
+                                                            fontSize = 14.5.sp,
                                                             color = MaterialTheme.colorScheme.onSurface,
                                                             textAlign = TextAlign.End
                                                         ),
@@ -663,15 +683,15 @@ fun TransactionSplitSheet(
                                                         decorationBox = { innerTextField ->
                                                             Row(
                                                                 modifier = Modifier
-                                                                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
-                                                                    .border(1.dp, White10, RoundedCornerShape(8.dp))
+                                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
+                                                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                                                                     .padding(horizontal = 8.dp, vertical = 6.dp),
                                                                 verticalAlignment = Alignment.CenterVertically
                                                             ) {
                                                                 Text(
                                                                     text = currencySymbol,
-                                                                    style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                                    style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                                                    color = MaterialTheme.colorScheme.primary
                                                                 )
                                                                 Spacer(modifier = Modifier.width(4.dp))
                                                                 Box(
@@ -702,8 +722,9 @@ fun TransactionSplitSheet(
                                                             notifyDraftChanged(updated)
                                                         },
                                                         textStyle = Typography.titleMedium.copy(
-                                                            fontFamily = Lato,
+                                                            fontFamily = DMSans,
                                                             fontWeight = FontWeight.Bold,
+                                                            fontSize = 14.5.sp,
                                                             color = MaterialTheme.colorScheme.onSurface,
                                                             textAlign = TextAlign.End
                                                         ),
@@ -716,8 +737,8 @@ fun TransactionSplitSheet(
                                                         decorationBox = { innerTextField ->
                                                             Row(
                                                                 modifier = Modifier
-                                                                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
-                                                                    .border(1.dp, White10, RoundedCornerShape(8.dp))
+                                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
+                                                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                                                                     .padding(horizontal = 8.dp, vertical = 6.dp),
                                                                 verticalAlignment = Alignment.CenterVertically
                                                             ) {
@@ -730,8 +751,8 @@ fun TransactionSplitSheet(
                                                                 Spacer(modifier = Modifier.width(3.dp))
                                                                 Text(
                                                                     text = "%",
-                                                                    style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                                    style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                                                    color = MaterialTheme.colorScheme.primary
                                                                 )
                                                             }
                                                         }
@@ -755,7 +776,7 @@ fun TransactionSplitSheet(
                                                         imageVector = LucideIcons.X,
                                                         contentDescription = "Remove",
                                                         tint = RoseExpense.copy(alpha = 0.8f),
-                                                        modifier = Modifier.size(16.dp)
+                                                        modifier = Modifier.size(15.dp)
                                                     )
                                                 }
                                             }
@@ -767,15 +788,19 @@ fun TransactionSplitSheet(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(14.dp))
-                                    .border(1.dp, White10, RoundedCornerShape(14.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(14.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
                                     .padding(horizontal = 12.dp, vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 BasicTextField(
                                     value = newPersonName,
                                     onValueChange = { newPersonName = it },
-                                    textStyle = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    textStyle = Typography.bodyMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontSize = 13.5.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    ),
                                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                     keyboardOptions = KeyboardOptions(
                                         capitalization = KeyboardCapitalization.Words,
@@ -792,8 +817,8 @@ fun TransactionSplitSheet(
                                         if (newPersonName.isBlank()) {
                                             Text(
                                                 text = stringResource(R.string.split_person_name_hint),
-                                                style = Typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.5.sp),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                             )
                                         }
                                         innerTextField()
@@ -810,7 +835,8 @@ fun TransactionSplitSheet(
                                     Icon(
                                         imageVector = LucideIcons.Plus,
                                         contentDescription = stringResource(R.string.split_add_person),
-                                        tint = if (newPersonName.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (newPersonName.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
@@ -824,12 +850,12 @@ fun TransactionSplitSheet(
                                         Row(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(10.dp))
-                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                                                .border(1.dp, White10, RoundedCornerShape(10.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
                                                 .clickable {
                                                     addParticipantWithName(suggestion)
                                                 }
-                                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                                .padding(horizontal = 10.dp, vertical = 5.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                                         ) {
@@ -837,13 +863,14 @@ fun TransactionSplitSheet(
                                                 imageVector = LucideIcons.Plus,
                                                 contentDescription = null,
                                                 tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(13.dp)
+                                                modifier = Modifier.size(12.dp)
                                             )
                                             Text(
                                                 text = suggestion,
                                                 style = Typography.labelMedium.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.SemiBold
+                                                    fontFamily = DMSans,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    fontSize = 12.sp
                                                 ),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
@@ -859,7 +886,7 @@ fun TransactionSplitSheet(
                                 .height(16.dp)
                                 .align(Alignment.TopCenter)
                                 .graphicsLayer { alpha = if (scrollState.canScrollBackward) 1f else 0f }
-                                .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.background, Color.Transparent)))
+                                .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Transparent)))
                         )
 
                         Box(
@@ -868,13 +895,13 @@ fun TransactionSplitSheet(
                                 .height(16.dp)
                                 .align(Alignment.BottomCenter)
                                 .graphicsLayer { alpha = if (scrollState.canScrollForward) 1f else 0f }
-                                .background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.background)))
+                                .background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.surfaceContainerHigh)))
                         )
                     }
 
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         if (splitMode == SplitMode.EXACT) {
                             val currentExactSum = participants.sumOf { it.amount }
@@ -885,13 +912,13 @@ fun TransactionSplitSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(
-                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surfaceContainer,
                                         RoundedCornerShape(12.dp)
                                     )
                                     .border(
                                         1.dp,
                                         if (isExactBalanced) EmeraldIncome.copy(alpha = 0.35f)
-                                        else if (exactRemaining > 0) White10
+                                        else if (exactRemaining > 0) MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                                         else RoseExpense.copy(alpha = 0.35f),
                                         RoundedCornerShape(12.dp)
                                     )
@@ -904,12 +931,12 @@ fun TransactionSplitSheet(
                                         text = if (isExactBalanced) "Balanced"
                                         else if (exactRemaining > 0) "Remaining: ${currencySymbol}${String.format(Locale.US, "%.2f", exactRemaining)}"
                                         else "Exceeded by: ${currencySymbol}${String.format(Locale.US, "%.2f", abs(exactRemaining))}",
-                                        style = Typography.titleSmall.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                        style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
                                         color = if (isExactBalanced) EmeraldIncome else if (exactRemaining > 0) MaterialTheme.colorScheme.onSurface else RoseExpense
                                     )
                                     Text(
                                         text = "Total: ${currencySymbol}${String.format(Locale.US, "%.2f", currentExactSum)} of ${currencySymbol}${String.format(Locale.US, "%.2f", currentEffectiveTotal)}",
-                                        style = Typography.labelSmall,
+                                        style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -935,7 +962,7 @@ fun TransactionSplitSheet(
                                     ) {
                                         Text(
                                             text = "Auto-balance",
-                                            style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            style = Typography.labelMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -950,13 +977,13 @@ fun TransactionSplitSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(
-                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surfaceContainer,
                                         RoundedCornerShape(12.dp)
                                     )
                                     .border(
                                         1.dp,
                                         if (isPctBalanced) EmeraldIncome.copy(alpha = 0.35f)
-                                        else if (pctRemaining > 0) White10
+                                        else if (pctRemaining > 0) MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                                         else RoseExpense.copy(alpha = 0.35f),
                                         RoundedCornerShape(12.dp)
                                     )
@@ -969,12 +996,12 @@ fun TransactionSplitSheet(
                                         text = if (isPctBalanced) "Balanced (100%)"
                                         else if (pctRemaining > 0) "Remaining: ${String.format(Locale.US, "%.1f", pctRemaining)}%"
                                         else "Exceeded by: ${String.format(Locale.US, "%.1f", abs(pctRemaining))}%",
-                                        style = Typography.titleSmall.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
+                                        style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
                                         color = if (isPctBalanced) EmeraldIncome else if (pctRemaining > 0) MaterialTheme.colorScheme.onSurface else RoseExpense
                                     )
                                     Text(
                                         text = "Allocated: ${String.format(Locale.US, "%.1f", currentPctSum)}% of 100%",
-                                        style = Typography.labelSmall,
+                                        style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -1000,7 +1027,7 @@ fun TransactionSplitSheet(
                                     ) {
                                         Text(
                                             text = "Auto-balance",
-                                            style = Typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            style = Typography.labelMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -1015,7 +1042,7 @@ fun TransactionSplitSheet(
                         ) {
                             Text(
                                 text = errorMessage.orEmpty(),
-                                style = Typography.labelMedium,
+                                style = Typography.labelMedium.copy(fontFamily = Lato),
                                 color = RoseExpense,
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
@@ -1023,7 +1050,7 @@ fun TransactionSplitSheet(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             if (!isStandaloneAdd && (participants.size > 1 || initialParticipants.isNotEmpty())) {
                                 Button(
@@ -1045,7 +1072,7 @@ fun TransactionSplitSheet(
                                 ) {
                                     Text(
                                         text = stringResource(R.string.split_clear),
-                                        style = Typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                        style = Typography.labelLarge.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold)
                                     )
                                 }
                             }
@@ -1137,7 +1164,7 @@ fun TransactionSplitSheet(
                             ) {
                                 Text(
                                     text = stringResource(R.string.split_save),
-                                    style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                    style = Typography.labelLarge.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold)
                                 )
                             }
                         }
@@ -1147,4 +1174,3 @@ fun TransactionSplitSheet(
         }
     }
 }
-
