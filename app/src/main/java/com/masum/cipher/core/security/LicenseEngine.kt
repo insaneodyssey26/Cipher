@@ -413,10 +413,34 @@ class LicenseEngine @Inject constructor() {
             if (responseCode in 200..299) {
                 val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
                 val json = JSONObject(text)
+                val isSuccess = json.optBoolean("success", true)
+                if (!isSuccess) {
+                    val err = json.optString("error", "License verification failed")
+                    return@withContext RemoteLicenseCheckResult.Revoked(err)
+                }
                 val tierStr = json.optString("tier", "LIFETIME")
                 val deviceCount = json.optInt("deviceCount", 1)
                 val maxDevices = json.optInt("maxDevices", 3)
-                RemoteLicenseCheckResult.Valid(parseTier(tierStr), deviceCount, maxDevices)
+                val devicesArray = json.optJSONArray("devices")
+                val isDeviceRegistered = if (devicesArray != null && currentDeviceId.isNotBlank()) {
+                    var found = false
+                    for (i in 0 until devicesArray.length()) {
+                        val dev = devicesArray.optJSONObject(i)
+                        if (dev?.optString("deviceId", "") == currentDeviceId || dev?.optBoolean("isCurrent", false) == true) {
+                            found = true
+                            break
+                        }
+                    }
+                    found
+                } else {
+                    true
+                }
+
+                if (!isDeviceRegistered) {
+                    RemoteLicenseCheckResult.Revoked("Device has been revoked from this license")
+                } else {
+                    RemoteLicenseCheckResult.Valid(parseTier(tierStr), deviceCount, maxDevices)
+                }
             } else {
                 val errText = conn.errorStream?.bufferedReader()?.use(BufferedReader::readText) ?: ""
                 val json = try { JSONObject(errText) } catch (_: Exception) { JSONObject() }
