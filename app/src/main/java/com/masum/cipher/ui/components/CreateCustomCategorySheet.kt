@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -26,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -171,29 +173,28 @@ fun CreateCustomCategorySheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = {
             Box(
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 6.dp)
                     .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.35f), RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f), RoundedCornerShape(2.dp))
             )
-        }
+        },
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.88f)
                 .navigationBarsPadding()
                 .imePadding()
-                .nestedScroll(consumeOverscrollConnection)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -215,7 +216,7 @@ fun CreateCustomCategorySheet(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
                 ) {
                     Icon(
                         imageVector = LucideIcons.X,
@@ -226,96 +227,170 @@ fun CreateCustomCategorySheet(
                 }
             }
 
-            OutlinedTextField(
-                value = categoryName,
-                onValueChange = {
-                    categoryName = it
-                    errorMessage = null
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.custom_category_name_placeholder),
-                        style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 14.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                    )
-                },
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 10.dp, end = 4.dp)
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(selectedColor.copy(alpha = 0.18f))
-                            .border(1.dp, selectedColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = selectedIcon,
-                            contentDescription = null,
-                            tint = selectedColor,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                },
-                singleLine = true,
-                isError = errorMessage != null,
-                supportingText = errorMessage?.let { { Text(text = it, color = RoseExpense, style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp)) } },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
-                    focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
-                )
-            )
-
-            Text(
-                text = stringResource(R.string.custom_category_select_color),
-                style = Typography.labelSmall.copy(
-                    fontFamily = Lato,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
-                    letterSpacing = 0.8.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                thickness = 1.dp
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .nestedScroll(consumeOverscrollConnection)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CategoryColorRegistry.COLORS.chunked(8).forEach { rowColors ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        rowColors.forEach { colorHex ->
-                            val isSelected = colorHex == selectedColorHex
-                            val itemColor = Color(colorHex.toInt())
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(30.dp)
-                                    .clip(CircleShape)
-                                    .background(itemColor)
-                                    .border(
-                                        width = if (isSelected) 2.5.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.surface else itemColor.copy(alpha = 0.25f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable {
-                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                        selectedColorHex = colorHex
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isSelected) {
+                OutlinedTextField(
+                    value = categoryName,
+                    onValueChange = {
+                        categoryName = it
+                        errorMessage = null
+                    },
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.custom_category_name_placeholder),
+                            style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 14.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                        )
+                    },
+                    leadingIcon = {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 10.dp, end = 4.dp)
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(selectedColor.copy(alpha = 0.18f))
+                                .border(1.dp, selectedColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = selectedIcon,
+                                contentDescription = null,
+                                tint = selectedColor,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    },
+                    singleLine = true,
+                    isError = errorMessage != null,
+                    supportingText = errorMessage?.let { { Text(text = it, color = RoseExpense, style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp)) } },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    )
+                )
+
+                Text(
+                    text = stringResource(R.string.custom_category_select_color),
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.5.sp,
+                        letterSpacing = 0.8.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CategoryColorRegistry.COLORS.chunked(8).forEach { rowColors ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowColors.forEach { colorHex ->
+                                val isSelected = colorHex == selectedColorHex
+                                val itemColor = Color(colorHex.toInt())
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(30.dp)
+                                        .clip(CircleShape)
+                                        .background(itemColor)
+                                        .border(
+                                            width = if (isSelected) 2.5.dp else 1.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.surface else itemColor.copy(alpha = 0.25f),
+                                            shape = CircleShape
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedColorHex = colorHex
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text(
+                    text = stringResource(R.string.custom_category_select_icon),
+                    style = Typography.labelSmall.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.5.sp,
+                        letterSpacing = 0.8.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+                        .padding(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    CategoryIconRegistry.ICONS.chunked(6).forEach { rowIcons ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            rowIcons.forEach { (iconKey, iconVector) ->
+                                val isSelected = iconKey == selectedIconName
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(38.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (isSelected) selectedColor.copy(alpha = 0.18f)
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) selectedColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.05f),
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedIconName = iconKey
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Icon(
-                                        imageVector = LucideIcons.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(14.dp)
+                                        imageVector = iconVector,
+                                        contentDescription = iconKey,
+                                        tint = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
@@ -324,152 +399,103 @@ fun CreateCustomCategorySheet(
                 }
             }
 
-            Text(
-                text = stringResource(R.string.custom_category_select_icon),
-                style = Typography.labelSmall.copy(
-                    fontFamily = Lato,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
-                    letterSpacing = 0.8.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                thickness = 1.dp
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.45f))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
-                    .padding(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CategoryIconRegistry.ICONS.chunked(6).forEach { rowIcons ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        rowIcons.forEach { (iconKey, iconVector) ->
-                            val isSelected = iconKey == selectedIconName
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(38.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        if (isSelected) selectedColor.copy(alpha = 0.18f)
-                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isSelected) selectedColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.06f),
-                                        RoundedCornerShape(10.dp)
-                                    )
-                                    .clickable {
-                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                        selectedIconName = iconKey
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = iconVector,
-                                    contentDescription = iconKey,
-                                    tint = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+                val errEmpty = stringResource(R.string.custom_category_error_empty)
+                val errExists = stringResource(R.string.custom_category_error_exists)
 
-            Spacer(modifier = Modifier.height(2.dp))
+                val btnInteraction = remember { MutableInteractionSource() }
+                val btnPressed by btnInteraction.collectIsPressedAsState()
+                val btnScale by animateFloatAsState(targetValue = if (btnPressed) 0.97f else 1f, label = "btn_scale")
 
-            val errEmpty = stringResource(R.string.custom_category_error_empty)
-            val errExists = stringResource(R.string.custom_category_error_exists)
-
-            val btnInteraction = remember { MutableInteractionSource() }
-            val btnPressed by btnInteraction.collectIsPressedAsState()
-            val btnScale by animateFloatAsState(targetValue = if (btnPressed) 0.97f else 1f, label = "btn_scale")
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .scale(btnScale)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable(interactionSource = btnInteraction, indication = null) {
-                        val trimmed = categoryName.trim()
-                        if (trimmed.isEmpty()) {
-                            errorMessage = errEmpty
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
-                            return@clickable
-                        }
-
-                        val isDuplicateDefault = TransactionCategory.entries.any {
-                            it.name.equals(trimmed, ignoreCase = true) || it.displayName.equals(trimmed, ignoreCase = true)
-                        }
-                        val isDuplicateCustom = existingCustomCategories.any {
-                            it.id != (existingCategory?.id ?: -1L) && it.name.equals(trimmed, ignoreCase = true)
-                        }
-
-                        if (isDuplicateDefault || isDuplicateCustom) {
-                            errorMessage = errExists
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
-                            return@clickable
-                        }
-
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        onSaveCategory(trimmed, selectedIconName, selectedColorHex)
-                        onDismiss()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(if (isEditing) R.string.custom_category_save else R.string.custom_category_create),
-                    style = Typography.titleMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-
-            if (isEditing && onDeleteCategory != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(RoseExpense.copy(alpha = 0.08f))
-                        .clickable {
+                        .scale(btnScale)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable(interactionSource = btnInteraction, indication = null) {
+                            val trimmed = categoryName.trim()
+                            if (trimmed.isEmpty()) {
+                                errorMessage = errEmpty
+                                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                return@clickable
+                            }
+
+                            val isDuplicateDefault = TransactionCategory.entries.any {
+                                it.name.equals(trimmed, ignoreCase = true) || it.displayName.equals(trimmed, ignoreCase = true)
+                            }
+                            val isDuplicateCustom = existingCustomCategories.any {
+                                it.id != (existingCategory?.id ?: -1L) && it.name.equals(trimmed, ignoreCase = true)
+                            }
+
+                            if (isDuplicateDefault || isDuplicateCustom) {
+                                errorMessage = errExists
+                                view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                return@clickable
+                            }
+
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            showDeleteConfirm = true
+                            onSaveCategory(trimmed, selectedIconName, selectedColorHex)
+                            onDismiss()
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Text(
+                        text = stringResource(if (isEditing) R.string.custom_category_save else R.string.custom_category_create),
+                        style = Typography.titleMedium.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                if (isEditing && onDeleteCategory != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(RoseExpense.copy(alpha = 0.08f))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showDeleteConfirm = true
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = LucideIcons.Trash2,
-                            contentDescription = null,
-                            tint = RoseExpense,
-                            modifier = Modifier.size(15.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.custom_category_delete),
-                            style = Typography.labelLarge.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.5.sp
-                            ),
-                            color = RoseExpense
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Trash2,
+                                contentDescription = null,
+                                tint = RoseExpense,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.custom_category_delete),
+                                style = Typography.labelLarge.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.5.sp
+                                ),
+                                color = RoseExpense
+                            )
+                        }
                     }
                 }
             }
