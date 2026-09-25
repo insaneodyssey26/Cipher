@@ -763,4 +763,8 @@
     <string name="goals_free_limit_desc">Débloquez des cagnottes et objectifs d\'épargne illimités avec Pro</string>
     <string name="pro_gate_goals_title">Cagnottes d\'épargne illimitées</string>
     <string name="pro_gate_goals_desc">Vous avez atteint la limite de 2 cagnottes du plan gratuit. Passez à Cipher Pro pour créer des objectifs illimités.</string>
+    <string name="license_revoked_dialog_title">Accès Cipher Pro révoqué</string>
+    <string name="license_revoked_dialog_desc">Cet appareil a été retiré de votre licence Cipher Pro ou la licence a été révoquée depuis un autre appareil. Vous pouvez réactiver votre clé de licence à tout moment.</string>
+    <string name="license_revoked_dialog_action_reactivate">Réactiver la licence</string>
+    <string name="license_revoked_dialog_action_dismiss">Continuer en version Free</string>
 </resources>

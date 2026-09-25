@@ -762,4 +762,8 @@
     <string name="goals_free_limit_desc">प्रो के साथ असीमित बचत पॉट और लक्ष्य अनलॉक करें</string>
     <string name="pro_gate_goals_title">असीमित बचत पॉट</string>
     <string name="pro_gate_goals_desc">मुफ़्त प्लान में आप अधिकतम 2 बचत पॉट बना सकते हैं। असीमित पॉट और लक्ष्यों के लिए साइफ़र प्रो में अपग्रेड करें।</string>
+    <string name="license_revoked_dialog_title">साइफर प्रो एक्सेस रद्द कर दिया गया</string>
+    <string name="license_revoked_dialog_desc">इस डिवाइस को आपके साइफर प्रो लाइसेंस से हटा दिया गया है या किसी अन्य डिवाइस से लाइसेंस रद्द कर दिया गया है। आप किसी भी समय अपनी लाइसेंस कुंजी पुनः सक्रिय कर सकते हैं।</string>
+    <string name="license_revoked_dialog_action_reactivate">लाइसेंस पुनः सक्रिय करें</string>
+    <string name="license_revoked_dialog_action_dismiss">मुफ़्त संस्करण जारी रखें</string>
 </resources>

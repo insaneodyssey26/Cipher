@@ -63,6 +63,7 @@ import com.masum.cipher.ui.accounts.analytics.AccountAnalyticsScreen
 import com.masum.cipher.ui.accounts.details.AccountDetailsScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
+import com.masum.cipher.ui.components.LicenseRevokedDialog
 import com.masum.cipher.ui.components.LockScreen
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.TransactionSplitSheet
@@ -601,6 +602,19 @@ class MainActivity : AppCompatActivity() {
                                 onCurrencySelected = { code, symbol -> mainViewModel.handleIntent(MainContract.Intent.SaveCurrency(code, symbol)) },
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
+                            )
+                        }
+
+                        if (state.settings?.showLicenseRevokedDialog == true) {
+                            LicenseRevokedDialog(
+                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true,
+                                onReactivate = {
+                                    mainViewModel.handleIntent(MainContract.Intent.DismissLicenseRevokedDialog)
+                                    navController.navigate("cipher_pro")
+                                },
+                                onDismiss = {
+                                    mainViewModel.handleIntent(MainContract.Intent.DismissLicenseRevokedDialog)
+                                }
                             )
                         }
 

@@ -134,7 +134,9 @@ class UserPreferences @Inject constructor(
             isNavBarCompressed = isCachedNavBarCompressed(),
             isPro = isPro,
             proTier = proTier,
-            proExpiresAtEpochMs = getCachedProExpiresAt()
+            proExpiresAtEpochMs = getCachedProExpiresAt(),
+            showLicenseRevokedDialog = syncPrefs.getBoolean("cached_show_license_revoked_dialog", false),
+            licenseRevokedReason = syncPrefs.getString("cached_license_revoked_reason", null)
         )
     }
 
@@ -186,6 +188,8 @@ class UserPreferences @Inject constructor(
         val PRO_EXPIRES_AT = longPreferencesKey("pro_expires_at")
         val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
         val LAST_LICENSE_SYNC_TIME = longPreferencesKey("last_license_sync_time")
+        val SHOW_LICENSE_REVOKED_DIALOG = booleanPreferencesKey("show_license_revoked_dialog")
+        val LICENSE_REVOKED_REASON = stringPreferencesKey("license_revoked_reason")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -327,7 +331,9 @@ class UserPreferences @Inject constructor(
             proLicenseToken = preferences[Keys.PRO_LICENSE_TOKEN],
             proOrderId = preferences[Keys.PRO_ORDER_ID],
             proExpiresAtEpochMs = preferences[Keys.PRO_EXPIRES_AT] ?: 0L,
-            showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true
+            showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true,
+            showLicenseRevokedDialog = preferences[Keys.SHOW_LICENSE_REVOKED_DIALOG] ?: false,
+            licenseRevokedReason = preferences[Keys.LICENSE_REVOKED_REASON]
         )
     }
 
@@ -704,6 +710,37 @@ class UserPreferences @Inject constructor(
         setProStatus(isPro = false, tier = "FREE", token = null, orderId = null, expiresAt = 0L)
     }
 
+    suspend fun markLicenseRevoked(reason: String = "REVOKED") {
+        syncPrefs.edit()
+            .putBoolean("cached_is_pro", false)
+            .putString("cached_pro_tier", "FREE")
+            .putString("cached_license_token", null)
+            .putLong("cached_pro_expiry", 0L)
+            .putBoolean("cached_show_license_revoked_dialog", true)
+            .putString("cached_license_revoked_reason", reason)
+            .apply()
+        context.dataStore.edit { preferences ->
+            preferences[Keys.PRO_ACTIVATED] = false
+            preferences[Keys.PRO_TIER] = "FREE"
+            preferences[Keys.PRO_EXPIRES_AT] = 0L
+            preferences.remove(Keys.PRO_LICENSE_TOKEN)
+            preferences.remove(Keys.PRO_ORDER_ID)
+            preferences[Keys.SHOW_LICENSE_REVOKED_DIALOG] = true
+            preferences[Keys.LICENSE_REVOKED_REASON] = reason
+        }
+    }
+
+    suspend fun clearLicenseRevokedNotice() {
+        syncPrefs.edit()
+            .putBoolean("cached_show_license_revoked_dialog", false)
+            .remove("cached_license_revoked_reason")
+            .apply()
+        context.dataStore.edit { preferences ->
+            preferences[Keys.SHOW_LICENSE_REVOKED_DIALOG] = false
+            preferences.remove(Keys.LICENSE_REVOKED_REASON)
+        }
+    }
+
     suspend fun setShowProBadge(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
     }
@@ -789,5 +826,7 @@ data class UserSettings(
     val proLicenseToken: String? = null,
     val proOrderId: String? = null,
     val proExpiresAtEpochMs: Long = 0L,
-    val showProBadge: Boolean = true
+    val showProBadge: Boolean = true,
+    val showLicenseRevokedDialog: Boolean = false,
+    val licenseRevokedReason: String? = null
 )

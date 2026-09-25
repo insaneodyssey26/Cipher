@@ -763,4 +763,8 @@
     <string name="goals_free_limit_desc">Schalte mit Pro unbegrenzte Spartöpfe &amp; Sparziele frei</string>
     <string name="pro_gate_goals_title">Unbegrenzte Spartöpfe</string>
     <string name="pro_gate_goals_desc">Sie haben das Limit von 2 Spartöpfen im kostenlosen Plan erreicht. Holen Sie sich Cipher Pro für unbegrenzte Sparziele.</string>
+    <string name="license_revoked_dialog_title">Cipher Pro Zugriff widerrufen</string>
+    <string name="license_revoked_dialog_desc">Dieses Gerät wurde von Ihrer Cipher Pro-Lizenz entfernt oder die Lizenz wurde von einem anderen Gerät widerrufen. Sie können Ihren Lizenzschlüssel jederzeit reaktivieren.</string>
+    <string name="license_revoked_dialog_action_reactivate">Lizenz reaktivieren</string>
+    <string name="license_revoked_dialog_action_dismiss">Mit Free fortfahren</string>
 </resources>

@@ -762,4 +762,8 @@
     <string name="goals_free_limit_desc">Desbloquea metas y huchas de ahorro ilimitadas con Pro</string>
     <string name="pro_gate_goals_title">Metas de ahorro ilimitadas</string>
     <string name="pro_gate_goals_desc">Has alcanzado el límite de 2 huchas de ahorro en el plan gratuito. Pásate a Cipher Pro para crear metas ilimitadas.</string>
+    <string name="license_revoked_dialog_title">Acceso a Cipher Pro revocado</string>
+    <string name="license_revoked_dialog_desc">Este dispositivo se ha eliminado de tu licencia de Cipher Pro o la licencia se revocó desde otro dispositivo. Puedes reactivar tu clave de licencia en cualquier momento.</string>
+    <string name="license_revoked_dialog_action_reactivate">Reactivar licencia</string>
+    <string name="license_revoked_dialog_action_dismiss">Continuar con Free</string>
 </resources>

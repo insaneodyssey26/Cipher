@@ -56,15 +56,21 @@ class LicenseSyncWorker(
                 userPreferences.setLastLicenseSyncTime(now)
                 Result.success()
             }
-            is RemoteLicenseCheckResult.Revoked,
-            is RemoteLicenseCheckResult.Expired,
+            is RemoteLicenseCheckResult.Revoked -> {
+                userPreferences.markLicenseRevoked("REVOKED")
+                Result.success()
+            }
+            is RemoteLicenseCheckResult.Expired -> {
+                userPreferences.markLicenseRevoked("EXPIRED")
+                Result.success()
+            }
             is RemoteLicenseCheckResult.NotFound -> {
-                userPreferences.deactivatePro()
+                userPreferences.markLicenseRevoked("NOT_FOUND")
                 Result.success()
             }
             is RemoteLicenseCheckResult.NetworkError -> {
                 if (lastSync > 0L && (now - lastSync) > OFFLINE_GRACE_PERIOD_MS) {
-                    userPreferences.deactivatePro()
+                    userPreferences.markLicenseRevoked("EXPIRED")
                 }
                 Result.retry()
             }

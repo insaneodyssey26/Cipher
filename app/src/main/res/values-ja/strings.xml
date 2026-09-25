@@ -763,4 +763,8 @@
     <string name="goals_free_limit_desc">Proにアップグレードして無制限に貯金ポットと目標を作成</string>
     <string name="pro_gate_goals_title">貯金ポット無制限</string>
     <string name="pro_gate_goals_desc">無料プランでは最大2個まで貯金ポットを作成できます。Cipher Proにアップグレードして無制限に目標を設定しましょう。</string>
+    <string name="license_revoked_dialog_title">Cipher Proのアクセス権が取り消されました</string>
+    <string name="license_revoked_dialog_desc">このデバイスはCipher Proライセンスから削除されたか、別のデバイスからライセンスが無効化されました。いつでもライセンスキーを再アクティブ化できます。</string>
+    <string name="license_revoked_dialog_action_reactivate">ライセンスを再アクティブ化</string>
+    <string name="license_revoked_dialog_action_dismiss">無料版を続ける</string>
 </resources>

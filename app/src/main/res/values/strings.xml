@@ -766,4 +766,8 @@
     <string name="goals_free_limit_desc">Unlock unlimited savings pots &amp; visual wealth goals with Pro</string>
     <string name="pro_gate_goals_title">Unlimited Savings Pots</string>
     <string name="pro_gate_goals_desc">You\'ve reached the limit of 2 savings pots on the free plan. Upgrade to Cipher Pro to create unlimited goals and pots.</string>
+    <string name="license_revoked_dialog_title">Cipher Pro Access Revoked</string>
+    <string name="license_revoked_dialog_desc">This device has been removed from your Cipher Pro license, or the license was revoked from another device. You can reactivate your license key anytime.</string>
+    <string name="license_revoked_dialog_action_reactivate">Reactivate License</string>
+    <string name="license_revoked_dialog_action_dismiss">Continue with Free</string>
 </resources>

@@ -763,4 +763,8 @@
     <string name="goals_free_limit_desc">প্রো-এর সাথে আনলিমিটেড সঞ্চয় পট ও লক্ষ্য আনলক করুন</string>
     <string name="pro_gate_goals_title">আনলিমিটেড সঞ্চয় পট</string>
     <string name="pro_gate_goals_desc">ফ্রি প্ল্যানে আপনি সর্বোচ্চ ২টি সঞ্চয় পট তৈরি করতে পারেন। সীমাহীন পট ও লক্ষ্যের জন্য সাইফার প্রো-তে আপগ্রেড করুন।</string>
+    <string name="license_revoked_dialog_title">সাইফার প্রো অ্যাক্সেস প্রত্যাহার করা হয়েছে</string>
+    <string name="license_revoked_dialog_desc">আপনার সাইফার প্রো লাইসেন্স থেকে এই ডিভাইসটি সরানো হয়েছে বা অন্য ডিভাইস থেকে লাইসেন্স প্রত্যাহার করা হয়েছে। আপনি যেকোনো সময় আবার লাইসেন্স সক্রিয় করতে পারেন।</string>
+    <string name="license_revoked_dialog_action_reactivate">লাইসেন্স পুনরায় সক্রিয় করুন</string>
+    <string name="license_revoked_dialog_action_dismiss">ফ্রি ভার্সন চালিয়ে যান</string>
 </resources>

@@ -20,6 +20,7 @@ class MainContract {
         data class UpdateDraftTransaction(val transaction: com.masum.cipher.core.data.local.entity.TransactionEntity?) : Intent()
         data class SetNavBarCompressed(val compressed: Boolean) : Intent()
         data class CreateCustomCategory(val name: String, val iconName: String, val colorHex: Long) : Intent()
+        object DismissLicenseRevokedDialog : Intent()
     }
 
     data class State(

@@ -762,4 +762,8 @@
     <string name="goals_free_limit_desc">Odblokuj nielimitowane skarbonki i cele oszczędnościowe z Pro</string>
     <string name="pro_gate_goals_title">Nielimitowane skarbonki</string>
     <string name="pro_gate_goals_desc">Osiągnięto limit 2 darmowych skarbonek. Przejdź na Cipher Pro, aby tworzyć nielimitowane cele oszczędnościowe.</string>
+    <string name="license_revoked_dialog_title">Dostęp do Cipher Pro unieważniony</string>
+    <string name="license_revoked_dialog_desc">To urządzenie zostało usunięte z Twojej licencji Cipher Pro lub licencja została unieważniona z innego urządzenia. Możesz w każdej chwili ponownie aktywować klucz licencyjny.</string>
+    <string name="license_revoked_dialog_action_reactivate">Aktywuj licencję ponownie</string>
+    <string name="license_revoked_dialog_action_dismiss">Kontynuuj w wersji Free</string>
 </resources>
