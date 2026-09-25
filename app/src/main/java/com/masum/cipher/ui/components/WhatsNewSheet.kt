@@ -156,8 +156,16 @@ fun WhatsNewSheet(
                     isLatest = true
                 ) {
                     WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v607_goals_title),
+                        description = stringResource(R.string.whats_new_v607_goals_desc)
+                    )
+                    WhatsNewFeatureEntry(
                         title = stringResource(R.string.whats_new_v607_original_message_title),
                         description = stringResource(R.string.whats_new_v607_original_message_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v607_category_palette_title),
+                        description = stringResource(R.string.whats_new_v607_category_palette_desc)
                     )
                 }
 

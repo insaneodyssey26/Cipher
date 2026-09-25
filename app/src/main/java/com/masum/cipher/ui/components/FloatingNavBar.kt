@@ -42,6 +42,7 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
+import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Users
@@ -50,7 +51,7 @@ import compose.icons.lucideicons.Wallet
 enum class BottomNavItem(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {
     Dashboard("dashboard", LucideIcons.Wallet, R.string.nav_spend),
     Insights("insights", LucideIcons.ChartBar, R.string.nav_insights),
-    Splits("split_expenses", LucideIcons.Users, R.string.nav_splits),
+    Splits("split_expenses", LucideIcons.Layers, R.string.nav_planning),
     Settings("settings", LucideIcons.Settings, R.string.nav_settings)
 }
 

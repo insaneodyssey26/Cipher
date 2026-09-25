@@ -1,7 +1,9 @@
 package com.masum.cipher.ui.splits
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -74,6 +76,7 @@ import com.masum.cipher.ui.components.VaultCard
 import com.masum.cipher.ui.components.rememberAccentedShimmerBrush
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.dashboard.DashboardViewModel
+import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
@@ -94,11 +97,15 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import compose.icons.lucideicons.ChevronDown
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -122,9 +129,17 @@ fun SplitExpensesScreen(
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
 
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val coroutineScope = rememberCoroutineScope()
+    val planningTabs = listOf(
+        stringResource(R.string.tab_split_expenses),
+        stringResource(R.string.tab_savings_goals)
+    )
+    val selectedPlanningTabIndex = pagerState.currentPage
     var selectedTab by remember { mutableStateOf(SplitFilterTab.ALL) }
     var editingSplitTx by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showAddGoalSheet by remember { mutableStateOf(false) }
     var draftStandaloneExpenseName by remember { mutableStateOf("") }
     var draftStandaloneTotalStr by remember { mutableStateOf("") }
     var draftStandaloneSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
@@ -196,7 +211,7 @@ fun SplitExpensesScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.split_hub_title),
+                        text = if (selectedPlanningTabIndex == 0) stringResource(R.string.split_hub_title) else stringResource(R.string.tab_savings_goals),
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -218,24 +233,37 @@ fun SplitExpensesScreen(
                     }
                 },
                 actions = {
-                    TimeSelectorDropdown(
-                        selectedPeriod = state.selectedTimePeriod,
-                        selectedTimeRange = state.selectedTimeRange,
-                        onPeriodSelected = { period, start, end ->
-                            viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
-                        },
-                        isHapticsEnabled = isHapticsEnabled,
-                        iconOnly = true
-                    )
-                    IconButton(onClick = {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        showAddSheet = true
-                    }) {
-                        Icon(
-                            imageVector = LucideIcons.Plus,
-                            contentDescription = stringResource(R.string.split_hub_add_split),
-                            tint = MaterialTheme.colorScheme.onSurface
+                    if (selectedPlanningTabIndex == 0) {
+                        TimeSelectorDropdown(
+                            selectedPeriod = state.selectedTimePeriod,
+                            selectedTimeRange = state.selectedTimeRange,
+                            onPeriodSelected = { period, start, end ->
+                                viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
+                            },
+                            isHapticsEnabled = isHapticsEnabled,
+                            iconOnly = true
                         )
+                        IconButton(onClick = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            showAddSheet = true
+                        }) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = stringResource(R.string.split_hub_add_split),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            showAddGoalSheet = true
+                        }) {
+                            Icon(
+                                imageVector = LucideIcons.Plus,
+                                contentDescription = stringResource(R.string.goals_create_goal),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -244,15 +272,82 @@ fun SplitExpensesScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 140.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(padding)
         ) {
-            item {
-                VaultCard(
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(3.dp)
+            ) {
+                val tabWidth = maxWidth / planningTabs.size
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedPlanningTabIndex,
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
+                    label = "planning_tab_offset"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+
+                Row(modifier = Modifier.fillMaxSize()) {
+                    planningTabs.forEachIndexed { index, title ->
+                        val isSelected = selectedPlanningTabIndex == index
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(9.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = title,
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 140.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                    item {
+                        VaultCard(
                     modifier = Modifier.fillMaxWidth(),
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     contentPadding = 18.dp
@@ -556,83 +651,93 @@ fun SplitExpensesScreen(
             }
         }
     }
-
-    val suggestedParticipants = remember(state.splitsByTransactionId) {
-        state.splitsByTransactionId.values
-            .asSequence()
-            .flatten()
-            .filter { !it.isCurrentUser }
-            .map { it.name.trim() }
-            .filter { it.isNotBlank() }
-            .distinctBy { it.lowercase(Locale.ROOT) }
-            .toList()
-    }
-
-    if (showAddSheet) {
-        TransactionSplitSheet(
-            expenseName = draftStandaloneExpenseName,
-            totalAmount = draftStandaloneTotalStr.toDoubleOrNull() ?: 0.0,
-            currencySymbol = state.currencySymbol,
-            initialParticipants = draftStandaloneSplits,
-            suggestedParticipants = suggestedParticipants,
-            isHapticsEnabled = isHapticsEnabled,
-            isStandaloneAdd = true,
-            onDismiss = { showAddSheet = false },
-            onDraftStandaloneChange = { name, totalStr, participants ->
-                draftStandaloneExpenseName = name
-                draftStandaloneTotalStr = totalStr
-                draftStandaloneSplits = participants
-            },
-            onSaveNewSplitExpense = { expenseName, totalAmount, splits ->
-                view.performVibrate(isHapticsEnabled, isLongPress = true)
-                val newTx = TransactionEntity(
-                    merchant = expenseName,
-                    amount = totalAmount,
-                    currency = state.currencySymbol,
-                    timestamp = System.currentTimeMillis(),
-                    category = "OTHERS",
-                    rawSms = null,
-                    isIncome = false
-                )
-                viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTx, splits))
-                draftStandaloneExpenseName = ""
-                draftStandaloneTotalStr = ""
-                draftStandaloneSplits = emptyList()
-                showAddSheet = false
-            }
+    1 -> {
+        com.masum.cipher.ui.goals.SavingsGoalsView(
+            showCreateSheetExternal = showAddGoalSheet,
+            onDismissCreateSheetExternal = { showAddGoalSheet = false }
         )
     }
+}
+}
 
-    editingSplitTx?.let { transaction ->
-        val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
-        val mappedParticipants = editingTxSplitsDraft[transaction.id] ?: splitsForTx.map {
-            SplitParticipant(
-                id = it.id.toString(),
-                name = it.name,
-                amount = it.amount,
-                percentage = if (transaction.amount > 0) (it.amount / transaction.amount) * 100.0 else 0.0,
-                isPaid = it.isPaid,
-                isCurrentUser = it.isCurrentUser
+        val suggestedParticipants = remember(state.splitsByTransactionId) {
+            state.splitsByTransactionId.values
+                .asSequence()
+                .flatten()
+                .filter { !it.isCurrentUser }
+                .map { it.name.trim() }
+                .filter { it.isNotBlank() }
+                .distinctBy { it.lowercase(Locale.ROOT) }
+                .toList()
+        }
+
+        if (showAddSheet) {
+            TransactionSplitSheet(
+                expenseName = draftStandaloneExpenseName,
+                totalAmount = draftStandaloneTotalStr.toDoubleOrNull() ?: 0.0,
+                currencySymbol = state.currencySymbol,
+                initialParticipants = draftStandaloneSplits,
+                suggestedParticipants = suggestedParticipants,
+                isHapticsEnabled = isHapticsEnabled,
+                isStandaloneAdd = true,
+                onDismiss = { showAddSheet = false },
+                onDraftStandaloneChange = { name, totalStr, participants ->
+                    draftStandaloneExpenseName = name
+                    draftStandaloneTotalStr = totalStr
+                    draftStandaloneSplits = participants
+                },
+                onSaveNewSplitExpense = { expenseName, totalAmount, splits ->
+                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                    val newTx = TransactionEntity(
+                        merchant = expenseName,
+                        amount = totalAmount,
+                        currency = state.currencySymbol,
+                        timestamp = System.currentTimeMillis(),
+                        category = "OTHERS",
+                        rawSms = null,
+                        isIncome = false
+                    )
+                    viewModel.handleIntent(DashboardContract.Intent.AddTransaction(newTx, splits))
+                    draftStandaloneExpenseName = ""
+                    draftStandaloneTotalStr = ""
+                    draftStandaloneSplits = emptyList()
+                    showAddSheet = false
+                }
             )
         }
-        TransactionSplitSheet(
-            expenseName = transaction.merchant,
-            totalAmount = transaction.amount,
-            currencySymbol = state.currencySymbol,
-            initialParticipants = mappedParticipants,
-            suggestedParticipants = suggestedParticipants,
-            isHapticsEnabled = isHapticsEnabled,
-            onDismiss = { editingSplitTx = null },
-            onDraftChange = { updatedSplits ->
-                editingTxSplitsDraft = editingTxSplitsDraft + (transaction.id to updatedSplits)
-            },
-            onSaveSplits = { updatedSplits ->
-                viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, updatedSplits))
-                editingTxSplitsDraft = editingTxSplitsDraft - transaction.id
-                editingSplitTx = null
+
+        editingSplitTx?.let { transaction ->
+            val splitsForTx = state.splitsByTransactionId[transaction.id] ?: emptyList()
+            val mappedParticipants = editingTxSplitsDraft[transaction.id] ?: splitsForTx.map {
+                SplitParticipant(
+                    id = it.id.toString(),
+                    name = it.name,
+                    amount = it.amount,
+                    percentage = if (transaction.amount > 0) (it.amount / transaction.amount) * 100.0 else 0.0,
+                    isPaid = it.isPaid,
+                    isCurrentUser = it.isCurrentUser
+                )
             }
-        )
+            TransactionSplitSheet(
+                expenseName = transaction.merchant,
+                totalAmount = transaction.amount,
+                currencySymbol = state.currencySymbol,
+                initialParticipants = mappedParticipants,
+                suggestedParticipants = suggestedParticipants,
+                isHapticsEnabled = isHapticsEnabled,
+                onDismiss = { editingSplitTx = null },
+                onDraftChange = { updatedSplits ->
+                    editingTxSplitsDraft = editingTxSplitsDraft + (transaction.id to updatedSplits)
+                },
+                onSaveSplits = { updatedSplits ->
+                    viewModel.handleIntent(DashboardContract.Intent.SaveTransactionSplits(transaction.id, updatedSplits))
+                    editingTxSplitsDraft = editingTxSplitsDraft - transaction.id
+                    editingSplitTx = null
+                }
+            )
+        }
     }
+}
 }
 
 @Composable
