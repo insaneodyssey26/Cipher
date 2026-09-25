@@ -1,5 +1,16 @@
 # Release Notes
 
+## [6.0.7]
+
+### Added & Highlighted
+- **Savings Goals & Visual Pots**: Create dedicated goal pots with 0%–100% circular bracket progress fills. Add and withdraw funds directly without affecting daily spending and income analytics.
+- **Original Messages & App Attribution**: Audit the exact raw SMS or notification captured for any transaction with 1-tap copy and verified bank source badges.
+- **Expanded Palette & Icons**: Customize pots and custom categories with 32 designer colors and 55+ Lucide icons.
+- **Split Expenses Polish**: Modern split expense setup with status bar padding, live auto-balancing (Equal, Exact, Percentage), and instant WhatsApp/text breakdown sharing.
+- **Multi-Device Pro License Sync**: Enhanced licensing engine with background sync, multi-device management, and localized expiration/revocation notices.
+
+---
+
 ## [6.0.2]
 
 ### Added & Highlighted
