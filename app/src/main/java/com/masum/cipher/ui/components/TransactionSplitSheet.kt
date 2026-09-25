@@ -349,16 +349,13 @@ fun TransactionSplitSheet(
                                         keyboardController?.hide()
                                         onDismiss()
                                     },
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
                                         imageVector = LucideIcons.X,
                                         contentDescription = stringResource(R.string.action_close),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
