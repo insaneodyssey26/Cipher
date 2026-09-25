@@ -102,6 +102,7 @@ import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Sparkles
+import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Wand
 import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
@@ -266,6 +267,11 @@ fun CipherProSheet(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                ProFeatureRow(
+                    icon = LucideIcons.Target,
+                    title = stringResource(R.string.pro_feature_unlimited_goals),
+                    subtitle = stringResource(R.string.pro_feature_unlimited_goals_desc)
+                )
                 ProFeatureRow(
                     icon = LucideIcons.Palette,
                     title = stringResource(R.string.pro_perk_card_themes_title),
