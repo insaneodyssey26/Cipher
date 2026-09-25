@@ -720,4 +720,9 @@
     <string name="whats_new_v60_statements_title">Extractos individuales por cuenta</string>
     <string name="whats_new_v60_widgets_desc">Monitorea balances, presupuesto diario y registra gastos desde tu pantalla de inicio.</string>
     <string name="whats_new_v60_widgets_title">5 nuevos widgets de pantalla de inicio</string>
+    <string name="original_message_title">Mensaje original</string>
+    <string name="original_message_copied">Copiado</string>
+    <string name="action_copy">Copiar</string>
+    <string name="whats_new_v607_original_message_title">Mensajes originales y distintivos de origen</string>
+    <string name="whats_new_v607_original_message_desc">Consulta el SMS o notificación original de cualquier transacción con copia en 1 toque y atribución verificada de banco o app.</string>
 </resources>

@@ -365,6 +365,8 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v607_original_message_title">Original Messages &amp; App Source Badges</string>
+    <string name="whats_new_v607_original_message_desc">View the original SMS or notification that captured any transaction with 1-tap copy and verified bank or app attribution.</string>
     <string name="whats_new_v60_widgets_title">5 New Home Screen Widgets</string>
     <string name="whats_new_v60_widgets_desc">Monitor balances, daily spending allowance, and log transactions directly from your home screen.</string>
     <string name="whats_new_v60_statements_title">Individual Account Statements</string>

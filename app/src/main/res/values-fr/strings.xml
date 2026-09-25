@@ -721,4 +721,9 @@
     <string name="whats_new_v60_statements_title">Relevés individuels par compte</string>
     <string name="whats_new_v60_widgets_desc">Suivez vos soldes, budget quotidien et enregistrez vos dépenses depuis l\'écran d\'accueil.</string>
     <string name="whats_new_v60_widgets_title">5 nouveaux widgets d\'écran d\'accueil</string>
+    <string name="original_message_title">Message d\'origine</string>
+    <string name="original_message_copied">Copié</string>
+    <string name="action_copy">Copier</string>
+    <string name="whats_new_v607_original_message_title">Messages originaux et badges d\'application</string>
+    <string name="whats_new_v607_original_message_desc">Consultez le SMS ou la notification d\'origine de chaque transaction avec copie en 1 clic et attribution bancaire ou applicative vérifiée.</string>
 </resources>

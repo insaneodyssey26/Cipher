@@ -721,4 +721,9 @@
     <string name="whats_new_v60_statements_title">口座別明細書エクスポート</string>
     <string name="whats_new_v60_widgets_desc">ホーム画面から残高や日割り予算の確認、ワンタップ支出記録が可能。</string>
     <string name="whats_new_v60_widgets_title">5つの新しいホーム画面ウィジェット</string>
+    <string name="original_message_title">元のメッセージ</string>
+    <string name="original_message_copied">コピー完了</string>
+    <string name="action_copy">コピー</string>
+    <string name="whats_new_v607_original_message_title">元のメッセージとアプリ元のバッジ</string>
+    <string name="whats_new_v607_original_message_desc">取引を記録した元のSMSや通知をワンタップでコピーでき、正確な銀行やアプリの送信元を確認できます。</string>
 </resources>

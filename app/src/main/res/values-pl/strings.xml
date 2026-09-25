@@ -720,4 +720,9 @@
     <string name="onboarding_capture_tour_title">Płać normalnie. Cipher zajmie się resztą.</string>
     <string name="onboarding_capture_tour_subtitle">Za każdym razem, gdy płacisz kartą, przelewem lub aplikacją płatniczą, Cipher natychmiast to rejestruje — w 100% prywatnie na Twoim telefonie.</string>
     <string name="onboarding_capture_tour_badge">W 100% prywatnie i na Twoim telefonie</string>
+    <string name="original_message_title">Oryginalna wiadomość</string>
+    <string name="original_message_copied">Skopiowano</string>
+    <string name="action_copy">Kopiuj</string>
+    <string name="whats_new_v607_original_message_title">Oryginalne wiadomości i plakietki źródła</string>
+    <string name="whats_new_v607_original_message_desc">Przeglądaj oryginalne SMS-y lub powiadomienia każdej transakcji z kopiowaniem 1 dotknięciem i zweryfikowanym źródłem banku lub aplikacji.</string>
 </resources>

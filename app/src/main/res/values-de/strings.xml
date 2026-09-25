@@ -721,4 +721,9 @@
     <string name="whats_new_v60_statements_title">Individuelle Kontoauszüge</string>
     <string name="whats_new_v60_widgets_desc">Kontostände, Tagesbudget und Schnellaufzeichnung direkt auf Ihrem Startbildschirm.</string>
     <string name="whats_new_v60_widgets_title">5 neue Startbildschirm-Widgets</string>
+    <string name="original_message_title">Originalnachricht</string>
+    <string name="original_message_copied">Kopiert</string>
+    <string name="action_copy">Kopieren</string>
+    <string name="whats_new_v607_original_message_title">Originalnachrichten &amp; App-Quellabzeichen</string>
+    <string name="whats_new_v607_original_message_desc">Sehen Sie die ursprüngliche SMS oder Benachrichtigung jeder Transaktion mit 1-Tap-Kopie und verifizierter Bank- oder App-Zuordnung.</string>
 </resources>

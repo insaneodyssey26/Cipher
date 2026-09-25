@@ -721,4 +721,9 @@
     <string name="whats_new_v60_statements_title">পৃথক অ্যাকাউন্ট স্টেটমেন্ট</string>
     <string name="whats_new_v60_widgets_desc">হোম স্ক্রিন থেকেই ব্যালেন্স, দৈনিক বাজেট সীমা ও এক ট্যাপে লেনদেন রেকর্ড করুন।</string>
     <string name="whats_new_v60_widgets_title">৫টি নতুন হোম স্ক্রিন উইজেট</string>
+    <string name="original_message_title">মূল মেসেজ</string>
+    <string name="original_message_copied">কপি করা হয়েছে</string>
+    <string name="action_copy">কপি করুন</string>
+    <string name="whats_new_v607_original_message_title">মূল মেসেজ এবং অ্যাপ সোর্স ব্যাজ</string>
+    <string name="whats_new_v607_original_message_desc">যেকোনো লেনদেনের মূল এসএমএস বা নোটিফিকেশন দেখুন, ১-ট্যাপ কপি এবং যাচাইকৃত ব্যাংক বা অ্যাপ সোর্স শনাক্তকরণ সহ।</string>
 </resources>

@@ -720,4 +720,9 @@
     <string name="whats_new_v60_statements_title">व्यक्तिगत खाता विवरण</string>
     <string name="whats_new_v60_widgets_desc">अपनी होम स्क्रीन से सीधे शेष राशि, दैनिक खर्च सीमा और त्वरित लेनदेन रिकॉर्ड करें।</string>
     <string name="whats_new_v60_widgets_title">5 नए होम स्क्रीन विजेट</string>
+    <string name="original_message_title">मूल संदेश</string>
+    <string name="original_message_copied">कॉपी किया गया</string>
+    <string name="action_copy">कॉपी करें</string>
+    <string name="whats_new_v607_original_message_title">मूल संदेश और ऐप स्रोत बैज</string>
+    <string name="whats_new_v607_original_message_desc">किसी भी लेन-देन को कैप्चर करने वाला मूल एसएमएस या नोटिफिकेशन देखें, 1-टैप कॉपी और बैंक या ऐप स्रोत पहचान के साथ।</string>
 </resources>
