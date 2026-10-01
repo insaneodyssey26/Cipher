@@ -3,6 +3,7 @@ package com.masum.cipher.ui.settings
 import android.content.Context
 import android.provider.Settings
 import androidx.lifecycle.viewModelScope
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
@@ -17,6 +18,7 @@ import com.masum.cipher.core.security.KeystoreManager
 import com.masum.cipher.core.worker.AutoBackupScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -79,6 +81,8 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetAutoBackupFrequency -> updateAutoBackupFrequency(intent.frequency)
             is SettingsContract.Intent.SetAutoBackupUri -> updateAutoBackupUri(intent.uri)
             is SettingsContract.Intent.SetAutoBackupEncryptedPassword -> updateAutoBackupPassword(intent.password)
+            SettingsContract.Intent.RevealAutoBackupPassword -> revealAutoBackupPassword()
+            SettingsContract.Intent.HideAutoBackupPassword -> updateState { copy(revealedAutoBackupPassword = null) }
             is SettingsContract.Intent.ActivatePro -> activatePro(intent.licenseKey, intent.email)
             is SettingsContract.Intent.DeactivatePro -> deactivatePro()
             is SettingsContract.Intent.SetShowProBadge -> updateShowProBadge(intent.enabled)
@@ -258,6 +262,18 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateAutoBackupUri(uri: String?) {
         viewModelScope.launch { updateSettingsUseCase.autoBackupUri(uri) }
+    }
+
+    private fun revealAutoBackupPassword() {
+        viewModelScope.launch {
+            val encrypted = userPreferences.settingsFlow.first().autoBackupEncryptedPassword
+            val password = encrypted?.let { keystoreManager.decrypt(it) }
+            if (password != null) {
+                updateState { copy(revealedAutoBackupPassword = password) }
+            } else {
+                emitEffect(SettingsContract.Effect.ShowToast(context.getString(R.string.backup_password_unavailable)))
+            }
+        }
     }
 
     private fun updateAutoBackupPassword(password: String?) {

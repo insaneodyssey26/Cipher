@@ -73,6 +73,8 @@ class SettingsContract {
         data class SetAutoBackupFrequency(val frequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency) : Intent()
         data class SetAutoBackupUri(val uri: String?) : Intent()
         data class SetAutoBackupEncryptedPassword(val password: String?) : Intent()
+        data object RevealAutoBackupPassword : Intent()
+        data object HideAutoBackupPassword : Intent()
         data class ActivatePro(val licenseKey: String, val email: String?) : Intent()
         data object DeactivatePro : Intent()
         data class SetShowProBadge(val enabled: Boolean) : Intent()
@@ -104,6 +106,7 @@ class SettingsContract {
         val autoBackupFrequency: com.masum.cipher.core.data.local.pref.AutoBackupFrequency = com.masum.cipher.core.data.local.pref.AutoBackupFrequency.NEVER,
         val autoBackupUri: String? = null,
         val autoBackupEncryptedPassword: String? = null,
+        val revealedAutoBackupPassword: String? = null,
         val isExporting: Boolean = false,
         val isImporting: Boolean = false,
         val isExportingCsv: Boolean = false,

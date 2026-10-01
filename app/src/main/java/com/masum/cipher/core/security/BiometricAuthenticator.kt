@@ -24,7 +24,9 @@ class BiometricAuthenticator @Inject constructor(
     fun authenticate(
         activity: FragmentActivity,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        title: String = "Unlock Cipher",
+        subtitle: String = "Log in using your biometric credential"
     ) {
         val executor = ContextCompat.getMainExecutor(activity)
         val biometricPrompt = BiometricPrompt(activity, executor,
@@ -41,8 +43,8 @@ class BiometricAuthenticator @Inject constructor(
             })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Unlock Cipher")
-            .setSubtitle("Log in using your biometric credential")
+            .setTitle(title)
+            .setSubtitle(subtitle)
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
             .build()
 

@@ -121,6 +121,7 @@ import compose.icons.lucideicons.CloudDownload
 import compose.icons.lucideicons.CloudUpload
 import compose.icons.lucideicons.Coffee
 import compose.icons.lucideicons.Database
+import compose.icons.lucideicons.Eye
 import compose.icons.lucideicons.EyeOff
 import compose.icons.lucideicons.FileSpreadsheet
 import compose.icons.lucideicons.FileText
@@ -189,6 +190,8 @@ fun SettingsScreen(
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var isColorPickerExpanded by remember { mutableStateOf(false) }
     var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
+    val revealPasswordPromptTitle = stringResource(R.string.show_backup_password_title)
+    val revealPasswordPromptSubtitle = stringResource(R.string.show_backup_password_prompt)
     var autoBackupSetupPassword by remember { mutableStateOf("") }
     var showProSheet by remember { mutableStateOf(false) }
     var showPdfUpsellSheet by remember { mutableStateOf(false) }
@@ -1232,6 +1235,25 @@ SettingsSection(stringResource(R.string.settings_data_backup), icon = LucideIcon
                             showFrequencyDialog = true
                         }
                     )
+                    if (matchAutoBackup) VaultSettingsItem(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Eye,
+                        title = stringResource(R.string.show_backup_password_title),
+                        onClick = {
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            if (biometricAuthenticator.isBiometricAvailable()) {
+                                biometricAuthenticator.authenticate(
+                                    activity = context as FragmentActivity,
+                                    onSuccess = { viewModel.handleIntent(SettingsContract.Intent.RevealAutoBackupPassword) },
+                                    onError = { },
+                                    title = revealPasswordPromptTitle,
+                                    subtitle = revealPasswordPromptSubtitle
+                                )
+                            } else {
+                                viewModel.handleIntent(SettingsContract.Intent.RevealAutoBackupPassword)
+                            }
+                        }
+                    )
                     if (matchLoc) VaultSettingsItem(
                         isHapticsEnabled = state.isHapticsEnabled,
                         icon = LucideIcons.FolderDown,
@@ -1761,6 +1783,26 @@ Spacer(modifier = Modifier.weight(1f))
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     )
                 )
+            }
+        }
+    }
+
+    state.revealedAutoBackupPassword?.let { revealedPassword ->
+        VaultSettingsDialog(
+            title = stringResource(R.string.backup_password_dialog_title),
+            onDismiss = { viewModel.handleIntent(SettingsContract.Intent.HideAutoBackupPassword) },
+            confirmText = stringResource(R.string.action_close),
+            showDismissButton = false,
+            onConfirm = { viewModel.handleIntent(SettingsContract.Intent.HideAutoBackupPassword) }
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = revealedPassword,
+                    style = Typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                BackupPasswordWarning()
             }
         }
     }
