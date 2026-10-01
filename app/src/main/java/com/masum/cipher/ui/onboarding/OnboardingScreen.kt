@@ -6,6 +6,9 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.hilt.navigation.compose.hiltViewModel
+import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -160,6 +163,22 @@ fun OnboardingScreen(
     var showCompletionDialog by remember { mutableStateOf(false) }
     var completedSelectedApps by remember { mutableStateOf<Set<String>>(emptySet()) }
 
+    val restoreViewModel: RestoreBackupViewModel = hiltViewModel()
+    val restoreState by restoreViewModel.state.collectAsStateWithLifecycle()
+    var pendingBackupUri by remember { mutableStateOf<Uri?>(null) }
+    val backupPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) pendingBackupUri = uri
+    }
+
+    LaunchedEffect(restoreViewModel) {
+        restoreViewModel.effect.collect { effect ->
+            if (effect is RestoreBackupContract.Effect.Restored) {
+                pendingBackupUri = null
+                onComplete()
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -212,6 +231,7 @@ fun OnboardingScreen(
                                 isProActive = userPreferences.isCachedPro()
                                 proTierName = userPreferences.getCachedProTier()
                             },
+                            onRestoreBackup = { backupPicker.launch(arrayOf("application/octet-stream")) },
                             onNext = { page = 1 }
                         )
                         1 -> ThemeSelectionPage(
@@ -272,6 +292,23 @@ fun OnboardingScreen(
                 showQuickLangDialog = false
             },
             onDismiss = { showQuickLangDialog = false }
+        )
+    }
+
+    pendingBackupUri?.let { uri ->
+        RestoreBackupPasswordDialog(
+            isRestoring = restoreState.isRestoring,
+            errorMessage = restoreState.errorMessage,
+            onConfirm = { password ->
+                restoreViewModel.handleIntent(RestoreBackupContract.Intent.Restore(uri, password))
+            },
+            onErrorCleared = {
+                restoreViewModel.handleIntent(RestoreBackupContract.Intent.DismissError)
+            },
+            onDismiss = {
+                pendingBackupUri = null
+                restoreViewModel.handleIntent(RestoreBackupContract.Intent.DismissError)
+            }
         )
     }
 
@@ -435,6 +472,7 @@ private fun WelcomePage(
     isPro: Boolean,
     proTier: String,
     onProStatusChanged: () -> Unit,
+    onRestoreBackup: () -> Unit,
     onNext: () -> Unit
 ) {
     val view = LocalView.current
@@ -622,6 +660,23 @@ private fun WelcomePage(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            TextButton(
+                onClick = {
+                    view.performVibrate(true, isLongPress = false)
+                    onRestoreBackup()
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_restore_from_backup),
+                    style = Typography.labelMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 12.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
