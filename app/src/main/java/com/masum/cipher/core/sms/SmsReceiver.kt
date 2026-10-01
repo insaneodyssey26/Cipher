@@ -52,7 +52,7 @@ class SmsReceiver : BroadcastReceiver() {
                                     amount = parsed.amount,
                                     merchant = parsed.merchant,
                                     currency = parsed.currency,
-                                    timestamp = resolveSmsTimestamp(sms.timestampMillis, System.currentTimeMillis()),
+                                    timestamp = resolveTransactionTimestamp(sms.timestampMillis, System.currentTimeMillis()),
                                     category = "",
                                     rawSms = body,
                                     isIncome = parsed.isIncome

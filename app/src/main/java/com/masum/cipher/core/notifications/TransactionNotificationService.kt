@@ -7,6 +7,7 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
 import com.masum.cipher.core.security.SecurityManager
 import com.masum.cipher.core.sms.TransactionParser
+import com.masum.cipher.core.sms.resolveTransactionTimestamp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +82,7 @@ class TransactionNotificationService : NotificationListenerService() {
         if (fullMessage.isBlank()) return
 
         val currencyCode = cachedCurrencyCode
+        val postedAtMillis = sbn.postTime
         serviceScope.launch {
             val parsedTx = transactionParser.parse(fullMessage, currencyCode)
             if (parsedTx != null) {
@@ -105,7 +107,7 @@ class TransactionNotificationService : NotificationListenerService() {
                     category = "",
                     isIncome = parsedTx.isIncome,
                     rawSms = storedMessage,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = resolveTransactionTimestamp(postedAtMillis, System.currentTimeMillis())
                 )
                 if (securityManager.isDatabaseKeyUnavailable()) return@launch
                 transactionRepository.insertTransaction(transactionEntity)
