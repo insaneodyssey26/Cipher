@@ -61,6 +61,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.groupByMerchant
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -126,12 +127,12 @@ fun CategoryDetailSheet(
 
     val topMerchants = remember(categoryTransactions) {
         categoryTransactions
-            .groupBy { it.merchant.trim().ifEmpty { "Unknown" } }
-            .map { (merchant, txs) ->
+            .groupByMerchant(blankLabel = "Unknown") { it.merchant }
+            .map { group ->
                 CategoryMerchantSpend(
-                    merchant = merchant,
-                    totalAmount = txs.sumOf { it.amount },
-                    count = txs.size
+                    merchant = group.name,
+                    totalAmount = group.items.sumOf { it.amount },
+                    count = group.items.size
                 )
             }
             .sortedByDescending { it.totalAmount }

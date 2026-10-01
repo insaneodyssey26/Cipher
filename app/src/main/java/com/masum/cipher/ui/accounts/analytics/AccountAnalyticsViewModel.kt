@@ -10,6 +10,7 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.AccountRepository
 import com.masum.cipher.core.data.repository.CategoryRepository
 import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.domain.groupByMerchant
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.mvi.BaseViewModel
 import com.masum.cipher.ui.dashboard.DashboardContract
@@ -308,19 +309,18 @@ class AccountAnalyticsViewModel @Inject constructor(
     }
 
     private fun calculateTopMerchants(transactions: List<TransactionEntity>): List<InsightsContract.MerchantData> {
-        return transactions.asSequence()
+        return transactions
             .filter { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }
-            .groupBy { it.merchant.trim().ifEmpty { "Unknown" } }
-            .map { (merchant, txs) ->
+            .groupByMerchant(blankLabel = "Unknown") { it.merchant }
+            .map { group ->
                 InsightsContract.MerchantData(
-                    merchant = merchant,
-                    amount = txs.sumOf { it.amount },
-                    count = txs.size
+                    merchant = group.name,
+                    amount = group.items.sumOf { it.amount },
+                    count = group.items.size
                 )
             }
             .sortedByDescending { it.amount }
             .take(5)
-            .toList()
     }
 
     private fun calculateVelocity(
