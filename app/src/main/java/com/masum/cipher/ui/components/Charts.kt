@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -69,6 +70,7 @@ import com.masum.cipher.R
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.insights.InsightsContract
+import com.masum.cipher.ui.theme.bestContrastingColor
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
@@ -934,6 +936,9 @@ fun PeakHoursChart(
     }
 }
 
+private val HeatmapLightText = Color(0xFFF8FAFC)
+private val HeatmapDarkText = Color(0xFF0D0D1A)
+
 @Composable
 fun CalendarHeatmap(
     data: Map<Long, Double>,
@@ -1090,7 +1095,16 @@ fun CalendarHeatmap(
                             
                             val isSelected = selectedTimestamp == time
                             val isToday = time == todayCal.timeInMillis
-                            val isBrightCell = isCurrentMonth && spend > 0 && (0.35f + intensity * 0.65f) >= 0.55f
+                            val cellColor = if (!isCurrentMonth) Color.Transparent
+                                else if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f + intensity * 0.65f)
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                            val dayTextColor = if (!isCurrentMonth) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                else if (spend > 0) bestContrastingColor(
+                                    background = cellColor.compositeOver(MaterialTheme.colorScheme.surface),
+                                    light = HeatmapLightText,
+                                    dark = HeatmapDarkText
+                                )
+                                else MaterialTheme.colorScheme.onSurface
 
                             Box(
                                 modifier = Modifier
@@ -1098,9 +1112,7 @@ fun CalendarHeatmap(
                                     .aspectRatio(1f)
                                     .padding(2.dp)
                                     .background(
-                                        color = if (!isCurrentMonth) Color.Transparent 
-                                                else if (spend > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f + intensity * 0.65f) 
-                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                                        color = cellColor,
                                         shape = RoundedCornerShape(10.dp)
                                     )
                                     .border(
@@ -1121,9 +1133,7 @@ fun CalendarHeatmap(
                                 Text(
                                     text = displayDayNum.toString(),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = if (!isCurrentMonth) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                                            else if (isBrightCell) Color(0xFF0D0D1A) 
-                                            else MaterialTheme.colorScheme.onSurface,
+                                    color = dayTextColor,
                                     fontWeight = if (isSelected || isToday || spend > 0) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
