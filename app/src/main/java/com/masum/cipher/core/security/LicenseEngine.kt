@@ -2,7 +2,7 @@ package com.masum.cipher.core.security
 
 import android.os.Build
 import android.util.Base64
-import android.util.Log
+import com.masum.cipher.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -71,6 +71,7 @@ sealed class RemoteLicenseCheckResult {
 class LicenseEngine @Inject constructor() {
 
     companion object {
+        private val USER_AGENT = "Cipher-Android/${BuildConfig.VERSION_NAME}"
         private const val RSA_ALGORITHM = "SHA256withRSA"
         private const val KEY_FACTORY_ALGORITHM = "RSA"
 
@@ -308,7 +309,7 @@ class LicenseEngine @Inject constructor() {
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
-                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+                setRequestProperty("User-Agent", USER_AGENT)
             }
 
             val jsonBody = JSONObject().apply {
@@ -326,7 +327,6 @@ class LicenseEngine @Inject constructor() {
             val responseCode = conn.responseCode
             val stream = if (responseCode in 200..299) conn.inputStream else conn.errorStream
             val responseText = stream?.bufferedReader()?.use(BufferedReader::readText) ?: ""
-            Log.d("LicenseEngine", "activateLicenseRemote responseCode=$responseCode body=$responseText")
 
             if (responseCode in 200..299) {
                 val jsonResponse = JSONObject(responseText)
@@ -367,8 +367,7 @@ class LicenseEngine @Inject constructor() {
                 val errorMsg = jsonResponse?.optString("error") ?: "Server returned error ($responseCode)"
                 LicenseValidationResult(isValid = false, errorMessage = errorMsg)
             }
-        } catch (e: Exception) {
-            Log.e("LicenseEngine", "activateLicenseRemote error: ${e.message}", e)
+        } catch (_: Exception) {
             LicenseValidationResult(
                 isValid = false,
                 errorMessage = "Internet connection required to activate this license key."
@@ -391,13 +390,12 @@ class LicenseEngine @Inject constructor() {
                 connectTimeout = 8000
                 readTimeout = 8000
                 setRequestProperty("Accept", "application/json")
-                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+                setRequestProperty("User-Agent", USER_AGENT)
             }
 
             val responseCode = conn.responseCode
             if (responseCode in 200..299) {
                 val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
-                Log.d("LicenseEngine", "fetchActiveDevicesRemote body=$text")
                 val json = JSONObject(text)
                 val count = json.optInt("deviceCount", 1)
                 val list = parseActiveDevices(json.optJSONArray("devices"), currentDeviceId)
@@ -405,8 +403,7 @@ class LicenseEngine @Inject constructor() {
             } else {
                 Pair(1, emptyList())
             }
-        } catch (e: Exception) {
-            Log.e("LicenseEngine", "fetchActiveDevicesRemote error: ${e.message}", e)
+        } catch (_: Exception) {
             Pair(1, emptyList())
         }
     }
@@ -447,7 +444,7 @@ class LicenseEngine @Inject constructor() {
                 connectTimeout = 8000
                 readTimeout = 8000
                 setRequestProperty("Accept", "application/json")
-                setRequestProperty("User-Agent", "Cipher-Android/6.0.1")
+                setRequestProperty("User-Agent", USER_AGENT)
             }
 
             val responseCode = conn.responseCode
@@ -526,7 +523,7 @@ class LicenseEngine @Inject constructor() {
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
-                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+                setRequestProperty("User-Agent", USER_AGENT)
             }
 
             val jsonBody = JSONObject().apply {
@@ -542,7 +539,6 @@ class LicenseEngine @Inject constructor() {
             val responseCode = conn.responseCode
             if (responseCode in 200..299) {
                 val text = conn.inputStream.bufferedReader().use(BufferedReader::readText)
-                Log.d("LicenseEngine", "revokeDeviceRemote body=$text")
                 val json = JSONObject(text)
                 val count = json.optInt("deviceCount", 0)
                 val list = parseActiveDevices(json.optJSONArray("devices"), currentDeviceId)
@@ -550,8 +546,7 @@ class LicenseEngine @Inject constructor() {
             } else {
                 Pair(0, emptyList())
             }
-        } catch (e: Exception) {
-            Log.e("LicenseEngine", "revokeDeviceRemote error: ${e.message}", e)
+        } catch (_: Exception) {
             Pair(0, emptyList())
         }
     }
@@ -571,7 +566,7 @@ class LicenseEngine @Inject constructor() {
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
-                setRequestProperty("User-Agent", "Cipher-Android/6.0.0")
+                setRequestProperty("User-Agent", USER_AGENT)
             }
 
             val jsonBody = JSONObject().apply {
