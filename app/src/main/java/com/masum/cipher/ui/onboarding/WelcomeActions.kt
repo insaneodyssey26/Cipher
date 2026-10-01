@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -50,6 +53,12 @@ import compose.icons.lucideicons.Key
 internal const val WELCOME_RESTORE_BACKUP_TAG = "welcome_restore_backup"
 internal const val WELCOME_LICENSE_KEY_TAG = "welcome_license_key"
 
+private const val COMPACT_WIDTH_DP = 360f
+private const val LARGE_FONT_SCALE = 1.3f
+
+internal fun shouldStackWelcomeActions(availableWidthDp: Float, fontScale: Float): Boolean =
+    availableWidthDp < COMPACT_WIDTH_DP || fontScale >= LARGE_FONT_SCALE
+
 private val SecondaryButtonShape = RoundedCornerShape(16.dp)
 private val ProAccent = Color(0xFFE2FF38)
 private val ProAccentSecondary = Color(0xFF38BDF8)
@@ -63,57 +72,62 @@ internal fun WelcomeReturningUserSection(
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
+    val fontScale = LocalDensity.current.fontScale
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        LabelledDivider(text = stringResource(R.string.onboarding_returning_title))
+    val restoreButton: @Composable (Modifier) -> Unit = { buttonModifier ->
+        WelcomeSecondaryButton(
+            icon = LucideIcons.CloudDownload,
+            label = stringResource(R.string.onboarding_restore_backup_short),
+            onClick = {
+                view.performVibrate(true, isLongPress = false)
+                onRestoreBackup()
+            },
+            modifier = buttonModifier.testTag(WELCOME_RESTORE_BACKUP_TAG)
+        )
+    }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            WelcomeSecondaryButton(
-                icon = LucideIcons.CloudDownload,
-                label = stringResource(R.string.onboarding_restore_backup_short),
-                onClick = {
-                    view.performVibrate(true, isLongPress = false)
-                    onRestoreBackup()
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .testTag(WELCOME_RESTORE_BACKUP_TAG)
+    val licenseButton: @Composable (Modifier) -> Unit = { buttonModifier ->
+        val openLicense = {
+            view.performVibrate(true, isLongPress = false)
+            onLicenseKey()
+        }
+        if (isPro) {
+            WelcomeProActiveButton(
+                tier = proTier,
+                onClick = openLicense,
+                modifier = buttonModifier.testTag(WELCOME_LICENSE_KEY_TAG)
             )
+        } else {
+            WelcomeSecondaryButton(
+                icon = LucideIcons.Key,
+                label = stringResource(R.string.onboarding_license_key_short),
+                onClick = openLicense,
+                modifier = buttonModifier.testTag(WELCOME_LICENSE_KEY_TAG)
+            )
+        }
+    }
 
-            if (isPro) {
-                WelcomeProActiveButton(
-                    tier = proTier,
-                    onClick = {
-                        view.performVibrate(true, isLongPress = false)
-                        onLicenseKey()
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .testTag(WELCOME_LICENSE_KEY_TAG)
-                )
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val stacked = shouldStackWelcomeActions(maxWidth.value, fontScale)
+
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            LabelledDivider(text = stringResource(R.string.onboarding_returning_title))
+
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    restoreButton(Modifier.fillMaxWidth())
+                    licenseButton(Modifier.fillMaxWidth())
+                }
             } else {
-                WelcomeSecondaryButton(
-                    icon = LucideIcons.Key,
-                    label = stringResource(R.string.onboarding_license_key_short),
-                    onClick = {
-                        view.performVibrate(true, isLongPress = false)
-                        onLicenseKey()
-                    },
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .testTag(WELCOME_LICENSE_KEY_TAG)
-                )
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    restoreButton(Modifier.weight(1f).fillMaxHeight())
+                    licenseButton(Modifier.weight(1f).fillMaxHeight())
+                }
             }
         }
     }
@@ -147,13 +161,12 @@ internal fun WelcomeSecondaryButton(
             text = label,
             style = Typography.titleSmall.copy(
                 fontFamily = Lato,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.5.sp,
-                lineHeight = 18.sp
+                fontWeight = FontWeight.SemiBold
             ),
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            maxLines = 2
+            maxLines = 2,
+            autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 14.5.sp, stepSize = 0.5.sp)
         )
     }
 }

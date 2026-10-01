@@ -31,6 +31,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -483,7 +485,7 @@ private fun OnboardingTopBar(
 }
 
 @Composable
-private fun WelcomePage(
+internal fun WelcomePage(
     userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
     isPro: Boolean,
     proTier: String,
@@ -497,123 +499,129 @@ private fun WelcomePage(
 
     LaunchedEffect(Unit) { entered = true }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp)
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewportHeight = maxHeight
+
         Column(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            StaggeredEntrance(visible = entered, delayMillis = 0) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "cipher.",
-                        style = Typography.displayLarge.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 48.sp,
-                            letterSpacing = ((-2).sp),
-                            lineHeight = 50.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = stringResource(R.string.onboarding_welcome_greet_lead),
-                        style = Typography.headlineSmall.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 22.sp,
-                            letterSpacing = (-0.4).sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = stringResource(R.string.onboarding_welcome_tagline_simple),
-                        style = Typography.bodyMedium.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 16.sp,
-                            lineHeight = 23.sp,
-                            letterSpacing = (-0.1).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            StaggeredEntrance(visible = entered, delayMillis = 120) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(20.dp)
-                        )
-                        .padding(horizontal = 18.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
-                ) {
-                    WelcomeFeatureBenefit(
-                        icon = LucideIcons.ShieldCheck,
-                        title = stringResource(R.string.onboarding_feature_offline_simple_title),
-                        description = stringResource(R.string.onboarding_feature_offline_simple_desc)
-                    )
-                    WelcomeFeatureBenefit(
-                        icon = LucideIcons.Zap,
-                        title = stringResource(R.string.onboarding_feature_auto_simple_title),
-                        description = stringResource(R.string.onboarding_feature_auto_simple_desc)
-                    )
-                    WelcomeFeatureBenefit(
-                        icon = LucideIcons.ChartBar,
-                        title = stringResource(R.string.onboarding_feature_insights_simple_title),
-                        description = stringResource(R.string.onboarding_feature_insights_simple_desc)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        StaggeredEntrance(visible = entered, delayMillis = 240) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 20.dp)
+                    .heightIn(min = viewportHeight)
+                    .padding(horizontal = 24.dp)
             ) {
-                PrimaryActionButton(
-                    label = stringResource(R.string.onboarding_welcome_begin),
-                    onClick = {
-                        view.performVibrate(true, isLongPress = false)
-                        onNext()
+                StaggeredEntrance(visible = entered, delayMillis = 0) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "cipher.",
+                            style = Typography.displayLarge.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 48.sp,
+                                letterSpacing = ((-2).sp),
+                                lineHeight = 50.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.onboarding_welcome_greet_lead),
+                            style = Typography.headlineSmall.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 22.sp,
+                                letterSpacing = (-0.4).sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = stringResource(R.string.onboarding_welcome_tagline_simple),
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 16.sp,
+                                lineHeight = 23.sp,
+                                letterSpacing = (-0.1).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                WelcomeReturningUserSection(
-                    isPro = isPro,
-                    proTier = proTier,
-                    onRestoreBackup = onRestoreBackup,
-                    onLicenseKey = { showRestoreKeyDialog = true }
-                )
+                StaggeredEntrance(visible = entered, delayMillis = 120) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(20.dp)
+                            )
+                            .padding(horizontal = 18.dp, vertical = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        WelcomeFeatureBenefit(
+                            icon = LucideIcons.ShieldCheck,
+                            title = stringResource(R.string.onboarding_feature_offline_simple_title),
+                            description = stringResource(R.string.onboarding_feature_offline_simple_desc)
+                        )
+                        WelcomeFeatureBenefit(
+                            icon = LucideIcons.Zap,
+                            title = stringResource(R.string.onboarding_feature_auto_simple_title),
+                            description = stringResource(R.string.onboarding_feature_auto_simple_desc)
+                        )
+                        WelcomeFeatureBenefit(
+                            icon = LucideIcons.ChartBar,
+                            title = stringResource(R.string.onboarding_feature_insights_simple_title),
+                            description = stringResource(R.string.onboarding_feature_insights_simple_desc)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.weight(1f))
+
+                StaggeredEntrance(visible = entered, delayMillis = 240) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp)
+                    ) {
+                        PrimaryActionButton(
+                            label = stringResource(R.string.onboarding_welcome_begin),
+                            onClick = {
+                                view.performVibrate(true, isLongPress = false)
+                                onNext()
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        WelcomeReturningUserSection(
+                            isPro = isPro,
+                            proTier = proTier,
+                            onRestoreBackup = onRestoreBackup,
+                            onLicenseKey = { showRestoreKeyDialog = true }
+                        )
+                    }
+                }
             }
         }
     }
