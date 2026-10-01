@@ -7,6 +7,7 @@ import android.provider.Telephony
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.security.SecurityManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,9 @@ class SmsReceiver : BroadcastReceiver() {
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var securityManager: SecurityManager
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -42,6 +46,7 @@ class SmsReceiver : BroadcastReceiver() {
                         val parsed = smsParser.parse(body, settings.currencyCode)
 
                         if (parsed != null) {
+                            if (securityManager.isDatabaseKeyUnavailable()) return@launch
                             repository.insertTransaction(
                                 TransactionEntity(
                                     amount = parsed.amount,

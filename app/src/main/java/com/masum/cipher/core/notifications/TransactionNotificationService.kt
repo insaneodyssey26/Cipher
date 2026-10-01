@@ -5,6 +5,7 @@ import android.service.notification.StatusBarNotification
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
+import com.masum.cipher.core.security.SecurityManager
 import com.masum.cipher.core.sms.TransactionParser
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,9 @@ class TransactionNotificationService : NotificationListenerService() {
 
     @Inject
     lateinit var packageInstallReceiver: PackageInstallReceiver
+
+    @Inject
+    lateinit var securityManager: SecurityManager
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
@@ -103,6 +107,7 @@ class TransactionNotificationService : NotificationListenerService() {
                     rawSms = storedMessage,
                     timestamp = System.currentTimeMillis()
                 )
+                if (securityManager.isDatabaseKeyUnavailable()) return@launch
                 transactionRepository.insertTransaction(transactionEntity)
             }
         }

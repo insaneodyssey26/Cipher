@@ -3,6 +3,7 @@ package com.masum.cipher.core.di
 import android.content.Context
 import androidx.room.Room
 import com.masum.cipher.core.data.local.AppDatabase
+import com.masum.cipher.core.data.local.LazyPassphraseOpenHelperFactory
 import com.masum.cipher.core.data.local.dao.CategoryRuleDao
 import com.masum.cipher.core.data.local.dao.MerchantAliasDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
@@ -13,7 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
 @Module
@@ -26,9 +26,8 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         securityManager: SecurityManager
     ): AppDatabase {
-        val passphrase = securityManager.getDatabasePassphrase()
-        val factory = SupportOpenHelperFactory(passphrase)
-        
+        val factory = LazyPassphraseOpenHelperFactory { securityManager.getDatabasePassphrase() }
+
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
