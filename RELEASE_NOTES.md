@@ -1,5 +1,28 @@
 # Release Notes
 
+## [6.1.5]
+
+### Added & Improved
+- **Restore on a New Phone**: Moving phones? Tap *Restore from a backup* right on the first screen to bring back your accounts, budgets and history in one step, then grant SMS and notification access to resume automatic tracking.
+- **See Your Backup Password**: View the saved auto-backup password anytime in Settings > Data & backup after confirming with your fingerprint or PIN. Cipher now also reminds you to write the password down when you set it.
+- **A Clearer Welcome Screen**: Bigger, easier-to-find Restore backup and License key buttons, larger text, and a layout that fits small phones and large font sizes.
+- **Faster Accounts**: Account balances are now calculated by the database, so the main screen, insights and accounts stay quick even with years of history.
+
+### Fixed
+- **Safer Transfers**: Moving money between your accounts is now saved all-or-nothing, so a transfer can never end up half done.
+- **Correct Dates for Delayed Messages**: Bank SMS and payment notifications that arrive late are recorded with the time they were actually sent.
+- **No-Spend Streak**: The streak now counts from your last real expense instead of showing a full year at the start of a month.
+- **Merchants Combined**: Merchants that differ only by capital letters, like JIO and Jio, are now grouped together in top merchants.
+- **Readable Calendar**: Day numbers in the activity calendar are easy to read on dark themes, and screen readers now describe each day with its date and spending.
+- **Correct Plurals**: "1 day" and "1 day left" instead of "1 days" in every language.
+
+### Security & Reliability
+- If Cipher cannot unlock its secure storage, for example after a phone transfer, it now explains what happened and offers recovery instead of crashing, and it never replaces your key silently.
+- App data is excluded from phone-to-phone transfer, because the encryption key cannot move between devices. Use a backup file to move your data.
+- Removed license and diagnostic details from the device log.
+
+---
+
 ## [6.1.2]
 
 ### Improved & Polished

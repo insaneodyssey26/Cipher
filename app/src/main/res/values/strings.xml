@@ -375,6 +375,14 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v615_restore_title">Restore on a New Phone</string>
+    <string name="whats_new_v615_restore_desc">Moving phones? Tap Restore from a backup on the first screen to bring back your accounts, budgets and history in one step.</string>
+    <string name="whats_new_v615_password_title">See Your Backup Password</string>
+    <string name="whats_new_v615_password_desc">Forgot the password you set for backups? View it anytime in Settings after confirming with your fingerprint or PIN.</string>
+    <string name="whats_new_v615_welcome_title">A Clearer Welcome</string>
+    <string name="whats_new_v615_welcome_desc">Restore and License buttons are now bigger and easier to find, and the screen fits small phones and large text sizes.</string>
+    <string name="whats_new_v615_reliable_title">More Reliable</string>
+    <string name="whats_new_v615_reliable_desc">Transfers are saved safely, delayed bank messages get the right date, merchants like JIO and Jio are combined, and balances load faster.</string>
     <string name="whats_new_v612_battery_title">Better Battery Life</string>
     <string name="whats_new_v612_battery_desc">Optimized background processing so Cipher uses even less battery throughout the day.</string>
     <string name="whats_new_v612_speed_title">Faster Loading &amp; Performance</string>
