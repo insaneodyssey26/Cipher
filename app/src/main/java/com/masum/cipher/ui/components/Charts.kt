@@ -46,6 +46,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -943,6 +948,7 @@ private val HeatmapDarkText = Color(0xFF0D0D1A)
 fun CalendarHeatmap(
     data: Map<Long, Double>,
     selectedTimestamp: Long?,
+    currencySymbol: String,
     onDayClick: (Long) -> Unit
 ) {
     val todayCal = remember { Calendar.getInstance().apply {
@@ -956,6 +962,7 @@ fun CalendarHeatmap(
     val coroutineScope = rememberCoroutineScope()
     val maxSpend = remember(data) { data.values.maxOfOrNull { it } ?: 1.0 }
     val locale = LocalLocale.current.platformLocale
+    val fullDateFormat = remember(locale) { com.masum.cipher.core.util.AppFormatters.getFullDate(locale) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -1106,6 +1113,19 @@ fun CalendarHeatmap(
                                 )
                                 else MaterialTheme.colorScheme.onSurface
 
+                            val dayDescription = if (!isCurrentMonth) "" else {
+                                val dateText = fullDateFormat.format(cellCal.time)
+                                if (spend > 0) {
+                                    stringResource(
+                                        R.string.heatmap_day_spent,
+                                        dateText,
+                                        com.masum.cipher.core.util.AppFormatters.formatCurrency(spend, currencySymbol, locale)
+                                    )
+                                } else {
+                                    stringResource(R.string.heatmap_day_no_spend, dateText)
+                                }
+                            }
+
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
@@ -1125,9 +1145,20 @@ fun CalendarHeatmap(
                                     )
                                     .clickable(
                                         enabled = isCurrentMonth,
+                                        role = Role.Button,
                                         interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                                         indication = null
-                                    ) { onDayClick(time) },
+                                    ) { onDayClick(time) }
+                                    .then(
+                                        if (isCurrentMonth) {
+                                            Modifier.semantics(mergeDescendants = true) {
+                                                contentDescription = dayDescription
+                                                selected = isSelected
+                                            }
+                                        } else {
+                                            Modifier.clearAndSetSemantics { }
+                                        }
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(

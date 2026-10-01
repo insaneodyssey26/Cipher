@@ -311,6 +311,8 @@
     <string name="backup_password_import_desc">Enter the password used to encrypt this backup file.</string>
     <string name="password_label">Password</string>
     <string name="backup_password_warning">Write this password down and keep it somewhere safe. If you forget it, your backups cannot be opened, even by us.</string>
+    <string name="heatmap_day_spent">%1$s, spent %2$s</string>
+    <string name="heatmap_day_no_spend">%1$s, no spending</string>
     <string name="show_backup_password_title">Show Backup Password</string>
     <string name="show_backup_password_prompt">Confirm it\'s you to view the saved backup password</string>
     <string name="backup_password_dialog_title">Your Backup Password</string>

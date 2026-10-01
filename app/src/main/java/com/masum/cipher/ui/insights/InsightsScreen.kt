@@ -387,6 +387,7 @@ fun InsightsScreen(
                                     CalendarHeatmap(
                                         data = state.calendarHeatmap,
                                         selectedTimestamp = state.selectedDayTimestamp,
+                                        currencySymbol = state.currencySymbol,
                                         onDayClick = { timestamp ->
                                             view.performVibrate(isHapticsEnabled, isLongPress = true)
                                             onNavigateToDayDetail(timestamp)
