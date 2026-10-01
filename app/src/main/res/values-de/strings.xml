@@ -773,4 +773,7 @@
         <item quantity="one">noch %1$d Tag</item>
         <item quantity="other">noch %1$d Tage</item>
     </plurals>
+    <string name="onboarding_returning_title">Du nutzt Cipher schon?</string>
+    <string name="onboarding_restore_backup_short">Wiederherstellen</string>
+    <string name="onboarding_license_key_short">Lizenzschlüssel</string>
 </resources>

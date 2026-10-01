@@ -222,7 +222,6 @@
     <string name="export_csv_title">Export CSV Report</string>
     <string name="export_pdf_title">Export PDF Statement</string>
     <string name="backup_vault_title">Backup Vault</string>
-    <string name="onboarding_restore_from_backup">Restore from a backup</string>
     <string name="restore_vault_title">Restore Vault</string>
     <string name="clear_all_data_title">Clear All Data</string>
     <string name="enable_auto_backup_title">Enable Auto-Backup</string>
@@ -817,4 +816,7 @@
         <item quantity="one">%1$d day left</item>
         <item quantity="other">%1$d days left</item>
     </plurals>
+    <string name="onboarding_returning_title">Already using Cipher?</string>
+    <string name="onboarding_restore_backup_short">Restore backup</string>
+    <string name="onboarding_license_key_short">License key</string>
 </resources>

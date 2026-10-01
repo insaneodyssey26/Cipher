@@ -772,4 +772,7 @@
         <item quantity="one">%1$d दिन शेष</item>
         <item quantity="other">%1$d दिन शेष</item>
     </plurals>
+    <string name="onboarding_returning_title">क्या आप पहले से Cipher इस्तेमाल करते हैं?</string>
+    <string name="onboarding_restore_backup_short">बैकअप रिस्टोर करें</string>
+    <string name="onboarding_license_key_short">लाइसेंस कुंजी</string>
 </resources>

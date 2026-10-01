@@ -775,4 +775,7 @@
         <item quantity="many">%1$d de jours restants</item>
         <item quantity="other">%1$d jours restants</item>
     </plurals>
+    <string name="onboarding_returning_title">Vous utilisez déjà Cipher ?</string>
+    <string name="onboarding_restore_backup_short">Restaurer</string>
+    <string name="onboarding_license_key_short">Clé de licence</string>
 </resources>

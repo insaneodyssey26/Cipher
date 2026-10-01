@@ -493,6 +493,9 @@ private fun WelcomePage(
 ) {
     val view = LocalView.current
     var showRestoreKeyDialog by remember { mutableStateOf(false) }
+    var entered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { entered = true }
 
     Column(
         modifier = Modifier
@@ -502,196 +505,114 @@ private fun WelcomePage(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    text = "cipher.",
-                    style = Typography.displayLarge.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 44.sp,
-                        letterSpacing = ((-2).sp),
-                        lineHeight = 46.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = stringResource(R.string.onboarding_welcome_greet_lead),
-                    style = Typography.headlineSmall.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 20.sp,
-                        letterSpacing = (-0.4).sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = stringResource(R.string.onboarding_welcome_tagline_simple),
-                    style = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.5.sp,
-                        lineHeight = 21.sp,
-                        letterSpacing = (-0.1).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                        RoundedCornerShape(20.dp)
-                    )
-                    .padding(horizontal = 18.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                WelcomeFeatureBenefit(
-                    icon = LucideIcons.ShieldCheck,
-                    title = stringResource(R.string.onboarding_feature_offline_simple_title),
-                    description = stringResource(R.string.onboarding_feature_offline_simple_desc)
-                )
-                Box(
+            StaggeredEntrance(visible = entered, delayMillis = 0) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-                )
-                WelcomeFeatureBenefit(
-                    icon = LucideIcons.Zap,
-                    title = stringResource(R.string.onboarding_feature_auto_simple_title),
-                    description = stringResource(R.string.onboarding_feature_auto_simple_desc)
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-                )
-                WelcomeFeatureBenefit(
-                    icon = LucideIcons.ChartBar,
-                    title = stringResource(R.string.onboarding_feature_insights_simple_title),
-                    description = stringResource(R.string.onboarding_feature_insights_simple_desc)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            PrimaryActionButton(
-                label = stringResource(R.string.onboarding_welcome_begin),
-                onClick = {
-                    view.performVibrate(true, isLongPress = false)
-                    onNext()
-                }
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            if (isPro) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    Color(0xFFE2FF38).copy(alpha = 0.16f),
-                                    Color(0xFF38BDF8).copy(alpha = 0.16f)
-                                )
-                            )
-                        )
-                        .border(
-                            1.dp,
-                            Color(0xFFE2FF38).copy(alpha = 0.35f),
-                            RoundedCornerShape(20.dp)
-                        )
-                        .clickable {
-                            view.performVibrate(true, isLongPress = false)
-                            showRestoreKeyDialog = true
-                        }
-                        .padding(horizontal = 14.dp, vertical = 7.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Crown,
-                            contentDescription = null,
-                            tint = Color(0xFFE2FF38),
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Text(
-                            text = "CIPHER PRO ACTIVE · ${proTier.uppercase()}",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.5.sp,
-                                letterSpacing = 0.8.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            } else {
-                TextButton(
-                    onClick = {
-                        view.performVibrate(true, isLongPress = false)
-                        showRestoreKeyDialog = true
-                    }
+                        .padding(top = 16.dp),
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = stringResource(R.string.pro_license_title),
-                        style = Typography.labelMedium.copy(
-                            fontFamily = Lato,
+                        text = "cipher.",
+                        style = Typography.displayLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 48.sp,
+                            letterSpacing = ((-2).sp),
+                            lineHeight = 50.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.onboarding_welcome_greet_lead),
+                        style = Typography.headlineSmall.copy(
+                            fontFamily = DMSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.5.sp
+                            fontSize = 22.sp,
+                            letterSpacing = (-0.4).sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = stringResource(R.string.onboarding_welcome_tagline_simple),
+                        style = Typography.bodyMedium.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp,
+                            lineHeight = 23.sp,
+                            letterSpacing = (-0.1).sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            TextButton(
-                onClick = {
-                    view.performVibrate(true, isLongPress = false)
-                    onRestoreBackup()
+            Spacer(modifier = Modifier.height(24.dp))
+
+            StaggeredEntrance(visible = entered, delayMillis = 120) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outlineVariant,
+                            RoundedCornerShape(20.dp)
+                        )
+                        .padding(horizontal = 18.dp, vertical = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    WelcomeFeatureBenefit(
+                        icon = LucideIcons.ShieldCheck,
+                        title = stringResource(R.string.onboarding_feature_offline_simple_title),
+                        description = stringResource(R.string.onboarding_feature_offline_simple_desc)
+                    )
+                    WelcomeFeatureBenefit(
+                        icon = LucideIcons.Zap,
+                        title = stringResource(R.string.onboarding_feature_auto_simple_title),
+                        description = stringResource(R.string.onboarding_feature_auto_simple_desc)
+                    )
+                    WelcomeFeatureBenefit(
+                        icon = LucideIcons.ChartBar,
+                        title = stringResource(R.string.onboarding_feature_insights_simple_title),
+                        description = stringResource(R.string.onboarding_feature_insights_simple_desc)
+                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        StaggeredEntrance(visible = entered, delayMillis = 240) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 20.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.onboarding_restore_from_backup),
-                    style = Typography.labelMedium.copy(
-                        fontFamily = Lato,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
+                PrimaryActionButton(
+                    label = stringResource(R.string.onboarding_welcome_begin),
+                    onClick = {
+                        view.performVibrate(true, isLongPress = false)
+                        onNext()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                WelcomeReturningUserSection(
+                    isPro = isPro,
+                    proTier = proTier,
+                    onRestoreBackup = onRestoreBackup,
+                    onLicenseKey = { showRestoreKeyDialog = true }
                 )
             }
         }
@@ -941,9 +862,8 @@ private fun WelcomeFeatureBenefit(
     ) {
         Box(
             modifier = Modifier
-                .padding(top = 2.dp)
-                .size(36.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
@@ -951,7 +871,7 @@ private fun WelcomeFeatureBenefit(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -960,7 +880,7 @@ private fun WelcomeFeatureBenefit(
                 style = Typography.titleSmall.copy(
                     fontFamily = Lato,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.5.sp
+                    fontSize = 15.5.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -969,10 +889,10 @@ private fun WelcomeFeatureBenefit(
                 text = description,
                 style = Typography.bodySmall.copy(
                     fontFamily = Lato,
-                    fontSize = 12.2.sp,
-                    lineHeight = 17.sp
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

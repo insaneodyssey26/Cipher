@@ -771,4 +771,7 @@
     <plurals name="days_left">
         <item quantity="other">残り %1$d 日</item>
     </plurals>
+    <string name="onboarding_returning_title">すでにCipherをお使いですか？</string>
+    <string name="onboarding_restore_backup_short">バックアップから復元</string>
+    <string name="onboarding_license_key_short">ライセンスキー</string>
 </resources>
