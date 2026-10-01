@@ -339,7 +339,7 @@ class GetInsightsUseCaseTest {
             merchant = "Transfer to Savings",
             currency = "INR",
             category = "TRANSFER",
-            timestamp = daysAgo(1),
+            timestamp = daysAgo(0),
             rawSms = null,
             isIncome = false
         )
@@ -348,12 +348,12 @@ class GetInsightsUseCaseTest {
             merchant = "Transfer from Checking",
             currency = "INR",
             category = "TRANSFER",
-            timestamp = daysAgo(1),
+            timestamp = daysAgo(0),
             rawSms = null,
             isIncome = true
         )
-        val realIncome = income(100.0, daysAgo = 2, merchant = "Client")
-        val realExpense = expense(50.0, daysAgo = 2, merchant = "Grocery Store", category = "GROCERIES")
+        val realIncome = income(100.0, daysAgo = 0, merchant = "Client")
+        val realExpense = expense(50.0, daysAgo = 0, merchant = "Grocery Store", category = "GROCERIES")
 
         val txList = listOf(transferOut, transferIn, realIncome, realExpense)
         stub(
