@@ -44,8 +44,7 @@ class TransferFundsUseCase @Inject constructor(
             accountId = toAccount.id
         )
 
-        transactionRepository.insertDirectTransaction(outflowTx)
-        transactionRepository.insertDirectTransaction(inflowTx)
+        transactionRepository.insertTransferPair(outflowTx, inflowTx)
 
         return Pair(outflowTx, inflowTx)
     }

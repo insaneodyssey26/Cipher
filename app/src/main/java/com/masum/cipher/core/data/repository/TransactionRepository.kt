@@ -21,10 +21,9 @@ class TransactionRepository @Inject constructor(
         return processIncomingTransactionUseCase(transaction)
     }
 
-    suspend fun insertDirectTransaction(transaction: TransactionEntity): Long {
-        val id = transactionDao.insertTransaction(transaction)
+    suspend fun insertTransferPair(outflow: TransactionEntity, inflow: TransactionEntity) {
+        transactionDao.insertTransactions(listOf(outflow, inflow))
         widgetSyncManager.syncWidget()
-        return id
     }
 
     suspend fun getTransactionById(id: Long): TransactionEntity? {

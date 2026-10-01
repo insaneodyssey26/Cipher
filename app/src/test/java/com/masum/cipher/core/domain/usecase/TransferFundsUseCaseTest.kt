@@ -64,11 +64,9 @@ class TransferFundsUseCaseTest {
             inflowMerchantText = "Transfer from HDFC Bank"
         )
 
-        val txCaptor = argumentCaptor<TransactionEntity>()
-        verify(transactionRepository, times(2)).insertDirectTransaction(txCaptor.capture())
-
-        val transactions = txCaptor.allValues
-        assertEquals(2, transactions.size)
+        val outflowCaptor = argumentCaptor<TransactionEntity>()
+        val inflowCaptor = argumentCaptor<TransactionEntity>()
+        verify(transactionRepository, times(1)).insertTransferPair(outflowCaptor.capture(), inflowCaptor.capture())
 
         assertEquals(1500.0, outflow.amount, 0.001)
         assertEquals("Transfer to ICICI Bank", outflow.merchant)
@@ -88,7 +86,7 @@ class TransferFundsUseCaseTest {
         assertTrue(inflow.isIncome)
         assertEquals("Rent split", inflow.note)
 
-        assertEquals(outflow, transactions[0])
-        assertEquals(inflow, transactions[1])
+        assertEquals(outflow, outflowCaptor.firstValue)
+        assertEquals(inflow, inflowCaptor.firstValue)
     }
 }
