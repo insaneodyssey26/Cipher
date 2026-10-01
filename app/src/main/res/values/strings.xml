@@ -309,6 +309,7 @@
     <string name="backup_password_export_desc">This password will be used to encrypt your backup. You will need it to restore your data.</string>
     <string name="backup_password_import_desc">Enter the password used to encrypt this backup file.</string>
     <string name="password_label">Password</string>
+    <string name="backup_password_warning">Write this password down and keep it somewhere safe. If you forget it, your backups cannot be opened, even by us.</string>
     <string name="auto_backup_password_title">Auto-Backup Password</string>
     <string name="auto_backup_password_desc">Enter a password to encrypt your automatic backups. You will need this to restore your data on a new device.</string>
     <string name="backup_password_placeholder">Backup Password</string>

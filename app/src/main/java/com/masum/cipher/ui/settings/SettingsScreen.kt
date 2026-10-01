@@ -1659,8 +1659,11 @@ Spacer(modifier = Modifier.weight(1f))
                         else stringResource(R.string.backup_password_import_desc),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = if (isExport) 8.dp else 16.dp)
                 )
+                if (isExport) {
+                    BackupPasswordWarning(modifier = Modifier.padding(bottom = 16.dp))
+                }
                 OutlinedTextField(
                     value = backupPassword,
                     onValueChange = { backupPassword = it },
@@ -1743,8 +1746,9 @@ Spacer(modifier = Modifier.weight(1f))
                     text = stringResource(R.string.auto_backup_password_desc),
                     style = Typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
+                BackupPasswordWarning(modifier = Modifier.padding(bottom = 16.dp))
                 OutlinedTextField(
                     value = autoBackupSetupPassword,
                     onValueChange = { autoBackupSetupPassword = it },
@@ -2231,4 +2235,14 @@ private fun HealthItemCard(
             }
         }
     }
+}
+
+@Composable
+private fun BackupPasswordWarning(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.backup_password_warning),
+        style = Typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+        modifier = modifier
+    )
 }
