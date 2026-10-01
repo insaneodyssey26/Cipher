@@ -17,6 +17,10 @@ kotlin {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.masum.cipher"
     compileSdk = 37

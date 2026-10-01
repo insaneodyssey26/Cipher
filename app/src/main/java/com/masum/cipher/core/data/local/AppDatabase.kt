@@ -31,7 +31,7 @@ import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
         GoalEntity::class
     ],
     version = 12,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao

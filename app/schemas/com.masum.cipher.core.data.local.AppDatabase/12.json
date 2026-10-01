@@ -1,0 +1,457 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 12,
+    "identityHash": "d3daa762cb074713a0256495ea9dd7b1",
+    "entities": [
+      {
+        "tableName": "transactions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `amount` REAL NOT NULL, `merchant` TEXT NOT NULL, `currency` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `category` TEXT NOT NULL, `rawSms` TEXT, `isIncome` INTEGER NOT NULL, `note` TEXT, `accountId` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amount",
+            "columnName": "amount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "merchant",
+            "columnName": "merchant",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawSms",
+            "columnName": "rawSms",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isIncome",
+            "columnName": "isIncome",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "accountId",
+            "columnName": "accountId",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_transactions_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_transactions_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_category` ON `${TABLE_NAME}` (`category`)"
+          },
+          {
+            "name": "index_transactions_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transactions_accountId` ON `${TABLE_NAME}` (`accountId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "merchant_aliases",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rawName` TEXT NOT NULL, `cleanName` TEXT NOT NULL, `isUserDefined` INTEGER NOT NULL, PRIMARY KEY(`rawName`))",
+        "fields": [
+          {
+            "fieldPath": "rawName",
+            "columnName": "rawName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cleanName",
+            "columnName": "cleanName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUserDefined",
+            "columnName": "isUserDefined",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rawName"
+          ]
+        }
+      },
+      {
+        "tableName": "category_rules",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`merchantName` TEXT NOT NULL, `customCategory` TEXT NOT NULL, PRIMARY KEY(`merchantName`))",
+        "fields": [
+          {
+            "fieldPath": "merchantName",
+            "columnName": "merchantName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customCategory",
+            "columnName": "customCategory",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "merchantName"
+          ]
+        }
+      },
+      {
+        "tableName": "subscriptions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `merchant` TEXT NOT NULL, `amount` REAL NOT NULL, `category` TEXT NOT NULL, `frequencyDays` INTEGER NOT NULL, `nextExpectedDate` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "merchant",
+            "columnName": "merchant",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amount",
+            "columnName": "amount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequencyDays",
+            "columnName": "frequencyDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextExpectedDate",
+            "columnName": "nextExpectedDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "transaction_splits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `transactionId` INTEGER NOT NULL, `name` TEXT NOT NULL, `amount` REAL NOT NULL, `isPaid` INTEGER NOT NULL, `isCurrentUser` INTEGER NOT NULL, FOREIGN KEY(`transactionId`) REFERENCES `transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amount",
+            "columnName": "amount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPaid",
+            "columnName": "isPaid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCurrentUser",
+            "columnName": "isCurrentUser",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_transaction_splits_transactionId",
+            "unique": false,
+            "columnNames": [
+              "transactionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_transaction_splits_transactionId` ON `${TABLE_NAME}` (`transactionId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "transactions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "transactionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "custom_categories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `iconName` TEXT NOT NULL, `colorHex` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconName",
+            "columnName": "iconName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_custom_categories_name",
+            "unique": true,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_categories_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ]
+      },
+      {
+        "tableName": "accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `initialBalance` REAL NOT NULL, `colorHex` INTEGER NOT NULL, `iconName` TEXT NOT NULL, `isDefault` INTEGER NOT NULL, `accountNumberLast4` TEXT, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "initialBalance",
+            "columnName": "initialBalance",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconName",
+            "columnName": "iconName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDefault",
+            "columnName": "isDefault",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountNumberLast4",
+            "columnName": "accountNumberLast4",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "goals",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `targetAmount` REAL NOT NULL, `savedAmount` REAL NOT NULL, `colorHex` INTEGER NOT NULL, `iconName` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetAmount",
+            "columnName": "targetAmount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savedAmount",
+            "columnName": "savedAmount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconName",
+            "columnName": "iconName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd3daa762cb074713a0256495ea9dd7b1')"
+    ]
+  }
+}
