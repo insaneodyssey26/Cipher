@@ -135,9 +135,12 @@ import compose.icons.lucideicons.Utensils
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+
+private const val PERMISSION_PAGE = 6
 
 @Composable
 fun OnboardingScreen(
@@ -157,6 +160,8 @@ fun OnboardingScreen(
     var isProActive by remember { mutableStateOf(userPreferences.isCachedPro()) }
     var proTierName by remember { mutableStateOf(userPreferences.getCachedProTier()) }
     var page by rememberSaveable { mutableIntStateOf(0) }
+    var restoredFromBackup by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     val totalPages = 8
     var showQuickLangDialog by remember { mutableStateOf(false) }
 
@@ -174,7 +179,8 @@ fun OnboardingScreen(
         restoreViewModel.effect.collect { effect ->
             if (effect is RestoreBackupContract.Effect.Restored) {
                 pendingBackupUri = null
-                onComplete()
+                restoredFromBackup = true
+                page = PERMISSION_PAGE
             }
         }
     }
@@ -199,7 +205,7 @@ fun OnboardingScreen(
                 totalPages = totalPages,
                 currentLanguageCode = currentLanguageCode,
                 onOpenLanguagePicker = { showQuickLangDialog = true },
-                onBack = { if (page > 0) page -= 1 }
+                onBack = { if (page > 0 && !restoredFromBackup) page -= 1 }
             )
 
             Box(
@@ -267,7 +273,17 @@ fun OnboardingScreen(
                         5 -> SmartRulesTourPage(
                             onNext = { page = 6 }
                         )
-                        6 -> PermissionPage(onComplete = { page = 7 })
+                        PERMISSION_PAGE -> PermissionPage(
+                            onComplete = {
+                                coroutineScope.launch {
+                                    val hasTrackedApps = userPreferences.settingsFlow.first().trackedApps.isNotEmpty()
+                                    when (stepAfterPermissions(restoredFromBackup, hasTrackedApps)) {
+                                        PostPermissionStep.SELECT_APPS -> page = PERMISSION_PAGE + 1
+                                        PostPermissionStep.FINISH -> onComplete()
+                                    }
+                                }
+                            }
+                        )
                         else -> AppSelectionScreen(
                             initialSelectedApps = emptySet(),
                             onComplete = { apps ->
@@ -281,7 +297,7 @@ fun OnboardingScreen(
             }
         }
 
-        BackHandler(enabled = page > 0) { page -= 1 }
+        BackHandler(enabled = page > 0 && !restoredFromBackup) { page -= 1 }
     }
 
     if (showQuickLangDialog) {
