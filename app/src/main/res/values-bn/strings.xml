@@ -490,12 +490,12 @@
     <string name="pro_perk_export_desc">সার্টিফাইড অ্যাকাউন্ট স্টেটমেন্ট এবং এনক্রিপ্ট করা ভল্ট ব্যাকআপ রপ্তানি করুন।</string>
     <string name="pro_faq_title">সাধারণ জিজ্ঞাসা (FAQ)</string>
     <string name="pro_faq_offline_q">প্রো ব্যবহারের জন্য কি ইন্টারনেট সংযোগ প্রয়োজন?</string>
-    <string name="pro_faq_offline_a">সমস্ত আর্থিক হিসাব ও তথ্য সম্পূর্ণ অফলাইনে আপনার ফোনেই থাকে। ইন্টারনেট সংযোগ শুধুমাত্র লাইসেন্স অ্যাক্টিভেশন এবং ডিভাইস সীমার জন্য ব্যবহৃত হয়।</string>
+    <string name="pro_faq_offline_a" formatted="false">সমস্ত আর্থিক হিসাব ও তথ্য সম্পূর্ণ অফলাইনে আপনার ফোনেই থাকে। ইন্টারনেট সংযোগ শুধুমাত্র লাইসেন্স অ্যাক্টিভেশন এবং ডিভাইস সীমার জন্য ব্যবহৃত হয়।</string>
     <string name="pro_faq_devices_q">আমি কি নতুন ডিভাইসে লাইসেন্স স্থানান্তর করতে পারব?</string>
     <string name="pro_faq_devices_a">হ্যাঁ, আপনার নতুন ডিভাইসে লাইফটাইম লাইসেন্স কি প্রবেশ করান অথবা এনক্রিপ্ট করা ব্যাকআপ রিস্টোর করুন।</string>
     <string name="pro_tier_badge_standard">স্ট্যান্ডার্ড</string>
-    <string name="pro_tier_badge_save_16">১৬% সাশ্রয় •</string>
-    <string name="pro_tier_badge_save_29">২৯% সাশ্রয় •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">১৬% সাশ্রয় •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">২৯% সাশ্রয় •</string>
     <string name="pro_tier_badge_lifetime_vip">লাইফটাইম ভিআইপি</string>
     <string name="pro_tier_badge_best_value">সেরা অফার</string>
     <string name="pro_tier_badge_popular_pill">জনপ্রিয়</string>
@@ -512,7 +512,7 @@
     <string name="pro_subtext_annual">কার্যকরী ₹৪১.৫৮ / মাস</string>
     <string name="pro_subtext_lifetime">একবার কিনুন, চিরকাল ব্যবহার করুন</string>
     <string name="pro_desc_monthly">মাসিক ভিত্তিতে সাইফার প্রো-এর সম্পূর্ণ সুবিধা নিন। সব প্রিমিয়াম ফিচার ট্রাই করার জন্য উপযুক্ত।</string>
-    <string name="pro_desc_6month">ছয় মাসের নিরবচ্ছিন্ন ব্যক্তিগত অর্থ ব্যবস্থাপনা। সাধারণ মাসিক পাসের চেয়ে ১৬% সাশ্রয়।</string>
+    <string name="pro_desc_6month" formatted="false">ছয় মাসের নিরবচ্ছিন্ন ব্যক্তিগত অর্থ ব্যবস্থাপনা। সাধারণ মাসিক পাসের চেয়ে ১৬% সাশ্রয়।</string>
     <string name="pro_desc_annual">পুরো এক বছরের আর্থিক স্পষ্টতা। বাজেট, রুলস ও ক্যাটাগরি ব্যবহারের সবচেয়ে সাশ্রয়ী প্ল্যান।</string>
     <string name="pro_desc_lifetime">সাইফারের চূড়ান্ত ভিআইপি পাস। এককালীন পেমেন্টে বর্তমান এবং ভবিষ্যতের সব প্রো ফিচার আজীবনের জন্য আনলক করুন।</string>
     <string name="pro_feature_unlimited_accounts">আনলিমিটেড অ্যাকাউন্ট ও ওয়ালেট</string>

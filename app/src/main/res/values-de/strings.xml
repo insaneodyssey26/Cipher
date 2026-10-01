@@ -490,12 +490,12 @@
     <string name="pro_perk_export_desc">Erstelle zertifizierte Kontoauszüge und verschlüsselte Tresor-Backups.</string>
     <string name="pro_faq_title">Häufig gestellte Fragen (FAQ)</string>
     <string name="pro_faq_offline_q">Benötigt Pro eine Internetverbindung?</string>
-    <string name="pro_faq_offline_a">Alle Finanzberechnungen und Daten bleiben streng offline auf deinem Gerät. Der Internetzugang wird ausschließlich für die Aktivierung des Lizenzschlüssels und die Geräteverwaltung verwendet.</string>
+    <string name="pro_faq_offline_a" formatted="false">Alle Finanzberechnungen und Daten bleiben streng offline auf deinem Gerät. Der Internetzugang wird ausschließlich für die Aktivierung des Lizenzschlüssels und die Geräteverwaltung verwendet.</string>
     <string name="pro_faq_devices_q">Kann ich meine Lizenz auf ein neues Gerät übertragen?</string>
     <string name="pro_faq_devices_a">Ja, gib einfach deinen lebenslangen Lizenzschlüssel auf dem neuen Gerät ein oder stelle dein verschlüsseltes Backup wieder her.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16">16% sparen •</string>
-    <string name="pro_tier_badge_save_29">29% sparen •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">16% sparen •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">29% sparen •</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BESTER WERT</string>
     <string name="pro_tier_badge_popular_pill">BELIEBT</string>
@@ -512,7 +512,7 @@
     <string name="pro_subtext_annual">Effektiv ₹41,58 / Monat</string>
     <string name="pro_subtext_lifetime">Einmal zahlen, für immer besitzen</string>
     <string name="pro_desc_monthly">Voller Zugriff auf Cipher Pro auf flexibler Monatsbasis. Perfekt, um alle erweiterten Funktionen auszuprobieren.</string>
-    <string name="pro_desc_6month">Ein halbes Jahr nahtlose Offline-Vermögensverwaltung. Spare 16% gegenüber dem Standard-Monatspass.</string>
+    <string name="pro_desc_6month" formatted="false">Ein halbes Jahr nahtlose Offline-Vermögensverwaltung. Spare 16% gegenüber dem Standard-Monatspass.</string>
     <string name="pro_desc_annual">Ein ganzes Jahr finanzielle Klarheit. Beste Gesamtersparnis für Budgets, Regeln und Kategorien.</string>
     <string name="pro_desc_lifetime">Der ultimative VIP-Pass. Schalte alle aktuellen und zukünftigen Pro-Funktionen dauerhaft mit einer Zahlung frei.</string>
     <string name="pro_feature_unlimited_accounts">Unbegrenzte Konten &amp; Wallets</string>

@@ -489,12 +489,12 @@
     <string name="pro_perk_export_desc">प्रमाणित खाता विवरण और एन्क्रिप्टेड वॉल्ट बैकअप निर्यात करें।</string>
     <string name="pro_faq_title">अक्सर पूछे जाने वाले प्रश्न</string>
     <string name="pro_faq_offline_q">क्या प्रो के लिए इंटरनेट कनेक्शन की आवश्यकता है?</string>
-    <string name="pro_faq_offline_a">सभी वित्तीय गणनाएं और डेटा पूरी तरह से आपके डिवाइस पर ऑफ़लाइन रहते हैं। इंटरनेट का उपयोग केवल लाइसेंस सक्रियण और डिवाइस प्रबंधन के लिए किया जाता है।</string>
+    <string name="pro_faq_offline_a" formatted="false">सभी वित्तीय गणनाएं और डेटा पूरी तरह से आपके डिवाइस पर ऑफ़लाइन रहते हैं। इंटरनेट का उपयोग केवल लाइसेंस सक्रियण और डिवाइस प्रबंधन के लिए किया जाता है।</string>
     <string name="pro_faq_devices_q">क्या मैं अपना लाइसेंस नए डिवाइस पर स्थानांतरित कर सकता हूँ?</string>
     <string name="pro_faq_devices_a">हाँ, बस अपने नए डिवाइस पर अपनी लाइफटाइम लाइसेंस कुंजी दर्ज करें या अपना एन्क्रिप्टेड बैकअप पुनर्स्थापित करें।</string>
     <string name="pro_tier_badge_standard">मानक</string>
-    <string name="pro_tier_badge_save_16">16% बचत •</string>
-    <string name="pro_tier_badge_save_29">29% बचत •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">16% बचत •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">29% बचत •</string>
     <string name="pro_tier_badge_lifetime_vip">लाइफटाइम वीआईपी</string>
     <string name="pro_tier_badge_best_value">सर्वश्रेष्ठ मूल्य</string>
     <string name="pro_tier_badge_popular_pill">लोकप्रिय</string>
@@ -511,7 +511,7 @@
     <string name="pro_subtext_annual">प्रभावी ₹41.58 / माह</string>
     <string name="pro_subtext_lifetime">एक बार भुगतान करें, हमेशा के लिए उपयोग करें</string>
     <string name="pro_desc_monthly">मासिक आधार पर साइफर प्रो का पूरा लाभ उठाएं। सभी प्रीमियम सुविधाओं को आज़माने के लिए सबसे उपयुक्त।</string>
-    <string name="pro_desc_6month">छह महीने का निर्बाध ऑफ़लाइन वित्त प्रबंधन। मानक मासिक पास की तुलना में 16% बचत।</string>
+    <string name="pro_desc_6month" formatted="false">छह महीने का निर्बाध ऑफ़लाइन वित्त प्रबंधन। मानक मासिक पास की तुलना में 16% बचत।</string>
     <string name="pro_desc_annual">पूरे एक वर्ष की वित्तीय स्पष्टता। बजट, नियम और श्रेणियों के लिए सबसे बड़ी बचत वाला प्लान।</string>
     <string name="pro_desc_lifetime">परम वित्तीय वीआईपी पास। एक ही भुगतान में वर्तमान और भविष्य के सभी प्रो फीचर्स हमेशा के लिए अनलॉक करें।</string>
     <string name="pro_feature_unlimited_accounts">असीमित खाते और वॉलेट</string>

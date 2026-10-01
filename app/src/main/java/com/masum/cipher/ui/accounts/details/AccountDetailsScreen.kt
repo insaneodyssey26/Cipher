@@ -111,6 +111,7 @@ fun AccountDetailsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val needMinAccountsMessage = stringResource(R.string.transfer_error_need_min_accounts)
     val view = LocalView.current
     val locale = Locale.getDefault()
 
@@ -284,7 +285,7 @@ fun AccountDetailsScreen(
                                 if (state.allAccounts.size < 2) {
                                     Toast.makeText(
                                         context,
-                                        context.getString(R.string.transfer_error_need_min_accounts),
+                                        needMinAccountsMessage,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {

@@ -491,12 +491,12 @@
     <string name="pro_perk_export_desc">認証済み口座明細書と暗号化バックアップの出力。</string>
     <string name="pro_faq_title">よくある質問 (FAQ)</string>
     <string name="pro_faq_offline_q">Pro はインターネット接続が必要ですか？</string>
-    <string name="pro_faq_offline_a">すべての財務計算やデータ記録は端末内で100%オフライン処理されます。インターネット通信はライセンスキーの認証および端末上限の管理時にのみ使用されます。</string>
+    <string name="pro_faq_offline_a" formatted="false">すべての財務計算やデータ記録は端末内で100%オフライン処理されます。インターネット通信はライセンスキーの認証および端末上限の管理時にのみ使用されます。</string>
     <string name="pro_faq_devices_q">新しい端末にライセンスを移行できますか？</string>
     <string name="pro_faq_devices_a">はい、新しい端末で買い切りライセンスキーを入力するか、暗号化バックアップを復元するだけで移行可能です。</string>
     <string name="pro_tier_badge_standard">スタンダード</string>
-    <string name="pro_tier_badge_save_16">16% お得 •</string>
-    <string name="pro_tier_badge_save_29">29% お得 •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">16% お得 •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">29% お得 •</string>
     <string name="pro_tier_badge_lifetime_vip">永久VIP</string>
     <string name="pro_tier_badge_best_value">一番お得</string>
     <string name="pro_tier_badge_popular_pill">人気</string>
@@ -513,7 +513,7 @@
     <string name="pro_subtext_annual">実質 ₹41.58 / 月</string>
     <string name="pro_subtext_lifetime">一度の支払いでずっと使える</string>
     <string name="pro_desc_monthly">月払いで手軽にCipher Proの全機能をご利用いただけます。まずは試してみたい方に最適です。</string>
-    <string name="pro_desc_6month">半年間の快適なオフライン資産管理。標準マンスリーパスより16%お得です。</string>
+    <string name="pro_desc_6month" formatted="false">半年間の快適なオフライン資産管理。標準マンスリーパスより16%お得です。</string>
     <string name="pro_desc_annual">1年間じっくり資産管理。予算や自動ルール、カテゴリ設定をフル活用するなら最もお得です。</string>
     <string name="pro_desc_lifetime">究極のプレミアムパス。一度のお支払いで、現在および将来追加されるすべてのPro機能が永久に使えます。</string>
     <string name="pro_feature_unlimited_accounts">無制限の口座・ウォレット</string>

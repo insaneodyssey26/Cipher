@@ -489,12 +489,12 @@
     <string name="pro_perk_export_desc">Genera extractos de cuenta certificados y copias de seguridad cifradas.</string>
     <string name="pro_faq_title">Preguntas frecuentes</string>
     <string name="pro_faq_offline_q">¿Pro requiere conexión a internet?</string>
-    <string name="pro_faq_offline_a">Todos los cálculos y registros financieros se mantienen 100% sin conexión en tu dispositivo. El acceso a internet solo se utiliza durante la activación de la clave de licencia y la gestión de dispositivos.</string>
+    <string name="pro_faq_offline_a" formatted="false">Todos los cálculos y registros financieros se mantienen 100% sin conexión en tu dispositivo. El acceso a internet solo se utiliza durante la activación de la clave de licencia y la gestión de dispositivos.</string>
     <string name="pro_faq_devices_q">¿Puedo transferir mi licencia a un nuevo dispositivo?</string>
     <string name="pro_faq_devices_a">Sí, solo introduce tu clave de por vida en tu nuevo dispositivo o restaura tu copia cifrada.</string>
     <string name="pro_tier_badge_standard">Estándar</string>
-    <string name="pro_tier_badge_save_16">Ahorra 16% •</string>
-    <string name="pro_tier_badge_save_29">Ahorra 29% •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">Ahorra 16% •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">Ahorra 29% •</string>
     <string name="pro_tier_badge_lifetime_vip">VIP DE POR VIDA</string>
     <string name="pro_tier_badge_best_value">MEJOR VALOR</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>
@@ -511,7 +511,7 @@
     <string name="pro_subtext_annual">Efectivo ₹41.58 / mes</string>
     <string name="pro_subtext_lifetime">Paga una vez, disfrútalo para siempre</string>
     <string name="pro_desc_monthly">Acceso completo a Cipher Pro mes a mes. Ideal si quieres probar todas las funciones avanzadas.</string>
-    <string name="pro_desc_6month">Medio año de gestión patrimonial privada y sin conexión. Ahorra un 16% frente al pase mensual estándar.</string>
+    <string name="pro_desc_6month" formatted="false">Medio año de gestión patrimonial privada y sin conexión. Ahorra un 16% frente al pase mensual estándar.</string>
     <string name="pro_desc_annual">Un año entero de máxima claridad financiera. El mayor ahorro para dominar presupuestos, reglas y categorías.</string>
     <string name="pro_desc_lifetime">El pase VIP definitivo. Desbloquea todas las funciones Pro actuales y futuras para siempre con un único pago.</string>
     <string name="pro_feature_unlimited_accounts">Cuentas y billeteras ilimitadas</string>
@@ -766,10 +766,12 @@
     <string name="license_revoked_dialog_action_dismiss">Continuar con Free</string>
     <plurals name="no_spend_streak_days">
         <item quantity="one">%d día</item>
+        <item quantity="many">%d de días</item>
         <item quantity="other">%d días</item>
     </plurals>
     <plurals name="days_left">
         <item quantity="one">%1$d día restante</item>
+        <item quantity="many">%1$d de días restantes</item>
         <item quantity="other">%1$d días restantes</item>
     </plurals>
 </resources>

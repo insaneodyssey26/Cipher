@@ -543,12 +543,12 @@
     <string name="pro_perk_export_desc">Generate certified account statements and encrypted vault exports.</string>
     <string name="pro_faq_title">Frequently Asked Questions</string>
     <string name="pro_faq_offline_q">Does Pro require an internet connection?</string>
-    <string name="pro_faq_offline_a">All financial calculations, transaction parsing, and records stay strictly offline on your device. Internet access is only used during license key activation and device seat management.</string>
+    <string name="pro_faq_offline_a" formatted="false">All financial calculations, transaction parsing, and records stay strictly offline on your device. Internet access is only used during license key activation and device seat management.</string>
     <string name="pro_faq_devices_q">Can I transfer my license to a new device?</string>
     <string name="pro_faq_devices_a">Yes, simply enter your lifetime license key on your new device or restore your encrypted backup.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16">Save 16% •</string>
-    <string name="pro_tier_badge_save_29">Save 29% •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">Save 16% •</string>
+    <string name="pro_tier_badge_save_29" formatted="false">Save 29% •</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BEST VALUE</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>
@@ -565,7 +565,7 @@
     <string name="pro_subtext_annual">Effective ₹41.58 / month</string>
     <string name="pro_subtext_lifetime">Pay once, own forever</string>
     <string name="pro_desc_monthly">Full Cipher Pro access on a flexible month-to-month basis. Perfect if you want to try all advanced features.</string>
-    <string name="pro_desc_6month">Half a year of seamless offline wealth management. Save 16% compared to the standard monthly pass.</string>
+    <string name="pro_desc_6month" formatted="false">Half a year of seamless offline wealth management. Save 16% compared to the standard monthly pass.</string>
     <string name="pro_desc_annual">A full year of uninterrupted financial clarity. Best overall savings for mastering budgets, rules, and categories.</string>
     <string name="pro_desc_lifetime">The ultimate financial clarity pass. Unlock all present and future Pro features forever with a single payment.</string>
     <string name="pro_feature_unlimited_accounts">Unlimited Accounts &amp; Wallets</string>
