@@ -11,6 +11,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.content.edit
 
+class DatabaseKeyUnavailableException :
+    IllegalStateException("The stored database key can no longer be decrypted")
+
 @Singleton
 class SecurityManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -45,11 +48,10 @@ class SecurityManager @Inject constructor(
 
         if (encryptedPassphraseHex != null) {
             val decryptedBase64 = keystoreManager.decrypt(encryptedPassphraseHex)
-            if (decryptedBase64 != null) {
-                return decodePassphrase(decryptedBase64)
-            }
+                ?: throw DatabaseKeyUnavailableException()
+            return decodePassphrase(decryptedBase64)
         }
-        
+
         val legacyPrefs = getLegacyEncryptedSharedPreferences()
         val legacyPassphrase = legacyPrefs?.getString(LEGACY_KEY_DB_PASSPHRASE, null)
         
@@ -65,6 +67,16 @@ class SecurityManager @Inject constructor(
         }
 
         return generateAndSaveNewPassphrase(sharedPrefs)
+    }
+
+    fun isDatabaseKeyUnavailable(): Boolean {
+        val encryptedPassphraseHex = getStandardSharedPreferences()
+            .getString(KEY_DB_PASSPHRASE_V2, null) ?: return false
+        return keystoreManager.decrypt(encryptedPassphraseHex) == null
+    }
+
+    fun discardDatabaseKey() {
+        getStandardSharedPreferences().edit { remove(KEY_DB_PASSPHRASE_V2) }
     }
 
     private fun generateAndSaveNewPassphrase(sharedPrefs: SharedPreferences): ByteArray {

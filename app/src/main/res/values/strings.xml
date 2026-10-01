@@ -795,4 +795,12 @@
     <string name="license_revoked_dialog_desc">This device has been removed from your Cipher Pro license, or the license was revoked from another device. You can reactivate your license key anytime.</string>
     <string name="license_revoked_dialog_action_reactivate">Reactivate License</string>
     <string name="license_revoked_dialog_action_dismiss">Continue with Free</string>
+    <string name="database_recovery_title">Secure storage unavailable</string>
+    <string name="database_recovery_message">Cipher can\'t unlock your encrypted data on this device. This can happen after moving the app to a new phone or restoring a device. Try again first. If it still fails, you can erase this device\'s data and restore from a Cipher backup file.</string>
+    <string name="database_recovery_still_unavailable">Still unavailable. Try again later or erase and restore from a backup.</string>
+    <string name="database_recovery_retry">Try again</string>
+    <string name="database_recovery_erase">Erase and start fresh</string>
+    <string name="database_recovery_erase_confirm_title">Erase all data?</string>
+    <string name="database_recovery_erase_confirm_message">This permanently deletes the encrypted data stored on this device and cannot be undone. You can restore afterwards from a Cipher backup file.</string>
+    <string name="database_recovery_erase_confirm_action">Erase</string>
 </resources>

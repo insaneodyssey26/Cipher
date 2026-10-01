@@ -54,6 +54,8 @@ import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.security.BiometricAuthenticator
+import com.masum.cipher.core.security.DatabaseRecovery
+import com.masum.cipher.core.security.SecurityManager
 import com.masum.cipher.core.updates.UpdateManager
 import com.masum.cipher.core.worker.NotificationScheduler
 import com.masum.cipher.ui.MainContract
@@ -81,6 +83,7 @@ import com.masum.cipher.ui.insights.InsightsViewModel
 import com.masum.cipher.ui.onboarding.AppSelectionScreen
 import com.masum.cipher.ui.onboarding.OnboardingScreen
 import com.masum.cipher.ui.privacy.PrivacyPolicyScreen
+import com.masum.cipher.ui.recovery.DatabaseRecoveryScreen
 import com.masum.cipher.ui.settings.CurrencySelectionScreen
 import com.masum.cipher.ui.settings.SettingsScreen
 import com.masum.cipher.ui.settings.SettingsViewModel
@@ -115,6 +118,12 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var licenseEngine: com.masum.cipher.core.security.LicenseEngine
 
+    @Inject
+    lateinit var securityManager: SecurityManager
+
+    @Inject
+    lateinit var databaseRecovery: DatabaseRecovery
+
     private val currentIntentFlow = MutableStateFlow<Intent?>(null)
     private val updateReady = MutableStateFlow(false)
 
@@ -134,8 +143,39 @@ class MainActivity : AppCompatActivity() {
         currentIntentFlow.value = intent
     }
 
+    private fun showDatabaseRecovery() {
+        enableEdgeToEdge()
+        setContent {
+            val darkTheme = when (userPreferences.getCachedAppTheme()) {
+                AppTheme.LIGHT -> false
+                AppTheme.DARK -> true
+                AppTheme.SYSTEM -> isSystemInDarkTheme()
+            }
+            CipherTheme(
+                darkTheme = darkTheme,
+                accentColor = Color(userPreferences.getCachedAccentColor().colorValue)
+            ) {
+                DatabaseRecoveryScreen(
+                    onRetry = {
+                        val recovered = !securityManager.isDatabaseKeyUnavailable()
+                        if (recovered) recreate()
+                        recovered
+                    },
+                    onErase = {
+                        databaseRecovery.eraseEncryptedData()
+                        recreate()
+                    }
+                )
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (securityManager.isDatabaseKeyUnavailable()) {
+            showDatabaseRecovery()
+            return
+        }
         currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
