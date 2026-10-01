@@ -350,7 +350,7 @@
     <string name="onboarding_ready_slide_hint">Glissez pour ouvrir</string>
     <string name="onboarding_welcome_greet_lead">Bienvenue sur Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Un suivi des dépenses automatique et privé qui fonctionne entièrement sur votre téléphone.</string>
-    <string name="onboarding_feature_offline_simple_title">100%% Hors Ligne et Privé</string>
+    <string name="onboarding_feature_offline_simple_title" formatted="false">100% Hors Ligne et Privé</string>
     <string name="onboarding_feature_offline_simple_desc">Vos données financières sont chiffrées et ne quittent jamais ce téléphone. Aucun compte ni serveur.</string>
     <string name="onboarding_feature_auto_simple_title">Suivi Automatique</string>
     <string name="onboarding_feature_auto_simple_desc">Détecte les SMS et notifications de paiement pour enregistrer automatiquement vos dépenses.</string>

@@ -349,7 +349,7 @@
     <string name="onboarding_ready_slide_hint">Desliza para abrir</string>
     <string name="onboarding_welcome_greet_lead">Bienvenido a Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Un gestor de gastos automático y privado que funciona totalmente en tu teléfono.</string>
-    <string name="onboarding_feature_offline_simple_title">100%% Sin Conexión y Privado</string>
+    <string name="onboarding_feature_offline_simple_title" formatted="false">100% Sin Conexión y Privado</string>
     <string name="onboarding_feature_offline_simple_desc">Tus datos financieros están cifrados y nunca salen de tu teléfono. Sin cuentas ni servidores.</string>
     <string name="onboarding_feature_auto_simple_title">Seguimiento Automático</string>
     <string name="onboarding_feature_auto_simple_desc">Detecta notificaciones bancarias y de pagos para registrar gastos al instante.</string>

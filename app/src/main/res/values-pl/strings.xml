@@ -350,7 +350,7 @@
     <string name="onboarding_ready_slide_hint">Przesuń, aby otworzyć sejf</string>
     <string name="onboarding_welcome_greet_lead">Witaj w Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Automatyczny, prywatny menedżer wydatków działający w całości na Twoim telefonie.</string>
-    <string name="onboarding_feature_offline_simple_title">W 100%% offline i prywatnie</string>
+    <string name="onboarding_feature_offline_simple_title" formatted="false">W 100% offline i prywatnie</string>
     <string name="onboarding_feature_offline_simple_desc">Twoje dane finansowe są zaszyfrowane i nigdy nie opuszczają tego telefonu. Bez kont, bez serwerów.</string>
     <string name="onboarding_feature_auto_simple_title">Automatyczne śledzenie</string>
     <string name="onboarding_feature_auto_simple_desc">Cipher wykrywa bankowe SMS-y i powiadomienia aplikacji płatniczych, aby automatycznie rejestrować wydatki.</string>

@@ -350,7 +350,7 @@
     <string name="onboarding_ready_slide_hint">Wischen zum Öffnen</string>
     <string name="onboarding_welcome_greet_lead">Willkommen bei Cipher</string>
     <string name="onboarding_welcome_tagline_simple">Ein automatischer, privater Ausgaben-Tracker, der vollständig auf Ihrem Smartphone läuft.</string>
-    <string name="onboarding_feature_offline_simple_title">100%% Offline &amp; Privat</string>
+    <string name="onboarding_feature_offline_simple_title" formatted="false">100% Offline &amp; Privat</string>
     <string name="onboarding_feature_offline_simple_desc">Ihre Finanzdaten sind verschlüsselt und verlassen niemals dieses Telefon. Keine Konten, keine Server.</string>
     <string name="onboarding_feature_auto_simple_title">Automatische Erfassung</string>
     <string name="onboarding_feature_auto_simple_desc">Erkennt Bank-SMS und Zahlungsbenachrichtigungen, um Ausgaben automatisch zu speichern.</string>
