@@ -249,6 +249,25 @@ class GetInsightsUseCaseTest {
         assertEquals(3, state.noSpendStreak)
     }
 
+    @Test
+    fun `no spend streak uses the whole history when the selected range is empty`() = runBlocking {
+        stub(rangeTransactions = emptyList(), allTransactions = listOf(expense(50.0, daysAgo = 3)))
+
+        val state = useCase(TimeRange.from(TimePeriod.THIS_MONTH)).first()
+
+        assertEquals(3, state.noSpendStreak)
+    }
+
+    @Test
+    fun `no spend streak is not broken by a transfer`() = runBlocking {
+        val transfer = expense(500.0, daysAgo = 1, category = "TRANSFER")
+        stub(rangeTransactions = emptyList(), allTransactions = listOf(transfer, expense(50.0, daysAgo = 4)))
+
+        val state = useCase(TimeRange.from(TimePeriod.THIS_MONTH)).first()
+
+        assertEquals(4, state.noSpendStreak)
+    }
+
     // ─── average transaction size ────────────────────────────────────────
 
     @Test

@@ -102,7 +102,7 @@ class GetInsightsUseCase @Inject constructor(
                 monthlySummary = calculateMonthlySummary(transactions),
                 weekdayBreakdown = calculateWeekdayBreakdown(transactions),
                 peakHours = calculatePeakHours(transactions),
-                noSpendStreak = calculateNoSpendStreak(transactions),
+                noSpendStreak = calculateNoSpendStreak(allTx),
                 avgTransactionSize = calculateAvgTransactionSize(transactions)
             )
         }.flowOn(Dispatchers.Default)
@@ -314,13 +314,12 @@ class GetInsightsUseCase @Inject constructor(
                 }.timeInMillis
             }.toSet()
 
+        val cursor = Calendar.getInstance().apply { timeInMillis = today }
         var streak = 0
-        var day = today
-        val oneDayMs = TimeUnit.DAYS.toMillis(1)
 
-        while (!spendDays.contains(day) && streak <= 365) {
+        while (!spendDays.contains(cursor.timeInMillis) && streak <= 365) {
             streak++
-            day -= oneDayMs
+            cursor.add(Calendar.DAY_OF_YEAR, -1)
         }
 
         return streak
