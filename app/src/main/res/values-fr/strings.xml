@@ -64,7 +64,6 @@
     <string name="no_spending_recorded">Aucune dépense enregistrée</string>
     <string name="no_spending_desc">Les transactions de cette période apparaîtront ici.</string>
     <string name="no_spend_streak">Série sans dépense</string>
-    <string name="days">Jours</string>
     <string name="daily_average">Moyenne quotidienne</string>
     <string name="day_unit">jour</string>
     <string name="avg_txn">Moy. / Tx</string>
@@ -76,7 +75,6 @@
     <string name="remaining">restant</string>
     <string name="exceeded">dépassé</string>
     <string name="spent_of">%1$s dépensé sur %2$s</string>
-    <string name="days_left">%1$d jours restants</string>
     <string name="safe_daily_spend">Dépense quotidienne sûre</string>
     <string name="cash_flow_trend">Tendance du flux</string>
     <string name="not_enough_data_trend">Données insuffisantes pour dégager une tendance.\nContinuez à enregistrer vos dépenses !</string>
@@ -767,4 +765,12 @@
     <string name="license_revoked_dialog_desc">Cet appareil a été retiré de votre licence Cipher Pro ou la licence a été révoquée depuis un autre appareil. Vous pouvez réactiver votre clé de licence à tout moment.</string>
     <string name="license_revoked_dialog_action_reactivate">Réactiver la licence</string>
     <string name="license_revoked_dialog_action_dismiss">Continuer en version Free</string>
+    <plurals name="no_spend_streak_days">
+        <item quantity="one">%d jour</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+    <plurals name="days_left">
+        <item quantity="one">%1$d jour restant</item>
+        <item quantity="other">%1$d jours restants</item>
+    </plurals>
 </resources>

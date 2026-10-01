@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -720,7 +721,7 @@ private fun InsightHero(state: InsightsContract.State) {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "${state.noSpendStreak} ${stringResource(R.string.days)}",
+                        text = pluralStringResource(R.plurals.no_spend_streak_days, state.noSpendStreak, state.noSpendStreak),
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,

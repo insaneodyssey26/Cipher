@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -383,7 +384,7 @@ fun BudgetHealthCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "${stringResource(R.string.days_left, daysRemaining)} ($percentDisplay)",
+                        text = "${pluralStringResource(R.plurals.days_left, daysRemaining, daysRemaining)} ($percentDisplay)",
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontSize = 11.sp,

@@ -65,7 +65,6 @@
     <string name="no_spending_recorded">কোন খরচ রেকর্ড করা হয়নি</string>
     <string name="no_spending_desc">এই সময়ের লেনদেন এখানে প্রদর্শিত হবে।</string>
     <string name="no_spend_streak">নো-স্পেন্ড স্ট্রিক</string>
-    <string name="days">দিন</string>
     <string name="daily_average">দৈনিক গড়</string>
     <string name="day_unit">দিন</string>
     <string name="avg_txn">গড় / লেনদেন</string>
@@ -77,7 +76,6 @@
     <string name="remaining">অবশিষ্ট</string>
     <string name="exceeded">অতিরিক্ত</string>
     <string name="spent_of">%2$s এর মধ্যে %1$s খরচ</string>
-    <string name="days_left">%1$d দিন বাকি</string>
     <string name="safe_daily_spend">নিরাপদ দৈনিক খরচ</string>
     <string name="cash_flow_trend">ক্যাশ ফ্লো ট্রেন্ড</string>
     <string name="not_enough_data_trend">ট্রেন্ড দেখানোর মতো পর্যাপ্ত ডেটা নেই।\nলেনদেন যোগ করতে থাকুন!</string>
@@ -767,4 +765,12 @@
     <string name="license_revoked_dialog_desc">আপনার সাইফার প্রো লাইসেন্স থেকে এই ডিভাইসটি সরানো হয়েছে বা অন্য ডিভাইস থেকে লাইসেন্স প্রত্যাহার করা হয়েছে। আপনি যেকোনো সময় আবার লাইসেন্স সক্রিয় করতে পারেন।</string>
     <string name="license_revoked_dialog_action_reactivate">লাইসেন্স পুনরায় সক্রিয় করুন</string>
     <string name="license_revoked_dialog_action_dismiss">ফ্রি ভার্সন চালিয়ে যান</string>
+    <plurals name="no_spend_streak_days">
+        <item quantity="one">%d দিন</item>
+        <item quantity="other">%d দিন</item>
+    </plurals>
+    <plurals name="days_left">
+        <item quantity="one">%1$d দিন বাকি</item>
+        <item quantity="other">%1$d দিন বাকি</item>
+    </plurals>
 </resources>

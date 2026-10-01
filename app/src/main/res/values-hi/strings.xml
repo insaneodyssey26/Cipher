@@ -65,7 +65,6 @@
     <string name="no_spending_recorded">कोई खर्च दर्ज नहीं हुआ</string>
     <string name="no_spending_desc">इस अवधि के लेनदेन यहाँ दिखाई देंगे।</string>
     <string name="no_spend_streak">नो-स्पेंड स्ट्रीक</string>
-    <string name="days">दिन</string>
     <string name="daily_average">दैनिक औसत</string>
     <string name="day_unit">दिन</string>
     <string name="avg_txn">औसत / लेन-देन</string>
@@ -77,7 +76,6 @@
     <string name="remaining">शेष</string>
     <string name="exceeded">अधिक</string>
     <string name="spent_of">%2$s में से %1$s खर्च</string>
-    <string name="days_left">%1$d दिन शेष</string>
     <string name="safe_daily_spend">सुरक्षित दैनिक खर्च</string>
     <string name="cash_flow_trend">नकदी प्रवाह रुझान</string>
     <string name="not_enough_data_trend">रुझान दिखाने के लिए पर्याप्त डेटा नहीं है।\nलेनदेन जोड़ते रहें!</string>
@@ -766,4 +764,12 @@
     <string name="license_revoked_dialog_desc">इस डिवाइस को आपके साइफर प्रो लाइसेंस से हटा दिया गया है या किसी अन्य डिवाइस से लाइसेंस रद्द कर दिया गया है। आप किसी भी समय अपनी लाइसेंस कुंजी पुनः सक्रिय कर सकते हैं।</string>
     <string name="license_revoked_dialog_action_reactivate">लाइसेंस पुनः सक्रिय करें</string>
     <string name="license_revoked_dialog_action_dismiss">मुफ़्त संस्करण जारी रखें</string>
+    <plurals name="no_spend_streak_days">
+        <item quantity="one">%d दिन</item>
+        <item quantity="other">%d दिन</item>
+    </plurals>
+    <plurals name="days_left">
+        <item quantity="one">%1$d दिन शेष</item>
+        <item quantity="other">%1$d दिन शेष</item>
+    </plurals>
 </resources>

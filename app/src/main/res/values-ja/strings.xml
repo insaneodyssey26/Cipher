@@ -64,7 +64,6 @@
     <string name="no_spending_recorded">支出の記録がありません</string>
     <string name="no_spending_desc">この期間の取引がここに表示されます。</string>
     <string name="no_spend_streak">無支出日数</string>
-    <string name="days">日</string>
     <string name="daily_average">1日平均</string>
     <string name="day_unit">日</string>
     <string name="avg_txn">平均 / 件</string>
@@ -76,7 +75,6 @@
     <string name="remaining">残り</string>
     <string name="exceeded">超過</string>
     <string name="spent_of">%2$s 中 %1$s を支出</string>
-    <string name="days_left">残り %1$d 日</string>
     <string name="safe_daily_spend">1日の目安支出</string>
     <string name="cash_flow_trend">キャッシュフロートレンド</string>
     <string name="not_enough_data_trend">トレンドを表示する十分なデータがありません。\n取引を記録しましょう！</string>
@@ -767,4 +765,10 @@
     <string name="license_revoked_dialog_desc">このデバイスはCipher Proライセンスから削除されたか、別のデバイスからライセンスが無効化されました。いつでもライセンスキーを再アクティブ化できます。</string>
     <string name="license_revoked_dialog_action_reactivate">ライセンスを再アクティブ化</string>
     <string name="license_revoked_dialog_action_dismiss">無料版を続ける</string>
+    <plurals name="no_spend_streak_days">
+        <item quantity="other">%d日</item>
+    </plurals>
+    <plurals name="days_left">
+        <item quantity="other">残り %1$d 日</item>
+    </plurals>
 </resources>
