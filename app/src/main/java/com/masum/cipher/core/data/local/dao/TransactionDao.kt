@@ -26,6 +26,15 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
     suspend fun getAllTransactionsList(): List<TransactionEntity>
 
+    @Query(
+        "SELECT accountId, " +
+            "COALESCE(SUM(CASE WHEN isIncome = 1 THEN amount ELSE 0 END), 0.0) AS income, " +
+            "COALESCE(SUM(CASE WHEN isIncome = 0 THEN amount ELSE 0 END), 0.0) AS expense, " +
+            "COUNT(*) AS transactionCount " +
+            "FROM transactions GROUP BY accountId"
+    )
+    fun getAccountFlowTotals(): Flow<List<AccountFlowTotals>>
+
     @Query("SELECT * FROM transactions WHERE merchant LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>
 

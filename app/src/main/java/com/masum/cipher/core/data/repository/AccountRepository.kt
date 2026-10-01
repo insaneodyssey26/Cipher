@@ -1,6 +1,7 @@
 package com.masum.cipher.core.data.repository
 
 import com.masum.cipher.core.data.local.dao.AccountDao
+import com.masum.cipher.core.data.local.dao.AccountFlowTotals
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.domain.model.AccountItem
@@ -16,36 +17,8 @@ class AccountRepository @Inject constructor(
 ) {
     fun getAllAccountsFlow(): Flow<List<AccountEntity>> = accountDao.getAllAccountsFlow()
 
-    fun getAllAccountsWithBalancesFlow(): Flow<List<AccountItem>> {
-        return combine(accountDao.getAllAccountsFlow(), transactionDao.getAllTransactions()) { accounts, transactions ->
-            if (accounts.isEmpty()) {
-                val defaultAcc = AccountEntity(
-                    id = 1,
-                    name = "Main Account",
-                    type = "BANK",
-                    initialBalance = 0.0,
-                    colorHex = 0xFF4F46E5,
-                    iconName = "Landmark",
-                    isDefault = true
-                )
-                val defaultTxs = transactions.filter { it.accountId == null || it.accountId == 1L }
-                val income = defaultTxs.filter { it.isIncome }.sumOf { it.amount }
-                val expense = defaultTxs.filter { !it.isIncome }.sumOf { it.amount }
-                listOf(AccountItem(defaultAcc, income - expense, defaultTxs.size))
-            } else {
-                val rootAccountId = accounts.minByOrNull { it.createdAt }?.id ?: accounts.first().id
-                accounts.map { account ->
-                    val accTxs = transactions.filter {
-                        it.accountId == account.id || (it.accountId == null && account.id == rootAccountId)
-                    }
-                    val income = accTxs.filter { it.isIncome }.sumOf { it.amount }
-                    val expense = accTxs.filter { !it.isIncome }.sumOf { it.amount }
-                    val currentBal = account.initialBalance + (income - expense)
-                    AccountItem(account, currentBal, accTxs.size)
-                }
-            }
-        }
-    }
+    fun getAllAccountsWithBalancesFlow(): Flow<List<AccountItem>> =
+        combine(accountDao.getAllAccountsFlow(), transactionDao.getAccountFlowTotals(), ::buildAccountItems)
 
     suspend fun getAccountById(id: Long): AccountEntity? = accountDao.getAccountById(id)
 
@@ -83,3 +56,39 @@ class AccountRepository @Inject constructor(
 
     suspend fun getAccountCount(): Int = accountDao.getAccountCount()
 }
+
+private const val FALLBACK_ACCOUNT_ID = 1L
+
+internal fun buildAccountItems(accounts: List<AccountEntity>, totals: List<AccountFlowTotals>): List<AccountItem> {
+    val totalsByAccount = totals.associateBy { it.accountId }
+    val unassigned = totalsByAccount[null]
+
+    if (accounts.isEmpty()) {
+        val fallbackAccount = AccountEntity(
+            id = FALLBACK_ACCOUNT_ID,
+            name = "Main Account",
+            type = "BANK",
+            initialBalance = 0.0,
+            colorHex = 0xFF4F46E5,
+            iconName = "Landmark",
+            isDefault = true
+        )
+        return listOf(accountItem(fallbackAccount, listOfNotNull(unassigned, totalsByAccount[FALLBACK_ACCOUNT_ID])))
+    }
+
+    val rootAccountId = accounts.minByOrNull { it.createdAt }?.id ?: accounts.first().id
+    return accounts.map { account ->
+        val owned = listOfNotNull(
+            totalsByAccount[account.id],
+            unassigned.takeIf { account.id == rootAccountId }
+        )
+        accountItem(account, owned)
+    }
+}
+
+private fun accountItem(account: AccountEntity, owned: List<AccountFlowTotals>): AccountItem =
+    AccountItem(
+        entity = account,
+        currentBalance = account.initialBalance + owned.sumOf { it.income } - owned.sumOf { it.expense },
+        transactionCount = owned.sumOf { it.transactionCount }
+    )
