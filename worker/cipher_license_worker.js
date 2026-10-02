@@ -359,14 +359,20 @@ export default {
       try {
         const rawBody = await request.text();
 
-        if (env.DODO_WEBHOOK_SECRET) {
-          const isValid = await verifyStandardWebhookSignature(rawBody, request.headers, env.DODO_WEBHOOK_SECRET);
-          if (!isValid) {
-            return new Response(JSON.stringify({ success: false, error: "Invalid webhook signature" }), {
-              status: 401,
-              headers: { "Content-Type": "application/json" }
-            });
-          }
+        if (!env.DODO_WEBHOOK_SECRET) {
+          console.error("[DODO WEBHOOK] DODO_WEBHOOK_SECRET is not configured; refusing to process webhooks");
+          return new Response(JSON.stringify({ success: false, error: "Webhook receiver is not configured" }), {
+            status: 503,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+
+        const isValid = await verifyStandardWebhookSignature(rawBody, request.headers, env.DODO_WEBHOOK_SECRET);
+        if (!isValid) {
+          return new Response(JSON.stringify({ success: false, error: "Invalid webhook signature" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" }
+          });
         }
 
         const eventData = JSON.parse(rawBody);

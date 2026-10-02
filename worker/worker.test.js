@@ -107,6 +107,39 @@ describe("Cipher License Worker Security & Endpoints", () => {
     expect(await env.CIPHER_LICENSES.get("FORGED-KEY-1234")).toBeNull();
   });
 
+  it("1b. refuses every webhook, signed or not, when no secret is configured", async () => {
+    delete env.DODO_WEBHOOK_SECRET;
+    const forged = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/webhook/dodo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "payment.succeeded",
+        data: { license_key: "MINTED-WITHOUT-SECRET", product_id: "pdt_any" }
+      })
+    });
+
+    const res = await worker.fetch(forged, env, {});
+
+    expect(res.status).toBe(503);
+    expect((await res.json()).success).toBe(false);
+    expect(await env.CIPHER_LICENSES.get("MINTED-WITHOUT-SECRET")).toBeNull();
+  });
+
+  it("1c. a forged refund cannot revoke a license when no secret is configured", async () => {
+    await env.CIPHER_LICENSES.put("REAL-KEY-1", JSON.stringify({ key: "REAL-KEY-1", tier: "LIFETIME", status: "ACTIVE", activatedDevices: [] }));
+    delete env.DODO_WEBHOOK_SECRET;
+    const forgedRefund = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/webhook/dodo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "refund.succeeded", data: { license_key: "REAL-KEY-1" } })
+    });
+
+    const res = await worker.fetch(forgedRefund, env, {});
+
+    expect(res.status).toBe(503);
+    expect((await env.CIPHER_LICENSES.get("REAL-KEY-1", { type: "json" })).status).toBe("ACTIVE");
+  });
+
   it("2. accepts genuine signed webhook and maps product tier correctly", async () => {
     const payload = {
       type: "payment.succeeded",
