@@ -533,6 +533,9 @@
     <string name="pro_coupon_notice">Vous avez un coupon ? Vous pouvez l\'ajouter au moment de payer.</string>
     <string name="pro_cant_find_key">Clé de licence introuvable ?</string>
     <string name="pro_customer_portal_link">Ouvrir le portail client Dodo</string>
+    <string name="pro_subscription_title">Abonnement</string>
+    <string name="pro_subscription_body">La facturation est gérée en toute sécurité par Dodo Payments. Vous pouvez résilier à tout moment depuis le portail client.</string>
+    <string name="pro_subscription_manage">Gérer ou résilier l\'abonnement</string>
 
     <string name="accounts_title">Comptes et portefeuilles</string>
     <string name="accounts_subtitle">Gérer les comptes financiers et grands livres</string>

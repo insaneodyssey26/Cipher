@@ -533,6 +533,9 @@
     <string name="pro_coupon_notice">কুপন কোড আছে? চেকআউটের সময় প্রবেশ করাতে পারেন।</string>
     <string name="pro_cant_find_key">লাইসেন্স কি খুঁজে পাচ্ছেন না?</string>
     <string name="pro_customer_portal_link">ডোডো কাস্টমার পোর্টাল খুলুন</string>
+    <string name="pro_subscription_title">সাবস্ক্রিপশন</string>
+    <string name="pro_subscription_body">বিলিং নিরাপদে Dodo Payments পরিচালনা করে। আপনি যেকোনো সময় কাস্টমার পোর্টাল থেকে বাতিল করতে পারেন।</string>
+    <string name="pro_subscription_manage">সাবস্ক্রিপশন পরিচালনা বা বাতিল করুন</string>
 
     <string name="accounts_title">অ্যাকাউন্ট ও ওয়ালেট</string>
     <string name="accounts_subtitle">আর্থিক অ্যাকাউন্ট ও খতিয়ান পরিচালনা করুন</string>

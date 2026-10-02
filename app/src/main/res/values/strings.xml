@@ -593,6 +593,9 @@
     <string name="pro_coupon_notice">Have a coupon? You can enter it at checkout.</string>
     <string name="pro_cant_find_key">Can\'t find your license key?</string>
     <string name="pro_customer_portal_link">Open Dodo Customer Portal</string>
+    <string name="pro_subscription_title">Subscription</string>
+    <string name="pro_subscription_body">Billing is handled securely by Dodo Payments. You can cancel anytime from the customer portal.</string>
+    <string name="pro_subscription_manage">Manage or cancel subscription</string>
 
     <string name="accounts_title">Accounts &amp; Wallets</string>
     <string name="accounts_subtitle">Manage financial accounts and ledgers</string>

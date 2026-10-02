@@ -532,6 +532,9 @@
     <string name="pro_coupon_notice">¿Tienes un cupón? Puedes introducirlo al finalizar la compra.</string>
     <string name="pro_cant_find_key">¿No encuentras tu clave de licencia?</string>
     <string name="pro_customer_portal_link">Abrir portal de clientes de Dodo</string>
+    <string name="pro_subscription_title">Suscripción</string>
+    <string name="pro_subscription_body">Dodo Payments gestiona la facturación de forma segura. Puedes cancelar en cualquier momento desde el portal de clientes.</string>
+    <string name="pro_subscription_manage">Gestionar o cancelar la suscripción</string>
 
     <string name="accounts_title">Cuentas y billeteras</string>
     <string name="accounts_subtitle">Administra cuentas financieras y libros contables</string>

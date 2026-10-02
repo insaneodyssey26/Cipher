@@ -534,6 +534,9 @@
     <string name="pro_coupon_notice">クーポンをお持ちですか？お支払い画面で入力できます。</string>
     <string name="pro_cant_find_key">ライセンスキーが見つかりませんか？</string>
     <string name="pro_customer_portal_link">Dodoカスタマーポータルを開く</string>
+    <string name="pro_subscription_title">サブスクリプション</string>
+    <string name="pro_subscription_body">お支払いはDodo Paymentsが安全に処理します。解約はいつでもカスタマーポータルから行えます。</string>
+    <string name="pro_subscription_manage">サブスクリプションの管理・解約</string>
 
     <string name="accounts_title">口座・ウォレット</string>
     <string name="accounts_subtitle">財務口座と取引台帳を管理</string>

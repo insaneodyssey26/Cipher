@@ -533,6 +533,9 @@
     <string name="pro_coupon_notice">Hast du einen Gutschein? Du kannst ihn an der Kasse einlösen.</string>
     <string name="pro_cant_find_key">Lizenzschlüssel nicht gefunden?</string>
     <string name="pro_customer_portal_link">Dodo-Kundenportal öffnen</string>
+    <string name="pro_subscription_title">Abonnement</string>
+    <string name="pro_subscription_body">Die Abrechnung erfolgt sicher über Dodo Payments. Du kannst jederzeit im Kundenportal kündigen.</string>
+    <string name="pro_subscription_manage">Abonnement verwalten oder kündigen</string>
 
     <string name="accounts_title">Konten &amp; Wallets</string>
     <string name="accounts_subtitle">Finanzkonten und Kontobücher verwalten</string>

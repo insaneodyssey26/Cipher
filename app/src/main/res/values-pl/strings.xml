@@ -547,6 +547,9 @@
     <string name="pro_coupon_notice">Masz kupon? Możesz go wpisać przy finalizacji zakupu.</string>
     <string name="pro_cant_find_key">Nie możesz znaleźć klucza licencyjnego?</string>
     <string name="pro_customer_portal_link">Otwórz portal klienta Dodo</string>
+    <string name="pro_subscription_title">Subskrypcja</string>
+    <string name="pro_subscription_body">Płatnościami bezpiecznie zarządza Dodo Payments. Możesz anulować w dowolnej chwili w portalu klienta.</string>
+    <string name="pro_subscription_manage">Zarządzaj subskrypcją lub ją anuluj</string>
 
     <string name="accounts_title">Konta i portfele</string>
     <string name="accounts_subtitle">Zarządzaj kontami finansowymi i rejestrami</string>

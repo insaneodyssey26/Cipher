@@ -1206,7 +1206,7 @@ fun CipherProScreen(
                     TextButton(
                         onClick = {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://customer.dodopayments.com"))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(CUSTOMER_PORTAL_URL))
                                 context.startActivity(intent)
                             } catch (_: Exception) {}
                         }
@@ -1826,6 +1826,21 @@ private fun ActiveProMembershipContent(
                         }
                     }
                 }
+            }
+
+            if (isSubscriptionTier(settings.proTier)) {
+                ManageSubscriptionCard(
+                    cardBg = cardBg,
+                    cardBorder = cardBorderDefault,
+                    textPrimary = textPrimary,
+                    textDescription = textDescription,
+                    onManageClick = {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CUSTOMER_PORTAL_URL)))
+                        } catch (_: Exception) {}
+                    }
+                )
             }
 
             Box(

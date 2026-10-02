@@ -532,6 +532,9 @@
     <string name="pro_coupon_notice">कूपन कोड है? आप इसे चेकआउट पर दर्ज कर सकते हैं।</string>
     <string name="pro_cant_find_key">लाइसेंस कुंजी नहीं मिल रही?</string>
     <string name="pro_customer_portal_link">डोडो ग्राहक पोर्टल खोलें</string>
+    <string name="pro_subscription_title">सदस्यता</string>
+    <string name="pro_subscription_body">बिलिंग Dodo Payments द्वारा सुरक्षित रूप से संभाली जाती है। आप कभी भी ग्राहक पोर्टल से रद्द कर सकते हैं।</string>
+    <string name="pro_subscription_manage">सदस्यता प्रबंधित करें या रद्द करें</string>
 
     <string name="accounts_title">खाते और वॉलेट</string>
     <string name="accounts_subtitle">वित्तीय खाते और बहीखाता प्रबंधित करें</string>
