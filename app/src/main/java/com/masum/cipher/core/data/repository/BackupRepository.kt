@@ -214,12 +214,7 @@ class BackupRepository @Inject constructor(
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
                 if (!data.proLicenseToken.isNullOrBlank()) {
-                    userPreferences.setProStatus(
-                        isPro = true,
-                        tier = data.proTier ?: "LIFETIME",
-                        token = data.proLicenseToken,
-                        orderId = data.proOrderId
-                    )
+                    userPreferences.setPendingLicenseToken(data.proLicenseToken)
                 }
             }
             Result.success(Unit)

@@ -1,7 +1,6 @@
 package com.masum.cipher.core.security
 
 import android.os.Build
-import android.util.Base64
 import com.masum.cipher.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,11 +13,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.security.KeyFactory
-import java.security.MessageDigest
-import java.security.PublicKey
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,7 +45,8 @@ data class LicenseValidationResult(
     val deviceCount: Int = 1,
     val maxDevices: Int = 3,
     val activeDevices: List<ActiveDeviceInfo> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isNetworkFailure: Boolean = false
 )
 
 sealed class RemoteLicenseCheckResult {
@@ -72,211 +67,11 @@ class LicenseEngine @Inject constructor() {
 
     companion object {
         private val USER_AGENT = "Cipher-Android/${BuildConfig.VERSION_NAME}"
-        private const val RSA_ALGORITHM = "SHA256withRSA"
-        private const val KEY_FACTORY_ALGORITHM = "RSA"
-
-        private val SCRAMBLED_PUBLIC_KEY_PARTS = listOf(
-            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyq7D2Z1x0e4pL9V1K3qX",
-            "8zQ7mXvL9wF2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1m",
-            "P9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9z",
-            "Q4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4x",
-            "X2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2y",
-            "T0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0k",
-            "L1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1mP9zQ4xX2yT0kL1m",
-            "IDAQAB"
-        )
-    }
-
-    fun validateLicense(licenseToken: String, expectedEmail: String? = null): LicenseValidationResult {
-        val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
-        if (sanitized.isBlank()) {
-            return LicenseValidationResult(isValid = false, errorMessage = "License key is empty")
-        }
-
-        if (isAlgorithmicPromoCode(sanitized)) {
-            val tier = determineAlgorithmicTier(sanitized)
-            val now = System.currentTimeMillis()
-            val expiryMs = when (tier) {
-                ProTier.MONTHLY -> now + 30L * 24L * 60L * 60L * 1000L
-                ProTier.HALF_YEARLY, ProTier.SIX_MONTH -> now + 180L * 24L * 60L * 60L * 1000L
-                ProTier.ANNUAL -> now + 365L * 24L * 60L * 60L * 1000L
-                ProTier.LIFETIME, ProTier.PROMO, ProTier.DEVELOPER -> 0L
-                ProTier.FREE -> 0L
-            }
-            return LicenseValidationResult(
-                isValid = true,
-                tier = tier,
-                orderId = "PROMO-${sanitized.takeLast(6).uppercase()}",
-                customerEmail = expectedEmail ?: "earlybird@cipher.app",
-                issuedAtEpochMs = now,
-                expiresAtEpochMs = expiryMs,
-                isExpired = false
-            )
-        }
-
-        if (isUuidFormat(sanitized)) {
-            return LicenseValidationResult(
-                isValid = false,
-                errorMessage = "Internet connection required to activate license key"
-            )
-        }
-
-        val parts = sanitized.split(".")
-        if (parts.size != 2) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Invalid license format")
-        }
-
-        val payloadBase64 = parts[0]
-        val signatureBase64 = parts[1]
-
-        val payloadBytes = try {
-            Base64.decode(payloadBase64, Base64.URL_SAFE or Base64.NO_WRAP)
-        } catch (_: Exception) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Malformed payload encoding")
-        }
-
-        val signatureBytes = try {
-            Base64.decode(signatureBase64, Base64.URL_SAFE or Base64.NO_WRAP)
-        } catch (_: Exception) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Malformed signature encoding")
-        }
-
-        val payloadStr = String(payloadBytes, StandardCharsets.UTF_8)
-        val payloadFields = payloadStr.split("|")
-        if (payloadFields.size < 4) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Incomplete license token")
-        }
-
-        val prefix = payloadFields[0]
-        val tierIdentifier = payloadFields[1]
-        val orderOrEmail = payloadFields[2]
-        val timestampStr = payloadFields[3]
-        val expiryStr = if (payloadFields.size >= 5) payloadFields[4] else "0"
-
-        if (prefix != "CIPHER_PRO") {
-            return LicenseValidationResult(isValid = false, errorMessage = "Unrecognized application signature")
-        }
-
-        val isSignatureValid = verifySignatureWithEccFallback(payloadBytes, signatureBytes)
-        if (!isSignatureValid) {
-            return LicenseValidationResult(isValid = false, errorMessage = "Cryptographic signature verification failed")
-        }
-
-        val issuedAt = timestampStr.toLongOrNull() ?: 0L
-        val expiresAt = expiryStr.toLongOrNull() ?: 0L
-        val now = System.currentTimeMillis()
-        val isExpired = expiresAt > 0L && now > expiresAt
-
-        if (isExpired) {
-            return LicenseValidationResult(
-                isValid = false,
-                tier = parseTier(tierIdentifier),
-                orderId = orderOrEmail,
-                issuedAtEpochMs = issuedAt,
-                expiresAtEpochMs = expiresAt,
-                isExpired = true,
-                errorMessage = "This license key has expired"
-            )
-        }
-
-        return LicenseValidationResult(
-            isValid = true,
-            tier = parseTier(tierIdentifier),
-            orderId = orderOrEmail,
-            customerEmail = if (orderOrEmail.contains("@")) orderOrEmail else null,
-            issuedAtEpochMs = issuedAt,
-            expiresAtEpochMs = expiresAt,
-            isExpired = false
-        )
-    }
-
-    private val uuidRegex = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-
-    fun isUuidFormat(token: String): Boolean {
-        return uuidRegex.matches(token.trim())
-    }
-
-    fun isAlgorithmicPromoCode(token: String): Boolean {
-        val trimmed = token.trim()
-        val uppercase = trimmed.uppercase()
-        val prefixes = listOf(
-            "CIPHER-LIFETIME-",
-            "CIPHER-ANNUAL-",
-            "CIPHER-6MONTH-",
-            "CIPHER-HALF-",
-            "CIPHER-MONTHLY-",
-            "CIPHER-PRO-",
-            "CIPHER-VIP-",
-            "CIPHER-EARLY-"
-        )
-        val matchedPrefix = prefixes.firstOrNull { uppercase.startsWith(it) } ?: return false
-        val suffix = uppercase.removePrefix(matchedPrefix).replace("-", "")
-        if (suffix.length < 8) return false
-
-        val body = suffix.dropLast(4)
-        val checksum = suffix.takeLast(4)
-        val expected = computeCheckCode(body)
-        return checksum.equals(expected, ignoreCase = true)
-    }
-
-    private fun determineAlgorithmicTier(token: String): ProTier {
-        val uppercase = token.uppercase().trim()
-        return when {
-            uppercase.startsWith("CIPHER-LIFETIME-") -> ProTier.LIFETIME
-            uppercase.startsWith("CIPHER-ANNUAL-") -> ProTier.ANNUAL
-            uppercase.startsWith("CIPHER-PRO-") -> ProTier.ANNUAL
-            uppercase.startsWith("CIPHER-6MONTH-") -> ProTier.HALF_YEARLY
-            uppercase.startsWith("CIPHER-HALF-") -> ProTier.HALF_YEARLY
-            uppercase.startsWith("CIPHER-MONTHLY-") -> ProTier.MONTHLY
-            uppercase.startsWith("CIPHER-VIP-") -> ProTier.PROMO
-            uppercase.startsWith("CIPHER-EARLY-") -> ProTier.PROMO
-            else -> ProTier.LIFETIME
-        }
-    }
-
-    fun computeCheckCode(input: String): String {
-        val salt = "CIPHER_VAULT_PRO_SECURE_SALT_2026"
-        val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest((input + salt).toByteArray(StandardCharsets.UTF_8))
-        val hex = digest.joinToString("") { "%02X".format(it) }
-        return hex.take(4).uppercase()
     }
 
     private fun parseTier(identifier: String): ProTier {
         return ProTier.entries.firstOrNull { it.identifier.equals(identifier, ignoreCase = true) }
             ?: ProTier.LIFETIME
-    }
-
-    private fun verifySignatureWithEccFallback(payload: ByteArray, signature: ByteArray): Boolean {
-        return try {
-            val pubKey = getEmbeddedPublicKey() ?: return verifyHmacFallback(payload, signature)
-            val sig = Signature.getInstance(RSA_ALGORITHM)
-            sig.initVerify(pubKey)
-            sig.update(payload)
-            sig.verify(signature)
-        } catch (_: Exception) {
-            verifyHmacFallback(payload, signature)
-        }
-    }
-
-    private fun verifyHmacFallback(payload: ByteArray, signature: ByteArray): Boolean {
-        val fallbackSecret = "CIPHER_ED25519_CORE_BACKUP_SECRET_2026_OFFLINE"
-        val md = MessageDigest.getInstance("SHA-256")
-        md.update(fallbackSecret.toByteArray(StandardCharsets.UTF_8))
-        val computed = md.digest(payload)
-        return MessageDigest.isEqual(computed, signature)
-    }
-
-    private fun getEmbeddedPublicKey(): PublicKey? {
-        return try {
-            val keyString = SCRAMBLED_PUBLIC_KEY_PARTS.joinToString("")
-            val keyBytes = Base64.decode(keyString, Base64.DEFAULT)
-            val spec = X509EncodedKeySpec(keyBytes)
-            val factory = KeyFactory.getInstance(KEY_FACTORY_ALGORITHM)
-            factory.generatePublic(spec)
-        } catch (_: Exception) {
-            null
-        }
     }
 
     suspend fun activateLicenseRemote(
@@ -288,16 +83,6 @@ class LicenseEngine @Inject constructor() {
         val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
         if (sanitized.isBlank()) {
             return@withContext LicenseValidationResult(isValid = false, errorMessage = "License key is empty")
-        }
-
-        if (isAlgorithmicPromoCode(sanitized)) {
-            return@withContext validateLicense(sanitized, email)
-        }
-
-        val parts = sanitized.split(".")
-        if (parts.size == 2) {
-            val localCheck = validateLicense(sanitized, email)
-            if (localCheck.isValid) return@withContext localCheck
         }
 
         try {
@@ -370,7 +155,8 @@ class LicenseEngine @Inject constructor() {
         } catch (_: Exception) {
             LicenseValidationResult(
                 isValid = false,
-                errorMessage = "Internet connection required to activate this license key."
+                errorMessage = "Internet connection required to activate this license key.",
+                isNetworkFailure = true
             )
         }
     }

@@ -719,7 +719,14 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun deactivatePro() {
+        setPendingLicenseToken(null)
         setProStatus(isPro = false, tier = "FREE", token = null, orderId = null, expiresAt = 0L)
+    }
+
+    fun getPendingLicenseToken(): String? = syncPrefs.getString("pending_license_token", null)
+
+    fun setPendingLicenseToken(token: String?) {
+        syncPrefs.edit().putString("pending_license_token", token).apply()
     }
 
     suspend fun markLicenseRevoked(reason: String = "REVOKED") {

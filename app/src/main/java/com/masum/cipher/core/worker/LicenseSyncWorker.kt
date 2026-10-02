@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.security.LicenseEngine
+import com.masum.cipher.core.security.PendingLicenseActivator
 import com.masum.cipher.core.security.RemoteLicenseCheckResult
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -26,12 +27,15 @@ class LicenseSyncWorker(
     interface WorkerEntryPoint {
         fun userPreferences(): UserPreferences
         fun licenseEngine(): LicenseEngine
+        fun pendingLicenseActivator(): PendingLicenseActivator
     }
 
     override suspend fun doWork(): Result {
         val entryPoint = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val userPreferences = entryPoint.userPreferences()
         val licenseEngine = entryPoint.licenseEngine()
+
+        entryPoint.pendingLicenseActivator().activate()
 
         if (!userPreferences.isCachedPro()) {
             return Result.success()
@@ -40,10 +44,6 @@ class LicenseSyncWorker(
         val token = userPreferences.getCachedLicenseToken()
         if (token.isNullOrBlank()) {
             userPreferences.deactivatePro()
-            return Result.success()
-        }
-
-        if (licenseEngine.isAlgorithmicPromoCode(token)) {
             return Result.success()
         }
 
