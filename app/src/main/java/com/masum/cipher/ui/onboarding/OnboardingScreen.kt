@@ -708,7 +708,7 @@ private fun OnboardingRestoreLicenseDialog(
                         ) {
                             if (keyInput.isEmpty()) {
                                 Text(
-                                    text = "CIPHER-XXXX-XXXX-XXXX",
+                                    text = stringResource(R.string.pro_license_hint),
                                     style = Typography.bodySmall.copy(
                                         fontFamily = Lato,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
