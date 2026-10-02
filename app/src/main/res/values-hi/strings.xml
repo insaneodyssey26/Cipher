@@ -363,6 +363,10 @@
     <string name="whats_new_header_title">Cipher अपडेट</string>
     <string name="whats_new_header_desc">हाल के अपडेट्स और नई सुविधाएं</string>
     <string name="whats_new_badge_latest">नवीनतम</string>
+    <string name="whats_new_v616_manage_title">अपनी सदस्यता प्रबंधित करें</string>
+    <string name="whats_new_v616_manage_desc">सब्सक्राइबर अब सदस्यता स्क्रीन से एक टैप में अपना प्लान प्रबंधित या रद्द कर सकते हैं।</string>
+    <string name="whats_new_v616_license_title">आसान लाइसेंस सक्रियण</string>
+    <string name="whats_new_v616_license_desc">बैकअप रिस्टोर करने के बाद नए फ़ोन पर Pro अब अपने आप फिर से सक्रिय हो जाता है, और आपके प्लान की नवीनीकरण तिथि सही दिखाई जाती है।</string>
     <string name="whats_new_feature_custom_categories_title">कस्टम श्रेणियां और रंग</string>
     <string name="whats_new_feature_custom_categories_desc">अपने तरीके से खर्च व्यवस्थित करने के लिए कस्टम आइकन और रंगों के साथ अपनी श्रेणियां बनाएं।</string>
     <string name="whats_new_feature_smart_rules_title">स्मार्ट रूल्स और साफ़ मर्चेंट नाम</string>

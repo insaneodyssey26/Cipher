@@ -121,8 +121,26 @@ fun WhatsNewSheet(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 WhatsNewVersionSection(
-                    versionTitle = "v6.1.5",
+                    versionTitle = "v6.1.6",
                     isLatest = true
+                ) {
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v616_manage_title),
+                        description = stringResource(R.string.whats_new_v616_manage_desc)
+                    )
+                    WhatsNewFeatureEntry(
+                        title = stringResource(R.string.whats_new_v616_license_title),
+                        description = stringResource(R.string.whats_new_v616_license_desc)
+                    )
+                }
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                    thickness = 1.dp
+                )
+
+                WhatsNewVersionSection(
+                    versionTitle = "v6.1.5"
                 ) {
                     WhatsNewFeatureEntry(
                         title = stringResource(R.string.whats_new_v615_restore_title),

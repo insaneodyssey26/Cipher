@@ -375,6 +375,10 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v616_manage_title">Manage Your Subscription</string>
+    <string name="whats_new_v616_manage_desc">Subscribers can now manage or cancel their plan from the Membership screen in one tap.</string>
+    <string name="whats_new_v616_license_title">Smoother License Activation</string>
+    <string name="whats_new_v616_license_desc">Pro now re-activates on a new phone after you restore a backup, and the renewal date of your plan is shown correctly.</string>
     <string name="whats_new_v615_restore_title">Restore on a New Phone</string>
     <string name="whats_new_v615_restore_desc">Moving phones? Tap Restore from a backup on the first screen to bring back your accounts, budgets and history in one step.</string>
     <string name="whats_new_v615_password_title">See Your Backup Password</string>

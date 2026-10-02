@@ -1,5 +1,16 @@
 # Release Notes
 
+## [6.1.6]
+
+### Added & Improved
+- **Manage Your Subscription**: Subscribers can now manage or cancel their plan right from the Membership screen in one tap.
+- **Smoother License Activation**: Pro re-activates on a new phone after you restore a backup, and the renewal date of your plan is shown correctly.
+
+### Fixed
+- The license key box on the welcome screen now shows the standard hint text.
+
+---
+
 ## [6.1.5]
 
 ### Added & Improved

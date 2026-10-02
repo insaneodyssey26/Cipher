@@ -364,6 +364,10 @@
     <string name="whats_new_header_title">Cipher-Updates</string>
     <string name="whats_new_header_desc">Kürzliche Updates und Verbesserungen</string>
     <string name="whats_new_badge_latest">Aktuell</string>
+    <string name="whats_new_v616_manage_title">Abonnement verwalten</string>
+    <string name="whats_new_v616_manage_desc">Abonnenten können ihren Tarif jetzt mit einem Tipp im Mitgliedsbereich verwalten oder kündigen.</string>
+    <string name="whats_new_v616_license_title">Reibungslosere Lizenzaktivierung</string>
+    <string name="whats_new_v616_license_desc">Pro wird nach dem Wiederherstellen eines Backups auf einem neuen Handy automatisch wieder aktiviert, und das Verlängerungsdatum deines Tarifs wird korrekt angezeigt.</string>
     <string name="whats_new_feature_custom_categories_title">Eigene Kategorien &amp; Farben</string>
     <string name="whats_new_feature_custom_categories_desc">Erstellen Sie eigene Kategorien mit individuellen Symbolen und Akzentfarben für Ihre Ausgaben.</string>
     <string name="whats_new_feature_smart_rules_title">Smart Rules &amp; Händlernamen</string>

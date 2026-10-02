@@ -364,6 +364,10 @@
     <string name="whats_new_header_title">Aktualizacje Cipher</string>
     <string name="whats_new_header_desc">Oto co zmieniło się w ostatnich aktualizacjach</string>
     <string name="whats_new_badge_latest">Najnowsza</string>
+    <string name="whats_new_v616_manage_title">Zarządzaj subskrypcją</string>
+    <string name="whats_new_v616_manage_desc">Subskrybenci mogą teraz zarządzać planem lub go anulować jednym dotknięciem na ekranie członkostwa.</string>
+    <string name="whats_new_v616_license_title">Płynniejsza aktywacja licencji</string>
+    <string name="whats_new_v616_license_desc">Pro aktywuje się ponownie na nowym telefonie po przywróceniu kopii zapasowej, a data odnowienia planu jest wyświetlana poprawnie.</string>
     <string name="whats_new_v60_widgets_title">5 nowych widżetów ekranu głównego</string>
     <string name="whats_new_v60_widgets_desc">Monitoruj salda, dzienny limit wydatków i rejestruj transakcje bezpośrednio z ekranu głównego.</string>
     <string name="whats_new_v60_statements_title">Indywidualne wyciągi z konta</string>

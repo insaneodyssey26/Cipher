@@ -363,6 +363,10 @@
     <string name="whats_new_header_title">Actualizaciones de Cipher</string>
     <string name="whats_new_header_desc">Actualizaciones y mejoras recientes</string>
     <string name="whats_new_badge_latest">Última</string>
+    <string name="whats_new_v616_manage_title">Gestiona tu suscripción</string>
+    <string name="whats_new_v616_manage_desc">Los suscriptores ahora pueden gestionar o cancelar su plan desde la pantalla de membresía con un solo toque.</string>
+    <string name="whats_new_v616_license_title">Activación de licencia más fluida</string>
+    <string name="whats_new_v616_license_desc">Pro ahora se reactiva en un teléfono nuevo después de restaurar una copia de seguridad, y la fecha de renovación de tu plan se muestra correctamente.</string>
     <string name="whats_new_feature_custom_categories_title">Categorías Personalizadas y Colores</string>
     <string name="whats_new_feature_custom_categories_desc">Crea tus propias categorías con iconos y colores personalizados para organizar tus gastos a tu manera.</string>
     <string name="whats_new_feature_smart_rules_title">Reglas Inteligentes y Nombres Claros</string>

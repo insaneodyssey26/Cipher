@@ -364,6 +364,10 @@
     <string name="whats_new_header_title">Mises à jour Cipher</string>
     <string name="whats_new_header_desc">Mises à jour et améliorations récentes</string>
     <string name="whats_new_badge_latest">Dernière</string>
+    <string name="whats_new_v616_manage_title">Gérez votre abonnement</string>
+    <string name="whats_new_v616_manage_desc">Les abonnés peuvent désormais gérer ou résilier leur formule depuis l\'écran Abonnement en un seul geste.</string>
+    <string name="whats_new_v616_license_title">Activation de licence plus fluide</string>
+    <string name="whats_new_v616_license_desc">Pro se réactive désormais sur un nouveau téléphone après la restauration d\'une sauvegarde, et la date de renouvellement de votre formule s\'affiche correctement.</string>
     <string name="whats_new_feature_custom_categories_title">Catégories &amp; Couleurs Personnalisées</string>
     <string name="whats_new_feature_custom_categories_desc">Créez vos propres catégories avec des icônes et des couleurs personnalisées pour organiser vos dépenses.</string>
     <string name="whats_new_feature_smart_rules_title">Règles Intelligentes &amp; Noms Clairs</string>

@@ -364,6 +364,10 @@
     <string name="whats_new_header_title">Cipher アップデート</string>
     <string name="whats_new_header_desc">最近のアップデート内容</string>
     <string name="whats_new_badge_latest">最新</string>
+    <string name="whats_new_v616_manage_title">サブスクリプションの管理</string>
+    <string name="whats_new_v616_manage_desc">定期購入のお客様は、メンバーシップ画面からワンタップでプランの管理や解約ができるようになりました。</string>
+    <string name="whats_new_v616_license_title">よりスムーズなライセンス認証</string>
+    <string name="whats_new_v616_license_desc">バックアップを復元すると、新しいスマートフォンでもProが自動的に再認証されます。プランの更新日も正しく表示されます。</string>
     <string name="whats_new_feature_custom_categories_title">カスタムカテゴリーとカラー</string>
     <string name="whats_new_feature_custom_categories_desc">独自のアイコンとアクセントカラーでカテゴリーを自由に作成し、支出をわかりやすく整理できます。</string>
     <string name="whats_new_feature_smart_rules_title">スマートルールと店舗名の自動整理</string>
