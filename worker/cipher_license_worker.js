@@ -1,4 +1,87 @@
 const MAX_DEVICES_PER_KEY = 3;
+const EXPIRY_GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+const MISSING_KEY_TTL_SECONDS = 30 * 24 * 60 * 60;
+const PENDING_SUBSCRIPTION_TTL_SECONDS = 7 * 24 * 60 * 60;
+const BLOCKED_STATUSES = ["REVOKED", "REFUNDED", "EXPIRED"];
+const SUBSCRIPTION_RENEWAL_EVENTS = new Set([
+  "subscription.active",
+  "subscription.renewed",
+  "subscription.updated",
+  "subscription.plan_changed"
+]);
+const KEY_BEARING_EVENTS = new Set(["payment.succeeded", "license_key.created"]);
+
+function parseTimestampMs(value) {
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  }
+  const parsed = Date.parse(value || "");
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function blockedStatus(record, now = Date.now()) {
+  if (BLOCKED_STATUSES.includes(record.status)) {
+    return record.status;
+  }
+  if (record.expiresAt && now > record.expiresAt + EXPIRY_GRACE_MS) {
+    return "EXPIRED";
+  }
+  return null;
+}
+
+function deriveSubscriptionUpdate(eventType, subscription, now = Date.now()) {
+  const nextBilling = parseTimestampMs(subscription.next_billing_date);
+  const cancelAtPeriodEnd = subscription.cancel_at_next_billing_date === true;
+
+  if (eventType === "subscription.expired") {
+    return { expire: true };
+  }
+  if (eventType === "subscription.cancelled") {
+    if (nextBilling > now) {
+      return { expire: false, expiresAt: nextBilling, cancelAtPeriodEnd: true };
+    }
+    return { expire: true };
+  }
+  if (SUBSCRIPTION_RENEWAL_EVENTS.has(eventType) && subscription.status === "active" && nextBilling > now) {
+    return { expire: false, expiresAt: nextBilling, cancelAtPeriodEnd };
+  }
+  return null;
+}
+
+function applySubscriptionUpdate(record, update, eventType, now = Date.now()) {
+  if (record.status !== "ACTIVE") {
+    return false;
+  }
+  if (update.expire) {
+    record.status = "EXPIRED";
+    record.expiredReason = eventType;
+    record.expiredAt = now;
+    return true;
+  }
+  record.expiresAt = update.expiresAt;
+  record.cancelAtPeriodEnd = update.cancelAtPeriodEnd;
+  return true;
+}
+
+async function resolveLicenseKey(env, payload, directKey) {
+  if (directKey) {
+    return directKey;
+  }
+  const lookups = [];
+  if (typeof payload.payment_id === "string" && payload.payment_id) {
+    lookups.push(`ORDER:${payload.payment_id}`);
+  }
+  if (typeof payload.subscription_id === "string" && payload.subscription_id) {
+    lookups.push(`SUB:${payload.subscription_id}`);
+  }
+  for (const lookup of lookups) {
+    const indexed = await env.CIPHER_LICENSES.get(lookup);
+    if (indexed) {
+      return indexed;
+    }
+  }
+  return null;
+}
 
 function base64ToUint8Array(base64) {
   const binaryString = atob(base64);
@@ -79,6 +162,26 @@ const PRODUCT_TIER_MAP = {
   "pdt_0nnvgqmxn76k14c90kljx": { tier: "LIFETIME", prefix: "CIPHER-LIFETIME" }
 };
 
+function toLicenseKeyString(candidate) {
+  if (typeof candidate === "string") {
+    return candidate.trim();
+  }
+  if (candidate && typeof candidate === "object") {
+    return toLicenseKeyString(candidate.key || candidate.license_key || candidate.value);
+  }
+  return "";
+}
+
+function extractLicenseKey(candidates) {
+  for (const candidate of candidates) {
+    const key = toLicenseKeyString(candidate);
+    if (key) {
+      return key.toUpperCase();
+    }
+  }
+  return null;
+}
+
 function resolveProductTier(productId, productName) {
   const cleanId = (productId || "").trim().toLowerCase();
   if (PRODUCT_TIER_MAP[cleanId]) {
@@ -139,11 +242,12 @@ export default {
           });
         }
 
-        if (kvData.status === "REVOKED" || kvData.status === "REFUNDED" || kvData.status === "EXPIRED") {
+        const blocked = blockedStatus(kvData);
+        if (blocked) {
           return new Response(JSON.stringify({
             success: false,
-            error: `License is ${kvData.status.toLowerCase()}`,
-            status: kvData.status
+            error: `License is ${blocked.toLowerCase()}`,
+            status: blocked
           }), {
             status: 403,
             headers: { "Content-Type": "application/json" }
@@ -160,6 +264,7 @@ export default {
         return new Response(JSON.stringify({
           success: true,
           tier: kvData.tier || "LIFETIME",
+          expiresAt: kvData.expiresAt || 0,
           deviceCount: devices.length,
           maxDevices: kvData.maxDevices || MAX_DEVICES_PER_KEY,
           devices: devices
@@ -197,11 +302,12 @@ export default {
           });
         }
 
-        if (kvData.status === "REVOKED" || kvData.status === "REFUNDED" || kvData.status === "EXPIRED") {
+        const blocked = blockedStatus(kvData);
+        if (blocked) {
           return new Response(JSON.stringify({
             success: false,
-            error: `License is ${kvData.status.toLowerCase()}. Activation denied.`,
-            status: kvData.status
+            error: `License is ${blocked.toLowerCase()}. Activation denied.`,
+            status: blocked
           }), {
             status: 403,
             headers: { "Content-Type": "application/json" }
@@ -231,6 +337,7 @@ export default {
           return new Response(JSON.stringify({
             success: true,
             tier: kvData.tier,
+            expiresAt: kvData.expiresAt || 0,
             deviceCount: kvData.activatedDevices.length,
             maxDevices: kvData.maxDevices || MAX_DEVICES_PER_KEY,
             devices: devices,
@@ -274,6 +381,7 @@ export default {
         return new Response(JSON.stringify({
           success: true,
           tier: kvData.tier,
+          expiresAt: kvData.expiresAt || 0,
           deviceCount: kvData.activatedDevices.length,
           maxDevices: maxDevices,
           devices: devices,
@@ -379,17 +487,16 @@ export default {
         const eventType = (eventData.type || eventData.event || "").toLowerCase();
         const payload = eventData.data || eventData.payload || eventData;
 
-        const dodoKey = (
-          payload.license_key ||
-          (Array.isArray(payload.license_keys) ? payload.license_keys[0] : null) ||
-          payload.license_key_instance?.key ||
-          payload.licenses?.[0]?.key ||
-          payload.licenseKey ||
-          payload.key ||
-          eventData.data?.license_key ||
-          (Array.isArray(eventData.data?.license_keys) ? eventData.data.license_keys[0] : null) ||
-          null
-        );
+        const dodoKey = extractLicenseKey([
+          payload.license_key,
+          Array.isArray(payload.license_keys) ? payload.license_keys[0] : null,
+          payload.license_key_instance?.key,
+          payload.licenses?.[0]?.key,
+          payload.licenseKey,
+          payload.key,
+          eventData.data?.license_key,
+          Array.isArray(eventData.data?.license_keys) ? eventData.data.license_keys[0] : null
+        ]);
 
         const paymentId = payload.payment_id || payload.id || `TXN_${Date.now()}`;
         const customerEmail = (
@@ -405,15 +512,17 @@ export default {
         const productName = (payload.product_name || payload.items?.[0]?.product_name || "").toUpperCase();
         const mapped = resolveProductTier(productId, productName);
 
+        const subscriptionId = typeof payload.subscription_id === "string" ? payload.subscription_id : "";
+
         if (eventType === "refund.succeeded" || eventType === "dispute.opened" || eventType === "dispute.lost") {
-          if (dodoKey) {
-            const cleanKey = dodoKey.toString().trim().toUpperCase();
-            const existing = await env.CIPHER_LICENSES.get(cleanKey, { type: "json" });
+          const targetKey = await resolveLicenseKey(env, payload, dodoKey);
+          if (targetKey) {
+            const existing = await env.CIPHER_LICENSES.get(targetKey, { type: "json" });
             if (existing) {
               existing.status = "REVOKED";
               existing.revokedReason = eventType;
               existing.revokedAt = Date.now();
-              await env.CIPHER_LICENSES.put(cleanKey, JSON.stringify(existing));
+              await env.CIPHER_LICENSES.put(targetKey, JSON.stringify(existing));
             }
           }
           return new Response(JSON.stringify({ success: true, message: `License revoked due to ${eventType}` }), {
@@ -421,18 +530,26 @@ export default {
           });
         }
 
-        if (eventType === "subscription.cancelled" || eventType === "subscription.expired") {
-          if (dodoKey) {
-            const cleanKey = dodoKey.toString().trim().toUpperCase();
-            const existing = await env.CIPHER_LICENSES.get(cleanKey, { type: "json" });
-            if (existing) {
-              existing.status = "EXPIRED";
-              existing.expiredReason = eventType;
-              existing.expiredAt = Date.now();
-              await env.CIPHER_LICENSES.put(cleanKey, JSON.stringify(existing));
+        if (eventType.startsWith("subscription.")) {
+          const update = deriveSubscriptionUpdate(eventType, payload);
+          if (update) {
+            const targetKey = await resolveLicenseKey(env, payload, dodoKey);
+            const record = targetKey ? await env.CIPHER_LICENSES.get(targetKey, { type: "json" }) : null;
+            if (record) {
+              if (applySubscriptionUpdate(record, update, eventType)) {
+                await env.CIPHER_LICENSES.put(targetKey, JSON.stringify(record));
+              }
+            } else if (!update.expire && subscriptionId) {
+              await env.CIPHER_LICENSES.put(`SUBSCRIPTION_PENDING:${subscriptionId}`, JSON.stringify(update), { expirationTtl: PENDING_SUBSCRIPTION_TTL_SECONDS });
             }
           }
-          return new Response(JSON.stringify({ success: true, message: `License updated for ${eventType}` }), {
+          return new Response(JSON.stringify({ success: true, message: `Subscription event ${eventType} processed` }), {
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+
+        if (!dodoKey && !KEY_BEARING_EVENTS.has(eventType)) {
+          return new Response(JSON.stringify({ success: true, ignored: true }), {
             headers: { "Content-Type": "application/json" }
           });
         }
@@ -447,7 +564,7 @@ export default {
               productName: productName,
               receivedAt: Date.now(),
               error: "Dodo license key feature was not triggered on this product"
-            }));
+            }), { expirationTtl: MISSING_KEY_TTL_SECONDS });
           }
           return new Response(JSON.stringify({
             success: false,
@@ -458,16 +575,22 @@ export default {
           });
         }
 
-        const licenseKey = dodoKey.toString().trim().toUpperCase();
+        const licenseKey = dodoKey;
+
+        await env.CIPHER_LICENSES.delete(`MISSING_KEY:${paymentId}`);
 
         const existingRecord = await env.CIPHER_LICENSES.get(licenseKey, { type: "json" });
         if (existingRecord) {
           existingRecord.email = existingRecord.email || customerEmail || null;
           existingRecord.orderId = existingRecord.orderId || paymentId;
           existingRecord.tier = existingRecord.tier || mapped.tier;
-          existingRecord.status = "ACTIVE";
+          existingRecord.status = existingRecord.status || "ACTIVE";
+          existingRecord.subscriptionId = existingRecord.subscriptionId || subscriptionId || null;
           await env.CIPHER_LICENSES.put(licenseKey, JSON.stringify(existingRecord));
           await env.CIPHER_LICENSES.put(`ORDER:${paymentId}`, licenseKey);
+          if (subscriptionId) {
+            await env.CIPHER_LICENSES.put(`SUB:${subscriptionId}`, licenseKey);
+          }
 
           return new Response(JSON.stringify({
             success: true,
@@ -485,11 +608,21 @@ export default {
           email: customerEmail || null,
           orderId: paymentId,
           productId: productId,
+          subscriptionId: subscriptionId || null,
           status: "ACTIVE",
           maxDevices: MAX_DEVICES_PER_KEY,
           activatedDevices: [],
           createdAt: Date.now()
         };
+
+        if (subscriptionId) {
+          const pending = await env.CIPHER_LICENSES.get(`SUBSCRIPTION_PENDING:${subscriptionId}`, { type: "json" });
+          if (pending) {
+            applySubscriptionUpdate(licenseRecord, pending, "subscription.pending");
+            await env.CIPHER_LICENSES.delete(`SUBSCRIPTION_PENDING:${subscriptionId}`);
+          }
+          await env.CIPHER_LICENSES.put(`SUB:${subscriptionId}`, licenseKey);
+        }
 
         await env.CIPHER_LICENSES.put(licenseKey, JSON.stringify(licenseRecord));
         await env.CIPHER_LICENSES.put(`ORDER:${paymentId}`, licenseKey);

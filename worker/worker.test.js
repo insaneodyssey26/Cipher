@@ -17,8 +17,10 @@ class MockKV {
     }
     return val;
   }
-  async put(key, val) {
+  async put(key, val, options) {
     this.store.set(key, typeof val === "string" ? val : JSON.stringify(val));
+    this.options = this.options || new Map();
+    this.options.set(key, options || {});
   }
   async delete(key) {
     this.store.delete(key);
@@ -222,6 +224,53 @@ describe("Cipher License Worker Security & Endpoints", () => {
     expect(missingLog.email).toBe("charlie@example.com");
   });
 
+  it("4b. never mints a record named after a non-string license_key", async () => {
+    const payload = {
+      type: "payment.succeeded",
+      data: {
+        payment_id: "pay_object_key_1",
+        license_key: { id: "lic_1", status: "active" },
+        product_id: "pdt_0NnvgqmXN76K14C90kLjX",
+        customer: { email: "dave@example.com" }
+      }
+    };
+
+    const res = await worker.fetch(await createSignedWebhookRequest(payload, env.DODO_WEBHOOK_SECRET), env, {});
+
+    expect((await res.json()).success).toBe(false);
+    expect(await env.CIPHER_LICENSES.get("[OBJECT OBJECT]")).toBeNull();
+    expect(await env.CIPHER_LICENSES.get("MISSING_KEY:pay_object_key_1", { type: "json" })).not.toBeNull();
+  });
+
+  it("4c. reads the key out of a license_key object", async () => {
+    const payload = {
+      type: "payment.succeeded",
+      data: {
+        payment_id: "pay_object_key_2",
+        license_key: { key: "a7576dcf-6ada-4c2d-941c-195879343030" },
+        product_id: "pdt_0NnvgqmXN76K14C90kLjX",
+        customer: { email: "erin@example.com" }
+      }
+    };
+
+    const res = await worker.fetch(await createSignedWebhookRequest(payload, env.DODO_WEBHOOK_SECRET), env, {});
+
+    expect((await res.json()).licenseKey).toBe("A7576DCF-6ADA-4C2D-941C-195879343030");
+    expect(await env.CIPHER_LICENSES.get("A7576DCF-6ADA-4C2D-941C-195879343030", { type: "json" })).not.toBeNull();
+  });
+
+  it("4d. clears the missing-key flag once the key arrives for that payment", async () => {
+    const withoutKey = { type: "payment.succeeded", data: { payment_id: "pay_late_key", product_id: "pdt_0NnvgqmXN76K14C90kLjX" } };
+    await worker.fetch(await createSignedWebhookRequest(withoutKey, env.DODO_WEBHOOK_SECRET, { webhookId: "msg_a" }), env, {});
+    expect(await env.CIPHER_LICENSES.get("MISSING_KEY:pay_late_key")).not.toBeNull();
+
+    const withKey = { type: "license_key.created", data: { payment_id: "pay_late_key", license_key: "LATE-KEY-1", product_id: "pdt_0NnvgqmXN76K14C90kLjX" } };
+    await worker.fetch(await createSignedWebhookRequest(withKey, env.DODO_WEBHOOK_SECRET, { webhookId: "msg_b" }), env, {});
+
+    expect(await env.CIPHER_LICENSES.get("MISSING_KEY:pay_late_key")).toBeNull();
+    expect(await env.CIPHER_LICENSES.get("LATE-KEY-1", { type: "json" })).not.toBeNull();
+  });
+
   it("5. rejects unknown / forged license key on /api/activate", async () => {
     const req = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
       method: "POST",
@@ -360,5 +409,147 @@ describe("Cipher License Worker Security & Endpoints", () => {
     expect(actRes.status).toBe(403);
     const actData = await actRes.json();
     expect(actData.error).toContain("revoked");
+  });
+
+  const MONTHLY_PRODUCT = "pdt_0NnvfQxm1f1vLtVQvAiYW";
+  const daysFromNow = (days) => new Date(Date.now() + days * 86400000).toISOString();
+  let webhookCounter = 0;
+
+  async function sendEvent(type, data) {
+    webhookCounter += 1;
+    const req = await createSignedWebhookRequest({ type, data }, env.DODO_WEBHOOK_SECRET, { webhookId: `msg_sub_${webhookCounter}` });
+    return worker.fetch(req, env, {});
+  }
+
+  async function createSubscriptionKey(overrides = {}) {
+    await sendEvent("license_key.created", {
+      key: "dac89841-7918-4eb1-9e08-c7a3a37dfd07",
+      payment_id: "pay_sub_1",
+      subscription_id: "sub_1",
+      product_id: MONTHLY_PRODUCT,
+      status: "active",
+      ...overrides
+    });
+    return "DAC89841-7918-4EB1-9E08-C7A3A37DFD07";
+  }
+
+  async function fetchDevices(key) {
+    const res = await worker.fetch(new Request(`https://cipher-license-api.skmasumali-main.workers.dev/api/devices?licenseKey=${key}&deviceId=d1`), env, {});
+    return { status: res.status, json: await res.json() };
+  }
+
+  it("10. license_key.created from Dodo creates a record and indexes its subscription", async () => {
+    const key = await createSubscriptionKey();
+
+    const record = await env.CIPHER_LICENSES.get(key, { type: "json" });
+    expect(record.tier).toBe("MONTHLY");
+    expect(record.status).toBe("ACTIVE");
+    expect(await env.CIPHER_LICENSES.get("SUB:sub_1")).toBe(key);
+    expect(await env.CIPHER_LICENSES.get("ORDER:pay_sub_1")).toBe(key);
+  });
+
+  it("11. a cancellation with no paid time left expires the key via the subscription index", async () => {
+    const key = await createSubscriptionKey();
+
+    await sendEvent("subscription.cancelled", {
+      subscription_id: "sub_1",
+      status: "cancelled",
+      cancel_at_next_billing_date: false,
+      next_billing_date: daysFromNow(-1)
+    });
+
+    const { status, json } = await fetchDevices(key);
+    expect(status).toBe(403);
+    expect(json.status).toBe("EXPIRED");
+  });
+
+  it("12. cancelling never cuts off paid time, however the cancellation was made", async () => {
+    const key = await createSubscriptionKey();
+    const nextBilling = daysFromNow(20);
+
+    await sendEvent("subscription.cancelled", {
+      subscription_id: "sub_1",
+      status: "cancelled",
+      cancel_at_next_billing_date: false,
+      next_billing_date: nextBilling
+    });
+
+    const { status, json } = await fetchDevices(key);
+    expect(status).toBe(200);
+    expect(json.expiresAt).toBe(Date.parse(nextBilling));
+  });
+
+  it("12b. a period-end cancellation also keeps the key active and reports the date", async () => {
+    const key = await createSubscriptionKey();
+    const nextBilling = daysFromNow(20);
+
+    await sendEvent("subscription.cancelled", {
+      subscription_id: "sub_1",
+      status: "cancelled",
+      cancel_at_next_billing_date: true,
+      next_billing_date: nextBilling
+    });
+
+    const { status, json } = await fetchDevices(key);
+    expect(status).toBe(200);
+    expect(json.expiresAt).toBe(Date.parse(nextBilling));
+  });
+
+  it("13. a renewal moves the expiry forward and a lapsed key stops working after the grace period", async () => {
+    const key = await createSubscriptionKey();
+    await sendEvent("subscription.active", { subscription_id: "sub_1", status: "active", next_billing_date: daysFromNow(30) });
+    expect((await fetchDevices(key)).json.expiresAt).toBeGreaterThan(Date.now() + 29 * 86400000);
+
+    const record = await env.CIPHER_LICENSES.get(key, { type: "json" });
+    record.expiresAt = Date.now() - 2 * 86400000;
+    await env.CIPHER_LICENSES.put(key, JSON.stringify(record));
+    expect((await fetchDevices(key)).status).toBe(200);
+
+    record.expiresAt = Date.now() - 4 * 86400000;
+    await env.CIPHER_LICENSES.put(key, JSON.stringify(record));
+    const lapsed = await fetchDevices(key);
+    expect(lapsed.status).toBe(403);
+    expect(lapsed.json.status).toBe("EXPIRED");
+  });
+
+  it("14. a subscription event that arrives before its key is applied once the key is created", async () => {
+    await sendEvent("subscription.active", { subscription_id: "sub_1", status: "active", next_billing_date: daysFromNow(30) });
+    const key = await createSubscriptionKey();
+
+    const { json } = await fetchDevices(key);
+    expect(json.expiresAt).toBeGreaterThan(Date.now() + 29 * 86400000);
+    expect(await env.CIPHER_LICENSES.get("SUBSCRIPTION_PENDING:sub_1")).toBeNull();
+  });
+
+  it("15. a refund that only carries the payment id revokes the license through the order index", async () => {
+    const key = await createSubscriptionKey();
+
+    await sendEvent("refund.succeeded", { payment_id: "pay_sub_1" });
+
+    expect((await env.CIPHER_LICENSES.get(key, { type: "json" })).status).toBe("REVOKED");
+  });
+
+  it("16. replaying the key creation event never revives an expired or revoked key", async () => {
+    const key = await createSubscriptionKey();
+    await sendEvent("subscription.cancelled", { subscription_id: "sub_1", status: "cancelled", cancel_at_next_billing_date: false });
+
+    await createSubscriptionKey();
+
+    expect((await env.CIPHER_LICENSES.get(key, { type: "json" })).status).toBe("EXPIRED");
+  });
+
+  it("17. events that never carry a key do not raise missing-key alarms", async () => {
+    const res = await sendEvent("entitlement_grant.created", { id: "ent_1", customer_id: "cus_1" });
+
+    expect((await res.json()).ignored).toBe(true);
+    expect(await env.CIPHER_LICENSES.get("MISSING_KEY:ent_1")).toBeNull();
+  });
+
+  it("18. temporary alarm and pending entries expire on their own", async () => {
+    await sendEvent("payment.succeeded", { payment_id: "pay_no_key_ttl", product_id: MONTHLY_PRODUCT });
+    await sendEvent("subscription.active", { subscription_id: "sub_ttl", status: "active", next_billing_date: daysFromNow(30) });
+
+    expect(env.CIPHER_LICENSES.options.get("MISSING_KEY:pay_no_key_ttl").expirationTtl).toBe(30 * 24 * 60 * 60);
+    expect(env.CIPHER_LICENSES.options.get("SUBSCRIPTION_PENDING:sub_ttl").expirationTtl).toBe(7 * 24 * 60 * 60);
   });
 });
