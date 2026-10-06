@@ -40,6 +40,7 @@ android {
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["appName"] = "@string/app_name"
     }
 
     buildTypes {
@@ -47,8 +48,10 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             isDebuggable = true
+            manifestPlaceholders["appName"] = "Cipher (Debug)"
         }
         release {
+            manifestPlaceholders["appName"] = "@string/app_name"
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
