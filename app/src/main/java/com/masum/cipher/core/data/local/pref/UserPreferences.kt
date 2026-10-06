@@ -187,6 +187,7 @@ class UserPreferences @Inject constructor(
         val LAST_LICENSE_SYNC_TIME = longPreferencesKey("last_license_sync_time")
         val SHOW_LICENSE_REVOKED_DIALOG = booleanPreferencesKey("show_license_revoked_dialog")
         val LICENSE_REVOKED_REASON = stringPreferencesKey("license_revoked_reason")
+        val BUDGET_ACCOUNT_ID = longPreferencesKey("budget_account_id")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -237,6 +238,7 @@ class UserPreferences @Inject constructor(
             autoLockTimeout = preferences[Keys.AUTO_LOCK_TIMEOUT] ?: 0L,
             lastStopTime = preferences[Keys.LAST_STOP_TIME] ?: 0L,
             monthlyBudget = preferences[Keys.MONTHLY_BUDGET] ?: 0.0,
+            budgetAccountId = preferences[Keys.BUDGET_ACCOUNT_ID]?.let { if (it <= 0L) null else it },
             isDynamicBudgetEnabled = preferences[Keys.IS_DYNAMIC_BUDGET_ENABLED] ?: false,
             hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false,
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
@@ -359,6 +361,16 @@ class UserPreferences @Inject constructor(
 
     suspend fun setMonthlyBudget(amount: Double) {
         context.dataStore.edit { it[Keys.MONTHLY_BUDGET] = amount }
+    }
+
+    suspend fun setBudgetAccountId(accountId: Long?) {
+        context.dataStore.edit { preferences ->
+            if (accountId != null && accountId > 0L) {
+                preferences[Keys.BUDGET_ACCOUNT_ID] = accountId
+            } else {
+                preferences.remove(Keys.BUDGET_ACCOUNT_ID)
+            }
+        }
     }
 
     suspend fun setDynamicBudgetEnabled(enabled: Boolean) {
@@ -816,6 +828,7 @@ data class UserSettings(
     val autoLockTimeout: Long,
     val lastStopTime: Long,
     val monthlyBudget: Double,
+    val budgetAccountId: Long? = null,
     val hasCompletedOnboarding: Boolean = false,
     val trackedApps: Set<String> = emptySet(),
     val accentColor: AccentColor = AccentColor.INDIGO,

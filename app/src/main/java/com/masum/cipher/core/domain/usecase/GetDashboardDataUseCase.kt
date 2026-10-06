@@ -41,12 +41,21 @@ class GetDashboardDataUseCase @Inject constructor(
             Triple(inc ?: 0.0, exp ?: 0.0, prev)
         }
 
-        val monthStatsFlow = combine(
-            repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime),
-            repository.getTotalIncomeBetween(thisMonthRange.startTime, thisMonthRange.endTime),
-            userPreferences.settingsFlow
-        ) { monthExp, monthInc, settings ->
-            Triple(monthExp ?: 0.0, monthInc ?: 0.0, settings)
+        val monthStatsFlow = userPreferences.settingsFlow.flatMapLatest { settings ->
+            val accountId = settings.budgetAccountId
+            val expFlow = if (accountId != null) {
+                repository.getTotalExpensesBetweenForAccount(thisMonthRange.startTime, thisMonthRange.endTime, accountId)
+            } else {
+                repository.getTotalExpensesBetween(thisMonthRange.startTime, thisMonthRange.endTime)
+            }
+            val incFlow = if (accountId != null) {
+                repository.getTotalIncomeBetweenForAccount(thisMonthRange.startTime, thisMonthRange.endTime, accountId)
+            } else {
+                repository.getTotalIncomeBetween(thisMonthRange.startTime, thisMonthRange.endTime)
+            }
+            combine(expFlow, incFlow) { monthExp, monthInc ->
+                Triple(monthExp ?: 0.0, monthInc ?: 0.0, settings)
+            }
         }
 
         return combine(rangeStatsFlow, monthStatsFlow) { (rangeInc, rangeExp, prevExp), (monthExp, monthInc, settings) ->

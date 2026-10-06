@@ -1609,9 +1609,11 @@ Spacer(modifier = Modifier.weight(1f))
             currentBudget = state.monthlyBudget,
             isDynamicBudget = state.isDynamicBudgetEnabled,
             currentMonthIncome = state.thisMonthIncome,
+            accounts = state.accounts,
+            selectedAccountId = state.budgetAccountId,
             onDismiss = { showBudgetDialog = false },
-            onConfirm = { amount, isDynamic ->
-                viewModel.handleIntent(SettingsContract.Intent.SetMonthlyBudget(amount, isDynamic))
+            onConfirm = { amount, isDynamic, accountId ->
+                viewModel.handleIntent(SettingsContract.Intent.SetMonthlyBudget(amount, isDynamic, accountId))
                 showBudgetDialog = false
             },
             isHapticsEnabled = state.isHapticsEnabled

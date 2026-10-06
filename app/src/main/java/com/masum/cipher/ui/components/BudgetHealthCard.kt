@@ -6,7 +6,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -81,6 +83,7 @@ fun BudgetHealthCard(
     income: Double = 0.0,
     isDynamicBudget: Boolean = false,
     currencySymbol: String = "₹",
+    targetAccountName: String? = null,
     onEditBudgetClick: () -> Unit,
     modifier: Modifier = Modifier,
     onToggleDynamicMode: ((Boolean) -> Unit)? = null,
@@ -149,7 +152,8 @@ fun BudgetHealthCard(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.weight(1f, fill = false)
                     ) {
                         Box(
                             modifier = Modifier
@@ -166,6 +170,27 @@ fun BudgetHealthCard(
                             ),
                             color = accentColor
                         )
+                        if (targetAccountName != null) {
+                            Text(
+                                text = "•",
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                text = targetAccountName,
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 11.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
 
                     Row(
@@ -561,8 +586,10 @@ fun EditBudgetDialog(
     isDynamicBudget: Boolean = false,
     currentMonthIncome: Double = 0.0,
     currencySymbol: String = "₹",
+    accounts: List<com.masum.cipher.core.data.local.entity.AccountEntity> = emptyList(),
+    selectedAccountId: Long? = null,
     onDismiss: () -> Unit,
-    onConfirm: (Double, Boolean) -> Unit,
+    onConfirm: (Double, Boolean, Long?) -> Unit,
     isHapticsEnabled: Boolean = true
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -572,6 +599,9 @@ fun EditBudgetDialog(
     }
     var selectedIsDynamic by remember {
         mutableStateOf(isDynamicBudget)
+    }
+    var chosenAccountId by remember {
+        mutableStateOf(selectedAccountId)
     }
     val view = LocalView.current
     val focusManager = LocalFocusManager.current
@@ -643,7 +673,7 @@ fun EditBudgetDialog(
                     IconButton(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            onConfirm(0.0, false)
+                            onConfirm(0.0, false, null)
                             closeWithAnimation()
                         },
                         modifier = Modifier.size(36.dp)
@@ -747,6 +777,123 @@ fun EditBudgetDialog(
                                 ),
                                 color = MaterialTheme.colorScheme.error
                             )
+                        }
+                    }
+                }
+            }
+
+            if (accounts.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = stringResource(R.string.budget_scope_header),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.5.sp,
+                            letterSpacing = 0.8.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val isAllSelected = chosenAccountId == null
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isAllSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                )
+                                .border(
+                                    width = if (isAllSelected) 1.5.dp else 1.dp,
+                                    color = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    chosenAccountId = null
+                                }
+                                .padding(horizontal = 14.dp, vertical = 9.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                if (isAllSelected) {
+                                    Icon(
+                                        imageVector = LucideIcons.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                                Text(
+                                    text = stringResource(R.string.budget_scope_all_accounts),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = if (isAllSelected) FontWeight.Bold else FontWeight.Medium,
+                                        fontSize = 12.sp
+                                    ),
+                                    color = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        accounts.forEach { acc ->
+                            val isSelected = chosenAccountId == acc.id
+                            val accColor = Color(acc.colorHex)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) accColor.copy(alpha = 0.16f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                    )
+                                    .border(
+                                        width = if (isSelected) 1.5.dp else 1.dp,
+                                        color = if (isSelected) accColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        chosenAccountId = acc.id
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 9.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(accColor)
+                                    )
+                                    Text(
+                                        text = acc.name,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = accColor,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -947,7 +1094,7 @@ fun EditBudgetDialog(
                 onClick = {
                     val amount = budgetInput.toDoubleOrNull() ?: 0.0
                     view.performVibrate(isHapticsEnabled, isLongPress = false)
-                    onConfirm(amount, selectedIsDynamic)
+                    onConfirm(amount, selectedIsDynamic, chosenAccountId)
                     closeWithAnimation()
                 },
                 shape = RoundedCornerShape(16.dp),

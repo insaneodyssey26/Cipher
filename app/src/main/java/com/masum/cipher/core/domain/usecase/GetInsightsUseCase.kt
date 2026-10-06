@@ -100,7 +100,7 @@ class GetInsightsUseCase @Inject constructor(
                 detectedSubscriptions = allSubscriptions,
                 allTransactions = allTx,
                 topMerchants = calculateTopMerchants(transactions),
-                monthlySummary = calculateMonthlySummary(transactions),
+                monthlySummary = calculateMonthlySummary(transactions, settings.budgetAccountId),
                 weekdayBreakdown = calculateWeekdayBreakdown(transactions),
                 peakHours = calculatePeakHours(transactions),
                 noSpendStreak = calculateNoSpendStreak(allTx),
@@ -235,14 +235,17 @@ class GetInsightsUseCase @Inject constructor(
             .take(5)
     }
 
-    private fun calculateMonthlySummary(transactions: List<TransactionEntity>): InsightsContract.MonthlySummary {
+    private fun calculateMonthlySummary(transactions: List<TransactionEntity>, budgetAccountId: Long? = null): InsightsContract.MonthlySummary {
         val cal = Calendar.getInstance()
         val currentMonth = cal.get(Calendar.MONTH)
         val currentYear = cal.get(Calendar.YEAR)
 
         val monthTxs = transactions.filter { tx ->
             val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-            txCal.get(Calendar.MONTH) == currentMonth && txCal.get(Calendar.YEAR) == currentYear && !tx.category.equals("TRANSFER", ignoreCase = true)
+            txCal.get(Calendar.MONTH) == currentMonth &&
+                txCal.get(Calendar.YEAR) == currentYear &&
+                !tx.category.equals("TRANSFER", ignoreCase = true) &&
+                (budgetAccountId == null || tx.accountId == budgetAccountId)
         }
 
         val income = monthTxs.filter { it.isIncome }.sumOf { it.amount }

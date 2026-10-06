@@ -269,4 +269,25 @@ class GetDashboardDataUseCaseTest {
         assertEquals("Coffee", state.transactions[0].merchant)
         assertTrue(state.hasAnyTransactions)
     }
+
+    @Test
+    fun `budget scoped to specific account calculates expenses and income for that account`() {
+        val targetAccountId = 5L
+        val customSettings = settings().copy(monthlyBudget = 15000.0, budgetAccountId = targetAccountId)
+        whenever(repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)).thenReturn(flowOf(emptyList()))
+        whenever(repository.hasNonTransferTransactions()).thenReturn(flowOf(true))
+        whenever(repository.getTotalIncomeBetween(timeRange.startTime, timeRange.endTime)).thenReturn(flowOf(0.0))
+        whenever(repository.getTotalExpensesBetween(timeRange.startTime, timeRange.endTime)).thenReturn(flowOf(0.0))
+        whenever(repository.getTotalExpensesBetween(previousRange.startTime, previousRange.endTime)).thenReturn(flowOf(null))
+        whenever(repository.getTotalExpensesBetweenForAccount(timeRange.startTime, timeRange.endTime, targetAccountId)).thenReturn(flowOf(4200.0))
+        whenever(repository.getTotalIncomeBetweenForAccount(timeRange.startTime, timeRange.endTime, targetAccountId)).thenReturn(flowOf(12000.0))
+        whenever(categoryRepository.getAllCustomCategoriesFlow()).thenReturn(flowOf(emptyList()))
+        whenever(userPreferences.settingsFlow).thenReturn(flowOf(customSettings))
+
+        val state = invoke()
+
+        assertEquals(4200.0, state.thisMonthExpenses, 0.001)
+        assertEquals(12000.0, state.thisMonthIncome, 0.001)
+        assertEquals(15000.0, state.monthlyBudget, 0.001)
+    }
 }

@@ -25,7 +25,7 @@ class SettingsContract {
         data class SetHapticsEnabled(val enabled: Boolean) : Intent()
         data class SetCurrency(val code: String, val symbol: String) : Intent()
         data class SetAppLanguage(val languageCode: String) : Intent()
-        data class SetMonthlyBudget(val amount: Double, val isDynamic: Boolean = false) : Intent()
+        data class SetMonthlyBudget(val amount: Double, val isDynamic: Boolean = false, val accountId: Long? = null) : Intent()
         object ClearAllData : Intent()
         data class ExportData(val uri: Uri, val password: CharArray) : Intent() {
             override fun equals(other: Any?): Boolean {
@@ -100,6 +100,8 @@ class SettingsContract {
         val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
         val appLanguage: String = "system",
         val monthlyBudget: Double = 0.0,
+        val budgetAccountId: Long? = null,
+        val accounts: List<com.masum.cipher.core.data.local.entity.AccountEntity> = emptyList(),
         val isDynamicBudgetEnabled: Boolean = false,
         val thisMonthIncome: Double = 0.0,
         val autoBackupEnabled: Boolean = false,

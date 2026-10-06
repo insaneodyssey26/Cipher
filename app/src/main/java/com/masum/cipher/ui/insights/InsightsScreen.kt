@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -94,6 +96,14 @@ import compose.icons.lucideicons.Plus
 import kotlinx.coroutines.launch
 import java.util.Date
 
+private data class InsightBudgetPage(
+    val accountId: Long?,
+    val name: String,
+    val spent: Double,
+    val income: Double,
+    val colorHex: Long
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsScreen(
@@ -109,10 +119,12 @@ fun InsightsScreen(
     var showAddSubDialog by remember { androidx.compose.runtime.mutableStateOf(false) }
     var selectedSubscription by remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
     var showBudgetDialog by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var dialogTargetAccountId by remember { androidx.compose.runtime.mutableStateOf<Long?>(null) }
     var selectedCategoryForDetail by remember { androidx.compose.runtime.mutableStateOf<DashboardContract.CategoryData?>(null) }
     var editingTransaction by remember { androidx.compose.runtime.mutableStateOf<com.masum.cipher.core.data.local.entity.TransactionEntity?>(null) }
     val monthlyBudget = settings?.monthlyBudget ?: 0.0
     val coroutineScope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
 
@@ -167,16 +179,25 @@ fun InsightsScreen(
     }
     
     if (showBudgetDialog) {
+        val accountEntities = state.accounts.map { it.entity }
         com.masum.cipher.ui.components.EditBudgetDialog(
             currentBudget = monthlyBudget,
             isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
             currentMonthIncome = state.monthlySummary.income,
             currencySymbol = state.currencySymbol,
+            accounts = accountEntities,
+            selectedAccountId = dialogTargetAccountId ?: settings?.budgetAccountId,
             onDismiss = { showBudgetDialog = false },
-            onConfirm = { amount, isDynamic ->
+            onConfirm = { amount, isDynamic, accountId ->
                 coroutineScope.launch {
                     userPreferences.setMonthlyBudget(amount)
                     userPreferences.setDynamicBudgetEnabled(isDynamic)
+                    userPreferences.setBudgetAccountId(accountId)
+                    try {
+                        dagger.hilt.android.EntryPointAccessors.fromApplication(context, com.masum.cipher.core.di.WidgetEntryPoint::class.java)
+                            .widgetSyncManager()
+                            .syncWidget()
+                    } catch (_: Exception) {}
                 }
                 showBudgetDialog = false
             },
@@ -305,20 +326,120 @@ fun InsightsScreen(
                             }
                             
                             item {
+                                val monthStart = remember { com.masum.cipher.core.util.DateTimeUtils.currentMonthStart() }
+                                val rootAccountId = remember(state.accounts) {
+                                    state.accounts.minByOrNull { it.entity.createdAt }?.id ?: state.accounts.firstOrNull()?.id ?: 1L
+                                }
+
+                                val budgetPages = remember(state.accounts, state.allTransactions, state.monthlySummary, monthlyBudget) {
+                                    val allPage = InsightBudgetPage(
+                                        accountId = null,
+                                        name = "All Accounts",
+                                        spent = state.monthlySummary.expense,
+                                        income = state.monthlySummary.income,
+                                        colorHex = 0xFF4F46E5L
+                                    )
+                                    val accountPages = state.accounts.map { acc ->
+                                        val accTxs = state.allTransactions.filter {
+                                            it.timestamp >= monthStart && (it.accountId == acc.id || (it.accountId == null && acc.id == rootAccountId))
+                                        }
+                                        val accSpent = accTxs.filter { !it.isIncome }.sumOf { it.amount }
+                                        val accIncome = accTxs.filter { it.isIncome }.sumOf { it.amount }
+                                        InsightBudgetPage(
+                                            accountId = acc.id,
+                                            name = acc.name,
+                                            spent = accSpent,
+                                            income = accIncome,
+                                            colorHex = acc.colorHex
+                                        )
+                                    }
+                                    listOf(allPage) + accountPages
+                                }
+
+                                val budgetPagerState = rememberPagerState(pageCount = { budgetPages.size })
+
                                 SectionLabel(stringResource(R.string.dashboard_monthly_budget).uppercase())
-                                com.masum.cipher.ui.components.BudgetHealthCard(
-                                    spent = state.monthlySummary.expense,
-                                    budget = monthlyBudget,
-                                    income = state.monthlySummary.income,
-                                    isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
-                                    currencySymbol = state.currencySymbol,
-                                    onEditBudgetClick = { showBudgetDialog = true },
-                                    onToggleDynamicMode = { enabled ->
-                                        viewModel.handleIntent(InsightsContract.Intent.SetDynamicBudget(enabled))
-                                    },
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    isHapticsEnabled = isHapticsEnabled
-                                )
+
+                                if (budgetPages.size > 1) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 10.dp)
+                                            .horizontalScroll(rememberScrollState()),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        budgetPages.forEachIndexed { index, pageData ->
+                                            val isSelected = budgetPagerState.currentPage == index
+                                            val pageColor = Color(pageData.colorHex)
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .background(
+                                                        if (isSelected) pageColor.copy(alpha = 0.16f)
+                                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                                    )
+                                                    .border(
+                                                        width = if (isSelected) 1.5.dp else 1.dp,
+                                                        color = if (isSelected) pageColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                                        shape = RoundedCornerShape(10.dp)
+                                                    )
+                                                    .clickable {
+                                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                        coroutineScope.launch {
+                                                            budgetPagerState.animateScrollToPage(index)
+                                                        }
+                                                    }
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(6.dp)
+                                                            .clip(CircleShape)
+                                                            .background(pageColor)
+                                                    )
+                                                    Text(
+                                                        text = pageData.name,
+                                                        style = Typography.labelMedium.copy(
+                                                            fontFamily = Lato,
+                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                            fontSize = 12.sp
+                                                        ),
+                                                        color = if (isSelected) pageColor else MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                HorizontalPager(
+                                    state = budgetPagerState,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { pageIdx ->
+                                    val pageData = budgetPages.getOrNull(pageIdx) ?: budgetPages.first()
+                                    com.masum.cipher.ui.components.BudgetHealthCard(
+                                        spent = pageData.spent,
+                                        budget = monthlyBudget,
+                                        income = pageData.income,
+                                        isDynamicBudget = settings?.isDynamicBudgetEnabled ?: false,
+                                        currencySymbol = state.currencySymbol,
+                                        targetAccountName = pageData.name,
+                                        onEditBudgetClick = {
+                                            dialogTargetAccountId = pageData.accountId
+                                            showBudgetDialog = true
+                                        },
+                                        onToggleDynamicMode = { enabled ->
+                                            viewModel.handleIntent(InsightsContract.Intent.SetDynamicBudget(enabled))
+                                        },
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        isHapticsEnabled = isHapticsEnabled
+                                    )
+                                }
                             }
 
                             item {

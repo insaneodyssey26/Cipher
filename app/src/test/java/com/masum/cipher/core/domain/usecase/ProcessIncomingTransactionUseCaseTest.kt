@@ -310,9 +310,56 @@ class ProcessIncomingTransactionUseCaseTest {
         assertEquals(999L, result!!.accountId)
     }
 
+    @Test
+    fun accountScopedBudgetExceededTriggersAlertNotification() = runBlocking {
+        var alertTriggered = false
+        var alertThreshold = 0
+        val targetAccountId = 10L
+
+        fakeTransactionDao.accountExpenses[targetAccountId] = 9500.0
+
+        useCase.onNotifyBudgetAlert = { _, _, threshold ->
+            alertTriggered = true
+            alertThreshold = threshold
+        }
+        useCase.onGetSettings = {
+            UserSettings(
+                theme = AppTheme.SYSTEM,
+                isBiometricEnabled = false,
+                isPrivacyModeEnabled = false,
+                isHapticsEnabled = true,
+                currency = "INR",
+                currencyCode = "INR",
+                currencySymbol = "₹",
+                appLanguage = "en",
+                autoLockTimeout = 0L,
+                lastStopTime = 0L,
+                monthlyBudget = 10000.0,
+                budgetAccountId = targetAccountId,
+                notifyAllTransactions = false,
+                notifyBudgetAlerts = true
+            )
+        }
+
+        val incoming = TransactionEntity(
+            amount = 1000.0,
+            merchant = "Electronics Store",
+            currency = "INR",
+            category = "SHOPPING",
+            timestamp = 900_000L,
+            rawSms = null,
+            isIncome = false,
+            accountId = targetAccountId
+        )
+
+        useCase(incoming)
+        assertEquals(true, alertTriggered)
+    }
+
     private class FakeTransactionDao {
         var duplicateReturn: TransactionEntity? = null
         val insertedTransactions = mutableListOf<TransactionEntity>()
+        val accountExpenses = mutableMapOf<Long, Double>()
 
         fun asDao(): TransactionDao {
             return Proxy.newProxyInstance(
@@ -336,6 +383,13 @@ class ProcessIncomingTransactionUseCaseTest {
                     }
                     "sumExpensesSince" -> 0.0
                     "sumIncomeSince" -> 0.0
+                    "sumExpensesSinceForAccount" -> {
+                        val accountId = args[1] as Long
+                        val base = accountExpenses[accountId] ?: 0.0
+                        val newlyInserted = insertedTransactions.filter { it.accountId == accountId && !it.isIncome }.sumOf { it.amount }
+                        base + newlyInserted
+                    }
+                    "sumIncomeSinceForAccount" -> 0.0
                     "getUncategorizedCount" -> 0
                     else -> null
                 }

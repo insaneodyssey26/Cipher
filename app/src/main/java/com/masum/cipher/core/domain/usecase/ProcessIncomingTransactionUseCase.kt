@@ -68,11 +68,12 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
             }
         }
 
-        val start = monthStart()
-        val previousSpent = transactionDao.sumExpensesSince(start)
-
         val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
         val isPro = settings?.isPro == true
+        val budgetAccountId = settings?.budgetAccountId
+
+        val start = monthStart()
+        val previousSpent = if (budgetAccountId != null) transactionDao.sumExpensesSinceForAccount(start, budgetAccountId) else transactionDao.sumExpensesSince(start)
 
         val resolvedAccountId = transaction.accountId ?: run {
             if (accountDao != null) {
@@ -102,7 +103,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         if (settings?.notifyAllTransactions == true) {
             onNotifyNewTransaction?.invoke(savedTx) ?: localNotificationManager?.showNewTransactionNotification(savedTx)
         }
-        checkBudgetAlert(previousSpent)
+        checkBudgetAlert(previousSpent, budgetAccountId)
 
         if (finalCategory == TransactionCategory.OTHERS.name) {
             val count = transactionDao.getUncategorizedCount()
@@ -114,15 +115,22 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
         return savedTx
     }
 
-    private suspend fun checkBudgetAlert(previousSpent: Double) {
+    private suspend fun checkBudgetAlert(previousSpent: Double, budgetAccountId: Long?) {
         val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
         val baseBudget = settings?.monthlyBudget ?: 0.0
         if (baseBudget <= 0) return
 
         val start = monthStart()
-        val totalIncome = if (settings?.isDynamicBudgetEnabled == true) transactionDao.sumIncomeSince(start) else 0.0
+        val totalIncome = if (settings?.isDynamicBudgetEnabled == true) {
+            if (budgetAccountId != null) transactionDao.sumIncomeSinceForAccount(start, budgetAccountId)
+            else transactionDao.sumIncomeSince(start)
+        } else 0.0
         val budget = baseBudget + totalIncome
-        val newSpent = transactionDao.sumExpensesSince(start)
+        val newSpent = if (budgetAccountId != null) {
+            transactionDao.sumExpensesSinceForAccount(start, budgetAccountId)
+        } else {
+            transactionDao.sumExpensesSince(start)
+        }
 
         if (budget in previousSpent..<newSpent) {
             onNotifyBudgetAlert?.invoke(true, newSpent - budget, 100) ?: localNotificationManager?.showBudgetAlertNotification(isExceeded = true, amount = newSpent - budget, threshold = 100)

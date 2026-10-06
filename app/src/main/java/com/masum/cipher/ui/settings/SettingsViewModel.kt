@@ -38,6 +38,7 @@ class SettingsViewModel @Inject constructor(
     private val keystoreManager: KeystoreManager,
     private val autoBackupScheduler: AutoBackupScheduler,
     private val transactionDao: TransactionDao,
+    private val accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
     private val licenseEngine: com.masum.cipher.core.security.LicenseEngine
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
     initialState = SettingsContract.State(
@@ -71,7 +72,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.code, intent.symbol)
             is SettingsContract.Intent.SetAppLanguage -> updateAppLanguage(intent.languageCode)
-            is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount, intent.isDynamic)
+            is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount, intent.isDynamic, intent.accountId)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
             is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
@@ -98,6 +99,9 @@ class SettingsViewModel @Inject constructor(
     private fun observeSettings() {
         viewModelScope.launch {
             userPreferences.settingsFlow.collect { settings ->
+                val accounts = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    accountDao.getAllAccounts()
+                }
                 val monthIncome = withContext(kotlinx.coroutines.Dispatchers.IO) {
                     val start = Calendar.getInstance().apply {
                         set(Calendar.DAY_OF_MONTH, 1)
@@ -106,7 +110,11 @@ class SettingsViewModel @Inject constructor(
                         set(Calendar.SECOND, 0)
                         set(Calendar.MILLISECOND, 0)
                     }.timeInMillis
-                    transactionDao.sumIncomeSince(start)
+                    if (settings.budgetAccountId != null) {
+                        transactionDao.sumIncomeSinceForAccount(start, settings.budgetAccountId)
+                    } else {
+                        transactionDao.sumIncomeSince(start)
+                    }
                 }
                 updateState {
                     copy(
@@ -128,6 +136,8 @@ class SettingsViewModel @Inject constructor(
                         currencySymbol = settings.currencySymbol,
                         appLanguage = settings.appLanguage,
                         monthlyBudget = settings.monthlyBudget,
+                        budgetAccountId = settings.budgetAccountId,
+                        accounts = accounts,
                         isDynamicBudgetEnabled = settings.isDynamicBudgetEnabled,
                         thisMonthIncome = monthIncome,
                         autoBackupEnabled = settings.autoBackupEnabled,
@@ -233,10 +243,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { updateSettingsUseCase.autoLockTimeout(timeout) }
     }
 
-    private fun updateMonthlyBudget(amount: Double, isDynamic: Boolean) {
+    private fun updateMonthlyBudget(amount: Double, isDynamic: Boolean, accountId: Long?) {
         viewModelScope.launch {
             updateSettingsUseCase.monthlyBudget(amount)
             updateSettingsUseCase.dynamicBudget(isDynamic)
+            updateSettingsUseCase.budgetAccountId(accountId)
         }
     }
 
