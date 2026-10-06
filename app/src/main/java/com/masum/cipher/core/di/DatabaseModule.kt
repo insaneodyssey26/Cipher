@@ -43,7 +43,9 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_8_9,
                 AppDatabase.MIGRATION_9_10,
                 AppDatabase.MIGRATION_10_11,
-                AppDatabase.MIGRATION_11_12
+                AppDatabase.MIGRATION_11_12,
+                AppDatabase.MIGRATION_12_13,
+                AppDatabase.MIGRATION_13_14
             )
             .fallbackToDestructiveMigration(dropAllTables = false)
             .build()
@@ -87,6 +89,11 @@ object DatabaseModule {
     @Provides
     fun provideGoalDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.GoalDao {
         return database.goalDao()
+    }
+
+    @Provides
+    fun provideDebtDao(database: AppDatabase): com.masum.cipher.core.data.local.dao.DebtDao {
+        return database.debtDao()
     }
 
     @Provides

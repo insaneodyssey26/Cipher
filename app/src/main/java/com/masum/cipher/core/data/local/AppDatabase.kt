@@ -17,6 +17,9 @@ import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.TransactionSplitDao
 import com.masum.cipher.core.data.local.entity.AccountEntity
+import com.masum.cipher.core.data.local.dao.DebtDao
+import com.masum.cipher.core.data.local.entity.DebtEntity
+import com.masum.cipher.core.data.local.entity.DebtRepaymentEntity
 import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 
 @Database(
@@ -28,9 +31,11 @@ import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
         TransactionSplitEntity::class,
         CustomCategoryEntity::class,
         AccountEntity::class,
-        GoalEntity::class
+        GoalEntity::class,
+        DebtEntity::class,
+        DebtRepaymentEntity::class
     ],
-    version = 12,
+    version = 14,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -42,6 +47,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun customCategoryDao(): CustomCategoryDao
     abstract fun accountDao(): AccountDao
     abstract fun goalDao(): GoalDao
+    abstract fun debtDao(): DebtDao
 
     companion object {
         const val DATABASE_NAME = "cipher_spend_db"
@@ -101,6 +107,25 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_11_12 = object : androidx.room.migration.Migration(11, 12) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_transactions_accountId` ON `transactions` (`accountId`)")
+            }
+        }
+
+        val MIGRATION_12_13 = object : androidx.room.migration.Migration(12, 13) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `debts` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personName` TEXT NOT NULL, `amount` REAL NOT NULL, `remainingAmount` REAL NOT NULL, `type` TEXT NOT NULL, `dueDate` INTEGER, `createdAt` INTEGER NOT NULL, `note` TEXT, `accountId` INTEGER, `isSettled` INTEGER NOT NULL, `interestRate` REAL NOT NULL)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debts_type` ON `debts` (`type`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debts_isSettled` ON `debts` (`isSettled`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debts_accountId` ON `debts` (`accountId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debts_dueDate` ON `debts` (`dueDate`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `debt_repayments` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `debtId` INTEGER NOT NULL, `amount` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `accountId` INTEGER, `note` TEXT, `transactionId` INTEGER, FOREIGN KEY(`debtId`) REFERENCES `debts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debt_repayments_debtId` ON `debt_repayments` (`debtId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_debt_repayments_timestamp` ON `debt_repayments` (`timestamp`)")
+            }
+        }
+
+        val MIGRATION_13_14 = object : androidx.room.migration.Migration(13, 14) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `debts` ADD COLUMN `transactionId` INTEGER DEFAULT NULL")
             }
         }
     }

@@ -59,8 +59,14 @@ interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 0 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp BETWEEN :startTime AND :endTime")
     fun getTotalExpensesBetween(startTime: Long, endTime: Long): Flow<Double?>
 
+    @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 0 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp BETWEEN :startTime AND :endTime AND accountId = :accountId")
+    fun getTotalExpensesBetweenForAccount(startTime: Long, endTime: Long, accountId: Long): Flow<Double?>
+
     @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 1 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp BETWEEN :startTime AND :endTime")
     fun getTotalIncomeBetween(startTime: Long, endTime: Long): Flow<Double?>
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE isIncome = 1 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp BETWEEN :startTime AND :endTime AND accountId = :accountId")
+    fun getTotalIncomeBetweenForAccount(startTime: Long, endTime: Long, accountId: Long): Flow<Double?>
 
     @Query("SELECT * FROM transactions WHERE isIncome = 0 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp >= :startTime")
     fun getExpensesSince(startTime: Long): Flow<List<TransactionEntity>>
@@ -77,8 +83,14 @@ interface TransactionDao {
     @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 0 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp >= :startTime")
     suspend fun sumExpensesSince(startTime: Long): Double
 
+    @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 0 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp >= :startTime AND accountId = :accountId")
+    suspend fun sumExpensesSinceForAccount(startTime: Long, accountId: Long): Double
+
     @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 1 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp >= :startTime")
     suspend fun sumIncomeSince(startTime: Long): Double
+
+    @Query("SELECT COALESCE(SUM(amount), 0.0) FROM transactions WHERE isIncome = 1 AND category != 'TRANSFER' COLLATE NOCASE AND timestamp >= :startTime AND accountId = :accountId")
+    suspend fun sumIncomeSinceForAccount(startTime: Long, accountId: Long): Double
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAllTransactions()

@@ -59,6 +59,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.masum.cipher.ui.debts.CreateEditDebtSheet
+import com.masum.cipher.ui.debts.DebtsContract
+import com.masum.cipher.ui.debts.DebtsTabContent
+import com.masum.cipher.ui.debts.DebtsViewModel
 import com.masum.cipher.ui.goals.GoalsContract
 import com.masum.cipher.ui.goals.GoalsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -126,10 +130,12 @@ fun SplitExpensesScreen(
     onNavigateToPro: () -> Unit = {},
     onNavigateToCreateGoal: () -> Unit = {},
     onNavigateToEditGoal: (Long) -> Unit = {},
-    goalsViewModel: GoalsViewModel = hiltViewModel()
+    goalsViewModel: GoalsViewModel = hiltViewModel(),
+    debtsViewModel: DebtsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val goalsState by goalsViewModel.state.collectAsStateWithLifecycle()
+    val debtsState by debtsViewModel.state.collectAsStateWithLifecycle()
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
     val view = LocalView.current
     val context = LocalContext.current
@@ -137,22 +143,25 @@ fun SplitExpensesScreen(
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val privacyMode = settings?.isPrivacyModeEnabled ?: false
 
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     val planningTabs = listOf(
         stringResource(R.string.tab_split_expenses),
+        stringResource(R.string.tab_debts_loans),
         stringResource(R.string.tab_savings_goals)
     )
     val selectedPlanningTabIndex = pagerState.currentPage
     var selectedTab by remember { mutableStateOf(SplitFilterTab.ALL) }
     var editingSplitTx by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showAddDebtSheet by remember { mutableStateOf(false) }
     var draftStandaloneExpenseName by remember { mutableStateOf("") }
     var draftStandaloneTotalStr by remember { mutableStateOf("") }
     var draftStandaloneSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
     var editingTxSplitsDraft by remember { mutableStateOf<Map<Long, List<SplitParticipant>>>(emptyMap()) }
     val snackbarHostState = remember { SnackbarHostState() }
     val deletedMessage = stringResource(R.string.split_deleted)
+    val debtDeletedMessage = stringResource(R.string.debt_deleted)
     val undoLabel = stringResource(R.string.action_undo)
 
     LaunchedEffect(Unit) {
@@ -166,6 +175,22 @@ fun SplitExpensesScreen(
                 if (result == SnackbarResult.ActionPerformed) {
                     view.performVibrate(isHapticsEnabled, isLongPress = true)
                     viewModel.handleIntent(DashboardContract.Intent.RestoreTransaction(effect.transaction, effect.splits))
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        debtsViewModel.effect.collectLatest { effect ->
+            if (effect is DebtsContract.Effect.ShowUndoDelete) {
+                val result = snackbarHostState.showSnackbar(
+                    message = debtDeletedMessage,
+                    actionLabel = undoLabel,
+                    duration = SnackbarDuration.Short
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    view.performVibrate(isHapticsEnabled, isLongPress = true)
+                    debtsViewModel.handleIntent(DebtsContract.Intent.RestoreDebt(effect.debt, effect.repayments, effect.transactions))
                 }
             }
         }
@@ -218,7 +243,11 @@ fun SplitExpensesScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = if (selectedPlanningTabIndex == 0) stringResource(R.string.split_hub_title) else stringResource(R.string.tab_savings_goals),
+                        text = when (selectedPlanningTabIndex) {
+                            0 -> stringResource(R.string.split_hub_title)
+                            1 -> stringResource(R.string.tab_debts_loans)
+                            else -> stringResource(R.string.tab_savings_goals)
+                        },
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Bold,
@@ -240,40 +269,55 @@ fun SplitExpensesScreen(
                     }
                 },
                 actions = {
-                    if (selectedPlanningTabIndex == 0) {
-                        TimeSelectorDropdown(
-                            selectedPeriod = state.selectedTimePeriod,
-                            selectedTimeRange = state.selectedTimeRange,
-                            onPeriodSelected = { period, start, end ->
-                                viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
-                            },
-                            isHapticsEnabled = isHapticsEnabled,
-                            iconOnly = true
-                        )
-                        IconButton(onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            showAddSheet = true
-                        }) {
-                            Icon(
-                                imageVector = LucideIcons.Plus,
-                                contentDescription = stringResource(R.string.split_hub_add_split),
-                                tint = MaterialTheme.colorScheme.onSurface
+                    when (selectedPlanningTabIndex) {
+                        0 -> {
+                            TimeSelectorDropdown(
+                                selectedPeriod = state.selectedTimePeriod,
+                                selectedTimeRange = state.selectedTimeRange,
+                                onPeriodSelected = { period, start, end ->
+                                    viewModel.handleIntent(DashboardContract.Intent.SetTimePeriod(period, start, end))
+                                },
+                                isHapticsEnabled = isHapticsEnabled,
+                                iconOnly = true
                             )
-                        }
-                    } else {
-                        IconButton(onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            if (!goalsState.isPro && goalsState.goals.size >= goalsState.freeGoalLimit) {
-                                goalsViewModel.handleIntent(GoalsContract.Intent.ShowProGate)
-                            } else {
-                                onNavigateToCreateGoal()
+                            IconButton(onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showAddSheet = true
+                            }) {
+                                Icon(
+                                    imageVector = LucideIcons.Plus,
+                                    contentDescription = stringResource(R.string.split_hub_add_split),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
                             }
-                        }) {
-                            Icon(
-                                imageVector = LucideIcons.Plus,
-                                contentDescription = stringResource(R.string.goals_create_goal),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                        }
+                        1 -> {
+                            IconButton(onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showAddDebtSheet = true
+                            }) {
+                                Icon(
+                                    imageVector = LucideIcons.Plus,
+                                    contentDescription = stringResource(R.string.action_add_debt),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                        else -> {
+                            IconButton(onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                if (!goalsState.isPro && goalsState.goals.size >= goalsState.freeGoalLimit) {
+                                    goalsViewModel.handleIntent(GoalsContract.Intent.ShowProGate)
+                                } else {
+                                    onNavigateToCreateGoal()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = LucideIcons.Plus,
+                                    contentDescription = stringResource(R.string.goals_create_goal),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 },
@@ -663,6 +707,13 @@ fun SplitExpensesScreen(
         }
     }
     1 -> {
+        DebtsTabContent(
+            state = debtsState,
+            onIntent = debtsViewModel::handleIntent,
+            onAddDebtClick = { showAddDebtSheet = true }
+        )
+    }
+    2 -> {
         com.masum.cipher.ui.goals.SavingsGoalsView(
             viewModel = goalsViewModel,
             onNavigateToCreateGoal = onNavigateToCreateGoal,
@@ -715,6 +766,29 @@ fun SplitExpensesScreen(
                     draftStandaloneTotalStr = ""
                     draftStandaloneSplits = emptyList()
                     showAddSheet = false
+                }
+            )
+        }
+
+        if (showAddDebtSheet) {
+            CreateEditDebtSheet(
+                accounts = debtsState.accounts,
+                currencySymbol = debtsState.currencySymbol,
+                isHapticsEnabled = isHapticsEnabled,
+                onDismiss = { showAddDebtSheet = false },
+                onSave = { personName, amount, type, dueDate, note, accountId, syncLedger ->
+                    debtsViewModel.handleIntent(
+                        DebtsContract.Intent.CreateDebt(
+                            personName = personName,
+                            amount = amount,
+                            type = type,
+                            dueDate = dueDate,
+                            note = note,
+                            accountId = accountId,
+                            syncLedger = syncLedger
+                        )
+                    )
+                    showAddDebtSheet = false
                 }
             )
         }
