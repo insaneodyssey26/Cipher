@@ -12,6 +12,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -43,6 +44,7 @@ import com.masum.cipher.MainActivity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.di.WidgetEntryPoint
+import com.masum.cipher.ui.dialogs.WidgetAccountPickerActivity
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
 
@@ -58,17 +60,31 @@ class BudgetWidget : GlanceAppWidget() {
         val accentColor = Color(settings.accentColor.colorValue)
         val currencySymbol = settings.currencySymbol
         provideContent {
-            val spent = currentState<Preferences>()[WidgetKeys.BUDGET_SPENT] ?: 0.0
-            val income = currentState<Preferences>()[WidgetKeys.STATS_INCOME] ?: 0.0
+            val prefs = currentState<Preferences>()
+            val spent = prefs[WidgetKeys.BUDGET_SPENT] ?: 0.0
+            val income = prefs[WidgetKeys.BUDGET_INCOME] ?: 0.0
+            val accountName = prefs[WidgetKeys.BUDGET_ACCOUNT_NAME] ?: "All Accounts"
             val budget = if (isDynamic && baseBudget > 0) baseBudget + income else baseBudget
             GlanceTheme {
-                Content(spent = spent, budget = budget, currencySymbol = currencySymbol, brandColor = ColorProvider(accentColor))
+                Content(
+                    spent = spent,
+                    budget = budget,
+                    accountName = accountName,
+                    currencySymbol = currencySymbol,
+                    brandColor = ColorProvider(accentColor)
+                )
             }
         }
     }
 
     @Composable
-    private fun Content(spent: Double, budget: Double, currencySymbol: String = "₹", brandColor: ColorProvider) {
+    private fun Content(
+        spent: Double,
+        budget: Double,
+        accountName: String,
+        currencySymbol: String = "₹",
+        brandColor: ColorProvider
+    ) {
         val progress = if (budget > 0) (spent / budget).toFloat().coerceIn(0f, 1f) else 0f
         val overBudget = spent > budget && budget > 0
         val remaining = budget - spent
@@ -79,12 +95,14 @@ class BudgetWidget : GlanceAppWidget() {
             else -> WidgetColors.LimeAccent
         }
 
+        val displayName = if (accountName.equals("All Accounts", ignoreCase = true)) "All" else accountName
+        val widgetTypeParam = ActionParameters.Key<String>(WidgetAccountPickerActivity.EXTRA_WIDGET_TYPE)
+
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(WidgetColors.SurfaceBg)
                 .cornerRadius(24.dp)
-                .clickable(actionStartActivity<MainActivity>())
                 .padding(10.dp),
             contentAlignment = Alignment.TopStart
         ) {
@@ -99,7 +117,8 @@ class BudgetWidget : GlanceAppWidget() {
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = brandColor
-                        )
+                        ),
+                        modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())
                     )
                     Spacer(GlanceModifier.width(4.dp))
                     Text(
@@ -110,47 +129,70 @@ class BudgetWidget : GlanceAppWidget() {
                         )
                     )
                     Spacer(GlanceModifier.width(4.dp))
-                    Text(
-                        text = "budget",
-                        style = TextStyle(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = WidgetColors.TextMuted
-                        ),
-                        maxLines = 1
-                    )
-                    Spacer(GlanceModifier.defaultWeight())
                     Box(
+                        modifier = GlanceModifier
+                            .cornerRadius(8.dp)
+                            .background(WidgetColors.CardBg)
+                            .clickable(
+                                actionStartActivity<WidgetAccountPickerActivity>(
+                                    actionParametersOf(widgetTypeParam to WidgetAccountPickerActivity.WIDGET_TYPE_BUDGET)
+                                )
+                            )
+                            .padding(horizontal = 7.dp, vertical = 3.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = GlanceModifier
-                                .size(24.dp)
-                                .cornerRadius(12.dp)
-                                .clickable(actionRunCallback<BudgetRefreshAction>()),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Row(verticalAlignment = Alignment.Vertical.CenterVertically) {
                             Text(
-                                text = "↻",
+                                text = displayName,
                                 style = TextStyle(
-                                    fontSize = 14.sp,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = brandColor
+                                ),
+                                maxLines = 1
+                            )
+                            Spacer(GlanceModifier.width(3.dp))
+                            Text(
+                                text = "▾",
+                                style = TextStyle(
+                                    fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = brandColor
                                 )
                             )
                         }
                     }
+                    Spacer(GlanceModifier.defaultWeight())
+                    Box(
+                        modifier = GlanceModifier
+                            .size(22.dp)
+                            .cornerRadius(11.dp)
+                            .clickable(actionRunCallback<BudgetRefreshAction>()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "↻",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = brandColor
+                            )
+                        )
+                    }
                 }
 
                 Column(
-                    modifier = GlanceModifier.defaultWeight().fillMaxWidth(),
+                    modifier = GlanceModifier
+                        .defaultWeight()
+                        .fillMaxWidth()
+                        .clickable(actionStartActivity<MainActivity>()),
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     if (budget <= 0.0) {
                         Text(
                             text = "No budget set",
                             style = TextStyle(
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = WidgetColors.TextPrimary
                             )
@@ -159,7 +201,7 @@ class BudgetWidget : GlanceAppWidget() {
                         Text(
                             text = "Tap to set in settings",
                             style = TextStyle(
-                                fontSize = 10.sp,
+                                fontSize = 9.5.sp,
                                 color = WidgetColors.TextMuted
                             )
                         )
@@ -176,7 +218,7 @@ class BudgetWidget : GlanceAppWidget() {
                         Text(
                             text = "spent of ${com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(budget, currencySymbol)}",
                             style = TextStyle(
-                                fontSize = 10.sp,
+                                fontSize = 9.5.sp,
                                 color = WidgetColors.TextMuted
                             )
                         )

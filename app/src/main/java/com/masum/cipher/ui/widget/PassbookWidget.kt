@@ -12,6 +12,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -45,6 +46,7 @@ import com.masum.cipher.R
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.di.WidgetEntryPoint
+import com.masum.cipher.ui.dialogs.WidgetAccountPickerActivity
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
@@ -64,12 +66,14 @@ class PassbookWidget : GlanceAppWidget() {
         provideContent {
             val prefs = currentState<Preferences>()
             val rawTxJson = prefs[WidgetKeys.RECENT_TX_JSON] ?: "[]"
-            val transactions = parseTransactionsJson(rawTxJson)
+            val selectedAccount = prefs[WidgetKeys.PASSBOOK_ACCOUNT_NAME] ?: "All Accounts"
+            val transactions = parseTransactionsJson(rawTxJson, selectedAccount)
 
             GlanceTheme {
                 Content(
                     context = context,
                     isPro = isPro,
+                    accountName = selectedAccount,
                     transactions = transactions,
                     currencySymbol = currencySymbol,
                     brandColor = ColorProvider(accentColor)
@@ -78,12 +82,16 @@ class PassbookWidget : GlanceAppWidget() {
         }
     }
 
-    private fun parseTransactionsJson(rawJson: String): List<SimpleTx> {
+    private fun parseTransactionsJson(rawJson: String, filterAccountName: String): List<SimpleTx> {
         return try {
             val array = JSONArray(rawJson)
             val list = mutableListOf<SimpleTx>()
             for (i in 0 until minOf(array.length(), 50)) {
                 val obj = array.getJSONObject(i)
+                val txAccountName = obj.optString("accountName", "")
+                if (filterAccountName != "All Accounts" && filterAccountName != "All" && txAccountName.isNotBlank() && txAccountName != filterAccountName) {
+                    continue
+                }
                 list.add(
                     SimpleTx(
                         merchant = obj.optString("merchant", "Expense"),
@@ -110,16 +118,20 @@ class PassbookWidget : GlanceAppWidget() {
     private fun Content(
         context: Context,
         isPro: Boolean,
+        accountName: String,
         transactions: List<SimpleTx>,
         currencySymbol: String,
         brandColor: ColorProvider
     ) {
+        val displayName = if (accountName.equals("All Accounts", ignoreCase = true)) "All" else accountName
+        val widgetTypeParam = ActionParameters.Key<String>(WidgetAccountPickerActivity.EXTRA_WIDGET_TYPE)
+
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(WidgetColors.SurfaceBg)
                 .cornerRadius(24.dp)
-                .padding(12.dp),
+                .padding(10.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -127,43 +139,62 @@ class PassbookWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
-                    Row(
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .clickable(actionStartActivity<MainActivity>()),
-                        verticalAlignment = Alignment.Vertical.CenterVertically
-                    ) {
-                        Text(
-                            text = "cipher",
-                            style = TextStyle(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = brandColor
-                            )
+                    Text(
+                        text = "cipher",
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = brandColor
+                        ),
+                        modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())
+                    )
+                    Spacer(GlanceModifier.width(4.dp))
+                    Text(
+                        text = "|",
+                        style = TextStyle(
+                            fontSize = 10.sp,
+                            color = WidgetColors.TextMuted
                         )
-                        Spacer(GlanceModifier.width(4.dp))
-                        Text(
-                            text = "|",
-                            style = TextStyle(
-                                fontSize = 10.sp,
-                                color = WidgetColors.TextMuted
-                            )
-                        )
-                        Spacer(GlanceModifier.width(4.dp))
-                        Text(
-                            text = "passbook",
-                            style = TextStyle(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = WidgetColors.TextMuted
-                            )
-                        )
-                    }
-
+                    )
+                    Spacer(GlanceModifier.width(4.dp))
                     Box(
                         modifier = GlanceModifier
-                            .size(24.dp)
-                            .cornerRadius(12.dp)
+                            .cornerRadius(8.dp)
+                            .background(WidgetColors.CardBg)
+                            .clickable(
+                                actionStartActivity<WidgetAccountPickerActivity>(
+                                    actionParametersOf(widgetTypeParam to WidgetAccountPickerActivity.WIDGET_TYPE_PASSBOOK)
+                                )
+                            )
+                            .padding(horizontal = 7.dp, vertical = 3.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.Vertical.CenterVertically) {
+                            Text(
+                                text = displayName,
+                                style = TextStyle(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = brandColor
+                                ),
+                                maxLines = 1
+                            )
+                            Spacer(GlanceModifier.width(3.dp))
+                            Text(
+                                text = "▾",
+                                style = TextStyle(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = brandColor
+                                )
+                            )
+                        }
+                    }
+                    Spacer(GlanceModifier.defaultWeight())
+                    Box(
+                        modifier = GlanceModifier
+                            .size(22.dp)
+                            .cornerRadius(11.dp)
                             .clickable(actionRunCallback<PassbookRefreshAction>()),
                         contentAlignment = Alignment.Center
                     ) {

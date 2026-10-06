@@ -12,6 +12,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -42,6 +43,7 @@ import com.masum.cipher.MainActivity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
 import com.masum.cipher.core.di.WidgetEntryPoint
+import com.masum.cipher.ui.dialogs.WidgetAccountPickerActivity
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
 
@@ -58,25 +60,38 @@ class StatsWidget : GlanceAppWidget() {
             val prefs = currentState<Preferences>()
             val spent = prefs[WidgetKeys.STATS_SPENT] ?: 0.0
             val income = prefs[WidgetKeys.STATS_INCOME] ?: 0.0
+            val accountName = prefs[WidgetKeys.STATS_ACCOUNT_NAME] ?: "All Accounts"
             GlanceTheme {
-                Content(spent = spent, income = income, currencySymbol = currencySymbol, brandColor = ColorProvider(accentColor))
+                Content(
+                    spent = spent,
+                    income = income,
+                    accountName = accountName,
+                    currencySymbol = currencySymbol,
+                    brandColor = ColorProvider(accentColor)
+                )
             }
         }
     }
 
     @Composable
-    private fun Content(spent: Double, income: Double, currencySymbol: String = "₹", brandColor: ColorProvider) {
+    private fun Content(
+        spent: Double,
+        income: Double,
+        accountName: String,
+        currencySymbol: String = "₹",
+        brandColor: ColorProvider
+    ) {
         val net = income - spent
         val netPositive = net >= 0
-
         val netColor = if (netPositive) WidgetColors.IncomeEmerald else WidgetColors.ExpenseRose
+        val displayName = if (accountName.equals("All Accounts", ignoreCase = true)) "All" else accountName
+        val widgetTypeParam = ActionParameters.Key<String>(WidgetAccountPickerActivity.EXTRA_WIDGET_TYPE)
 
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(WidgetColors.SurfaceBg)
                 .cornerRadius(24.dp)
-                .clickable(actionStartActivity<MainActivity>())
                 .padding(10.dp),
             contentAlignment = Alignment.TopStart
         ) {
@@ -91,7 +106,8 @@ class StatsWidget : GlanceAppWidget() {
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = brandColor
-                        )
+                        ),
+                        modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())
                     )
                     Spacer(GlanceModifier.width(4.dp))
                     Text(
@@ -102,40 +118,63 @@ class StatsWidget : GlanceAppWidget() {
                         )
                     )
                     Spacer(GlanceModifier.width(4.dp))
-                    Text(
-                        text = "flow",
-                        style = TextStyle(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = WidgetColors.TextMuted
-                        ),
-                        maxLines = 1
-                    )
-                    Spacer(GlanceModifier.defaultWeight())
                     Box(
+                        modifier = GlanceModifier
+                            .cornerRadius(8.dp)
+                            .background(WidgetColors.CardBg)
+                            .clickable(
+                                actionStartActivity<WidgetAccountPickerActivity>(
+                                    actionParametersOf(widgetTypeParam to WidgetAccountPickerActivity.WIDGET_TYPE_STATS)
+                                )
+                            )
+                            .padding(horizontal = 7.dp, vertical = 3.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = GlanceModifier
-                                .size(24.dp)
-                                .cornerRadius(12.dp)
-                                .clickable(actionRunCallback<StatsRefreshAction>()),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Row(verticalAlignment = Alignment.Vertical.CenterVertically) {
                             Text(
-                                text = "↻",
+                                text = displayName,
                                 style = TextStyle(
-                                    fontSize = 14.sp,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = brandColor
+                                ),
+                                maxLines = 1
+                            )
+                            Spacer(GlanceModifier.width(3.dp))
+                            Text(
+                                text = "▾",
+                                style = TextStyle(
+                                    fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = brandColor
                                 )
                             )
                         }
                     }
+                    Spacer(GlanceModifier.defaultWeight())
+                    Box(
+                        modifier = GlanceModifier
+                            .size(22.dp)
+                            .cornerRadius(11.dp)
+                            .clickable(actionRunCallback<StatsRefreshAction>()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "↻",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = brandColor
+                            )
+                        )
+                    }
                 }
 
                 Column(
-                    modifier = GlanceModifier.defaultWeight().fillMaxWidth(),
+                    modifier = GlanceModifier
+                        .defaultWeight()
+                        .fillMaxWidth()
+                        .clickable(actionStartActivity<MainActivity>()),
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     val formattedNet = com.masum.cipher.core.util.AppFormatters.formatCompactCurrency(kotlin.math.abs(net), currencySymbol)

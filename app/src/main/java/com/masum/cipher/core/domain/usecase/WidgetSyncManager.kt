@@ -31,17 +31,22 @@ class WidgetSyncManager @Inject constructor(
 ) {
 
     suspend fun syncWidget() {
-        val start = DateTimeUtils.currentMonthStart()
-        val today = DateTimeUtils.todayStart()
-        val spent = transactionDao.sumExpensesSince(start)
-        val income = transactionDao.sumIncomeSince(start)
-        val dailySpent = transactionDao.sumExpensesSince(today)
-
         val settings = userPreferences.settingsFlow.first()
         val isPro = settings.isPro
         val proTier = settings.proTier
         val baseBudget = settings.monthlyBudget
         val isDynamic = settings.isDynamicBudgetEnabled
+        val budgetAccountId = settings.budgetAccountId
+
+        val start = DateTimeUtils.currentMonthStart()
+        val today = DateTimeUtils.todayStart()
+        val allSpent = transactionDao.sumExpensesSince(start)
+        val allIncome = transactionDao.sumIncomeSince(start)
+
+        val spent = if (budgetAccountId != null) transactionDao.sumExpensesSinceForAccount(start, budgetAccountId) else allSpent
+        val income = if (budgetAccountId != null) transactionDao.sumIncomeSinceForAccount(start, budgetAccountId) else allIncome
+        val dailySpent = if (budgetAccountId != null) transactionDao.sumExpensesSinceForAccount(today, budgetAccountId) else transactionDao.sumExpensesSince(today)
+
         val effectiveBudget = if (isDynamic && baseBudget > 0) baseBudget + income else baseBudget
         val remainingDays = DateTimeUtils.remainingDaysInMonth()
         val remainingBudget = (effectiveBudget - spent).coerceAtLeast(0.0)
@@ -50,6 +55,32 @@ class WidgetSyncManager @Inject constructor(
         val accounts = accountDao.getAllAccounts()
         val allTransactions = transactionDao.getAllTransactionsList()
         val rootAccountId = accounts.minByOrNull { it.createdAt }?.id ?: accounts.firstOrNull()?.id ?: 1L
+
+        val budgetAccountsJsonArray = JSONArray().apply {
+            put(
+                JSONObject().apply {
+                    put("id", -1L)
+                    put("name", "All Accounts")
+                    put("spent", allSpent)
+                    put("income", allIncome)
+                }
+            )
+            accounts.forEach { acc ->
+                val accSpent = transactionDao.sumExpensesSinceForAccount(start, acc.id)
+                val accIncome = transactionDao.sumIncomeSinceForAccount(start, acc.id)
+                put(
+                    JSONObject().apply {
+                        put("id", acc.id)
+                        put("name", acc.name)
+                        put("spent", accSpent)
+                        put("income", accIncome)
+                    }
+                )
+            }
+        }
+
+        val targetAccount = accounts.find { it.id == budgetAccountId }
+        val activeAccountName = targetAccount?.name ?: "All Accounts"
 
         val accountsJsonArray = JSONArray()
         var calculatedNetWorth = 0.0
@@ -92,12 +123,16 @@ class WidgetSyncManager @Inject constructor(
         val recentTxs = transactionDao.getRecentTransactionsList(50)
         val recentTxJsonArray = JSONArray()
         recentTxs.forEach { tx ->
+            val accName = accounts.find { it.id == tx.accountId }?.name ?: "Main Account"
             recentTxJsonArray.put(
                 JSONObject().apply {
+                    put("id", tx.id)
                     put("merchant", tx.merchant)
                     put("amount", tx.amount)
                     put("isIncome", tx.isIncome)
                     put("category", tx.category)
+                    put("accountId", tx.accountId ?: -1L)
+                    put("accountName", accName)
                 }
             )
         }
@@ -106,16 +141,34 @@ class WidgetSyncManager @Inject constructor(
 
         manager.getGlanceIds(BudgetWidget::class.java).forEach { id ->
             updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
-                prefs.toMutablePreferences().apply { this[WidgetKeys.BUDGET_SPENT] = spent }
+                prefs.toMutablePreferences().apply {
+                    this[WidgetKeys.BUDGET_SPENT] = spent
+                    this[WidgetKeys.BUDGET_INCOME] = income
+                    this[WidgetKeys.BUDGET_ACCOUNT_NAME] = activeAccountName
+                    this[WidgetKeys.BUDGET_ACCOUNTS_JSON] = budgetAccountsJsonArray.toString()
+                }
             }
             BudgetWidget().update(context, id)
         }
 
         manager.getGlanceIds(StatsWidget::class.java).forEach { id ->
             updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+                val currentStatsAcc = prefs[WidgetKeys.STATS_ACCOUNT_NAME] ?: "All Accounts"
+                var targetSpent = allSpent
+                var targetIncome = allIncome
+                for (i in 0 until budgetAccountsJsonArray.length()) {
+                    val obj = budgetAccountsJsonArray.getJSONObject(i)
+                    if (obj.optString("name") == currentStatsAcc) {
+                        targetSpent = obj.optDouble("spent", allSpent)
+                        targetIncome = obj.optDouble("income", allIncome)
+                        break
+                    }
+                }
                 prefs.toMutablePreferences().apply {
-                    this[WidgetKeys.STATS_SPENT] = spent
-                    this[WidgetKeys.STATS_INCOME] = income
+                    this[WidgetKeys.STATS_SPENT] = targetSpent
+                    this[WidgetKeys.STATS_INCOME] = targetIncome
+                    this[WidgetKeys.STATS_ACCOUNT_NAME] = currentStatsAcc
+                    this[WidgetKeys.STATS_ACCOUNTS_JSON] = budgetAccountsJsonArray.toString()
                 }
             }
             StatsWidget().update(context, id)
@@ -145,9 +198,12 @@ class WidgetSyncManager @Inject constructor(
 
         manager.getGlanceIds(PassbookWidget::class.java).forEach { id ->
             updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+                val currentPassbookAcc = prefs[WidgetKeys.PASSBOOK_ACCOUNT_NAME] ?: "All Accounts"
                 prefs.toMutablePreferences().apply {
                     this[WidgetKeys.IS_PRO] = isPro
                     this[WidgetKeys.PRO_TIER] = proTier
+                    this[WidgetKeys.PASSBOOK_ACCOUNT_NAME] = currentPassbookAcc
+                    this[WidgetKeys.PASSBOOK_ACCOUNTS_JSON] = budgetAccountsJsonArray.toString()
                     this[WidgetKeys.RECENT_TX_JSON] = recentTxJsonArray.toString()
                 }
             }
@@ -167,4 +223,3 @@ class WidgetSyncManager @Inject constructor(
         }
     }
 }
-
