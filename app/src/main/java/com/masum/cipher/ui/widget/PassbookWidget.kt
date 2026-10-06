@@ -131,7 +131,7 @@ class PassbookWidget : GlanceAppWidget() {
                 .fillMaxSize()
                 .background(WidgetColors.SurfaceBg)
                 .cornerRadius(24.dp)
-                .padding(10.dp),
+                .padding(12.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
@@ -148,7 +148,7 @@ class PassbookWidget : GlanceAppWidget() {
                         ),
                         modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>())
                     )
-                    Spacer(GlanceModifier.width(4.dp))
+                    Spacer(GlanceModifier.width(6.dp))
                     Text(
                         text = "|",
                         style = TextStyle(
@@ -156,17 +156,17 @@ class PassbookWidget : GlanceAppWidget() {
                             color = WidgetColors.TextMuted
                         )
                     )
-                    Spacer(GlanceModifier.width(4.dp))
+                    Spacer(GlanceModifier.width(6.dp))
                     Box(
                         modifier = GlanceModifier
-                            .cornerRadius(8.dp)
+                            .cornerRadius(9.dp)
                             .background(WidgetColors.CardBg)
                             .clickable(
                                 actionStartActivity<WidgetAccountPickerActivity>(
                                     actionParametersOf(widgetTypeParam to WidgetAccountPickerActivity.WIDGET_TYPE_PASSBOOK)
                                 )
                             )
-                            .padding(horizontal = 7.dp, vertical = 3.dp),
+                            .padding(horizontal = 9.dp, vertical = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.Vertical.CenterVertically) {
@@ -179,7 +179,7 @@ class PassbookWidget : GlanceAppWidget() {
                                 ),
                                 maxLines = 1
                             )
-                            Spacer(GlanceModifier.width(3.dp))
+                            Spacer(GlanceModifier.width(4.dp))
                             Text(
                                 text = "▾",
                                 style = TextStyle(
@@ -193,15 +193,16 @@ class PassbookWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.defaultWeight())
                     Box(
                         modifier = GlanceModifier
-                            .size(22.dp)
-                            .cornerRadius(11.dp)
+                            .size(26.dp)
+                            .cornerRadius(13.dp)
+                            .background(WidgetColors.CardBg)
                             .clickable(actionRunCallback<PassbookRefreshAction>()),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "↻",
                             style = TextStyle(
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = brandColor
                             )
@@ -209,7 +210,7 @@ class PassbookWidget : GlanceAppWidget() {
                     }
                 }
 
-                Spacer(GlanceModifier.height(8.dp))
+                Spacer(GlanceModifier.height(10.dp))
 
                 if (!isPro) {
                     Box(
@@ -267,30 +268,41 @@ class PassbookWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.fillMaxSize()
                     ) {
                         items(transactions) { tx ->
+                            val amountPrefix = if (tx.isIncome) "+" else "-"
+                            val amountColor = if (tx.isIncome) WidgetColors.IncomeEmerald else WidgetColors.ExpenseRose
                             Row(
                                 modifier = GlanceModifier
                                     .fillMaxWidth()
                                     .background(WidgetColors.CardBg)
-                                    .cornerRadius(12.dp)
-                                    .padding(horizontal = 11.dp, vertical = 8.dp)
+                                    .cornerRadius(14.dp)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                                     .clickable(actionStartActivity<MainActivity>()),
                                 verticalAlignment = Alignment.Vertical.CenterVertically
                             ) {
+                                Spacer(
+                                    modifier = GlanceModifier
+                                        .size(width = 3.dp, height = 24.dp)
+                                        .cornerRadius(2.dp)
+                                        .background(amountColor)
+                                )
+
+                                Spacer(GlanceModifier.width(10.dp))
+
                                 Column(modifier = GlanceModifier.defaultWeight()) {
                                     Text(
                                         text = tx.merchant,
                                         style = TextStyle(
-                                            fontSize = 11.sp,
+                                            fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = WidgetColors.TextPrimary
                                         ),
                                         maxLines = 1
                                     )
-                                    Spacer(GlanceModifier.height(1.dp))
+                                    Spacer(GlanceModifier.height(2.dp))
                                     Text(
                                         text = tx.category.uppercase(),
                                         style = TextStyle(
-                                            fontSize = 8.sp,
+                                            fontSize = 8.5.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = WidgetColors.TextMuted
                                         ),
@@ -298,18 +310,16 @@ class PassbookWidget : GlanceAppWidget() {
                                     )
                                 }
 
-                                val amountPrefix = if (tx.isIncome) "+" else "-"
-                                val amountColor = if (tx.isIncome) WidgetColors.IncomeEmerald else WidgetColors.ExpenseRose
                                 Text(
                                     text = "$amountPrefix$currencySymbol${formatAmount(tx.amount)}",
                                     style = TextStyle(
-                                        fontSize = 12.sp,
+                                        fontSize = 12.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = amountColor
                                     )
                                 )
                             }
-                            Spacer(GlanceModifier.height(6.dp))
+                            Spacer(GlanceModifier.height(8.dp))
                         }
                     }
                 }

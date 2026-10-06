@@ -144,7 +144,7 @@ class AccountsWidget : GlanceAppWidget() {
                                 color = brandColor
                             )
                         )
-                        Spacer(GlanceModifier.width(4.dp))
+                        Spacer(GlanceModifier.width(6.dp))
                         Text(
                             text = "|",
                             style = TextStyle(
@@ -152,28 +152,37 @@ class AccountsWidget : GlanceAppWidget() {
                                 color = WidgetColors.TextMuted
                             )
                         )
-                        Spacer(GlanceModifier.width(4.dp))
-                        Text(
-                            text = "accounts",
-                            style = TextStyle(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = WidgetColors.TextMuted
+                        Spacer(GlanceModifier.width(6.dp))
+                        Box(
+                            modifier = GlanceModifier
+                                .cornerRadius(9.dp)
+                                .background(WidgetColors.CardBg)
+                                .padding(horizontal = 9.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "accounts",
+                                style = TextStyle(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = WidgetColors.TextMuted
+                                )
                             )
-                        )
+                        }
                     }
 
                     Box(
                         modifier = GlanceModifier
-                            .size(24.dp)
-                            .cornerRadius(12.dp)
+                            .size(26.dp)
+                            .cornerRadius(13.dp)
+                            .background(WidgetColors.CardBg)
                             .clickable(actionRunCallback<AccountsRefreshAction>()),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "↻",
                             style = TextStyle(
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = brandColor
                             )
@@ -181,7 +190,7 @@ class AccountsWidget : GlanceAppWidget() {
                     }
                 }
 
-                Spacer(GlanceModifier.height(4.dp))
+                Spacer(GlanceModifier.height(10.dp))
 
                 if (!isPro) {
                     Box(
@@ -217,13 +226,15 @@ class AccountsWidget : GlanceAppWidget() {
                         }
                     }
                 } else {
-                    Row(
+                    Box(
                         modifier = GlanceModifier
                             .fillMaxWidth()
-                            .clickable(actionStartActivity<MainActivity>()),
-                        verticalAlignment = Alignment.Vertical.Bottom
+                            .background(WidgetColors.CardBg)
+                            .cornerRadius(16.dp)
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .clickable(actionStartActivity<MainActivity>())
                     ) {
-                        Column(modifier = GlanceModifier.defaultWeight()) {
+                        Column {
                             Text(
                                 text = context.getString(R.string.widget_net_worth_title).uppercase(),
                                 style = TextStyle(
@@ -233,10 +244,11 @@ class AccountsWidget : GlanceAppWidget() {
                                 ),
                                 maxLines = 1
                             )
+                            Spacer(GlanceModifier.height(2.dp))
                             Text(
                                 text = formatMoney(netWorth, currencySymbol),
                                 style = TextStyle(
-                                    fontSize = 18.sp,
+                                    fontSize = 19.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = WidgetColors.TextPrimary
                                 ),
@@ -245,16 +257,16 @@ class AccountsWidget : GlanceAppWidget() {
                         }
                     }
 
-                    Spacer(GlanceModifier.height(8.dp))
+                    Spacer(GlanceModifier.height(10.dp))
 
                     if (accounts.isEmpty()) {
                         Box(
                             modifier = GlanceModifier
                                 .fillMaxWidth()
                                 .background(WidgetColors.CardBg)
-                                .cornerRadius(12.dp)
+                                .cornerRadius(14.dp)
                                 .clickable(actionStartActivity<MainActivity>())
-                                .padding(10.dp),
+                                .padding(12.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -274,35 +286,35 @@ class AccountsWidget : GlanceAppWidget() {
                                     modifier = GlanceModifier
                                         .fillMaxWidth()
                                         .background(WidgetColors.CardBg)
-                                        .cornerRadius(12.dp)
-                                        .padding(horizontal = 11.dp, vertical = 7.dp)
+                                        .cornerRadius(14.dp)
+                                        .padding(horizontal = 12.dp, vertical = 10.dp)
                                         .clickable(actionStartActivity<MainActivity>()),
                                     verticalAlignment = Alignment.Vertical.CenterVertically
                                 ) {
                                     Spacer(
                                         modifier = GlanceModifier
-                                            .size(8.dp)
-                                            .cornerRadius(4.dp)
+                                            .size(width = 3.dp, height = 24.dp)
+                                            .cornerRadius(2.dp)
                                             .background(ColorProvider(Color(acc.colorHex)))
                                     )
 
-                                    Spacer(GlanceModifier.width(8.dp))
+                                    Spacer(GlanceModifier.width(10.dp))
 
                                     Column(modifier = GlanceModifier.defaultWeight()) {
                                         Text(
                                             text = acc.name,
                                             style = TextStyle(
-                                                fontSize = 11.sp,
+                                                fontSize = 11.5.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = WidgetColors.TextPrimary
                                             ),
                                             maxLines = 1
                                         )
-                                        Spacer(GlanceModifier.height(1.dp))
+                                        Spacer(GlanceModifier.height(2.dp))
                                         Text(
                                             text = acc.type.uppercase(),
                                             style = TextStyle(
-                                                fontSize = 8.sp,
+                                                fontSize = 8.5.sp,
                                                 fontWeight = FontWeight.Medium,
                                                 color = WidgetColors.TextMuted
                                             ),
@@ -313,13 +325,13 @@ class AccountsWidget : GlanceAppWidget() {
                                     Text(
                                         text = formatMoney(acc.balance, currencySymbol),
                                         style = TextStyle(
-                                            fontSize = 12.sp,
+                                            fontSize = 12.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = WidgetColors.TextPrimary
                                         )
                                     )
                                 }
-                                Spacer(GlanceModifier.height(5.dp))
+                                Spacer(GlanceModifier.height(8.dp))
                             }
                         }
                     }
