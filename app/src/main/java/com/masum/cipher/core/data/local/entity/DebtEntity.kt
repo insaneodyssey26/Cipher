@@ -3,6 +3,7 @@ package com.masum.cipher.core.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "debts",
@@ -13,6 +14,7 @@ import androidx.room.PrimaryKey
         Index(value = ["dueDate"])
     ]
 )
+@Serializable
 data class DebtEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,

@@ -59,7 +59,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.masum.cipher.ui.debts.CreateEditDebtSheet
 import com.masum.cipher.ui.debts.DebtsContract
 import com.masum.cipher.ui.debts.DebtsTabContent
 import com.masum.cipher.ui.debts.DebtsViewModel
@@ -130,6 +129,8 @@ fun SplitExpensesScreen(
     onNavigateToPro: () -> Unit = {},
     onNavigateToCreateGoal: () -> Unit = {},
     onNavigateToEditGoal: (Long) -> Unit = {},
+    onNavigateToCreateDebt: () -> Unit = {},
+    onNavigateToEditDebt: (Long) -> Unit = {},
     goalsViewModel: GoalsViewModel = hiltViewModel(),
     debtsViewModel: DebtsViewModel = hiltViewModel()
 ) {
@@ -154,7 +155,6 @@ fun SplitExpensesScreen(
     var selectedTab by remember { mutableStateOf(SplitFilterTab.ALL) }
     var editingSplitTx by remember { mutableStateOf<TransactionEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
-    var showAddDebtSheet by remember { mutableStateOf(false) }
     var draftStandaloneExpenseName by remember { mutableStateOf("") }
     var draftStandaloneTotalStr by remember { mutableStateOf("") }
     var draftStandaloneSplits by remember { mutableStateOf<List<SplitParticipant>>(emptyList()) }
@@ -294,7 +294,7 @@ fun SplitExpensesScreen(
                         1 -> {
                             IconButton(onClick = {
                                 view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                showAddDebtSheet = true
+                                onNavigateToCreateDebt()
                             }) {
                                 Icon(
                                     imageVector = LucideIcons.Plus,
@@ -710,7 +710,8 @@ fun SplitExpensesScreen(
         DebtsTabContent(
             state = debtsState,
             onIntent = debtsViewModel::handleIntent,
-            onAddDebtClick = { showAddDebtSheet = true }
+            onAddDebtClick = onNavigateToCreateDebt,
+            onEditDebtClick = onNavigateToEditDebt
         )
     }
     2 -> {
@@ -766,29 +767,6 @@ fun SplitExpensesScreen(
                     draftStandaloneTotalStr = ""
                     draftStandaloneSplits = emptyList()
                     showAddSheet = false
-                }
-            )
-        }
-
-        if (showAddDebtSheet) {
-            CreateEditDebtSheet(
-                accounts = debtsState.accounts,
-                currencySymbol = debtsState.currencySymbol,
-                isHapticsEnabled = isHapticsEnabled,
-                onDismiss = { showAddDebtSheet = false },
-                onSave = { personName, amount, type, dueDate, note, accountId, syncLedger ->
-                    debtsViewModel.handleIntent(
-                        DebtsContract.Intent.CreateDebt(
-                            personName = personName,
-                            amount = amount,
-                            type = type,
-                            dueDate = dueDate,
-                            note = note,
-                            accountId = accountId,
-                            syncLedger = syncLedger
-                        )
-                    )
-                    showAddDebtSheet = false
                 }
             )
         }

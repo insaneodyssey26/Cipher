@@ -30,6 +30,18 @@ class DebtsContract {
             val interestRate: Double = 0.0
         ) : Intent()
 
+        data class UpdateDebt(
+            val debtId: Long,
+            val personName: String,
+            val amount: Double,
+            val type: DebtType,
+            val dueDate: Long? = null,
+            val note: String? = null,
+            val accountId: Long? = null,
+            val syncLedger: Boolean = false,
+            val interestRate: Double = 0.0
+        ) : Intent()
+
         data class RecordRepayment(
             val debtId: Long,
             val amount: Double,
@@ -49,6 +61,27 @@ class DebtsContract {
             val repayments: List<DebtRepaymentEntity> = emptyList(),
             val transactions: List<TransactionEntity> = emptyList()
         ) : Intent()
+
+        data class UpdateDraft(
+            val personName: String,
+            val amount: String,
+            val type: DebtType,
+            val dueDate: Long?,
+            val note: String,
+            val accountId: Long?,
+            val syncLedger: Boolean
+        ) : Intent()
+
+        data object ClearDraft : Intent()
+
+        data class SyncDebtToLedger(
+            val debtId: Long,
+            val accountId: Long
+        ) : Intent()
+
+        data class UnlogDebtFromLedger(
+            val debtId: Long
+        ) : Intent()
     }
 
     @Immutable
@@ -63,7 +96,14 @@ class DebtsContract {
         val isHapticsEnabled: Boolean = true,
         val isPro: Boolean = false,
         val filterTab: DebtFilterTab = DebtFilterTab.ACTIVE,
-        val typeFilter: DebtType? = null
+        val typeFilter: DebtType? = null,
+        val draftPersonName: String = "",
+        val draftAmount: String = "",
+        val draftType: DebtType = DebtType.LENT,
+        val draftDueDate: Long? = null,
+        val draftNote: String = "",
+        val draftAccountId: Long? = null,
+        val draftSyncLedger: Boolean = false
     ) : UiState
 
     sealed class Effect : UiEffect {

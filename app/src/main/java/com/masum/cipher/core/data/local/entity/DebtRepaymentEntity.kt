@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "debt_repayments",
@@ -20,6 +21,7 @@ import androidx.room.PrimaryKey
         Index(value = ["timestamp"])
     ]
 )
+@Serializable
 data class DebtRepaymentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,

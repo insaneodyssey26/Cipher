@@ -68,6 +68,9 @@ import com.masum.cipher.ui.accounts.analytics.AccountAnalyticsScreen
 import com.masum.cipher.ui.accounts.details.AccountDetailsScreen
 import com.masum.cipher.ui.categories.CategoriesScreen
 import com.masum.cipher.ui.components.FloatingNavBar
+import com.masum.cipher.ui.debts.CreateEditDebtScreen
+import com.masum.cipher.ui.debts.DebtsContract
+import com.masum.cipher.ui.debts.DebtsViewModel
 import com.masum.cipher.ui.goals.CreateEditGoalScreen
 import com.masum.cipher.ui.goals.GoalsContract
 import com.masum.cipher.ui.goals.GoalsViewModel
@@ -320,33 +323,50 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         val isTopLevel = currentRoute in listOf("dashboard", "insights", "split_expenses", "settings")
+                        val modalRoutes = setOf("create_debt", "edit_debt/{debtId}", "create_goal", "edit_goal/{goalId}")
 
                         NavHost(
                             navController = navController,
                             startDestination = "dashboard",
                             enterTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
+                                val targetRoute = targetState.destination.route
+                                val initialRoute = initialState.destination.route
+                                if (targetRoute in modalRoutes) {
+                                    slideInVertically(initialOffsetY = { it }, animationSpec = tween(350, easing = FastOutSlowInEasing)) + fadeIn(tween(300))
+                                } else if (targetRoute in listOf("dashboard", "insights", "split_expenses", "settings") && initialRoute in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideInHorizontally(initialOffsetX = { (it * 0.25f).toInt() }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeIn(tween(300))
                                 }
                             },
                             exitTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
+                                val targetRoute = targetState.destination.route
+                                val initialRoute = initialState.destination.route
+                                if (targetRoute in modalRoutes) {
+                                    fadeOut(tween(250)) + scaleOut(targetScale = 0.96f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else if (targetRoute in listOf("dashboard", "insights", "split_expenses", "settings") && initialRoute in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideOutHorizontally(targetOffsetX = { -(it * 0.25f).toInt() }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
                                 }
                             },
                             popEnterTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
+                                val targetRoute = targetState.destination.route
+                                val initialRoute = initialState.destination.route
+                                if (initialRoute in modalRoutes) {
+                                    fadeIn(tween(250)) + scaleIn(initialScale = 0.96f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                                } else if (targetRoute in listOf("dashboard", "insights", "split_expenses", "settings") && initialRoute in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeIn(tween(300)) + scaleIn(initialScale = 0.95f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideInHorizontally(initialOffsetX = { -(it * 0.25f).toInt() }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeIn(tween(300))
                                 }
                             },
                             popExitTransition = { 
-                                if (targetState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings") && initialState.destination.route in listOf("dashboard", "insights", "split_expenses", "settings")) {
+                                val targetRoute = targetState.destination.route
+                                val initialRoute = initialState.destination.route
+                                if (initialRoute in modalRoutes) {
+                                    slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
+                                } else if (targetRoute in listOf("dashboard", "insights", "split_expenses", "settings") && initialRoute in listOf("dashboard", "insights", "split_expenses", "settings")) {
                                     fadeOut(tween(300)) + scaleOut(targetScale = 1.05f, animationSpec = tween(300, easing = FastOutSlowInEasing))
                                 } else {
                                     slideOutHorizontally(targetOffsetX = { (it * 0.25f).toInt() }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
@@ -381,7 +401,9 @@ class MainActivity : AppCompatActivity() {
                                     },
                                     onNavigateToPro = { navController.navigate("cipher_pro") },
                                     onNavigateToCreateGoal = { navController.navigate("create_goal") },
-                                    onNavigateToEditGoal = { goalId -> navController.navigate("edit_goal/$goalId") }
+                                    onNavigateToEditGoal = { goalId -> navController.navigate("edit_goal/$goalId") },
+                                    onNavigateToCreateDebt = { navController.navigate("create_debt") },
+                                    onNavigateToEditDebt = { debtId -> navController.navigate("edit_debt/$debtId") }
                                 )
                             }
                             composable("insights") {
@@ -636,6 +658,101 @@ class MainActivity : AppCompatActivity() {
                                         },
                                         onDeleteGoal = {
                                             viewModel.handleIntent(GoalsContract.Intent.DeleteGoal(it))
+                                            navController.popBackStack()
+                                        }
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.background)
+                                    )
+                                }
+                            }
+                            composable(
+                                route = "create_debt",
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { it }, animationSpec = tween(350, easing = FastOutSlowInEasing)) + fadeIn(tween(300))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(300))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
+                                }
+                            ) {
+                                val viewModel: DebtsViewModel = hiltViewModel()
+                                val debtsState by viewModel.state.collectAsStateWithLifecycle()
+                                CreateEditDebtScreen(
+                                    debtToEdit = null,
+                                    accounts = debtsState.accounts,
+                                    currencySymbol = debtsState.currencySymbol,
+                                    isHapticsEnabled = debtsState.isHapticsEnabled,
+                                    onNavigateBack = { navController.popBackStack() },
+                                    onSaveDebt = { personName, amount, type, dueDate, note, accountId, syncLedger ->
+                                        viewModel.handleIntent(
+                                            DebtsContract.Intent.CreateDebt(
+                                                personName = personName,
+                                                amount = amount,
+                                                type = type,
+                                                dueDate = dueDate,
+                                                note = note,
+                                                accountId = accountId,
+                                                syncLedger = syncLedger
+                                            )
+                                        )
+                                        navController.popBackStack()
+                                    }
+                                )
+                            }
+                            composable(
+                                route = "edit_debt/{debtId}",
+                                arguments = listOf(navArgument("debtId") { type = NavType.LongType }),
+                                enterTransition = {
+                                    slideInVertically(initialOffsetY = { it }, animationSpec = tween(350, easing = FastOutSlowInEasing)) + fadeIn(tween(300))
+                                },
+                                exitTransition = {
+                                    slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
+                                },
+                                popEnterTransition = {
+                                    fadeIn(tween(300))
+                                },
+                                popExitTransition = {
+                                    slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300, easing = FastOutSlowInEasing)) + fadeOut(tween(300))
+                                }
+                            ) { backStackEntry ->
+                                val debtId = backStackEntry.arguments?.getLong("debtId") ?: 0L
+                                val viewModel: DebtsViewModel = hiltViewModel()
+                                val debtsState by viewModel.state.collectAsStateWithLifecycle()
+                                val debtItemToEdit = debtsState.debts.find { it.debt.id == debtId }
+
+                                if (debtItemToEdit != null) {
+                                    CreateEditDebtScreen(
+                                        debtToEdit = debtItemToEdit.debt,
+                                        accounts = debtsState.accounts,
+                                        currencySymbol = debtsState.currencySymbol,
+                                        isHapticsEnabled = debtsState.isHapticsEnabled,
+                                        onNavigateBack = { navController.popBackStack() },
+                                        onSaveDebt = { personName, amount, type, dueDate, note, accountId, syncLedger ->
+                                            viewModel.handleIntent(
+                                                DebtsContract.Intent.UpdateDebt(
+                                                    debtId = debtId,
+                                                    personName = personName,
+                                                    amount = amount,
+                                                    type = type,
+                                                    dueDate = dueDate,
+                                                    note = note,
+                                                    accountId = accountId,
+                                                    syncLedger = syncLedger
+                                                )
+                                            )
+                                            navController.popBackStack()
+                                        },
+                                        onDeleteDebt = {
+                                            viewModel.handleIntent(DebtsContract.Intent.DeleteDebt(it))
                                             navController.popBackStack()
                                         }
                                     )

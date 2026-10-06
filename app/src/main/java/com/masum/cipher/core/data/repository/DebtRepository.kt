@@ -170,6 +170,77 @@ class DebtRepository @Inject constructor(
         debtDao.updateDebt(debt)
     }
 
+    suspend fun updateDebtDetails(
+        debtId: Long,
+        personName: String,
+        amount: Double,
+        type: DebtType,
+        dueDate: Long? = null,
+        note: String? = null,
+        accountId: Long? = null,
+        syncLedger: Boolean = false,
+        interestRate: Double = 0.0
+    ) {
+        val existing = debtDao.getDebtById(debtId) ?: return
+        val repaidAmount = (existing.amount - existing.remainingAmount).coerceAtLeast(0.0)
+        val newRemaining = (amount - repaidAmount).coerceAtLeast(0.0)
+        val isSettled = newRemaining <= 0.001
+
+        var updatedTxId = existing.transactionId
+        if (syncLedger && existing.transactionId == null && accountId != null && amount > 0.0) {
+            val isIncome = (type == DebtType.BORROWED)
+            val merchantName = if (type == DebtType.BORROWED) "Loan from $personName" else "Loan to $personName"
+            val tx = TransactionEntity(
+                amount = amount,
+                merchant = merchantName,
+                currency = "INR",
+                category = "OTHERS",
+                timestamp = System.currentTimeMillis(),
+                rawSms = null,
+                isIncome = isIncome,
+                note = note,
+                accountId = accountId
+            )
+            updatedTxId = transactionDao.insertTransaction(tx)
+            widgetSyncManager.syncWidget()
+        } else if (!syncLedger && existing.transactionId != null) {
+            val tx = transactionDao.getTransactionById(existing.transactionId)
+            if (tx != null) transactionDao.deleteTransaction(tx)
+            updatedTxId = null
+            widgetSyncManager.syncWidget()
+        } else if (syncLedger && existing.transactionId != null) {
+            val tx = transactionDao.getTransactionById(existing.transactionId)
+            if (tx != null) {
+                val isIncome = (type == DebtType.BORROWED)
+                val merchantName = if (type == DebtType.BORROWED) "Loan from $personName" else "Loan to $personName"
+                transactionDao.insertTransaction(
+                    tx.copy(
+                        amount = amount,
+                        merchant = merchantName,
+                        isIncome = isIncome,
+                        note = note,
+                        accountId = accountId ?: tx.accountId
+                    )
+                )
+                widgetSyncManager.syncWidget()
+            }
+        }
+
+        val updated = existing.copy(
+            personName = personName.trim(),
+            amount = amount,
+            remainingAmount = newRemaining,
+            type = type.key,
+            dueDate = dueDate,
+            note = note?.trim()?.ifBlank { null },
+            accountId = accountId,
+            isSettled = isSettled,
+            interestRate = interestRate,
+            transactionId = updatedTxId
+        )
+        debtDao.updateDebt(updated)
+    }
+
     suspend fun getDebtWithRepaymentsAndTransactions(debtId: Long): Triple<DebtEntity?, List<DebtRepaymentEntity>, List<TransactionEntity>> {
         val debt = debtDao.getDebtById(debtId) ?: return Triple(null, emptyList(), emptyList())
         val repayments = debtDao.getRepaymentsForDebtList(debtId)
@@ -224,6 +295,42 @@ class DebtRepository @Inject constructor(
             val newRemaining = (debt.amount - totalRepaid).coerceAtLeast(0.0)
             debtDao.updateDebt(debt.copy(remainingAmount = newRemaining, isSettled = newRemaining <= 0.001))
         }
+        widgetSyncManager.syncWidget()
+    }
+
+    suspend fun syncDebtToLedger(debtId: Long, accountId: Long): Long {
+        val debt = debtDao.getDebtById(debtId) ?: return 0L
+        if (debt.transactionId != null) return debt.transactionId
+        val type = DebtType.fromKey(debt.type)
+        val isIncome = (type == DebtType.BORROWED)
+        val merchantName = if (type == DebtType.BORROWED) "Loan from ${debt.personName}" else "Loan to ${debt.personName}"
+        val tx = TransactionEntity(
+            amount = debt.amount,
+            merchant = merchantName,
+            currency = "INR",
+            category = "OTHERS",
+            timestamp = debt.createdAt,
+            rawSms = null,
+            isIncome = isIncome,
+            note = debt.note,
+            accountId = accountId
+        )
+        val txId = transactionDao.insertTransaction(tx)
+        val updatedDebt = debt.copy(transactionId = txId, accountId = accountId)
+        debtDao.updateDebt(updatedDebt)
+        widgetSyncManager.syncWidget()
+        return txId
+    }
+
+    suspend fun unlogDebtFromLedger(debtId: Long) {
+        val debt = debtDao.getDebtById(debtId) ?: return
+        val txId = debt.transactionId ?: return
+        val tx = transactionDao.getTransactionById(txId)
+        if (tx != null) {
+            transactionDao.deleteTransaction(tx)
+        }
+        val updatedDebt = debt.copy(transactionId = null)
+        debtDao.updateDebt(updatedDebt)
         widgetSyncManager.syncWidget()
     }
 

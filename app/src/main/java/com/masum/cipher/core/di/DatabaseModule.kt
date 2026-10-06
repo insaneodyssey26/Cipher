@@ -118,6 +118,7 @@ object DatabaseModule {
         customCategoryDao: com.masum.cipher.core.data.local.dao.CustomCategoryDao,
         accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
         goalDao: com.masum.cipher.core.data.local.dao.GoalDao,
+        debtDao: com.masum.cipher.core.data.local.dao.DebtDao,
         userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
         backupCrypto: com.masum.cipher.core.security.BackupCrypto
     ): BackupRepository {
@@ -132,6 +133,7 @@ object DatabaseModule {
             customCategoryDao = customCategoryDao,
             accountDao = accountDao,
             goalDao = goalDao,
+            debtDao = debtDao,
             userPreferences = userPreferences,
             backupCrypto = backupCrypto
         )

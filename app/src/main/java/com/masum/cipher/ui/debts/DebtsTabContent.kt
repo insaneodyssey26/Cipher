@@ -29,11 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,9 +66,12 @@ fun DebtsTabContent(
     state: DebtsContract.State,
     onIntent: (DebtsContract.Intent) -> Unit,
     onAddDebtClick: () -> Unit,
+    onEditDebtClick: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val locale = LocalLocale.current.platformLocale
     val isHapticsEnabled = state.isHapticsEnabled
 
@@ -95,6 +102,7 @@ fun DebtsTabContent(
         val currentItem = state.debts.find { it.id == selectedDebtForDetails!!.id } ?: selectedDebtForDetails!!
         DebtDetailsSheet(
             debtItem = currentItem,
+            accounts = state.accounts,
             currencySymbol = state.currencySymbol,
             isHapticsEnabled = isHapticsEnabled,
             onDismiss = { selectedDebtForDetails = null },
@@ -109,6 +117,16 @@ fun DebtsTabContent(
             },
             onDeleteRepaymentClick = { repayment ->
                 onIntent(DebtsContract.Intent.DeleteRepayment(repayment))
+            },
+            onSyncToLedger = { debtId, accountId ->
+                onIntent(DebtsContract.Intent.SyncDebtToLedger(debtId, accountId))
+            },
+            onUnlogFromLedger = { debtId ->
+                onIntent(DebtsContract.Intent.UnlogDebtFromLedger(debtId))
+            },
+            onEditDebtClick = { debtId ->
+                selectedDebtForDetails = null
+                onEditDebtClick(debtId)
             }
         )
     }
@@ -137,7 +155,14 @@ fun DebtsTabContent(
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                })
+            },
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -445,10 +470,14 @@ fun DebtsTabContent(
                 val daysUntilDue = debtItem.dueDate?.let { ((it - System.currentTimeMillis()) / 86_400_000L).toInt() }
 
                 VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem(),
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                     contentPadding = 14.dp,
                     onClick = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         selectedDebtForDetails = debtItem
                     }

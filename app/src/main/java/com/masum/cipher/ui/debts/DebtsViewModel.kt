@@ -72,6 +72,7 @@ class DebtsViewModel @Inject constructor(
     fun handleIntent(intent: DebtsContract.Intent) {
         when (intent) {
             is DebtsContract.Intent.CreateDebt -> createDebt(intent)
+            is DebtsContract.Intent.UpdateDebt -> updateDebt(intent)
             is DebtsContract.Intent.RecordRepayment -> recordRepayment(intent)
             is DebtsContract.Intent.SettleDebt -> settleDebt(intent.debtId)
             is DebtsContract.Intent.DeleteDebt -> deleteDebt(intent.debt)
@@ -79,6 +80,48 @@ class DebtsViewModel @Inject constructor(
             is DebtsContract.Intent.SetFilterTab -> _state.value = _state.value.copy(filterTab = intent.tab)
             is DebtsContract.Intent.SetTypeFilter -> _state.value = _state.value.copy(typeFilter = intent.type)
             is DebtsContract.Intent.RestoreDebt -> restoreDebt(intent)
+            is DebtsContract.Intent.UpdateDraft -> updateDraft(intent)
+            is DebtsContract.Intent.ClearDraft -> clearDraft()
+            is DebtsContract.Intent.SyncDebtToLedger -> syncDebtToLedger(intent.debtId, intent.accountId)
+            is DebtsContract.Intent.UnlogDebtFromLedger -> unlogDebtFromLedger(intent.debtId)
+        }
+    }
+
+    private fun updateDraft(intent: DebtsContract.Intent.UpdateDraft) {
+        _state.value = _state.value.copy(
+            draftPersonName = intent.personName,
+            draftAmount = intent.amount,
+            draftType = intent.type,
+            draftDueDate = intent.dueDate,
+            draftNote = intent.note,
+            draftAccountId = intent.accountId,
+            draftSyncLedger = intent.syncLedger
+        )
+    }
+
+    private fun clearDraft() {
+        _state.value = _state.value.copy(
+            draftPersonName = "",
+            draftAmount = "",
+            draftType = DebtType.LENT,
+            draftDueDate = null,
+            draftNote = "",
+            draftAccountId = null,
+            draftSyncLedger = false
+        )
+    }
+
+    private fun syncDebtToLedger(debtId: Long, accountId: Long) {
+        viewModelScope.launch {
+            debtRepository.syncDebtToLedger(debtId, accountId)
+            _effect.emit(DebtsContract.Effect.ShowToast("Logged to Dashboard"))
+        }
+    }
+
+    private fun unlogDebtFromLedger(debtId: Long) {
+        viewModelScope.launch {
+            debtRepository.unlogDebtFromLedger(debtId)
+            _effect.emit(DebtsContract.Effect.ShowToast("Unlinked from Dashboard"))
         }
     }
 
@@ -94,6 +137,24 @@ class DebtsViewModel @Inject constructor(
                 syncLedger = intent.syncLedger,
                 interestRate = intent.interestRate
             )
+            clearDraft()
+        }
+    }
+
+    private fun updateDebt(intent: DebtsContract.Intent.UpdateDebt) {
+        viewModelScope.launch {
+            debtRepository.updateDebtDetails(
+                debtId = intent.debtId,
+                personName = intent.personName,
+                amount = intent.amount,
+                type = intent.type,
+                dueDate = intent.dueDate,
+                note = intent.note,
+                accountId = intent.accountId,
+                syncLedger = intent.syncLedger,
+                interestRate = intent.interestRate
+            )
+            clearDraft()
         }
     }
 

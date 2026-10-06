@@ -59,4 +59,10 @@ interface DebtDao {
 
     @Query("SELECT * FROM debts WHERE isSettled = 0 AND dueDate IS NOT NULL AND dueDate <= :thresholdTimestamp")
     suspend fun getUpcomingDueDebts(thresholdTimestamp: Long): List<DebtEntity>
+
+    @Query("SELECT * FROM debts ORDER BY createdAt ASC")
+    suspend fun getAllDebtsList(): List<DebtEntity>
+
+    @Query("SELECT * FROM debt_repayments ORDER BY timestamp ASC")
+    suspend fun getAllRepaymentsList(): List<DebtRepaymentEntity>
 }
