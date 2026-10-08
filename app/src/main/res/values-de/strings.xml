@@ -835,6 +835,12 @@
     <string name="whats_new_v615_welcome_desc">Die Buttons für Wiederherstellung und Lizenz sind jetzt größer und leichter zu finden, und der Bildschirm passt sich kleinen Handys und großer Schrift an.</string>
     <string name="whats_new_v615_reliable_title">Zuverlässiger</string>
     <string name="whats_new_v615_reliable_desc">Überweisungen werden sicher gespeichert, verspätete Bank-Nachrichten erhalten das richtige Datum, Händler wie JIO und Jio werden zusammengefasst und Kontostände laden schneller.</string>
+    <string name="whats_new_v620_debts_title">Schulden &amp; Kredite</string>
+    <string name="whats_new_v620_debts_desc">Verfolgen Sie verliehenes oder geliehenes Geld, erfassen Sie Teil- oder Vollrückzahlungen und halten Sie Kontostände synchron.</string>
+    <string name="whats_new_v620_account_budgets_title">Kontospezifische Budgets</string>
+    <string name="whats_new_v620_account_budgets_desc">Legen Sie monatliche Ausgabenlimits für einzelne Konten fest und wischen Sie in den Einblicken durch den Budgetstatus.</string>
+    <string name="whats_new_v620_widgets_title">Interaktive Startbildschirm-Widgets</string>
+    <string name="whats_new_v620_widgets_desc">Wechseln Sie Konten direkt über Ihre Widgets mit optimierten Abständen und übersichtlicheren Karten.</string>
     <string name="tab_debts_loans">Schulden &amp; Kredite</string>
     <string name="debts_empty_title">Keine Schulden oder Kredite</string>
     <string name="debts_empty_desc">Verfolgen Sie verliehenes oder geliehenes Geld mit Rückzahlungshistorie und Kontostand-Abgleich.</string>

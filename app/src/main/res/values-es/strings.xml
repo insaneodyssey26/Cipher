@@ -836,6 +836,12 @@
     <string name="whats_new_v615_welcome_desc">Los botones de restaurar y de licencia ahora son más grandes y fáciles de encontrar, y la pantalla se adapta a teléfonos pequeños y textos grandes.</string>
     <string name="whats_new_v615_reliable_title">Más fiable</string>
     <string name="whats_new_v615_reliable_desc">Las transferencias se guardan de forma segura, los mensajes bancarios con retraso reciben la fecha correcta, comercios como JIO y Jio se unifican y los saldos cargan más rápido.</string>
+    <string name="whats_new_v620_debts_title">Deudas y préstamos</string>
+    <string name="whats_new_v620_debts_desc">Lleva el control del dinero prestado o recibido, registra pagos parciales o totales y mantén tus saldos sincronizados.</string>
+    <string name="whats_new_v620_account_budgets_title">Presupuestos por cuenta</string>
+    <string name="whats_new_v620_account_budgets_desc">Establece límites de gasto mensuales para cuentas individuales y desliza para ver el estado de tu presupuesto en Estadísticas.</string>
+    <string name="whats_new_v620_widgets_title">Widgets interactivos de inicio</string>
+    <string name="whats_new_v620_widgets_desc">Cambia de cuenta directamente desde los widgets con un diseño más espacioso y tarjetas más claras.</string>
     <string name="tab_debts_loans">Deudas y préstamos</string>
     <string name="debts_empty_title">Sin deudas ni préstamos</string>
     <string name="debts_empty_desc">Registra el dinero prestado a amigos o recibido de otros con historial de pagos y sincronización de saldo.</string>

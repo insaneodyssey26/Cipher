@@ -375,6 +375,12 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v620_debts_title">Debts &amp; Loans</string>
+    <string name="whats_new_v620_debts_desc">Track money you lent or borrowed, log partial or full repayments, and keep everything in sync with your account balances.</string>
+    <string name="whats_new_v620_account_budgets_title">Account-Specific Budgets</string>
+    <string name="whats_new_v620_account_budgets_desc">Set individual monthly spending targets for separate bank accounts and swipe through live budget health in Insights.</string>
+    <string name="whats_new_v620_widgets_title">Interactive Home Widgets</string>
+    <string name="whats_new_v620_widgets_desc">Switch accounts directly from your home screen widgets, with cleaner spacing and better visual cards.</string>
     <string name="whats_new_v616_manage_title">Manage Your Subscription</string>
     <string name="whats_new_v616_manage_desc">Subscribers can now manage or cancel their plan from the Membership screen in one tap.</string>
     <string name="whats_new_v616_license_title">Smoother License Activation</string>

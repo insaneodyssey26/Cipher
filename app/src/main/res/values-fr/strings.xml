@@ -837,6 +837,12 @@
     <string name="whats_new_v615_welcome_desc">Les boutons de restauration et de licence sont plus grands et plus faciles à trouver, et l’écran s’adapte aux petits téléphones et aux grandes tailles de texte.</string>
     <string name="whats_new_v615_reliable_title">Plus fiable</string>
     <string name="whats_new_v615_reliable_desc">Les virements sont enregistrés en toute sécurité, les messages bancaires tardifs reçoivent la bonne date, les marchands comme JIO et Jio sont regroupés et les soldes se chargent plus vite.</string>
+    <string name="whats_new_v620_debts_title">Dettes et prêts</string>
+    <string name="whats_new_v620_debts_desc">Suivez l\'argent prêté ou emprunté, enregistrez les remboursements partiels ou complets et synchronisez vos soldes de compte.</string>
+    <string name="whats_new_v620_account_budgets_title">Budgets par compte</string>
+    <string name="whats_new_v620_account_budgets_desc">Définissez des limites de dépenses mensuelles pour chaque compte et faites glisser pour voir l\'état du budget dans Aperçus.</string>
+    <string name="whats_new_v620_widgets_title">Widgets interactifs sur l\'écran d\'accueil</string>
+    <string name="whats_new_v620_widgets_desc">Changez de compte directement depuis vos widgets avec un espacement plus aéré et des cartes plus nettes.</string>
     <string name="tab_debts_loans">Dettes et prêts</string>
     <string name="debts_empty_title">Aucune dette ni prêt</string>
     <string name="debts_empty_desc">Suivez l\'argent prêté à des amis ou emprunté à d\'autres avec historique de remboursement et synchronisation du solde.</string>

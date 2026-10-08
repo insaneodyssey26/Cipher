@@ -1,5 +1,18 @@
 # Release Notes
 
+## [6.2.0]
+
+### Added & Improved
+- **Debts & Loans**: Keep track of money you've lent to friends or borrowed from others. Record partial repayments, track settled balances, and link them to your accounts so your balances update automatically.
+- **Account-Specific Budgets**: Set dedicated monthly spending limits for individual accounts and wallets alongside your overall budget.
+- **Interactive Home Screen Widgets**: Switch between accounts right from your home widgets with the new account picker without opening the app.
+- **Polished Widget Layouts**: Refreshed Passbook and Accounts widgets with cleaner spacing, clearer text hierarchy, and account color indicators.
+
+### Fixed & Refined
+- Fixed layout clipping and status bar spacing across compact devices.
+
+---
+
 ## [6.1.6]
 
 ### Added & Improved

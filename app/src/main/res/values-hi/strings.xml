@@ -834,6 +834,12 @@
     <string name="whats_new_v615_welcome_desc">पुनर्स्थापित और लाइसेंस के बटन अब बड़े और आसानी से मिलने वाले हैं, और स्क्रीन छोटे फ़ोन और बड़े टेक्स्ट साइज़ में भी ठीक से फिट होती है।</string>
     <string name="whats_new_v615_reliable_title">ज़्यादा भरोसेमंद</string>
     <string name="whats_new_v615_reliable_desc">धन अंतरण सुरक्षित रूप से सेव होते हैं, देर से आए बैंक संदेशों को सही तारीख मिलती है, JIO और Jio जैसे मर्चेंट एक साथ गिने जाते हैं, और बैलेंस तेज़ी से लोड होते हैं।</string>
+    <string name="whats_new_v620_debts_title">उधार व ऋण ट्रैकर</string>
+    <string name="whats_new_v620_debts_desc">दिए गए या लिए गए पैसों का हिसाब रखें, किस्तों में या पूरा भुगतान दर्ज करें और खाता शेष को सिंक रखें।</string>
+    <string name="whats_new_v620_account_budgets_title">खाते अनुसार अलग बजट</string>
+    <string name="whats_new_v620_account_budgets_desc">अलग-अलग बैंक खातों के लिए अलग मासिक खर्च सीमा तय करें और इनसाइट्स में स्वाइप करके बजट स्थिति देखें।</string>
+    <string name="whats_new_v620_widgets_title">इंटरैक्टिव होम स्क्रीन विजेट</string>
+    <string name="whats_new_v620_widgets_desc">होम स्क्रीन विजेट से सीधे खाते बदलें, ज़्यादा साफ़ स्पेसिंग और सुंदर कार्ड्स के साथ।</string>
     <string name="tab_debts_loans">उधार व ऋण</string>
     <string name="debts_empty_title">कोई उधार या ऋण नहीं</string>
     <string name="debts_empty_desc">दोस्तों को दिए गए या दूसरों से लिए गए पैसों को पुनर्भुगतान इतिहास और शेष राशि सिंक के साथ ट्रैक करें।</string>

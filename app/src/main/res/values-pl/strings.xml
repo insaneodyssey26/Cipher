@@ -838,6 +838,12 @@
     <string name="whats_new_v615_welcome_desc">Przyciski przywracania i licencji są większe i łatwiejsze do znalezienia, a ekran dopasowuje się do małych telefonów i dużego tekstu.</string>
     <string name="whats_new_v615_reliable_title">Większa niezawodność</string>
     <string name="whats_new_v615_reliable_desc">Przelewy zapisują się bezpiecznie, opóźnione wiadomości z banku dostają właściwą datę, sprzedawcy tacy jak JIO i Jio są łączeni, a salda ładują się szybciej.</string>
+    <string name="whats_new_v620_debts_title">Długi i pożyczki</string>
+    <string name="whats_new_v620_debts_desc">Śledź pożyczone lub zaciągnięte pieniądze, rejestruj spłaty częściowe i całkowite oraz synchronizuj salda kont.</string>
+    <string name="whats_new_v620_account_budgets_title">Budżety dla poszczególnych kont</string>
+    <string name="whats_new_v620_account_budgets_desc">Ustawiaj miesięczne limity wydatków dla osobnych kont bankowych i sprawdzaj stan budżetu przesuwając karty w Statystykach.</string>
+    <string name="whats_new_v620_widgets_title">Interaktywne widżety ekranu głównego</string>
+    <string name="whats_new_v620_widgets_desc">Przełączaj konta bezpośrednio z poziomu widżetów z czytelniejszymi odstępami i nowym układem kart.</string>
     <string name="tab_debts_loans">Długi i pożyczki</string>
     <string name="debts_empty_title">Brak długów i pożyczek</string>
     <string name="debts_empty_desc">Śledź pieniądze pożyczone znajomym lub od innych z historią spłat i synchronizacją salda.</string>

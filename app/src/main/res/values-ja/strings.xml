@@ -833,6 +833,12 @@
     <string name="whats_new_v615_welcome_desc">復元とライセンスのボタンが大きく見つけやすくなり、小さなスマートフォンや大きな文字サイズにも合わせて表示されます。</string>
     <string name="whats_new_v615_reliable_title">より安定して</string>
     <string name="whats_new_v615_reliable_desc">振替は安全に保存され、遅れて届いた銀行のメッセージにも正しい日付が付き、JIOとJioのような店舗名はまとめられ、残高の読み込みも速くなりました。</string>
+    <string name="whats_new_v620_debts_title">貸し借り・ローン管理</string>
+    <string name="whats_new_v620_debts_desc">友人への貸出や借入を記録し、分割・一括返済を管理しながら口座残高と連携できます。</string>
+    <string name="whats_new_v620_account_budgets_title">口座別の予算設定</string>
+    <string name="whats_new_v620_account_budgets_desc">銀行口座ごとに個別の月間予算を設定し、分析画面でスワイプして予算の進捗を確認できます。</string>
+    <string name="whats_new_v620_widgets_title">インタラクティブなホーム画面ウィジェット</string>
+    <string name="whats_new_v620_widgets_desc">ウィジェットから直接口座を切り替えられるようになり、余白やカードの配置が見やすくなりました。</string>
     <string name="tab_debts_loans">貸し借り・ローン</string>
     <string name="debts_empty_title">貸し借りの記録はありません</string>
     <string name="debts_empty_desc">友人への貸出や借入を返済履歴と残高連携で簡単に追跡できます。</string>

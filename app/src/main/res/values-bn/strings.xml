@@ -835,6 +835,12 @@
     <string name="whats_new_v615_welcome_desc">পুনরুদ্ধার ও লাইসেন্সের বোতাম এখন বড় এবং সহজে খুঁজে পাওয়া যায়, আর স্ক্রিনটি ছোট ফোন ও বড় লেখার আকারেও ঠিকমতো মানায়।</string>
     <string name="whats_new_v615_reliable_title">আরও নির্ভরযোগ্য</string>
     <string name="whats_new_v615_reliable_desc">স্থানান্তর নিরাপদে সেভ হয়, দেরিতে আসা ব্যাংক বার্তায় সঠিক তারিখ বসে, JIO ও Jio-র মতো মার্চেন্ট একসঙ্গে গণনা হয়, আর ব্যালেন্স দ্রুত লোড হয়।</string>
+    <string name="whats_new_v620_debts_title">ধার ও ঋণের হিসাব</string>
+    <string name="whats_new_v620_debts_desc">কাউকে দেওয়া বা কারো থেকে নেওয়া ধারের হিসাব রাখুন, আংশিক বা সম্পূর্ণ পরিশোধের রেকর্ড রাখুন এবং অ্যাকাউন্ট ব্যালেন্স সিঙ্ক করুন।</string>
+    <string name="whats_new_v620_account_budgets_title">অ্যাকাউন্টভিত্তিক বাজেট</string>
+    <string name="whats_new_v620_account_budgets_desc">আলাদা ব্যাংক অ্যাকাউন্টের জন্য আলাদা মাসিক বাজেট সেট করুন এবং ইনসাইটসে সোয়াইপ করে বাজেটের অগ্রগতি দেখুন।</string>
+    <string name="whats_new_v620_widgets_title">ইন্টারঅ্যাকটিভ হোম স্ক্রিন উইজেট</string>
+    <string name="whats_new_v620_widgets_desc">হোম স্ক্রিন উইজেট থেকেই সহজে অ্যাকাউন্ট বদলান, আরও পরিষ্কার স্পেসিং ও সুন্দর কার্ড ডিজাইনের সাথে।</string>
     <string name="tab_debts_loans">ধার ও ঋণ</string>
     <string name="debts_empty_title">কোনো ধার বা ঋণ নেই</string>
     <string name="debts_empty_desc">বন্ধুদের দেওয়া টাকা বা অন্যদের থেকে ধার করা টাকা পরিশোধের ইতিহাস ও ব্যালেন্স সিঙ্কের সাথে ট্র্যাক করুন।</string>

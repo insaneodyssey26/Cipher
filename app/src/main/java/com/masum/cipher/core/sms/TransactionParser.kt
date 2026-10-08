@@ -50,12 +50,20 @@ class TransactionParser @Inject constructor() {
 
     private fun hasExclusionKeywords(message: String, rules: RegionParserRules): Boolean {
         val lower = message.lowercase()
-        return rules.exclusionKeywords.any { lower.contains(it) }
+        if (rules.exclusionKeywords.any { lower.contains(it) }) return true
+        if (TransactionPatterns.PROMOTIONAL_PATTERNS.any { it.matcher(message).find() }) return true
+        return false
     }
 
     private fun hasTransactionIntent(message: String, rules: RegionParserRules): Boolean {
         val lower = message.lowercase()
-        return rules.intentKeywords.any { lower.contains(it) }
+        return rules.intentKeywords.any { keyword ->
+            if (keyword.all { it.isLetterOrDigit() } && keyword.length <= 3) {
+                Regex("\\b${Regex.escape(keyword)}\\b", RegexOption.IGNORE_CASE).containsMatchIn(message)
+            } else {
+                lower.contains(keyword.lowercase())
+            }
+        }
     }
 
     private fun hasTransactionEvidence(message: String, rules: RegionParserRules): Boolean {
@@ -70,6 +78,7 @@ class TransactionParser @Inject constructor() {
             while (matcher.find()) {
                 val match = matcher.group(1) ?: matcher.group(0)
                 if (isPartOfAccountNumber(message, matcher.start())) continue
+                if (isPrecededByPromotionalQualifier(message, matcher.start())) continue
 
                 val numeric = match.replace(",", "").replace(NUMERIC_CLEANUP, "")
                 val value = numeric.toDoubleOrNull() ?: continue
@@ -81,6 +90,11 @@ class TransactionParser @Inject constructor() {
             }
         }
         return null
+    }
+
+    private fun isPrecededByPromotionalQualifier(message: String, matchStart: Int): Boolean {
+        val precedingText = message.substring(maxOf(0, matchStart - 35), matchStart)
+        return TransactionPatterns.PROMOTIONAL_AMOUNT_PREFIX_PATTERN.matcher(precedingText).find()
     }
 
     private fun isPartOfAccountNumber(message: String, matchStart: Int): Boolean {

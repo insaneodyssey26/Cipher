@@ -54,6 +54,66 @@ class TransactionParserTest {
     }
 
     @Test
+    fun `GPay promotional EMI loan notification is rejected`() {
+        assertNull(parser.parse("EMIs from ₹1,000 to fund your big purchase 🛍️ Take a personal loan of up to ₹40 lakh & enjoy low EMIs. Tap to learn more!"))
+    }
+
+    @Test
+    fun `promotional lifetime free credit card offer is rejected`() {
+        assertNull(parser.parse("Get a lifetime free credit card with Rs.50,000 credit limit! Apply now: bank.in/card"))
+    }
+
+    @Test
+    fun `promotional personal loan up to amount is rejected`() {
+        assertNull(parser.parse("Instant Personal Loan up to ₹5,00,000 approved for you! Flexible tenure & low interest. Avail now."))
+    }
+
+    @Test
+    fun `promotional EMI starting from amount is rejected`() {
+        assertNull(parser.parse("Exclusive Offer! EMIs starting from ₹999 on the latest iPhone. Tap to buy now."))
+    }
+
+    @Test
+    fun `promotional eligible for personal loan is rejected`() {
+        assertNull(parser.parse("Congratulations! You are eligible for a personal loan of up to Rs. 10 Lakh. Tap to apply."))
+    }
+
+    @Test
+    fun `promotional discount and cashback offers are rejected`() {
+        assertNull(parser.parse("Get flat ₹500 cashback on min purchase of ₹2000. Use code SAVE500."))
+        assertNull(parser.parse("Save up to Rs 200 on your next Swiggy order using HDFC Card. Tap to order."))
+        assertNull(parser.parse("Earn up to ₹1,000 cashback! Scratch card waiting in your rewards. Tap to scratch."))
+    }
+
+    @Test
+    fun `real credit card transaction at Slice is parsed correctly`() {
+        val result = parser.parse("Rs 500 spent on your credit card xx0032 at slice on 08-Oct")
+        assertNotNull(result)
+        assertEquals(500.0, result!!.amount, 0.001)
+        assertEquals("SLICE", result.merchant)
+        assertEquals("0032", result.accountLast4)
+        assertEquals(false, result.isIncome)
+    }
+
+    @Test
+    fun `real loan EMI auto debit is parsed correctly`() {
+        val result = parser.parse("Your a/c no. XX1234 is debited for Rs.15000 on 05-Oct towards Loan EMI payment")
+        assertNotNull(result)
+        assertEquals(15000.0, result!!.amount, 0.001)
+        assertEquals("1234", result.accountLast4)
+        assertEquals(false, result.isIncome)
+    }
+
+    @Test
+    fun `real home loan EMI debit is parsed correctly`() {
+        val result = parser.parse("Rs 2,500 debited from A/C XX5678 for HDFC HOME LOAN EMI on 01-Oct. Avl Bal Rs 45,000")
+        assertNotNull(result)
+        assertEquals(2500.0, result!!.amount, 0.001)
+        assertEquals("5678", result.accountLast4)
+        assertEquals(false, result.isIncome)
+    }
+
+    @Test
     fun `sms without transaction evidence is rejected even with amount and merchant`() {
         assertNull(parser.parse("Rs.500 found at AMAZON. Great deals every day!"))
     }
