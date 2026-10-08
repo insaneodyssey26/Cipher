@@ -138,4 +138,12 @@ object DatabaseModule {
             backupCrypto = backupCrypto
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideMessageIntentClassifier(
+        impl: com.masum.cipher.core.ml.OnDeviceIntentClassifier
+    ): com.masum.cipher.core.ml.MessageIntentClassifier {
+        return impl
+    }
 }

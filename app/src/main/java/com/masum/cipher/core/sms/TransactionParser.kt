@@ -1,6 +1,7 @@
 package com.masum.cipher.core.sms
 
 import com.masum.cipher.core.domain.model.ParsedTransaction
+import com.masum.cipher.core.ml.MessageIntentClassifier
 import com.masum.cipher.core.sms.config.TransactionPatterns
 import com.masum.cipher.core.sms.region.RegionParserRules
 import com.masum.cipher.core.sms.region.RegionRuleProvider
@@ -8,10 +9,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TransactionParser @Inject constructor() {
+class TransactionParser @Inject constructor(
+    private val intentClassifier: MessageIntentClassifier
+) {
+
+    constructor() : this(object : MessageIntentClassifier {
+        override fun classify(message: String): com.masum.cipher.core.ml.IntentClassificationResult {
+            return com.masum.cipher.core.ml.IntentClassificationResult(
+                intent = com.masum.cipher.core.ml.MessageIntent.TRANSACTION_EXPENSE,
+                confidence = 0.5f,
+                probabilities = emptyMap()
+            )
+        }
+    })
 
     fun parse(message: String, preferredCurrency: String? = null): ParsedTransaction? {
         val cleanMessage = message.replace(MULTI_SPACE_REGEX, " ")
+
+        val result = intentClassifier.classify(cleanMessage)
+        if (result.confidence >= 0.70f && (result.isPromotional || result.isInformational)) {
+            return null
+        }
 
         val ruleChain = RegionRuleProvider.getAllRules(preferredCurrency ?: "INR")
 
@@ -36,7 +54,12 @@ class TransactionParser @Inject constructor() {
 
         val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
         val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
-        val isIncome = isCredit && !isDebit
+        val classification = intentClassifier.classify(message)
+        val isIncome = when {
+            classification.confidence >= 0.70f && classification.isIncome -> true
+            classification.confidence >= 0.70f && classification.isExpense -> false
+            else -> isCredit && !isDebit
+        }
         val accountLast4 = extractAccountLast4(message)
 
         return ParsedTransaction(
