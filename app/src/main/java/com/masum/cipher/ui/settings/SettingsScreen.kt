@@ -290,7 +290,7 @@ fun SettingsScreen(
     val matchCrash = query.isBlank() || "app diagnostics".contains(query) || "view and copy crash logs".contains(query)
     val matchContact = query.isBlank() || "contact developer".contains(query)
     val matchSource = query.isBlank() || "open source".contains(query)
-    val matchPrivacyPol = query.isBlank() || "privacy policy".contains(query)
+    val matchPrivacyPol = query.isBlank() || "privacy & terms".contains(query) || "privacy policy".contains(query) || "terms of service".contains(query) || "terms and conditions".contains(query)
     val matchSupportDev = query.isBlank() || "support development".contains(query)
     val matchAbout = query.isBlank() || "about".contains(query) || "support".contains(query) || matchRate || matchFeedback || matchUpdate || matchCrash || matchContact || matchSource || matchPrivacyPol || matchSupportDev
 
@@ -1344,8 +1344,8 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     }
                 )
                 if (matchPrivacyPol) VaultSettingsItem(
-                    icon = LucideIcons.Info,
-                    title = stringResource(R.string.privacy_policy_title),
+                    icon = LucideIcons.ShieldCheck,
+                    title = stringResource(R.string.privacy_terms_title),
                     onClick = onNavigateToPrivacy
                 )
                 if (matchSupportDev) VaultSettingsItem(

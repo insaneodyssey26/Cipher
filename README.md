@@ -177,6 +177,24 @@ flowchart LR
 - Advanced scrollable Calendar heatmap with monthly paging and day-detail drill-down
 - Subscriptions Hub: Tracks recurring bills with monthly totals, annual projections, due date alerts, and manual entry/editing
 
+### Multi-Account & Custom Budgets
+- **Account Management**: Manage bank accounts, credit cards, and digital wallets with individual balance tracking
+- **Account-Specific Budgets**: Set dedicated monthly spending limits for separate bank accounts alongside overall budgets
+- **Interactive Widgets**: Quick-switch accounts and monitor account balances right from your home screen
+
+### Debts & Loans Tracking
+- **Lent & Borrowed**: Track money lent to friends or borrowed from others with due date reminders
+- **Partial & Full Settlements**: Log individual repayments that automatically synchronize with your account balances
+- **Settlement Reminders**: 1-tap shareable repayment reminders
+
+### Bill Splitting & Custom Categories
+- **Transaction Splitting**: Split group dining and shared expenses across friends with live settlement indicators
+- **Custom Categories**: Create and personalize categories with custom colors and Lucide icons
+
+### Typography & Footprint Optimization
+- **General Sans Variable**: Powered by Indian Type Foundry's General Sans variable font for razor-sharp figures and native currency symbol (`₹`, `$`, `€`, `£`, `¥`, `zł`) alignment
+- **Ultra-Lightweight**: Single variable font footprint (~109 KB) reducing total font bundle size by over 80%
+
 ### Security
 - **Database**: SQLCipher AES-256 full-disk encryption
 - **Biometric lock**: Fingerprint / face auth via `BiometricPrompt`; configurable auto-lock timeout
@@ -221,7 +239,7 @@ android.service.notification.NotificationListenerService
                     ├── amount regex        (e.g. "Rs. 450.00", "INR 1,200")
                     ├── direction keywords  (debited/credited/spent/received)
                     ├── merchant extraction (brand dict → fallback heuristics)
-                    └── returns null for non-transactional messages
+                    └── returns null for non-transactional / promotional messages
             └─► CategorizerEngine.classify(merchant): TransactionCategory
             └─► TransactionRepository.insertTransaction(TransactionEntity)
                     └─► TransactionDao.insert() → SQLCipher Room DB
@@ -238,7 +256,7 @@ MainActivity.onCreate()
             ├── isBiometricEnabled + BiometricAuthenticator.available?
             │       YES → show LockScreen → BiometricPrompt
             │       NO  → isAuthenticated = true immediately
-            └─► NavHost renders: dashboard / insights / day_detail / settings
+            └─► NavHost renders: dashboard / insights / day_detail / settings / accounts / debts
 ```
 
 ### UserPreferences (DataStore)
@@ -269,30 +287,37 @@ app/
     │   ├── data/
     │   │   ├── local/
     │   │   │   ├── AppDatabase.kt    # Room + SQLCipher setup
-    │   │   │   ├── dao/              # TransactionDao, MerchantAliasDao
-    │   │   │   ├── entity/           # TransactionEntity, MerchantAliasEntity
+    │   │   │   ├── dao/              # TransactionDao, AccountDao, DebtDao, SplitDao
+    │   │   │   ├── entity/           # TransactionEntity, AccountEntity, DebtEntity
     │   │   │   └── pref/             # UserPreferences, WidgetDataStore
-    │   │   └── repository/           # TransactionRepository, BackupRepository
-    │   ├── di/                       # Hilt modules (DatabaseModule)
+    │   │   └── repository/           # TransactionRepository, AccountRepository, DebtRepository
+    │   ├── di/                       # Hilt modules (DatabaseModule, UseCaseModule)
     │   ├── domain/
+    │   │   ├── usecase/              # TransactionUseCases, AccountUseCases, DebtUseCases
     │   │   ├── CategorizerEngine.kt  # Merchant → category heuristics
     │   │   ├── SubscriptionDetector.kt
     │   │   └── model/                # ParsedTransaction, TransactionCategory
     │   ├── mvi/                      # MviBase (shared ViewModel base)
-    │   ├── security/                 # BiometricAuthenticator, SecurityManager
-    │   ├── sms/                      # SmsReceiver, SmsParser
-    │   ├── util/                     # Formatters, PdfGenerator
-    │   └── worker/                   # WorkManager (AutoBackup, Notifications)
+    │   ├── security/                 # BiometricAuthenticator, LicenseEngine, BackupCrypto
+    │   ├── sms/                      # SmsReceiver, SmsParser, SmsPatterns
+    │   ├── util/                     # Formatters, PdfGenerator, CurrencyDetect
+    │   └── worker/                   # WorkManager (AutoBackup, Notifications, LicenseSync)
     │
     └── ui/
-        ├── components/               # Shared composables, Charts, LockScreen
+        ├── accounts/                 # AccountsScreen, AccountDetails, CreateEditAccount
+        ├── categories/               # CategoriesScreen, CustomCategoryDialog
+        ├── components/               # Shared composables, Charts, LockScreen, WhatsNewSheet
         ├── dashboard/                # DashboardScreen + ViewModel + Contract
+        ├── debts/                    # DebtsScreen, CreateEditDebt, DebtDetailsSheet
+        ├── goals/                    # GoalsScreen, CreateEditGoalSheet
         ├── insights/                 # InsightsScreen + DayDetailScreen + ViewModel
-        ├── onboarding/               # OnboardingScreen (first-run)
+        ├── onboarding/               # OnboardingScreen (first-run & restore)
         ├── privacy/                  # PrivacyPolicyScreen
+        ├── pro/                      # CipherProScreen, ManageSubscriptionCard
         ├── settings/                 # SettingsScreen + ViewModel + Contract
-        ├── theme/                    # Color, Typography, Theme
-        └── widget/                   # BudgetWidget, StatsWidget + Receivers
+        ├── splits/                   # SplitExpensesScreen, TransactionSplitSheet
+        ├── theme/                    # Color, Typography (General Sans), Theme
+        └── widget/                   # BudgetWidget, StatsWidget, AccountsWidget + Receivers
 ```
 
 ---
@@ -301,11 +326,12 @@ app/
 
 | Layer | Technology                              |
 |-------|-----------------------------------------|
-| Language | Kotlin 2.4.10                           |
+| Language | Kotlin 2.4.20                           |
 | UI | Jetpack Compose + Material 3            |
-| Architecture | MVI via `MviBase`                       |
+| Typography | General Sans Variable (Indian Type Foundry) |
+| Architecture | MVI via `MviBase` + Clean UseCase Layer |
 | DI | Hilt                                    |
-| Database | Room 2.x + SQLCipher (AES-256)          |
+| Database | Room 2.8.5 + SQLCipher 4.19.0 (AES-256) |
 | Preferences | DataStore Preferences                   |
 | Security | BiometricPrompt, androidx.security.crypto |
 | Navigation | Navigation Compose                      |
@@ -358,6 +384,11 @@ There is zero telemetry, zero analytics trackers, zero advertising SDKs, and zer
 ## Release history
 
 See [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+## Privacy & Terms
+
+- **Privacy Policy**: [PRIVACY_POLICY.md](PRIVACY_POLICY.md)
+- **Terms of Service**: [TERMS.md](TERMS.md)
 
 ---
 
