@@ -29,8 +29,8 @@ android {
         applicationId = "com.masum.cipher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 48
-        versionName = "6.2.0"
+        versionCode = 49
+        versionName = "6.2.5"
         androidResources {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
         }
@@ -119,7 +119,6 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.sqlcipher)
-    implementation(libs.sqlite.ktx)
 
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
@@ -138,7 +137,6 @@ dependencies {
 
     baselineProfile(project(":baselineprofile"))
     
-    implementation(libs.play.review)
     implementation(libs.play.app.update)
 
     testImplementation(libs.junit)

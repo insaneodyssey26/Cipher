@@ -524,9 +524,9 @@ internal fun WelcomePage(
                             text = "cipher.",
                             style = Typography.displayLarge.copy(
                                 fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.SemiBold,
                                 fontSize = 48.sp,
-                                letterSpacing = ((-2).sp),
+                                letterSpacing = (-1).sp,
                                 lineHeight = 50.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurface

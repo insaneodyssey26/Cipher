@@ -108,14 +108,22 @@ fun DayDetailScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = dayName.uppercase(),
-                            style = Typography.labelSmall.copy(letterSpacing = 2.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = fullDate,
+                            style = Typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 17.sp,
+                                letterSpacing = (-0.2).sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = fullDate,
-                            style = Typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
+                            text = dayName.uppercase(),
+                            style = Typography.labelSmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 1.2.sp,
+                                fontSize = 11.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -340,7 +348,7 @@ private fun DetailStatCard(
                 text = amount,
                 style = Typography.headlineSmall.copy(
                     fontFamily = Lato,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = fontSize
                 ),
                 color = color,

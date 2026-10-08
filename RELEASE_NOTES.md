@@ -1,15 +1,21 @@
 # Release Notes
 
+## [6.2.5]
+
+### Added & Improved
+- **Refined Typography & Smaller App Size**: Upgraded typography across the entire app to General Sans (by Indian Type Foundry), delivering a natively proportioned Rupee symbol (`₹`) and razor-sharp financial figures while trimming over 540 KB from the app bundle.
+- **Smarter Expense Detection**: Automatically filters out promotional SMS, loan offers, and marketing noise so only your real spending is captured.
+- **Smoother Screen Transitions**: Refined screen animations when browsing and navigating back for a faster, responsive feel.
+- **Core Optimization**: Streamlined dependencies and updated AndroidX, Room, and Compose libraries to the latest stable releases.
+
+---
+
 ## [6.2.0]
 
 ### Added & Improved
-- **Debts & Loans**: Keep track of money you've lent to friends or borrowed from others. Record partial repayments, track settled balances, and link them to your accounts so your balances update automatically.
+- **Debts & Loans**: Keep track of money you've lent to friends or borrowed from others. Record partial or full repayments, track settled balances, and link them to your accounts so balances stay automatically synchronized.
 - **Account-Specific Budgets**: Set dedicated monthly spending limits for individual accounts and wallets alongside your overall budget.
 - **Interactive Home Screen Widgets**: Switch between accounts right from your home widgets with the new account picker without opening the app.
-- **Polished Widget Layouts**: Refreshed Passbook and Accounts widgets with cleaner spacing, clearer text hierarchy, and account color indicators.
-
-### Fixed & Refined
-- Fixed layout clipping and status bar spacing across compact devices.
 
 ---
 

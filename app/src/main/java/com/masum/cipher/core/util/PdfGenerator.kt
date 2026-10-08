@@ -44,13 +44,13 @@ object PdfGenerator {
         val colorNeutralBar = Color.rgb(243, 244, 246)
 
         val logoTypeface = try {
-            ResourcesCompat.getFont(context, R.font.dmsans_variable)
+            ResourcesCompat.getFont(context, R.font.generalsans_variable)
         } catch (_: Exception) {
             Typeface.DEFAULT
         }
         
         val normalTypeface = try {
-            ResourcesCompat.getFont(context, R.font.dmsans_variable)
+            ResourcesCompat.getFont(context, R.font.generalsans_variable)
         } catch (_: Exception) {
             Typeface.DEFAULT
         }

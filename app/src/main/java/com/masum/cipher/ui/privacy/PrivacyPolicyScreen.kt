@@ -127,8 +127,8 @@ private fun PolicyMeta() {
             text = "cipher.",
             style = MaterialTheme.typography.displaySmall.copy(
                 fontFamily = DMSans,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-1.5).sp
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = (-0.8).sp
             ),
             color = MaterialTheme.colorScheme.primary
         )

@@ -1407,8 +1407,8 @@ Spacer(modifier = Modifier.weight(1f))
                             text = "cipher.",
                             style = Typography.titleLarge.copy(
                                 fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = (-0.6).sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = (-0.4).sp,
                                 fontSize = 20.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)

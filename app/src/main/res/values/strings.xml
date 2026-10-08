@@ -375,6 +375,12 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v625_font_title">Refined Typography &amp; Smaller App Size</string>
+    <string name="whats_new_v625_font_desc">Upgraded to General Sans for crisp amounts and currencies while reducing download size by over half a megabyte.</string>
+    <string name="whats_new_v625_promo_title">Smarter Expense Detection</string>
+    <string name="whats_new_v625_promo_desc">Automatically ignores promotional SMS, marketing offers, and loan ads so only your real spending is captured.</string>
+    <string name="whats_new_v625_anim_title">Smoother Screen Transitions</string>
+    <string name="whats_new_v625_anim_desc">Refined animations when browsing and backing out of screens for a faster, cleaner feel.</string>
     <string name="whats_new_v620_debts_title">Debts &amp; Loans</string>
     <string name="whats_new_v620_debts_desc">Track money you lent or borrowed, log partial or full repayments, and keep everything in sync with your account balances.</string>
     <string name="whats_new_v620_account_budgets_title">Account-Specific Budgets</string>

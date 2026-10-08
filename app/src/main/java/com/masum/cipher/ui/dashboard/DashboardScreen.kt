@@ -1669,9 +1669,9 @@ private fun DashboardHero(
                                     text = if (isSuffix) "•••••• $currencySymbol" else "$currencySymbol••••••",
                                     style = Typography.displayLarge.copy(
                                         fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.SemiBold,
                                         fontSize = balanceFontSize,
-                                        letterSpacing = (-1).sp
+                                        letterSpacing = (-0.5).sp
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -1688,9 +1688,9 @@ private fun DashboardHero(
                                             text = targetText,
                                             style = Typography.displayLarge.copy(
                                                 fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold,
+                                                fontWeight = FontWeight.SemiBold,
                                                 fontSize = balanceFontSize,
-                                                letterSpacing = (-1.2).sp
+                                                letterSpacing = (-0.5).sp
                                             ),
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
@@ -1704,7 +1704,7 @@ private fun DashboardHero(
                                                 text = currencySymbol,
                                                 style = Typography.headlineMedium.copy(
                                                     fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.SemiBold
                                                 ),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.padding(end = 2.dp)
@@ -1715,9 +1715,9 @@ private fun DashboardHero(
                                                 text = "-",
                                                 style = Typography.displayLarge.copy(
                                                     fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold,
+                                                    fontWeight = FontWeight.SemiBold,
                                                     fontSize = balanceFontSize,
-                                                    letterSpacing = (-1.2).sp
+                                                    letterSpacing = (-0.5).sp
                                                 ),
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
@@ -1726,9 +1726,9 @@ private fun DashboardHero(
                                             value = kotlin.math.abs(totalBalance),
                                             textStyle = Typography.displayLarge.copy(
                                                 fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold,
+                                                fontWeight = FontWeight.SemiBold,
                                                 fontSize = balanceFontSize,
-                                                letterSpacing = (-1.2).sp
+                                                letterSpacing = (-0.5).sp
                                             ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
@@ -1737,7 +1737,7 @@ private fun DashboardHero(
                                                 text = currencySymbol,
                                                 style = Typography.headlineMedium.copy(
                                                     fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.SemiBold
                                                 ),
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.padding(start = 4.dp)
@@ -1928,8 +1928,8 @@ private fun DashboardHero(
                         text = "cipher.",
                         style = Typography.titleLarge.copy(
                             fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-1).sp
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.5).sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1
@@ -2265,7 +2265,7 @@ fun TransactionItem(
                     text = if (privacyMode) "•••" else signedAmount,
                     style = Typography.titleMedium.copy(
                         fontFamily = Lato,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     ),
                     color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
                     maxLines = 1,
@@ -2585,8 +2585,8 @@ private fun CashFlowSegmentBar(
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.8.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
@@ -2604,9 +2604,9 @@ private fun CashFlowSegmentBar(
                         text = targetText,
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
-                            fontSize = if (isCollapsed) 14.5.sp else 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.5).sp
+                            fontSize = if (isCollapsed) 14.sp else 15.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.2).sp
                         ),
                         color = EmeraldIncome,
                         maxLines = 1,
@@ -2631,9 +2631,9 @@ private fun CashFlowSegmentBar(
                         text = targetText,
                         style = Typography.titleMedium.copy(
                             fontFamily = Lato,
-                            fontSize = if (isCollapsed) 14.5.sp else 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.5).sp
+                            fontSize = if (isCollapsed) 14.sp else 15.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = (-0.2).sp
                         ),
                         color = RoseExpense,
                         maxLines = 1,
@@ -2648,8 +2648,8 @@ private fun CashFlowSegmentBar(
                         style = Typography.labelSmall.copy(
                             fontFamily = Lato,
                             fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.8.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
