@@ -877,16 +877,25 @@ private fun SplitTransactionCard(
                     }
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
                     Text(
                         text = if (privacyMode) "•••" else AppFormatters.formatCurrency(transaction.amount, currencySymbol, locale, decimals = 0),
                         style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                     Text(
                         text = "${stringResource(R.string.split_hub_my_share)}: ${if (privacyMode) "•••" else AppFormatters.formatCurrency(myShare, currencySymbol, locale, decimals = 0)}",
                         style = Typography.labelSmall.copy(fontSize = 10.5.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                 }
             }
@@ -991,12 +1000,16 @@ private fun SplitTransactionCard(
 
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        modifier = Modifier.padding(start = 6.dp)
                                     ) {
                                         Text(
                                             text = if (privacyMode) "•••" else AppFormatters.formatCurrency(participant.amount, currencySymbol, locale, decimals = 2),
                                             style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            softWrap = false
                                         )
 
                                         Box(

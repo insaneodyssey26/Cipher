@@ -92,11 +92,11 @@ fun GoalCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
-                modifier = Modifier.size(116.dp),
+                modifier = Modifier.size(104.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Canvas(modifier = Modifier.size(112.dp)) {
-                    val strokeWidth = 7.dp.toPx()
+                Canvas(modifier = Modifier.size(100.dp)) {
+                    val strokeWidth = 6.5.dp.toPx()
                     val diameter = size.minDimension - strokeWidth
                     val topLeft = Offset(strokeWidth / 2, strokeWidth / 2)
                     val arcSize = Size(diameter, diameter)
@@ -133,16 +133,18 @@ fun GoalCard(
                         style = Typography.labelMedium.copy(
                             fontFamily = DMSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 12.5.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        softWrap = false
                     )
 
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
                             .background(goalColor.copy(alpha = 0.18f))
                             .border(1.dp, goalColor.copy(alpha = 0.4f), CircleShape),
@@ -152,7 +154,7 @@ fun GoalCard(
                             imageVector = icon,
                             contentDescription = null,
                             tint = goalColor,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -160,14 +162,15 @@ fun GoalCard(
 
             Text(
                 text = goal.name,
-                style = Typography.titleMedium.copy(
+                style = Typography.titleSmall.copy(
                     fontFamily = DMSans,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
+                    fontSize = 14.5.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                softWrap = false,
                 textAlign = TextAlign.Center
             )
 
@@ -176,11 +179,12 @@ fun GoalCard(
                 style = Typography.titleMedium.copy(
                     fontFamily = DMSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp
+                    fontSize = 15.5.sp
                 ),
                 color = goalColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                softWrap = false,
                 textAlign = TextAlign.Center
             )
 
@@ -188,11 +192,12 @@ fun GoalCard(
                 text = stringResource(R.string.goals_target_label, AppFormatters.formatCurrency(goal.targetAmount, currencySymbol, decimals = 0)),
                 style = Typography.bodySmall.copy(
                     fontFamily = Lato,
-                    fontSize = 11.5.sp
+                    fontSize = 11.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                softWrap = false,
                 textAlign = TextAlign.Center
             )
         }

@@ -490,7 +490,8 @@ fun DebtsTabContent(
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.weight(1f, fill = false)
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -510,7 +511,10 @@ fun DebtsTabContent(
                                     )
                                 }
 
-                                Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                                Column(
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    verticalArrangement = Arrangement.spacedBy(1.dp)
+                                ) {
                                     Text(
                                         text = debtItem.personName,
                                         style = Typography.titleSmall.copy(
@@ -533,7 +537,9 @@ fun DebtsTabContent(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 11.sp
                                             ),
-                                            color = typeColor
+                                            color = typeColor,
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                         if (debtItem.accountName != null) {
                                             Text(
@@ -542,14 +548,19 @@ fun DebtsTabContent(
                                                     fontFamily = Lato,
                                                     fontSize = 11.sp
                                                 ),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                         }
                                     }
                                 }
                             }
 
-                            Column(horizontalAlignment = Alignment.End) {
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                modifier = Modifier.padding(start = 8.dp)
+                            ) {
                                 Text(
                                     text = AppFormatters.formatCurrency(if (debtItem.isSettled) debtItem.totalAmount else debtItem.remainingAmount, state.currencySymbol, locale),
                                     style = Typography.titleMedium.copy(
@@ -557,7 +568,10 @@ fun DebtsTabContent(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
                                     ),
-                                    color = if (debtItem.isSettled) MaterialTheme.colorScheme.onSurface else typeColor
+                                    color = if (debtItem.isSettled) MaterialTheme.colorScheme.onSurface else typeColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    softWrap = false
                                 )
                                 Text(
                                     text = if (debtItem.isSettled) stringResource(R.string.debt_settled_badge) else stringResource(R.string.debt_remaining_label, ""),
@@ -565,7 +579,10 @@ fun DebtsTabContent(
                                         fontFamily = Lato,
                                         fontSize = 10.5.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -593,7 +610,8 @@ fun DebtsTabContent(
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.weight(1f, fill = false)
                             ) {
                                 if (isOverdue) {
                                     Box(
@@ -609,7 +627,9 @@ fun DebtsTabContent(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 10.sp
                                             ),
-                                            color = RoseExpense
+                                            color = RoseExpense,
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                     }
                                 } else if (daysUntilDue != null && daysUntilDue in 0..7 && !debtItem.isSettled) {
@@ -626,7 +646,9 @@ fun DebtsTabContent(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 10.sp
                                             ),
-                                            color = Color(0xFFF59E0B)
+                                            color = Color(0xFFF59E0B),
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                     }
                                 } else {
@@ -640,13 +662,18 @@ fun DebtsTabContent(
                                             fontFamily = Lato,
                                             fontSize = 11.sp
                                         ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
 
                             if (!debtItem.isSettled) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.padding(start = 6.dp)
+                                ) {
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))

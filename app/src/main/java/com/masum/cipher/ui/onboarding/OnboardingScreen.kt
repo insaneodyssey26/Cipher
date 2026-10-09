@@ -1910,7 +1910,7 @@ private fun CurrencySelectionPage(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f, fill = false)) {
                                 Text(
                                     text = stringResource(R.string.onboarding_live_preview_label),
                                     style = Typography.labelSmall.copy(
@@ -1919,7 +1919,9 @@ private fun CurrencySelectionPage(
                                         fontSize = 9.sp,
                                         letterSpacing = 0.8.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
@@ -1929,18 +1931,23 @@ private fun CurrencySelectionPage(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = stringResource(R.string.onboarding_preview_category),
                                     style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                             AnimatedContent(
                                 targetState = selectedSym,
                                 transitionSpec = { fadeIn(tween(260)) togetherWith fadeOut(tween(180)) },
-                                label = "preview_amount"
+                                label = "preview_amount",
+                                modifier = Modifier.padding(start = 8.dp)
                             ) { sym ->
                                 val formatted = AppFormatters.formatCurrency(14.50, sym, activeLocale, 2)
                                 Text(
@@ -1951,7 +1958,9 @@ private fun CurrencySelectionPage(
                                         fontSize = 22.sp,
                                         letterSpacing = (-0.5).sp
                                     ),
-                                    color = RoseExpense
+                                    color = RoseExpense,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -2452,7 +2461,7 @@ private fun QuickLanguagePickerModal(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Column {
+                                Column(modifier = Modifier.weight(1f, fill = false)) {
                                     Text(
                                         text = systemLang.nativeName,
                                         style = Typography.titleSmall.copy(
@@ -2460,12 +2469,16 @@ private fun QuickLanguagePickerModal(
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                             fontSize = 13.sp
                                         ),
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = systemLang.name,
                                         style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                                 if (isSelected) {
@@ -2508,7 +2521,7 @@ private fun QuickLanguagePickerModal(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f, fill = false)) {
                                             Text(
                                                 text = lang.nativeName,
                                                 style = Typography.titleSmall.copy(
@@ -2516,12 +2529,16 @@ private fun QuickLanguagePickerModal(
                                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                                                     fontSize = 13.sp
                                                 ),
-                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
                                                 text = lang.name,
                                                 style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                         }
                                         if (isSelected) {
@@ -3054,15 +3071,21 @@ private fun TransactionCaptureTourPage(
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 11.sp
                                                     ),
-                                                    color = MaterialTheme.colorScheme.primary
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    modifier = Modifier.weight(1f, fill = false)
                                                 )
+                                                Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
                                                     text = "Just now",
                                                     style = Typography.labelSmall.copy(
                                                         fontFamily = Lato,
                                                         fontSize = 10.sp
                                                     ),
-                                                    color = Color.White.copy(alpha = 0.5f)
+                                                    color = Color.White.copy(alpha = 0.5f),
+                                                    maxLines = 1,
+                                                    softWrap = false
                                                 )
                                             }
                                             Spacer(modifier = Modifier.height(2.dp))
@@ -3146,6 +3169,7 @@ private fun TransactionCaptureTourPage(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Row(
+                                            modifier = Modifier.weight(1f, fill = false),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                                         ) {
@@ -3167,7 +3191,10 @@ private fun TransactionCaptureTourPage(
                                                 )
                                             }
 
-                                            Column {
+                                            Column(
+                                                modifier = Modifier.weight(1f, fill = false),
+                                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                                            ) {
                                                 Text(
                                                     text = if (animStep == 3) "Zara India" else "Waiting for spending...",
                                                     style = Typography.titleSmall.copy(
@@ -3175,7 +3202,9 @@ private fun TransactionCaptureTourPage(
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 13.sp
                                                     ),
-                                                    color = Color.White
+                                                    color = Color.White,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                                 Text(
                                                     text = if (animStep == 3) "Shopping · HDFC Card" else "Auto-records bank SMS",
@@ -3183,7 +3212,9 @@ private fun TransactionCaptureTourPage(
                                                         fontFamily = Lato,
                                                         fontSize = 10.5.sp
                                                     ),
-                                                    color = if (animStep == 3) EmeraldIncome else Color.White.copy(alpha = 0.55f)
+                                                    color = if (animStep == 3) EmeraldIncome else Color.White.copy(alpha = 0.55f),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
                                         }
@@ -3195,7 +3226,10 @@ private fun TransactionCaptureTourPage(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp
                                             ),
-                                            color = if (animStep == 3) RoseExpense else Color.White.copy(alpha = 0.4f)
+                                            color = if (animStep == 3) RoseExpense else Color.White.copy(alpha = 0.4f),
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 }
@@ -3572,7 +3606,9 @@ private fun SmartRulesTourPage(
                                                         fontWeight = FontWeight.SemiBold,
                                                         fontSize = 11.sp
                                                     ),
-                                                    color = MaterialTheme.colorScheme.onSurface
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
 
@@ -3610,7 +3646,9 @@ private fun SmartRulesTourPage(
                                                             fontWeight = FontWeight.Bold,
                                                             fontSize = 11.sp
                                                         ),
-                                                        color = if (animStep >= 2) Color(0xFFFF7A59) else MaterialTheme.colorScheme.onSurfaceVariant
+                                                        color = if (animStep >= 2) Color(0xFFFF7A59) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
                                                     )
                                                 }
                                             }
@@ -3639,7 +3677,10 @@ private fun SmartRulesTourPage(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Column {
+                                        Column(
+                                            modifier = Modifier.weight(1f, fill = false),
+                                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                                        ) {
                                             Text(
                                                 text = if (animStep == 3) "Swiggy Food Order" else "Swiggy Bangalore",
                                                 style = Typography.titleSmall.copy(
@@ -3647,7 +3688,9 @@ private fun SmartRulesTourPage(
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 13.sp
                                                 ),
-                                                color = MaterialTheme.colorScheme.onSurface
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
                                                 text = if (animStep == 3) "Auto-assigned: Food & Dining · HDFC 4821" else "Organizing...",
@@ -3655,7 +3698,9 @@ private fun SmartRulesTourPage(
                                                     fontFamily = Lato,
                                                     fontSize = 10.5.sp
                                                 ),
-                                                color = if (animStep == 3) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                                color = if (animStep == 3) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                         }
                                         Text(
@@ -3665,7 +3710,10 @@ private fun SmartRulesTourPage(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp
                                             ),
-                                            color = RoseExpense
+                                            color = RoseExpense,
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 }

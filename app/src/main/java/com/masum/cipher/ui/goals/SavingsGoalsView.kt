@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -206,6 +207,10 @@ fun SavingsGoalsView(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 24.sp
                                 ),
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
@@ -215,6 +220,10 @@ fun SavingsGoalsView(
                                     fontFamily = Lato,
                                     fontSize = 12.5.sp
                                 ),
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(start = 8.dp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -228,10 +237,10 @@ fun SavingsGoalsView(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(overallProgressFraction)
-                                    .height(6.dp)
-                                    .clip(RoundedCornerShape(3.dp))
-                                    .background(EmeraldIncome)
+                                .fillMaxWidth(overallProgressFraction)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(EmeraldIncome)
                             )
                         }
                     }
@@ -293,7 +302,7 @@ fun SavingsGoalsView(
                                     )
                                 }
 
-                                Column {
+                                Column(modifier = Modifier.weight(1f, fill = false)) {
                                     Text(
                                         text = stringResource(R.string.goals_free_limit_reached, state.goals.size, state.freeGoalLimit),
                                         style = Typography.titleSmall.copy(
@@ -301,6 +310,8 @@ fun SavingsGoalsView(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.5.sp
                                         ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
@@ -309,6 +320,8 @@ fun SavingsGoalsView(
                                             fontFamily = Lato,
                                             fontSize = 11.5.sp
                                         ),
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
