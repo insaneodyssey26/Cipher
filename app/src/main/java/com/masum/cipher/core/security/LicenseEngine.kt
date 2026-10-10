@@ -13,6 +13,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -67,6 +70,31 @@ class LicenseEngine @Inject constructor() {
 
     companion object {
         private val USER_AGENT = "Cipher-Android/${BuildConfig.VERSION_NAME}"
+        private const val LICENSE_SIGNING_SECRET = "cipher-license-v1-k9f3x8b2m4q7w1z5p0"
+    }
+
+    fun verifyLicenseSignature(
+        licenseKey: String,
+        tier: String,
+        deviceId: String,
+        expiresAt: Long,
+        signatureHex: String?
+    ): Boolean {
+        if (signatureHex.isNullOrBlank()) return false
+        return try {
+            val canonical = "${licenseKey.trim().uppercase()}:${tier.trim().uppercase()}:${deviceId.trim()}:$expiresAt"
+            val mac = Mac.getInstance("HmacSHA256")
+            val secretKey = SecretKeySpec(LICENSE_SIGNING_SECRET.toByteArray(StandardCharsets.UTF_8), "HmacSHA256")
+            mac.init(secretKey)
+            val computedBytes = mac.doFinal(canonical.toByteArray(StandardCharsets.UTF_8))
+            val computedHex = computedBytes.joinToString("") { "%02x".format(it) }
+            MessageDigest.isEqual(
+                computedHex.toByteArray(StandardCharsets.UTF_8),
+                signatureHex.trim().lowercase().toByteArray(StandardCharsets.UTF_8)
+            )
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun parseTier(identifier: String): ProTier {
@@ -124,6 +152,15 @@ class LicenseEngine @Inject constructor() {
                     val parsedTier = parseTier(tierStr)
                     val now = System.currentTimeMillis()
                     val serverExpiry = jsonResponse.optLong("expiresAt", 0L)
+                    val signature = jsonResponse.optString("signature", "")
+
+                    if (!verifyLicenseSignature(sanitized, tierStr, deviceId, serverExpiry, signature)) {
+                        return@withContext LicenseValidationResult(
+                            isValid = false,
+                            errorMessage = "Cryptographic signature verification failed. Activation denied."
+                        )
+                    }
+
                     val expiryMs = if (serverExpiry > 0L) serverExpiry else when (parsedTier) {
                         ProTier.MONTHLY -> now + 30L * 24L * 60L * 60L * 1000L
                         ProTier.HALF_YEARLY, ProTier.SIX_MONTH -> now + 180L * 24L * 60L * 60L * 1000L
@@ -262,6 +299,12 @@ class LicenseEngine @Inject constructor() {
 
                 val parsedTier = parseTier(tierStr)
                 val serverExpiry = json.optLong("expiresAt", 0L)
+                val signature = json.optString("signature", "")
+
+                if (signature.isNotBlank() && !verifyLicenseSignature(sanitized, tierStr, currentDeviceId, serverExpiry, signature)) {
+                    return@withContext RemoteLicenseCheckResult.Revoked("Cryptographic signature verification failed")
+                }
+
                 val now = System.currentTimeMillis()
                 val expiryMs = if (serverExpiry > 0L) serverExpiry else when (parsedTier) {
                     ProTier.MONTHLY -> now + 30L * 24L * 60L * 60L * 1000L

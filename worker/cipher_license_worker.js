@@ -2,6 +2,9 @@ const MAX_DEVICES_PER_KEY = 3;
 const EXPIRY_GRACE_MS = 3 * 24 * 60 * 60 * 1000;
 const MISSING_KEY_TTL_SECONDS = 30 * 24 * 60 * 60;
 const PENDING_SUBSCRIPTION_TTL_SECONDS = 7 * 24 * 60 * 60;
+const MAX_FAILED_ACTIVATION_ATTEMPTS = 10;
+const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
+const DEFAULT_SIGNING_SECRET = "cipher-license-v1-k9f3x8b2m4q7w1z5p0";
 const BLOCKED_STATUSES = ["REVOKED", "REFUNDED", "EXPIRED"];
 const SUBSCRIPTION_RENEWAL_EVENTS = new Set([
   "subscription.active",
@@ -10,6 +13,47 @@ const SUBSCRIPTION_RENEWAL_EVENTS = new Set([
   "subscription.plan_changed"
 ]);
 const KEY_BEARING_EVENTS = new Set(["payment.succeeded", "license_key.created"]);
+
+async function generateLicenseSignature(env, licenseKey, tier, deviceId, expiresAt) {
+  const secret = (env && env.LICENSE_SIGNING_SECRET) || DEFAULT_SIGNING_SECRET;
+  const canonical = `${(licenseKey || "").trim().toUpperCase()}:${(tier || "LIFETIME").trim().toUpperCase()}:${(deviceId || "").trim()}:${Number(expiresAt) || 0}`;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, enc.encode(canonical));
+  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function checkFailedAttemptsRateLimit(env, clientIp) {
+  if (!clientIp || clientIp === "unknown") return { blocked: false, count: 0 };
+  const key = `RATELIMIT:FAIL:${clientIp}`;
+  const record = await env.CIPHER_LICENSES.get(key, { type: "json" });
+  if (record && typeof record.count === "number" && record.count >= MAX_FAILED_ACTIVATION_ATTEMPTS) {
+    return { blocked: true, count: record.count };
+  }
+  return { blocked: false, count: record?.count || 0 };
+}
+
+async function recordFailedActivationAttempt(env, clientIp) {
+  if (!clientIp || clientIp === "unknown") return;
+  const key = `RATELIMIT:FAIL:${clientIp}`;
+  const record = await env.CIPHER_LICENSES.get(key, { type: "json" });
+  const count = (record?.count || 0) + 1;
+  await env.CIPHER_LICENSES.put(key, JSON.stringify({ count: count, lastFailedAt: Date.now() }), {
+    expirationTtl: RATE_LIMIT_WINDOW_SECONDS
+  });
+}
+
+async function clearFailedActivationAttempts(env, clientIp) {
+  if (!clientIp || clientIp === "unknown") return;
+  const key = `RATELIMIT:FAIL:${clientIp}`;
+  await env.CIPHER_LICENSES.delete(key);
+}
 
 function parseTimestampMs(value) {
   if (typeof value === "number") {
@@ -261,13 +305,22 @@ export default {
           isCurrent: currentDeviceId ? d.deviceId === currentDeviceId : false
         }));
 
+        const signature = await generateLicenseSignature(
+          env,
+          licenseKey,
+          kvData.tier || "LIFETIME",
+          currentDeviceId,
+          kvData.expiresAt || 0
+        );
+
         return new Response(JSON.stringify({
           success: true,
           tier: kvData.tier || "LIFETIME",
           expiresAt: kvData.expiresAt || 0,
           deviceCount: devices.length,
           maxDevices: kvData.maxDevices || MAX_DEVICES_PER_KEY,
-          devices: devices
+          devices: devices,
+          signature: signature
         }), {
           headers: { "Content-Type": "application/json" }
         });
@@ -281,6 +334,20 @@ export default {
 
     if (url.pathname === "/api/activate" && request.method === "POST") {
       try {
+        const rateLimit = await checkFailedAttemptsRateLimit(env, clientIp);
+        if (rateLimit.blocked) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: "Too many failed activation attempts. Please try again later."
+          }), {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "3600"
+            }
+          });
+        }
+
         const body = await request.json();
         const licenseKey = (body.licenseKey || "").trim().toUpperCase();
         const email = (body.email || "").trim().toLowerCase();
@@ -296,6 +363,7 @@ export default {
 
         const kvData = await env.CIPHER_LICENSES.get(licenseKey, { type: "json" });
         if (!kvData) {
+          await recordFailedActivationAttempt(env, clientIp);
           return new Response(JSON.stringify({ success: false, error: "License key not found. Please ensure you purchased a valid license." }), {
             status: 404,
             headers: { "Content-Type": "application/json" }
@@ -304,6 +372,7 @@ export default {
 
         const blocked = blockedStatus(kvData);
         if (blocked) {
+          await recordFailedActivationAttempt(env, clientIp);
           return new Response(JSON.stringify({
             success: false,
             error: `License is ${blocked.toLowerCase()}. Activation denied.`,
@@ -326,6 +395,7 @@ export default {
             kvData.activatedDevices[existingDeviceIndex].deviceName = deviceName;
           }
           await env.CIPHER_LICENSES.put(licenseKey, JSON.stringify(kvData));
+          await clearFailedActivationAttempts(env, clientIp);
 
           const devices = kvData.activatedDevices.map(d => ({
             deviceId: d.deviceId,
@@ -334,6 +404,14 @@ export default {
             isCurrent: d.deviceId === deviceId
           }));
 
+          const signature = await generateLicenseSignature(
+            env,
+            licenseKey,
+            kvData.tier,
+            deviceId,
+            kvData.expiresAt || 0
+          );
+
           return new Response(JSON.stringify({
             success: true,
             tier: kvData.tier,
@@ -341,6 +419,7 @@ export default {
             deviceCount: kvData.activatedDevices.length,
             maxDevices: kvData.maxDevices || MAX_DEVICES_PER_KEY,
             devices: devices,
+            signature: signature,
             message: "Cipher Pro restored on this device."
           }), {
             headers: { "Content-Type": "application/json" }
@@ -370,6 +449,7 @@ export default {
         }
 
         await env.CIPHER_LICENSES.put(licenseKey, JSON.stringify(kvData));
+        await clearFailedActivationAttempts(env, clientIp);
 
         const devices = kvData.activatedDevices.map(d => ({
           deviceId: d.deviceId,
@@ -378,6 +458,14 @@ export default {
           isCurrent: d.deviceId === deviceId
         }));
 
+        const signature = await generateLicenseSignature(
+          env,
+          licenseKey,
+          kvData.tier,
+          deviceId,
+          kvData.expiresAt || 0
+        );
+
         return new Response(JSON.stringify({
           success: true,
           tier: kvData.tier,
@@ -385,6 +473,7 @@ export default {
           deviceCount: kvData.activatedDevices.length,
           maxDevices: maxDevices,
           devices: devices,
+          signature: signature,
           message: "Cipher Pro successfully activated!"
         }), {
           headers: { "Content-Type": "application/json" }

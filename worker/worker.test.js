@@ -552,4 +552,144 @@ describe("Cipher License Worker Security & Endpoints", () => {
     expect(env.CIPHER_LICENSES.options.get("MISSING_KEY:pay_no_key_ttl").expirationTtl).toBe(30 * 24 * 60 * 60);
     expect(env.CIPHER_LICENSES.options.get("SUBSCRIPTION_PENDING:sub_ttl").expirationTtl).toBe(7 * 24 * 60 * 60);
   });
+
+  it("19. rate limits IP after 10 consecutive failed activation attempts", async () => {
+    const clientIp = "198.51.100.42";
+
+    for (let i = 0; i < 10; i++) {
+      const badReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "cf-connecting-ip": clientIp },
+        body: JSON.stringify({ licenseKey: `BOGUS-KEY-${i}`, deviceId: "dev-1" })
+      });
+      const res = await worker.fetch(badReq, env, {});
+      expect(res.status).toBe(404);
+    }
+
+    const blockedReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "cf-connecting-ip": clientIp },
+      body: JSON.stringify({ licenseKey: "ANOTHER-GUESS-KEY", deviceId: "dev-1" })
+    });
+    const blockedRes = await worker.fetch(blockedReq, env, {});
+    expect(blockedRes.status).toBe(429);
+    const json = await blockedRes.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toContain("Too many failed activation attempts");
+  });
+
+  it("20. successful activation clears failed attempts for that IP", async () => {
+    const clientIp = "198.51.100.99";
+    await env.CIPHER_LICENSES.put("VALID-KEY-100", JSON.stringify({
+      key: "VALID-KEY-100",
+      tier: "LIFETIME",
+      status: "ACTIVE",
+      activatedDevices: []
+    }));
+
+    for (let i = 0; i < 5; i++) {
+      const badReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "cf-connecting-ip": clientIp },
+        body: JSON.stringify({ licenseKey: `WRONG-KEY-${i}`, deviceId: "dev-1" })
+      });
+      await worker.fetch(badReq, env, {});
+    }
+
+    const recordBefore = await env.CIPHER_LICENSES.get(`RATELIMIT:FAIL:${clientIp}`, { type: "json" });
+    expect(recordBefore.count).toBe(5);
+
+    const goodReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "cf-connecting-ip": clientIp },
+      body: JSON.stringify({ licenseKey: "VALID-KEY-100", deviceId: "dev-1" })
+    });
+    const goodRes = await worker.fetch(goodReq, env, {});
+    expect(goodRes.status).toBe(200);
+
+    const recordAfter = await env.CIPHER_LICENSES.get(`RATELIMIT:FAIL:${clientIp}`);
+    expect(recordAfter).toBeNull();
+  });
+
+  it("21. background /api/devices checks are not affected by activation rate limits", async () => {
+    const clientIp = "198.51.100.77";
+    await env.CIPHER_LICENSES.put("SYNC-KEY-1", JSON.stringify({
+      key: "SYNC-KEY-1",
+      tier: "LIFETIME",
+      status: "ACTIVE",
+      activatedDevices: [{ deviceId: "sync-dev-1", activatedAt: Date.now() }]
+    }));
+
+    await env.CIPHER_LICENSES.put(`RATELIMIT:FAIL:${clientIp}`, JSON.stringify({ count: 15, lastFailedAt: Date.now() }));
+
+    const syncReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/devices?licenseKey=SYNC-KEY-1&deviceId=sync-dev-1", {
+      method: "GET",
+      headers: { "cf-connecting-ip": clientIp }
+    });
+    const syncRes = await worker.fetch(syncReq, env, {});
+    expect(syncRes.status).toBe(200);
+    const json = await syncRes.json();
+    expect(json.success).toBe(true);
+  });
+
+  it("22. provides cryptographic HMAC response signature in /api/activate and /api/devices", async () => {
+    const futureExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000;
+    await env.CIPHER_LICENSES.put("SIG-KEY-1", JSON.stringify({
+      key: "SIG-KEY-1",
+      tier: "ANNUAL",
+      status: "ACTIVE",
+      expiresAt: futureExpiry,
+      activatedDevices: []
+    }));
+
+    const actReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey: "SIG-KEY-1", deviceId: "my-phone-123" })
+    });
+    const actRes = await worker.fetch(actReq, env, {});
+    expect(actRes.status).toBe(200);
+    const actJson = await actRes.json();
+    expect(actJson.success).toBe(true);
+    expect(typeof actJson.signature).toBe("string");
+    expect(actJson.signature.length).toBe(64);
+
+    const devReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/devices?licenseKey=SIG-KEY-1&deviceId=my-phone-123", {
+      method: "GET"
+    });
+    const devRes = await worker.fetch(devReq, env, {});
+    expect(devRes.status).toBe(200);
+    const devJson = await devRes.json();
+    expect(devJson.success).toBe(true);
+    expect(typeof devJson.signature).toBe("string");
+    expect(devJson.signature.length).toBe(64);
+    expect(devJson.signature).toBe(actJson.signature);
+  });
+
+  it("23. HMAC signature changes when key, tier, device, or expiry changes", async () => {
+    await env.CIPHER_LICENSES.put("SIG-KEY-A", JSON.stringify({
+      key: "SIG-KEY-A",
+      tier: "LIFETIME",
+      status: "ACTIVE",
+      activatedDevices: []
+    }));
+
+    const req1 = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey: "SIG-KEY-A", deviceId: "device-1" })
+    });
+    const res1 = await worker.fetch(req1, env, {});
+    const json1 = await res1.json();
+
+    const req2 = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey: "SIG-KEY-A", deviceId: "device-2" })
+    });
+    const res2 = await worker.fetch(req2, env, {});
+    const json2 = await res2.json();
+
+    expect(json1.signature).not.toBe(json2.signature);
+  });
 });
