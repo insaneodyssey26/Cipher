@@ -396,6 +396,12 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v626_terms_title">Terms of Service</string>
+    <string name="whats_new_v626_terms_desc">Added an in-app Terms of Service screen alongside the Privacy Policy.</string>
+    <string name="whats_new_v626_layout_title">Layout &amp; Display Improvements</string>
+    <string name="whats_new_v626_layout_desc">Fixed text wrapping and layout clipping across Onboarding, Debts, Savings Goals, and Split Expenses.</string>
+    <string name="whats_new_v626_reliability_title">Stability &amp; Performance</string>
+    <string name="whats_new_v626_reliability_desc">Improved sync reliability and general app stability.</string>
     <string name="whats_new_v625_font_title">Refined Typography &amp; Smaller App Size</string>
     <string name="whats_new_v625_font_desc">Upgraded to General Sans for crisp amounts and currencies while reducing download size by over half a megabyte.</string>
     <string name="whats_new_v625_promo_title">Smarter Expense Detection</string>

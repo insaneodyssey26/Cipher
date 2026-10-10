@@ -1,5 +1,14 @@
 # Release Notes
 
+## [6.2.6]
+
+### Added & Improved
+- **Terms of Service**: Added an in-app Terms of Service screen alongside the Privacy Policy with clean section navigation.
+- **Layout & Display Fixes**: Fixed text wrapping, padding, and layout clipping across Onboarding, Debts, Savings Goals, and Split Expenses on compact displays and larger system font sizes.
+- **Stability & Performance**: Improved background sync reliability and general application performance.
+
+---
+
 ## [6.2.5]
 
 ### Added & Improved
