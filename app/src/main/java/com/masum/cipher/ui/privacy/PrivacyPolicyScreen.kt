@@ -44,12 +44,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +81,7 @@ import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Mail
 import compose.icons.lucideicons.RefreshCw
+import compose.icons.lucideicons.ShieldAlert
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Sparkles
@@ -353,7 +363,6 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.Layers,
                 title = stringResource(R.string.terms_service_model_title),
                 body = stringResource(R.string.terms_service_model_body)
             )
@@ -361,7 +370,6 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.Key,
                 title = stringResource(R.string.terms_licensing_title),
                 body = stringResource(R.string.terms_licensing_body)
             )
@@ -369,7 +377,6 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.CreditCard,
                 title = stringResource(R.string.terms_subscriptions_title),
                 body = stringResource(R.string.terms_subscriptions_body)
             )
@@ -377,7 +384,13 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.Info,
+                title = stringResource(R.string.terms_distribution_title),
+                body = stringResource(R.string.terms_distribution_body)
+            )
+        }
+
+        item {
+            PolicyCard(
                 title = stringResource(R.string.terms_disclaimer_title),
                 body = stringResource(R.string.terms_disclaimer_body)
             )
@@ -385,7 +398,6 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.Lock,
                 title = stringResource(R.string.terms_data_ownership_title),
                 body = stringResource(R.string.terms_data_ownership_body)
             )
@@ -393,7 +405,6 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
         item {
             PolicyCard(
-                icon = LucideIcons.Mail,
                 title = stringResource(R.string.terms_contact_title),
                 body = stringResource(R.string.terms_contact_body)
             )
@@ -531,12 +542,66 @@ private fun PolicyHeaderCard(
     }
 }
 
+private val POLICY_LINKS = listOf(
+    "Google Play Store" to "https://play.google.com/store/apps/details?id=com.masum.cipher",
+    "Google Play" to "https://play.google.com/store/apps/details?id=com.masum.cipher",
+    "insaneodyssey26/cipher" to "https://github.com/insaneodyssey26/cipher",
+    "skmasumali.dev@gmail.com" to "mailto:skmasumali.dev@gmail.com"
+)
+
+private fun buildPolicyAnnotatedString(body: String, linkColor: Color): AnnotatedString {
+    return buildAnnotatedString {
+        var currentIndex = 0
+        while (currentIndex < body.length) {
+            var firstMatchIndex = -1
+            var matchedPhrase = ""
+            var matchedUrl = ""
+
+            for ((phrase, url) in POLICY_LINKS) {
+                val index = body.indexOf(phrase, currentIndex)
+                if (index != -1 && (firstMatchIndex == -1 || index < firstMatchIndex)) {
+                    firstMatchIndex = index
+                    matchedPhrase = phrase
+                    matchedUrl = url
+                }
+            }
+
+            if (firstMatchIndex != -1) {
+                append(body.substring(currentIndex, firstMatchIndex))
+                withLink(
+                    LinkAnnotation.Url(
+                        url = matchedUrl,
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                color = linkColor,
+                                fontWeight = FontWeight.SemiBold,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    )
+                ) {
+                    append(matchedPhrase)
+                }
+                currentIndex = firstMatchIndex + matchedPhrase.length
+            } else {
+                append(body.substring(currentIndex))
+                break
+            }
+        }
+    }
+}
+
 @Composable
 private fun PolicyCard(
-    icon: ImageVector,
     title: String,
-    body: String
+    body: String,
+    icon: ImageVector? = null
 ) {
+    val linkColor = MaterialTheme.colorScheme.primary
+    val annotatedBody = remember(body, linkColor) {
+        buildPolicyAnnotatedString(body, linkColor)
+    }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -556,19 +621,21 @@ private fun PolicyCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(17.dp)
-                    )
+                if (icon != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
                 }
 
                 Text(
@@ -582,7 +649,7 @@ private fun PolicyCard(
             }
 
             Text(
-                text = body,
+                text = annotatedBody,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 0.1.sp

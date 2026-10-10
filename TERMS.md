@@ -34,7 +34,16 @@ When you purchase a Cipher Pro license (Monthly, 6-Month, Annual, or Lifetime):
 
 ---
 
-## 4. Financial & Advisory Disclaimer
+## 4. Official Distribution & Security Disclaimer
+
+Cipher requires sensitive SMS reading and notification listener permissions to provide automated financial expense tracking:
+* **Official Channels**: Genuine, verified, and secure builds of Cipher are distributed solely through the **Google Play Store** and the **[Official GitHub Releases](https://github.com/insaneodyssey26/cipher/releases)**.
+* **Modified / Pirated APKs**: The developer does not authorize, distribute, or support modified, cracked, or third-party repackaged APKs from untrusted forums or file-sharing websites.
+* **Liability Disclaimer**: Installing modified or unofficial builds poses severe risks to your personal data, privacy, and device security. The developer explicitly disclaims all liability and responsibility for any data theft, financial losses, malware, or security compromises arising from the installation or use of unauthorized third-party distributions.
+
+---
+
+## 5. Financial & Advisory Disclaimer
 
 * **Informational Tool Only**: Cipher is an automated organizational utility designed to help you track expenses and organize personal receipts on your phone.
 * **Not a Financial Advisor**: Cipher does not provide financial, legal, tax, or investment advice. You remain solely responsible for your personal budgeting, spending decisions, and account balancing.
@@ -42,7 +51,7 @@ When you purchase a Cipher Pro license (Monthly, 6-Month, Annual, or Lifetime):
 
 ---
 
-## 5. Privacy & Data Ownership
+## 6. Privacy & Data Ownership
 
 Your financial data belongs exclusively to you:
 * No transaction details, account balances, notes, or SMS contents are ever sent to external servers.
@@ -50,13 +59,13 @@ Your financial data belongs exclusively to you:
 
 ---
 
-## 6. Changes to Terms
+## 7. Changes to Terms
 
 These Terms may be updated occasionally to reflect new features or licensing options. Updates will be published in this repository and noted with an updated Effective Date.
 
 ---
 
-## 7. Contact & Support
+## 8. Contact & Support
 
 If you have questions about these Terms, need assistance with your license key, or want to report an issue, please contact me:
 

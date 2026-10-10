@@ -35,9 +35,10 @@ Cipher requires internet access solely for:
 *   **Licensing Records**: License records (license key, tier, order ID, optional billing email, active device IDs, and activation timestamps) are stored securely in Cloudflare KV to enforce multi-device limits and preserve your license entitlements across device migrations.
 *   **Data Deletion**: You may request complete removal of your billing email and device association records at any time by contacting me directly or opening an issue on GitHub. Revoking a device directly from the app immediately removes that device ID from active license records.
 
-## 5. Security
+## 5. Security & Official Distribution Guarantees
 
-Your financial data is protected using Android's native `BiometricPrompt` (requiring fingerprint, face, or device PIN) and encrypted on-disk using AES-256 encryption.
+*   **On-Device Protection**: Your financial data is protected using Android's native `BiometricPrompt` (requiring fingerprint, face, or device PIN) and encrypted on-disk using AES-256 encryption via SQLCipher.
+*   **Official Build Guarantees**: The zero-tracking, local parsing, and encryption guarantees described in this Privacy Policy apply strictly to authentic builds installed via the **Google Play Store** or **[Official GitHub Releases](https://github.com/insaneodyssey26/cipher/releases)**. The developer cannot guarantee privacy or security protections on unofficial, modified, or third-party repackaged APKs.
 
 ## 6. Changes to This Privacy Policy
 

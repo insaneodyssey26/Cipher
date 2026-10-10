@@ -298,8 +298,8 @@
     <string name="privacy_network_body">All financial calculations, transaction parsing, and database storage run 100% locally and offline on your device. Network access is used strictly to verify cryptographic Pro product license keys. There are no tracking SDKs, analytics, crash reporters, or ads.</string>
     <string name="privacy_exports_title">Exports &amp; Auto Backups</string>
     <string name="privacy_exports_body">When you export a CSV, PDF statement, or configure Auto Backup, the files are saved directly to your selected device storage or cloud-synced folder via Android\'s native Storage Framework. Database backups are encrypted with a password you choose. Cipher does not transmit this data anywhere and has no remote access to where you store these files beyond the folder permissions you explicitly grant.</string>
-    <string name="privacy_open_source_title">Open Source</string>
-    <string name="privacy_open_source_body">Cipher is open source. You can audit every line of code on GitHub to verify all of the above. If you find anything that contradicts this policy, please open an issue.</string>
+    <string name="privacy_open_source_title">Open Source &amp; Official Builds</string>
+    <string name="privacy_open_source_body">Cipher is open source. You can audit every line of code on GitHub to verify all of the above. These privacy and zero-tracking guarantees apply strictly to authentic builds distributed via the Google Play Store and official GitHub Releases (insaneodyssey26/cipher). If you find anything that contradicts this policy, please open an issue.</string>
     <string name="privacy_changes_title">Changes</string>
     <string name="privacy_changes_body">If this policy ever changes, the updated version will be shipped with the app release and noted in the changelog.</string>
     <string name="privacy_last_updated">Last updated: October 2026</string>
@@ -312,11 +312,13 @@
     <string name="terms_badge">GPL-3.0 &amp; Pro Licensing</string>
     <string name="terms_subscriptions_title">3. Subscriptions, Cancellations &amp; Refunds</string>
     <string name="terms_subscriptions_body">Subscriptions renew automatically at the end of each billing cycle unless cancelled. You can cancel or manage your plan anytime via the Manage Subscription button in Cipher Pro. All purchases and subscription fees are non-refundable once processed, except where required by applicable mandatory consumer laws. Upon cancellation, Pro features remain active until your paid period ends, after which Cipher smoothly returns to the Standard Edition without affecting any of your local financial data.</string>
-    <string name="terms_disclaimer_title">4. Financial &amp; Advisory Disclaimer</string>
+    <string name="terms_distribution_title">4. Official Distribution &amp; Security Disclaimer</string>
+    <string name="terms_distribution_body">Cipher requires sensitive SMS reading and notification permissions for financial tracking. Genuine and authentic builds are distributed exclusively via the Google Play Store and official GitHub repository (insaneodyssey26/cipher). The developer does not authorize, distribute, or support modified, cracked, or third-party repackaged APKs. Installing unverified builds poses severe security risks to your financial privacy, and the developer explicitly disclaims all liability and responsibility for data theft, loss, security compromise, or malware resulting from third-party modified distributions.</string>
+    <string name="terms_disclaimer_title">5. Financial &amp; Advisory Disclaimer</string>
     <string name="terms_disclaimer_body">Cipher is an automated tracking tool designed to help you organize personal expenses on your phone. It is not an authorized bank, accountant, or financial advisor. You remain solely responsible for your financial decisions. Because third-party banks occasionally change message formats, Cipher is provided on an \'as-is\' basis without warranty of 100% parsing accuracy for every non-standard message format.</string>
-    <string name="terms_data_ownership_title">5. Complete Data Ownership</string>
+    <string name="terms_data_ownership_title">6. Complete Data Ownership</string>
     <string name="terms_data_ownership_body">Your financial data belongs exclusively to you. No transaction amounts, merchant names, bank accounts, or notes are ever uploaded to remote servers.</string>
-    <string name="terms_contact_title">6. Support &amp; Contact</string>
+    <string name="terms_contact_title">7. Support &amp; Contact</string>
     <string name="terms_contact_body">If you have questions about these terms, need help with your license, or wish to report an issue, contact the developer directly at skmasumali.dev@gmail.com or via GitHub.</string>
     <string name="terms_last_updated">Last updated: October 2026</string>
     <string name="action_continue">Continue</string>
