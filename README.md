@@ -10,6 +10,14 @@ A local-first, privacy-focused personal finance app for Android. cipher reads yo
     <img alt="Get it on GitHub" height="80" src="docs/badges/github.svg" />
   </a>
 </p>
+<p align="left">
+  <a href="https://www.producthunt.com/products/cipher-4/launches/cipher-5?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-cipher-5" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1220752&amp;theme=dark&amp;t=1792039109757">
+      <img alt="Cipher - Track your money privately, entirely on-device | Product Hunt" height="54" width="250" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1220752&amp;theme=light&amp;t=1792039095819">
+    </picture>
+  </a>
+</p>
 
 ---
 
