@@ -396,6 +396,12 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v628_bento_title">Redesigned Sheets &amp; Bento Cards</string>
+    <string name="whats_new_v628_bento_desc">Transaction details, split expenses, debts, goals, and category breakdowns have been revamped with clean modern bento layouts, faster controls, and fluid gestures.</string>
+    <string name="whats_new_v628_icons_title">Expanded Category Icons</string>
+    <string name="whats_new_v628_icons_desc">Added 67 new icons to the icon picker with quick search, making it simple to personalize custom categories and savings pots.</string>
+    <string name="whats_new_v628_performance_title">Speed &amp; Refinements</string>
+    <string name="whats_new_v628_performance_desc">Removed unused assets, tightened toolbar search proportions, fixed accidental sheet dismissing, and polished overall performance.</string>
     <string name="whats_new_v626_terms_title">Terms of Service</string>
     <string name="whats_new_v626_terms_desc">Added an in-app Terms of Service screen alongside the Privacy Policy.</string>
     <string name="whats_new_v626_layout_title">Layout &amp; Display Improvements</string>

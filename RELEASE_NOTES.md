@@ -1,5 +1,16 @@
 # Release Notes
 
+## [6.2.8]
+
+### Added & Improved
+- **Modern Bento Sheet Design**: Completely refreshed transaction details, split expenses, category breakdowns, savings pots, and debt tracking with responsive bento cards, real-time calculations, and fluid animations.
+- **Category Icon Expansion**: Added 67 new Lucide icons covering travel, lifestyle, utilities, shopping, and everyday finances, paired with a fast search bar for quick discovery.
+- **Manage Subscriptions Direct Link**: Pro members can now open and manage their active recurring subscriptions directly from the membership screen in one tap.
+- **Scroll & Sheet Polish**: Prevented accidental bottom sheet dismissals when scrolling through transactions, removed system keyboard popups during read-only browsing, and tightened dashboard search proportions.
+- **Under-the-Hood Cleanup**: Removed unused legacy assets, streamlined internal imports, resolved deprecations, and patched dependencies for a lighter, faster app.
+
+---
+
 ## [6.2.6]
 
 ### Added & Improved
