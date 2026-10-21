@@ -1,7 +1,16 @@
 package com.masum.cipher.ui.debts
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,21 +19,27 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -32,12 +47,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -54,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -63,7 +79,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
@@ -81,11 +99,15 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowDownLeft
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowUpRight
+import compose.icons.lucideicons.Building2
 import compose.icons.lucideicons.Calendar
 import compose.icons.lucideicons.Check
+import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.User
+import compose.icons.lucideicons.X
 import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,6 +116,7 @@ fun CreateEditDebtScreen(
     accounts: List<AccountEntity>,
     currencySymbol: String = "₹",
     isHapticsEnabled: Boolean = true,
+    suggestedPersons: List<String> = emptyList(),
     onNavigateBack: () -> Unit,
     onSaveDebt: (personName: String, amount: Double, type: DebtType, dueDate: Long?, note: String?, accountId: Long?, syncLedger: Boolean) -> Unit,
     onDeleteDebt: ((DebtEntity) -> Unit)? = null
@@ -150,7 +173,15 @@ fun CreateEditDebtScreen(
     }
 
     val typeColor = if (selectedType == DebtType.LENT) EmeraldIncome else RoseExpense
-    val quickChips = listOf(500.0, 1000.0, 2000.0, 5000.0)
+    val quickChips = listOf(100.0, 500.0, 1000.0, 2000.0, 5000.0)
+
+    val filteredSuggestions = remember(suggestedPersons, personName) {
+        val currentLower = personName.trim().lowercase(Locale.ROOT)
+        suggestedPersons
+            .filter { it.isNotBlank() && it.trim().lowercase(Locale.ROOT) != currentLower }
+            .distinctBy { it.trim().lowercase(Locale.ROOT) }
+            .take(6)
+    }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dueDate ?: System.currentTimeMillis())
@@ -159,21 +190,23 @@ fun CreateEditDebtScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        view.performVibrate(isHapticsEnabled)
                         dueDate = datePickerState.selectedDateMillis
                         showDatePicker = false
                     }
                 ) {
-                    Text(stringResource(R.string.action_save), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.action_save), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
+                        view.performVibrate(isHapticsEnabled)
                         dueDate = null
                         showDatePicker = false
                     }
                 ) {
-                    Text(stringResource(R.string.action_clear_input))
+                    Text(stringResource(R.string.action_clear_input), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         ) {
@@ -238,7 +271,7 @@ fun CreateEditDebtScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -257,8 +290,8 @@ fun CreateEditDebtScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), CircleShape)
                     ) {
                         Icon(
                             imageVector = LucideIcons.ArrowLeft,
@@ -274,7 +307,7 @@ fun CreateEditDebtScreen(
                             style = Typography.titleLarge.copy(
                                 fontFamily = DMSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
+                                fontSize = 17.5.sp
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
@@ -308,61 +341,67 @@ fun CreateEditDebtScreen(
                             imageVector = LucideIcons.Trash2,
                             contentDescription = stringResource(R.string.action_delete),
                             tint = RoseExpense,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(17.dp)
                         )
                     }
                 }
             }
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.background,
+                tonalElevation = 4.dp
             ) {
-                val formattedAmountDisplay = AppFormatters.formatCurrency(parsedAmount, currencySymbol, locale = locale, decimals = 0)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .scale(btnScale)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isFormValid) typeColor else MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable(enabled = isFormValid, interactionSource = btnInteraction, indication = null) {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                            onSaveDebt(
-                                personName.trim(),
-                                parsedAmount,
-                                selectedType,
-                                dueDate,
-                                noteText.trim().ifBlank { null },
-                                selectedAccountId,
-                                syncLedger
-                            )
-                        },
-                    contentAlignment = Alignment.Center
+                        .navigationBarsPadding()
+                        .imePadding()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
-                    Text(
-                        text = if (isEditing) {
-                            stringResource(R.string.goals_save_changes)
-                        } else if (selectedType == DebtType.LENT) {
-                            stringResource(R.string.debt_record_lent_action, formattedAmountDisplay)
-                        } else {
-                            stringResource(R.string.debt_record_borrowed_action, formattedAmountDisplay)
-                        },
-                        style = Typography.titleMedium.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
-                        ),
-                        color = if (isFormValid) Color.White else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    val formattedAmountDisplay = AppFormatters.formatCurrency(parsedAmount, currencySymbol, locale = locale, decimals = 0)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .scale(btnScale)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (isFormValid) typeColor else MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable(enabled = isFormValid, interactionSource = btnInteraction, indication = null) {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                                onSaveDebt(
+                                    personName.trim(),
+                                    parsedAmount,
+                                    selectedType,
+                                    dueDate,
+                                    noteText.trim().ifBlank { null },
+                                    selectedAccountId,
+                                    syncLedger
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (isEditing) {
+                                stringResource(R.string.goals_save_changes)
+                            } else if (selectedType == DebtType.LENT) {
+                                stringResource(R.string.debt_record_lent_action, formattedAmountDisplay)
+                            } else {
+                                stringResource(R.string.debt_record_borrowed_action, formattedAmountDisplay)
+                            },
+                            style = Typography.titleMedium.copy(
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            ),
+                            color = if (isFormValid) Color.White else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
@@ -373,218 +412,179 @@ fun CreateEditDebtScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(22.dp))
+                    .padding(18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val isLent = selectedType == DebtType.LENT
-                Box(
+                BoxWithConstraints(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isLent) EmeraldIncome.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(
-                            width = if (isLent) 1.5.dp else 1.dp,
-                            color = if (isLent) EmeraldIncome.copy(alpha = 0.8f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .clickable {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            selectedType = DebtType.LENT
-                        }
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(22.dp))
+                        .padding(3.dp)
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                    val pillWidth = maxWidth / 2
+                    val indicatorOffset by animateDpAsState(
+                        targetValue = if (selectedType == DebtType.LENT) 0.dp else pillWidth,
+                        animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
+                        label = "pillIndicator"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .offset { IntOffset(x = indicatorOffset.roundToPx(), y = 0) }
+                            .width(pillWidth)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(19.dp))
+                            .background(typeColor)
+                    )
+
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(19.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                view.performVibrate(isHapticsEnabled)
+                                selectedType = DebtType.LENT
+                            },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isLent) EmeraldIncome.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface)
-                                    .border(1.dp, if (isLent) EmeraldIncome.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Icon(
                                     imageVector = LucideIcons.ArrowDownLeft,
                                     contentDescription = null,
-                                    tint = if (isLent) EmeraldIncome else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = if (selectedType == DebtType.LENT) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(15.dp)
                                 )
-                            }
-                            if (isLent) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                        .clip(CircleShape)
-                                        .background(EmeraldIncome),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(11.dp)
-                                    )
-                                }
+                                Text(
+                                    text = stringResource(R.string.debt_type_lent_short),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    ),
+                                    color = if (selectedType == DebtType.LENT) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(
-                                text = stringResource(R.string.debt_type_lent_short),
-                                style = Typography.labelLarge.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                ),
-                                color = if (isLent) EmeraldIncome else MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = stringResource(R.string.debt_lent_desc),
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.5.sp,
-                                    fontWeight = if (isLent) FontWeight.SemiBold else FontWeight.Normal
-                                ),
-                                color = if (isLent) EmeraldIncome.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
 
-                val isBorrowed = selectedType == DebtType.BORROWED
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (isBorrowed) RoseExpense.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(
-                            width = if (isBorrowed) 1.5.dp else 1.dp,
-                            color = if (isBorrowed) RoseExpense.copy(alpha = 0.8f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .clickable {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            selectedType = DebtType.BORROWED
-                        }
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(19.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                view.performVibrate(isHapticsEnabled)
+                                selectedType = DebtType.BORROWED
+                            },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isBorrowed) RoseExpense.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface)
-                                    .border(1.dp, if (isBorrowed) RoseExpense.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Icon(
                                     imageVector = LucideIcons.ArrowUpRight,
                                     contentDescription = null,
-                                    tint = if (isBorrowed) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = if (selectedType == DebtType.BORROWED) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(15.dp)
                                 )
+                                Text(
+                                    text = stringResource(R.string.debt_type_borrowed_short),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    ),
+                                    color = if (selectedType == DebtType.BORROWED) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                            if (isBorrowed) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(18.dp)
-                                        .clip(CircleShape)
-                                        .background(RoseExpense),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(11.dp)
-                                    )
-                                }
-                            }
-                        }
-                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(
-                                text = stringResource(R.string.debt_type_borrowed_short),
-                                style = Typography.labelLarge.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                ),
-                                color = if (isBorrowed) RoseExpense else MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = stringResource(R.string.debt_borrowed_desc),
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.5.sp,
-                                    fontWeight = if (isBorrowed) FontWeight.SemiBold else FontWeight.Normal
-                                ),
-                                color = if (isBorrowed) RoseExpense.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
                     }
                 }
-            }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = amountText,
-                    onValueChange = { input ->
-                        if (input.all { it.isDigit() || it == '.' } && input.count { it == '.' } <= 1 && input.length <= 10) {
-                            amountText = input
-                        }
-                    },
-                    placeholder = {
-                        Text(
-                            text = "0.00",
-                            style = Typography.headlineMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                        )
-                    },
-                    prefix = {
-                        Text(
-                            text = currencySymbol,
-                            style = Typography.headlineMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
-                            color = typeColor
-                        )
-                    },
-                    textStyle = Typography.headlineMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true,
+                val amountLength = amountText.length
+                val dynamicFontSize = when {
+                    amountLength > 9 -> 26.sp
+                    amountLength > 7 -> 30.sp
+                    amountLength > 5 -> 34.sp
+                    else -> 38.sp
+                }
+
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = typeColor,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = currencySymbol,
+                        style = Typography.headlineLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = dynamicFontSize * 0.85f
+                        ),
+                        color = typeColor
                     )
-                )
+                    Spacer(Modifier.width(4.dp))
+                    BasicTextField(
+                        value = amountText,
+                        onValueChange = { input ->
+                            if (input.all { it.isDigit() || it == '.' } && input.count { it == '.' } <= 1 && input.length <= 10) {
+                                amountText = input
+                            }
+                        },
+                        textStyle = Typography.headlineLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = dynamicFontSize,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Start
+                        ),
+                        cursorBrush = SolidColor(typeColor),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Next
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (amountText.isBlank()) {
+                                    Text(
+                                        text = "0.00",
+                                        style = Typography.headlineLarge.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = dynamicFontSize
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                }
 
                 Row(
                     modifier = Modifier
@@ -593,19 +593,16 @@ fun CreateEditDebtScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     quickChips.forEach { chipAmount ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f), RoundedCornerShape(10.dp))
-                                .clickable {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    val currentVal = amountText.toDoubleOrNull() ?: 0.0
-                                    val newVal = currentVal + chipAmount
-                                    amountText = if (newVal % 1.0 == 0.0) newVal.toLong().toString() else newVal.toString()
-                                }
-                                .padding(horizontal = 14.dp, vertical = 8.dp),
-                            contentAlignment = Alignment.Center
+                        Surface(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled)
+                                val currentVal = amountText.toDoubleOrNull() ?: 0.0
+                                val newVal = currentVal + chipAmount
+                                amountText = if (newVal % 1.0 == 0.0) newVal.toLong().toString() else String.format(Locale.US, "%.2f", newVal)
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
                         ) {
                             Text(
                                 text = "+${AppFormatters.formatCurrency(chipAmount, currencySymbol, locale = locale, decimals = 0)}",
@@ -614,140 +611,276 @@ fun CreateEditDebtScreen(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.5.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
                             )
                         }
                     }
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.debt_person_name_label),
                     style = Typography.labelMedium.copy(
                         fontFamily = DMSans,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = personName,
-                    onValueChange = { personName = it },
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.debt_person_name_placeholder),
-                            style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 14.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                        )
-                    },
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 10.dp, end = 4.dp)
-                                .size(34.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(typeColor.copy(alpha = 0.16f))
-                                .border(1.dp, typeColor.copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.User,
-                                contentDescription = null,
-                                tint = typeColor,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Next
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
-                    )
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = stringResource(R.string.debt_due_date_label),
-                    style = Typography.labelMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
+                        fontSize = 12.5.sp
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 12.dp, vertical = 11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                            .clickable {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                showDatePicker = true
-                            }
-                            .padding(horizontal = 12.dp, vertical = 11.dp)
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(typeColor.copy(alpha = 0.16f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.Calendar,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
+                        if (personName.isNotBlank()) {
                             Text(
-                                text = if (dueDate != null) AppFormatters.getFullDate().format(Date(dueDate!!)) else stringResource(R.string.debt_select_due_date),
-                                style = Typography.bodyMedium.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 13.sp,
-                                    fontWeight = if (dueDate != null) FontWeight.Bold else FontWeight.Normal
-                                ),
-                                color = if (dueDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = personName.trim().take(1).uppercase(Locale.ROOT),
+                                style = Typography.labelMedium.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold),
+                                color = typeColor
+                            )
+                        } else {
+                            Icon(
+                                imageVector = LucideIcons.User,
+                                contentDescription = null,
+                                tint = typeColor,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
 
-                    val quickDays = listOf(7, 14, 30)
-                    quickDays.forEach { days ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    dueDate = System.currentTimeMillis() + (days * 86_400_000L)
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (personName.isBlank()) {
+                            Text(
+                                text = stringResource(R.string.debt_person_name_placeholder),
+                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 14.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                            )
+                        }
+                        BasicTextField(
+                            value = personName,
+                            onValueChange = { personName = it },
+                            textStyle = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Words,
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    if (personName.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled)
+                                personName = ""
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.X,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (filteredSuggestions.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(filteredSuggestions) { suggestion ->
+                            Surface(
+                                onClick = {
+                                    view.performVibrate(isHapticsEnabled)
+                                    personName = suggestion
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(typeColor.copy(alpha = 0.2f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = suggestion.take(1).uppercase(Locale.ROOT),
+                                            style = Typography.labelSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.Bold, fontSize = 9.sp),
+                                            color = typeColor
+                                        )
+                                    }
+                                    Text(
+                                        text = suggestion,
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 11.5.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                 }
-                                .padding(horizontal = 10.dp, vertical = 11.dp)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.debt_due_date_label),
+                        style = Typography.labelMedium.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (dueDate != null) {
+                        Text(
+                            text = stringResource(R.string.action_clear_input),
+                            style = Typography.labelSmall.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            ),
+                            color = RoseExpense,
+                            modifier = Modifier.clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                dueDate = null
+                            }
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .clickable {
+                            view.performVibrate(isHapticsEnabled)
+                            showDatePicker = true
+                        }
+                        .padding(horizontal = 14.dp, vertical = 11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Calendar,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (dueDate != null) AppFormatters.getFullDate().format(Date(dueDate!!)) else stringResource(R.string.debt_select_due_date),
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontSize = 13.5.sp,
+                                fontWeight = if (dueDate != null) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (dueDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                        if (dueDate == null) {
+                            Text(
+                                text = "Optional • Open-ended repayment",
+                                style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val quickOffsets = listOf(7, 14, 30, 60)
+                    quickOffsets.forEach { days ->
+                        Surface(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled)
+                                dueDate = System.currentTimeMillis() + (days * 86_400_000L)
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)),
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(
                                 text = "+${days}d",
                                 style = Typography.labelSmall.copy(
                                     fontFamily = DMSans,
                                     fontWeight = FontWeight.SemiBold,
-                                    fontSize = 12.sp
+                                    fontSize = 11.5.sp,
+                                    textAlign = TextAlign.Center
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(vertical = 7.dp)
                             )
                         }
                     }
@@ -755,175 +888,212 @@ fun CreateEditDebtScreen(
             }
 
             if (accounts.isNotEmpty()) {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            text = stringResource(R.string.debt_linked_account_label),
-                            style = Typography.labelMedium.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            accounts.forEach { acc ->
-                                val isSelected = selectedAccountId == acc.id
-                                val accColor = Color(acc.colorHex)
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(
-                                            if (isSelected) accColor.copy(alpha = 0.18f)
-                                            else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-                                        )
-                                        .border(
-                                            width = if (isSelected) 1.5.dp else 1.dp,
-                                            color = if (isSelected) accColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            selectedAccountId = acc.id
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                            Icon(
+                                imageVector = LucideIcons.Building2,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.debt_linked_account_label),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        accounts.forEach { acc ->
+                            val isSelected = selectedAccountId == acc.id
+                            val accColor = Color(acc.colorHex)
+                            Surface(
+                                onClick = {
+                                    view.performVibrate(isHapticsEnabled)
+                                    selectedAccountId = acc.id
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) accColor.copy(alpha = 0.18f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(
+                                    if (isSelected) 1.5.dp else 0.5.dp,
+                                    if (isSelected) accColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(accColor)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(accColor)
+                                    )
+                                    Text(
+                                        text = acc.name,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.5.sp
+                                        ),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = LucideIcons.Check,
+                                            contentDescription = null,
+                                            tint = accColor,
+                                            modifier = Modifier.size(13.dp)
                                         )
-                                        Text(
-                                            text = acc.name,
-                                            style = Typography.labelMedium.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                fontSize = 12.5.sp
-                                            ),
-                                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = LucideIcons.Check,
-                                                contentDescription = null,
-                                                tint = accColor,
-                                                modifier = Modifier.size(13.dp)
-                                            )
-                                        }
                                     }
                                 }
                             }
                         }
+                    }
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
-                        )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                        thickness = 1.dp
+                    )
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    syncLedger = !syncLedger
-                                },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.debt_sync_ledger_label),
-                                    style = Typography.labelMedium.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 13.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = stringResource(R.string.debt_sync_ledger_desc),
-                                    style = Typography.bodySmall.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 11.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Switch(
-                                checked = syncLedger,
-                                onCheckedChange = {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    syncLedger = it
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-                                )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled)
+                                syncLedger = !syncLedger
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.debt_sync_ledger_label),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 13.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.debt_sync_ledger_desc),
+                                style = Typography.bodySmall.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        Switch(
+                            checked = syncLedger,
+                            onCheckedChange = {
+                                view.performVibrate(isHapticsEnabled)
+                                syncLedger = it
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                            )
+                        )
                     }
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = stringResource(R.string.adjust_balance_note_label),
-                    style = Typography.labelMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = noteText,
-                    onValueChange = { noteText = it },
-                    placeholder = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = LucideIcons.FileText,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.adjust_balance_note_label),
+                        style = Typography.labelMedium.copy(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 11.dp)
+                ) {
+                    if (noteText.isBlank()) {
                         Text(
                             text = "e.g. Dinner split, Rent loan, UPI",
                             style = Typography.bodyMedium.copy(fontFamily = Lato, fontSize = 13.5.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                         )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                        }
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                    }
+                    BasicTextField(
+                        value = noteText,
+                        onValueChange = { noteText = it },
+                        textStyle = Typography.bodyMedium.copy(
+                            fontFamily = Lato,
+                            fontSize = 13.5.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                            }
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
-                )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

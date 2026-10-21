@@ -686,11 +686,15 @@ class MainActivity : AppCompatActivity() {
                             ) {
                                 val viewModel: DebtsViewModel = hiltViewModel()
                                 val debtsState by viewModel.state.collectAsStateWithLifecycle()
+                                val suggestedPersons = remember(debtsState.debts) {
+                                    debtsState.debts.map { it.debt.personName }.distinct()
+                                }
                                 CreateEditDebtScreen(
                                     debtToEdit = null,
                                     accounts = debtsState.accounts,
                                     currencySymbol = debtsState.currencySymbol,
                                     isHapticsEnabled = debtsState.isHapticsEnabled,
+                                    suggestedPersons = suggestedPersons,
                                     onNavigateBack = { navController.popBackStack() },
                                     onSaveDebt = { personName, amount, type, dueDate, note, accountId, syncLedger ->
                                         viewModel.handleIntent(
@@ -730,11 +734,15 @@ class MainActivity : AppCompatActivity() {
                                 val debtItemToEdit = debtsState.debts.find { it.debt.id == debtId }
 
                                 if (debtItemToEdit != null) {
+                                    val suggestedPersons = remember(debtsState.debts) {
+                                        debtsState.debts.map { it.debt.personName }.distinct()
+                                    }
                                     CreateEditDebtScreen(
                                         debtToEdit = debtItemToEdit.debt,
                                         accounts = debtsState.accounts,
                                         currencySymbol = debtsState.currencySymbol,
                                         isHapticsEnabled = debtsState.isHapticsEnabled,
+                                        suggestedPersons = suggestedPersons,
                                         onNavigateBack = { navController.popBackStack() },
                                         onSaveDebt = { personName, amount, type, dueDate, note, accountId, syncLedger ->
                                             viewModel.handleIntent(
