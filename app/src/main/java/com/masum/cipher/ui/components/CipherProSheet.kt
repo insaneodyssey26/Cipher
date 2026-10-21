@@ -98,6 +98,12 @@ import compose.icons.lucideicons.ExternalLink
 import compose.icons.lucideicons.FileSpreadsheet
 import compose.icons.lucideicons.Key
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.heightIn
+import com.masum.cipher.ui.pro.CUSTOMER_PORTAL_URL
+import com.masum.cipher.ui.pro.isSubscriptionTier
+import compose.icons.lucideicons.CreditCard
 import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Palette
 import compose.icons.lucideicons.ShieldCheck
@@ -571,35 +577,80 @@ fun CipherProSheet(
                     }
                 }
             } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(EmeraldIncome.copy(alpha = 0.12f))
-                        .border(
-                            width = 1.dp,
-                            color = EmeraldIncome.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(18.dp),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = LucideIcons.Check,
-                            contentDescription = null,
-                            tint = EmeraldIncome,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Licensed: $proTier Access Unlocked",
-                            style = Typography.titleMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = EmeraldIncome
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(EmeraldIncome.copy(alpha = 0.12f))
+                            .border(
+                                width = 1.dp,
+                                color = EmeraldIncome.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(18.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = LucideIcons.Check,
+                                contentDescription = null,
+                                tint = EmeraldIncome,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "Licensed: $proTier Access Unlocked",
+                                style = Typography.titleMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = EmeraldIncome
+                            )
+                        }
+                    }
+
+                    if (isSubscriptionTier(proTier)) {
+                        OutlinedButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                try {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CUSTOMER_PORTAL_URL)))
+                                } catch (_: Exception) {}
+                            },
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, EmeraldIncome.copy(alpha = 0.6f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.CreditCard,
+                                contentDescription = null,
+                                tint = EmeraldIncome,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.pro_subscription_manage),
+                                style = Typography.labelLarge.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = LucideIcons.ExternalLink,
+                                contentDescription = null,
+                                tint = EmeraldIncome,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
                     }
                 }
             }
