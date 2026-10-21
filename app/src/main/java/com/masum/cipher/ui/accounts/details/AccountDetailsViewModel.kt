@@ -2,7 +2,6 @@ package com.masum.cipher.ui.accounts.details
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences

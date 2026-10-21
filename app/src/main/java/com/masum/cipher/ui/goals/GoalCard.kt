@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,8 +44,6 @@ import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
-import com.masum.cipher.ui.theme.White10
-import compose.icons.LucideIcons
 
 @Composable
 fun GoalCard(

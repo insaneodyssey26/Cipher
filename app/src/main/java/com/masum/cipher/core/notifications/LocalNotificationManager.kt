@@ -54,11 +54,10 @@ class LocalNotificationManager @Inject constructor(
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager: NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            val channels = listOf(
+        val channels = listOf(
                 NotificationChannel(CHANNEL_TRANSACTIONS, "Transactions", NotificationManager.IMPORTANCE_HIGH).apply {
                     description = "Alerts for newly detected transactions"
                 },
@@ -82,7 +81,6 @@ class LocalNotificationManager @Inject constructor(
                 }
             )
             notificationManager.createNotificationChannels(channels)
-        }
     }
 
     fun showNewAppDetectedNotification(appName: String, packageName: String) {

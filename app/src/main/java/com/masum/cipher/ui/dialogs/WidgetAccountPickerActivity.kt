@@ -57,7 +57,6 @@ import com.masum.cipher.ui.accounts.getAccountIconVector
 import com.masum.cipher.ui.theme.CipherTheme
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
-import com.masum.cipher.ui.widget.BudgetWidget
 import com.masum.cipher.ui.widget.PassbookWidget
 import com.masum.cipher.ui.widget.StatsWidget
 import compose.icons.LucideIcons

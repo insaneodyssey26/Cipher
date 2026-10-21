@@ -2,7 +2,6 @@ package com.masum.cipher.ui.goals
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.masum.cipher.core.data.local.entity.GoalEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.GoalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

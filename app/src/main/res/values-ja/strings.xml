@@ -738,13 +738,10 @@
     <string name="tab_split_expenses">割り勘</string>
     <string name="tab_savings_goals">貯金目標</string>
     <string name="goals_total_saved">現在の合計貯金額</string>
-    <string name="goals_total_target">目標額</string>
     <string name="goals_new_goal">新しい貯金ポット</string>
     <string name="goals_edit_goal">貯金ポットを編集</string>
     <string name="goals_create_goal">目標を作成</string>
     <string name="goals_save_changes">変更を保存</string>
-    <string name="goals_add_funds">入金する</string>
-    <string name="goals_withdraw_funds">出金する</string>
     <string name="goals_deposit">入金</string>
     <string name="goals_withdraw">出金</string>
     <string name="goals_target_amount">目標金額</string>
@@ -852,8 +849,6 @@
     <string name="debt_type_borrowed">お金を借りた（返す）</string>
     <string name="debt_type_lent_short">貸出</string>
     <string name="debt_type_borrowed_short">借入</string>
-    <string name="debt_lent_desc">返してもらう</string>
-    <string name="debt_borrowed_desc">返す</string>
     <string name="debt_create_title">新規貸出・借入</string>
     <string name="debt_edit_title">貸出・借入を編集</string>
     <string name="debt_create_lent_subtitle">誰かに貸したお金を記録</string>
@@ -863,15 +858,12 @@
     <string name="debt_select_due_date">期日を選択</string>
     <string name="debt_person_name_label">相手の名前・名称</string>
     <string name="debt_person_name_placeholder">例: 田中 太郎</string>
-    <string name="debt_amount_label">元金金額</string>
     <string name="debt_due_date_label">返済期日（任意）</string>
     <string name="debt_linked_account_label">連携口座</string>
     <string name="debt_sync_ledger_label">口座残高に反映する</string>
     <string name="debt_sync_ledger_desc">保存時に口座残高を自動的に更新します</string>
     <string name="repayment_history_title">返済履歴</string>
     <string name="no_repayments_yet">返済履歴はまだありません</string>
-    <string name="repayment_amount_label">返済金額</string>
-    <string name="repayment_pay_full">全額支払</string>
     <string name="debt_overdue">期限超過</string>
     <string name="debt_due_in_days">期日まであと %1$d 日</string>
     <string name="debt_settled_badge">精算済み</string>
@@ -879,7 +871,6 @@
     <string name="debt_deleted">記録を削除しました</string>
     <string name="debt_delete_confirm_title">記録を削除しますか？</string>
     <string name="debt_delete_confirm_desc">この貸出・借入記録を削除してもよろしいですか？連携された取引も解除されます。</string>
-    <string name="repayment_recorded">返済を記録しました</string>
     <string name="debt_repaid_of_total">%2$s 中 %1$s 返済済み</string>
     <string name="debt_remaining_label">残り %1$s</string>
 </resources>

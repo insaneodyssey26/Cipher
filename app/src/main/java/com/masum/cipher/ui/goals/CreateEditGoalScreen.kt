@@ -3,7 +3,6 @@ package com.masum.cipher.ui.goals
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -100,7 +99,6 @@ import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Palette
-import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.Wallet

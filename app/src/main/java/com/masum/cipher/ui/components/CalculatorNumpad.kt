@@ -1,6 +1,5 @@
 package com.masum.cipher.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,9 +31,9 @@ import compose.icons.lucideicons.Delete
 @Composable
 fun CalculatorNumpad(
     input: String,
-    cursorPosition: Int = input.length,
     onInputChange: (newInput: String, newCursorPosition: Int) -> Unit,
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cursorPosition: Int = input.length
 ) {
     val view = LocalView.current
     val safeCursor = cursorPosition.coerceIn(0, input.length)
@@ -119,9 +118,9 @@ fun CalculatorNumpad(
 @Composable
 private fun NumpadButton(
     text: String,
-    isOperator: Boolean = false,
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isOperator: Boolean = false
 ) {
     val bgColor = MaterialTheme.colorScheme.surface
     

@@ -737,13 +737,10 @@
     <string name="tab_split_expenses">Dividir gastos</string>
     <string name="tab_savings_goals">Metas de ahorro</string>
     <string name="goals_total_saved">Total ahorrado</string>
-    <string name="goals_total_target">Objetivo</string>
     <string name="goals_new_goal">Nueva hucha</string>
     <string name="goals_edit_goal">Editar hucha</string>
     <string name="goals_create_goal">Crear meta</string>
     <string name="goals_save_changes">Guardar cambios</string>
-    <string name="goals_add_funds">Añadir fondos</string>
-    <string name="goals_withdraw_funds">Retirar fondos</string>
     <string name="goals_deposit">Depositar</string>
     <string name="goals_withdraw">Retirar</string>
     <string name="goals_target_amount">Monto objetivo</string>
@@ -855,8 +852,6 @@
     <string name="debt_type_borrowed">Pedí prestado (Debo)</string>
     <string name="debt_type_lent_short">Prestado</string>
     <string name="debt_type_borrowed_short">Adeudado</string>
-    <string name="debt_lent_desc">Me deben</string>
-    <string name="debt_borrowed_desc">Debo</string>
     <string name="debt_create_title">Nueva deuda / préstamo</string>
     <string name="debt_edit_title">Editar deuda / préstamo</string>
     <string name="debt_create_lent_subtitle">Registrar dinero prestado a alguien</string>
@@ -866,15 +861,12 @@
     <string name="debt_select_due_date">Seleccionar fecha de vencimiento</string>
     <string name="debt_person_name_label">Nombre de la persona / entidad</string>
     <string name="debt_person_name_placeholder">ej. Carlos Ruiz</string>
-    <string name="debt_amount_label">Monto principal</string>
     <string name="debt_due_date_label">Fecha de vencimiento (opcional)</string>
     <string name="debt_linked_account_label">Cuenta vinculada</string>
     <string name="debt_sync_ledger_label">Registrar en el saldo de la cuenta</string>
     <string name="debt_sync_ledger_desc">Actualizar automáticamente el saldo de la cuenta al guardar esta entrada</string>
     <string name="repayment_history_title">Historial de reembolsos</string>
     <string name="no_repayments_yet">No hay reembolsos registrados aún</string>
-    <string name="repayment_amount_label">Monto del reembolso</string>
-    <string name="repayment_pay_full">Pagar todo</string>
     <string name="debt_overdue">Vencido</string>
     <string name="debt_due_in_days">Vence en %1$d días</string>
     <string name="debt_settled_badge">Saldado</string>
@@ -882,7 +874,6 @@
     <string name="debt_deleted">Registro de deuda eliminado</string>
     <string name="debt_delete_confirm_title">¿Eliminar registro de deuda?</string>
     <string name="debt_delete_confirm_desc">¿Seguro que deseas eliminar este registro? Las transacciones vinculadas también se desvincularán.</string>
-    <string name="repayment_recorded">Reembolso registrado</string>
     <string name="debt_repaid_of_total">%1$s de %2$s pagado</string>
     <string name="debt_remaining_label">%1$s restante</string>
 </resources>

@@ -45,7 +45,6 @@ import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Settings
-import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.Wallet
 
 enum class BottomNavItem(val route: String, val icon: ImageVector, @StringRes val labelRes: Int) {

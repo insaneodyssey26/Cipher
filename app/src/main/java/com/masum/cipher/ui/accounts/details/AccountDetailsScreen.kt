@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,7 +67,6 @@ import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.accounts.LuxuryAccountCard
-import com.masum.cipher.ui.accounts.getAccountIconVector
 import com.masum.cipher.ui.components.ProFeatureGateSheet
 import com.masum.cipher.ui.components.ProFeaturePerk
 import com.masum.cipher.ui.components.TransactionDetailsSheet
@@ -85,17 +83,14 @@ import compose.icons.lucideicons.ArrowDownLeft
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowLeftRight
 import compose.icons.lucideicons.ArrowUpRight
-import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Download
 import compose.icons.lucideicons.FileSpreadsheet
 import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Search
-import compose.icons.lucideicons.SlidersHorizontal
 import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.TrendingUp
-import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
 import java.util.Locale
 

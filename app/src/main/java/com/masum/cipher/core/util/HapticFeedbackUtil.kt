@@ -36,7 +36,7 @@ fun View.performVibrate(isHapticsEnabled: Boolean, isLongPress: Boolean = false)
                         VibrationEffect.EFFECT_CLICK
                     }
                     vibrator.vibrate(VibrationEffect.createPredefined(effectId))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                } else {
                     val duration = if (isLongPress) 40L else 12L
                     val amplitude = if (isLongPress) VibrationEffect.DEFAULT_AMPLITUDE else 120
                     vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))

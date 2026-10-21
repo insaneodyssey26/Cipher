@@ -737,13 +737,10 @@
     <string name="tab_split_expenses">Wspólne rachunki</string>
     <string name="tab_savings_goals">Cele oszczędnościowe</string>
     <string name="goals_total_saved">Łącznie zaoszczędzono</string>
-    <string name="goals_total_target">Cel</string>
     <string name="goals_new_goal">Nowa skarbonka</string>
     <string name="goals_edit_goal">Edytuj skarbonkę</string>
     <string name="goals_create_goal">Utwórz cel</string>
     <string name="goals_save_changes">Zapisz zmiany</string>
-    <string name="goals_add_funds">Dodaj środki</string>
-    <string name="goals_withdraw_funds">Wypłać środki</string>
     <string name="goals_deposit">Wpłata</string>
     <string name="goals_withdraw">Wypłata</string>
     <string name="goals_target_amount">Kwota docelowa</string>
@@ -857,8 +854,6 @@
     <string name="debt_type_borrowed">Pożyczyłem od kogoś (Jestem winien)</string>
     <string name="debt_type_lent_short">Pożyczone</string>
     <string name="debt_type_borrowed_short">Zaciągnięte</string>
-    <string name="debt_lent_desc">Są mi winni</string>
-    <string name="debt_borrowed_desc">Jestem winien</string>
     <string name="debt_create_title">Nowy dług / pożyczka</string>
     <string name="debt_edit_title">Edytuj dług / pożyczkę</string>
     <string name="debt_create_lent_subtitle">Zarejestruj pieniądze pożyczone komuś</string>
@@ -868,15 +863,12 @@
     <string name="debt_select_due_date">Wybierz termin spłaty</string>
     <string name="debt_person_name_label">Osoba / podmiot</string>
     <string name="debt_person_name_placeholder">np. Jan Kowalski</string>
-    <string name="debt_amount_label">Kwota główna</string>
     <string name="debt_due_date_label">Termin spłaty (opcjonalnie)</string>
     <string name="debt_linked_account_label">Powiązane konto</string>
     <string name="debt_sync_ledger_label">Zapisz w saldzie konta</string>
     <string name="debt_sync_ledger_desc">Automatycznie aktualizuj saldo konta podczas zapisywania</string>
     <string name="repayment_history_title">Historia spłat</string>
     <string name="no_repayments_yet">Brak zarejestrowanych spłat</string>
-    <string name="repayment_amount_label">Kwota spłaty</string>
-    <string name="repayment_pay_full">Spłać całość</string>
     <string name="debt_overdue">Zaległe</string>
     <string name="debt_due_in_days">Termin za %1$d dni</string>
     <string name="debt_settled_badge">Rozliczone</string>
@@ -884,7 +876,6 @@
     <string name="debt_deleted">Wpis został usunięty</string>
     <string name="debt_delete_confirm_title">Usunąć wpis długu?</string>
     <string name="debt_delete_confirm_desc">Czy na pewno chcesz usunąć ten wpis? Powiązane transakcje na koncie zostaną odłączone.</string>
-    <string name="repayment_recorded">Spłata została zarejestrowana</string>
     <string name="debt_repaid_of_total">Spłacono %1$s z %2$s</string>
     <string name="debt_remaining_label">Pozostało %1$s</string>
 </resources>

@@ -23,9 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -57,7 +55,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -69,22 +66,16 @@ import com.masum.cipher.ui.theme.DMSans
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
-import compose.icons.lucideicons.CreditCard
 import compose.icons.lucideicons.Database
-import compose.icons.lucideicons.ExternalLink
 import compose.icons.lucideicons.FolderDown
 import compose.icons.lucideicons.Github
 import compose.icons.lucideicons.Globe
-import compose.icons.lucideicons.Info
-import compose.icons.lucideicons.Key
 import compose.icons.lucideicons.Layers
 import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Mail
 import compose.icons.lucideicons.RefreshCw
-import compose.icons.lucideicons.ShieldAlert
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
-import compose.icons.lucideicons.Sparkles
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

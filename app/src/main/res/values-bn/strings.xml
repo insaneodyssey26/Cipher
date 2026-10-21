@@ -738,13 +738,10 @@
     <string name="tab_split_expenses">খরচ ভাগ</string>
     <string name="tab_savings_goals">সঞ্চয় লক্ষ্য</string>
     <string name="goals_total_saved">মোট সঞ্চয়</string>
-    <string name="goals_total_target">লক্ষ্যমাত্রা</string>
     <string name="goals_new_goal">নতুন সঞ্চয় পট</string>
     <string name="goals_edit_goal">সঞ্চয় পট সম্পাদনা</string>
     <string name="goals_create_goal">লক্ষ্য তৈরি করুন</string>
     <string name="goals_save_changes">সংরক্ষণ করুন</string>
-    <string name="goals_add_funds">টাকা যোগ করুন</string>
-    <string name="goals_withdraw_funds">টাকা তুলুন</string>
     <string name="goals_deposit">জমা</string>
     <string name="goals_withdraw">উত্তোলন</string>
     <string name="goals_target_amount">লক্ষ্যমাত্রা</string>
@@ -854,8 +851,6 @@
     <string name="debt_type_borrowed">আমি ধার নিয়েছি (আমাকে ফেরত দিতে হবে)</string>
     <string name="debt_type_lent_short">দেওয়া ধার</string>
     <string name="debt_type_borrowed_short">নেওয়া ঋণ</string>
-    <string name="debt_lent_desc">তারা ফেরত দেবে</string>
-    <string name="debt_borrowed_desc">আমাকে ফেরত দিতে হবে</string>
     <string name="debt_create_title">নতুন ধার / ঋণ</string>
     <string name="debt_edit_title">ধার / ঋণ সম্পাদনা</string>
     <string name="debt_create_lent_subtitle">কাউকে দেওয়া ধারের হিসাব রাখুন</string>
@@ -865,15 +860,12 @@
     <string name="debt_select_due_date">পরিশোধের শেষ তারিখ বেছে নিন</string>
     <string name="debt_person_name_label">ব্যক্তি / প্রতিষ্ঠানের নাম</string>
     <string name="debt_person_name_placeholder">যেমন: রাহুল সেন</string>
-    <string name="debt_amount_label">মূল পরিমাণ</string>
     <string name="debt_due_date_label">পরিশোধের তারিখ (ঐচ্ছিক)</string>
     <string name="debt_linked_account_label">সংযুক্ত অ্যাকাউন্ট</string>
     <string name="debt_sync_ledger_label">অ্যাকাউন্ট ব্যালেন্সে রেকর্ড করুন</string>
     <string name="debt_sync_ledger_desc">এই এন্ট্রি সংরক্ষণের সময় অ্যাকাউন্ট ব্যালেন্স স্বয়ংক্রিয়ভাবে আপডেট করুন</string>
     <string name="repayment_history_title">পরিশোধের ইতিহাস</string>
     <string name="no_repayments_yet">এখনও কোনো পরিশোধ রেকর্ড করা হয়নি</string>
-    <string name="repayment_amount_label">পরিশোধের পরিমাণ</string>
-    <string name="repayment_pay_full">সম্পূর্ণ পরিশোধ</string>
     <string name="debt_overdue">সময় উত্তীর্ণ</string>
     <string name="debt_due_in_days">%1$d দিনের মধ্যে প্রদেয়</string>
     <string name="debt_settled_badge">নিষ্পন্ন</string>
@@ -881,7 +873,6 @@
     <string name="debt_deleted">রেকর্ড মুছে ফেলা হয়েছে</string>
     <string name="debt_delete_confirm_title">ধার রেকর্ড মুছবেন?</string>
     <string name="debt_delete_confirm_desc">আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি মুছে ফেলতে চান? সংযুক্ত লেনদেনগুলোও আনলিংক হবে।</string>
-    <string name="repayment_recorded">পরিশোধ রেকর্ড করা হয়েছে</string>
     <string name="debt_repaid_of_total">%2$s এর মধ্যে %1$s পরিশোধিত</string>
     <string name="debt_remaining_label">%1$s বাকি</string>
 </resources>

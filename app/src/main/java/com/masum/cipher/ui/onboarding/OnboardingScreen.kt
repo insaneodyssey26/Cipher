@@ -111,7 +111,6 @@ import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
-import compose.icons.lucideicons.ArrowDown
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
 import compose.icons.lucideicons.BellRing
@@ -119,7 +118,6 @@ import compose.icons.lucideicons.Bot
 import compose.icons.lucideicons.ChartBar
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
-import compose.icons.lucideicons.Compass
 import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Lock
@@ -128,11 +126,9 @@ import compose.icons.lucideicons.MousePointer
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.ShoppingBag
-import compose.icons.lucideicons.Smartphone
 import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Sun
 import compose.icons.lucideicons.SunMoon
-import compose.icons.lucideicons.Tag
 import compose.icons.lucideicons.Utensils
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.Zap

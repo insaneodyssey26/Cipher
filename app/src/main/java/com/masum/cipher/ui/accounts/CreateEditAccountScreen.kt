@@ -1,20 +1,15 @@
 package com.masum.cipher.ui.accounts
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -56,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalView
@@ -69,7 +63,6 @@ import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.domain.model.AccountType
-import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
@@ -78,25 +71,11 @@ import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
-import compose.icons.lucideicons.Briefcase
-import compose.icons.lucideicons.Building2
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.ChevronDown
-import compose.icons.lucideicons.ChevronLeft
-import compose.icons.lucideicons.ChevronRight
-import compose.icons.lucideicons.CreditCard
-import compose.icons.lucideicons.Globe
-import compose.icons.lucideicons.Landmark
-import compose.icons.lucideicons.Layers
-import compose.icons.lucideicons.PiggyBank
-import compose.icons.lucideicons.Plus
-import compose.icons.lucideicons.ShieldCheck
-import compose.icons.lucideicons.Smartphone
-import compose.icons.lucideicons.Wallet
 import com.masum.cipher.core.domain.model.CategoryColorRegistry
 import com.masum.cipher.core.domain.model.CategoryIconRegistry
 import androidx.compose.ui.graphics.vector.ImageVector
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 val AccountPaletteColors = CategoryColorRegistry.COLORS

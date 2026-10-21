@@ -1088,17 +1088,10 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         onClick = {
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             try {
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                    val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                        putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                    }
-                                    context.startActivity(intent)
-                                } else {
-                                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = "package:${context.packageName}".toUri()
-                                    }
-                                    context.startActivity(intent)
+                                val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
                                 }
+                                context.startActivity(intent)
                             } catch (_: Exception) {
                                 val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                                     data = "package:${context.packageName}".toUri()

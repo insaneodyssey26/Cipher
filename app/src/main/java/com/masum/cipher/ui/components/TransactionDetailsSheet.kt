@@ -1,10 +1,7 @@
 package com.masum.cipher.ui.components
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -15,7 +12,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,13 +72,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.toClipEntry
+import android.content.ClipData
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -132,7 +132,6 @@ import compose.icons.lucideicons.Copy
 import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.MessageSquareText
 import compose.icons.lucideicons.PenLine
-import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.Wallet
@@ -163,8 +162,7 @@ fun TransactionDetailsSheet(
     onCreateCustomCategory: ((name: String, iconName: String, colorHex: Long) -> Unit)? = null,
     onUpdateCustomCategory: ((id: Long, oldName: String, newName: String, iconName: String, colorHex: Long) -> Unit)? = null,
     onDeleteCustomCategory: ((CustomCategoryEntity) -> Unit)? = null,
-    isHapticsEnabled: Boolean = true,
-    isPro: Boolean = true
+    isHapticsEnabled: Boolean = true
 ) {
     val isEditing = transaction.id != 0L
     var merchant by remember { mutableStateOf(transaction.merchant) }
@@ -225,7 +223,6 @@ fun TransactionDetailsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val view = LocalView.current
     val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     val merchantFocusRequester = remember { FocusRequester() }
     val noteFocusRequester = remember { FocusRequester() }
@@ -1206,7 +1203,7 @@ private data class MessageSourceInfo(
 )
 
 private fun parseMessageSource(rawMessage: String): MessageSourceInfo {
-    val bracketMatch = Regex("^\\[([^\\]]+)\\]\\s*(.*)$", RegexOption.DOT_MATCHES_ALL).find(rawMessage)
+    val bracketMatch = Regex("^\\[([^]]+)\\]\\s*(.*)$", RegexOption.DOT_MATCHES_ALL).find(rawMessage)
     if (bracketMatch != null) {
         val appName = bracketMatch.groupValues[1].trim()
         val text = bracketMatch.groupValues[2].trim()
@@ -1310,13 +1307,14 @@ private fun OriginalMessageDialog(
     onDismiss: () -> Unit
 ) {
     var isCopied by remember { mutableStateOf(false) }
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val view = LocalView.current
     val sourceInfo = remember(rawMessage) { parseMessageSource(rawMessage) }
 
     LaunchedEffect(isCopied) {
         if (isCopied) {
-            delay(2000)
+            delay(2.seconds)
             isCopied = false
         }
     }
@@ -1448,7 +1446,9 @@ private fun OriginalMessageDialog(
                     Button(
                         onClick = {
                             view.performVibrate(isHapticsEnabled)
-                            clipboardManager.setText(AnnotatedString(sourceInfo.cleanText))
+                            coroutineScope.launch {
+                                clipboard.setClipEntry(ClipData.newPlainText("cipher_message", sourceInfo.cleanText).toClipEntry())
+                            }
                             isCopied = true
                         },
                         shape = RoundedCornerShape(12.dp),

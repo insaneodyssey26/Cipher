@@ -71,11 +71,6 @@ import com.masum.cipher.ui.components.PeakHoursChart
 import com.masum.cipher.ui.components.SpendingTrendChart
 import com.masum.cipher.ui.components.TimeSelectorDropdown
 import com.masum.cipher.ui.components.VaultCard
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import com.masum.cipher.ui.dashboard.DashboardContract
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
@@ -90,7 +85,6 @@ import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.RoseExpense
 import compose.icons.lucideicons.Wallet
-import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Plus
 import kotlinx.coroutines.launch

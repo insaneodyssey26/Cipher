@@ -85,7 +85,6 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.ArrowRight
-import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.Store
