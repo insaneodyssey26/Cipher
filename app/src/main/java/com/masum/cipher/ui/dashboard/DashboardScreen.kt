@@ -1992,7 +1992,7 @@ private fun DashboardHero(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .widthIn(min = 120.dp, max = 150.dp)
+                            .widthIn(min = 105.dp, max = 130.dp)
                             .height(38.dp)
                             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
                             .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(19.dp))
