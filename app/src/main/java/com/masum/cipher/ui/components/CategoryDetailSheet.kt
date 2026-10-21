@@ -1,26 +1,29 @@
 package com.masum.cipher.ui.components
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -31,34 +34,46 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.res.stringResource
-import com.masum.cipher.R
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.groupByMerchant
@@ -66,6 +81,7 @@ import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.dashboard.DashboardContract
+import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
@@ -77,6 +93,7 @@ import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.X
 import java.util.Calendar
 import java.util.Date
+import kotlinx.coroutines.launch
 
 private data class CategoryMerchantSpend(
     val merchant: String,
@@ -84,7 +101,7 @@ private data class CategoryMerchantSpend(
     val count: Int
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CategoryDetailSheet(
     categoryData: DashboardContract.CategoryData,
@@ -172,154 +189,119 @@ fun CategoryDetailSheet(
         )
     }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
-    ) {
-        BackHandler { onDismiss() }
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        Box(
+    val closeWithAnimation: () -> Unit = {
+        coroutineScope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismiss()
+            }
+        }
+    }
+
+    val consumeOverscrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset = Offset.Zero
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                return available
+            }
+            override suspend fun onPreFling(available: Velocity): Velocity = Velocity.Zero
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                return available
+            }
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(top = 12.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 4.dp)
+                    .size(width = 38.dp, height = 4.5.dp)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(3.dp))
+            )
+        },
+        tonalElevation = 0.dp
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onDismiss() },
-            contentAlignment = Alignment.BottomCenter
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.navigationBars)
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.92f)
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {}
-                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(categoryColor.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = categoryIcon,
-                                contentDescription = null,
-                                tint = categoryColor,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = categoryTitle,
-                                style = Typography.titleLarge.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = stringResource(R.string.percent_of_expenses, String.format(locale, "%.1f", categoryData.percentage * 100)),
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 12.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.width(10.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.weight(1f, fill = false)
-                    ) {
-                        Text(
-                            text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale),
-                            style = Typography.headlineMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = if (totalSpent >= 1_000_000_000) 18.sp else 22.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                                .clickable {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    onDismiss()
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.X,
-                                contentDescription = "Close",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                Text(
+                    text = stringResource(R.string.view_breakdown_transactions),
+                    style = Typography.titleMedium.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 20.dp),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 36.dp)
-                ) {
-
-            item {
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
+                IconButton(
                     onClick = {
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        showBudgetDialog = true
+                        closeWithAnimation()
                     },
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    contentPadding = 14.dp
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
-                    if (categoryBudget > 0) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                    Icon(
+                        imageVector = LucideIcons.X,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .nestedScroll(consumeOverscrollConnection),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 28.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        categoryColor.copy(alpha = 0.22f),
+                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surface
+                                    )
+                                )
+                            )
+                            .border(1.2.dp, categoryColor.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
+                            .padding(18.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -327,71 +309,209 @@ fun CategoryDetailSheet(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(7.dp)
-                                            .clip(CircleShape)
-                                            .background(if (isOverBudget) RoseExpense else if (budgetPercentInt >= 85) Color(0xFFF59E0B) else EmeraldIncome)
-                                    )
-                                    Text(
-                                        text = if (isOverBudget) "OVER LIMIT" else "$budgetPercentInt% OF LIMIT USED",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 10.sp,
-                                            letterSpacing = 0.8.sp
-                                        ),
-                                        color = if (isOverBudget) RoseExpense else if (budgetPercentInt >= 85) Color(0xFFF59E0B) else EmeraldIncome
-                                    )
+                                            .size(46.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(categoryColor.copy(alpha = 0.2f))
+                                            .border(1.dp, categoryColor.copy(alpha = 0.5f), RoundedCornerShape(14.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = categoryIcon,
+                                            contentDescription = null,
+                                            tint = categoryColor,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(
+                                            text = categoryTitle,
+                                            style = Typography.titleMedium.copy(
+                                                fontFamily = DMSans,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 17.5.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.percent_of_expenses, String.format(locale, "%.1f", categoryData.percentage * 100)),
+                                            style = Typography.bodySmall.copy(
+                                                fontFamily = Lato,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
 
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = categoryColor.copy(alpha = 0.16f),
+                                    border = BorderStroke(1.dp, categoryColor.copy(alpha = 0.4f))
                                 ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Settings,
-                                        contentDescription = "Edit Category Budget",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(12.dp)
-                                    )
                                     Text(
-                                        text = "${stringResource(R.string.limit_suffix)}: ${AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 11.sp
+                                        text = "${String.format(locale, "%.1f", categoryData.percentage * 100)}%",
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.5.sp
                                         ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = categoryColor,
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.5.dp)
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        text = "Total Spent",
+                                        style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.5.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale),
+                                        style = Typography.headlineMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = if (totalSpent >= 1_000_000_000) 20.sp else 24.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                if (hasBudget) {
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = if (isOverBudget) RoseExpense.copy(alpha = 0.12f) else EmeraldIncome.copy(alpha = 0.12f),
+                                        border = BorderStroke(0.5.dp, if (isOverBudget) RoseExpense.copy(alpha = 0.4f) else EmeraldIncome.copy(alpha = 0.4f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(6.dp)
+                                                    .clip(CircleShape)
+                                                    .background(if (isOverBudget) RoseExpense else EmeraldIncome)
+                                            )
+                                            Text(
+                                                text = if (isOverBudget) "OVER LIMIT" else "$budgetPercentInt% OF LIMIT",
+                                                style = Typography.labelSmall.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 10.sp
+                                                ),
+                                                color = if (isOverBudget) RoseExpense else EmeraldIncome
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                showBudgetDialog = true
+                            }
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (categoryBudget > 0) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.Target,
+                                        contentDescription = null,
+                                        tint = categoryColor,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Text(
+                                        text = "${stringResource(R.string.limit_suffix)}: ${AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Settings,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(11.dp)
+                                        )
+                                        Text(
+                                            text = "Edit Limit",
+                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 10.5.sp, fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
 
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(6.dp)
-                                    .clip(RoundedCornerShape(3.dp))
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                    .height(7.dp)
+                                    .clip(RoundedCornerShape(3.5.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth(animatedBudgetProgress)
                                         .fillMaxHeight()
-                                        .clip(RoundedCornerShape(3.dp))
+                                        .clip(RoundedCornerShape(3.5.dp))
                                         .background(if (isOverBudget) RoseExpense else categoryColor)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
-
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = if (isOverBudget) {
@@ -401,8 +521,8 @@ fun CategoryDetailSheet(
                                     },
                                     style = Typography.labelSmall.copy(
                                         fontFamily = Lato,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.SemiBold
                                     ),
                                     color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -415,243 +535,232 @@ fun CategoryDetailSheet(
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold
                                         ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = EmeraldIncome
                                     )
                                 }
                             }
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        } else {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(CircleShape)
-                                        .background(categoryColor.copy(alpha = 0.14f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Target,
-                                        contentDescription = null,
-                                        tint = categoryColor,
-                                        modifier = Modifier.size(17.dp)
-                                    )
-                                }
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.set_category_budget),
-                                        style = Typography.titleSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.5.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.set_spending_limit_for, categoryTitle),
-                                        style = Typography.bodySmall.copy(fontSize = 11.sp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(categoryColor.copy(alpha = 0.15f))
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.weight(1f)
                                 ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Plus,
-                                        contentDescription = null,
-                                        tint = categoryColor,
-                                        modifier = Modifier.size(11.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.set_limit),
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = categoryColor
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(CircleShape)
+                                            .background(categoryColor.copy(alpha = 0.14f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Target,
+                                            contentDescription = null,
+                                            tint = categoryColor,
+                                            modifier = Modifier.size(17.dp)
+                                        )
+                                    }
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.set_category_budget),
+                                            style = Typography.titleSmall.copy(
+                                                fontFamily = DMSans,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.5.sp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.set_spending_limit_for, categoryTitle),
+                                            style = Typography.bodySmall.copy(fontSize = 11.sp, fontFamily = Lato),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = categoryColor.copy(alpha = 0.16f),
+                                    border = BorderStroke(0.5.dp, categoryColor.copy(alpha = 0.4f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Plus,
+                                            contentDescription = null,
+                                            tint = categoryColor,
+                                            modifier = Modifier.size(11.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.set_limit),
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 11.sp
+                                            ),
+                                            color = categoryColor
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(androidx.compose.foundation.layout.IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    VaultCard(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        contentPadding = 12.dp
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.SpaceBetween
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
-                            Text(
-                                text = stringResource(R.string.avg_spend_header),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 9.sp,
-                                    letterSpacing = 0.7.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.avg_spend_header),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
-                    }
 
-                    VaultCard(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        contentPadding = 12.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.SpaceBetween
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
-                            Text(
-                                text = stringResource(R.string.count_header),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 9.sp,
-                                    letterSpacing = 0.7.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "$txCount",
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.count_header),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "$txCount txs",
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
-                    }
 
-                    VaultCard(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        contentPadding = 12.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.SpaceBetween
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         ) {
-                            Text(
-                                text = stringResource(R.string.largest_header),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 9.sp,
-                                    letterSpacing = 0.7.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.largest_header),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
+                                    style = Typography.titleMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                if (topMerchants.isNotEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.top_merchants),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 
-            if (topMerchants.isNotEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(R.string.top_merchants),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            letterSpacing = 1.2.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    VaultCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        contentPadding = 14.dp
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            topMerchants.forEach { merchant ->
-                                val merchantPercent = if (totalSpent > 0) (merchant.totalAmount / totalSpent).toFloat() else 0f
-                                Column(modifier = Modifier.fillMaxWidth()) {
+                            topMerchants.forEach { merchantSpend ->
+                                val merchantPercent = if (totalSpent > 0) (merchantSpend.totalAmount / totalSpent).toFloat() else 0f
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                                ) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = merchant.merchant,
+                                            text = merchantSpend.merchant,
                                             style = Typography.bodyMedium.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.SemiBold,
@@ -664,9 +773,9 @@ fun CategoryDetailSheet(
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = AppFormatters.formatCurrency(merchant.totalAmount, currencySymbol, locale),
+                                            text = AppFormatters.formatCurrency(merchantSpend.totalAmount, currencySymbol, locale),
                                             style = Typography.bodyMedium.copy(
-                                                fontFamily = Lato,
+                                                fontFamily = DMSans,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 13.sp
                                             ),
@@ -676,14 +785,12 @@ fun CategoryDetailSheet(
                                         )
                                     }
 
-                                    Spacer(modifier = Modifier.height(6.dp))
-
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(5.dp)
                                             .clip(RoundedCornerShape(2.5.dp))
-                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
                                     ) {
                                         Box(
                                             modifier = Modifier
@@ -697,83 +804,108 @@ fun CategoryDetailSheet(
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            if (categoryTransactions.isNotEmpty()) {
-                item {
-                    Text(
-                        text = "${stringResource(R.string.transactions_header)} (${categoryTransactions.size})",
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            letterSpacing = 1.2.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                items(
-                    items = categoryTransactions,
-                    key = { it.id }
-                ) { tx ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .clickable {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                onTransactionClick(tx)
-                            }
-                            .padding(vertical = 10.dp, horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = tx.merchant.ifEmpty { stringResource(R.string.expense) },
-                                style = Typography.bodyMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = "${AppFormatters.getDay().format(Date(tx.timestamp))}${if (!tx.note.isNullOrBlank()) " • ${tx.note}" else ""}",
-                                style = Typography.bodySmall.copy(
-                                    fontSize = 11.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-
-                        Spacer(Modifier.width(8.dp))
-
+                if (categoryTransactions.isNotEmpty()) {
+                    item {
                         Text(
-                            text = "-${AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
-                            style = Typography.titleMedium.copy(
-                                fontFamily = Lato,
+                            text = "${stringResource(R.string.transactions_header)} (${categoryTransactions.size})",
+                            style = Typography.labelMedium.copy(
+                                fontFamily = DMSans,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
+                                fontSize = 12.5.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
+                    }
+
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                                .padding(vertical = 4.dp)
+                        ) {
+                            categoryTransactions.forEachIndexed { index, tx ->
+                                if (index > 0) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                                        thickness = 1.dp
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            onTransactionClick(tx)
+                                        }
+                                        .padding(horizontal = 14.dp, vertical = 11.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(categoryColor)
+                                        )
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = tx.merchant.ifEmpty { stringResource(R.string.expense) },
+                                                style = Typography.bodyMedium.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    fontSize = 13.5.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = "${AppFormatters.getDay().format(Date(tx.timestamp))}${if (!tx.note.isNullOrBlank()) " • ${tx.note}" else ""}",
+                                                style = Typography.bodySmall.copy(
+                                                    fontFamily = Lato,
+                                                    fontSize = 11.5.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(Modifier.width(8.dp))
+
+                                    Text(
+                                        text = "-${AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
+                                        style = Typography.titleSmall.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.5.sp
+                                        ),
+                                        color = RoseExpense,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
-}
-}
 }
 
 @Composable
