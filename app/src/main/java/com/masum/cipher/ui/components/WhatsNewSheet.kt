@@ -25,12 +25,18 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.BuildConfig
@@ -51,6 +57,15 @@ fun WhatsNewSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
+
+    val consumeOverscrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset = Offset.Zero
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset = available
+            override suspend fun onPreFling(available: Velocity): Velocity = Velocity.Zero
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -110,6 +125,7 @@ fun WhatsNewSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .nestedScroll(consumeOverscrollConnection)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -371,68 +387,6 @@ fun WhatsNewSheet(
                     WhatsNewFeatureEntry(
                         title = stringResource(R.string.whats_new_v60_onboarding_title),
                         description = stringResource(R.string.whats_new_v60_onboarding_desc)
-                    )
-                }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
-                WhatsNewVersionSection(
-                    versionTitle = "v5.6.2"
-                ) {
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_feature_custom_categories_title),
-                        description = stringResource(R.string.whats_new_feature_custom_categories_desc)
-                    )
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_feature_smart_rules_title),
-                        description = stringResource(R.string.whats_new_feature_smart_rules_desc)
-                    )
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v56_notification_title),
-                        description = stringResource(R.string.whats_new_v56_notification_desc)
-                    )
-                }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
-                WhatsNewVersionSection(
-                    versionTitle = "v5.5.0"
-                ) {
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v55_splits_title),
-                        description = stringResource(R.string.whats_new_v55_splits_desc)
-                    )
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v55_balance_title),
-                        description = stringResource(R.string.whats_new_v55_balance_desc)
-                    )
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v55_compact_nav_title),
-                        description = stringResource(R.string.whats_new_v55_compact_nav_desc)
-                    )
-                }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
-                WhatsNewVersionSection(
-                    versionTitle = "v5.2.0"
-                ) {
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v52_currency_lang_title),
-                        description = stringResource(R.string.whats_new_v52_currency_lang_desc)
-                    )
-                    WhatsNewFeatureEntry(
-                        title = stringResource(R.string.whats_new_v52_dates_title),
-                        description = stringResource(R.string.whats_new_v52_dates_desc)
                     )
                 }
 
