@@ -894,7 +894,11 @@ fun TransactionSplitSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        items(availableSuggestions) { name ->
+                        items(
+                            items = availableSuggestions,
+                            key = { it },
+                            contentType = { "suggestion_item" }
+                        ) { name ->
                             Surface(
                                 onClick = { addParticipantWithName(name) },
                                 shape = RoundedCornerShape(10.dp),

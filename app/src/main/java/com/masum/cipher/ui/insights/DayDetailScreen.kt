@@ -197,7 +197,11 @@ fun DayDetailScreen(
                     }
                 }
             } else {
-                itemsIndexed(items = dayTransactions, key = { _, it -> it.id }) { index, transaction ->
+                itemsIndexed(
+                    items = dayTransactions,
+                    key = { _, it -> it.id },
+                    contentType = { _, _ -> "day_transaction_item" }
+                ) { index, transaction ->
                     StaggeredEntranceItem(index = index) {
                         TransactionItem(
                             transaction = transaction,

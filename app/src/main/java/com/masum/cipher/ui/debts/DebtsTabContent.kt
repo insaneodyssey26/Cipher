@@ -462,7 +462,11 @@ fun DebtsTabContent(
                 }
             }
         } else {
-            items(filteredDebts, key = { it.id }) { debtItem ->
+            items(
+                items = filteredDebts,
+                key = { it.id },
+                contentType = { "debt_item" }
+            ) { debtItem ->
                 val typeColor = if (debtItem.type == DebtType.LENT) EmeraldIncome else RoseExpense
                 val typeLabel = if (debtItem.type == DebtType.LENT) stringResource(R.string.debt_type_lent_short) else stringResource(R.string.debt_type_borrowed_short)
 

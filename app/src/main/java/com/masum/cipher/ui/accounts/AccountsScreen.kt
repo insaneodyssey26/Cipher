@@ -481,7 +481,11 @@ fun AccountsScreen(
                         )
                     }
 
-                    items(state.accounts, key = { it.id }) { item ->
+                    items(
+                        items = state.accounts,
+                        key = { it.id },
+                        contentType = { "account_item" }
+                    ) { item ->
                         val isFrozen = !state.isPro && item.id !in activeIds
                         LuxuryAccountCard(
                             name = item.name,

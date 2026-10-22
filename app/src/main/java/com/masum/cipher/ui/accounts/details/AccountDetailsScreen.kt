@@ -727,7 +727,11 @@ fun AccountDetailsScreen(
                         }
                     }
 
-                    items(group.transactions, key = { it.id }) { tx ->
+                    items(
+                        items = group.transactions,
+                        key = { it.id },
+                        contentType = { "account_tx_item" }
+                    ) { tx ->
                         val txSplits = state.splits.filter { it.transactionId == tx.id }
                         TransactionItem(
                             transaction = tx,

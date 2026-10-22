@@ -406,7 +406,7 @@ class LocalNotificationManager @Inject constructor(
                 context,
                 notificationId + 100,
                 approveIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             val approveAction = NotificationCompat.Action.Builder(
                 com.masum.cipher.R.drawable.ic_notification,
@@ -423,7 +423,7 @@ class LocalNotificationManager @Inject constructor(
                 context,
                 notificationId + 200,
                 skipIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             val skipAction = NotificationCompat.Action.Builder(
                 com.masum.cipher.R.drawable.ic_notification,

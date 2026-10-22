@@ -879,7 +879,8 @@ private fun LazyListScope.dashboardTransactionListContent(
             }
             itemsIndexed(
                 items = transactions,
-                key = { _, t -> t.id }
+                key = { _, t -> t.id },
+                contentType = { _, _ -> "transaction_item" }
             ) { index, transaction ->
                 StaggeredEntranceItem(index = index) {
                     TransactionItem(

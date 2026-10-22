@@ -715,7 +715,11 @@ fun CreateEditDebtScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        items(filteredSuggestions) { suggestion ->
+                        items(
+                            items = filteredSuggestions,
+                            key = { it },
+                            contentType = { "suggestion_item" }
+                        ) { suggestion ->
                             Surface(
                                 onClick = {
                                     view.performVibrate(isHapticsEnabled)

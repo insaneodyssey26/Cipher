@@ -652,7 +652,11 @@ fun SplitExpensesScreen(
                     }
                 }
             } else {
-                items(displayedTransactions, key = { it.id }) { transaction ->
+                items(
+                    items = displayedTransactions,
+                    key = { it.id },
+                    contentType = { "split_tx_item" }
+                ) { transaction ->
                     val splits = state.splitsByTransactionId[transaction.id] ?: emptyList()
                     SplitTransactionCard(
                         transaction = transaction,
