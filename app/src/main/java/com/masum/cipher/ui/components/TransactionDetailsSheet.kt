@@ -113,6 +113,7 @@ import com.masum.cipher.core.domain.model.CategoryItem
 import com.masum.cipher.core.domain.model.SplitParticipant
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.core.util.DateTimeUtils
 import com.masum.cipher.core.util.MathEvaluator
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.accounts.getAccountIconVector
@@ -137,10 +138,8 @@ import compose.icons.lucideicons.Users
 import compose.icons.lucideicons.Wallet
 import compose.icons.lucideicons.X
 import kotlinx.coroutines.delay
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 
@@ -699,16 +698,15 @@ fun TransactionDetailsSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val now = Calendar.getInstance()
-                    val target = Calendar.getInstance().apply { timeInMillis = selectedTimestamp }
-                    val isToday = now.get(Calendar.YEAR) == target.get(Calendar.YEAR) &&
-                            now.get(Calendar.DAY_OF_YEAR) == target.get(Calendar.DAY_OF_YEAR)
+                    val today = java.time.LocalDate.now()
+                    val targetDate = java.time.Instant.ofEpochMilli(selectedTimestamp).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                    val isToday = today == targetDate
                     val todayStr = stringResource(R.string.today)
                     val locale = LocalLocale.current.platformLocale
                     val dateLabel = if (isToday) {
-                        "$todayStr, " + AppFormatters.getDay(locale).format(Date(selectedTimestamp))
+                        "$todayStr, " + AppFormatters.formatDay(selectedTimestamp, locale = locale)
                     } else {
-                        AppFormatters.getShortDate(locale).format(Date(selectedTimestamp))
+                        AppFormatters.formatShortDate(selectedTimestamp, locale = locale)
                     }
 
                     ActionPillChip(
@@ -870,15 +868,7 @@ fun TransactionDetailsSheet(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
-                            val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-                                timeInMillis = pickedUtcMillis
-                            }
-                            val localCal = Calendar.getInstance().apply {
-                                set(Calendar.YEAR, utcCal.get(Calendar.YEAR))
-                                set(Calendar.MONTH, utcCal.get(Calendar.MONTH))
-                                set(Calendar.DAY_OF_MONTH, utcCal.get(Calendar.DAY_OF_MONTH))
-                            }
-                            selectedTimestamp = localCal.timeInMillis
+                            selectedTimestamp = DateTimeUtils.utcEpochMillisToLocalStartOfDay(pickedUtcMillis)
                         }
                         showDatePicker = false
                     }

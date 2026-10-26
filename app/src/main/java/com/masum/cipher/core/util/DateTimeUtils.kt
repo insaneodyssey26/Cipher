@@ -25,4 +25,9 @@ object DateTimeUtils {
         val lengthOfMonth = today.lengthOfMonth()
         return (lengthOfMonth - today.dayOfMonth + 1).coerceAtLeast(1)
     }
+
+    fun utcEpochMillisToLocalStartOfDay(utcEpochMillis: Long, localZoneId: ZoneId = ZoneId.systemDefault()): Long {
+        val utcDate = java.time.Instant.ofEpochMilli(utcEpochMillis).atZone(ZoneId.of("UTC")).toLocalDate()
+        return utcDate.atStartOfDay(localZoneId).toInstant().toEpochMilli()
+    }
 }

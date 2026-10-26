@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 import com.masum.cipher.core.util.AppFormatters
+import com.masum.cipher.core.util.DateTimeUtils
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.EmeraldIncome
 import com.masum.cipher.ui.theme.Lato
@@ -64,8 +65,6 @@ import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.TrendingDown
 import compose.icons.lucideicons.TrendingUp
 import compose.icons.lucideicons.X
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -402,7 +401,7 @@ fun AdjustBalanceSheet(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = SimpleDateFormat("dd MMMM yyyy", locale).format(Date(selectedTimestamp)),
+                        text = AppFormatters.formatFullDate(selectedTimestamp, locale = locale),
                         style = Typography.bodyMedium.copy(
                             fontFamily = Lato,
                             fontWeight = FontWeight.Medium
@@ -430,15 +429,7 @@ fun AdjustBalanceSheet(
                         TextButton(
                             onClick = {
                                 datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
-                                    val utcCal = Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC")).apply {
-                                        timeInMillis = pickedUtcMillis
-                                    }
-                                    val localCal = Calendar.getInstance().apply {
-                                        set(Calendar.YEAR, utcCal.get(Calendar.YEAR))
-                                        set(Calendar.MONTH, utcCal.get(Calendar.MONTH))
-                                        set(Calendar.DAY_OF_MONTH, utcCal.get(Calendar.DAY_OF_MONTH))
-                                    }
-                                    selectedTimestamp = localCal.timeInMillis
+                                    selectedTimestamp = DateTimeUtils.utcEpochMillisToLocalStartOfDay(pickedUtcMillis)
                                 }
                                 showDatePicker = false
                             }
