@@ -142,17 +142,16 @@ class GetInsightsUseCase @Inject constructor(
 
         val dailyExpenses = mutableMapOf<Long, Double>()
         val dailyIncomes = mutableMapOf<Long, Double>()
+        val reusableCal = Calendar.getInstance()
 
         transactions.forEach { tx ->
             if (tx.category.equals("TRANSFER", ignoreCase = true)) return@forEach
-            val txCal = Calendar.getInstance().apply { 
-                timeInMillis = tx.timestamp 
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            val key = txCal.timeInMillis
+            reusableCal.timeInMillis = tx.timestamp 
+            reusableCal.set(Calendar.HOUR_OF_DAY, 0)
+            reusableCal.set(Calendar.MINUTE, 0)
+            reusableCal.set(Calendar.SECOND, 0)
+            reusableCal.set(Calendar.MILLISECOND, 0)
+            val key = reusableCal.timeInMillis
             if (tx.isIncome) {
                 dailyIncomes[key] = (dailyIncomes[key] ?: 0.0) + tx.amount
             } else {
@@ -240,12 +239,12 @@ class GetInsightsUseCase @Inject constructor(
         val currentMonth = cal.get(Calendar.MONTH)
         val currentYear = cal.get(Calendar.YEAR)
 
+        val reusableCal = Calendar.getInstance()
         val monthTxs = transactions.filter { tx ->
-            val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-            txCal.get(Calendar.MONTH) == currentMonth &&
-                txCal.get(Calendar.YEAR) == currentYear &&
-                !tx.category.equals("TRANSFER", ignoreCase = true) &&
-                (budgetAccountId == null || tx.accountId == budgetAccountId)
+            if (tx.category.equals("TRANSFER", ignoreCase = true)) return@filter false
+            if (budgetAccountId != null && tx.accountId != budgetAccountId) return@filter false
+            reusableCal.timeInMillis = tx.timestamp
+            reusableCal.get(Calendar.MONTH) == currentMonth && reusableCal.get(Calendar.YEAR) == currentYear
         }
 
         val income = monthTxs.filter { it.isIncome }.sumOf { it.amount }
@@ -258,10 +257,11 @@ class GetInsightsUseCase @Inject constructor(
     private fun calculateWeekdayBreakdown(transactions: List<TransactionEntity>): List<InsightsContract.DayOfWeekData> {
         val dayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         val amounts = DoubleArray(7)
+        val reusableCal = Calendar.getInstance()
 
         transactions.filter { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }.forEach { tx ->
-            val txCal = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-            val dayIndex = (txCal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
+            reusableCal.timeInMillis = tx.timestamp
+            val dayIndex = (reusableCal.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
             amounts[dayIndex] += tx.amount
         }
 
@@ -278,9 +278,11 @@ class GetInsightsUseCase @Inject constructor(
 
     private fun calculatePeakHours(transactions: List<TransactionEntity>): List<InsightsContract.PeakHourData> {
         val buckets = mutableMapOf("Morning" to 0.0, "Afternoon" to 0.0, "Evening" to 0.0, "Night" to 0.0)
+        val reusableCal = Calendar.getInstance()
 
         transactions.filter { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }.forEach { tx ->
-            val hour = Calendar.getInstance().apply { timeInMillis = tx.timestamp }.get(Calendar.HOUR_OF_DAY)
+            reusableCal.timeInMillis = tx.timestamp
+            val hour = reusableCal.get(Calendar.HOUR_OF_DAY)
             val label = when (hour) {
                 in 6..11 -> "Morning"
                 in 12..16 -> "Afternoon"
@@ -303,22 +305,25 @@ class GetInsightsUseCase @Inject constructor(
     }
 
     private fun calculateNoSpendStreak(transactions: List<TransactionEntity>): Int {
-        val today = Calendar.getInstance().apply {
+        val todayCal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
+        }
+        val today = todayCal.timeInMillis
+        val reusableCal = Calendar.getInstance()
 
         val spendDays = transactions.asSequence()
             .filter { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }
             .map { tx ->
-                Calendar.getInstance().apply {
-                    timeInMillis = tx.timestamp
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                }.timeInMillis
+                reusableCal.timeInMillis = tx.timestamp
+                reusableCal.set(Calendar.HOUR_OF_DAY, 0)
+                reusableCal.set(Calendar.MINUTE, 0)
+                reusableCal.set(Calendar.SECOND, 0)
+                reusableCal.set(Calendar.MILLISECOND, 0)
+                reusableCal.timeInMillis
             }.toSet()
 
-        val cursor = Calendar.getInstance().apply { timeInMillis = today }
+        val cursor = todayCal
         var streak = 0
 
         while (!spendDays.contains(cursor.timeInMillis) && streak <= 365) {
