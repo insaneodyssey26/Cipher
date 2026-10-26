@@ -508,6 +508,18 @@ export default {
           });
         }
 
+        const callerDeviceId = (body.callerDeviceId || "").trim();
+        const activeList = Array.isArray(kvData.activatedDevices) ? kvData.activatedDevices : [];
+        if (callerDeviceId) {
+          const isCallerAuthorized = activeList.some(d => d.deviceId === callerDeviceId);
+          if (!isCallerAuthorized) {
+            return new Response(JSON.stringify({ success: false, error: "Unauthorized: caller device is not recognized on this license" }), {
+              status: 403,
+              headers: { "Content-Type": "application/json" }
+            });
+          }
+        }
+
         if (Array.isArray(kvData.activatedDevices)) {
           kvData.activatedDevices = kvData.activatedDevices.filter(d => d.deviceId !== deviceId);
           await env.CIPHER_LICENSES.put(licenseKey, JSON.stringify(kvData));

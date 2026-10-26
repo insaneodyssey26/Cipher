@@ -357,6 +357,9 @@ class LicenseEngine @Inject constructor() {
             val jsonBody = JSONObject().apply {
                 put("licenseKey", sanitized)
                 put("deviceId", deviceId)
+                if (currentDeviceId.isNotBlank()) {
+                    put("callerDeviceId", currentDeviceId)
+                }
             }
 
             OutputStreamWriter(conn.outputStream, StandardCharsets.UTF_8).use { writer ->
@@ -381,7 +384,8 @@ class LicenseEngine @Inject constructor() {
 
     suspend fun deactivateLicenseRemote(
         licenseToken: String,
-        deviceId: String
+        deviceId: String,
+        callerDeviceId: String = deviceId
     ): Boolean = withContext(Dispatchers.IO) {
         val sanitized = licenseToken.trim().replace("\n", "").replace("\r", "")
         if (sanitized.isBlank()) return@withContext true
@@ -400,6 +404,9 @@ class LicenseEngine @Inject constructor() {
             val jsonBody = JSONObject().apply {
                 put("licenseKey", sanitized)
                 put("deviceId", deviceId)
+                if (callerDeviceId.isNotBlank()) {
+                    put("callerDeviceId", callerDeviceId)
+                }
             }
 
             OutputStreamWriter(conn.outputStream, StandardCharsets.UTF_8).use { writer ->

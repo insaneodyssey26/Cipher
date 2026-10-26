@@ -357,12 +357,22 @@ describe("Cipher License Worker Security & Endpoints", () => {
     const revokeReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/revoke", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ licenseKey: key, deviceId: "dev_2" })
+      body: JSON.stringify({ licenseKey: key, deviceId: "dev_2", callerDeviceId: "dev_1" })
     });
     const revokeRes = await worker.fetch(revokeReq, env, {});
     expect(revokeRes.status).toBe(200);
     const revokeData = await revokeRes.json();
     expect(revokeData.deviceCount).toBe(2);
+
+    const unauthorizedRevokeReq = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/revoke", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey: key, deviceId: "dev_3", callerDeviceId: "unauthorized_attacker_device" })
+    });
+    const unauthRes = await worker.fetch(unauthorizedRevokeReq, env, {});
+    expect(unauthRes.status).toBe(403);
+    const unauthData = await unauthRes.json();
+    expect(unauthData.success).toBe(false);
 
     const actReq4 = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
       method: "POST",
