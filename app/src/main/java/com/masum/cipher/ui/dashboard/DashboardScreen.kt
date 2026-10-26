@@ -130,7 +130,6 @@ import compose.icons.lucideicons.X
 import com.masum.cipher.core.domain.model.AccountItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
@@ -2225,7 +2224,7 @@ fun TransactionItem(
                     }
                 }
                 Text(
-                    text = SimpleDateFormat("d MMM, HH:mm", locale).format(Date(transaction.timestamp)),
+                    text = AppFormatters.formatDateTime(transaction.timestamp, locale = locale),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

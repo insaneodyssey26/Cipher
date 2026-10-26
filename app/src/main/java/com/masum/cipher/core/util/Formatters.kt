@@ -20,6 +20,15 @@ object AppFormatters {
     private val monthYearFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
     private val monthYearShortFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
     private val yearFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val dateTimeFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+
+    fun getDateTimeFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        dateTimeFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "dMMM, HH:mm"),
+                locale
+            )
+        }
 
     fun getDayFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
         dayFormatters.computeIfAbsent(locale) {
@@ -80,6 +89,9 @@ object AppFormatters {
 
     fun formatMonthYear(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
         getMonthYearFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
+
+    fun formatDateTime(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        getDateTimeFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
 
     fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)

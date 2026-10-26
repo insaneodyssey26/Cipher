@@ -109,7 +109,6 @@ import androidx.compose.ui.unit.IntOffset
 import compose.icons.lucideicons.ChevronDown
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
@@ -871,7 +870,7 @@ private fun SplitTransactionCard(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = SimpleDateFormat("d MMM, HH:mm", locale).format(Date(transaction.timestamp)),
+                            text = AppFormatters.formatDateTime(transaction.timestamp, locale = locale),
                             style = Typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
