@@ -3,7 +3,9 @@ package com.masum.cipher.core.domain.usecase
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -14,13 +16,14 @@ private fun nextDueDate(subscription: SubscriptionEntity): Long {
 
 class ApproveSubscriptionUseCase @Inject constructor(
     private val subscriptionDao: SubscriptionDao,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val userPreferences: UserPreferences
 ) {
     suspend operator fun invoke(subscription: SubscriptionEntity) {
         val newTransaction = TransactionEntity(
             merchant = subscription.merchant,
             amount = subscription.amount,
-            currency = "INR",
+            currency = userPreferences.settingsFlow.first().currencyCode,
             rawSms = null,
             category = subscription.category,
             timestamp = System.currentTimeMillis(),

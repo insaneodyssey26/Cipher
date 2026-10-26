@@ -144,7 +144,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                         val newTransaction = com.masum.cipher.core.data.local.entity.TransactionEntity(
                             merchant = subscription.merchant,
                             amount = subscription.amount,
-                            currency = "INR",
+                            currency = userPreferences.settingsFlow.first().currencyCode,
                             rawSms = null,
                             category = subscription.category,
                             timestamp = System.currentTimeMillis(),

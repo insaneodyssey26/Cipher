@@ -6,11 +6,13 @@ import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.DebtEntity
 import com.masum.cipher.core.data.local.entity.DebtRepaymentEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.DebtItem
 import com.masum.cipher.core.domain.model.DebtType
 import com.masum.cipher.core.domain.usecase.WidgetSyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +21,8 @@ class DebtRepository @Inject constructor(
     private val debtDao: DebtDao,
     private val accountDao: AccountDao,
     private val transactionDao: TransactionDao,
-    private val widgetSyncManager: WidgetSyncManager
+    private val widgetSyncManager: WidgetSyncManager,
+    private val userPreferences: UserPreferences
 ) {
     fun getAllDebtItems(): Flow<List<DebtItem>> {
         return combine(
@@ -75,7 +78,7 @@ class DebtRepository @Inject constructor(
             val tx = TransactionEntity(
                 amount = amount,
                 merchant = merchantName,
-                currency = "INR",
+                currency = userPreferences.settingsFlow.first().currencyCode,
                 category = "OTHERS",
                 timestamp = System.currentTimeMillis(),
                 rawSms = null,
@@ -119,7 +122,7 @@ class DebtRepository @Inject constructor(
             val tx = TransactionEntity(
                 amount = amount,
                 merchant = merchantName,
-                currency = "INR",
+                currency = userPreferences.settingsFlow.first().currencyCode,
                 category = "OTHERS",
                 timestamp = timestamp,
                 rawSms = null,
@@ -193,7 +196,7 @@ class DebtRepository @Inject constructor(
             val tx = TransactionEntity(
                 amount = amount,
                 merchant = merchantName,
-                currency = "INR",
+                currency = userPreferences.settingsFlow.first().currencyCode,
                 category = "OTHERS",
                 timestamp = System.currentTimeMillis(),
                 rawSms = null,
@@ -307,7 +310,7 @@ class DebtRepository @Inject constructor(
         val tx = TransactionEntity(
             amount = debt.amount,
             merchant = merchantName,
-            currency = "INR",
+            currency = userPreferences.settingsFlow.first().currencyCode,
             category = "OTHERS",
             timestamp = debt.createdAt,
             rawSms = null,

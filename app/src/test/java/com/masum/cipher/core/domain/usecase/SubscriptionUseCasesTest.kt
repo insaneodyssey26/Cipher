@@ -3,6 +3,8 @@ package com.masum.cipher.core.domain.usecase
 import com.masum.cipher.core.data.local.dao.SubscriptionDao
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.pref.AppTheme
+import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -23,6 +25,7 @@ class SubscriptionUseCasesTest {
 
     private lateinit var subscriptionDao: SubscriptionDao
     private lateinit var transactionRepository: TransactionRepository
+    private lateinit var userPreferences: UserPreferences
 
     private fun subscription(
         id: Long = 1L,
@@ -43,24 +46,40 @@ class SubscriptionUseCasesTest {
     fun setup() {
         subscriptionDao = mock()
         transactionRepository = mock()
+        userPreferences = mock()
+        whenever(userPreferences.settingsFlow).thenReturn(
+            flowOf(
+                com.masum.cipher.core.data.local.pref.UserSettings(
+                    theme = AppTheme.SYSTEM,
+                    isBiometricEnabled = false,
+                    isPrivacyModeEnabled = false,
+                    isHapticsEnabled = true,
+                    currency = "USD",
+                    currencyCode = "USD",
+                    autoLockTimeout = 0L,
+                    lastStopTime = 0L,
+                    monthlyBudget = 0.0
+                )
+            )
+        )
     }
 
     // ─── ApproveSubscriptionUseCase ──────────────────────────────────────
 
     @Test
     fun `approving a subscription inserts a new expense transaction`() = runBlocking {
-        val useCase = ApproveSubscriptionUseCase(subscriptionDao, transactionRepository)
+        val useCase = ApproveSubscriptionUseCase(subscriptionDao, transactionRepository, userPreferences)
         val sub = subscription()
 
         useCase(sub)
 
-        verify(transactionRepository).insertTransaction(argThat { merchant == "NETFLIX" && amount == 649.0 && !isIncome })
+        verify(transactionRepository).insertTransaction(argThat { merchant == "NETFLIX" && amount == 649.0 && currency == "USD" && !isIncome })
         Unit
     }
 
     @Test
     fun `approving a subscription advances the next expected date by one frequency interval`() = runBlocking {
-        val useCase = ApproveSubscriptionUseCase(subscriptionDao, transactionRepository)
+        val useCase = ApproveSubscriptionUseCase(subscriptionDao, transactionRepository, userPreferences)
         val sub = subscription(nextExpectedDate = 1_000_000L, frequencyDays = 30)
 
         useCase(sub)
