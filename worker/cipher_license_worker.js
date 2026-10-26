@@ -15,9 +15,27 @@ const SUBSCRIPTION_RENEWAL_EVENTS = new Set([
 const KEY_BEARING_EVENTS = new Set(["payment.succeeded", "license_key.created"]);
 
 async function generateLicenseSignature(env, licenseKey, tier, deviceId, expiresAt) {
-  const secret = (env && env.LICENSE_SIGNING_SECRET) || DEFAULT_SIGNING_SECRET;
   const canonical = `${(licenseKey || "").trim().toUpperCase()}:${(tier || "LIFETIME").trim().toUpperCase()}:${(deviceId || "").trim()}:${Number(expiresAt) || 0}`;
   const enc = new TextEncoder();
+  const data = enc.encode(canonical);
+
+  const privateKeyB64 = (env && env.LICENSE_SIGNING_KEY) || "";
+  if (privateKeyB64) {
+    try {
+      const rawBinary = Uint8Array.from(atob(privateKeyB64), c => c.charCodeAt(0));
+      const privKey = await crypto.subtle.importKey(
+        "pkcs8",
+        rawBinary,
+        { name: "Ed25519" },
+        false,
+        ["sign"]
+      );
+      const signature = await crypto.subtle.sign({ name: "Ed25519" }, privKey, data);
+      return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch (_) {}
+  }
+
+  const secret = (env && env.LICENSE_SIGNING_SECRET) || DEFAULT_SIGNING_SECRET;
   const key = await crypto.subtle.importKey(
     "raw",
     enc.encode(secret),
@@ -25,7 +43,7 @@ async function generateLicenseSignature(env, licenseKey, tier, deviceId, expires
     false,
     ["sign"]
   );
-  const signature = await crypto.subtle.sign("HMAC", key, enc.encode(canonical));
+  const signature = await crypto.subtle.sign("HMAC", key, data);
   return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 

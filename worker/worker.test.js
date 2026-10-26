@@ -702,4 +702,31 @@ describe("Cipher License Worker Security & Endpoints", () => {
 
     expect(json1.signature).not.toBe(json2.signature);
   });
+
+  it("24. signs with primary signing key when configured in environment", async () => {
+    const key = "CIPHER-PRIMARY-KEY-TEST";
+    await env.CIPHER_LICENSES.put(key, JSON.stringify({
+      key: key,
+      tier: "LIFETIME",
+      status: "ACTIVE",
+      activatedDevices: []
+    }));
+
+    const envWithKey = {
+      ...env,
+      LICENSE_SIGNING_KEY: "MC4CAQAwBQYDK2VwBCIEII0UAKIzkraitgxe45EQRhmsBZMsAT78ElYEoFPgosQN"
+    };
+
+    const req = new Request("https://cipher-license-api.skmasumali-main.workers.dev/api/activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey: key, deviceId: "device-test" })
+    });
+    const res = await worker.fetch(req, envWithKey, {});
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(typeof json.signature).toBe("string");
+    expect(json.signature.length).toBe(128);
+  });
 });

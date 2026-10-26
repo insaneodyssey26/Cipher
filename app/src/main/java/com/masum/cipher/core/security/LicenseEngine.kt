@@ -12,7 +12,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.security.KeyFactory
 import java.security.MessageDigest
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
@@ -70,6 +73,7 @@ class LicenseEngine @Inject constructor() {
     companion object {
         private val USER_AGENT = "Cipher-Android/${BuildConfig.VERSION_NAME}"
         private const val LICENSE_SIGNING_SECRET = "cipher-license-v1-k9f3x8b2m4q7w1z5p0"
+        private const val LICENSE_VERIFICATION_KEY = "MCowBQYDK2VwAyEAnnXEPAiRar5gNXpHy5iMECgdkyu3ASUko6gf2n/nRsw="
     }
 
     fun verifyLicenseSignature(
@@ -80,8 +84,20 @@ class LicenseEngine @Inject constructor() {
         signatureHex: String?
     ): Boolean {
         if (signatureHex.isNullOrBlank()) return false
+        val canonical = "${licenseKey.trim().uppercase()}:${tier.trim().uppercase()}:${deviceId.trim()}:$expiresAt"
+
+        try {
+            val keyBytes = java.util.Base64.getDecoder().decode(LICENSE_VERIFICATION_KEY)
+            val pubKey = KeyFactory.getInstance("Ed25519").generatePublic(X509EncodedKeySpec(keyBytes))
+            val sig = Signature.getInstance("Ed25519").apply {
+                initVerify(pubKey)
+                update(canonical.toByteArray(StandardCharsets.UTF_8))
+            }
+            val sigBytes = signatureHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+            if (sig.verify(sigBytes)) return true
+        } catch (_: Exception) {}
+
         return try {
-            val canonical = "${licenseKey.trim().uppercase()}:${tier.trim().uppercase()}:${deviceId.trim()}:$expiresAt"
             val mac = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(LICENSE_SIGNING_SECRET.toByteArray(StandardCharsets.UTF_8), "HmacSHA256")
             mac.init(secretKey)
