@@ -2,7 +2,13 @@ package com.masum.cipher.core.domain.model
 
 import androidx.annotation.StringRes
 import com.masum.cipher.R
-import java.util.Calendar
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 enum class TimePeriod(
     val label: String,
@@ -24,122 +30,107 @@ data class TimeRange(
     val label: String = period.label
 ) {
     companion object {
-        fun from(period: TimePeriod, customStart: Long? = null, customEnd: Long? = null): TimeRange {
+        fun from(
+            period: TimePeriod,
+            customStart: Long? = null,
+            customEnd: Long? = null,
+            zoneId: ZoneId = ZoneId.systemDefault(),
+            locale: Locale = Locale.getDefault()
+        ): TimeRange {
             if (period == TimePeriod.CUSTOM && customStart != null && customEnd != null) {
                 return TimeRange(period, customStart, customEnd, "Custom")
             }
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
+            val today = LocalDate.now(zoneId)
 
             return when (period) {
                 TimePeriod.THIS_WEEK -> {
-                    calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.WEEK_OF_YEAR, 1)
-                    val end = calendar.timeInMillis - 1
+                    val firstDayOfWeek = WeekFields.of(locale).firstDayOfWeek
+                    val startOfWeek = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+                    val start = startOfWeek.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfWeek.plusWeeks(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
                 TimePeriod.LAST_WEEK -> {
-                    calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-                    calendar.add(Calendar.WEEK_OF_YEAR, -1)
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.WEEK_OF_YEAR, 1)
-                    val end = calendar.timeInMillis - 1
+                    val firstDayOfWeek = WeekFields.of(locale).firstDayOfWeek
+                    val startOfLastWeek = today.minusWeeks(1).with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+                    val start = startOfLastWeek.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfLastWeek.plusWeeks(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
                 TimePeriod.THIS_MONTH -> {
-                    calendar.set(Calendar.DAY_OF_MONTH, 1)
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.MONTH, 1)
-                    val end = calendar.timeInMillis - 1
+                    val startOfMonth = today.withDayOfMonth(1)
+                    val start = startOfMonth.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfMonth.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
                 TimePeriod.LAST_MONTH -> {
-                    calendar.set(Calendar.DAY_OF_MONTH, 1)
-                    calendar.add(Calendar.MONTH, -1)
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.MONTH, 1)
-                    val end = calendar.timeInMillis - 1
+                    val startOfLastMonth = today.minusMonths(1).withDayOfMonth(1)
+                    val start = startOfLastMonth.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfLastMonth.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
                 TimePeriod.THIS_YEAR -> {
-                    calendar.set(Calendar.DAY_OF_YEAR, 1)
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.YEAR, 1)
-                    val end = calendar.timeInMillis - 1
+                    val startOfYear = today.withDayOfYear(1)
+                    val start = startOfYear.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfYear.plusYears(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
                 TimePeriod.ALL_TIME -> {
                     TimeRange(period, 0L, Long.MAX_VALUE)
                 }
                 TimePeriod.CUSTOM -> {
-                    val start = calendar.timeInMillis
-                    calendar.add(Calendar.DAY_OF_YEAR, 1)
-                    val end = calendar.timeInMillis - 1
+                    val start = today.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = today.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(period, start, end)
                 }
             }
         }
 
-        fun previousEquivalentRange(period: TimePeriod): TimeRange? {
-            val now = Calendar.getInstance()
-            val cal = Calendar.getInstance()
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
+        fun previousEquivalentRange(
+            period: TimePeriod,
+            zoneId: ZoneId = ZoneId.systemDefault(),
+            locale: Locale = Locale.getDefault()
+        ): TimeRange? {
+            val nowInstant = Instant.now()
+            val nowZoned = nowInstant.atZone(zoneId)
+            val today = nowZoned.toLocalDate()
 
             return when (period) {
                 TimePeriod.THIS_MONTH -> {
-                    val dayOfMonth = now.get(Calendar.DAY_OF_MONTH)
-                    cal.set(Calendar.DAY_OF_MONTH, 1)
-                    cal.add(Calendar.MONTH, -1)
-                    val start = cal.timeInMillis
-                    val maxDayInPrevMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-                    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth.coerceAtMost(maxDayInPrevMonth))
-                    cal.set(Calendar.HOUR_OF_DAY, 23)
-                    cal.set(Calendar.MINUTE, 59)
-                    cal.set(Calendar.SECOND, 59)
-                    cal.set(Calendar.MILLISECOND, 999)
-                    val end = cal.timeInMillis
+                    val startOfPrevMonth = today.minusMonths(1).withDayOfMonth(1)
+                    val start = startOfPrevMonth.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val maxDayInPrevMonth = startOfPrevMonth.lengthOfMonth()
+                    val targetDay = today.dayOfMonth.coerceAtMost(maxDayInPrevMonth)
+                    val end = startOfPrevMonth.withDayOfMonth(targetDay).atTime(23, 59, 59, 999_000_000)
+                        .atZone(zoneId).toInstant().toEpochMilli()
                     TimeRange(TimePeriod.LAST_MONTH, start, end, "vs last month")
                 }
                 TimePeriod.THIS_WEEK -> {
-                    val currentWeekRange = from(TimePeriod.THIS_WEEK)
-                    val elapsedMs = (now.timeInMillis - currentWeekRange.startTime).coerceAtLeast(0L)
+                    val currentWeekRange = from(TimePeriod.THIS_WEEK, zoneId = zoneId, locale = locale)
+                    val elapsedMs = (nowInstant.toEpochMilli() - currentWeekRange.startTime).coerceAtLeast(0L)
                     val lastWeekStart = currentWeekRange.startTime - (7L * 24L * 60L * 60L * 1000L)
                     val lastWeekEnd = lastWeekStart + elapsedMs
                     TimeRange(TimePeriod.LAST_WEEK, lastWeekStart, lastWeekEnd, "vs last week")
                 }
                 TimePeriod.LAST_MONTH -> {
-                    cal.set(Calendar.DAY_OF_MONTH, 1)
-                    cal.add(Calendar.MONTH, -2)
-                    val start = cal.timeInMillis
-                    cal.add(Calendar.MONTH, 1)
-                    val end = cal.timeInMillis - 1
+                    val startOfPriorMonth = today.minusMonths(2).withDayOfMonth(1)
+                    val start = startOfPriorMonth.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val end = startOfPriorMonth.plusMonths(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
                     TimeRange(TimePeriod.LAST_MONTH, start, end, "vs prior month")
                 }
                 TimePeriod.LAST_WEEK -> {
-                    val lastWeekRange = from(TimePeriod.LAST_WEEK)
+                    val lastWeekRange = from(TimePeriod.LAST_WEEK, zoneId = zoneId, locale = locale)
                     val priorWeekStart = lastWeekRange.startTime - (7L * 24L * 60L * 60L * 1000L)
                     val priorWeekEnd = lastWeekRange.endTime - (7L * 24L * 60L * 60L * 1000L)
                     TimeRange(TimePeriod.LAST_WEEK, priorWeekStart, priorWeekEnd, "vs prior week")
                 }
                 TimePeriod.THIS_YEAR -> {
-                    val dayOfYear = now.get(Calendar.DAY_OF_YEAR)
-                    cal.set(Calendar.DAY_OF_YEAR, 1)
-                    cal.add(Calendar.YEAR, -1)
-                    val start = cal.timeInMillis
-                    val maxDayInPrevYear = cal.getActualMaximum(Calendar.DAY_OF_YEAR)
-                    cal.set(Calendar.DAY_OF_YEAR, dayOfYear.coerceAtMost(maxDayInPrevYear))
-                    cal.set(Calendar.HOUR_OF_DAY, 23)
-                    cal.set(Calendar.MINUTE, 59)
-                    cal.set(Calendar.SECOND, 59)
-                    cal.set(Calendar.MILLISECOND, 999)
-                    val end = cal.timeInMillis
+                    val startOfPrevYear = today.minusYears(1).withDayOfYear(1)
+                    val start = startOfPrevYear.atStartOfDay(zoneId).toInstant().toEpochMilli()
+                    val maxDayInPrevYear = startOfPrevYear.lengthOfYear()
+                    val targetDay = today.dayOfYear.coerceAtMost(maxDayInPrevYear)
+                    val end = startOfPrevYear.withDayOfYear(targetDay).atTime(23, 59, 59, 999_000_000)
+                        .atZone(zoneId).toInstant().toEpochMilli()
                     TimeRange(TimePeriod.THIS_YEAR, start, end, "vs last year")
                 }
                 TimePeriod.ALL_TIME, TimePeriod.CUSTOM -> null
