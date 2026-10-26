@@ -30,9 +30,22 @@ class NotificationActionReceiver : BroadcastReceiver() {
     @Inject
     lateinit var userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences
 
+    @Inject
+    lateinit var subscriptionDao: com.masum.cipher.core.data.local.dao.SubscriptionDao
+
+    @Inject
+    lateinit var approveSubscriptionUseCase: com.masum.cipher.core.domain.usecase.ApproveSubscriptionUseCase
+
+    @Inject
+    lateinit var skipSubscriptionUseCase: com.masum.cipher.core.domain.usecase.SkipSubscriptionUseCase
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
+        handleAction(context, intent)
+    }
+
+    internal fun handleAction(context: Context, intent: Intent) {
         if (intent.action == ACTION_ADD_NOTE) {
             val transactionId = intent.getLongExtra(EXTRA_TRANSACTION_ID, -1L)
             if (transactionId == -1L) return
@@ -136,26 +149,13 @@ class NotificationActionReceiver : BroadcastReceiver() {
             if (subId == -1L) return
 
             scope.launch {
-                val subscriptionDao = dagger.hilt.android.EntryPointAccessors.fromApplication(context.applicationContext, com.masum.cipher.core.worker.SubscriptionWorker.WorkerEntryPoint::class.java).subscriptionDao()
-                val transactionDao = dagger.hilt.android.EntryPointAccessors.fromApplication(context.applicationContext, com.masum.cipher.core.worker.SubscriptionWorker.WorkerEntryPoint::class.java).transactionDao()
                 val subscription = subscriptionDao.getById(subId)
                 if (subscription != null) {
                     if (intent.action == ACTION_APPROVE_SUBSCRIPTION) {
-                        val newTransaction = com.masum.cipher.core.data.local.entity.TransactionEntity(
-                            merchant = subscription.merchant,
-                            amount = subscription.amount,
-                            currency = userPreferences.settingsFlow.first().currencyCode,
-                            rawSms = null,
-                            category = subscription.category,
-                            timestamp = System.currentTimeMillis(),
-                            isIncome = false,
-                            note = "Approved subscription"
-                        )
-                        transactionDao.insertTransaction(newTransaction)
+                        approveSubscriptionUseCase(subscription)
+                    } else {
+                        skipSubscriptionUseCase(subscription)
                     }
-
-                    val intervalMs = java.util.concurrent.TimeUnit.DAYS.toMillis(subscription.frequencyDays.toLong())
-                    subscriptionDao.update(subscription.copy(nextExpectedDate = subscription.nextExpectedDate + intervalMs))
 
                     if (notificationId != -1) {
                         NotificationManagerCompat.from(context).cancel(notificationId)
