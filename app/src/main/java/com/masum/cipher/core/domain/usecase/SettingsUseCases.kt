@@ -1,8 +1,10 @@
 package com.masum.cipher.core.domain.usecase
 
 import android.net.Uri
+import com.masum.cipher.core.data.local.AppDatabase
 import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.BackupRepository
@@ -49,10 +51,24 @@ class UpdateSettingsUseCase @Inject constructor(
 }
 
 class ClearAllDataUseCase @Inject constructor(
-    private val transactionDao: TransactionDao
+    private val appDatabase: AppDatabase,
+    private val widgetSyncManager: WidgetSyncManager
 ) {
     suspend operator fun invoke() = withContext(Dispatchers.IO) {
-        transactionDao.deleteAllTransactions()
+        appDatabase.clearAllTables()
+        appDatabase.accountDao().insertAccount(
+            AccountEntity(
+                id = 1L,
+                name = "Main Account",
+                type = "BANK",
+                initialBalance = 0.0,
+                colorHex = 0xFF4F46E5L,
+                iconName = "Landmark",
+                isDefault = true,
+                createdAt = System.currentTimeMillis()
+            )
+        )
+        widgetSyncManager.syncWidget()
     }
 }
 
