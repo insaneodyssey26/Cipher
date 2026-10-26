@@ -4,11 +4,82 @@ import android.content.Context
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 object AppFormatters {
+
+    private val dayFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val shortDateFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val fullDateFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val monthYearFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val monthYearShortFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+    private val yearFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+
+    fun getDayFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        dayFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd"),
+                locale
+            )
+        }
+
+    fun getShortDateFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        shortDateFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMMd"),
+                locale
+            )
+        }
+
+    fun getFullDateFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        fullDateFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMMMd"),
+                locale
+            )
+        }
+
+    fun getMonthYearFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        monthYearFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMMM"),
+                locale
+            )
+        }
+
+    fun getMonthYearShortFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        monthYearShortFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyyMMM"),
+                locale
+            )
+        }
+
+    fun getYearFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter =
+        yearFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyy"),
+                locale
+            )
+        }
+
+    fun formatDay(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        getDayFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
+
+    fun formatShortDate(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        getShortDateFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
+
+    fun formatFullDate(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        getFullDateFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
+
+    fun formatMonthYear(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        getMonthYearFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
 
     fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
@@ -29,19 +100,19 @@ object AppFormatters {
         period: com.masum.cipher.core.domain.model.TimePeriod,
         transactions: List<TransactionEntity> = emptyList(),
         context: Context? = null,
-        locale: Locale = Locale.getDefault()
+        locale: Locale = Locale.getDefault(),
+        zoneId: ZoneId = ZoneId.systemDefault()
     ): String {
         if (period == com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME && transactions.isNotEmpty()) {
             val minTime = transactions.minOfOrNull { it.timestamp }
             val maxTime = transactions.maxOfOrNull { it.timestamp }
             if (minTime != null && maxTime != null) {
-                val format = getMonthYearShortFormat(locale)
-                val startStr = format.format(Date(minTime))
-                val endStr = format.format(Date(maxTime))
+                val startStr = formatMonthYearShort(minTime, zoneId, locale)
+                val endStr = formatMonthYearShort(maxTime, zoneId, locale)
                 return if (startStr == endStr) startStr else "$startStr - $endStr"
             }
         }
-        val calendar = Calendar.getInstance()
+        val today = LocalDate.now(zoneId)
         return when (period) {
             com.masum.cipher.core.domain.model.TimePeriod.THIS_WEEK -> {
                 context?.getString(R.string.period_this_week) ?: "This Week"
@@ -50,14 +121,13 @@ object AppFormatters {
                 context?.getString(R.string.period_last_week) ?: "Last Week"
             }
             com.masum.cipher.core.domain.model.TimePeriod.THIS_MONTH -> {
-                getMonthYearFormat(locale).format(calendar.time)
+                getMonthYearFormatter(locale).format(today)
             }
             com.masum.cipher.core.domain.model.TimePeriod.LAST_MONTH -> {
-                calendar.add(Calendar.MONTH, -1)
-                getMonthYearFormat(locale).format(calendar.time)
+                getMonthYearFormatter(locale).format(today.minusMonths(1))
             }
             com.masum.cipher.core.domain.model.TimePeriod.THIS_YEAR -> {
-                SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "yyyy"), locale).format(calendar.time)
+                getYearFormatter(locale).format(today)
             }
             com.masum.cipher.core.domain.model.TimePeriod.ALL_TIME -> {
                 context?.getString(R.string.period_all_time) ?: "All Time"
@@ -67,13 +137,15 @@ object AppFormatters {
                     val minTime = transactions.minOfOrNull { it.timestamp }
                     val maxTime = transactions.maxOfOrNull { it.timestamp }
                     if (minTime != null && maxTime != null) {
-                        val format = getDay(locale)
-                        "${format.format(Date(minTime))} – ${format.format(Date(maxTime))}"
+                        "${formatDay(minTime, zoneId, locale)} – ${formatDay(maxTime, zoneId, locale)}"
                     } else context?.getString(R.string.period_custom_range) ?: "Custom Range"
                 } else context?.getString(R.string.period_custom_range) ?: "Custom Range"
             }
         }
     }
+
+    private fun formatMonthYearShort(timestamp: Long, zoneId: ZoneId, locale: Locale): String =
+        getMonthYearShortFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
 
     @Volatile
     var activeIsSuffix: Boolean = false

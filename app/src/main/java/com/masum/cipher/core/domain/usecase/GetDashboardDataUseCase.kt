@@ -80,28 +80,42 @@ class GetDashboardDataUseCase @Inject constructor(
             }
 
             combine(transactionsFlow, repository.hasNonTransferTransactions(), categoryRepository.getAllCustomCategoriesFlow()) { transactions, hasTransactions, customCats ->
+                val hasCategoryFilter = filter.selectedCategories.isNotEmpty()
+                val minAmt = filter.minAmount
+                val maxAmt = filter.maxAmount
+                val filterType = filter.type
+
+                val resolvedCategoryCache = if (hasCategoryFilter) {
+                    val distinctCategories = transactions.map { it.category }.distinct()
+                    val map = HashMap<String, Boolean>(distinctCategories.size)
+                    for (cat in distinctCategories) {
+                        val categoryItem = CategoryHelper.resolveCategory(cat, customCats)
+                        val matches = filter.selectedCategories.contains(cat) ||
+                                filter.selectedCategories.contains(categoryItem.name) ||
+                                filter.selectedCategories.contains(categoryItem.displayName)
+                        map[cat] = matches
+                    }
+                    map
+                } else null
+
                 val filteredList = transactions.filter { tx ->
                     if (tx.category.equals("TRANSFER", ignoreCase = true)) return@filter false
 
-                    val matchesType = when (filter.type) {
+                    val matchesType = when (filterType) {
                         DashboardContract.FilterType.ALL -> true
                         DashboardContract.FilterType.INCOME -> tx.isIncome
                         DashboardContract.FilterType.EXPENSE -> !tx.isIncome
                     }
                     if (!matchesType) return@filter false
 
-                    if (filter.selectedCategories.isNotEmpty()) {
-                        val categoryItem = CategoryHelper.resolveCategory(tx.category, customCats)
-                        val matchesCategory = filter.selectedCategories.contains(tx.category) ||
-                                filter.selectedCategories.contains(categoryItem.name) ||
-                                filter.selectedCategories.contains(categoryItem.displayName)
-                        if (!matchesCategory) return@filter false
+                    if (resolvedCategoryCache != null) {
+                        if (resolvedCategoryCache[tx.category] != true) return@filter false
                     }
 
-                    if (filter.minAmount != null && tx.amount < filter.minAmount) {
+                    if (minAmt != null && tx.amount < minAmt) {
                         return@filter false
                     }
-                    if (filter.maxAmount != null && tx.amount > filter.maxAmount) {
+                    if (maxAmt != null && tx.amount > maxAmt) {
                         return@filter false
                     }
 

@@ -12,7 +12,6 @@ import com.masum.cipher.core.util.AppFormatters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import java.util.Date
 import javax.inject.Inject
 
 class UpdateSettingsUseCase @Inject constructor(
@@ -96,7 +95,7 @@ class ExportCsvUseCase @Inject constructor(
 
             val csvHeader = "ID,Date,Merchant,Amount,Currency,Category,Type,IsSplit,MyShare,SplitDetails,Note\n"
             val csvData = transactions.joinToString("\n") { tx ->
-                val date = AppFormatters.getFullDate().format(Date(tx.timestamp))
+                val date = AppFormatters.formatFullDate(tx.timestamp)
                 val type = if (tx.isIncome) "Income" else "Expense"
                 val noteStr = tx.note?.replace("\"", "\"\"") ?: ""
                 val splits = splitsByTx[tx.id]
