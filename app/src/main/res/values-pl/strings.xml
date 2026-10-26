@@ -304,6 +304,10 @@
     <string name="action_enable">Włącz</string>
     <string name="backup_password_export_desc">To hasło zostanie użyte do zaszyfrowania kopii zapasowej. Będzie potrzebne do przywrócenia danych.</string>
     <string name="backup_password_import_desc">Wprowadź hasło użyte do zaszyfrowania tego pliku kopii zapasowej.</string>
+    <string name="restore_mode_clean_title">Zastąp</string>
+    <string name="restore_mode_clean_desc">Czyści lokalne dane i przywraca kopię</string>
+    <string name="restore_mode_merge_title">Scal</string>
+    <string name="restore_mode_merge_desc">Zachowuje obecne dane i dodaje nowe</string>
     <string name="password_label">Hasło</string>
     <string name="auto_backup_password_title">Hasło automatycznej kopii</string>
     <string name="auto_backup_password_desc">Wprowadź hasło do szyfrowania automatycznych kopii zapasowych. Będzie potrzebne do przywrócenia danych na nowym urządzeniu.</string>

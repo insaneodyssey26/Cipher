@@ -303,6 +303,10 @@
     <string name="action_enable">सक्षम करें</string>
     <string name="backup_password_export_desc">यह पासवर्ड आपके बैकअप को एन्क्रिप्ट करने के लिए उपयोग किया जाएगा। डेटा पुनर्स्थापित करने के लिए आपको इसकी आवश्यकता होगी।</string>
     <string name="backup_password_import_desc">इस बैकअप फ़ाइल को एन्क्रिप्ट करने के लिए उपयोग किया गया पासवर्ड दर्ज करें।</string>
+    <string name="restore_mode_clean_title">बदलें</string>
+    <string name="restore_mode_clean_desc">स्थानीय डेटा हटाकर बैकअप पुनर्स्थापित करता है</string>
+    <string name="restore_mode_merge_title">मर्ज करें</string>
+    <string name="restore_mode_merge_desc">मौजूदा डेटा रखता है और नया जोड़ता है</string>
     <string name="password_label">पासवर्ड</string>
     <string name="auto_backup_password_title">ऑटो-बैकअप पासवर्ड</string>
     <string name="auto_backup_password_desc">अपने स्वचालित बैकअप को एन्क्रिप्ट करने के लिए एक पासवर्ड दर्ज करें। नए डिवाइस पर डेटा पुनर्स्थापित करने के लिए आपको इसकी आवश्यकता होगी।</string>

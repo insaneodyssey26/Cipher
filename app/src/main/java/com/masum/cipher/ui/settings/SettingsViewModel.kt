@@ -75,7 +75,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetMonthlyBudget -> updateMonthlyBudget(intent.amount, intent.isDynamic, intent.accountId)
             is SettingsContract.Intent.ClearAllData -> clearAllData()
             is SettingsContract.Intent.ExportData -> exportData(intent.uri, intent.password)
-            is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password)
+            is SettingsContract.Intent.ImportData -> importData(intent.uri, intent.password, intent.clearExisting)
             is SettingsContract.Intent.ExportCsv -> exportCsv(intent.uri)
             is SettingsContract.Intent.ExportPdf -> exportPdf(intent.uri)
             is SettingsContract.Intent.SetAutoBackupEnabled -> updateAutoBackupEnabled(intent.enabled)
@@ -342,10 +342,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun importData(uri: android.net.Uri, password: CharArray) {
+    private fun importData(uri: android.net.Uri, password: CharArray, clearExisting: Boolean) {
         viewModelScope.launch {
             updateState { copy(isImporting = true) }
-            val result = importDataUseCase(uri, password)
+            val result = importDataUseCase(uri, password, clearExisting)
             updateState { copy(isImporting = false) }
             
             val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"

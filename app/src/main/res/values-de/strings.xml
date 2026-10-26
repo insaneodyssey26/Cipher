@@ -304,6 +304,10 @@
     <string name="action_enable">Aktivieren</string>
     <string name="backup_password_export_desc">Dieses Passwort wird verwendet, um Ihr Backup zu verschlüsseln. Sie benötigen es zur Wiederherstellung.</string>
     <string name="backup_password_import_desc">Geben Sie das Passwort ein, das zur Verschlüsselung dieser Datei verwendet wurde.</string>
+    <string name="restore_mode_clean_title">Ersetzen</string>
+    <string name="restore_mode_clean_desc">Löscht lokale Daten und stellt Backup wieder her</string>
+    <string name="restore_mode_merge_title">Zusammenführen</string>
+    <string name="restore_mode_merge_desc">Behält vorhandene Daten und fügt neue hinzu</string>
     <string name="password_label">Passwort</string>
     <string name="auto_backup_password_title">Passwort für automatisches Backup</string>
     <string name="auto_backup_password_desc">Geben Sie ein Passwort zur Verschlüsselung Ihrer automatischen Backups ein.</string>

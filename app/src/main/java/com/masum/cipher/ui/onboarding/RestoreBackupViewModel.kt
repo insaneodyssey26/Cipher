@@ -17,16 +17,16 @@ class RestoreBackupViewModel @Inject constructor(
 
     override fun handleIntent(intent: RestoreBackupContract.Intent) {
         when (intent) {
-            is RestoreBackupContract.Intent.Restore -> restore(intent.uri, intent.password)
+            is RestoreBackupContract.Intent.Restore -> restore(intent.uri, intent.password, intent.clearExisting)
             RestoreBackupContract.Intent.DismissError -> updateState { copy(errorMessage = null) }
         }
     }
 
-    private fun restore(uri: Uri, password: CharArray) {
+    private fun restore(uri: Uri, password: CharArray, clearExisting: Boolean) {
         if (currentState.isRestoring) return
         viewModelScope.launch {
             updateState { copy(isRestoring = true, errorMessage = null) }
-            importDataUseCase(uri, password).fold(
+            importDataUseCase(uri, password, clearExisting).fold(
                 onSuccess = {
                     updateState { copy(isRestoring = false) }
                     emitEffect(RestoreBackupContract.Effect.Restored)

@@ -41,7 +41,7 @@ class RestoreBackupViewModelTest {
     }
 
     private fun givenImportResult(result: Result<Unit>) = runBlocking {
-        whenever(importDataUseCase(any(), any())).thenReturn(result)
+        whenever(importDataUseCase(any(), any(), any())).thenReturn(result)
     }
 
     @Test

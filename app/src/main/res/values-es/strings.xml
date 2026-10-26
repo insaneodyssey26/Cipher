@@ -303,6 +303,10 @@
     <string name="action_enable">Habilitar</string>
     <string name="backup_password_export_desc">Esta contraseña se utilizará para cifrar tu copia de seguridad. La necesitarás para restaurar tus datos.</string>
     <string name="backup_password_import_desc">Introduce la contraseña utilizada para cifrar este archivo de copia.</string>
+    <string name="restore_mode_clean_title">Reemplazar</string>
+    <string name="restore_mode_clean_desc">Borra datos locales y restaura la copia</string>
+    <string name="restore_mode_merge_title">Combinar</string>
+    <string name="restore_mode_merge_desc">Mantiene datos actuales y añade nuevos</string>
     <string name="password_label">Contraseña</string>
     <string name="auto_backup_password_title">Contraseña de copia automática</string>
     <string name="auto_backup_password_desc">Introduce una contraseña para cifrar tus copias automáticas. La necesitarás para restaurar tus datos en un nuevo dispositivo.</string>

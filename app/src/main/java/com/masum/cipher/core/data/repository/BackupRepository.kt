@@ -159,7 +159,11 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun restoreData(inputStream: InputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun restoreData(
+        inputStream: InputStream,
+        password: CharArray,
+        clearExisting: Boolean = false
+    ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             inputStream.use { stream ->
                 val bytes = stream.readBytes()
@@ -172,6 +176,9 @@ class BackupRepository @Inject constructor(
                 val data = json.decodeFromString<BackupData>(jsonString)
 
                 appDatabase.withTransaction {
+                    if (clearExisting) {
+                        appDatabase.clearAllTables()
+                    }
                     data.transactions.forEach { transactionDao.insertTransaction(it) }
                     if (data.splits.isNotEmpty()) {
                         transactionSplitDao.insertSplits(data.splits)

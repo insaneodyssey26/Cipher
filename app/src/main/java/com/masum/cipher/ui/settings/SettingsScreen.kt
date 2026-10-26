@@ -187,6 +187,7 @@ fun SettingsScreen(
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
+    var restoreClearExisting by remember { mutableStateOf(false) }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var isColorPickerExpanded by remember { mutableStateOf(false) }
     var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
@@ -1654,7 +1655,11 @@ Spacer(modifier = Modifier.weight(1f))
         val isExport = showBackupPasswordDialog == BackupAction.EXPORT
         VaultSettingsDialog(
             title = if (isExport) stringResource(R.string.set_backup_password_title) else stringResource(R.string.enter_backup_password_title),
-            onDismiss = { showBackupPasswordDialog = null; backupPassword = "" },
+            onDismiss = {
+                showBackupPasswordDialog = null
+                backupPassword = ""
+                restoreClearExisting = false
+            },
             confirmText = if (isExport) stringResource(R.string.action_export) else stringResource(R.string.action_import),
             onConfirm = {
                 val uri = pendingUri
@@ -1662,11 +1667,12 @@ Spacer(modifier = Modifier.weight(1f))
                     if (showBackupPasswordDialog == BackupAction.EXPORT) {
                         viewModel.handleIntent(SettingsContract.Intent.ExportData(uri, backupPassword.toCharArray()))
                     } else {
-                        viewModel.handleIntent(SettingsContract.Intent.ImportData(uri, backupPassword.toCharArray()))
+                        viewModel.handleIntent(SettingsContract.Intent.ImportData(uri, backupPassword.toCharArray(), restoreClearExisting))
                     }
                 }
                 showBackupPasswordDialog = null
                 backupPassword = ""
+                restoreClearExisting = false
             }
         ) {
             Column {
@@ -1696,6 +1702,28 @@ Spacer(modifier = Modifier.weight(1f))
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (!isExport) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        RestoreOptionCard(
+                            title = stringResource(R.string.restore_mode_merge_title),
+                            description = stringResource(R.string.restore_mode_merge_desc),
+                            icon = LucideIcons.FolderSync,
+                            isSelected = !restoreClearExisting,
+                            onClick = { restoreClearExisting = false }
+                        )
+                        RestoreOptionCard(
+                            title = stringResource(R.string.restore_mode_clean_title),
+                            description = stringResource(R.string.restore_mode_clean_desc),
+                            icon = LucideIcons.RefreshCw,
+                            isSelected = restoreClearExisting,
+                            onClick = { restoreClearExisting = true }
+                        )
+                    }
+                }
             }
         }
     }
@@ -2037,7 +2065,11 @@ private fun VaultSettingsDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         title = { Text(title, style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
-        text = { content() },
+        text = {
+            Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                content()
+            }
+        },
         confirmButton = {
             Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = confirmColor)) {
                 Text(confirmText, color = MaterialTheme.colorScheme.onSurface)
@@ -2050,6 +2082,89 @@ private fun VaultSettingsDialog(
 }
 
 private enum class BackupAction { EXPORT, IMPORT }
+
+@Composable
+private fun RestoreOptionCard(
+    title: String,
+    description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val animatedBorder by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+        label = "restoreBorder"
+    )
+    val animatedBackground by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        label = "restoreBg"
+    )
+    val iconTint by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "restoreIcon"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(animatedBackground)
+            .border(width = if (isSelected) 1.5.dp else 1.dp, color = animatedBorder, shape = RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = Typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = description,
+                style = Typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.width(6.dp))
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                .border(
+                    width = 1.5.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Icon(
+                    imageVector = LucideIcons.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(13.dp)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun ThemeOptionCard(

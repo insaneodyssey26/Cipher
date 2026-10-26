@@ -47,7 +47,7 @@ class SettingsContract {
             }
         }
 
-        data class ImportData(val uri: Uri, val password: CharArray) : Intent() {
+        data class ImportData(val uri: Uri, val password: CharArray, val clearExisting: Boolean = false) : Intent() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (javaClass != other?.javaClass) return false
@@ -56,6 +56,7 @@ class SettingsContract {
 
                 if (uri != other.uri) return false
                 if (!password.contentEquals(other.password)) return false
+                if (clearExisting != other.clearExisting) return false
 
                 return true
             }
@@ -63,6 +64,7 @@ class SettingsContract {
             override fun hashCode(): Int {
                 var result = uri.hashCode()
                 result = 31 * result + password.contentHashCode()
+                result = 31 * result + clearExisting.hashCode()
                 return result
             }
         }

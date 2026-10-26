@@ -304,6 +304,10 @@
     <string name="action_enable">有効にする</string>
     <string name="backup_password_export_desc">このパスワードはバックアップの暗号化に使用されます。復元時に必要になります。</string>
     <string name="backup_password_import_desc">このバックアップファイルを暗号化したパスワードを入力してください。</string>
+    <string name="restore_mode_clean_title">置換</string>
+    <string name="restore_mode_clean_desc">現在のデータを削除してバックアップを復元</string>
+    <string name="restore_mode_merge_title">統合</string>
+    <string name="restore_mode_merge_desc">既存のデータを保持して新規分を追加</string>
     <string name="password_label">パスワード</string>
     <string name="auto_backup_password_title">自動バックアップパスワード</string>
     <string name="auto_backup_password_desc">自動バックアップを暗号化するためのパスワードを入力してください。</string>

@@ -304,6 +304,10 @@
     <string name="action_enable">সক্ষম করুন</string>
     <string name="backup_password_export_desc">এই পাসওয়ার্ডটি আপনার ব্যাকআপ এনক্রিপ্ট করতে ব্যবহার করা হবে। ডেটা পুনরুদ্ধার করতে আপনার এটি প্রয়োজন হবে।</string>
     <string name="backup_password_import_desc">এই ব্যাকআপ ফাইলটি এনক্রিপ্ট করতে ব্যবহৃত পাসওয়ার্ডটি দিন।</string>
+    <string name="restore_mode_clean_title">প্রতিস্থাপন</string>
+    <string name="restore_mode_clean_desc">বিদ্যমান ডেটা মুছে ব্যাকআপ ডেটা পুনরুদ্ধার করবে</string>
+    <string name="restore_mode_merge_title">মার্জ</string>
+    <string name="restore_mode_merge_desc">বর্তমান ডেটা রেখে নতুনগুলো যুক্ত করবে</string>
     <string name="password_label">পাসওয়ার্ড</string>
     <string name="auto_backup_password_title">অটো-ব্যাকআপ পাসওয়ার্ড</string>
     <string name="auto_backup_password_desc">আপনার স্বয়ংক্রিয় ব্যাকআপ এনক্রিপ্ট করার জন্য একটি পাসওয়ার্ড দিন। একটি নতুন ডিভাইসে ডেটা পুনরুদ্ধার করতে আপনার এটি প্রয়োজন হবে।</string>

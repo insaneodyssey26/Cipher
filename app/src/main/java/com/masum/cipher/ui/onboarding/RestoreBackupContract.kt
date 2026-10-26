@@ -13,7 +13,7 @@ object RestoreBackupContract {
     ) : UiState
 
     sealed interface Intent : UiIntent {
-        class Restore(val uri: Uri, val password: CharArray) : Intent
+        class Restore(val uri: Uri, val password: CharArray, val clearExisting: Boolean = true) : Intent
         data object DismissError : Intent
     }
 
