@@ -1573,7 +1573,10 @@ Spacer(modifier = Modifier.weight(1f))
                                     Button(
                                         onClick = {
                                             view.performVibrate(state.isHapticsEnabled)
-                                            viewModel.handleIntent(SettingsContract.Intent.DownloadAndInstallUpdate(updateInfo.downloadUrl))
+                                            try {
+                                                context.startActivity(Intent(Intent.ACTION_VIEW, updateInfo.downloadUrl.toUri()))
+                                            } catch (_: Exception) {}
+                                            viewModel.handleIntent(SettingsContract.Intent.DismissUpdateDialog)
                                         },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(14.dp),
