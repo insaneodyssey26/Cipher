@@ -36,7 +36,7 @@ android {
         }
 
         ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+            abiFilters += listOf("arm64-v8a")
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -76,10 +76,11 @@ android {
     packaging {
         resources {
             excludes += listOf(
-                "META-INF/LICENSE*",
-                "META-INF/NOTICE*",
-                "META-INF/*.txt",
-                "META-INF/*.version",
+                "META-INF/**/LICENSE*",
+                "META-INF/**/NOTICE*",
+                "META-INF/**/*.txt",
+                "META-INF/**/*.version",
+                "META-INF/DEPENDENCIES",
                 "**/*.kotlin_builtins",
                 "**/*.kotlin_metadata"
             )

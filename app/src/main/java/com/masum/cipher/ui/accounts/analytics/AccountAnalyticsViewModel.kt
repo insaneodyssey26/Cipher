@@ -364,7 +364,7 @@ class AccountAnalyticsViewModel @Inject constructor(
         val locale = Locale.getDefault()
 
         val weekdayTotals = mutableMapOf<DayOfWeek, Double>()
-        for (day in DayOfWeek.values()) {
+        for (day in DayOfWeek.entries) {
             weekdayTotals[day] = 0.0
         }
 
