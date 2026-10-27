@@ -9,7 +9,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import java.io.OutputStream
-import java.util.Date
 import java.util.Locale
 
 object PdfGenerator {
@@ -168,9 +167,6 @@ object PdfGenerator {
         val colAmount = rightMargin - 10f
         
         val locale = Locale.getDefault()
-        val dateFormatter = AppFormatters.getFullDate(locale)
-        val rowDateFormatter = AppFormatters.getDay(locale)
-        
         fun formatMoney(amount: Double): String = AppFormatters.formatCurrency(amount, currencySymbol, locale, decimals = 2)
 
         if (transactions.isEmpty()) {
@@ -239,9 +235,9 @@ object PdfGenerator {
         dashCanvas.drawLine(marginX, currentY, rightMargin, currentY, linePaint)
         currentY += 18f
 
-        val generatedDate = dateFormatter.format(Date())
-        val startDate = dateFormatter.format(Date(transactions.last().timestamp))
-        val endDate = dateFormatter.format(Date(transactions.first().timestamp))
+        val generatedDate = AppFormatters.formatFullDate(System.currentTimeMillis(), locale = locale)
+        val startDate = AppFormatters.formatFullDate(transactions.last().timestamp, locale = locale)
+        val endDate = AppFormatters.formatFullDate(transactions.first().timestamp, locale = locale)
 
         dashCanvas.drawText("STATEMENT PERIOD", marginX, currentY, labelPaint)
         dashCanvas.drawText("$startDate — $endDate", marginX, currentY + 15f, valuePaint)
@@ -504,7 +500,7 @@ object PdfGenerator {
                     canvas.drawRect(marginX, ledgerY, rightMargin, ledgerY + rowHeight, rowBackgroundPaint)
                 }
 
-                val date = rowDateFormatter.format(Date(tx.timestamp))
+                val date = AppFormatters.formatDay(tx.timestamp, locale = locale)
                 val merchant = if (tx.merchant.length > 28) tx.merchant.take(25) + "..." else tx.merchant
                 val category = tx.category.uppercase()
                 val splits = splitsMap[tx.id]
