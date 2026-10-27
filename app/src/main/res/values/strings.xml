@@ -400,6 +400,14 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v630_splash_title">App Launch Animation &amp; Vibration</string>
+    <string name="whats_new_v630_splash_desc">Added an opening animation with dark mode support, plus a quick vibration as the dashboard opens.</string>
+    <string name="whats_new_v630_updater_title">In-App Updates</string>
+    <string name="whats_new_v630_updater_desc">Download and install new updates directly inside Settings without opening a browser.</string>
+    <string name="whats_new_v630_restore_title">Backup Restore Options</string>
+    <string name="whats_new_v630_restore_desc">Choose whether to merge backup data into your existing records or replace everything completely.</string>
+    <string name="whats_new_v630_performance_title">Faster Date Filters &amp; Smaller App</string>
+    <string name="whats_new_v630_performance_desc">Faster date filtering in transactions and analytics, along with a smaller app download size.</string>
     <string name="whats_new_v628_bento_title">Redesigned Sheets &amp; Bento Cards</string>
     <string name="whats_new_v628_bento_desc">Transaction details, split expenses, debts, goals, and category breakdowns have been revamped with clean modern bento layouts, faster controls, and fluid gestures.</string>
     <string name="whats_new_v628_icons_title">Expanded Category Icons</string>

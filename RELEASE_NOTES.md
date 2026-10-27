@@ -1,5 +1,15 @@
 # Release Notes
 
+## [6.3.0]
+
+### Added & Improved
+- **App Opening Animation & Vibration**: Added an opening animation with dark mode support and a quick vibration as your dashboard opens.
+- **In-App Updates**: Download and install updates directly from Settings without needing a browser.
+- **Backup Restore Options**: Choose whether to merge backup data into your existing records or replace everything completely.
+- **Faster Date Filters & Smaller App**: Faster date filtering in transactions and analytics, and a smaller app download size.
+
+---
+
 ## [6.2.8]
 
 ### Added & Improved
