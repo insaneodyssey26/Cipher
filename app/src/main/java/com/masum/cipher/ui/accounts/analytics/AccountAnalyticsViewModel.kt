@@ -21,8 +21,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import java.text.DateFormatSymbols
-import java.util.Calendar
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.TextStyle
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
@@ -214,48 +217,30 @@ class AccountAnalyticsViewModel @Inject constructor(
     ): Triple<List<DashboardContract.Point>, List<DashboardContract.Point>, List<DashboardContract.Point>> {
         if (transactions.isEmpty()) return Triple(emptyList(), emptyList(), emptyList())
 
-        val startCal = Calendar.getInstance().apply {
-            when (period) {
-                AccountAnalyticsPeriod.DAYS_7 -> timeInMillis = now - 6L * 86400000L
-                AccountAnalyticsPeriod.DAYS_30 -> timeInMillis = now - 29L * 86400000L
-                AccountAnalyticsPeriod.DAYS_90 -> timeInMillis = now - 89L * 86400000L
-                AccountAnalyticsPeriod.YEAR_1 -> timeInMillis = now - 364L * 86400000L
-                AccountAnalyticsPeriod.ALL -> {
-                    val minTs = transactions.minOfOrNull { it.timestamp } ?: now
-                    timeInMillis = minTs
-                }
+        val zoneId = ZoneId.systemDefault()
+        val nowLocalDate = Instant.ofEpochMilli(now).atZone(zoneId).toLocalDate()
+
+        val startDate = when (period) {
+            AccountAnalyticsPeriod.DAYS_7 -> nowLocalDate.minusDays(6)
+            AccountAnalyticsPeriod.DAYS_30 -> nowLocalDate.minusDays(29)
+            AccountAnalyticsPeriod.DAYS_90 -> nowLocalDate.minusDays(89)
+            AccountAnalyticsPeriod.YEAR_1 -> nowLocalDate.minusDays(364)
+            AccountAnalyticsPeriod.ALL -> {
+                val minTs = transactions.minOfOrNull { it.timestamp } ?: now
+                Instant.ofEpochMilli(minTs).atZone(zoneId).toLocalDate()
             }
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }
 
-        val endCal = Calendar.getInstance().apply {
-            timeInMillis = now
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-
-        val dailyExpenses = mutableMapOf<Long, Double>()
-        val dailyIncomes = mutableMapOf<Long, Double>()
+        val dailyExpenses = mutableMapOf<LocalDate, Double>()
+        val dailyIncomes = mutableMapOf<LocalDate, Double>()
 
         transactions.forEach { tx ->
             if (tx.category.equals("TRANSFER", ignoreCase = true)) return@forEach
-            val txCal = Calendar.getInstance().apply {
-                timeInMillis = tx.timestamp
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            val key = txCal.timeInMillis
+            val txDate = Instant.ofEpochMilli(tx.timestamp).atZone(zoneId).toLocalDate()
             if (tx.isIncome) {
-                dailyIncomes[key] = (dailyIncomes[key] ?: 0.0) + tx.amount
+                dailyIncomes[txDate] = (dailyIncomes[txDate] ?: 0.0) + tx.amount
             } else {
-                dailyExpenses[key] = (dailyExpenses[key] ?: 0.0) + tx.amount
+                dailyExpenses[txDate] = (dailyExpenses[txDate] ?: 0.0) + tx.amount
             }
         }
 
@@ -267,20 +252,21 @@ class AccountAnalyticsViewModel @Inject constructor(
         var runningExpense = 0.0
         var runningIncome = 0.0
 
-        val cursorCal = Calendar.getInstance().apply { timeInMillis = startCal.timeInMillis }
-        while (cursorCal.timeInMillis <= endCal.timeInMillis) {
-            val exp = dailyExpenses[cursorCal.timeInMillis] ?: 0.0
-            val inc = dailyIncomes[cursorCal.timeInMillis] ?: 0.0
+        var cursorDate = startDate
+        while (!cursorDate.isAfter(nowLocalDate)) {
+            val exp = dailyExpenses[cursorDate] ?: 0.0
+            val inc = dailyIncomes[cursorDate] ?: 0.0
             runningExpense += exp
             runningIncome += inc
             val runningNet = runningIncome - runningExpense
 
-            expensePoints.add(DashboardContract.Point(index, runningExpense.toFloat(), cursorCal.timeInMillis))
-            incomePoints.add(DashboardContract.Point(index, runningIncome.toFloat(), cursorCal.timeInMillis))
-            netPoints.add(DashboardContract.Point(index, runningNet.toFloat(), cursorCal.timeInMillis))
+            val cursorMillis = cursorDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+            expensePoints.add(DashboardContract.Point(index, runningExpense.toFloat(), cursorMillis))
+            incomePoints.add(DashboardContract.Point(index, runningIncome.toFloat(), cursorMillis))
+            netPoints.add(DashboardContract.Point(index, runningNet.toFloat(), cursorMillis))
 
             index += 1f
-            cursorCal.add(Calendar.DAY_OF_YEAR, 1)
+            cursorDate = cursorDate.plusDays(1)
         }
 
         return Triple(expensePoints, incomePoints, netPoints)
@@ -374,35 +360,34 @@ class AccountAnalyticsViewModel @Inject constructor(
     private fun calculateWeekdayBreakdown(transactions: List<TransactionEntity>): List<WeekdaySpendData> {
         val expenses = transactions.filter { !it.isIncome && !it.category.equals("TRANSFER", ignoreCase = true) }
         val total = expenses.sumOf { it.amount }
-        val cal = Calendar.getInstance()
-        val symbols = DateFormatSymbols(Locale.getDefault()).shortWeekdays
+        val zoneId = ZoneId.systemDefault()
+        val locale = Locale.getDefault()
 
-        val weekdayTotals = mutableMapOf<Int, Double>()
-        for (day in Calendar.SUNDAY..Calendar.SATURDAY) {
+        val weekdayTotals = mutableMapOf<DayOfWeek, Double>()
+        for (day in DayOfWeek.values()) {
             weekdayTotals[day] = 0.0
         }
 
         expenses.forEach { tx ->
-            cal.timeInMillis = tx.timestamp
-            val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
+            val dayOfWeek = Instant.ofEpochMilli(tx.timestamp).atZone(zoneId).dayOfWeek
             weekdayTotals[dayOfWeek] = (weekdayTotals[dayOfWeek] ?: 0.0) + tx.amount
         }
 
         val maxAmount = weekdayTotals.values.maxOrNull() ?: 0.0
 
         val orderedDays = listOf(
-            Calendar.MONDAY,
-            Calendar.TUESDAY,
-            Calendar.WEDNESDAY,
-            Calendar.THURSDAY,
-            Calendar.FRIDAY,
-            Calendar.SATURDAY,
-            Calendar.SUNDAY
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY,
+            DayOfWeek.FRIDAY,
+            DayOfWeek.SATURDAY,
+            DayOfWeek.SUNDAY
         )
 
-        return orderedDays.map { dayKey ->
-            val amt = weekdayTotals[dayKey] ?: 0.0
-            val name = symbols.getOrNull(dayKey) ?: ""
+        return orderedDays.map { day ->
+            val amt = weekdayTotals[day] ?: 0.0
+            val name = day.getDisplayName(TextStyle.SHORT, locale)
             val pct = if (total > 0.0) (amt / total).toFloat() else 0f
             WeekdaySpendData(
                 dayName = name,
