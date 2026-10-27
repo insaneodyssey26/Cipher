@@ -1,0 +1,8 @@
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:propertyName="scaleX"
+    android:startOffset="780"
+    android:duration="400"
+    android:valueFrom="0"
+    android:valueTo="1"
+    android:valueType="floatType"
+    android:interpolator="@android:interpolator/fast_out_slow_in" />

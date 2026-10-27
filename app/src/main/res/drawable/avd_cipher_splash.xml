@@ -1,0 +1,24 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vector_cipher_splash">
+
+    <target
+        android:name="outer_stroke"
+        android:animation="@animator/anim_outer_stroke" />
+
+    <target
+        android:name="group_disc"
+        android:animation="@animator/anim_disc_bloom" />
+
+    <target
+        android:name="group_keyhole_void"
+        android:animation="@animator/anim_keyhole_void" />
+
+    <target
+        android:name="group_notch"
+        android:animation="@animator/anim_keyhole_notch" />
+
+    <target
+        android:name="group_pin"
+        android:animation="@animator/anim_inner_pin" />
+
+</animated-vector>

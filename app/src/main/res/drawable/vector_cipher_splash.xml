@@ -1,0 +1,78 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="root_scale"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.65"
+        android:scaleY="0.65">
+
+    <group
+        android:name="group_outer_stroke"
+        android:pivotX="256"
+        android:pivotY="256">
+        <path
+            android:name="outer_stroke"
+            android:strokeColor="@color/splash_foreground"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:trimPathStart="0"
+            android:trimPathEnd="0"
+            android:pathData="M 256,108 A 148,148 0 1,1 255.9,108" />
+    </group>
+
+    <group
+        android:name="group_disc"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0"
+        android:scaleY="0"
+        android:alpha="0">
+        <path
+            android:name="disc_fill"
+            android:fillColor="@color/splash_foreground"
+            android:pathData="M 256,106 A 150,150 0 1,1 255.9,106 Z" />
+    </group>
+
+    <group
+        android:name="group_keyhole_void"
+        android:pivotX="241"
+        android:pivotY="256"
+        android:scaleX="0"
+        android:scaleY="0">
+        <path
+            android:name="keyhole_circle"
+            android:fillColor="@color/splash_cutout"
+            android:pathData="M 241,193.5 A 62.5,62.5 0 1,1 240.9,193.5 Z" />
+    </group>
+
+    <group
+        android:name="group_notch"
+        android:pivotX="241"
+        android:pivotY="256"
+        android:scaleX="0">
+        <path
+            android:name="keyhole_wedge"
+            android:fillColor="@color/splash_cutout"
+            android:pathData="M 241,228.5 L 426,188.5 L 426,323.5 L 241,283.5 Z" />
+    </group>
+
+    <group
+        android:name="group_pin"
+        android:pivotX="241"
+        android:pivotY="256"
+        android:scaleX="0"
+        android:scaleY="0">
+        <path
+            android:name="inner_pin"
+            android:fillColor="@color/splash_foreground"
+            android:pathData="M 241,231 A 25,25 0 1,1 240.9,231 Z" />
+    </group>
+
+    </group>
+
+</vector>

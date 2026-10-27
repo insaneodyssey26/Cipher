@@ -2,6 +2,7 @@
 agp = "9.4.0"
 kotlin = "2.4.20"
 coreKtx = "1.19.1"
+coreSplashScreen = "1.2.0"
 junit = "4.13.2"
 mockitoCore = "5.14.2"
 mockitoKotlin = "5.4.0"
@@ -35,6 +36,7 @@ uiautomator = "2.4.0"
 [libraries]
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashScreen" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }

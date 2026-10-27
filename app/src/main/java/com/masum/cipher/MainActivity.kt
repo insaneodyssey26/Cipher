@@ -7,6 +7,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -174,6 +175,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        var keepOnScreen = true
+        splashScreen.setKeepOnScreenCondition { keepOnScreen }
         super.onCreate(savedInstanceState)
         if (securityManager.isDatabaseKeyUnavailable()) {
             showDatabaseRecovery()
@@ -207,13 +211,9 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemDark
                 }
 
-                LaunchedEffect(darkTheme) {
-                    val style = if (darkTheme) {
-                        SystemBarStyle.dark(AndroidColor.TRANSPARENT)
-                    } else {
-                        SystemBarStyle.light(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT)
-                    }
-                    enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(900)
+                    keepOnScreen = false
                 }
 
                 CipherTheme(
