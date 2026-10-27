@@ -46,7 +46,8 @@ class SettingsViewModel @Inject constructor(
         currencySymbol = userPreferences.getCachedCurrencySymbol(),
         isPro = userPreferences.isCachedPro(),
         proTier = userPreferences.getCachedProTier(),
-        proExpiresAtEpochMs = userPreferences.getCachedProExpiresAt()
+        proExpiresAtEpochMs = userPreferences.getCachedProExpiresAt(),
+        isInstalledFromPlayStore = com.masum.cipher.core.updates.UpdateManager.isInstalledFromPlayStore(context)
     )
 ) {
 
@@ -87,6 +88,9 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.ActivatePro -> activatePro(intent.licenseKey, intent.email)
             is SettingsContract.Intent.DeactivatePro -> deactivatePro()
             is SettingsContract.Intent.SetShowProBadge -> updateShowProBadge(intent.enabled)
+            SettingsContract.Intent.CheckForAppUpdates -> checkForAppUpdates()
+            is SettingsContract.Intent.DownloadAndInstallUpdate -> downloadAndInstallUpdate(intent.downloadUrl)
+            SettingsContract.Intent.DismissUpdateDialog -> updateState { copy(updateCheckResult = null, downloadPercent = null, downloadError = null) }
         }
     }
 
@@ -393,6 +397,46 @@ class SettingsViewModel @Inject constructor(
             }
             userPreferences.deactivatePro()
             emitEffect(SettingsContract.Effect.ShowToast("Pro deactivated. Device slot freed."))
+        }
+    }
+
+    private fun checkForAppUpdates() {
+        viewModelScope.launch {
+            updateState { copy(isCheckingUpdate = true) }
+            val checkResult = com.masum.cipher.core.updates.GitHubUpdateManager.checkForUpdate()
+            updateState {
+                copy(
+                    isCheckingUpdate = false,
+                    updateCheckResult = checkResult
+                )
+            }
+            if (!checkResult.isUpdateAvailable) {
+                emitEffect(SettingsContract.Effect.ShowToast("Cipher is up to date (v${checkResult.currentVersion})"))
+            }
+        }
+    }
+
+    private fun downloadAndInstallUpdate(downloadUrl: String) {
+        viewModelScope.launch {
+            updateState { copy(downloadPercent = 0, downloadError = null) }
+            com.masum.cipher.core.updates.GitHubUpdateManager.downloadApk(
+                context = context,
+                downloadUrl = downloadUrl
+            ) { progress ->
+                when (progress) {
+                    is com.masum.cipher.core.updates.DownloadProgress.Progress -> {
+                        updateState { copy(downloadPercent = progress.percent) }
+                    }
+                    is com.masum.cipher.core.updates.DownloadProgress.Success -> {
+                        updateState { copy(downloadPercent = null, updateCheckResult = null) }
+                        com.masum.cipher.core.updates.GitHubUpdateManager.installApk(context, progress.apkFile)
+                    }
+                    is com.masum.cipher.core.updates.DownloadProgress.Error -> {
+                        updateState { copy(downloadPercent = null, downloadError = progress.message) }
+                        emitEffect(SettingsContract.Effect.ShowToast("Update download failed: ${progress.message}"))
+                    }
+                }
+            }
         }
     }
 }

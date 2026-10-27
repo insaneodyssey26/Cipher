@@ -9,6 +9,8 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.notifications.LocalNotificationManager
+import com.masum.cipher.core.updates.GitHubUpdateManager
+import com.masum.cipher.core.updates.UpdateManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -30,22 +32,6 @@ class AppUpdateWorker(
     }
 
     override suspend fun doWork(): Result {
-        val isInstalledFromPlayStore = try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val sourceInfo = applicationContext.packageManager.getInstallSourceInfo(applicationContext.packageName)
-                sourceInfo.installingPackageName == "com.android.vending"
-            } else {
-                @Suppress("DEPRECATION")
-                applicationContext.packageManager.getInstallerPackageName(applicationContext.packageName) == "com.android.vending"
-            }
-        } catch (_: Exception) {
-            false
-        }
-
-        if (!isInstalledFromPlayStore) {
-            return Result.success()
-        }
-
         val entryPoint = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val userPreferences = entryPoint.userPreferences()
         val localNotificationManager = entryPoint.localNotificationManager()
@@ -55,34 +41,46 @@ class AppUpdateWorker(
             return Result.success()
         }
 
-        val appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+        val isInstalledFromPlayStore = UpdateManager.isInstalledFromPlayStore(applicationContext)
 
-        val appUpdateInfo: AppUpdateInfo? = suspendCancellableCoroutine { cont ->
-            appUpdateManager.appUpdateInfo
-                .addOnSuccessListener { info ->
-                    if (cont.isActive) cont.resume(info)
-                }
-                .addOnFailureListener {
-                    if (cont.isActive) cont.resume(null)
-                }
-        }
-
-        if (appUpdateInfo != null && appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-            val availableVersionCode = appUpdateInfo.availableVersionCode()
-            val currentVersionCode = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).longVersionCode.toInt()
-                } else {
-                    @Suppress("DEPRECATION")
-                    applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).versionCode
-                }
-            } catch (_: Exception) {
-                0
+        if (isInstalledFromPlayStore) {
+            val appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+            val appUpdateInfo: AppUpdateInfo? = suspendCancellableCoroutine { cont ->
+                appUpdateManager.appUpdateInfo
+                    .addOnSuccessListener { info ->
+                        if (cont.isActive) cont.resume(info)
+                    }
+                    .addOnFailureListener {
+                        if (cont.isActive) cont.resume(null)
+                    }
             }
 
-            if (availableVersionCode > currentVersionCode && availableVersionCode > settings.lastNotifiedUpdateVersionCode) {
-                localNotificationManager.showAppUpdateAvailableNotification()
-                userPreferences.setLastNotifiedUpdateVersionCode(availableVersionCode)
+            if (appUpdateInfo != null && appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                val availableVersionCode = appUpdateInfo.availableVersionCode()
+                val currentVersionCode = try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).longVersionCode.toInt()
+                    } else {
+                        @Suppress("DEPRECATION")
+                        applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).versionCode
+                    }
+                } catch (_: Exception) {
+                    0
+                }
+
+                if (availableVersionCode > currentVersionCode && availableVersionCode > settings.lastNotifiedUpdateVersionCode) {
+                    localNotificationManager.showAppUpdateAvailableNotification()
+                    userPreferences.setLastNotifiedUpdateVersionCode(availableVersionCode)
+                }
+            }
+        } else {
+            val result = GitHubUpdateManager.checkForUpdate()
+            if (result.isUpdateAvailable) {
+                val numericCode = result.latestVersion.filter { it.isDigit() }.toIntOrNull() ?: 0
+                if (numericCode > settings.lastNotifiedUpdateVersionCode) {
+                    localNotificationManager.showAppUpdateAvailableNotification(versionName = result.latestVersion)
+                    userPreferences.setLastNotifiedUpdateVersionCode(numericCode)
+                }
             }
         }
 

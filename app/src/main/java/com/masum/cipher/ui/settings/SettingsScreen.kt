@@ -117,6 +117,7 @@ import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
 import compose.icons.lucideicons.Crown
+import compose.icons.lucideicons.Download
 import compose.icons.lucideicons.CloudDownload
 import compose.icons.lucideicons.CloudUpload
 import compose.icons.lucideicons.Coffee
@@ -143,6 +144,7 @@ import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Shapes
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
+import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.Star
 import compose.icons.lucideicons.Sun
 import compose.icons.lucideicons.Target
@@ -1299,12 +1301,17 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                 if (matchUpdate) VaultSettingsItem(
                     icon = LucideIcons.RefreshCw,
                     title = stringResource(R.string.check_updates_title),
-                    subtitle = stringResource(R.string.check_updates_desc),
+                    subtitle = if (state.isInstalledFromPlayStore) stringResource(R.string.check_updates_desc) else "Check for the latest updates on GitHub",
+                    loading = state.isCheckingUpdate,
                     onClick = {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
-                        } catch (_: android.content.ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
+                        if (state.isInstalledFromPlayStore) {
+                            try {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                            } catch (_: android.content.ActivityNotFoundException) {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
+                            }
+                        } else {
+                            viewModel.handleIntent(SettingsContract.Intent.CheckForAppUpdates)
                         }
                     }
                 )
@@ -1452,6 +1459,198 @@ Spacer(modifier = Modifier.weight(1f))
             onDismiss = { showWhatsNewSheet = false },
             onContinue = { showWhatsNewSheet = false }
         )
+    }
+
+    state.updateCheckResult?.let { updateInfo ->
+        if (updateInfo.isUpdateAvailable) {
+            AlertDialog(
+                onDismissRequest = {
+                    if (state.downloadPercent == null) {
+                        viewModel.handleIntent(SettingsContract.Intent.DismissUpdateDialog)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .padding(vertical = 16.dp),
+                shape = RoundedCornerShape(24.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                title = {
+                    Column {
+                        Text(
+                            text = "Update Available",
+                            style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "v${updateInfo.latestVersion} is ready (Current: v${updateInfo.currentVersion})",
+                            style = Typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (updateInfo.changelog.isNotBlank()) {
+                            Text(
+                                text = "What's New:",
+                                style = Typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(280.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        RoundedCornerShape(16.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(16.dp)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                com.masum.cipher.ui.components.MarkdownChangelogView(
+                                    markdownText = updateInfo.changelog
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        if (state.downloadPercent != null) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Downloading update...",
+                                        style = Typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "${state.downloadPercent}%",
+                                        style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                androidx.compose.material3.LinearProgressIndicator(
+                                    progress = { (state.downloadPercent ?: 0) / 100f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp)),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    if (state.downloadPercent == null) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Update via",
+                                style = Typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                if (!updateInfo.downloadUrl.isNullOrBlank()) {
+                                    Button(
+                                        onClick = {
+                                            view.performVibrate(state.isHapticsEnabled)
+                                            viewModel.handleIntent(SettingsContract.Intent.DownloadAndInstallUpdate(updateInfo.downloadUrl))
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(14.dp),
+                                        border = androidx.compose.foundation.BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                        ),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                            contentColor = MaterialTheme.colorScheme.onSurface
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = LucideIcons.Github,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "GitHub",
+                                            style = Typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                        )
+                                    }
+                                }
+
+                                Button(
+                                    onClick = {
+                                        view.performVibrate(state.isHapticsEnabled)
+                                        try {
+                                            context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
+                                        } catch (_: android.content.ActivityNotFoundException) {
+                                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=com.masum.cipher".toUri()))
+                                        }
+                                        viewModel.handleIntent(SettingsContract.Intent.DismissUpdateDialog)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                    ),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_play_store),
+                                        contentDescription = null,
+                                        tint = Color.Unspecified,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Play Store",
+                                        style = Typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    view.performVibrate(state.isHapticsEnabled)
+                                    viewModel.handleIntent(SettingsContract.Intent.DismissUpdateDialog)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Later", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                },
+                dismissButton = {}
+            )
+        }
     }
 
     if (showCrashLogDialog) {

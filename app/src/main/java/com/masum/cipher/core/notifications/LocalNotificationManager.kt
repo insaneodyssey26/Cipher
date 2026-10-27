@@ -448,7 +448,7 @@ class LocalNotificationManager @Inject constructor(
         }
     }
 
-    fun showAppUpdateAvailableNotification() {
+    fun showAppUpdateAvailableNotification(versionName: String? = null) {
         scope.launch {
             val settings = userPreferences.settingsFlow.first()
             if (!settings.notifyAppUpdates) return@launch
@@ -457,21 +457,27 @@ class LocalNotificationManager @Inject constructor(
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) return@launch
 
-            val updateIntent = Intent(Intent.ACTION_VIEW).apply {
-                data = android.net.Uri.parse("market://details?id=${context.packageName}")
-                setPackage("com.android.vending")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
+            val isFromPlayStore = com.masum.cipher.core.updates.UpdateManager.isInstalledFromPlayStore(context)
 
-            val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
-                data = android.net.Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-
-            val targetIntent = if (updateIntent.resolveActivity(context.packageManager) != null) {
-                updateIntent
+            val targetIntent = if (isFromPlayStore) {
+                val updateIntent = Intent(Intent.ACTION_VIEW).apply {
+                    data = android.net.Uri.parse("market://details?id=${context.packageName}")
+                    setPackage("com.android.vending")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                if (updateIntent.resolveActivity(context.packageManager) != null) {
+                    updateIntent
+                } else {
+                    Intent(Intent.ACTION_VIEW).apply {
+                        data = android.net.Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                }
             } else {
-                fallbackIntent
+                Intent(context, com.masum.cipher.MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra("open_update_dialog", true)
+                }
             }
 
             val pendingIntent = PendingIntent.getActivity(
@@ -481,11 +487,17 @@ class LocalNotificationManager @Inject constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val desc = if (!versionName.isNullOrBlank()) {
+                "Cipher v$versionName is now available. Tap to update."
+            } else {
+                context.getString(R.string.notify_update_available_desc)
+            }
+
             val builder = NotificationCompat.Builder(context, CHANNEL_SYSTEM)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor("#4F46E5".toColorInt())
                 .setContentTitle(context.getString(R.string.notify_update_available_title))
-                .setContentText(context.getString(R.string.notify_update_available_desc))
+                .setContentText(desc)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
