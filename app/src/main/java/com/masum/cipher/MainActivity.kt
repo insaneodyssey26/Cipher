@@ -58,6 +58,8 @@ import com.masum.cipher.core.security.BiometricAuthenticator
 import com.masum.cipher.core.security.DatabaseRecovery
 import com.masum.cipher.core.security.SecurityManager
 import com.masum.cipher.core.updates.UpdateManager
+import com.masum.cipher.core.util.HapticIntensity
+import com.masum.cipher.core.util.performHaptic
 import com.masum.cipher.core.worker.NotificationScheduler
 import com.masum.cipher.ui.MainContract
 import com.masum.cipher.ui.MainViewModel
@@ -211,9 +213,11 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemDark
                 }
 
+                val currentView = androidx.compose.ui.platform.LocalView.current
                 LaunchedEffect(Unit) {
                     kotlinx.coroutines.delay(900)
                     keepOnScreen = false
+                    currentView.performHaptic(userSettings.isHapticsEnabled, HapticIntensity.MEDIUM)
                 }
 
                 CipherTheme(

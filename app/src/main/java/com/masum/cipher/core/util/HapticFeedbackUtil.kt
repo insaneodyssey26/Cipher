@@ -8,13 +8,30 @@ import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import android.view.View
 
+enum class HapticIntensity {
+    LIGHT,
+    MEDIUM,
+    HEAVY
+}
+
 fun View.performVibrate(isHapticsEnabled: Boolean, isLongPress: Boolean = false) {
     if (!isHapticsEnabled) return
+    performHaptic(isHapticsEnabled, if (isLongPress) HapticIntensity.HEAVY else HapticIntensity.LIGHT)
+}
 
-    val feedbackConstant = if (isLongPress) {
-        HapticFeedbackConstants.LONG_PRESS
-    } else {
-        HapticFeedbackConstants.KEYBOARD_TAP
+fun View.performHaptic(isHapticsEnabled: Boolean, intensity: HapticIntensity = HapticIntensity.LIGHT) {
+    if (!isHapticsEnabled) return
+
+    val feedbackConstant = when (intensity) {
+        HapticIntensity.LIGHT -> HapticFeedbackConstants.KEYBOARD_TAP
+        HapticIntensity.MEDIUM -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                HapticFeedbackConstants.CONFIRM
+            } else {
+                HapticFeedbackConstants.CONTEXT_CLICK
+            }
+        }
+        HapticIntensity.HEAVY -> HapticFeedbackConstants.LONG_PRESS
     }
 
     val handled = this.performHapticFeedback(feedbackConstant)
@@ -30,15 +47,29 @@ fun View.performVibrate(isHapticsEnabled: Boolean, isLongPress: Boolean = false)
 
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val effectId = if (isLongPress) {
-                        VibrationEffect.EFFECT_HEAVY_CLICK
-                    } else {
-                        VibrationEffect.EFFECT_CLICK
+                    val effectId = when (intensity) {
+                        HapticIntensity.LIGHT -> VibrationEffect.EFFECT_CLICK
+                        HapticIntensity.MEDIUM -> {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                VibrationEffect.EFFECT_CLICK
+                            } else {
+                                VibrationEffect.EFFECT_HEAVY_CLICK
+                            }
+                        }
+                        HapticIntensity.HEAVY -> VibrationEffect.EFFECT_HEAVY_CLICK
                     }
                     vibrator.vibrate(VibrationEffect.createPredefined(effectId))
                 } else {
-                    val duration = if (isLongPress) 40L else 12L
-                    val amplitude = if (isLongPress) VibrationEffect.DEFAULT_AMPLITUDE else 120
+                    val duration = when (intensity) {
+                        HapticIntensity.LIGHT -> 12L
+                        HapticIntensity.MEDIUM -> 22L
+                        HapticIntensity.HEAVY -> 40L
+                    }
+                    val amplitude = when (intensity) {
+                        HapticIntensity.LIGHT -> 120
+                        HapticIntensity.MEDIUM -> 180
+                        HapticIntensity.HEAVY -> VibrationEffect.DEFAULT_AMPLITUDE
+                    }
                     vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
                 }
             }
