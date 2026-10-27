@@ -66,7 +66,6 @@ import compose.icons.lucideicons.Share2
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.TrendingUp
 import kotlinx.coroutines.launch
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,7 +262,7 @@ fun DebtDetailsSheet(
                     IconButton(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            val shareText = "Cipher Reminder: ${if (debtItem.type == DebtType.LENT) "Pending balance of" else "I owe"} ${AppFormatters.formatCurrency(debtItem.remainingAmount, currencySymbol, locale)} for ${debtNote ?: "loan"}${if (debtDueDate != null) ", due on ${AppFormatters.getFullDate().format(Date(debtDueDate))}" else ""}."
+                            val shareText = "Cipher Reminder: ${if (debtItem.type == DebtType.LENT) "Pending balance of" else "I owe"} ${AppFormatters.formatCurrency(debtItem.remainingAmount, currencySymbol, locale)} for ${debtNote ?: "loan"}${if (debtDueDate != null) ", due on ${AppFormatters.formatFullDate(debtDueDate)}" else ""}."
                             val sendIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, shareText)
@@ -624,7 +623,7 @@ fun DebtDetailsSheet(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = AppFormatters.getFullDate().format(Date(detailDueDate)),
+                                text = AppFormatters.formatFullDate(detailDueDate, locale = locale),
                                 style = Typography.bodySmall.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -701,7 +700,7 @@ fun DebtDetailsSheet(
                                     color = EmeraldIncome
                                 )
                                 Text(
-                                    text = "${AppFormatters.getFullDate().format(Date(repayment.timestamp))}${if (!repayment.note.isNullOrBlank()) " • ${repayment.note}" else ""}",
+                                    text = "${AppFormatters.formatFullDate(repayment.timestamp, locale = locale)}${if (!repayment.note.isNullOrBlank()) " • ${repayment.note}" else ""}",
                                     style = Typography.bodySmall.copy(
                                         fontFamily = Lato,
                                         fontSize = 11.5.sp

@@ -89,7 +89,6 @@ import compose.icons.lucideicons.Settings
 import compose.icons.lucideicons.Target
 import compose.icons.lucideicons.X
 import java.util.Calendar
-import java.util.Date
 import kotlinx.coroutines.launch
 
 private data class CategoryMerchantSpend(
@@ -870,7 +869,7 @@ fun CategoryDetailSheet(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
-                                                text = "${AppFormatters.getDay().format(Date(tx.timestamp))}${if (!tx.note.isNullOrBlank()) " • ${tx.note}" else ""}",
+                                                text = "${AppFormatters.formatDay(tx.timestamp, locale = locale)}${if (!tx.note.isNullOrBlank()) " • ${tx.note}" else ""}",
                                                 style = Typography.bodySmall.copy(
                                                     fontFamily = Lato,
                                                     fontSize = 11.5.sp

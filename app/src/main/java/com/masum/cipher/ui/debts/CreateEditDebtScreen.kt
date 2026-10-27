@@ -100,7 +100,6 @@ import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.Trash2
 import compose.icons.lucideicons.User
 import compose.icons.lucideicons.X
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -835,7 +834,7 @@ fun CreateEditDebtScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = if (dueDate != null) AppFormatters.getFullDate().format(Date(dueDate!!)) else stringResource(R.string.debt_select_due_date),
+                            text = if (dueDate != null) AppFormatters.formatFullDate(dueDate!!) else stringResource(R.string.debt_select_due_date),
                             style = Typography.bodyMedium.copy(
                                 fontFamily = Lato,
                                 fontSize = 13.5.sp,

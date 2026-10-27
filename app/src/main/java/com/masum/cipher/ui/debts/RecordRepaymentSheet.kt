@@ -80,7 +80,6 @@ import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Plus
 import compose.icons.lucideicons.X
 import kotlinx.coroutines.launch
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -358,7 +357,7 @@ fun RecordRepaymentSheet(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = AppFormatters.getFullDate().format(Date(timestamp)),
+                            text = AppFormatters.formatFullDate(timestamp),
                             style = Typography.bodyMedium.copy(
                                 fontFamily = Lato,
                                 fontSize = 13.sp,
