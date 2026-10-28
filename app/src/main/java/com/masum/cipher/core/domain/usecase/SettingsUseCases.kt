@@ -130,11 +130,12 @@ class ExportPdfUseCase @Inject constructor(
     private val transactionSplitDao: com.masum.cipher.core.data.local.dao.TransactionSplitDao,
     private val accountDao: AccountDao,
     private val backupRepository: BackupRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator
 ) {
     suspend operator fun invoke(uri: Uri, accountId: Long? = null, accountName: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            if (!userPreferences.isCachedPro()) {
+            if (!appIntegrityValidator.isEnvironmentValid() || !userPreferences.isCachedPro()) {
                 throw IllegalStateException("PDF statement export is a Pro feature")
             }
             val allTransactions = transactionDao.getAllTransactions().first()
