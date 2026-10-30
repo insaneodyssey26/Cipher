@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/feature-graphic.jpg" alt="Cipher - Private money tracking" width="100%" />
+</p>
+
 # cipher
 
 A local-first, privacy-focused personal finance app for Android. cipher reads your bank SMS alerts and app notifications, turning them into a clean, searchable transaction ledger — entirely on-device, with zero cloud dependency.
