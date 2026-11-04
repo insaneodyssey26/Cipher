@@ -196,6 +196,8 @@ fun SettingsScreen(
     val revealPasswordPromptTitle = stringResource(R.string.show_backup_password_title)
     val revealPasswordPromptSubtitle = stringResource(R.string.show_backup_password_prompt)
     var autoBackupSetupPassword by remember { mutableStateOf("") }
+    var pendingAutoBackupPassword by remember { mutableStateOf<String?>(null) }
+    val autoBackupFolderRequiredMessage = stringResource(R.string.auto_backup_folder_required)
     var showProSheet by remember { mutableStateOf(false) }
     var showPdfUpsellSheet by remember { mutableStateOf(false) }
     var showAccentColorsGateSheet by remember { mutableStateOf(false) }
@@ -225,10 +227,21 @@ fun SettingsScreen(
     }
 
     val autoBackupFolderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        uri?.let {
+        if (uri != null) {
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            context.contentResolver.takePersistableUriPermission(it, takeFlags)
-            viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupUri(it.toString()))
+            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+            viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupUri(uri.toString()))
+            val password = pendingAutoBackupPassword
+            if (password != null) {
+                viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(password))
+                viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(true))
+                pendingAutoBackupPassword = null
+            }
+        } else {
+            if (pendingAutoBackupPassword != null) {
+                pendingAutoBackupPassword = null
+                Toast.makeText(context, autoBackupFolderRequiredMessage, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -1981,10 +1994,16 @@ Spacer(modifier = Modifier.weight(1f))
             confirmText = stringResource(R.string.action_enable),
             onConfirm = {
                 if (autoBackupSetupPassword.length >= 4) {
-                    viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(autoBackupSetupPassword))
-                    viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(true))
+                    val password = autoBackupSetupPassword
                     showAutoBackupPasswordSetupDialog = false
                     autoBackupSetupPassword = ""
+                    if (state.autoBackupUri != null) {
+                        viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(password))
+                        viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(true))
+                    } else {
+                        pendingAutoBackupPassword = password
+                        autoBackupFolderLauncher.launch(null)
+                    }
                 }
             }
         ) {

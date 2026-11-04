@@ -221,6 +221,7 @@
     <string name="clear_all_data_title">Borrar todos los datos</string>
     <string name="enable_auto_backup_title">Activar copia automática</string>
     <string name="enable_auto_backup_desc">Hacer copia local silenciosa del baúl</string>
+    <string name="auto_backup_folder_required">Seleccione una carpeta de copia para activar la copia automática</string>
     <string name="backup_frequency_title">Frecuencia de copia</string>
     <string name="backup_location_title">Ubicación de copia</string>
     <string name="tap_select_folder">Tocar para seleccionar carpeta</string>

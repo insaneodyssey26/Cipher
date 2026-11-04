@@ -222,6 +222,7 @@
     <string name="clear_all_data_title">সমস্ত ডেটা মুছুন</string>
     <string name="enable_auto_backup_title">স্বয়ংক্রিয় ব্যাকআপ সক্রিয় করুন</string>
     <string name="enable_auto_backup_desc">স্থানীয়ভাবে নিঃশব্দে আপনার ভল্ট ব্যাকআপ নিন</string>
+    <string name="auto_backup_folder_required">অটো-ব্যাকআপ চালু করতে একটি ব্যাকআপ ফোল্ডার নির্বাচন করুন</string>
     <string name="backup_frequency_title">ব্যাকআপের পুনরাবৃত্তি</string>
     <string name="backup_location_title">ব্যাকআপের অবস্থান</string>
     <string name="tap_select_folder">ফোল্ডার নির্বাচন করতে ট্যাপ করুন</string>

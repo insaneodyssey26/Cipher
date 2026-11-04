@@ -226,6 +226,7 @@
     <string name="clear_all_data_title">Clear All Data</string>
     <string name="enable_auto_backup_title">Enable Auto-Backup</string>
     <string name="enable_auto_backup_desc">Silently backup your vault locally</string>
+    <string name="auto_backup_folder_required">Please select a backup folder to enable auto-backup</string>
     <string name="backup_frequency_title">Backup Frequency</string>
     <string name="backup_location_title">Backup Location</string>
     <string name="tap_select_folder">Tap to select folder</string>

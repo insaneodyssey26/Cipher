@@ -222,6 +222,7 @@
     <string name="clear_all_data_title">すべてのデータを消去</string>
     <string name="enable_auto_backup_title">自動バックアップを有効化</string>
     <string name="enable_auto_backup_desc">保管庫をローカルに自動バックアップ</string>
+    <string name="auto_backup_folder_required">自動バックアップを有効にするにはフォルダを選択してください</string>
     <string name="backup_frequency_title">バックアップ頻度</string>
     <string name="backup_location_title">バックアップの保存先</string>
     <string name="tap_select_folder">タップしてフォルダーを選択</string>
