@@ -347,6 +347,9 @@
     <string name="onboarding_apps_subtitle">Cipher এই অ্যাপগুলির বিজ্ঞপ্তি পর্যবেক্ষণ করে লেনদেন স্বয়ংক্রিয়ভাবে লগ করে। কিছু আপনার ফোন ছাড়ে না।</string>
     <string name="onboarding_apps_search_hint">খুঁজুন</string>
     <string name="onboarding_apps_selected_count">%d নির্বাচিত</string>
+    <string name="onboarding_selected_apps_title">নির্বাচিত অ্যাপ</string>
+    <string name="onboarding_selected_apps_clear">সব বাতিল করুন</string>
+    <string name="onboarding_selected_apps_empty">কোনো অ্যাপ নির্বাচিত নেই</string>
     <string name="onboarding_apps_finish">সেটআপ সম্পন্ন করুন</string>
     <string name="onboarding_apps_loading">ইনস্টল করা অ্যাপ লোড হচ্ছে…</string>
     <string name="onboarding_perm_intro">এই অনুমতিগুলি কখনো আপনার ডিভাইসের বাইরে ডেটা পাঠায় না। সবকিছু স্থানীয়ভাবে চলে।</string>

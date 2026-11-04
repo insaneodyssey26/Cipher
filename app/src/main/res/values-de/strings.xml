@@ -347,6 +347,9 @@
     <string name="onboarding_apps_subtitle">Cipher überwacht die Benachrichtigungen dieser Apps und protokolliert Transaktionen automatisch. Nichts verlässt Ihr Telefon.</string>
     <string name="onboarding_apps_search_hint">Suchen</string>
     <string name="onboarding_apps_selected_count">%d ausgewählt</string>
+    <string name="onboarding_selected_apps_title">Ausgewählte Apps</string>
+    <string name="onboarding_selected_apps_clear">Alle abwählen</string>
+    <string name="onboarding_selected_apps_empty">Keine Apps ausgewählt</string>
     <string name="onboarding_apps_finish">Einrichtung abschließen</string>
     <string name="onboarding_apps_loading">Installierte Apps werden geladen…</string>
     <string name="onboarding_perm_intro">Diese Berechtigungen senden niemals Daten außerhalb Ihres Geräts. Alles läuft lokal.</string>

@@ -23,6 +23,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -83,6 +84,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -124,6 +126,7 @@ import compose.icons.lucideicons.Lock
 import compose.icons.lucideicons.Moon
 import compose.icons.lucideicons.MousePointer
 import compose.icons.lucideicons.Plus
+import compose.icons.lucideicons.Search
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.ShoppingBag
 import compose.icons.lucideicons.Sparkles
@@ -131,6 +134,7 @@ import compose.icons.lucideicons.Sun
 import compose.icons.lucideicons.SunMoon
 import compose.icons.lucideicons.Utensils
 import compose.icons.lucideicons.Wallet
+import compose.icons.lucideicons.X
 import compose.icons.lucideicons.Zap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -448,7 +452,7 @@ private fun OnboardingTopBar(
                     Icon(
                         imageVector = LucideIcons.Globe,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = if (currentPage == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(11.dp)
                     )
                     AnimatedContent(
@@ -507,92 +511,128 @@ internal fun WelcomePage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = viewportHeight)
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                StaggeredEntrance(visible = entered, delayMillis = 0) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            text = "cipher.",
-                            style = Typography.displayLarge.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 48.sp,
-                                letterSpacing = (-1).sp,
-                                lineHeight = 50.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    StaggeredEntrance(visible = entered, delayMillis = 0) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(76.dp)
+                                    .clip(RoundedCornerShape(22.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(22.dp)
+                                    )
+                                    .padding(14.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
+                                    contentDescription = "Cipher Logo",
+                                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
 
-                        Text(
-                            text = stringResource(R.string.onboarding_welcome_greet_lead),
-                            style = Typography.headlineSmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 22.sp,
-                                letterSpacing = (-0.4).sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                            Spacer(modifier = Modifier.height(20.dp))
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Text(
-                            text = stringResource(R.string.onboarding_welcome_tagline_simple),
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 16.sp,
-                                lineHeight = 23.sp,
-                                letterSpacing = (-0.1).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                StaggeredEntrance(visible = entered, delayMillis = 120) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                            .border(
-                                1.dp,
-                                MaterialTheme.colorScheme.outlineVariant,
-                                RoundedCornerShape(20.dp)
+                            Text(
+                                text = "cipher.",
+                                style = Typography.displayLarge.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 44.sp,
+                                    letterSpacing = (-1.2).sp,
+                                    lineHeight = 46.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
                             )
-                            .padding(horizontal = 18.dp, vertical = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(18.dp)
-                    ) {
-                        WelcomeFeatureBenefit(
-                            icon = LucideIcons.ShieldCheck,
-                            title = stringResource(R.string.onboarding_feature_offline_simple_title),
-                            description = stringResource(R.string.onboarding_feature_offline_simple_desc)
-                        )
-                        WelcomeFeatureBenefit(
-                            icon = LucideIcons.Zap,
-                            title = stringResource(R.string.onboarding_feature_auto_simple_title),
-                            description = stringResource(R.string.onboarding_feature_auto_simple_desc)
-                        )
-                        WelcomeFeatureBenefit(
-                            icon = LucideIcons.ChartBar,
-                            title = stringResource(R.string.onboarding_feature_insights_simple_title),
-                            description = stringResource(R.string.onboarding_feature_insights_simple_desc)
-                        )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = stringResource(R.string.onboarding_welcome_greet_lead),
+                                style = Typography.headlineSmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 20.sp,
+                                    letterSpacing = (-0.3).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = stringResource(R.string.onboarding_welcome_tagline_simple),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 14.5.sp,
+                                    lineHeight = 21.sp,
+                                    letterSpacing = (-0.1).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(26.dp))
+
+                    StaggeredEntrance(visible = entered, delayMillis = 120) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant,
+                                    RoundedCornerShape(20.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 18.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            WelcomeFeatureBenefit(
+                                icon = LucideIcons.ShieldCheck,
+                                title = stringResource(R.string.onboarding_feature_offline_simple_title),
+                                description = stringResource(R.string.onboarding_feature_offline_simple_desc),
+                                iconTint = MaterialTheme.colorScheme.onSurface
+                            )
+                            WelcomeFeatureBenefit(
+                                icon = LucideIcons.Zap,
+                                title = stringResource(R.string.onboarding_feature_auto_simple_title),
+                                description = stringResource(R.string.onboarding_feature_auto_simple_desc),
+                                iconTint = MaterialTheme.colorScheme.onSurface
+                            )
+                            WelcomeFeatureBenefit(
+                                icon = LucideIcons.ChartBar,
+                                title = stringResource(R.string.onboarding_feature_insights_simple_title),
+                                description = stringResource(R.string.onboarding_feature_insights_simple_desc),
+                                iconTint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                Spacer(modifier = Modifier.weight(1f))
 
                 StaggeredEntrance(visible = entered, delayMillis = 240) {
                     Column(
@@ -602,13 +642,15 @@ internal fun WelcomePage(
                     ) {
                         PrimaryActionButton(
                             label = stringResource(R.string.onboarding_welcome_begin),
+                            containerColor = MaterialTheme.colorScheme.onSurface,
+                            contentColor = MaterialTheme.colorScheme.surface,
                             onClick = {
                                 view.performVibrate(true, isLongPress = false)
                                 onNext()
                             }
                         )
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         WelcomeReturningUserSection(
                             isPro = isPro,
@@ -857,7 +899,8 @@ private fun OnboardingRestoreLicenseDialog(
 private fun WelcomeFeatureBenefit(
     icon: ImageVector,
     title: String,
-    description: String
+    description: String,
+    iconTint: Color = MaterialTheme.colorScheme.primary
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -868,13 +911,13 @@ private fun WelcomeFeatureBenefit(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                .background(iconTint.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = iconTint,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -884,7 +927,7 @@ private fun WelcomeFeatureBenefit(
                 style = Typography.titleSmall.copy(
                     fontFamily = Lato,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.5.sp
+                    fontSize = 15.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -893,10 +936,10 @@ private fun WelcomeFeatureBenefit(
                 text = description,
                 style = Typography.bodySmall.copy(
                     fontFamily = Lato,
-                    fontSize = 13.5.sp,
-                    lineHeight = 19.sp
+                    fontSize = 13.sp,
+                    lineHeight = 18.5.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
         }
     }
@@ -1619,208 +1662,237 @@ private fun LanguageSelectionPage(
         gridAlpha.animateTo(1f, tween(360))
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 22.dp)
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewportHeight = maxHeight
+
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = viewportHeight)
+                    .padding(horizontal = 22.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Box(modifier = Modifier.graphicsLayer { alpha = heroAlpha.value }) {
-                    Column {
-                        StepLabel(text = stringResource(R.string.onboarding_step_region))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_section_language)
-                                .lowercase().replaceFirstChar { it.uppercase() },
-                            style = Typography.displaySmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 30.sp,
-                                lineHeight = 36.sp,
-                                letterSpacing = (-0.8).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_lang_subtitle),
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.5.sp,
-                                lineHeight = 19.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(22.dp))
-
-                Box(modifier = Modifier.graphicsLayer { alpha = gridAlpha.value }) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(9.dp)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = heroAlpha.value },
+                        contentAlignment = Alignment.Center
                     ) {
-                        val systemLang = AppLanguage.SUPPORTED_LANGUAGES.firstOrNull { it.code == "system" }
-                        val otherLanguages = AppLanguage.SUPPORTED_LANGUAGES.filter { it.code != "system" }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            StepLabel(text = stringResource(R.string.onboarding_step_region))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_section_language)
+                                    .lowercase().replaceFirstChar { it.uppercase() },
+                                style = Typography.displaySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 28.sp,
+                                    lineHeight = 34.sp,
+                                    letterSpacing = (-0.8).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_lang_subtitle),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 19.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
 
-                        if (systemLang != null) {
-                            val isSelected = selectedLang.equals(systemLang.code, ignoreCase = true) ||
-                                    (selectedLang.isBlank() && systemLang.code == "system")
-                            SelectionTile(
-                                modifier = Modifier.fillMaxWidth(),
-                                isSelected = isSelected,
-                                onClick = {
-                                    view.performVibrate(true, isLongPress = false)
-                                    selectedLang = systemLang.code
-                                    onLanguageSelected(systemLang.code)
-                                }
-                            ) {
-                                Row(
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = gridAlpha.value }
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            val systemLang = AppLanguage.SUPPORTED_LANGUAGES.firstOrNull { it.code == "system" }
+                            val otherLanguages = AppLanguage.SUPPORTED_LANGUAGES.filter { it.code != "system" }
+
+                            if (systemLang != null) {
+                                val isSelected = selectedLang.equals(systemLang.code, ignoreCase = true) ||
+                                        (selectedLang.isBlank() && systemLang.code == "system")
+                                SelectionTile(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = systemLang.nativeName,
-                                            style = Typography.titleSmall.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                                fontSize = 14.sp
-                                            ),
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = systemLang.name,
-                                            style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.5.sp),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                        )
+                                    isSelected = isSelected,
+                                    onClick = {
+                                        view.performVibrate(true, isLongPress = false)
+                                        selectedLang = systemLang.code
+                                        onLanguageSelected(systemLang.code)
                                     }
-                                    if (isSelected) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(20.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.primary),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = LucideIcons.Check,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(11.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = systemLang.nativeName,
+                                                style = Typography.titleSmall.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                    fontSize = 14.5.sp
+                                                ),
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = systemLang.name,
+                                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                             )
                                         }
-                                    } else {
-                                        Text(
-                                            text = systemLang.countryCode,
-                                            style = Typography.labelSmall.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 9.sp,
-                                                letterSpacing = 0.5.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                                        )
+                                        if (isSelected) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = LucideIcons.Check,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(11.dp)
+                                                )
+                                            }
+                                        } else {
+                                            Text(
+                                                text = systemLang.countryCode,
+                                                style = Typography.labelSmall.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 9.sp,
+                                                    letterSpacing = 0.5.sp
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        otherLanguages.chunked(2).forEach { rowLangs ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(9.dp)
-                            ) {
-                                rowLangs.forEach { lang ->
-                                    val isSelected = selectedLang.equals(lang.code, ignoreCase = true)
-                                    SelectionTile(
-                                        modifier = Modifier.weight(1f),
-                                        isSelected = isSelected,
-                                        onClick = {
-                                            view.performVibrate(true, isLongPress = false)
-                                            selectedLang = lang.code
-                                            onLanguageSelected(lang.code)
-                                        }
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Column {
-                                                Text(
-                                                    text = lang.nativeName,
-                                                    style = Typography.titleSmall.copy(
-                                                        fontFamily = Lato,
-                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                                        fontSize = 14.sp
-                                                    ),
-                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = lang.name,
-                                                    style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.5.sp),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                                )
+                            otherLanguages.chunked(2).forEach { rowLangs ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    rowLangs.forEach { lang ->
+                                        val isSelected = selectedLang.equals(lang.code, ignoreCase = true)
+                                        SelectionTile(
+                                            modifier = Modifier.weight(1f),
+                                            isSelected = isSelected,
+                                            onClick = {
+                                                view.performVibrate(true, isLongPress = false)
+                                                selectedLang = lang.code
+                                                onLanguageSelected(lang.code)
                                             }
-                                            if (isSelected) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(20.dp)
-                                                        .clip(CircleShape)
-                                                        .background(MaterialTheme.colorScheme.primary),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Icon(
-                                                        imageVector = LucideIcons.Check,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                                        modifier = Modifier.size(11.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Column(modifier = Modifier.weight(1f, fill = false)) {
+                                                    Text(
+                                                        text = lang.nativeName,
+                                                        style = Typography.titleSmall.copy(
+                                                            fontFamily = Lato,
+                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                                            fontSize = 14.5.sp
+                                                        ),
+                                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                    Text(
+                                                        text = lang.name,
+                                                        style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
                                                     )
                                                 }
-                                            } else {
-                                                Text(
-                                                    text = lang.countryCode,
-                                                    style = Typography.labelSmall.copy(
-                                                        fontFamily = Lato,
-                                                        fontWeight = FontWeight.Bold,
-                                                        fontSize = 9.sp,
-                                                        letterSpacing = 0.5.sp
-                                                    ),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                if (isSelected) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(20.dp)
+                                                            .clip(CircleShape)
+                                                            .background(MaterialTheme.colorScheme.primary),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = LucideIcons.Check,
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                                            modifier = Modifier.size(11.dp)
+                                                        )
+                                                    }
+                                                } else {
+                                                    Text(
+                                                        text = lang.countryCode,
+                                                        style = Typography.labelSmall.copy(
+                                                            fontFamily = Lato,
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 9.sp,
+                                                            letterSpacing = 0.5.sp
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
+                                    if (rowLangs.size == 1) Spacer(modifier = Modifier.weight(1f))
                                 }
-                                if (rowLangs.size == 1) Spacer(modifier = Modifier.weight(1f))
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp, top = 20.dp)
+                ) {
+                    PrimaryActionButton(
+                        label = stringResource(R.string.action_continue),
+                        onClick = {
+                            view.performVibrate(true, isLongPress = false)
+                            onNext()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
         }
-
-        PrimaryActionButton(
-            label = stringResource(R.string.action_continue),
-            onClick = {
-                view.performVibrate(true, isLongPress = false)
-                onNext()
-            }
-        )
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -1835,9 +1907,23 @@ private fun CurrencySelectionPage(
     val view = LocalView.current
     var selectedCode by rememberSaveable { mutableStateOf(currentCurrencyCode) }
     var selectedSym by rememberSaveable { mutableStateOf(currentCurrencySymbol) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     val activeLocale = remember(currentLanguageCode) {
         if (currentLanguageCode == "system") Locale.getDefault() else Locale.forLanguageTag(currentLanguageCode)
+    }
+
+    val filteredCurrencies = remember(searchQuery) {
+        val q = searchQuery.trim().lowercase()
+        if (q.isBlank()) {
+            AppCurrency.SUPPORTED_CURRENCIES
+        } else {
+            AppCurrency.SUPPORTED_CURRENCIES.filter {
+                it.code.lowercase().contains(q) ||
+                it.name.lowercase().contains(q) ||
+                it.symbol.lowercase().contains(q)
+            }
+        }
     }
 
     val heroAlpha = remember { Animatable(0f) }
@@ -1851,196 +1937,301 @@ private fun CurrencySelectionPage(
         gridAlpha.animateTo(1f, tween(340))
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 22.dp)
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewportHeight = maxHeight
+
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = viewportHeight)
+                    .padding(horizontal = 22.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Box(modifier = Modifier.graphicsLayer { alpha = heroAlpha.value }) {
-                    Column {
-                        StepLabel(text = stringResource(R.string.onboarding_step_region))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_section_currency)
-                                .lowercase().replaceFirstChar { it.uppercase() },
-                            style = Typography.displaySmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 30.sp,
-                                lineHeight = 36.sp,
-                                letterSpacing = (-0.8).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_lang_subtitle),
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.5.sp,
-                                lineHeight = 19.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(modifier = Modifier.graphicsLayer { alpha = previewAlpha.value }) {
-                    VaultCard(
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        contentPadding = 16.dp
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = heroAlpha.value },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(modifier = Modifier.weight(1f, fill = false)) {
-                                Text(
-                                    text = stringResource(R.string.onboarding_live_preview_label),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 9.sp,
-                                        letterSpacing = 0.8.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.onboarding_preview_merchant),
-                                    style = Typography.titleSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = stringResource(R.string.onboarding_preview_category),
-                                    style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            AnimatedContent(
-                                targetState = selectedSym,
-                                transitionSpec = { fadeIn(tween(260)) togetherWith fadeOut(tween(180)) },
-                                label = "preview_amount",
-                                modifier = Modifier.padding(start = 8.dp)
-                            ) { sym ->
-                                val formatted = AppFormatters.formatCurrency(14.50, sym, activeLocale, 2)
-                                Text(
-                                    text = "-$formatted",
-                                    style = Typography.titleLarge.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 22.sp,
-                                        letterSpacing = (-0.5).sp
-                                    ),
-                                    color = RoseExpense,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            StepLabel(text = stringResource(R.string.onboarding_step_region))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_section_currency)
+                                    .lowercase().replaceFirstChar { it.uppercase() },
+                                style = Typography.displaySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 28.sp,
+                                    lineHeight = 34.sp,
+                                    letterSpacing = (-0.8).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_lang_subtitle),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 19.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                Box(modifier = Modifier.graphicsLayer { alpha = gridAlpha.value }) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(9.dp)
-                    ) {
-                        AppCurrency.SUPPORTED_CURRENCIES.chunked(2).forEach { row ->
+                    Box(modifier = Modifier.graphicsLayer { alpha = previewAlpha.value }) {
+                        VaultCard(
+                            backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                            contentPadding = 16.dp
+                        ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(9.dp)
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                row.forEach { cur ->
-                                    val isSelected = selectedCode.equals(cur.code, ignoreCase = true)
-                                    SelectionTile(
-                                        modifier = Modifier.weight(1f),
-                                        isSelected = isSelected,
-                                        onClick = {
-                                            view.performVibrate(true, isLongPress = false)
-                                            selectedCode = cur.code
-                                            selectedSym = cur.symbol
-                                            onCurrencySelected(cur.code, cur.symbol)
-                                        }
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                    text = cur.code,
-                                                    style = Typography.titleSmall.copy(
-                                                        fontFamily = Lato,
-                                                        fontWeight = FontWeight.Bold,
-                                                        fontSize = 14.sp
-                                                    ),
-                                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = cur.name,
-                                                    style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = cur.symbol,
-                                                style = Typography.titleMedium.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                ),
-                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                Column(modifier = Modifier.weight(1f, fill = false)) {
+                                    Text(
+                                        text = stringResource(R.string.onboarding_live_preview_label),
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 9.sp,
+                                            letterSpacing = 0.8.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.onboarding_preview_merchant),
+                                        style = Typography.titleSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.onboarding_preview_category),
+                                        style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                AnimatedContent(
+                                    targetState = selectedSym,
+                                    transitionSpec = { fadeIn(tween(260)) togetherWith fadeOut(tween(180)) },
+                                    label = "preview_amount",
+                                    modifier = Modifier.padding(start = 8.dp)
+                                ) { sym ->
+                                    val formatted = AppFormatters.formatCurrency(14.50, sym, activeLocale, 2)
+                                    Text(
+                                        text = "-$formatted",
+                                        style = Typography.titleLarge.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp,
+                                            letterSpacing = (-0.5).sp
+                                        ),
+                                        color = RoseExpense,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 12.dp),
+                        textStyle = Typography.bodyMedium.copy(
+                            fontFamily = Lato,
+                            fontSize = 13.5.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Search,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.onboarding_apps_search_hint),
+                                            style = Typography.bodyMedium.copy(
+                                                fontFamily = Lato,
+                                                fontSize = 13.5.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                             )
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                                if (searchQuery.isNotEmpty()) {
+                                    Icon(
+                                        imageVector = LucideIcons.X,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = { searchQuery = "" }
+                                            )
+                                    )
+                                }
+                            }
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Box(modifier = Modifier.graphicsLayer { alpha = gridAlpha.value }) {
+                        if (filteredCurrencies.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.account_details_empty_search_title),
+                                    style = Typography.bodyMedium.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(9.dp)
+                            ) {
+                                filteredCurrencies.chunked(2).forEach { row ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(9.dp)
+                                    ) {
+                                        row.forEach { cur ->
+                                            val isSelected = selectedCode.equals(cur.code, ignoreCase = true)
+                                            SelectionTile(
+                                                modifier = Modifier.weight(1f),
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    view.performVibrate(true, isLongPress = false)
+                                                    selectedCode = cur.code
+                                                    selectedSym = cur.symbol
+                                                    onCurrencySelected(cur.code, cur.symbol)
+                                                }
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = cur.code,
+                                                            style = Typography.titleSmall.copy(
+                                                                fontFamily = Lato,
+                                                                fontWeight = FontWeight.Bold,
+                                                                fontSize = 14.sp
+                                                            ),
+                                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                        Text(
+                                                            text = cur.name,
+                                                            style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 10.sp),
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = cur.symbol,
+                                                        style = Typography.titleMedium.copy(
+                                                            fontFamily = Lato,
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp
+                                                        ),
+                                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                                    )
+                                                }
+                                            }
                                         }
+                                        if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
                                     }
                                 }
-                                if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.weight(1f))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp, top = 20.dp)
+                ) {
+                    PrimaryActionButton(
+                        label = stringResource(R.string.action_continue),
+                        onClick = {
+                            view.performVibrate(true, isLongPress = false)
+                            onNext()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
         }
-
-        PrimaryActionButton(
-            label = stringResource(R.string.action_continue),
-            onClick = {
-                view.performVibrate(true, isLongPress = false)
-                onNext()
-            }
-        )
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -2620,7 +2811,12 @@ private fun SelectionTile(
 }
 
 @Composable
-private fun PrimaryActionButton(label: String, onClick: () -> Unit) {
+private fun PrimaryActionButton(
+    label: String,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    onClick: () -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -2634,7 +2830,7 @@ private fun PrimaryActionButton(label: String, onClick: () -> Unit) {
             .scale(scale)
             .height(56.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(containerColor)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -2650,12 +2846,12 @@ private fun PrimaryActionButton(label: String, onClick: () -> Unit) {
                     fontSize = 15.sp,
                     letterSpacing = (-0.2).sp
                 ),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = contentColor
             )
             Icon(
                 imageVector = LucideIcons.ArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.80f),
+                tint = contentColor.copy(alpha = 0.85f),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -2853,49 +3049,64 @@ private fun TransactionCaptureTourPage(
         label = "vault_entry_alpha"
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewportHeight = maxHeight
+
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = viewportHeight)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Box(modifier = Modifier.graphicsLayer { alpha = heroAlpha.value }) {
-                    Column {
-                        StepLabel(text = stringResource(R.string.onboarding_capture_tour_step))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_capture_tour_title),
-                            style = Typography.displaySmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 28.sp,
-                                lineHeight = 34.sp,
-                                letterSpacing = (-0.8).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_capture_tour_subtitle),
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.5.sp,
-                                lineHeight = 19.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = heroAlpha.value },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            StepLabel(text = stringResource(R.string.onboarding_capture_tour_step))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_capture_tour_title),
+                                style = Typography.displaySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 26.sp,
+                                    lineHeight = 32.sp,
+                                    letterSpacing = (-0.8).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_capture_tour_subtitle),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 19.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                 Box(
                     modifier = Modifier
@@ -3245,80 +3456,81 @@ private fun TransactionCaptureTourPage(
                         }
                     }
                 }
-            }
+                    Spacer(modifier = Modifier.height(18.dp))
 
-            Column {
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            RoundedCornerShape(16.dp)
-                        )
-                        .padding(14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(16.dp)
+                            )
+                            .padding(14.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Icon(
-                                imageVector = LucideIcons.ShieldCheck,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(EmeraldIncome.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.ShieldCheck,
+                                    contentDescription = null,
+                                    tint = EmeraldIncome,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.onboarding_capture_tour_badge),
-                                style = Typography.titleSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Everything happens right on your device. Your bank messages never leave your phone, and no internet is used.",
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.sp,
-                                    lineHeight = 15.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.onboarding_capture_tour_badge),
+                                    style = Typography.titleSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = stringResource(R.string.onboarding_feature_offline_simple_desc),
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 11.sp,
+                                        lineHeight = 15.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                                )
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp, top = 20.dp)
+                ) {
+                    PrimaryActionButton(
+                        label = stringResource(R.string.action_continue),
+                        onClick = {
+                            view.performVibrate(true, isLongPress = false)
+                            onNext()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
         }
-
-        PrimaryActionButton(
-            label = stringResource(R.string.action_continue),
-            onClick = {
-                view.performVibrate(true, isLongPress = false)
-                onNext()
-            }
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -3382,49 +3594,64 @@ private fun SmartRulesTourPage(
         label = "pointer_tap"
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewportHeight = maxHeight
+
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = viewportHeight)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Box(modifier = Modifier.graphicsLayer { alpha = heroAlpha.value }) {
-                    Column {
-                        StepLabel(text = stringResource(R.string.onboarding_rules_tour_step))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_rules_tour_title),
-                            style = Typography.displaySmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 28.sp,
-                                lineHeight = 34.sp,
-                                letterSpacing = (-0.8).sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(R.string.onboarding_rules_tour_subtitle),
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.5.sp,
-                                lineHeight = 19.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = heroAlpha.value },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            StepLabel(text = stringResource(R.string.onboarding_rules_tour_step))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_rules_tour_title),
+                                style = Typography.displaySmall.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 26.sp,
+                                    lineHeight = 32.sp,
+                                    letterSpacing = (-0.8).sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.onboarding_rules_tour_subtitle),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 19.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                 Box(
                     modifier = Modifier
@@ -3735,80 +3962,81 @@ private fun SmartRulesTourPage(
                         }
                     }
                 }
-            }
+                    Spacer(modifier = Modifier.height(18.dp))
 
-            Column {
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            RoundedCornerShape(16.dp)
-                        )
-                        .padding(14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(16.dp)
+                            )
+                            .padding(14.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Icon(
-                                imageVector = LucideIcons.Sparkles,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Sparkles,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.onboarding_rules_free_notice),
-                                style = Typography.titleSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Set up rules for your favorite stores. All organization happens automatically on your phone.",
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.sp,
-                                    lineHeight = 15.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.onboarding_rules_free_notice),
+                                    style = Typography.titleSmall.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = stringResource(R.string.onboarding_rules_tour_subtitle),
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 11.sp,
+                                        lineHeight = 15.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                                )
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp, top = 20.dp)
+                ) {
+                    PrimaryActionButton(
+                        label = stringResource(R.string.action_continue),
+                        onClick = {
+                            view.performVibrate(true, isLongPress = false)
+                            onNext()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
         }
-
-        PrimaryActionButton(
-            label = stringResource(R.string.action_continue),
-            onClick = {
-                view.performVibrate(true, isLongPress = false)
-                onNext()
-            }
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 

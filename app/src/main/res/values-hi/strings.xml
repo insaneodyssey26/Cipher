@@ -346,6 +346,9 @@
     <string name="onboarding_apps_subtitle">Cipher इन ऐप्स की सूचनाओं को देखता है और लेनदेन स्वतः लॉग करता है। कुछ भी आपके फोन से बाहर नहीं जाता।</string>
     <string name="onboarding_apps_search_hint">खोजें</string>
     <string name="onboarding_apps_selected_count">%d चुना गया</string>
+    <string name="onboarding_selected_apps_title">चयनित ऐप्स</string>
+    <string name="onboarding_selected_apps_clear">सभी चयन हटाएं</string>
+    <string name="onboarding_selected_apps_empty">कोई ऐप चुना नहीं गया</string>
     <string name="onboarding_apps_finish">सेटअप पूरा करें</string>
     <string name="onboarding_apps_loading">इंस्टॉल ऐप्स लोड हो रहे हैं…</string>
     <string name="onboarding_perm_intro">ये अनुमतियाँ कभी भी आपके डिवाइस से डेटा नहीं भेजती। सब कुछ स्थानीय रूप से चलता है।</string>

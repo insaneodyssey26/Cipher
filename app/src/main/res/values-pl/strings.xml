@@ -347,6 +347,9 @@
     <string name="onboarding_apps_subtitle">Cipher odczytuje powiadomienia z tych aplikacji, aby automatycznie zapisywać transakcje. Żadne dane nie opuszczają Twojego telefonu.</string>
     <string name="onboarding_apps_search_hint">Szukaj</string>
     <string name="onboarding_apps_selected_count">Wybrano: %d</string>
+    <string name="onboarding_selected_apps_title">Wybrane aplikacje</string>
+    <string name="onboarding_selected_apps_clear">Odznacz wszystkie</string>
+    <string name="onboarding_selected_apps_empty">Brak wybranych aplikacji</string>
     <string name="onboarding_apps_finish">Zakończ konfigurację</string>
     <string name="onboarding_apps_loading">Wczytywanie zainstalowanych aplikacji…</string>
     <string name="onboarding_perm_intro">Te uprawnienia nigdy nie przesyłają danych poza Twoje urządzenie. Wszystko działa lokalnie.</string>

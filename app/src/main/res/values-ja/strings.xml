@@ -347,6 +347,9 @@
     <string name="onboarding_apps_subtitle">Cipherはこれらのアプリの通知を監視し、取引を自動的に記録します。データは端末の外に出ません。</string>
     <string name="onboarding_apps_search_hint">検索</string>
     <string name="onboarding_apps_selected_count">%d個選択済み</string>
+    <string name="onboarding_selected_apps_title">選択中のアプリ</string>
+    <string name="onboarding_selected_apps_clear">すべて解除</string>
+    <string name="onboarding_selected_apps_empty">選択されたアプリはありません</string>
     <string name="onboarding_apps_finish">セットアップ完了</string>
     <string name="onboarding_apps_loading">インストール済みアプリを読み込み中…</string>
     <string name="onboarding_perm_intro">これらの権限はデバイス外にデータを送信しません。すべてローカルで動作します。</string>

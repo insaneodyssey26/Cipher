@@ -379,6 +379,9 @@
     <string name="onboarding_apps_subtitle">Cipher watches these apps’ notifications to log transactions automatically. Nothing leaves your phone.</string>
     <string name="onboarding_apps_search_hint">Search</string>
     <string name="onboarding_apps_selected_count">%d selected</string>
+    <string name="onboarding_selected_apps_title">Selected Apps</string>
+    <string name="onboarding_selected_apps_clear">Deselect All</string>
+    <string name="onboarding_selected_apps_empty">No apps selected</string>
     <string name="onboarding_apps_finish">Finish Setup</string>
     <string name="onboarding_apps_loading">Loading installed apps…</string>
     <string name="onboarding_perm_intro">These permissions never send data off your device. Everything runs locally.</string>
