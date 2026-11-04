@@ -670,6 +670,8 @@
     <string name="account_export_error">स्टेटमेंट एक्सपोर्ट विफल: %1$s</string>
     <string name="notify_action_switch_account">खाता बदलें</string>
     <string name="notify_action_discard">हटाएं</string>
+    <string name="notify_action_keep">रखें</string>
+    <string name="notify_title_review_transaction">लेनदेन की समीक्षा करें</string>
     <string name="notify_account_updated_title">खाता अपडेट किया गया</string>
     <string name="notify_account_updated_desc">%1$s को सौंपा गया</string>
     <string name="pro_gate_custom_categories_title">कस्टम श्रेणियाँ सीमा</string>

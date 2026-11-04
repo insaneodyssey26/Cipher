@@ -176,6 +176,11 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     }
                 }
             }
+        } else if (intent.action == ACTION_KEEP_TRANSACTION) {
+            val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            if (notificationId != -1) {
+                NotificationManagerCompat.from(context).cancel(notificationId)
+            }
         }
     }
 
@@ -193,6 +198,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
         const val ACTION_APPROVE_SUBSCRIPTION = "com.masum.cipher.ACTION_APPROVE_SUBSCRIPTION"
         const val ACTION_SKIP_SUBSCRIPTION = "com.masum.cipher.ACTION_SKIP_SUBSCRIPTION"
         const val ACTION_DISCARD_TRANSACTION = "com.masum.cipher.ACTION_DISCARD_TRANSACTION"
+        const val ACTION_KEEP_TRANSACTION = "com.masum.cipher.ACTION_KEEP_TRANSACTION"
         const val KEY_TEXT_REPLY = "key_text_reply"
         const val KEY_ACCOUNT_CHOICE = "key_account_choice"
         const val EXTRA_TRANSACTION_ID = "extra_transaction_id"

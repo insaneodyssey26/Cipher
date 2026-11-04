@@ -672,6 +672,8 @@
     <string name="account_export_error">明細書のエクスポートに失敗しました: %1$s</string>
     <string name="notify_action_switch_account">口座を変更</string>
     <string name="notify_action_discard">破棄</string>
+    <string name="notify_action_keep">保持</string>
+    <string name="notify_title_review_transaction">取引を確認</string>
     <string name="notify_account_updated_title">口座を更新しました</string>
     <string name="notify_account_updated_desc">%1$s に割り当てられました</string>
     <string name="pro_gate_custom_categories_title">カスタムカテゴリの上限</string>

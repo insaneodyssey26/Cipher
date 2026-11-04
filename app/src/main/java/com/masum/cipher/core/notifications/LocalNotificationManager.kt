@@ -17,6 +17,7 @@ import com.masum.cipher.MainActivity
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.entity.SubscriptionEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.repository.AccountRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -370,28 +371,56 @@ class LocalNotificationManager @Inject constructor(
                 discardPendingIntent
             ).build()
 
+            val keepIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                action = NotificationActionReceiver.ACTION_KEEP_TRANSACTION
+                putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            }
+            val keepPendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId + 5000,
+                keepIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val keepAction = NotificationCompat.Action.Builder(
+                com.masum.cipher.R.drawable.ic_notification,
+                context.getString(R.string.notify_action_keep),
+                keepPendingIntent
+            ).build()
+
             val currencySymbol = settings.currencySymbol
             val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, currencySymbol, decimals = 0)
             val currentAccount = allAccounts.find { it.id == transaction.accountId }
             val accountSuffix = currentAccount?.let { " [${it.name}]" } ?: ""
 
+            val isAmbiguous = transaction.category == TransactionCategory.OTHERS.name && transaction.rawSms != null
+            val notificationTitle = if (isAmbiguous) {
+                context.getString(R.string.notify_title_review_transaction) + accountSuffix
+            } else {
+                (if (transaction.isIncome) "Money Received" else "New Expense") + accountSuffix
+            }
+
             val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
                 .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
                 .setColor(if (transaction.isIncome) "#10B981".toColorInt() else "#F43F5E".toColorInt())
-                .setContentTitle((if (transaction.isIncome) "Money Received" else "New Expense") + accountSuffix)
+                .setContentTitle(notificationTitle)
                 .setContentText(
                     if (transaction.isIncome) "You received $amountStr from ${transaction.merchant}."
                     else "You spent $amountStr at ${transaction.merchant}."
                 )
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(categorizePendingIntent)
-                .addAction(addNoteAction)
-                .addAction(categorizeAction)
                 .apply {
-                    if (switchAccountAction != null) {
-                        addAction(switchAccountAction)
+                    if (isAmbiguous) {
+                        addAction(keepAction)
+                        addAction(discardAction)
+                    } else {
+                        addAction(addNoteAction)
+                        addAction(categorizeAction)
+                        if (switchAccountAction != null) {
+                            addAction(switchAccountAction)
+                        }
+                        addAction(discardAction)
                     }
-                    addAction(discardAction)
                 }
                 .setAutoCancel(true)
 

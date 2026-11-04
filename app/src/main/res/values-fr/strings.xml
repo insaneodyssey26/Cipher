@@ -667,6 +667,8 @@
     <string name="account_export_error">Échec de l\'exportation du relevé : %1$s</string>
     <string name="notify_action_switch_account">Changer de compte</string>
     <string name="notify_action_discard">Ignorer</string>
+    <string name="notify_action_keep">Conserver</string>
+    <string name="notify_title_review_transaction">Vérifier la transaction</string>
     <string name="notify_account_updated_title">Compte mis à jour</string>
     <string name="notify_account_updated_desc">Assigné à %1$s</string>
     <string name="pro_gate_custom_categories_title">Limite de catégories personnalisées</string>
