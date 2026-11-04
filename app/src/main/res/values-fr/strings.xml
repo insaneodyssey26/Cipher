@@ -671,7 +671,10 @@
     <string name="notify_action_switch_account">Changer de compte</string>
     <string name="notify_action_discard">Ignorer</string>
     <string name="notify_action_keep">Conserver</string>
+    <string name="notify_action_save_anyway">Enregistrer quand même</string>
     <string name="notify_title_review_transaction">Vérifier la transaction</string>
+    <string name="notify_title_duplicate_transaction">Transaction en double ignorée</string>
+    <string name="notify_desc_duplicate_transaction">%1$s chez %2$s correspond à une transaction récente.</string>
     <string name="notify_account_updated_title">Compte mis à jour</string>
     <string name="notify_account_updated_desc">Assigné à %1$s</string>
     <string name="pro_gate_custom_categories_title">Limite de catégories personnalisées</string>
@@ -789,6 +792,8 @@
     <string name="heatmap_day_spent">%1$s, dépensé %2$s</string>
     <string name="notify_app_updates_desc">Soyez averti lorsqu’une nouvelle version de Cipher est disponible</string>
     <string name="notify_app_updates_title">Notifications de mise à jour</string>
+    <string name="notify_duplicates_title">Transactions en double</string>
+    <string name="notify_duplicates_desc">Alerter lorsqu\'une transaction identique est détectée et ignorée</string>
     <string name="notify_update_available_desc">Une nouvelle version de Cipher est disponible sur Google Play. Touchez pour mettre à jour.</string>
     <string name="notify_update_available_title">Nouvelle mise à jour disponible</string>
     <string name="show_backup_password_prompt">Confirmez votre identité pour afficher le mot de passe de sauvegarde enregistré</string>

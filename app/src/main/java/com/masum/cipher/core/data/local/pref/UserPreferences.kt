@@ -172,6 +172,7 @@ class UserPreferences @Inject constructor(
         val NOTIFY_SUBSCRIPTIONS = booleanPreferencesKey("notify_subscriptions")
         val NOTIFY_NEW_APP_DETECTED = booleanPreferencesKey("notify_new_app_detected")
         val NOTIFY_APP_UPDATES = booleanPreferencesKey("notify_app_updates")
+        val NOTIFY_DUPLICATES = booleanPreferencesKey("notify_duplicates")
         val LAST_NOTIFIED_UPDATE_VERSION_CODE = intPreferencesKey("last_notified_update_version_code")
         val IGNORED_SUBSCRIPTIONS = stringSetPreferencesKey("ignored_subscriptions")
         val CATEGORY_BUDGETS = stringPreferencesKey("category_budgets")
@@ -264,6 +265,7 @@ class UserPreferences @Inject constructor(
             notifySubscriptions = preferences[Keys.NOTIFY_SUBSCRIPTIONS] ?: true,
             notifyNewAppDetected = preferences[Keys.NOTIFY_NEW_APP_DETECTED] ?: true,
             notifyAppUpdates = preferences[Keys.NOTIFY_APP_UPDATES] ?: true,
+            notifyDuplicates = preferences[Keys.NOTIFY_DUPLICATES] ?: false,
             lastNotifiedUpdateVersionCode = preferences[Keys.LAST_NOTIFIED_UPDATE_VERSION_CODE] ?: 0,
             ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet(),
             categoryBudgets = preferences[Keys.CATEGORY_BUDGETS]?.let { jsonStr ->
@@ -486,6 +488,10 @@ class UserPreferences @Inject constructor(
 
     suspend fun setNotifyAppUpdates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.NOTIFY_APP_UPDATES] = enabled }
+    }
+
+    suspend fun setNotifyDuplicates(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.NOTIFY_DUPLICATES] = enabled }
     }
 
     suspend fun setLastNotifiedUpdateVersionCode(versionCode: Int) {
@@ -849,6 +855,7 @@ data class UserSettings(
     val notifySubscriptions: Boolean = true,
     val notifyNewAppDetected: Boolean = true,
     val notifyAppUpdates: Boolean = true,
+    val notifyDuplicates: Boolean = false,
     val lastNotifiedUpdateVersionCode: Int = 0,
     val ignoredSubscriptions: Set<String> = emptySet(),
     val categoryBudgets: Map<String, Double> = emptyMap(),

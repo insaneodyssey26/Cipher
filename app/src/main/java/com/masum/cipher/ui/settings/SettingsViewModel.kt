@@ -69,6 +69,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetNotifySubscriptions -> updateNotifySubscriptions(intent.enabled)
             is SettingsContract.Intent.SetNotifyNewAppDetected -> updateNotifyNewAppDetected(intent.enabled)
             is SettingsContract.Intent.SetNotifyAppUpdates -> updateNotifyAppUpdates(intent.enabled)
+            is SettingsContract.Intent.SetNotifyDuplicates -> updateNotifyDuplicates(intent.enabled)
             is SettingsContract.Intent.SetHapticsEnabled -> updateHaptics(intent.enabled)
             is SettingsContract.Intent.SetAutoLockTimeout -> updateAutoLockTimeout(intent.timeout)
             is SettingsContract.Intent.SetCurrency -> updateCurrency(intent.code, intent.symbol)
@@ -134,6 +135,7 @@ class SettingsViewModel @Inject constructor(
                         notifySubscriptions = settings.notifySubscriptions,
                         notifyNewAppDetected = settings.notifyNewAppDetected,
                         notifyAppUpdates = settings.notifyAppUpdates,
+                        notifyDuplicates = settings.notifyDuplicates,
                         isHapticsEnabled = settings.isHapticsEnabled,
                         autoLockTimeout = settings.autoLockTimeout,
                         currencyCode = settings.currencyCode,
@@ -232,6 +234,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setNotifyAppUpdates(enabled)
             updateState { copy(notifyAppUpdates = enabled) }
+        }
+    }
+
+    private fun updateNotifyDuplicates(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setNotifyDuplicates(enabled)
+            updateState { copy(notifyDuplicates = enabled) }
         }
     }
 

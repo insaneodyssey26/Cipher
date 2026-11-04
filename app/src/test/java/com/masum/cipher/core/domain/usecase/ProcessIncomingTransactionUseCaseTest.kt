@@ -74,6 +74,26 @@ class ProcessIncomingTransactionUseCaseTest {
 
     @Test
     fun duplicateTransactionWithinWindowIsDiscarded() = runBlocking {
+        var notifiedDuplicate: TransactionEntity? = null
+        useCase.onNotifyDuplicate = { notifiedDuplicate = it }
+        useCase.onGetSettings = {
+            UserSettings(
+                theme = AppTheme.SYSTEM,
+                isBiometricEnabled = false,
+                isPrivacyModeEnabled = false,
+                isHapticsEnabled = true,
+                currency = "INR",
+                currencyCode = "INR",
+                currencySymbol = "₹",
+                appLanguage = "en",
+                autoLockTimeout = 0L,
+                lastStopTime = 0L,
+                monthlyBudget = 0.0,
+                notifyAllTransactions = false,
+                notifyDuplicates = true
+            )
+        }
+
         val existing = TransactionEntity(
             id = 1L,
             amount = 500.0,
@@ -100,6 +120,8 @@ class ProcessIncomingTransactionUseCaseTest {
         assertNull(result)
         assertEquals(0, fakeTransactionDao.insertedTransactions.size)
         assertEquals(0, syncCount)
+        assertNotNull(notifiedDuplicate)
+        assertEquals("SWIGGY", notifiedDuplicate?.merchant)
     }
 
     @Test

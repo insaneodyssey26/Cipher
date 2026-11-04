@@ -73,6 +73,7 @@ data class BackupData(
     val notifyUncategorizedReminder: Boolean? = null,
     val notifySubscriptions: Boolean? = null,
     val notifyNewAppDetected: Boolean? = null,
+    val notifyDuplicates: Boolean? = null,
     val appLanguage: String? = null,
     val proLicenseToken: String? = null,
     val proTier: String? = null,
@@ -139,6 +140,7 @@ class BackupRepository @Inject constructor(
                 notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
                 notifySubscriptions = settings.notifySubscriptions,
                 notifyNewAppDetected = settings.notifyNewAppDetected,
+                notifyDuplicates = settings.notifyDuplicates,
                 appLanguage = settings.appLanguage,
                 proLicenseToken = settings.proLicenseToken,
                 proTier = settings.proTier,
@@ -229,6 +231,7 @@ class BackupRepository @Inject constructor(
                 data.notifyUncategorizedReminder?.let { userPreferences.setNotifyUncategorizedReminder(it) }
                 data.notifySubscriptions?.let { userPreferences.setNotifySubscriptions(it) }
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
+                data.notifyDuplicates?.let { userPreferences.setNotifyDuplicates(it) }
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
                 if (!data.proLicenseToken.isNullOrBlank()) {
                     userPreferences.setPendingLicenseToken(data.proLicenseToken)

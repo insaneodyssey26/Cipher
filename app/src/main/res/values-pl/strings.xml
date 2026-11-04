@@ -687,7 +687,10 @@
     <string name="notify_action_switch_account">Przełącz konto</string>
     <string name="notify_action_discard">Odrzuć</string>
     <string name="notify_action_keep">Zachowaj</string>
+    <string name="notify_action_save_anyway">Zapisz mimo to</string>
     <string name="notify_title_review_transaction">Przejrzyj transakcję</string>
+    <string name="notify_title_duplicate_transaction">Pominięto zduplikowaną transakcję</string>
+    <string name="notify_desc_duplicate_transaction">%1$s w %2$s pasuje do niedawnej transakcji.</string>
     <string name="notify_account_updated_title">Konto zaktualizowane</string>
     <string name="notify_account_updated_desc">Przypisano do %1$s</string>
     <string name="pro_gate_custom_categories_title">Limit własnych kategorii</string>
@@ -794,6 +797,8 @@
     <string name="heatmap_day_spent">%1$s, wydano %2$s</string>
     <string name="notify_app_updates_desc">Otrzymuj powiadomienie, gdy dostępna jest nowa wersja Cipher</string>
     <string name="notify_app_updates_title">Powiadomienia o aktualizacjach</string>
+    <string name="notify_duplicates_title">Zduplikowane transakcje</string>
+    <string name="notify_duplicates_desc">Powiadamiaj, gdy identyczna transakcja zostanie wykryta i pominięta</string>
     <string name="notify_update_available_desc">Nowa wersja Cipher jest dostępna w Google Play. Dotknij, aby zaktualizować.</string>
     <string name="notify_update_available_title">Dostępna nowa aktualizacja</string>
     <string name="show_backup_password_prompt">Potwierdź swoją tożsamość, aby wyświetlić zapisane hasło kopii zapasowej</string>

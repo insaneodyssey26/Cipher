@@ -212,6 +212,8 @@
     <string name="notify_new_app_desc">Prompt to track newly installed banking or payment apps</string>
     <string name="notify_app_updates_title">Update Notifications</string>
     <string name="notify_app_updates_desc">Get notified when a new version of Cipher is available</string>
+    <string name="notify_duplicates_title">Duplicate Transactions</string>
+    <string name="notify_duplicates_desc">Alert when an identical transaction is detected and skipped</string>
     <string name="notify_update_available_title">New Update Available</string>
     <string name="notify_update_available_desc">A new version of Cipher is ready on Google Play. Tap to update.</string>
     <string name="notify_system_title">System Notification Channels</string>
@@ -790,7 +792,10 @@
     <string name="notify_action_switch_account">Switch Account</string>
     <string name="notify_action_discard">Discard</string>
     <string name="notify_action_keep">Keep</string>
+    <string name="notify_action_save_anyway">Save Anyway</string>
     <string name="notify_title_review_transaction">Review Transaction</string>
+    <string name="notify_title_duplicate_transaction">Duplicate Transaction Skipped</string>
+    <string name="notify_desc_duplicate_transaction">%1$s at %2$s matched a recent transaction.</string>
     <string name="notify_account_updated_title">Account Updated</string>
     <string name="notify_account_updated_desc">Assigned to %1$s</string>
     <string name="pro_gate_custom_categories_title">Custom Categories Limit</string>

@@ -31,6 +31,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     internal var onNotifyNewTransaction: ((TransactionEntity) -> Unit)? = null
     internal var onNotifyUncategorized: ((Int) -> Unit)? = null
     internal var onNotifyBudgetAlert: ((isExceeded: Boolean, amount: Double, threshold: Int) -> Unit)? = null
+    internal var onNotifyDuplicate: ((TransactionEntity) -> Unit)? = null
     suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? {
         if (transaction.rawSms != null) {
             val timeWindow = 60_000L
@@ -46,6 +47,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
                     val candidateRef = extractReferenceNumber(candidate.rawSms.orEmpty())
                     if (incomingRef != null && candidateRef != null) {
                         if (incomingRef.equals(candidateRef, ignoreCase = true)) {
+                            notifyDuplicateIfEnabled(transaction)
                             return null
                         }
                         continue
@@ -54,6 +56,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
                     if (candidate.rawSms != null) {
                         val candidateNormalizedSms = normalizeMessageText(candidate.rawSms)
                         if (incomingNormalizedSms.isNotBlank() && incomingNormalizedSms == candidateNormalizedSms) {
+                            notifyDuplicateIfEnabled(transaction)
                             return null
                         }
                     }
@@ -63,6 +66,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
                         val incomingMerchant = transaction.merchant.trim()
                         if (candidateMerchant.isNotBlank() && incomingMerchant.isNotBlank() &&
                             candidateMerchant.equals(incomingMerchant, ignoreCase = true)) {
+                            notifyDuplicateIfEnabled(transaction)
                             return null
                         }
                     } else {
@@ -71,6 +75,7 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
                         if (candidateMerchant.isNotBlank() && incomingMerchant.isNotBlank() &&
                             !isGenericMerchant(candidateMerchant) && !isGenericMerchant(incomingMerchant) &&
                             candidateMerchant.equals(incomingMerchant, ignoreCase = true)) {
+                            notifyDuplicateIfEnabled(transaction)
                             return null
                         }
                     }
@@ -177,6 +182,13 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     }
 
     private fun monthStart(): Long = com.masum.cipher.core.util.DateTimeUtils.currentMonthStart()
+
+    private suspend fun notifyDuplicateIfEnabled(transaction: TransactionEntity) {
+        val settings = onGetSettings?.invoke() ?: userPreferences?.settingsFlow?.first()
+        if (settings?.notifyDuplicates == true) {
+            onNotifyDuplicate?.invoke(transaction) ?: localNotificationManager?.showDuplicateSkippedNotification(transaction)
+        }
+    }
 
     private fun resolveAccount(
         rawMessage: String,

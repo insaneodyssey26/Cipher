@@ -181,6 +181,36 @@ class NotificationActionReceiver : BroadcastReceiver() {
             if (notificationId != -1) {
                 NotificationManagerCompat.from(context).cancel(notificationId)
             }
+        } else if (intent.action == ACTION_SAVE_DUPLICATE_TRANSACTION) {
+            val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            val amount = intent.getDoubleExtra("amount", 0.0)
+            val merchant = intent.getStringExtra("merchant").orEmpty()
+            val currency = intent.getStringExtra("currency").orEmpty()
+            val timestamp = intent.getLongExtra("timestamp", System.currentTimeMillis())
+            val category = intent.getStringExtra("category").orEmpty()
+            val rawSms = intent.getStringExtra("raw_sms")
+            val isIncome = intent.getBooleanExtra("is_income", false)
+            val note = intent.getStringExtra("note")
+            val rawAccountId = intent.getLongExtra("account_id", -1L)
+            val accountId = if (rawAccountId != -1L) rawAccountId else null
+
+            scope.launch {
+                val tx = com.masum.cipher.core.data.local.entity.TransactionEntity(
+                    amount = amount,
+                    merchant = merchant,
+                    currency = currency,
+                    timestamp = timestamp,
+                    category = category.ifBlank { com.masum.cipher.core.domain.model.TransactionCategory.OTHERS.name },
+                    rawSms = rawSms,
+                    isIncome = isIncome,
+                    note = note,
+                    accountId = accountId
+                )
+                transactionRepository.insertTransaction(tx)
+                if (notificationId != -1) {
+                    NotificationManagerCompat.from(context).cancel(notificationId)
+                }
+            }
         }
     }
 
@@ -199,6 +229,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
         const val ACTION_SKIP_SUBSCRIPTION = "com.masum.cipher.ACTION_SKIP_SUBSCRIPTION"
         const val ACTION_DISCARD_TRANSACTION = "com.masum.cipher.ACTION_DISCARD_TRANSACTION"
         const val ACTION_KEEP_TRANSACTION = "com.masum.cipher.ACTION_KEEP_TRANSACTION"
+        const val ACTION_SAVE_DUPLICATE_TRANSACTION = "com.masum.cipher.ACTION_SAVE_DUPLICATE_TRANSACTION"
         const val KEY_TEXT_REPLY = "key_text_reply"
         const val KEY_ACCOUNT_CHOICE = "key_account_choice"
         const val EXTRA_TRANSACTION_ID = "extra_transaction_id"

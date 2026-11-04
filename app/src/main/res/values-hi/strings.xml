@@ -674,7 +674,10 @@
     <string name="notify_action_switch_account">खाता बदलें</string>
     <string name="notify_action_discard">हटाएं</string>
     <string name="notify_action_keep">रखें</string>
+    <string name="notify_action_save_anyway">फिर भी सहेजें</string>
     <string name="notify_title_review_transaction">लेनदेन की समीक्षा करें</string>
+    <string name="notify_title_duplicate_transaction">डुप्लिकेट लेनदेन छोड़ा गया</string>
+    <string name="notify_desc_duplicate_transaction">%2$s पर %1$s का लेनदेन हाल ही के लेनदेन से मेल खाता है।</string>
     <string name="notify_account_updated_title">खाता अपडेट किया गया</string>
     <string name="notify_account_updated_desc">%1$s को सौंपा गया</string>
     <string name="pro_gate_custom_categories_title">कस्टम श्रेणियाँ सीमा</string>
@@ -790,6 +793,8 @@
     <string name="heatmap_day_spent">%1$s, खर्च %2$s</string>
     <string name="notify_app_updates_desc">Cipher का नया संस्करण उपलब्ध होने पर सूचना पाएँ</string>
     <string name="notify_app_updates_title">अपडेट सूचनाएँ</string>
+    <string name="notify_duplicates_title">डुप्लिकेट लेनदेन</string>
+    <string name="notify_duplicates_desc">समान लेनदेन मिलने और छोड़ने पर सूचित करें</string>
     <string name="notify_update_available_desc">Google Play पर Cipher का नया संस्करण तैयार है। अपडेट करने के लिए टैप करें।</string>
     <string name="notify_update_available_title">नया अपडेट उपलब्ध है</string>
     <string name="show_backup_password_prompt">सहेजा गया बैकअप पासवर्ड देखने के लिए अपनी पहचान की पुष्टि करें</string>

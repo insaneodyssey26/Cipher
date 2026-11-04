@@ -552,4 +552,59 @@ class LocalNotificationManager @Inject constructor(
             with(NotificationManagerCompat.from(context)) { notify(NOTIFICATION_ID_APP_UPDATE, builder.build()) }
         }
     }
+
+    fun showDuplicateSkippedNotification(transaction: TransactionEntity) {
+        scope.launch {
+            val settings = userPreferences.settingsFlow.first()
+            if (!settings.notifyDuplicates) return@launch
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) return@launch
+
+            val notificationId = (transaction.timestamp % 100000).toInt() + 8000
+
+            val saveIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                action = NotificationActionReceiver.ACTION_SAVE_DUPLICATE_TRANSACTION
+                putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+                putExtra("amount", transaction.amount)
+                putExtra("merchant", transaction.merchant)
+                putExtra("currency", transaction.currency)
+                putExtra("timestamp", transaction.timestamp)
+                putExtra("category", transaction.category)
+                putExtra("raw_sms", transaction.rawSms)
+                putExtra("is_income", transaction.isIncome)
+                putExtra("note", transaction.note)
+                putExtra("account_id", transaction.accountId ?: -1L)
+            }
+
+            val savePendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId,
+                saveIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val saveAction = NotificationCompat.Action.Builder(
+                com.masum.cipher.R.drawable.ic_notification,
+                context.getString(R.string.notify_action_save_anyway),
+                savePendingIntent
+            ).build()
+
+            val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, settings.currencySymbol, decimals = 0)
+            val title = context.getString(R.string.notify_title_duplicate_transaction)
+            val text = context.getString(R.string.notify_desc_duplicate_transaction, amountStr, transaction.merchant)
+
+            val builder = NotificationCompat.Builder(context, CHANNEL_TRANSACTIONS)
+                .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
+                .setColor("#F59E0B".toColorInt())
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .addAction(saveAction)
+                .setAutoCancel(true)
+
+            with(NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }
+        }
+    }
 }

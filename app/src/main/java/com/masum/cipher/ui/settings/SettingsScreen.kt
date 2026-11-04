@@ -116,6 +116,7 @@ import compose.icons.lucideicons.ChevronDown
 import compose.icons.lucideicons.ChevronLeft
 import compose.icons.lucideicons.ChevronRight
 import compose.icons.lucideicons.Clock
+import compose.icons.lucideicons.Copy
 import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.Download
 import compose.icons.lucideicons.CloudDownload
@@ -281,8 +282,9 @@ fun SettingsScreen(
     val matchNotifyUncategorized = query.isBlank() || "uncategorized reminders".contains(query) || "action needed".contains(query)
     val matchNotifyApp = query.isBlank() || "new app suggestions".contains(query) || "payment app detected".contains(query)
     val matchNotifyUpdates = query.isBlank() || "update notifications".contains(query) || "app updates".contains(query) || "update".contains(query)
+    val matchNotifyDuplicates = query.isBlank() || "duplicate transactions".contains(query) || "duplicate".contains(query) || "duplicates".contains(query)
     val matchNotifySystem = query.isBlank() || "system notification channels".contains(query) || "notification channels".contains(query)
-    val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifyMonthly || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifyUpdates || matchNotifySystem
+    val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifyMonthly || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifyUpdates || matchNotifyDuplicates || matchNotifySystem
 
     val matchBudget = query.isBlank() || "monthly budget".contains(query) || "budget".contains(query)
     val matchGoals = query.isBlank() || "financial goals".contains(query) || matchBudget
@@ -1094,6 +1096,17 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(SettingsContract.Intent.SetNotifyAppUpdates(it)) 
+                        }
+                    )
+                    if (matchNotifyDuplicates) VaultSettingsSwitch(
+                        isHapticsEnabled = state.isHapticsEnabled,
+                        icon = LucideIcons.Copy,
+                        title = stringResource(R.string.notify_duplicates_title),
+                        description = stringResource(R.string.notify_duplicates_desc),
+                        checked = state.notifyDuplicates,
+                        onCheckedChange = { 
+                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyDuplicates(it)) 
                         }
                     )
                     if (matchNotifySystem) VaultSettingsItem(

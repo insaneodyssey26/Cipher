@@ -676,7 +676,10 @@
     <string name="notify_action_switch_account">口座を変更</string>
     <string name="notify_action_discard">破棄</string>
     <string name="notify_action_keep">保持</string>
+    <string name="notify_action_save_anyway">保存する</string>
     <string name="notify_title_review_transaction">取引を確認</string>
+    <string name="notify_title_duplicate_transaction">重複した取引をスキップしました</string>
+    <string name="notify_desc_duplicate_transaction">%2$sでの%1$sは最近の取引と一致しました。</string>
     <string name="notify_account_updated_title">口座を更新しました</string>
     <string name="notify_account_updated_desc">%1$s に割り当てられました</string>
     <string name="pro_gate_custom_categories_title">カスタムカテゴリの上限</string>
@@ -789,6 +792,8 @@
     <string name="heatmap_day_spent">%1$s、支出 %2$s</string>
     <string name="notify_app_updates_desc">Cipherの新しいバージョンが利用可能になったときに通知します</string>
     <string name="notify_app_updates_title">アップデート通知</string>
+    <string name="notify_duplicates_title">重複した取引</string>
+    <string name="notify_duplicates_desc">同一の取引が検出されてスキップされたときに通知</string>
     <string name="notify_update_available_desc">Google PlayでCipherの新しいバージョンが利用できます。タップして更新してください。</string>
     <string name="notify_update_available_title">新しいアップデートがあります</string>
     <string name="show_backup_password_prompt">保存されているバックアップのパスワードを表示するには、本人確認を行ってください</string>

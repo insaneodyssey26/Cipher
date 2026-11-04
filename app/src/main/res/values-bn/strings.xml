@@ -675,7 +675,10 @@
     <string name="notify_action_switch_account">অ্যাকাউন্ট পরিবর্তন</string>
     <string name="notify_action_discard">বাতিল করুন</string>
     <string name="notify_action_keep">রাখুন</string>
+    <string name="notify_action_save_anyway">তবুও সংরক্ষণ করুন</string>
     <string name="notify_title_review_transaction">লেনদেন পর্যালোচনা</string>
+    <string name="notify_title_duplicate_transaction">অনুরূপ লেনদেন এড়িয়ে যাওয়া হয়েছে</string>
+    <string name="notify_desc_duplicate_transaction">%2$s-এ %1$s এর সাম্প্রতিক লেনদেনের সাথে মিলে গেছে।</string>
     <string name="notify_account_updated_title">অ্যাকাউন্ট আপডেট হয়েছে</string>
     <string name="notify_account_updated_desc">%1$s অ্যাকাউন্টে বরাদ্দ করা হয়েছে</string>
     <string name="pro_gate_custom_categories_title">কাস্টম ক্যাটাগরি সীমা</string>
@@ -791,6 +794,8 @@
     <string name="heatmap_day_spent">%1$s, খরচ %2$s</string>
     <string name="notify_app_updates_desc">Cipher-এর নতুন সংস্করণ এলে জানতে পারবেন</string>
     <string name="notify_app_updates_title">আপডেট নোটিফিকেশন</string>
+    <string name="notify_duplicates_title">অনুরূপ লেনদেন</string>
+    <string name="notify_duplicates_desc">একই লেনদেন শনাক্ত হলে সতর্ক করুন</string>
     <string name="notify_update_available_desc">Google Play-তে Cipher-এর নতুন সংস্করণ প্রস্তুত। আপডেট করতে ট্যাপ করুন।</string>
     <string name="notify_update_available_title">নতুন আপডেট উপলব্ধ</string>
     <string name="show_backup_password_prompt">সংরক্ষিত ব্যাকআপ পাসওয়ার্ড দেখতে আপনার পরিচয় নিশ্চিত করুন</string>
