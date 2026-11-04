@@ -27,21 +27,25 @@ class TransactionParser @Inject constructor(
         val cleanMessage = message.replace(MULTI_SPACE_REGEX, " ")
 
         val result = intentClassifier.classify(cleanMessage)
-        if (result.confidence >= 0.70f && (result.isPromotional || result.isInformational)) {
+        if (result.confidence >= 0.65f && (result.isPromotional || result.isInformational)) {
             return null
         }
 
         val ruleChain = RegionRuleProvider.getAllRules(preferredCurrency ?: "INR")
 
         for (rules in ruleChain) {
-            val parsed = tryParseWithRules(cleanMessage, rules)
+            val parsed = tryParseWithRules(cleanMessage, rules, result)
             if (parsed != null) return parsed
         }
 
         return null
     }
 
-    private fun tryParseWithRules(message: String, rules: RegionParserRules): ParsedTransaction? {
+    private fun tryParseWithRules(
+        message: String,
+        rules: RegionParserRules,
+        classificationResult: com.masum.cipher.core.ml.IntentClassificationResult
+    ): ParsedTransaction? {
         if (hasExclusionKeywords(message, rules)) return null
         if (!hasTransactionIntent(message, rules)) return null
         if (!hasTransactionEvidence(message, rules)) return null
@@ -54,20 +58,24 @@ class TransactionParser @Inject constructor(
 
         val isDebit = TransactionPatterns.DEBIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
         val isCredit = TransactionPatterns.CREDIT_KEYWORDS.any { message.contains(it, ignoreCase = true) }
-        val classification = intentClassifier.classify(message)
         val isIncome = when {
-            classification.confidence >= 0.70f && classification.isIncome -> true
-            classification.confidence >= 0.70f && classification.isExpense -> false
+            classificationResult.confidence >= 0.70f && classificationResult.isIncome -> true
+            classificationResult.confidence >= 0.70f && classificationResult.isExpense -> false
             else -> isCredit && !isDebit
         }
         val accountLast4 = extractAccountLast4(message)
+        val isAmbiguous = (classificationResult.isPromotional && classificationResult.confidence in 0.50f..0.64f) ||
+            (!isDebit && !isCredit && classificationResult.confidence < 0.70f) ||
+            merchant == null
 
         return ParsedTransaction(
             amount = amount,
             merchant = sanitizeMerchant(merchant ?: "Miscellaneous"),
             currency = rules.defaultCurrency,
             isIncome = isIncome,
-            accountLast4 = accountLast4
+            accountLast4 = accountLast4,
+            confidence = classificationResult.confidence,
+            isAmbiguous = isAmbiguous
         )
     }
 

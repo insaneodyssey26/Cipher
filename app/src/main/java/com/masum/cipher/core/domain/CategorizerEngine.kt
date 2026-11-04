@@ -18,19 +18,31 @@ class CategorizerEngine @Inject constructor() {
             ?: raw
     }
 
-    fun categorize(merchantName: String): TransactionCategory {
+    fun categorize(merchantName: String, contextualMessage: String? = null): TransactionCategory {
         val normalized = merchantName.uppercase().trim()
 
-        if (normalized.isBlank()) return TransactionCategory.OTHERS
+        if (normalized.isNotBlank()) {
+            val mappedCategory = CategorizerConfig.BRAND_MAPPINGS.entries.firstOrNull { 
+                normalized.contains(it.key) || normalized.startsWith(it.key + " ")
+            }?.value
+            
+            if (mappedCategory != null) return mappedCategory
 
-        val mappedCategory = CategorizerConfig.BRAND_MAPPINGS.entries.firstOrNull { 
-            normalized.contains(it.key) || normalized.startsWith(it.key + " ")
-        }?.value
-        
-        if (mappedCategory != null) return mappedCategory
+            for ((keywords, category) in CategorizerConfig.KEYWORD_ANCHORS) {
+                if (keywords.any { normalized.contains(it) }) return category
+            }
+        }
 
-        for ((keywords, category) in CategorizerConfig.KEYWORD_ANCHORS) {
-            if (keywords.any { normalized.contains(it) }) return category
+        if (!contextualMessage.isNullOrBlank()) {
+            val normalizedContext = contextualMessage.uppercase().trim()
+            val contextMappedCategory = CategorizerConfig.BRAND_MAPPINGS.entries.firstOrNull { 
+                normalizedContext.contains(it.key)
+            }?.value
+            if (contextMappedCategory != null) return contextMappedCategory
+
+            for ((keywords, category) in CategorizerConfig.KEYWORD_ANCHORS) {
+                if (keywords.any { normalizedContext.contains(it) }) return category
+            }
         }
 
         return TransactionCategory.OTHERS

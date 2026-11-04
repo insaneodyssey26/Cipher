@@ -5,5 +5,7 @@ data class ParsedTransaction(
     val merchant: String,
     val currency: String,
     val isIncome: Boolean,
-    val accountLast4: String? = null
+    val accountLast4: String? = null,
+    val confidence: Float = 1.0f,
+    val isAmbiguous: Boolean = false
 )

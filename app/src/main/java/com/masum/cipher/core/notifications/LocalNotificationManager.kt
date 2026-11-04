@@ -353,6 +353,23 @@ class LocalNotificationManager @Inject constructor(
                 null
             }
 
+            val discardIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                action = NotificationActionReceiver.ACTION_DISCARD_TRANSACTION
+                putExtra(NotificationActionReceiver.EXTRA_TRANSACTION_ID, transaction.id)
+                putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            }
+            val discardPendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId + 4000,
+                discardIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val discardAction = NotificationCompat.Action.Builder(
+                com.masum.cipher.R.drawable.ic_notification,
+                context.getString(R.string.notify_action_discard),
+                discardPendingIntent
+            ).build()
+
             val currencySymbol = settings.currencySymbol
             val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, currencySymbol, decimals = 0)
             val currentAccount = allAccounts.find { it.id == transaction.accountId }
@@ -374,6 +391,7 @@ class LocalNotificationManager @Inject constructor(
                     if (switchAccountAction != null) {
                         addAction(switchAccountAction)
                     }
+                    addAction(discardAction)
                 }
                 .setAutoCancel(true)
 

@@ -785,6 +785,7 @@
     <string name="account_export_success">Statement exported successfully</string>
     <string name="account_export_error">Failed to export statement: %1$s</string>
     <string name="notify_action_switch_account">Switch Account</string>
+    <string name="notify_action_discard">Discard</string>
     <string name="notify_account_updated_title">Account Updated</string>
     <string name="notify_account_updated_desc">Assigned to %1$s</string>
     <string name="pro_gate_custom_categories_title">Custom Categories Limit</string>

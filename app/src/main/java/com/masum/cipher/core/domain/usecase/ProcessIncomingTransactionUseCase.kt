@@ -87,12 +87,12 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
             finalMerchant = alias.cleanName
             val savedCategory = categoryRuleDao.getCategoryForMerchant(finalMerchant)
             finalCategory = transaction.category.ifBlank {
-                savedCategory ?: categorizerEngine.categorize(finalMerchant).name
+                savedCategory ?: categorizerEngine.categorize(finalMerchant, transaction.rawSms).name
             }
         } else {
             val cleanName = categorizerEngine.cleanMerchantName(transaction.merchant)
             val savedCategory = categoryRuleDao.getCategoryForMerchant(cleanName)
-            val autoCategory = categorizerEngine.categorize(cleanName)
+            val autoCategory = categorizerEngine.categorize(cleanName, transaction.rawSms)
 
             if (cleanName != transaction.merchant) {
                 merchantAliasDao.insertAlias(MerchantAliasEntity(rawMerchant, cleanName))

@@ -670,6 +670,7 @@
     <string name="account_export_success">স্টেটমেন্ট সফলভাবে এক্সপোর্ট হয়েছে</string>
     <string name="account_export_error">স্টেটমেন্ট এক্সপোর্ট ব্যর্থ হয়েছে: %1$s</string>
     <string name="notify_action_switch_account">অ্যাকাউন্ট পরিবর্তন</string>
+    <string name="notify_action_discard">বাতিল করুন</string>
     <string name="notify_account_updated_title">অ্যাকাউন্ট আপডেট হয়েছে</string>
     <string name="notify_account_updated_desc">%1$s অ্যাকাউন্টে বরাদ্দ করা হয়েছে</string>
     <string name="pro_gate_custom_categories_title">কাস্টম ক্যাটাগরি সীমা</string>

@@ -243,4 +243,22 @@ class CategorizerEngineTest {
     fun `merchant cleaning logic only titlecases the first letter`() {
         assertEquals("Mcdonalds", engine.cleanMerchantName("MCDONALDS"))
     }
+
+    @Test
+    fun `contextual message triggers food category when merchant is unknown`() {
+        val result = engine.categorize("Sharmaji", "Paid Rs 300 at Sharmaji for lunch at cafe")
+        assertEquals(TransactionCategory.FOOD, result)
+    }
+
+    @Test
+    fun `contextual message triggers transport category for unknown fuel pump`() {
+        val result = engine.categorize("Choudhary Ent", "Rs 1500 debited for petrol fuel refill")
+        assertEquals(TransactionCategory.TRANSPORT, result)
+    }
+
+    @Test
+    fun `contextual message triggers health category for medical store`() {
+        val result = engine.categorize("Gupta Traders", "Payment of Rs 450 at pharmacy clinic")
+        assertEquals(TransactionCategory.HEALTH, result)
+    }
 }

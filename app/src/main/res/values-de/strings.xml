@@ -670,6 +670,7 @@
     <string name="account_export_success">Kontoauszug erfolgreich exportiert</string>
     <string name="account_export_error">Fehler beim Exportieren des Kontoauszugs: %1$s</string>
     <string name="notify_action_switch_account">Konto wechseln</string>
+    <string name="notify_action_discard">Verwerfen</string>
     <string name="notify_account_updated_title">Konto aktualisiert</string>
     <string name="notify_account_updated_desc">Zugewiesen an %1$s</string>
     <string name="pro_gate_custom_categories_title">Limit für eigene Kategorien</string>
