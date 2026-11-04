@@ -35,7 +35,7 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.CreditCard
 import compose.icons.lucideicons.ExternalLink
 
-internal const val CUSTOMER_PORTAL_URL = "https://customer.dodopayments.com"
+internal const val CUSTOMER_PORTAL_URL = "https://play.google.com/store/account/subscriptions"
 
 private val SUBSCRIPTION_TIERS = setOf(
     "MONTHLY",

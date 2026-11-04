@@ -130,6 +130,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var databaseRecovery: DatabaseRecovery
 
+    @Inject
+    lateinit var billingManager: com.masum.cipher.core.billing.BillingManager
+
     private val currentIntentFlow = MutableStateFlow<Intent?>(null)
     private val updateReady = MutableStateFlow(false)
 
@@ -447,6 +450,7 @@ class MainActivity : AppCompatActivity() {
                                 SettingsScreen(
                                     viewModel = viewModel,
                                     biometricAuthenticator = biometricAuthenticator,
+                                    billingManager = billingManager,
                                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToSmartRules = { navController.navigate("smart_rules") },
@@ -551,6 +555,7 @@ class MainActivity : AppCompatActivity() {
                             composable("cipher_pro") {
                                 com.masum.cipher.ui.pro.CipherProScreen(
                                     userPreferences = userPreferences,
+                                    billingManager = billingManager,
                                     onNavigateBack = { navController.popBackStack() }
                                 )
                             }

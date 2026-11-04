@@ -530,9 +530,9 @@
     <string name="pro_pricing_adjust_notice">Preise passen sich an dein Land an. Dein lokaler Preis wird an der Kasse angezeigt. Steuern können anfallen.</string>
     <string name="pro_coupon_notice">Hast du einen Gutschein? Du kannst ihn an der Kasse einlösen.</string>
     <string name="pro_cant_find_key">Lizenzschlüssel nicht gefunden?</string>
-    <string name="pro_customer_portal_link">Dodo-Kundenportal öffnen</string>
+    <string name="pro_customer_portal_link">Bei Google Play verwalten</string>
     <string name="pro_subscription_title">Abonnement</string>
-    <string name="pro_subscription_body">Die Abrechnung erfolgt sicher über Dodo Payments. Du kannst jederzeit im Kundenportal kündigen.</string>
+    <string name="pro_subscription_body">Die Abrechnung erfolgt sicher über Google Play. Du kannst jederzeit in deinen Google Play-Abos kündigen oder Pläne wechseln.</string>
     <string name="pro_subscription_manage">Abonnement verwalten oder kündigen</string>
 
     <string name="accounts_title">Konten &amp; Wallets</string>

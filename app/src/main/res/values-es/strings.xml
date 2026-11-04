@@ -529,9 +529,9 @@
     <string name="pro_pricing_adjust_notice">Los precios se adaptan a tu país. Tu precio local aparecerá al pagar. Pueden aplicarse impuestos.</string>
     <string name="pro_coupon_notice">¿Tienes un cupón? Puedes introducirlo al finalizar la compra.</string>
     <string name="pro_cant_find_key">¿No encuentras tu clave de licencia?</string>
-    <string name="pro_customer_portal_link">Abrir portal de clientes de Dodo</string>
+    <string name="pro_customer_portal_link">Gestionar en Google Play</string>
     <string name="pro_subscription_title">Suscripción</string>
-    <string name="pro_subscription_body">Dodo Payments gestiona la facturación de forma segura. Puedes cancelar en cualquier momento desde el portal de clientes.</string>
+    <string name="pro_subscription_body">Google Play gestiona la facturación de forma segura. Puedes cancelar o cambiar de plan en cualquier momento desde tus suscripciones de Google Play.</string>
     <string name="pro_subscription_manage">Gestionar o cancelar la suscripción</string>
 
     <string name="accounts_title">Cuentas y billeteras</string>

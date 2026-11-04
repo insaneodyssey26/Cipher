@@ -162,6 +162,7 @@ import androidx.core.net.toUri
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     biometricAuthenticator: BiometricAuthenticator,
+    billingManager: com.masum.cipher.core.billing.BillingManager? = null,
     onNavigateToPrivacy: () -> Unit,
     onNavigateToManageApps: () -> Unit,
     onNavigateToSmartRules: () -> Unit,
@@ -199,7 +200,6 @@ fun SettingsScreen(
     var autoBackupSetupPassword by remember { mutableStateOf("") }
     var pendingAutoBackupPassword by remember { mutableStateOf<String?>(null) }
     val autoBackupFolderRequiredMessage = stringResource(R.string.auto_backup_folder_required)
-    var showProSheet by remember { mutableStateOf(false) }
     var showPdfUpsellSheet by remember { mutableStateOf(false) }
     var showAccentColorsGateSheet by remember { mutableStateOf(false) }
 
@@ -2091,21 +2091,6 @@ Spacer(modifier = Modifier.weight(1f))
                 viewModel.handleIntent(SettingsContract.Intent.SetAppLanguage(code))
             },
             onDismiss = { showLanguageDialog = false }
-        )
-    }
-
-    if (showProSheet) {
-        com.masum.cipher.ui.components.CipherProSheet(
-            isPro = state.isPro,
-            proTier = state.proTier,
-            isActivating = state.isActivatingPro,
-            activationError = state.proActivationError,
-            activationSuccess = state.proActivationSuccess,
-            isHapticsEnabled = state.isHapticsEnabled,
-            onActivateKey = { key, email ->
-                viewModel.handleIntent(SettingsContract.Intent.ActivatePro(key, email))
-            },
-            onDismiss = { showProSheet = false }
         )
     }
 }

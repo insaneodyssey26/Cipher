@@ -65,16 +65,17 @@ private val ProAccentSecondary = Color(0xFF38BDF8)
 
 @Composable
 internal fun WelcomeReturningUserSection(
-    isPro: Boolean,
-    proTier: String,
     onRestoreBackup: () -> Unit,
-    onLicenseKey: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
-    val fontScale = LocalDensity.current.fontScale
 
-    val restoreButton: @Composable (Modifier) -> Unit = { buttonModifier ->
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        LabelledDivider(text = stringResource(R.string.onboarding_returning_title))
+
         WelcomeSecondaryButton(
             icon = LucideIcons.CloudDownload,
             label = stringResource(R.string.onboarding_restore_backup_short),
@@ -82,54 +83,8 @@ internal fun WelcomeReturningUserSection(
                 view.performVibrate(true, isLongPress = false)
                 onRestoreBackup()
             },
-            modifier = buttonModifier.testTag(WELCOME_RESTORE_BACKUP_TAG)
+            modifier = Modifier.fillMaxWidth().testTag(WELCOME_RESTORE_BACKUP_TAG)
         )
-    }
-
-    val licenseButton: @Composable (Modifier) -> Unit = { buttonModifier ->
-        val openLicense = {
-            view.performVibrate(true, isLongPress = false)
-            onLicenseKey()
-        }
-        if (isPro) {
-            WelcomeProActiveButton(
-                tier = proTier,
-                onClick = openLicense,
-                modifier = buttonModifier.testTag(WELCOME_LICENSE_KEY_TAG)
-            )
-        } else {
-            WelcomeSecondaryButton(
-                icon = LucideIcons.Key,
-                label = stringResource(R.string.onboarding_license_key_short),
-                onClick = openLicense,
-                modifier = buttonModifier.testTag(WELCOME_LICENSE_KEY_TAG)
-            )
-        }
-    }
-
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val stacked = shouldStackWelcomeActions(maxWidth.value, fontScale)
-
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            LabelledDivider(text = stringResource(R.string.onboarding_returning_title))
-
-            if (stacked) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    restoreButton(Modifier.fillMaxWidth())
-                    licenseButton(Modifier.fillMaxWidth())
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    restoreButton(Modifier.weight(1f).fillMaxHeight())
-                    licenseButton(Modifier.weight(1f).fillMaxHeight())
-                }
-            }
-        }
     }
 }
 

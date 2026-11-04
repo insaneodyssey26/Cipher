@@ -96,12 +96,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
+import android.app.Activity
 import android.content.ClipData
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.ArrowLeft
 import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.ExternalLink
+import compose.icons.lucideicons.Info
 import compose.icons.lucideicons.Key
 import compose.icons.lucideicons.ShieldCheck
 import compose.icons.lucideicons.Smartphone
@@ -115,15 +117,6 @@ import com.masum.cipher.core.data.local.pref.AppTheme
 import java.util.Locale
 import kotlinx.coroutines.launch
 
-private data class PricingValues(
-    val monthly: String,
-    val sixMonth: String,
-    val sixMonthStrike: String?,
-    val annual: String,
-    val annualStrike: String?,
-    val lifetime: String
-)
-
 private data class PlanFeatureItem(
     val title: String,
     val subtitle: String,
@@ -135,7 +128,7 @@ private data class PricingCardData(
     val title: String,
     val badge: String,
     val strikePrice: String?,
-    val mainPrice: String,
+    val mainPrice: String?,
     val periodLabel: String,
     val billedSubtext: String,
     val description: String,
@@ -143,19 +136,17 @@ private data class PricingCardData(
     val accentColorLight: Color,
     val onAccentColorDark: Color,
     val onAccentColorLight: Color,
-    val checkoutUrl: String,
-    val features: List<PlanFeatureItem>
+    val features: List<PlanFeatureItem>,
+    val productId: String,
+    val basePlanId: String? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CipherProScreen(
     userPreferences: UserPreferences,
-    onNavigateBack: () -> Unit,
-    dodoCheckoutUrlMonthly: String = "https://checkout.dodopayments.com/buy/pdt_0NnvfQxm1f1vLtVQvAiYW?quantity=1",
-    dodoCheckoutUrlHalfYearly: String = "https://checkout.dodopayments.com/buy/pdt_0NnvgNp6Fu53ZP3IZwST8?quantity=1",
-    dodoCheckoutUrlYearly: String = "https://checkout.dodopayments.com/buy/pdt_0Nnvgcewj9JY1Oyrs2kWF?quantity=1",
-    dodoCheckoutUrlLifetime: String = "https://checkout.dodopayments.com/buy/pdt_0NnvgqmXN76K14C90kLjX?quantity=1"
+    billingManager: com.masum.cipher.core.billing.BillingManager? = null,
+    onNavigateBack: () -> Unit
 ) {
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val context = LocalContext.current
@@ -187,15 +178,9 @@ fun CipherProScreen(
     val ctaButtonBg = if (isDark) Color.White else Color(0xFF0F172A)
     val ctaButtonText = if (isDark) Color.Black else Color.White
 
-    var showKeyActivation by remember { mutableStateOf(false) }
     var showCongratulations by remember { mutableStateOf(false) }
     var activatedTierName by remember { mutableStateOf("") }
     var activatedDeviceQuota by remember { mutableStateOf<Pair<Int, Int>?>(null) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var licenseKeyInput by remember { mutableStateOf("") }
-    var emailInput by remember { mutableStateOf("") }
-    var isActivating by remember { mutableStateOf(false) }
-    var activationError by remember { mutableStateOf<String?>(null) }
     var showBrowsePlans by remember { mutableStateOf(false) }
     var showDeactivateConfirmDialog by remember { mutableStateOf(false) }
     var isDeactivatingDevice by remember { mutableStateOf(false) }
@@ -207,12 +192,6 @@ fun CipherProScreen(
     val monthlyPeriod = stringResource(R.string.pro_period_monthly)
     val monthlySubtext = stringResource(R.string.pro_subtext_monthly)
     val monthlyDesc = stringResource(R.string.pro_desc_monthly)
-
-    val sixMonthTitle = stringResource(R.string.pro_tier_6month_title)
-    val sixMonthBadge = stringResource(R.string.pro_tier_badge_save_16)
-    val sixMonthPeriod = stringResource(R.string.pro_period_6month)
-    val sixMonthSubtext = stringResource(R.string.pro_subtext_6month)
-    val sixMonthDesc = stringResource(R.string.pro_desc_6month)
 
     val annualTitle = stringResource(R.string.pro_tier_annual_title)
     val annualBadge = stringResource(R.string.pro_tier_badge_save_29)
@@ -235,92 +214,46 @@ fun CipherProScreen(
     val featTheme = PlanFeatureItem(stringResource(R.string.pro_feature_theme_styling), stringResource(R.string.pro_feature_theme_styling_desc))
     val commonFeatures = listOf(featAccounts, featGoals, featRules, featWidgets, featExport, featCategories, featTheme)
 
-    val countryCode = remember {
-        Locale.getDefault().country.uppercase(Locale.ROOT)
-    }
+    val productDetailsMap by (billingManager?.productDetailsMap ?: kotlinx.coroutines.flow.MutableStateFlow<Map<String, com.android.billingclient.api.ProductDetails>>(emptyMap()))
+        .collectAsStateWithLifecycle()
 
-    val pricing = remember(countryCode) {
-        when {
-            countryCode == "IN" -> {
-                PricingValues(
-                    monthly = "₹59",
-                    sixMonth = "₹299",
-                    sixMonthStrike = "₹354",
-                    annual = "₹499",
-                    annualStrike = "₹708",
-                    lifetime = "₹899"
-                )
-            }
-            countryCode == "BD" -> {
-                PricingValues(
-                    monthly = "৳79",
-                    sixMonth = "৳399",
-                    sixMonthStrike = "৳474",
-                    annual = "৳699",
-                    annualStrike = "৳948",
-                    lifetime = "৳1,199"
-                )
-            }
-            countryCode == "JP" -> {
-                PricingValues(
-                    monthly = "¥300",
-                    sixMonth = "¥1,500",
-                    sixMonthStrike = "¥1,800",
-                    annual = "¥2,500",
-                    annualStrike = "¥3,600",
-                    lifetime = "¥4,500"
-                )
-            }
-            countryCode == "GB" || countryCode == "UK" -> {
-                PricingValues(
-                    monthly = "£1.99",
-                    sixMonth = "£9.99",
-                    sixMonthStrike = "£11.94",
-                    annual = "£16.99",
-                    annualStrike = "£23.88",
-                    lifetime = "£29.99"
-                )
-            }
-            countryCode == "PL" -> {
-                PricingValues(
-                    monthly = "4,99 zł",
-                    sixMonth = "24,99 zł",
-                    sixMonthStrike = "29,94 zł",
-                    annual = "39,99 zł",
-                    annualStrike = "59,88 zł",
-                    lifetime = "69,99 zł"
-                )
-            }
-            countryCode in setOf("DE", "FR", "ES", "IT", "NL", "BE", "AT", "IE", "FI", "PT", "GR", "EE", "LV", "LT", "SK", "SI", "CY", "MT", "LU") -> {
-                PricingValues(
-                    monthly = "€1.99",
-                    sixMonth = "€9.99",
-                    sixMonthStrike = "€11.94",
-                    annual = "€16.99",
-                    annualStrike = "€23.88",
-                    lifetime = "€29.99"
-                )
-            }
-            else -> {
-                PricingValues(
-                    monthly = "$1.99",
-                    sixMonth = "$9.99",
-                    sixMonthStrike = "$11.94",
-                    annual = "$16.99",
-                    annualStrike = "$23.88",
-                    lifetime = "$29.99"
-                )
+    val liveLifetimePrice = remember(productDetailsMap) { billingManager?.getLifetimePrice() }
+    val liveMonthlyPrice = remember(productDetailsMap) { billingManager?.getMonthlyPrice() }
+    val liveYearlyPrice = remember(productDetailsMap) { billingManager?.getYearlyPrice() }
+
+    LaunchedEffect(billingManager) {
+        billingManager?.billingEvents?.collect { event ->
+            when (event) {
+                is com.masum.cipher.core.billing.BillingEvent.Success -> {
+                    snackbarHostState.showSnackbar("Welcome to Cipher Pro!")
+                    showCongratulations = true
+                    activatedTierName = event.tier
+                }
+                is com.masum.cipher.core.billing.BillingEvent.Restored -> {
+                    if (event.hasPro) {
+                        snackbarHostState.showSnackbar("Pro purchases restored successfully!")
+                    } else {
+                        snackbarHostState.showSnackbar("No active Pro purchases found.")
+                    }
+                }
+                is com.masum.cipher.core.billing.BillingEvent.AlreadyOwned -> {
+                    snackbarHostState.showSnackbar("Product already owned. Restored successfully!")
+                }
+                is com.masum.cipher.core.billing.BillingEvent.Error -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+                com.masum.cipher.core.billing.BillingEvent.Cancelled -> {}
             }
         }
     }
 
     val plans = remember(
-        dodoCheckoutUrlMonthly, dodoCheckoutUrlHalfYearly, dodoCheckoutUrlYearly, dodoCheckoutUrlLifetime,
-        monthlyTitle, sixMonthTitle, annualTitle, lifetimeTitle,
-        monthlyDesc, sixMonthDesc, annualDesc, lifetimeDesc,
-        monthlySubtext, sixMonthSubtext, annualSubtext, lifetimeSubtext,
-        monthlyBadge, sixMonthBadge, annualBadge, lifetimeBadge,
-        commonFeatures, pricing
+        liveLifetimePrice, liveMonthlyPrice, liveYearlyPrice,
+        monthlyTitle, annualTitle, lifetimeTitle,
+        monthlyDesc, annualDesc, lifetimeDesc,
+        monthlySubtext, annualSubtext, lifetimeSubtext,
+        monthlyBadge, annualBadge, lifetimeBadge,
+        commonFeatures
     ) {
         listOf(
             PricingCardData(
@@ -328,7 +261,7 @@ fun CipherProScreen(
                 title = monthlyTitle,
                 badge = monthlyBadge,
                 strikePrice = null,
-                mainPrice = pricing.monthly,
+                mainPrice = liveMonthlyPrice,
                 periodLabel = monthlyPeriod,
                 billedSubtext = monthlySubtext,
                 description = monthlyDesc,
@@ -336,31 +269,16 @@ fun CipherProScreen(
                 accentColorLight = Color(0xFF64748B),
                 onAccentColorDark = Color(0xFF0F172A),
                 onAccentColorLight = Color.White,
-                checkoutUrl = dodoCheckoutUrlMonthly,
-                features = commonFeatures
-            ),
-            PricingCardData(
-                planId = "6month",
-                title = sixMonthTitle,
-                badge = sixMonthBadge,
-                strikePrice = pricing.sixMonthStrike,
-                mainPrice = pricing.sixMonth,
-                periodLabel = sixMonthPeriod,
-                billedSubtext = sixMonthSubtext,
-                description = sixMonthDesc,
-                accentColorDark = Color(0xFFFBBF24),
-                accentColorLight = Color(0xFFD97706),
-                onAccentColorDark = Color(0xFF1C1917),
-                onAccentColorLight = Color.White,
-                checkoutUrl = dodoCheckoutUrlHalfYearly,
-                features = commonFeatures
+                features = commonFeatures,
+                productId = com.masum.cipher.core.billing.BillingManager.PRODUCT_SUBSCRIPTION,
+                basePlanId = com.masum.cipher.core.billing.BillingManager.BASE_PLAN_MONTHLY
             ),
             PricingCardData(
                 planId = "annual",
                 title = annualTitle,
                 badge = annualBadge,
-                strikePrice = pricing.annualStrike,
-                mainPrice = pricing.annual,
+                strikePrice = null,
+                mainPrice = liveYearlyPrice,
                 periodLabel = annualPeriod,
                 billedSubtext = annualSubtext,
                 description = annualDesc,
@@ -368,15 +286,16 @@ fun CipherProScreen(
                 accentColorLight = Color(0xFF059669),
                 onAccentColorDark = Color.Black,
                 onAccentColorLight = Color.White,
-                checkoutUrl = dodoCheckoutUrlYearly,
-                features = commonFeatures
+                features = commonFeatures,
+                productId = com.masum.cipher.core.billing.BillingManager.PRODUCT_SUBSCRIPTION,
+                basePlanId = com.masum.cipher.core.billing.BillingManager.BASE_PLAN_YEARLY
             ),
             PricingCardData(
                 planId = "lifetime",
                 title = lifetimeTitle,
                 badge = lifetimeBadge,
                 strikePrice = null,
-                mainPrice = pricing.lifetime,
+                mainPrice = liveLifetimePrice,
                 periodLabel = lifetimePeriod,
                 billedSubtext = lifetimeSubtext,
                 description = lifetimeDesc,
@@ -384,8 +303,9 @@ fun CipherProScreen(
                 accentColorLight = Color(0xFF7C3AED),
                 onAccentColorDark = Color(0xFF1E1B4B),
                 onAccentColorLight = Color.White,
-                checkoutUrl = dodoCheckoutUrlLifetime,
-                features = commonFeatures
+                features = commonFeatures,
+                productId = com.masum.cipher.core.billing.BillingManager.PRODUCT_LIFETIME,
+                basePlanId = null
             )
         )
     }
@@ -655,51 +575,80 @@ fun CipherProScreen(
                                     verticalAlignment = Alignment.Bottom,
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    if (plan.strikePrice != null) {
+                                    if (plan.mainPrice != null) {
                                         Text(
-                                            text = plan.strikePrice,
-                                            style = Typography.titleLarge.copy(
+                                            text = plan.mainPrice,
+                                            style = Typography.displaySmall.copy(
                                                 fontFamily = DMSans,
-                                                fontWeight = FontWeight.SemiBold,
-                                                fontSize = 20.sp,
-                                                textDecoration = TextDecoration.LineThrough
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 32.sp
+                                            ),
+                                            color = planAccent
+                                        )
+
+                                        Text(
+                                            text = plan.periodLabel,
+                                            style = Typography.bodyMedium.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = 13.sp
                                             ),
                                             color = textSecondary,
-                                            modifier = Modifier.padding(bottom = 2.dp)
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "—",
+                                            style = Typography.displaySmall.copy(
+                                                fontFamily = DMSans,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 32.sp
+                                            ),
+                                            color = planAccent
                                         )
                                     }
+                                }
 
+                                if (plan.mainPrice != null) {
                                     Text(
-                                        text = plan.mainPrice,
-                                        style = Typography.displaySmall.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 32.sp
+                                        text = plan.billedSubtext,
+                                        style = Typography.bodySmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 11.5.sp
                                         ),
                                         color = planAccent
                                     )
-
-                                    Text(
-                                        text = plan.periodLabel,
-                                        style = Typography.bodyMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 13.sp
-                                        ),
-                                        color = textSecondary,
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color(0xFFF59E0B).copy(alpha = 0.14f))
+                                            .border(1.dp, Color(0xFFF59E0B).copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 9.dp, vertical = 5.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = LucideIcons.Info,
+                                                contentDescription = null,
+                                                tint = Color(0xFFF59E0B),
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                            Text(
+                                                text = "Connect to internet to fetch live prices",
+                                                style = Typography.labelSmall.copy(
+                                                    fontFamily = Lato,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 11.sp
+                                                ),
+                                                color = Color(0xFFF59E0B)
+                                            )
+                                        }
+                                    }
                                 }
-
-                                Text(
-                                    text = plan.billedSubtext,
-                                    style = Typography.bodySmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 11.5.sp
-                                    ),
-                                    color = planAccent
-                                )
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -809,10 +758,20 @@ fun CipherProScreen(
                                 Button(
                                     onClick = {
                                         view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                        try {
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(plan.checkoutUrl))
-                                            context.startActivity(intent)
-                                        } catch (_: Exception) {}
+                                        if (plan.mainPrice == null) {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Please connect to the internet to load prices.")
+                                            }
+                                            return@Button
+                                        }
+                                        val activity = context as? Activity
+                                        if (activity != null && billingManager != null) {
+                                            billingManager.launchPurchaseFlow(
+                                                activity = activity,
+                                                productId = plan.productId,
+                                                basePlanId = plan.basePlanId
+                                            )
+                                        }
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -835,20 +794,13 @@ fun CipherProScreen(
                                         )
                                         Spacer(modifier = Modifier.width(7.dp))
                                         Text(
-                                            text = "Get ${plan.title} — ${plan.mainPrice}",
+                                            text = if (plan.mainPrice != null) "Get ${plan.title} — ${plan.mainPrice}" else "Get ${plan.title}",
                                             style = Typography.titleMedium.copy(
                                                 fontFamily = Lato,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp
                                             ),
                                             color = ctaButtonText
-                                        )
-                                        Spacer(modifier = Modifier.width(5.dp))
-                                        Icon(
-                                            imageVector = LucideIcons.ExternalLink,
-                                            contentDescription = null,
-                                            tint = ctaButtonText.copy(alpha = 0.75f),
-                                            modifier = Modifier.size(13.dp)
                                         )
                                     }
                                 }
@@ -872,23 +824,19 @@ fun CipherProScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                TextButton(
-                    onClick = {
-                        view.performVibrate(isHapticsEnabled)
-                        showKeyActivation = true
-                    },
-                    modifier = Modifier.padding(bottom = 4.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = LucideIcons.Key,
-                            contentDescription = null,
-                            tint = textSecondary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+                    TextButton(
+                        onClick = {
+                            view.performVibrate(isHapticsEnabled)
+                            billingManager?.restorePurchases(isManual = true)
+                        }
+                    ) {
                         Text(
-                            text = stringResource(R.string.pro_license_title),
+                            text = "Restore Purchases",
                             style = Typography.bodySmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold
@@ -971,253 +919,6 @@ fun CipherProScreen(
                 }
             }
         )
-    }
-
-    if (showKeyActivation) {
-        val activePlan = plans[pagerState.currentPage.coerceIn(0, plans.lastIndex)]
-        val activePlanAccent = if (isDark) activePlan.accentColorDark else activePlan.accentColorLight
-        val activePlanOnAccent = if (isDark) activePlan.onAccentColorDark else activePlan.onAccentColorLight
-
-        ModalBottomSheet(
-            onDismissRequest = { showKeyActivation = false },
-            sheetState = sheetState,
-            containerColor = cardBg,
-            scrimColor = Color.Black.copy(alpha = 0.6f)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
-                    .navigationBarsPadding()
-                    .imePadding(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.pro_license_desc),
-                    style = Typography.labelMedium.copy(
-                        fontFamily = Lato,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = textSecondary
-                )
-
-                BasicTextField(
-                    value = licenseKeyInput,
-                    onValueChange = { 
-                        licenseKeyInput = it.uppercase()
-                        activationError = null
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(screenBg)
-                        .border(
-                            width = 1.dp,
-                            color = if (activationError != null) RoseExpense else activePlanAccent,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 14.dp),
-                    textStyle = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        color = textPrimary,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    singleLine = true,
-                    cursorBrush = SolidColor(textPrimary),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Next
-                    ),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (licenseKeyInput.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.pro_license_hint),
-                                    style = Typography.bodyMedium.copy(
-                                        fontFamily = Lato,
-                                        color = textSecondary,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
-                )
-
-                BasicTextField(
-                    value = emailInput,
-                    onValueChange = { 
-                        emailInput = it
-                        activationError = null
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(screenBg)
-                        .border(
-                            width = 1.dp,
-                            color = cardBorderDefault,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 14.dp),
-                    textStyle = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        color = textPrimary
-                    ),
-                    singleLine = true,
-                    cursorBrush = SolidColor(textPrimary),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-                        }
-                    ),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (emailInput.isEmpty()) {
-                                Text(
-                                    text = "Email address (optional)",
-                                    style = Typography.bodyMedium.copy(
-                                        fontFamily = Lato,
-                                        color = textSecondary
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
-                )
-
-                if (activationError != null) {
-                    Text(
-                        text = activationError ?: "",
-                        style = Typography.bodySmall.copy(
-                            fontFamily = Lato,
-                            color = RoseExpense,
-                            fontSize = 12.sp
-                        )
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                        val rawKey = licenseKeyInput.trim()
-                        if (rawKey.isBlank()) {
-                            activationError = "Please enter a valid license key."
-                            return@Button
-                        }
-                        isActivating = true
-                        activationError = null
-                        coroutineScope.launch {
-                            val androidId = android.provider.Settings.Secure.getString(
-                                context.contentResolver,
-                                android.provider.Settings.Secure.ANDROID_ID
-                            ) ?: "device_${System.currentTimeMillis()}"
-
-                            val result = licenseEngine.activateLicenseRemote(
-                                licenseToken = rawKey,
-                                email = emailInput.ifBlank { null },
-                                deviceId = androidId
-                            )
-                            if (result.isValid) {
-                                userPreferences.setProStatus(
-                                    isPro = true,
-                                    tier = result.tier.identifier,
-                                    token = rawKey,
-                                    orderId = result.orderId,
-                                    expiresAt = result.expiresAtEpochMs
-                                )
-                                isActivating = false
-                                showKeyActivation = false
-                                activatedTierName = result.tier.displayName
-                                activatedDeviceQuota = Pair(result.deviceCount, result.maxDevices)
-                                showCongratulations = true
-                            } else {
-                                isActivating = false
-                                activationError = result.errorMessage ?: "Invalid or expired license key."
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = activePlanAccent,
-                        contentColor = activePlanOnAccent
-                    ),
-                    enabled = !isActivating
-                ) {
-                    if (isActivating) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = activePlanOnAccent,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.pro_license_verify),
-                            style = Typography.labelLarge.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = activePlanOnAccent
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.pro_coupon_notice),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontSize = 11.5.sp
-                        ),
-                        color = textSecondary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    TextButton(
-                        onClick = {
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(CUSTOMER_PORTAL_URL))
-                                context.startActivity(intent)
-                            } catch (_: Exception) {}
-                        }
-                    ) {
-                        Text(
-                            text = "${stringResource(R.string.pro_cant_find_key)} ${stringResource(R.string.pro_customer_portal_link)}",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.SemiBold,
-                                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
-                            ),
-                            color = textSecondary
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-        }
     }
 
     if (showCongratulations) {

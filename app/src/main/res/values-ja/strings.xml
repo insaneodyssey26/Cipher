@@ -531,9 +531,9 @@
     <string name="pro_pricing_adjust_notice">お住まいの国・地域に合わせて価格が調整されます。現地通貨での金額は購入画面でご確認いただけます（税別/税込）。</string>
     <string name="pro_coupon_notice">クーポンをお持ちですか？お支払い画面で入力できます。</string>
     <string name="pro_cant_find_key">ライセンスキーが見つかりませんか？</string>
-    <string name="pro_customer_portal_link">Dodoカスタマーポータルを開く</string>
+    <string name="pro_customer_portal_link">Google Playで管理</string>
     <string name="pro_subscription_title">サブスクリプション</string>
-    <string name="pro_subscription_body">お支払いはDodo Paymentsが安全に処理します。解約はいつでもカスタマーポータルから行えます。</string>
+    <string name="pro_subscription_body">お支払いはGoogle Playが安全に処理します。プランの変更や解約はいつでもGoogle Playの定期購入から行えます。</string>
     <string name="pro_subscription_manage">サブスクリプションの管理・解約</string>
 
     <string name="accounts_title">口座・ウォレット</string>

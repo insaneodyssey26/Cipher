@@ -29,7 +29,7 @@ android {
         applicationId = "com.masum.cipher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 53
+        versionCode = 54
         versionName = "6.3.0"
         androidResources {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
@@ -140,12 +140,12 @@ dependencies {
     baselineProfile(project(":baselineprofile"))
     
     implementation(libs.play.app.update)
+    implementation(libs.play.billing)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.androidx.espresso.core)
