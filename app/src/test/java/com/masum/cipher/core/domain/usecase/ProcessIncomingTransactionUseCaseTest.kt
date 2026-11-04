@@ -103,6 +103,66 @@ class ProcessIncomingTransactionUseCaseTest {
     }
 
     @Test
+    fun multipleSameAmountIncomesFromDifferentSendersAreNotDiscarded() = runBlocking {
+        val existing = TransactionEntity(
+            id = 1L,
+            amount = 500.0,
+            merchant = "Rahul",
+            currency = "INR",
+            category = "INCOME",
+            timestamp = 100_000L,
+            rawSms = "Received Rs 500 from Rahul Ref: 123456789012",
+            isIncome = true
+        )
+        fakeTransactionDao.duplicateReturn = existing
+
+        val incoming = TransactionEntity(
+            amount = 500.0,
+            merchant = "Priya",
+            currency = "INR",
+            category = "",
+            timestamp = 110_000L,
+            rawSms = "Received Rs 500 from Priya Ref: 987654321098",
+            isIncome = true
+        )
+
+        val result = useCase(incoming)
+        assertNotNull(result)
+        assertEquals(1, fakeTransactionDao.insertedTransactions.size)
+        assertEquals(500.0, result?.amount)
+        assertEquals("Priya", result?.merchant)
+    }
+
+    @Test
+    fun sameAmountIncomeWithMatchingRefIsDiscarded() = runBlocking {
+        val existing = TransactionEntity(
+            id = 1L,
+            amount = 500.0,
+            merchant = "Rahul",
+            currency = "INR",
+            category = "INCOME",
+            timestamp = 100_000L,
+            rawSms = "Received Rs 500 from Rahul Ref: 123456789012",
+            isIncome = true
+        )
+        fakeTransactionDao.duplicateReturn = existing
+
+        val incoming = TransactionEntity(
+            amount = 500.0,
+            merchant = "Rahul",
+            currency = "INR",
+            category = "",
+            timestamp = 105_000L,
+            rawSms = "Bank alert: Credited Rs 500 UTR: 123456789012",
+            isIncome = true
+        )
+
+        val result = useCase(incoming)
+        assertNull(result)
+        assertEquals(0, fakeTransactionDao.insertedTransactions.size)
+    }
+
+    @Test
     fun smartRuleOverridesAutoCategorizer() = runBlocking {
         fakeCategoryRuleDao.rules["Amazon"] = "SHOPPING"
 
@@ -374,6 +434,13 @@ class ProcessIncomingTransactionUseCaseTest {
                         duplicateReturn?.takeIf {
                             it.amount == amount && it.isIncome == isIncome && it.merchant.equals(merchant, ignoreCase = true)
                         }
+                    }
+                    "findPotentialDuplicates" -> {
+                        val amount = args[0] as Double
+                        val isIncome = args[1] as Boolean
+                        val list = mutableListOf<TransactionEntity>()
+                        duplicateReturn?.takeIf { it.amount == amount && it.isIncome == isIncome }?.let { list.add(it) }
+                        list
                     }
                     "insertTransaction" -> {
                         val tx = args[0] as TransactionEntity

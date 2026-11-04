@@ -37,9 +37,44 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
             val startTime = transaction.timestamp - timeWindow
             val endTime = transaction.timestamp + timeWindow
 
-            val duplicate = transactionDao.findDuplicate(transaction.amount, transaction.isIncome, transaction.merchant.trim(), startTime, endTime)
-            if (duplicate != null) {
-                return null
+            val candidates = transactionDao.findPotentialDuplicates(transaction.amount, transaction.isIncome, startTime, endTime)
+            if (candidates.isNotEmpty()) {
+                val incomingRef = extractReferenceNumber(transaction.rawSms)
+                val incomingNormalizedSms = normalizeMessageText(transaction.rawSms)
+
+                for (candidate in candidates) {
+                    val candidateRef = extractReferenceNumber(candidate.rawSms.orEmpty())
+                    if (incomingRef != null && candidateRef != null) {
+                        if (incomingRef.equals(candidateRef, ignoreCase = true)) {
+                            return null
+                        }
+                        continue
+                    }
+
+                    if (candidate.rawSms != null) {
+                        val candidateNormalizedSms = normalizeMessageText(candidate.rawSms)
+                        if (incomingNormalizedSms.isNotBlank() && incomingNormalizedSms == candidateNormalizedSms) {
+                            return null
+                        }
+                    }
+
+                    if (!transaction.isIncome) {
+                        val candidateMerchant = candidate.merchant.trim()
+                        val incomingMerchant = transaction.merchant.trim()
+                        if (candidateMerchant.isNotBlank() && incomingMerchant.isNotBlank() &&
+                            candidateMerchant.equals(incomingMerchant, ignoreCase = true)) {
+                            return null
+                        }
+                    } else {
+                        val candidateMerchant = candidate.merchant.trim()
+                        val incomingMerchant = transaction.merchant.trim()
+                        if (candidateMerchant.isNotBlank() && incomingMerchant.isNotBlank() &&
+                            !isGenericMerchant(candidateMerchant) && !isGenericMerchant(incomingMerchant) &&
+                            candidateMerchant.equals(incomingMerchant, ignoreCase = true)) {
+                            return null
+                        }
+                    }
+                }
             }
         }
 
@@ -216,5 +251,42 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
 
         val defaultAcc = accounts.firstOrNull { it.isDefault } ?: accounts.firstOrNull()
         return defaultAcc?.id
+    }
+
+    private fun normalizeMessageText(text: String): String {
+        return text.lowercase()
+            .replace(Regex("\\[[^\\]]+\\]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
+
+    private fun isGenericMerchant(name: String): Boolean {
+        val lower = name.trim().lowercase()
+        return lower in GENERIC_MERCHANT_SET
+    }
+
+    private fun extractReferenceNumber(text: String): String? {
+        if (text.isBlank()) return null
+        for (pattern in REFERENCE_NUMBER_PATTERNS) {
+            val matcher = pattern.matcher(text)
+            if (matcher.find()) {
+                val candidate = matcher.group(1)?.trim()
+                if (!candidate.isNullOrBlank() && candidate.length >= 6) {
+                    return candidate
+                }
+            }
+        }
+        return null
+    }
+
+    companion object {
+        private val GENERIC_MERCHANT_SET = setOf(
+            "upi", "bank", "transfer", "payment", "received", "credited", "debited", "unknown", "account", "a/c", "card"
+        )
+        private val REFERENCE_NUMBER_PATTERNS = listOf(
+            java.util.regex.Pattern.compile("(?i)\\b(?:utr|rrn|txn\\s*id|transaction\\s*id|ref\\s*no|ref\\s*num|reference\\s*no|reference)\\s*[:#-]?\\s*([A-Za-z0-9]{6,25})\\b"),
+            java.util.regex.Pattern.compile("(?i)\\b(?:upi\\s*ref(?:\\s*no)?|imps(?:/p2a)?)\\s*[:#-]?\\s*([A-Za-z0-9]{6,25})\\b"),
+            java.util.regex.Pattern.compile("(?i)/(\\d{10,20})/")
+        )
     }
 }
