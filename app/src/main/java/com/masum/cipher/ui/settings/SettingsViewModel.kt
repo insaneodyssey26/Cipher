@@ -154,6 +154,7 @@ class SettingsViewModel @Inject constructor(
                         proExpiresAtEpochMs = settings.proExpiresAtEpochMs,
                         proLicenseToken = settings.proLicenseToken,
                         proOrderId = settings.proOrderId,
+                        isLegacyPro = settings.isLegacyPro,
                         showProBadge = settings.showProBadge
                     )
                 }

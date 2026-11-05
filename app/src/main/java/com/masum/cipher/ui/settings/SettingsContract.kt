@@ -125,6 +125,7 @@ class SettingsContract {
         val proExpiresAtEpochMs: Long = 0L,
         val proLicenseToken: String? = null,
         val proOrderId: String? = null,
+        val isLegacyPro: Boolean = false,
         val showProBadge: Boolean = true,
         val isActivatingPro: Boolean = false,
         val proActivationError: String? = null,

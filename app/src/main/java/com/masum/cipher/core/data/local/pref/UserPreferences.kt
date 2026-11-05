@@ -870,4 +870,14 @@ data class UserSettings(
     val showProBadge: Boolean = true,
     val showLicenseRevokedDialog: Boolean = false,
     val licenseRevokedReason: String? = null
-)
+) {
+    val isLegacyPro: Boolean
+        get() {
+            if (!isPro) return false
+            val order = proOrderId?.trim()
+            val token = proLicenseToken?.trim()
+            val isGooglePlay = (order != null && order.startsWith("GPA.")) ||
+                (token != null && (token.startsWith("GPA.") || token.length > 80))
+            return !isGooglePlay
+        }
+}

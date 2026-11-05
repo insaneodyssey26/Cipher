@@ -1521,6 +1521,15 @@ private fun ActiveProMembershipContent(
                 }
             }
 
+            if (settings.isLegacyPro) {
+                LegacyMigrationBanner(
+                    isLifetime = isLifetime,
+                    licenseToken = licenseKey,
+                    isDark = isDark,
+                    isHapticsEnabled = isHapticsEnabled
+                )
+            }
+
             if (isSubscriptionTier(settings.proTier)) {
                 ManageSubscriptionCard(
                     cardBg = cardBg,

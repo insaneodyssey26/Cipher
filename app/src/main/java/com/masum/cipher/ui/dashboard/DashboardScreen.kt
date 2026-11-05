@@ -168,9 +168,12 @@ fun DashboardScreen(
     val lastSeenWhatsNewVersionCode = settings?.lastSeenWhatsNewVersionCode ?: 0
     val shouldShowWhatsNew = settings != null && settings?.hasCompletedOnboarding == true && lastSeenWhatsNewVersionCode < currentVersionCode
     var showWhatsNewSheet by remember { mutableStateOf(false) }
+    var showLegacyMigrationDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(shouldShowWhatsNew) {
-        if (shouldShowWhatsNew) {
+    LaunchedEffect(shouldShowWhatsNew, settings?.isLegacyPro) {
+        if (settings?.isLegacyPro == true) {
+            showLegacyMigrationDialog = true
+        } else if (shouldShowWhatsNew) {
             showWhatsNewSheet = true
         }
     }
@@ -693,6 +696,23 @@ fun DashboardScreen(
                 }
             },
             isPro = settings?.isPro == true
+        )
+    }
+
+    if (showLegacyMigrationDialog && settings?.isLegacyPro == true) {
+        val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+        com.masum.cipher.ui.pro.LegacyMigrationDialog(
+            isLifetime = settings?.proTier?.uppercase() == "LIFETIME",
+            licenseToken = settings?.proLicenseToken ?: settings?.proOrderId,
+            isDark = isDark,
+            isHapticsEnabled = isHapticsEnabled,
+            onDismiss = {
+                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                showLegacyMigrationDialog = false
+                if (shouldShowWhatsNew) {
+                    showWhatsNewSheet = true
+                }
+            }
         )
     }
 

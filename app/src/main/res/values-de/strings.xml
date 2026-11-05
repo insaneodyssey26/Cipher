@@ -534,6 +534,12 @@
     <string name="pro_subscription_title">Abonnement</string>
     <string name="pro_subscription_body">Die Abrechnung erfolgt sicher über Google Play. Du kannst jederzeit in deinen Google Play-Abos kündigen oder Pläne wechseln.</string>
     <string name="pro_subscription_manage">Abonnement verwalten oder kündigen</string>
+    <string name="pro_migration_badge">Handlung erforderlich</string>
+    <string name="pro_migration_title">Google Play Pass Migration</string>
+    <string name="pro_migration_desc_lifetime">Ich habe die Cipher Pro Abrechnung zu Google Play migriert. Ich habe einen 100% kostenlosen Google Play Lifetime Pass an deine Kauf-E-Mail gesendet. Bitte prüfe deinen Posteingang oder Spam-Ordner. Wenn du ihn nicht findest, schreibe mir direkt.</string>
+    <string name="pro_migration_desc_subscription">Ich habe die Cipher Pro Abrechnung zu Google Play migriert. Das Dodo-Abonnement wurde gekündigt, damit keine Gebühren mehr anfallen, und ein kostenloser Pass wurde gesendet. Bitte prüfe dein Postfach oder schreibe mir.</string>
+    <string name="pro_migration_action_redeem">Auf Google Play einlösen</string>
+    <string name="pro_migration_action_contact">Entwickler kontaktieren</string>
 
     <string name="accounts_title">Konten &amp; Wallets</string>
     <string name="accounts_subtitle">Finanzkonten und Kontobücher verwalten</string>

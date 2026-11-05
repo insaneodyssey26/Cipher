@@ -546,6 +546,12 @@
     <string name="pro_subscription_title">Subskrypcja</string>
     <string name="pro_subscription_body">Płatnościami bezpiecznie zarządza Google Play. Możesz anulować subskrypcję lub zmienić plan w dowolnej chwili w subskrypcjach Google Play.</string>
     <string name="pro_subscription_manage">Zarządzaj subskrypcją lub ją anuluj</string>
+    <string name="pro_migration_badge">Wymagane działanie</string>
+    <string name="pro_migration_title">Migracja na Google Play</string>
+    <string name="pro_migration_desc_lifetime">Przeniosłem rozliczenia Cipher Pro bezpośrednio do Google Play. Na adres e-mail użyty przy zakupie wysłałem bezpłatny kod dożywotniego dostępu Google Play. Sprawdź swoją skrzynkę lub spam. W razie pytań napisz do mnie.</string>
+    <string name="pro_migration_desc_subscription">Przeniosłem subskrypcje Cipher Pro do Google Play. Twoja subskrypcja Dodo została anulowana, aby uniknąć opłat, a darmowy kod został wysłany na e-mail. Sprawdź skrzynkę odbiorczą lub napisz do mnie.</string>
+    <string name="pro_migration_action_redeem">Zrealizuj w Google Play</string>
+    <string name="pro_migration_action_contact">Napisz do dewelopera</string>
 
     <string name="accounts_title">Konta i portfele</string>
     <string name="accounts_subtitle">Zarządzaj kontami finansowymi i rejestrami</string>

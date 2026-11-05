@@ -535,6 +535,12 @@
     <string name="pro_subscription_title">サブスクリプション</string>
     <string name="pro_subscription_body">お支払いはGoogle Playが安全に処理します。プランの変更や解約はいつでもGoogle Playの定期購入から行えます。</string>
     <string name="pro_subscription_manage">サブスクリプションの管理・解約</string>
+    <string name="pro_migration_badge">要対応</string>
+    <string name="pro_migration_title">Google Playへの移行案内</string>
+    <string name="pro_migration_desc_lifetime">Cipher Proの課金システムをGoogle Playへ移行しました。購入時のメールアドレス宛に100%無料のGoogle Playライフタイムパスをお送りしました。受信トレイや迷惑メールをご確認ください。届いていない場合は購入時メールから直接ご連絡ください。</string>
+    <string name="pro_migration_desc_subscription">Cipher Proの課金システムをGoogle Playへ移行しました。今後の二重請求を防ぐためDodo決済は解約済みです。無料パスをお送りしましたのでメールをご確認いただくかご連絡ください。</string>
+    <string name="pro_migration_action_redeem">Google Playでコードを利用</string>
+    <string name="pro_migration_action_contact">開発者にメールを送信</string>
 
     <string name="accounts_title">口座・ウォレット</string>
     <string name="accounts_subtitle">財務口座と取引台帳を管理</string>

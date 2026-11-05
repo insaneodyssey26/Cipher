@@ -534,6 +534,12 @@
     <string name="pro_subscription_title">সাবস্ক্রিপশন</string>
     <string name="pro_subscription_body">বিলিং নিরাপদে Google Play পরিচালনা করে। আপনি যেকোনো সময় Google Play সাবস্ক্রিপশন থেকে পরিবর্তন বা বাতিল করতে পারেন।</string>
     <string name="pro_subscription_manage">সাবস্ক্রিপশন পরিচালনা বা বাতিল করুন</string>
+    <string name="pro_migration_badge">পদক্ষেপ প্রয়োজন</string>
+    <string name="pro_migration_title">গুগল প্লে পাস মাইগ্রেশন</string>
+    <string name="pro_migration_desc_lifetime">আমি সাইফার প্রো-এর বিলিং গুগল প্লে-তে স্থানান্তর করেছি। আপনি যে ইমেইল দিয়ে কিনেছিলেন সেখানে ১০০% ফ্রি গুগল প্লে লাইফটাইম পাস পাঠিয়েছি। দয়া করে আপনার ইনবক্স বা স্প্যাম ফোল্ডার দেখুন। না পেলে আমাকে সেই ইমেইল থেকে সরাসরি লিখুন।</string>
+    <string name="pro_migration_desc_subscription">আমি সাইফার প্রো-এর বিলিং গুগল প্লে-তে স্থানান্তর করেছি। ডোড়ো বিলিং বাতিল করা হয়েছে যাতে আর কোনো চার্জ না কাটে এবং আপনার ইমেইলে ফ্রি গুগল প্লে পাস পাঠানো হয়েছে। দয়া করে ইনবক্স দেখুন বা আমাকে লিখুন।</string>
+    <string name="pro_migration_action_redeem">গুগল প্লে-তে রিডিম করুন</string>
+    <string name="pro_migration_action_contact">ডেভেলপারকে ইমেইল করুন</string>
 
     <string name="accounts_title">অ্যাকাউন্ট ও ওয়ালেট</string>
     <string name="accounts_subtitle">আর্থিক অ্যাকাউন্ট ও খতিয়ান পরিচালনা করুন</string>

@@ -30,7 +30,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 54
-        versionName = "6.3.0"
+        versionName = "6.3.0-rc01"
         androidResources {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
         }

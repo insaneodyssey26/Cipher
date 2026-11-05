@@ -129,6 +129,7 @@ import compose.icons.lucideicons.FileSpreadsheet
 import compose.icons.lucideicons.FileText
 import compose.icons.lucideicons.FolderDown
 import compose.icons.lucideicons.FolderSync
+import compose.icons.lucideicons.Gift
 import compose.icons.lucideicons.Github
 import compose.icons.lucideicons.Globe
 import compose.icons.lucideicons.Info
@@ -465,6 +466,17 @@ fun SettingsScreen(
                 } else {
                     "All Pro features unlocked • Lifetime Access"
                 }
+            }
+
+            if (state.isLegacyPro) {
+                val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                com.masum.cipher.ui.pro.LegacyMigrationBanner(
+                    isLifetime = state.proTier.uppercase() == "LIFETIME",
+                    licenseToken = state.proLicenseToken ?: state.proOrderId,
+                    isDark = isDark,
+                    isHapticsEnabled = state.isHapticsEnabled,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                )
             }
 
             Box(

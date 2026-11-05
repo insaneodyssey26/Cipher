@@ -530,6 +530,12 @@
     <string name="pro_subscription_title">Abonnement</string>
     <string name="pro_subscription_body">La facturation est gérée en toute sécurité par Google Play. Vous pouvez résilier ou modifier votre forfait à tout moment depuis vos abonnements Google Play.</string>
     <string name="pro_subscription_manage">Gérer ou résilier l\'abonnement</string>
+    <string name="pro_migration_badge">Action requise</string>
+    <string name="pro_migration_title">Migration vers Google Play</string>
+    <string name="pro_migration_desc_lifetime">J\'ai migré la facturation de Cipher Pro directement sur Google Play. J\'ai envoyé un pass à vie 100% gratuit à l\'adresse e-mail de votre achat. Veuillez vérifier votre boîte de réception ou vos spams. Si vous ne le trouvez pas, écrivez-moi directement.</string>
+    <string name="pro_migration_desc_subscription">J\'ai migré la facturation de Cipher Pro sur Google Play. J\'ai résilié votre abonnement Dodo pour éviter tout prélèvement, et je vous ai envoyé un pass gratuit. Veuillez vérifier vos e-mails ou me contacter.</string>
+    <string name="pro_migration_action_redeem">Utiliser sur Google Play</string>
+    <string name="pro_migration_action_contact">Contacter le développeur</string>
 
     <string name="accounts_title">Comptes et portefeuilles</string>
     <string name="accounts_subtitle">Gérer les comptes financiers et grands livres</string>
