@@ -52,7 +52,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +63,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Color
+import compose.icons.lucideicons.Undo2
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -415,18 +420,36 @@ fun AppSelectionScreen(
         Spacer(modifier = Modifier.height(12.dp))
     }
 
+    var removedHistory by remember { mutableStateOf<List<String>>(emptyList()) }
+
     if (showSelectedAppsDialog) {
         SelectedAppsDialog(
             selectedApps = selectedApps,
             allApps = installedApps,
             packageManager = context.packageManager,
+            removedHistory = removedHistory,
             onDeselect = { pkg ->
+                removedHistory = removedHistory + pkg
                 selectedApps = selectedApps - pkg
             },
+            onUndo = {
+                val last = removedHistory.lastOrNull()
+                if (last != null) {
+                    removedHistory = removedHistory.dropLast(1)
+                    selectedApps = selectedApps + last
+                }
+            },
             onClearAll = {
+                val currentList = selectedApps.toList()
+                if (currentList.isNotEmpty()) {
+                    removedHistory = removedHistory + currentList
+                }
                 selectedApps = emptySet()
             },
-            onDismiss = { showSelectedAppsDialog = false }
+            onDismiss = {
+                removedHistory = emptyList()
+                showSelectedAppsDialog = false
+            }
         )
     }
 }
@@ -437,84 +460,82 @@ private fun SelectedAppsDialog(
     selectedApps: Set<String>,
     allApps: List<InstalledApp>,
     packageManager: PackageManager,
+    removedHistory: List<String>,
     onDeselect: (String) -> Unit,
+    onUndo: () -> Unit,
     onClearAll: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
+    val appMap = remember(allApps) { allApps.associateBy { it.packageName } }
     val selectedAppList = remember(selectedApps, allApps) {
-        val appMap = allApps.associateBy { it.packageName }
         selectedApps.mapNotNull { appMap[it] }.sortedBy { it.appName }
     }
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+
+    val closeSheet: () -> Unit = {
+        coroutineScope.launch {
+            sheetState.hide()
+            onDismiss()
+        }
+    }
+
+    val sheetBg = if (isDark) Color(0xFF13161C) else MaterialTheme.colorScheme.surface
+    val itemBg = if (isDark) Color(0xFF1B1F27) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+    val itemBorder = if (isDark) Color(0xFF282E3A) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, bottom = 6.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.35f), RoundedCornerShape(2.dp))
-            )
-        }
+        sheetGesturesEnabled = false,
+        containerColor = sheetBg,
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(bottom = 20.dp)
+                .padding(top = 18.dp, bottom = 20.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 22.dp, vertical = 8.dp),
+                    .padding(horizontal = 22.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.onboarding_selected_apps_title),
+                        style = Typography.titleLarge.copy(
+                            fontFamily = DMSans,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontSize = 19.sp,
+                            letterSpacing = (-0.4).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.onboarding_selected_apps_title),
-                            style = Typography.titleLarge.copy(
+                            text = selectedApps.size.toString(),
+                            style = Typography.labelSmall.copy(
                                 fontFamily = DMSans,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 19.sp,
-                                letterSpacing = (-0.4).sp
+                                fontSize = 11.5.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = selectedApps.size.toString(),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
-                        style = Typography.bodySmall.copy(
-                            fontFamily = Lato,
-                            fontSize = 12.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                    )
                 }
 
                 Row(
@@ -538,24 +559,89 @@ private fun SelectedAppsDialog(
                         }
                     }
 
-                    IconButton(
-                        onClick = onDismiss,
+                    Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                            .background(if (isDark) Color(0xFF202530) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = closeSheet
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = LucideIcons.X,
                             contentDescription = stringResource(R.string.action_cancel),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+
+            if (removedHistory.isNotEmpty()) {
+                val lastPkg = removedHistory.lastOrNull()
+                val lastAppName = lastPkg?.let { appMap[it]?.appName } ?: ""
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isDark) Color(0xFF1E2430) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
+                        .border(1.dp, itemBorder, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (lastAppName.isNotBlank()) "Removed $lastAppName" else "Removed app",
+                        style = Typography.bodySmall.copy(
+                            fontFamily = Lato,
+                            fontSize = 12.5.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .clickable(onClick = onUndo)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = LucideIcons.Undo2,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.action_undo),
+                                style = Typography.labelSmall.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                    fontSize = 11.5.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             if (selectedAppList.isEmpty()) {
                 Box(
@@ -579,7 +665,7 @@ private fun SelectedAppsDialog(
                         .fillMaxWidth()
                         .heightIn(max = 420.dp)
                         .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(selectedAppList, key = { it.packageName }) { app ->
                         var icon by remember(app.packageName) { mutableStateOf(appIconCache.get(app.packageName)) }
@@ -604,13 +690,17 @@ private fun SelectedAppsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                                    RoundedCornerShape(16.dp)
+                                .animateItem(
+                                    fadeInSpec = androidx.compose.animation.core.tween(150),
+                                    fadeOutSpec = androidx.compose.animation.core.tween(150),
+                                    placementSpec = androidx.compose.animation.core.tween(
+                                        durationMillis = 200,
+                                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                                    )
                                 )
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(itemBg)
+                                .border(1.dp, itemBorder, RoundedCornerShape(14.dp))
                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -620,26 +710,13 @@ private fun SelectedAppsDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                                        .border(
-                                            0.5.dp,
-                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                                            RoundedCornerShape(12.dp)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    icon?.let { bitmap ->
-                                        Image(
-                                            bitmap = bitmap,
-                                            contentDescription = app.appName,
-                                            modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp))
-                                        )
-                                    }
-                                }
+                                icon?.let { bitmap ->
+                                    Image(
+                                        bitmap = bitmap,
+                                        contentDescription = app.appName,
+                                        modifier = Modifier.size(38.dp).clip(RoundedCornerShape(9.dp))
+                                    )
+                                } ?: Box(modifier = Modifier.size(38.dp))
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -647,7 +724,7 @@ private fun SelectedAppsDialog(
                                         style = Typography.titleSmall.copy(
                                             fontFamily = Lato,
                                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                            fontSize = 14.5.sp
+                                            fontSize = 14.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
@@ -658,10 +735,10 @@ private fun SelectedAppsDialog(
                                         text = app.packageName,
                                         style = Typography.bodySmall.copy(
                                             fontFamily = Lato,
-                                            fontSize = 11.5.sp,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                                            fontSize = 11.sp,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
                                         ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -670,14 +747,9 @@ private fun SelectedAppsDialog(
 
                             Box(
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(28.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                                    .border(
-                                        0.5.dp,
-                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                                        CircleShape
-                                    )
+                                    .background(if (isDark) Color(0xFF242A36) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
@@ -689,7 +761,7 @@ private fun SelectedAppsDialog(
                                     imageVector = LucideIcons.X,
                                     contentDescription = "Remove",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(15.dp)
+                                    modifier = Modifier.size(13.dp)
                                 )
                             }
                         }
@@ -709,7 +781,7 @@ private fun SelectedAppsDialog(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onDismiss
+                        onClick = closeSheet
                     ),
                 contentAlignment = Alignment.Center
             ) {
