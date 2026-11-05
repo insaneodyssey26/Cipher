@@ -344,6 +344,7 @@ fun CipherProScreen(
                     view.performVibrate(isHapticsEnabled)
                     showBrowsePlans = true
                 },
+                billingManager = billingManager,
                 onCopyLicense = { key ->
                     view.performVibrate(isHapticsEnabled)
                     coroutineScope.launch {
@@ -1247,6 +1248,7 @@ private fun ActiveProMembershipContent(
     onNavigateBack: () -> Unit,
     onDeactivateClick: () -> Unit,
     onBrowsePlansClick: () -> Unit,
+    billingManager: com.masum.cipher.core.billing.BillingManager? = null,
     onCopyLicense: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -1526,7 +1528,23 @@ private fun ActiveProMembershipContent(
                     isLifetime = isLifetime,
                     licenseToken = licenseKey,
                     isDark = isDark,
-                    isHapticsEnabled = isHapticsEnabled
+                    isHapticsEnabled = isHapticsEnabled,
+                    onRedeemClick = {
+                        val activity = context.findActivity()
+                        if (activity != null && billingManager != null) {
+                            val productId = if (isLifetime) {
+                                com.masum.cipher.core.billing.BillingManager.PRODUCT_LIFETIME
+                            } else {
+                                com.masum.cipher.core.billing.BillingManager.PRODUCT_SUBSCRIPTION
+                            }
+                            val basePlanId = if (isLifetime) {
+                                null
+                            } else {
+                                com.masum.cipher.core.billing.BillingManager.BASE_PLAN_YEARLY
+                            }
+                            billingManager.launchPurchaseFlow(activity, productId, basePlanId)
+                        }
+                    }
                 )
             }
 

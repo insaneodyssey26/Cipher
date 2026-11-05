@@ -622,9 +622,9 @@
     <string name="pro_period_6month">/ 6 months</string>
     <string name="pro_period_annual">/ year</string>
     <string name="pro_period_lifetime">/ one-time</string>
-    <string name="pro_subtext_monthly">₹59 billed every month</string>
-    <string name="pro_subtext_6month">Effective ₹49.80 / month</string>
-    <string name="pro_subtext_annual">Effective ₹41.58 / month</string>
+    <string name="pro_subtext_monthly">Billed every month</string>
+    <string name="pro_subtext_6month">Billed every 6 months</string>
+    <string name="pro_subtext_annual">Billed annually</string>
     <string name="pro_subtext_lifetime">Pay once, own forever</string>
     <string name="pro_desc_monthly">Full Cipher Pro access on a flexible month-to-month basis. Perfect if you want to try all advanced features.</string>
     <string name="pro_desc_6month" formatted="false">Half a year of seamless offline wealth management. Save 16% compared to the standard monthly pass.</string>
@@ -651,12 +651,12 @@
     <string name="pro_subscription_title">Subscription</string>
     <string name="pro_subscription_body">Billing is managed securely by Google Play. You can cancel or change plans anytime from your Google Play subscriptions.</string>
     <string name="pro_subscription_manage">Manage or cancel subscription</string>
-    <string name="pro_migration_badge">Action Required</string>
-    <string name="pro_migration_title">Google Play Pass Migration</string>
-    <string name="pro_migration_desc_lifetime">I have moved Cipher Pro billing directly to Google Play. I have emailed a 100% free Google Play Lifetime Pass to your purchase email. Please check your inbox or spam folder. If you can\'t find it, email me directly from the email you used on Dodo Payments.</string>
-    <string name="pro_migration_desc_subscription">I have moved Cipher Pro billing directly to Google Play. I have cancelled your Dodo subscription so you won\'t be charged there anymore, and I\'ve emailed you a free Google Play pass. Please check your inbox or email me directly.</string>
-    <string name="pro_migration_action_redeem">Redeem on Google Play</string>
-    <string name="pro_migration_action_contact">Email Developer</string>
+    <string name="pro_migration_badge">Pro Update</string>
+    <string name="pro_migration_title">Switching to Google Play</string>
+    <string name="pro_migration_desc_lifetime">Cipher has moved to Google Play Billing. You don\'t need to pay again.\n\nI\'ve sent a free lifetime code to your purchase email. Check your inbox or spam.\n\nIf you can\'t find it, tap below to email me with your license details.</string>
+    <string name="pro_migration_desc_subscription">Cipher has moved to Google Play Billing. Your old Dodo subscription was cancelled so you won\'t be charged there.\n\nI\'ve sent your free pass code to your purchase email. Check your inbox or spam.\n\nIf you can\'t find it, tap below to email me with your license details.</string>
+    <string name="pro_migration_action_redeem">Redeem code</string>
+    <string name="pro_migration_action_contact">Email me</string>
 
     <string name="accounts_title">Accounts &amp; Wallets</string>
     <string name="accounts_subtitle">Manage financial accounts and ledgers</string>

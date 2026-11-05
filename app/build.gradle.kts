@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage", "DEPRECATION")
 
+import java.util.Properties
+import java.io.FileInputStream
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -29,8 +31,8 @@ android {
         applicationId = "com.masum.cipher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 54
-        versionName = "6.3.0-rc01"
+        versionCode = 60
+        versionName = "6.3.0-rc06"
         androidResources {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
         }
@@ -43,14 +45,37 @@ android {
         manifestPlaceholders["appName"] = "@string/app_name"
     }
 
+    signingConfigs {
+        val keystorePropertiesFile = rootProject.file("keystore.properties")
+        if (keystorePropertiesFile.exists()) {
+            val properties = Properties()
+            FileInputStream(keystorePropertiesFile).use { properties.load(it) }
+            create("releaseConfig") {
+                storeFile = file(properties.getProperty("storeFile"))
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-DEBUG"
+            val releaseSigning = signingConfigs.findByName("releaseConfig")
+            if (releaseSigning != null) {
+                signingConfig = releaseSigning
+            } else {
+                applicationIdSuffix = ".debug"
+                versionNameSuffix = "-DEBUG"
+            }
             isDebuggable = true
-            manifestPlaceholders["appName"] = "Cipher (Debug)"
+            manifestPlaceholders["appName"] = if (releaseSigning != null) "@string/app_name" else "Cipher (Debug)"
         }
         release {
+            val releaseSigning = signingConfigs.findByName("releaseConfig")
+            if (releaseSigning != null) {
+                signingConfig = releaseSigning
+            }
             manifestPlaceholders["appName"] = "@string/app_name"
             isMinifyEnabled = true
             isShrinkResources = true

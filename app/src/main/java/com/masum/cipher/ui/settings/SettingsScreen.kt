@@ -475,7 +475,26 @@ fun SettingsScreen(
                     licenseToken = state.proLicenseToken ?: state.proOrderId,
                     isDark = isDark,
                     isHapticsEnabled = state.isHapticsEnabled,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                    onRedeemClick = {
+                        val activity = context as? android.app.Activity
+                        if (activity != null && billingManager != null) {
+                            val isLifetime = state.proTier.uppercase() == "LIFETIME"
+                            val productId = if (isLifetime) {
+                                com.masum.cipher.core.billing.BillingManager.PRODUCT_LIFETIME
+                            } else {
+                                com.masum.cipher.core.billing.BillingManager.PRODUCT_SUBSCRIPTION
+                            }
+                            val basePlanId = if (isLifetime) {
+                                null
+                            } else {
+                                com.masum.cipher.core.billing.BillingManager.BASE_PLAN_YEARLY
+                            }
+                            billingManager.launchPurchaseFlow(activity, productId, basePlanId)
+                        } else {
+                            onNavigateToPro()
+                        }
+                    }
                 )
             }
 

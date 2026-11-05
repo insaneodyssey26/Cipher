@@ -77,7 +77,6 @@ import com.masum.cipher.ui.debts.DebtsViewModel
 import com.masum.cipher.ui.goals.CreateEditGoalScreen
 import com.masum.cipher.ui.goals.GoalsContract
 import com.masum.cipher.ui.goals.GoalsViewModel
-import com.masum.cipher.ui.components.LicenseRevokedDialog
 import com.masum.cipher.ui.components.LockScreen
 import com.masum.cipher.ui.components.TransactionDetailsSheet
 import com.masum.cipher.ui.components.TransactionSplitSheet
@@ -191,8 +190,6 @@ class MainActivity : AppCompatActivity() {
         currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
-        licenseSyncScheduler.schedulePeriodicLicenseSync()
-        licenseSyncScheduler.syncLicenseOnLaunch()
         appUpdateScheduler.schedulePeriodicUpdateCheck()
         UpdateManager.checkForUpdates(this) {
             updateReady.value = true
@@ -290,6 +287,17 @@ class MainActivity : AppCompatActivity() {
                                     if (targetScreen == "pro") {
                                         navController.navigate("cipher_pro")
                                     }
+                                } else if (dataUri.host == "test-legacy-pro") {
+                                    val tier = dataUri.getQueryParameter("tier") ?: "LIFETIME"
+                                    userPreferences.setProStatus(
+                                        isPro = true,
+                                        tier = tier,
+                                        token = "DODO-LEGACY-SAMPLE-LICENSE",
+                                        orderId = "dodo_test_ord_12345",
+                                        expiresAt = if (tier.uppercase() == "LIFETIME") 0L else System.currentTimeMillis() + 30L * 86400000L
+                                    )
+                                } else if (dataUri.host == "reset-pro") {
+                                    userPreferences.deactivatePro()
                                 }
                             }
 
@@ -888,19 +896,6 @@ class MainActivity : AppCompatActivity() {
                                 onCurrencySelected = { code, symbol -> mainViewModel.handleIntent(MainContract.Intent.SaveCurrency(code, symbol)) },
                                 onComplete = { mainViewModel.handleIntent(MainContract.Intent.SetOnboardingCompleted(true)) },
                                 onSaveApps = { apps -> mainViewModel.handleIntent(MainContract.Intent.SaveTrackedApps(apps)) }
-                            )
-                        }
-
-                        if (state.settings?.showLicenseRevokedDialog == true) {
-                            LicenseRevokedDialog(
-                                isHapticsEnabled = state.settings?.isHapticsEnabled ?: true,
-                                onReactivate = {
-                                    mainViewModel.handleIntent(MainContract.Intent.DismissLicenseRevokedDialog)
-                                    navController.navigate("cipher_pro")
-                                },
-                                onDismiss = {
-                                    mainViewModel.handleIntent(MainContract.Intent.DismissLicenseRevokedDialog)
-                                }
                             )
                         }
 

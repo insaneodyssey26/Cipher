@@ -41,7 +41,7 @@ class BillingManager @Inject constructor(
 ) : PurchasesUpdatedListener {
 
     companion object {
-        const val PRODUCT_LIFETIME = "cipher_pro_lifetime"
+        const val PRODUCT_LIFETIME = "lifetime_plan"
         const val PRODUCT_SUBSCRIPTION = "cipher_pro_subscription"
         const val BASE_PLAN_MONTHLY = "monthly-plan"
         const val BASE_PLAN_YEARLY = "yearly-plan"
@@ -160,19 +160,19 @@ class BillingManager @Inject constructor(
         productId: String,
         basePlanId: String? = null
     ): Boolean {
-        if (!billingClient.isReady) {
-            scope.launch {
-                if (ensureConnected()) {
-                    withContext(Dispatchers.Main) {
-                        launchPurchaseFlowInternal(activity, productId, basePlanId)
-                    }
-                } else {
-                    _billingEvents.emit(BillingEvent.Error("Billing service unavailable. Please check Google Play."))
-                }
+        scope.launch {
+            if (!ensureConnected()) {
+                _billingEvents.emit(BillingEvent.Error("Billing service unavailable. Please check Google Play."))
+                return@launch
             }
-            return false
+            if (_productDetailsMap.value[productId] == null) {
+                queryAvailableProducts()
+            }
+            withContext(Dispatchers.Main) {
+                launchPurchaseFlowInternal(activity, productId, basePlanId)
+            }
         }
-        return launchPurchaseFlowInternal(activity, productId, basePlanId)
+        return true
     }
 
     private fun launchPurchaseFlowInternal(

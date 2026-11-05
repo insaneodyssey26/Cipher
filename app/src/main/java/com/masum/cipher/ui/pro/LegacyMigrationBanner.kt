@@ -1,6 +1,8 @@
 package com.masum.cipher.ui.pro
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedVisibility
@@ -59,8 +61,16 @@ import compose.icons.lucideicons.Gift
 import compose.icons.lucideicons.Mail
 import compose.icons.lucideicons.X
 
-private const val PLAY_STORE_REDEEM_URL = "https://play.google.com/redeem"
 private const val DEVELOPER_SUPPORT_EMAIL = "skmasumali.dev@gmail.com"
+
+fun Context.findActivity(): Activity? {
+    var current = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
 
 @Composable
 fun LegacyMigrationBanner(
@@ -68,7 +78,8 @@ fun LegacyMigrationBanner(
     licenseToken: String?,
     isDark: Boolean,
     isHapticsEnabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRedeemClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -189,10 +200,7 @@ fun LegacyMigrationBanner(
                     Button(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, PLAY_STORE_REDEEM_URL.toUri())
-                                context.startActivity(intent)
-                            } catch (_: Exception) {}
+                            onRedeemClick?.invoke()
                         },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -271,6 +279,7 @@ fun LegacyMigrationDialog(
     licenseToken: String?,
     isDark: Boolean,
     isHapticsEnabled: Boolean,
+    onRedeemClick: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -334,10 +343,7 @@ fun LegacyMigrationDialog(
                 Button(
                     onClick = {
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, PLAY_STORE_REDEEM_URL.toUri())
-                            context.startActivity(intent)
-                        } catch (_: Exception) {}
+                        onRedeemClick?.invoke()
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(

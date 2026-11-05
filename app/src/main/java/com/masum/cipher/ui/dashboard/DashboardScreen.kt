@@ -706,6 +706,10 @@ fun DashboardScreen(
             licenseToken = settings?.proLicenseToken ?: settings?.proOrderId,
             isDark = isDark,
             isHapticsEnabled = isHapticsEnabled,
+            onRedeemClick = {
+                showLegacyMigrationDialog = false
+                onNavigateToPro()
+            },
             onDismiss = {
                 view.performVibrate(isHapticsEnabled, isLongPress = false)
                 showLegacyMigrationDialog = false
