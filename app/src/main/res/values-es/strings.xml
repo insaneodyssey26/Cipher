@@ -491,8 +491,8 @@
     <string name="pro_faq_devices_q">¿Puedo transferir mi licencia a un nuevo dispositivo?</string>
     <string name="pro_faq_devices_a">Sí, solo introduce tu clave de por vida en tu nuevo dispositivo o restaura tu copia cifrada.</string>
     <string name="pro_tier_badge_standard">Estándar</string>
-    <string name="pro_tier_badge_save_16" formatted="false">Ahorra 16% •</string>
-    <string name="pro_tier_badge_save_29" formatted="false">Ahorra 29% •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">Ahorra 16%</string>
+    <string name="pro_tier_badge_save_29" formatted="false">Ahorra 29%</string>
     <string name="pro_tier_badge_lifetime_vip">VIP DE POR VIDA</string>
     <string name="pro_tier_badge_best_value">MEJOR VALOR</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>

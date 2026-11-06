@@ -492,8 +492,8 @@
     <string name="pro_faq_devices_q">Kann ich meine Lizenz auf ein neues Gerät übertragen?</string>
     <string name="pro_faq_devices_a">Ja, gib einfach deinen lebenslangen Lizenzschlüssel auf dem neuen Gerät ein oder stelle dein verschlüsseltes Backup wieder her.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16" formatted="false">16% sparen •</string>
-    <string name="pro_tier_badge_save_29" formatted="false">29% sparen •</string>
+    <string name="pro_tier_badge_save_16" formatted="false">16% sparen</string>
+    <string name="pro_tier_badge_save_29" formatted="false">29% sparen</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BESTER WERT</string>
     <string name="pro_tier_badge_popular_pill">BELIEBT</string>

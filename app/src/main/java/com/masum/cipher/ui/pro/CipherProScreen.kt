@@ -200,7 +200,7 @@ fun CipherProScreen(
     val annualDesc = stringResource(R.string.pro_desc_annual)
 
     val lifetimeTitle = stringResource(R.string.pro_tier_lifetime_title)
-    val lifetimeBadge = stringResource(R.string.pro_tier_badge_best_value) + " •"
+    val lifetimeBadge = stringResource(R.string.pro_tier_badge_best_value)
     val lifetimePeriod = stringResource(R.string.pro_period_lifetime)
     val lifetimeSubtext = stringResource(R.string.pro_subtext_lifetime)
     val lifetimeDesc = stringResource(R.string.pro_desc_lifetime)

@@ -70,16 +70,30 @@ class UserPreferences @Inject constructor(
         return "${tier.trim().uppercase()}:${token.trim()}:${(orderId ?: "").trim()}"
     }
 
+    private fun decodeKey(encoded: ByteArray, salt: Byte): String {
+        val out = ByteArray(encoded.size)
+        for (i in encoded.indices) {
+            out[i] = (encoded[i].toInt() xor salt.toInt()).toByte()
+        }
+        return String(out, Charsets.UTF_8)
+    }
+
+    private val KEY_CACHED_PRO = decodeKey(byteArrayOf(54, 46, 54, 51, 40, 41, 10, 52, 60, 10, 39, 37, 50), 0x55.toByte())
+    private val KEY_CACHED_TIER = decodeKey(byteArrayOf(54, 46, 54, 51, 40, 41, 10, 39, 37, 50, 10, 35, 62, 50, 37), 0x55.toByte())
+    private val KEY_CACHED_TOKEN = decodeKey(byteArrayOf(54, 46, 54, 51, 40, 41, 10, 59, 62, 54, 50, 57, 36, 50, 10, 35, 56, 52, 50, 57), 0x55.toByte())
+    private val KEY_CACHED_ORDER = decodeKey(byteArrayOf(54, 46, 54, 51, 40, 41, 10, 39, 37, 50, 10, 56, 37, 51, 50, 37, 10, 62, 51), 0x55.toByte())
+    private val KEY_CACHED_HMAC = decodeKey(byteArrayOf(54, 46, 54, 51, 40, 41, 10, 50, 57, 35, 62, 35, 59, 50, 58, 50, 57, 35, 10, 51, 58, 54, 52), 0x55.toByte())
+
     fun isCachedPro(): Boolean {
-        val isFlagged = syncPrefs.getBoolean("cached_is_pro", false)
+        val isFlagged = syncPrefs.getBoolean(KEY_CACHED_PRO, false)
         if (!isFlagged) return false
-        val token = syncPrefs.getString("cached_license_token", null) ?: return false
-        val tier = syncPrefs.getString("cached_pro_tier", "FREE") ?: "FREE"
-        val orderId = syncPrefs.getString("cached_pro_order_id", null)
+        val token = syncPrefs.getString(KEY_CACHED_TOKEN, null) ?: return false
+        val tier = syncPrefs.getString(KEY_CACHED_TIER, "FREE") ?: "FREE"
+        val orderId = syncPrefs.getString(KEY_CACHED_ORDER, null)
         val expiresAt = syncPrefs.getLong("cached_pro_expiry", 0L)
 
         if (expiresAt > 0L && System.currentTimeMillis() > expiresAt) {
-            syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
+            syncPrefs.edit().putBoolean(KEY_CACHED_PRO, false).putString(KEY_CACHED_TIER, "FREE").apply()
             return false
         }
 
@@ -87,12 +101,12 @@ class UserPreferences @Inject constructor(
             return false
         }
 
-        val storedHmac = syncPrefs.getString("cached_entitlement_hmac", null)
+        val storedHmac = syncPrefs.getString(KEY_CACHED_HMAC, null)
         val payload = computeEntitlementPayload(tier, token, orderId)
         if (storedHmac.isNullOrBlank()) {
             val generated = keystoreManager.generateEntitlementHmac(payload)
             if (generated.isNotBlank()) {
-                syncPrefs.edit().putString("cached_entitlement_hmac", generated).apply()
+                syncPrefs.edit().putString(KEY_CACHED_HMAC, generated).apply()
                 return true
             }
             return false
@@ -100,7 +114,7 @@ class UserPreferences @Inject constructor(
 
         val isValid = keystoreManager.verifyEntitlementHmac(payload, storedHmac)
         if (!isValid) {
-            syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
+            syncPrefs.edit().putBoolean(KEY_CACHED_PRO, false).putString(KEY_CACHED_TIER, "FREE").apply()
             return false
         }
         return true
@@ -756,11 +770,11 @@ class UserPreferences @Inject constructor(
         }
 
         syncPrefs.edit()
-            .putBoolean("cached_is_pro", isPro)
-            .putString("cached_pro_tier", tier)
-            .putString("cached_license_token", token)
-            .putString("cached_pro_order_id", orderId)
-            .putString("cached_entitlement_hmac", entitlementHmac)
+            .putBoolean(KEY_CACHED_PRO, isPro)
+            .putString(KEY_CACHED_TIER, tier)
+            .putString(KEY_CACHED_TOKEN, token)
+            .putString(KEY_CACHED_ORDER, orderId)
+            .putString(KEY_CACHED_HMAC, entitlementHmac)
             .putLong("cached_pro_expiry", expiresAt)
             .apply()
         context.dataStore.edit { preferences ->

@@ -22,3 +22,9 @@
 
 # Tink (Google Crypto) uses Error Prone annotations which are not required at runtime.
 -dontwarn com.google.errorprone.annotations.**
+
+-repackageclasses ''
+-allowaccessmodification
+-renamesourcefileattribute SourceFile
+-keepattributes !SourceFile,!LineNumberTable
+
