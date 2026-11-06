@@ -1,5 +1,17 @@
 # Release Notes
 
+## [6.4.0]
+
+### Added & Improved
+- **Direct Google Play Purchases**: Upgrades now run natively via Google Play instead of external Dodo checkouts. No license keys to copy or device slot limits to manage — your Pro access automatically follows your Google account across all your phones.
+- **Duplicate Charge Alerts**: Cipher automatically spots repeated transactions or accidental double-charges so you can review or dismiss them right away.
+- **Quick Notification Actions**: Review, adjust categories, or confirm captured transactions directly from your notification panel without switching apps.
+- **Fresh Welcome Experience**: A streamlined setup flow with a smoother app selector for choosing which payment apps to track.
+- **Legacy Migration**: Previous Pro users seamlessly keep their active status, with a dedicated 1-tap option to transition to Google Play.
+- **Enhanced Security & Storage**: Strengthened hardware-backed entitlement checks, offline price caching, and safer backup folder selection.
+
+---
+
 ## [6.3.0]
 
 ### Added & Improved

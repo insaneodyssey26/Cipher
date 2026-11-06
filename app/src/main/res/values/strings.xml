@@ -406,6 +406,14 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v640_billing_title">Direct Google Play Purchases</string>
+    <string name="whats_new_v640_billing_desc">Cipher Pro now runs officially through Google Play instead of external checkouts. No license keys to manage, with automatic access across all your phones.</string>
+    <string name="whats_new_v640_onboarding_title">Fresh Welcome &amp; App Selection</string>
+    <string name="whats_new_v640_onboarding_desc">Setting up Cipher is now simpler and faster with a streamlined app picker and smoother animations.</string>
+    <string name="whats_new_v640_duplicates_title">Duplicate Charge Alerts</string>
+    <string name="whats_new_v640_duplicates_desc">Cipher spots double-charges or repeated transactions right away and lets you review or dismiss them with one tap.</string>
+    <string name="whats_new_v640_notifications_title">Quick Actions on Transaction Alerts</string>
+    <string name="whats_new_v640_notifications_desc">Review, adjust, or keep captured transactions straight from your notification bar without opening the app.</string>
     <string name="whats_new_v630_splash_title">App Launch Animation &amp; Vibration</string>
     <string name="whats_new_v630_splash_desc">Added an opening animation with dark mode support, plus a quick vibration as the dashboard opens.</string>
     <string name="whats_new_v630_updater_title">In-App Updates</string>

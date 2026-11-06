@@ -172,6 +172,35 @@ class BackupDataSerializationTest {
     }
 
     @Test
+    fun newBackupWithoutProLicenseTokenSerializesAndRestoresCleanly() {
+        val googlePlayUserBackup = BackupData(
+            transactions = emptyList(),
+            monthlyBudget = 10000.0,
+            currencyCode = "INR",
+            currencySymbol = "₹",
+            theme = "SYSTEM",
+            proLicenseToken = null,
+            proTier = null,
+            proOrderId = null
+        )
+
+        val encodedJson = json.encodeToString(BackupData.serializer(), googlePlayUserBackup)
+        val password = "GooglePlayUserPassword123!".toCharArray()
+
+        val encryptedBytes = crypto.encrypt(encodedJson.toByteArray(Charsets.UTF_8), password)
+        assertTrue(encryptedBytes.isNotEmpty())
+
+        val decryptedBytes = crypto.decrypt(encryptedBytes, password)
+        val decodedJson = String(decryptedBytes, Charsets.UTF_8)
+        val restored = json.decodeFromString(BackupData.serializer(), decodedJson)
+
+        assertEquals(null, restored.proLicenseToken)
+        assertEquals(null, restored.proTier)
+        assertEquals(null, restored.proOrderId)
+        assertEquals(10000.0, restored.monthlyBudget, 0.001)
+    }
+
+    @Test
     fun legacyBackupWithoutDebtsAndGoalsRestoresSafelyWithDefaults() {
         val legacyJson = """
             {

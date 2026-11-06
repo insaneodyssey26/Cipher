@@ -109,6 +109,7 @@ class BackupRepository @Inject constructor(
     suspend fun exportData(outputStream: OutputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val settings = userPreferences.settingsFlow.first()
+            val isLegacy = settings.isLegacyPro
             val data = BackupData(
                 transactions = transactionDao.getAllTransactions().first(),
                 splits = transactionSplitDao.getAllSplits(),
@@ -142,9 +143,9 @@ class BackupRepository @Inject constructor(
                 notifyNewAppDetected = settings.notifyNewAppDetected,
                 notifyDuplicates = settings.notifyDuplicates,
                 appLanguage = settings.appLanguage,
-                proLicenseToken = settings.proLicenseToken,
-                proTier = settings.proTier,
-                proOrderId = settings.proOrderId
+                proLicenseToken = if (isLegacy) settings.proLicenseToken else null,
+                proTier = if (isLegacy) settings.proTier else null,
+                proOrderId = if (isLegacy) settings.proOrderId else null
             )
             val jsonString = json.encodeToString(data)
             val jsonBytes = jsonString.toByteArray(Charsets.UTF_8)
@@ -233,8 +234,12 @@ class BackupRepository @Inject constructor(
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
                 data.notifyDuplicates?.let { userPreferences.setNotifyDuplicates(it) }
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
-                if (!data.proLicenseToken.isNullOrBlank()) {
-                    userPreferences.setPendingLicenseToken(data.proLicenseToken)
+                val token = data.proLicenseToken?.trim()
+                val order = data.proOrderId?.trim()
+                val isGooglePlay = (order != null && order.startsWith("GPA.")) ||
+                    (token != null && (token.startsWith("GPA.") || token.length > 80))
+                if (!token.isNullOrBlank() && !isGooglePlay) {
+                    userPreferences.setPendingLicenseToken(token)
                 }
             }
             Result.success(Unit)
