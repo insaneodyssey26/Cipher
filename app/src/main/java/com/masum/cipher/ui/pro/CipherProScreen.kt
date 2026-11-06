@@ -314,7 +314,14 @@ fun CipherProScreen(
 
     Scaffold(
         containerColor = screenBg,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(bottom = 12.dp)
+            )
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         if (isAlreadyPro && !showBrowsePlans) {
@@ -759,6 +766,12 @@ fun CipherProScreen(
                                 Button(
                                     onClick = {
                                         view.performVibrate(isHapticsEnabled, isLongPress = true)
+                                        if (billingManager?.isNetworkAvailable() == false) {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Please connect to the internet to complete purchase.")
+                                            }
+                                            return@Button
+                                        }
                                         if (plan.mainPrice == null) {
                                             coroutineScope.launch {
                                                 snackbarHostState.showSnackbar("Please connect to the internet to load prices.")

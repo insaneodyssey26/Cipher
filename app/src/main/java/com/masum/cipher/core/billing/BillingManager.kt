@@ -2,6 +2,8 @@ package com.masum.cipher.core.billing
 
 import android.app.Activity
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -46,7 +48,13 @@ class BillingManager @Inject constructor(
         const val PRODUCT_SUBSCRIPTION = "cipher_pro_subscription"
         const val BASE_PLAN_MONTHLY = "monthly-plan"
         const val BASE_PLAN_YEARLY = "yearly-plan"
+        private const val PREFS_BILLING_CACHE = "billing_price_cache"
+        private const val KEY_CACHED_LIFETIME = "cached_lifetime_price"
+        private const val KEY_CACHED_MONTHLY = "cached_monthly_price"
+        private const val KEY_CACHED_YEARLY = "cached_yearly_price"
     }
+
+    private val pricePrefs = context.getSharedPreferences(PREFS_BILLING_CACHE, Context.MODE_PRIVATE)
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -137,23 +145,46 @@ class BillingManager @Inject constructor(
         }
 
         _productDetailsMap.value = resultMap
+
+        getLifetimePriceLive()?.let { pricePrefs.edit().putString(KEY_CACHED_LIFETIME, it).apply() }
+        getMonthlyPriceLive()?.let { pricePrefs.edit().putString(KEY_CACHED_MONTHLY, it).apply() }
+        getYearlyPriceLive()?.let { pricePrefs.edit().putString(KEY_CACHED_YEARLY, it).apply() }
     }
 
-    fun getLifetimePrice(): String? {
+    private fun getLifetimePriceLive(): String? {
         val details = _productDetailsMap.value[PRODUCT_LIFETIME]
         return details?.oneTimePurchaseOfferDetails?.formattedPrice
     }
 
-    fun getMonthlyPrice(): String? {
+    private fun getMonthlyPriceLive(): String? {
         val details = _productDetailsMap.value[PRODUCT_SUBSCRIPTION] ?: return null
         val offer = details.subscriptionOfferDetails?.find { it.basePlanId == BASE_PLAN_MONTHLY }
         return offer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
     }
 
-    fun getYearlyPrice(): String? {
+    private fun getYearlyPriceLive(): String? {
         val details = _productDetailsMap.value[PRODUCT_SUBSCRIPTION] ?: return null
         val offer = details.subscriptionOfferDetails?.find { it.basePlanId == BASE_PLAN_YEARLY }
         return offer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
+    }
+
+    fun getLifetimePrice(): String? {
+        return getLifetimePriceLive() ?: pricePrefs.getString(KEY_CACHED_LIFETIME, null)
+    }
+
+    fun getMonthlyPrice(): String? {
+        return getMonthlyPriceLive() ?: pricePrefs.getString(KEY_CACHED_MONTHLY, null)
+    }
+
+    fun getYearlyPrice(): String? {
+        return getYearlyPriceLive() ?: pricePrefs.getString(KEY_CACHED_YEARLY, null)
+    }
+
+    fun isNetworkAvailable(): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     fun launchPurchaseFlow(
@@ -162,6 +193,10 @@ class BillingManager @Inject constructor(
         basePlanId: String? = null
     ): Boolean {
         scope.launch {
+            if (!isNetworkAvailable()) {
+                _billingEvents.emit(BillingEvent.Error("Please connect to the internet to complete purchase."))
+                return@launch
+            }
             if (!ensureConnected()) {
                 _billingEvents.emit(BillingEvent.Error("Billing service unavailable. Please check Google Play."))
                 return@launch
