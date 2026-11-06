@@ -346,7 +346,7 @@ fun CategoriesScreen(
                         )
                         .clickable {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            if (!isPro && state.customCategories.size >= 5) {
+                            if (!isPro && state.customCategories.size >= 3) {
                                 showProGateSheet = true
                             } else {
                                 editingCustomCategory = null
@@ -493,7 +493,7 @@ fun CategoriesScreen(
                                         )
                                         if (categoryItem.isCustom) {
                                             val customIndex = state.customCategories.indexOfFirst { it.name.equals(categoryItem.name, ignoreCase = true) }
-                                            val isCustomPaused = !isPro && customIndex >= 5
+                                            val isCustomPaused = !isPro && customIndex >= 3
                                             val customEntity = state.customCategories.find { it.name.equals(categoryItem.name, ignoreCase = true) }
 
                                             Box(
@@ -786,7 +786,7 @@ fun CategoriesScreen(
 
                                     if (categoryItem.isCustom) {
                                         val customIndex = state.customCategories.indexOfFirst { it.name.equals(categoryItem.name, ignoreCase = true) }
-                                        val isCustomPaused = !isPro && customIndex >= 5
+                                        val isCustomPaused = !isPro && customIndex >= 3
                                         val customEntity = state.customCategories.find { it.name.equals(categoryItem.name, ignoreCase = true) }
                                         if (customEntity != null) {
                                             Box(

@@ -47,7 +47,16 @@ class PurchaseVerifier @Inject constructor() {
     private fun verifySignature(publicKey: PublicKey, signedData: String, signature: String): Boolean {
         return try {
             val signatureBytes = Base64.decode(signature, Base64.DEFAULT)
-            val sig = Signature.getInstance("SHA256withRSA")
+            tryAlgorithm("SHA1withRSA", publicKey, signedData, signatureBytes) ||
+                tryAlgorithm("SHA256withRSA", publicKey, signedData, signatureBytes)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun tryAlgorithm(algorithm: String, publicKey: PublicKey, signedData: String, signatureBytes: ByteArray): Boolean {
+        return try {
+            val sig = Signature.getInstance(algorithm)
             sig.initVerify(publicKey)
             sig.update(signedData.toByteArray(Charsets.UTF_8))
             sig.verify(signatureBytes)

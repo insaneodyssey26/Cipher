@@ -9,6 +9,7 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ConsumeParams
 import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
@@ -16,6 +17,7 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
+import com.android.billingclient.api.consumePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.masum.cipher.core.data.local.pref.UserPreferences
@@ -52,6 +54,7 @@ class BillingManager @Inject constructor(
         private const val KEY_CACHED_LIFETIME = "cached_lifetime_price"
         private const val KEY_CACHED_MONTHLY = "cached_monthly_price"
         private const val KEY_CACHED_YEARLY = "cached_yearly_price"
+        private const val KEY_LAST_PENDING_PLAN = "last_pending_base_plan"
     }
 
     private val pricePrefs = context.getSharedPreferences(PREFS_BILLING_CACHE, Context.MODE_PRIVATE)
@@ -241,6 +244,7 @@ class BillingManager @Inject constructor(
                 }
                 return false
             }
+            pricePrefs.edit().putString(KEY_LAST_PENDING_PLAN, offer.basePlanId).apply()
             productDetailsParamsBuilder.setOfferToken(offerToken)
         }
 
@@ -302,7 +306,13 @@ class BillingManager @Inject constructor(
             val hasLifetime = purchase.products.contains(PRODUCT_LIFETIME)
             val hasSubscription = purchase.products.contains(PRODUCT_SUBSCRIPTION)
 
-            val tier = if (hasLifetime) "LIFETIME" else if (hasSubscription) "SUBSCRIBER" else "PRO"
+            val pendingPlan = pricePrefs.getString(KEY_LAST_PENDING_PLAN, null)
+            val subTier = when (pendingPlan) {
+                BASE_PLAN_MONTHLY -> "MONTHLY"
+                BASE_PLAN_YEARLY -> "ANNUAL"
+                else -> "MONTHLY"
+            }
+            val tier = if (hasLifetime) "LIFETIME" else if (hasSubscription) subTier else "PRO"
 
             userPreferences.setProStatus(
                 isPro = true,
@@ -345,7 +355,15 @@ class BillingManager @Inject constructor(
                     allPurchases.addAll(subResult.purchasesList)
                 }
 
-                val activePurchase = allPurchases.firstOrNull { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+                val activePurchase = allPurchases
+                    .filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+                    .maxByOrNull { purchase ->
+                        when {
+                            purchase.products.contains(PRODUCT_LIFETIME) -> 2
+                            purchase.products.contains(PRODUCT_SUBSCRIPTION) -> 1
+                            else -> 0
+                        }
+                    }
 
                 if (activePurchase != null) {
                     handlePurchase(activePurchase)
@@ -353,6 +371,11 @@ class BillingManager @Inject constructor(
                         _billingEvents.emit(BillingEvent.Restored(true))
                     }
                 } else {
+                    val cachedTier = userPreferences.getCachedProTier().uppercase()
+                    val isLifetimeOrLegacy = cachedTier == "LIFETIME" || cachedTier == "DEV" || userPreferences.getCachedLicenseToken()?.startsWith("GPA.") == false
+                    if (userPreferences.isCachedPro() && !isLifetimeOrLegacy) {
+                        userPreferences.deactivatePro()
+                    }
                     if (isManual) {
                         _billingEvents.emit(BillingEvent.Restored(false))
                     }
@@ -360,6 +383,38 @@ class BillingManager @Inject constructor(
             } catch (e: Exception) {
                 if (isManual) {
                     _billingEvents.emit(BillingEvent.Error(e.message ?: "Failed to restore purchases."))
+                }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun consumeAllPurchasesForDebug(onComplete: (Boolean) -> Unit = {}) {
+        scope.launch {
+            _isLoading.value = true
+            try {
+                if (ensureConnected()) {
+                    val inAppParams = QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+                    val inAppResult = billingClient.queryPurchasesAsync(inAppParams)
+                    if (inAppResult.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                        for (purchase in inAppResult.purchasesList) {
+                            val consumeParams = ConsumeParams.newBuilder()
+                                .setPurchaseToken(purchase.purchaseToken)
+                                .build()
+                            billingClient.consumePurchase(consumeParams)
+                        }
+                    }
+                }
+                userPreferences.deactivatePro()
+                withContext(Dispatchers.Main) {
+                    onComplete(true)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onComplete(false)
                 }
             } finally {
                 _isLoading.value = false

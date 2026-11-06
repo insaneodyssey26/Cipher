@@ -277,7 +277,7 @@ fun SmartRulesScreen(
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled)
                     val totalRules = state.categoryRules.size + state.merchantRules.size
-                    if (!state.isPro && totalRules >= 5) {
+                    if (!state.isPro && totalRules >= 3) {
                         viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
                     } else {
                         if (pagerState.currentPage == 0) {
@@ -458,7 +458,7 @@ fun SmartRulesScreen(
                             ) {
                                 items(categoryRules, key = { it.merchantName }) { rule ->
                                     val originalIndex = state.categoryRules.indexOfFirst { it.merchantName.equals(rule.merchantName, ignoreCase = true) }
-                                    val isPaused = !state.isPro && originalIndex >= 5
+                                    val isPaused = !state.isPro && originalIndex >= 3
                                     CategoryRuleItem(
                                         rule = rule,
                                         customCategories = state.customCategories,
@@ -512,7 +512,7 @@ fun SmartRulesScreen(
                             ) {
                                 items(merchantRules, key = { it.rawName }) { alias ->
                                     val originalIndex = state.merchantRules.indexOfFirst { it.rawName.equals(alias.rawName, ignoreCase = true) }
-                                    val isPaused = !state.isPro && originalIndex >= 5
+                                    val isPaused = !state.isPro && originalIndex >= 3
                                     MerchantRuleItem(
                                         alias = alias,
                                         isPaused = isPaused,

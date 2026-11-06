@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -33,6 +35,7 @@ import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.CreditCard
+import compose.icons.lucideicons.Crown
 import compose.icons.lucideicons.ExternalLink
 
 internal const val CUSTOMER_PORTAL_URL = "https://play.google.com/store/account/subscriptions"
@@ -57,7 +60,9 @@ internal fun ManageSubscriptionCard(
     textPrimary: Color,
     textDescription: Color,
     onManageClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lifetimePrice: String? = null,
+    onUpgradeLifetimeClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -122,6 +127,38 @@ internal fun ManageSubscriptionCard(
                 tint = EmeraldIncome,
                 modifier = Modifier.size(16.dp)
             )
+        }
+
+        if (onUpgradeLifetimeClick != null) {
+            Button(
+                onClick = onUpgradeLifetimeClick,
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = EmeraldIncome,
+                    contentColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
+                Icon(
+                    imageVector = LucideIcons.Crown,
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                val label = if (lifetimePrice != null) "Upgrade to Lifetime • $lifetimePrice" else "Upgrade to Lifetime VIP"
+                Text(
+                    text = label,
+                    style = Typography.labelLarge.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

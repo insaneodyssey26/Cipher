@@ -225,7 +225,6 @@ fun CipherProScreen(
         billingManager?.billingEvents?.collect { event ->
             when (event) {
                 is com.masum.cipher.core.billing.BillingEvent.Success -> {
-                    snackbarHostState.showSnackbar("Welcome to Cipher Pro!")
                     showCongratulations = true
                     activatedTierName = event.tier
                 }
@@ -1298,41 +1297,6 @@ private fun ActiveProMembershipContent(
     }
     val licenseKey = settings.proLicenseToken ?: userPreferences.getCachedLicenseToken() ?: settings.proOrderId ?: "CIPHER-PRO-ACTIVE"
 
-    var activeDevices by remember { mutableStateOf<List<ActiveDeviceInfo>>(emptyList()) }
-    var deviceCount by remember { mutableStateOf(1) }
-    var maxDevices by remember { mutableStateOf(3) }
-    var isLoadingDevices by remember { mutableStateOf(true) }
-    var deviceToRevoke by remember { mutableStateOf<ActiveDeviceInfo?>(null) }
-    var isRevokingDevice by remember { mutableStateOf(false) }
-
-    LaunchedEffect(licenseKey) {
-        if (licenseKey.isNotBlank() && licenseKey != "CIPHER-PRO-ACTIVE") {
-            val (count, list) = licenseEngine.fetchActiveDevicesRemote(licenseKey, currentDeviceId)
-            val isCurrentAlreadyRegistered = list.any { it.deviceId == currentDeviceId }
-            if (!isCurrentAlreadyRegistered && currentDeviceId.isNotBlank()) {
-                val actResult = licenseEngine.activateLicenseRemote(
-                    licenseToken = licenseKey,
-                    email = null,
-                    deviceId = currentDeviceId
-                )
-                if (actResult.isValid && actResult.activeDevices.isNotEmpty()) {
-                    activeDevices = actResult.activeDevices
-                    deviceCount = actResult.deviceCount.coerceAtLeast(actResult.activeDevices.size).coerceAtLeast(1)
-                    maxDevices = actResult.maxDevices
-                } else {
-                    activeDevices = list
-                    deviceCount = count.coerceAtLeast(list.size).coerceAtLeast(1)
-                }
-            } else {
-                activeDevices = list
-                deviceCount = count.coerceAtLeast(list.size).coerceAtLeast(1)
-            }
-            isLoadingDevices = false
-        } else {
-            isLoadingDevices = false
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -1459,79 +1423,25 @@ private fun ActiveProMembershipContent(
 
                     HorizontalDivider(color = cardBorderDefault, thickness = 1.dp)
 
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.Smartphone,
+                            contentDescription = null,
+                            tint = textSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "PRODUCT LICENSE KEY",
+                            text = "Linked to your Google Play account across all your devices",
                             style = Typography.labelSmall.copy(
                                 fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 10.sp,
-                                letterSpacing = 1.sp
+                                fontSize = 11.5.sp
                             ),
                             color = textSecondary
                         )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(screenBg)
-                                .border(1.dp, cardBorderDefault, RoundedCornerShape(12.dp))
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = licenseKey,
-                                style = Typography.bodyMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp
-                                ),
-                                color = textPrimary,
-                                maxLines = 1,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(EmeraldIncome)
-                                    .clickable { onCopyLicense(licenseKey) }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = "COPY",
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.5.sp
-                                    ),
-                                    color = Color.Black
-                                )
-                            }
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 2.dp)
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.Smartphone,
-                                contentDescription = null,
-                                tint = textSecondary,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = "Valid on up to 3 of your personal Android devices",
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 10.5.sp
-                                ),
-                                color = textSecondary
-                            )
-                        }
                     }
                 }
             }
@@ -1567,11 +1477,23 @@ private fun ActiveProMembershipContent(
                     cardBorder = cardBorderDefault,
                     textPrimary = textPrimary,
                     textDescription = textDescription,
+                    lifetimePrice = billingManager?.getLifetimePrice(),
                     onManageClick = {
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(CUSTOMER_PORTAL_URL)))
                         } catch (_: Exception) {}
+                    },
+                    onUpgradeLifetimeClick = {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        val activity = context.findActivity()
+                        if (activity != null && billingManager != null) {
+                            billingManager.launchPurchaseFlow(
+                                activity = activity,
+                                productId = com.masum.cipher.core.billing.BillingManager.PRODUCT_LIFETIME,
+                                basePlanId = null
+                            )
+                        }
                     }
                 )
             }
@@ -1605,7 +1527,7 @@ private fun ActiveProMembershipContent(
                     }
 
                     val benefits = listOf(
-                        "Unlimited Custom Categories (beyond 5 free limit)",
+                        "Unlimited Custom Categories (beyond 3 free limit)",
                         "Real-Time Home Screen Widgets (Balance & Quick-Add)",
                         "Financial Statement Importer (PDF, CSV & Excel)",
                         "Automated Encrypted Device Backups",
@@ -1648,336 +1570,6 @@ private fun ActiveProMembershipContent(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(cardBg)
-                    .border(1.dp, cardBorderDefault, RoundedCornerShape(24.dp))
-                    .padding(20.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Device License Slots",
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                ),
-                                color = textPrimary
-                            )
-                            Text(
-                                text = "Active on $deviceCount of $maxDevices allowed devices",
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = textSecondary
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (deviceCount < maxDevices) EmeraldIncome.copy(alpha = 0.15f) else RoseExpense.copy(alpha = 0.15f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "${(maxDevices - deviceCount).coerceAtLeast(0)} SLOTS LEFT",
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 10.sp
-                                ),
-                                color = if (deviceCount < maxDevices) EmeraldIncome else RoseExpense
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "Your license can be used across 3 personal devices simultaneously. You can manage and revoke active devices at any time.",
-                        style = Typography.bodySmall.copy(
-                            fontFamily = Lato,
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp
-                        ),
-                        color = textDescription
-                    )
-
-                    if (isLoadingDevices) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                color = EmeraldIncome,
-                                strokeWidth = 2.dp
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Checking active devices...",
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 12.sp
-                                ),
-                                color = textSecondary
-                            )
-                        }
-                    } else if (activeDevices.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            activeDevices.forEach { dev ->
-                                val isThisDevice = dev.isCurrentDevice || (dev.deviceId.isNotBlank() && dev.deviceId == currentDeviceId)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(screenBg)
-                                        .border(1.dp, if (isThisDevice) EmeraldIncome.copy(alpha = 0.35f) else cardBorderDefault, RoundedCornerShape(14.dp))
-                                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .clip(CircleShape)
-                                                .background(if (isThisDevice) EmeraldIncome.copy(alpha = 0.18f) else (if (isDark) Color(0xFF262E39) else Color(0xFFE2E8F0))),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = LucideIcons.Smartphone,
-                                                contentDescription = null,
-                                                tint = if (isThisDevice) EmeraldIncome else textSecondary,
-                                                modifier = Modifier.size(17.dp)
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(10.dp))
-                                        Column(modifier = Modifier.weight(1f, fill = false)) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                Text(
-                                                    text = dev.deviceName,
-                                                    style = Typography.bodyMedium.copy(
-                                                        fontFamily = Lato,
-                                                        fontWeight = FontWeight.Bold,
-                                                        fontSize = 13.5.sp
-                                                    ),
-                                                    color = textPrimary,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                                if (isThisDevice) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .clip(RoundedCornerShape(6.dp))
-                                                            .background(EmeraldIncome.copy(alpha = 0.2f))
-                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                                    ) {
-                                                        Text(
-                                                            text = "THIS PHONE",
-                                                            style = Typography.labelSmall.copy(
-                                                                fontFamily = Lato,
-                                                                fontWeight = FontWeight.Bold,
-                                                                fontSize = 9.sp,
-                                                                letterSpacing = 0.5.sp
-                                                            ),
-                                                            color = EmeraldIncome
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            if (dev.activatedAtEpochMs > 0L) {
-                                                val dateStr = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(dev.activatedAtEpochMs))
-                                                Text(
-                                                    text = "Activated $dateStr",
-                                                    style = Typography.bodySmall.copy(
-                                                        fontFamily = Lato,
-                                                        fontSize = 11.sp
-                                                    ),
-                                                    color = textSecondary
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    if (!isThisDevice) {
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .background(RoseExpense.copy(alpha = 0.12f))
-                                                .border(1.dp, RoseExpense.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
-                                                .clickable {
-                                                    view.performVibrate(isHapticsEnabled)
-                                                    deviceToRevoke = dev
-                                                }
-                                                .padding(horizontal = 10.dp, vertical = 6.dp)
-                                        ) {
-                                            Text(
-                                                text = "Revoke",
-                                                style = Typography.labelMedium.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 11.5.sp
-                                                ),
-                                                color = RoseExpense
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(color = cardBorderDefault, thickness = 1.dp)
-
-                    Button(
-                        onClick = onDeactivateClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = RoseExpense.copy(alpha = 0.14f),
-                            contentColor = RoseExpense
-                        ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, RoseExpense.copy(alpha = 0.4f)),
-                        enabled = !isDeactivatingDevice
-                    ) {
-                        if (isDeactivatingDevice) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                color = RoseExpense,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.Trash2,
-                                    contentDescription = null,
-                                    tint = RoseExpense,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Deactivate on this Device",
-                                    style = Typography.labelLarge.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    ),
-                                    color = RoseExpense
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (deviceToRevoke != null) {
-                val targetDev = deviceToRevoke!!
-                AlertDialog(
-                    onDismissRequest = { if (!isRevokingDevice) deviceToRevoke = null },
-                    containerColor = cardBg,
-                    title = {
-                        Text(
-                            text = "Revoke ${targetDev.deviceName}?",
-                            style = Typography.titleMedium.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            ),
-                            color = textPrimary
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = "This will remove ${targetDev.deviceName} from your Cipher Pro license and immediately free up 1 device slot.",
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.5.sp,
-                                lineHeight = 18.sp
-                            ),
-                            color = textSecondary
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                isRevokingDevice = true
-                                coroutineScope.launch {
-                                    val (newCount, newList) = licenseEngine.revokeDeviceRemote(
-                                        licenseToken = licenseKey,
-                                        deviceId = targetDev.deviceId,
-                                        currentDeviceId = currentDeviceId
-                                    )
-                                    activeDevices = newList
-                                    deviceCount = newCount.coerceAtLeast(newList.size).coerceAtLeast(1)
-                                    isRevokingDevice = false
-                                    deviceToRevoke = null
-                                    view.performVibrate(isHapticsEnabled, isLongPress = true)
-                                    snackbarHostState.showSnackbar("${targetDev.deviceName} revoked. License slot freed.")
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = RoseExpense,
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(10.dp),
-                            enabled = !isRevokingDevice
-                        ) {
-                            if (isRevokingDevice) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text(
-                                    text = "Revoke Device",
-                                    style = Typography.labelLarge.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
-                            }
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = { deviceToRevoke = null },
-                            enabled = !isRevokingDevice
-                        ) {
-                            Text(
-                                text = "Cancel",
-                                style = Typography.labelLarge.copy(
-                                    fontFamily = Lato,
-                                    color = textSecondary
-                                )
-                            )
-                        }
-                    }
-                )
-            }
 
             if (!isLifetime) {
                 Box(

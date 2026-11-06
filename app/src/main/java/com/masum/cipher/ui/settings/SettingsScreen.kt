@@ -463,8 +463,10 @@ fun SettingsScreen(
                 } else if (state.proExpiresAtEpochMs > 0L) {
                     val formattedDate = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(state.proExpiresAtEpochMs))
                     "Active until $formattedDate • Tap to manage"
-                } else {
+                } else if (state.proTier.uppercase() == "LIFETIME") {
                     "All Pro features unlocked • Lifetime Access"
+                } else {
+                    "All Pro features unlocked • Subscription Active"
                 }
             }
 
