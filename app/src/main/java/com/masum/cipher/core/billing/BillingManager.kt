@@ -37,7 +37,8 @@ import kotlin.coroutines.resume
 @Singleton
 class BillingManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val purchaseVerifier: PurchaseVerifier
 ) : PurchasesUpdatedListener {
 
     companion object {
@@ -248,6 +249,11 @@ class BillingManager @Inject constructor(
 
     private suspend fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            if (!purchaseVerifier.verify(purchase)) {
+                _billingEvents.emit(BillingEvent.Error("Purchase validation failed."))
+                return
+            }
+
             if (!purchase.isAcknowledged) {
                 val acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
                     .setPurchaseToken(purchase.purchaseToken)

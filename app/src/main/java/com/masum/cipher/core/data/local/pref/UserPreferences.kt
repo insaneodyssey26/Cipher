@@ -21,7 +21,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 @Singleton
 class UserPreferences @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val keystoreManager: com.masum.cipher.core.security.KeystoreManager = com.masum.cipher.core.security.KeystoreManager(),
+    private val appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator = com.masum.cipher.core.security.AppIntegrityValidator(context)
 ) {
     private val syncPrefs = context.getSharedPreferences("sync_currency_cache", Context.MODE_PRIVATE)
 
@@ -64,12 +66,40 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getBoolean("cached_onboarding_completed", false)
     }
 
+    private fun computeEntitlementPayload(tier: String, token: String, orderId: String?): String {
+        return "${tier.trim().uppercase()}:${token.trim()}:${(orderId ?: "").trim()}"
+    }
+
     fun isCachedPro(): Boolean {
         val isFlagged = syncPrefs.getBoolean("cached_is_pro", false)
         if (!isFlagged) return false
         val token = syncPrefs.getString("cached_license_token", null) ?: return false
+        val tier = syncPrefs.getString("cached_pro_tier", "FREE") ?: "FREE"
+        val orderId = syncPrefs.getString("cached_pro_order_id", null)
         val expiresAt = syncPrefs.getLong("cached_pro_expiry", 0L)
+
         if (expiresAt > 0L && System.currentTimeMillis() > expiresAt) {
+            syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
+            return false
+        }
+
+        if (!appIntegrityValidator.isEnvironmentValid()) {
+            return false
+        }
+
+        val storedHmac = syncPrefs.getString("cached_entitlement_hmac", null)
+        val payload = computeEntitlementPayload(tier, token, orderId)
+        if (storedHmac.isNullOrBlank()) {
+            val generated = keystoreManager.generateEntitlementHmac(payload)
+            if (generated.isNotBlank()) {
+                syncPrefs.edit().putString("cached_entitlement_hmac", generated).apply()
+                return true
+            }
+            return false
+        }
+
+        val isValid = keystoreManager.verifyEntitlementHmac(payload, storedHmac)
+        if (!isValid) {
             syncPrefs.edit().putBoolean("cached_is_pro", false).putString("cached_pro_tier", "FREE").apply()
             return false
         }
@@ -184,6 +214,7 @@ class UserPreferences @Inject constructor(
         val PRO_LICENSE_TOKEN = stringPreferencesKey("pro_license_token")
         val PRO_ORDER_ID = stringPreferencesKey("pro_order_id")
         val PRO_EXPIRES_AT = longPreferencesKey("pro_expires_at")
+        val PRO_ENTITLEMENT_HMAC = stringPreferencesKey("pro_entitlement_hmac")
         val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
         val LAST_LICENSE_SYNC_TIME = longPreferencesKey("last_license_sync_time")
         val SHOW_LICENSE_REVOKED_DIALOG = booleanPreferencesKey("show_license_revoked_dialog")
@@ -313,7 +344,20 @@ class UserPreferences @Inject constructor(
                     if (token.isNullOrBlank()) false
                     else {
                         val expiresAt = preferences[Keys.PRO_EXPIRES_AT] ?: 0L
-                        expiresAt == 0L || System.currentTimeMillis() <= expiresAt
+                        val notExpired = expiresAt == 0L || System.currentTimeMillis() <= expiresAt
+                        if (!notExpired) false
+                        else if (!appIntegrityValidator.isEnvironmentValid()) false
+                        else {
+                            val tier = preferences[Keys.PRO_TIER] ?: "FREE"
+                            val orderId = preferences[Keys.PRO_ORDER_ID]
+                            val payload = computeEntitlementPayload(tier, token, orderId)
+                            val storedHmac = preferences[Keys.PRO_ENTITLEMENT_HMAC]
+                            if (storedHmac.isNullOrBlank()) {
+                                isCachedPro()
+                            } else {
+                                keystoreManager.verifyEntitlementHmac(payload, storedHmac)
+                            }
+                        }
                     }
                 }
             },
@@ -704,16 +748,26 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun setProStatus(isPro: Boolean, tier: String, token: String?, orderId: String?, expiresAt: Long = 0L) {
+        val entitlementHmac = if (isPro && token != null) {
+            val payload = computeEntitlementPayload(tier, token, orderId)
+            keystoreManager.generateEntitlementHmac(payload)
+        } else {
+            ""
+        }
+
         syncPrefs.edit()
             .putBoolean("cached_is_pro", isPro)
             .putString("cached_pro_tier", tier)
             .putString("cached_license_token", token)
+            .putString("cached_pro_order_id", orderId)
+            .putString("cached_entitlement_hmac", entitlementHmac)
             .putLong("cached_pro_expiry", expiresAt)
             .apply()
         context.dataStore.edit { preferences ->
             preferences[Keys.PRO_ACTIVATED] = isPro
             preferences[Keys.PRO_TIER] = tier
             preferences[Keys.PRO_EXPIRES_AT] = expiresAt
+            preferences[Keys.PRO_ENTITLEMENT_HMAC] = entitlementHmac
             if (token != null) {
                 preferences[Keys.PRO_LICENSE_TOKEN] = token
             } else {

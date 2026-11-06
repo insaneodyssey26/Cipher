@@ -43,6 +43,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["appName"] = "@string/app_name"
+
+        val keystorePropertiesFile = rootProject.file("keystore.properties")
+        val playBillingPublicKey = if (keystorePropertiesFile.exists()) {
+            val properties = Properties()
+            FileInputStream(keystorePropertiesFile).use { properties.load(it) }
+            properties.getProperty("playBillingPublicKey", "") ?: ""
+        } else {
+            ""
+        }
+        buildConfigField("String", "PLAY_LICENSE_PUBLIC_KEY", "\"$playBillingPublicKey\"")
     }
 
     signingConfigs {
