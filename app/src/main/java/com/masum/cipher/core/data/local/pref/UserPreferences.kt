@@ -84,20 +84,49 @@ class UserPreferences @Inject constructor(
     private val KEY_CACHED_ORDER = decodeKey(byteArrayOf(54, 52, 54, 61, 48, 49, 10, 37, 39, 58, 10, 58, 39, 49, 48, 39, 10, 60, 49), 0x55.toByte())
     private val KEY_CACHED_HMAC = decodeKey(byteArrayOf(54, 52, 54, 61, 48, 49, 10, 48, 59, 33, 60, 33, 57, 48, 56, 48, 59, 33, 10, 61, 56, 52, 54), 0x55.toByte())
 
+    init {
+        migrateLegacyPlaintextPrefs()
+    }
+
+    private fun migrateLegacyPlaintextPrefs() {
+        if (syncPrefs.contains("cached_is_pro") || syncPrefs.contains("cached_license_token")) {
+            val editor = syncPrefs.edit()
+            if (!syncPrefs.contains(KEY_CACHED_PRO) && syncPrefs.contains("cached_is_pro")) {
+                editor.putBoolean(KEY_CACHED_PRO, syncPrefs.getBoolean("cached_is_pro", false))
+            }
+            if (!syncPrefs.contains(KEY_CACHED_TIER) && syncPrefs.contains("cached_pro_tier")) {
+                editor.putString(KEY_CACHED_TIER, syncPrefs.getString("cached_pro_tier", "FREE"))
+            }
+            if (!syncPrefs.contains(KEY_CACHED_TOKEN) && syncPrefs.contains("cached_license_token")) {
+                editor.putString(KEY_CACHED_TOKEN, syncPrefs.getString("cached_license_token", null))
+            }
+            if (!syncPrefs.contains(KEY_CACHED_ORDER) && syncPrefs.contains("cached_pro_order_id")) {
+                editor.putString(KEY_CACHED_ORDER, syncPrefs.getString("cached_pro_order_id", null))
+            }
+            if (!syncPrefs.contains(KEY_CACHED_HMAC) && syncPrefs.contains("cached_entitlement_hmac")) {
+                editor.putString(KEY_CACHED_HMAC, syncPrefs.getString("cached_entitlement_hmac", null))
+            }
+            editor.remove("cached_is_pro")
+                .remove("cached_pro_tier")
+                .remove("cached_license_token")
+                .remove("cached_pro_order_id")
+                .remove("cached_entitlement_hmac")
+                .apply()
+        }
+    }
+
     fun isCachedPro(): Boolean {
-        val isFlagged = syncPrefs.getBoolean(KEY_CACHED_PRO, false) || syncPrefs.getBoolean("cached_is_pro", false)
+        val isFlagged = syncPrefs.getBoolean(KEY_CACHED_PRO, false)
         if (!isFlagged) return false
-        val token = syncPrefs.getString(KEY_CACHED_TOKEN, null) ?: syncPrefs.getString("cached_license_token", null) ?: return false
-        val tier = syncPrefs.getString(KEY_CACHED_TIER, null) ?: syncPrefs.getString("cached_pro_tier", "FREE") ?: "FREE"
-        val orderId = syncPrefs.getString(KEY_CACHED_ORDER, null) ?: syncPrefs.getString("cached_pro_order_id", null)
+        val token = syncPrefs.getString(KEY_CACHED_TOKEN, null) ?: return false
+        val tier = syncPrefs.getString(KEY_CACHED_TIER, null) ?: "FREE"
+        val orderId = syncPrefs.getString(KEY_CACHED_ORDER, null)
         val expiresAt = syncPrefs.getLong("cached_pro_expiry", 0L)
 
         if (expiresAt > 0L && System.currentTimeMillis() > expiresAt) {
             syncPrefs.edit()
                 .putBoolean(KEY_CACHED_PRO, false)
                 .putString(KEY_CACHED_TIER, "FREE")
-                .putBoolean("cached_is_pro", false)
-                .putString("cached_pro_tier", "FREE")
                 .apply()
             return false
         }
@@ -106,7 +135,7 @@ class UserPreferences @Inject constructor(
             return false
         }
 
-        val storedHmac = syncPrefs.getString(KEY_CACHED_HMAC, null) ?: syncPrefs.getString("cached_entitlement_hmac", null)
+        val storedHmac = syncPrefs.getString(KEY_CACHED_HMAC, null)
         val payload = computeEntitlementPayload(tier, token, orderId)
         if (storedHmac.isNullOrBlank()) {
             val generated = keystoreManager.generateEntitlementHmac(payload)
@@ -122,8 +151,6 @@ class UserPreferences @Inject constructor(
             syncPrefs.edit()
                 .putBoolean(KEY_CACHED_PRO, false)
                 .putString(KEY_CACHED_TIER, "FREE")
-                .putBoolean("cached_is_pro", false)
-                .putString("cached_pro_tier", "FREE")
                 .apply()
             return false
         }
@@ -137,15 +164,12 @@ class UserPreferences @Inject constructor(
 
     fun getCachedProTier(): String {
         if (!isCachedPro()) return "FREE"
-        return syncPrefs.getString(KEY_CACHED_TIER, null)
-            ?: syncPrefs.getString("cached_pro_tier", "FREE")
-            ?: "FREE"
+        return syncPrefs.getString(KEY_CACHED_TIER, null) ?: "FREE"
     }
 
     fun getCachedLicenseToken(): String? {
         if (!isCachedPro()) return null
         return syncPrefs.getString(KEY_CACHED_TOKEN, null)
-            ?: syncPrefs.getString("cached_license_token", null)
     }
 
     fun getCachedAppTheme(): AppTheme {
@@ -835,9 +859,9 @@ class UserPreferences @Inject constructor(
             .putString(KEY_CACHED_TOKEN, null)
             .putString(KEY_CACHED_ORDER, null)
             .putString(KEY_CACHED_HMAC, "")
-            .putBoolean("cached_is_pro", false)
-            .putString("cached_pro_tier", "FREE")
-            .putString("cached_license_token", null)
+            .remove("cached_is_pro")
+            .remove("cached_pro_tier")
+            .remove("cached_license_token")
             .putLong("cached_pro_expiry", 0L)
             .putBoolean("cached_show_license_revoked_dialog", true)
             .putString("cached_license_revoked_reason", reason)

@@ -119,7 +119,8 @@ object DatabaseModule {
         goalDao: com.masum.cipher.core.data.local.dao.GoalDao,
         debtDao: com.masum.cipher.core.data.local.dao.DebtDao,
         userPreferences: com.masum.cipher.core.data.local.pref.UserPreferences,
-        backupCrypto: com.masum.cipher.core.security.BackupCrypto
+        backupCrypto: com.masum.cipher.core.security.BackupCrypto,
+        appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator
     ): BackupRepository {
         return BackupRepository(
             context = context,
@@ -134,7 +135,8 @@ object DatabaseModule {
             goalDao = goalDao,
             debtDao = debtDao,
             userPreferences = userPreferences,
-            backupCrypto = backupCrypto
+            backupCrypto = backupCrypto,
+            appIntegrityValidator = appIntegrityValidator
         )
     }
 

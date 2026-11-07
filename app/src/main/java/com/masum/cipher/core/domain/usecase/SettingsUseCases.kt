@@ -131,12 +131,24 @@ class ExportPdfUseCase @Inject constructor(
     private val accountDao: AccountDao,
     private val backupRepository: BackupRepository,
     private val userPreferences: UserPreferences,
-    private val appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator
+    private val appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator,
+    private val keystoreManager: com.masum.cipher.core.security.KeystoreManager
 ) {
     suspend operator fun invoke(uri: Uri, accountId: Long? = null, accountName: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            if (!appIntegrityValidator.isEnvironmentValid() || !userPreferences.isCachedPro()) {
+            if (!appIntegrityValidator.isEnvironmentValid() ||
+                !appIntegrityValidator.verifyCertificateSignature() ||
+                appIntegrityValidator.isHookingDetected() ||
+                !userPreferences.isCachedPro()
+            ) {
                 throw IllegalStateException("PDF statement export is a Pro feature")
+            }
+            val signatureDigest = appIntegrityValidator.getPrimarySignatureDigest()
+            val token = userPreferences.getCachedLicenseToken().orEmpty()
+            val sentinelPayload = "SENTINEL_PDF:${context.packageName}:$signatureDigest:$token"
+            val sentinelToken = keystoreManager.generateEntitlementHmac(sentinelPayload)
+            if (sentinelToken.isBlank() || !keystoreManager.verifyEntitlementHmac(sentinelPayload, sentinelToken)) {
+                throw IllegalStateException("Integrity verification failed")
             }
             val allTransactions = transactionDao.getAllTransactions().first()
             val targetAccount = if (accountId != null) accountDao.getAccountById(accountId) else null
@@ -157,7 +169,8 @@ class ExportPdfUseCase @Inject constructor(
                     outputStream = outputStream,
                     currencySymbol = currencySymbol,
                     splitsMap = splitsByTx,
-                    accountName = accountName ?: targetAccount?.name
+                    accountName = accountName ?: targetAccount?.name,
+                    sentinelToken = sentinelToken
                 )
             } ?: throw Exception("Could not open file for writing")
         }

@@ -94,7 +94,8 @@ class BackupRepository @Inject constructor(
     private val goalDao: GoalDao,
     private val debtDao: DebtDao,
     private val userPreferences: UserPreferences,
-    private val backupCrypto: BackupCrypto
+    private val backupCrypto: BackupCrypto,
+    private val appIntegrityValidator: com.masum.cipher.core.security.AppIntegrityValidator
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -108,6 +109,9 @@ class BackupRepository @Inject constructor(
 
     suspend fun exportData(outputStream: OutputStream, password: CharArray): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            if (!appIntegrityValidator.verifyCertificateSignature() || appIntegrityValidator.isHookingDetected()) {
+                throw SecurityException("Environment integrity compromised")
+            }
             val settings = userPreferences.settingsFlow.first()
             val isLegacy = settings.isLegacyPro
             val data = BackupData(

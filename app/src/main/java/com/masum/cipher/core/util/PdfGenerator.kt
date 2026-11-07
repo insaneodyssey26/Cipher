@@ -29,8 +29,12 @@ object PdfGenerator {
         outputStream: OutputStream,
         currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,
         splitsMap: Map<Long, List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity>> = emptyMap(),
-        accountName: String? = null
+        accountName: String? = null,
+        sentinelToken: String? = null
     ) {
+        if (sentinelToken == null || sentinelToken.isBlank()) {
+            return
+        }
         val document = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
         
