@@ -242,7 +242,8 @@ class BackupRepository @Inject constructor(
                 val order = data.proOrderId?.trim()
                 val isGooglePlay = (order != null && order.startsWith("GPA.")) ||
                     (token != null && (token.startsWith("GPA.") || token.length > 80))
-                if (!token.isNullOrBlank() && !isGooglePlay) {
+                val alreadyHasGooglePlayPro = userPreferences.isCachedGooglePlayPro()
+                if (!token.isNullOrBlank() && !isGooglePlay && !alreadyHasGooglePlayPro) {
                     userPreferences.setPendingLicenseToken(token)
                 }
             }

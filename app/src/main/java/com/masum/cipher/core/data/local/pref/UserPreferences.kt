@@ -172,6 +172,14 @@ class UserPreferences @Inject constructor(
         return syncPrefs.getString(KEY_CACHED_TOKEN, null)
     }
 
+    fun isCachedGooglePlayPro(): Boolean {
+        if (!isCachedPro()) return false
+        val order = syncPrefs.getString(KEY_CACHED_ORDER, null)?.trim()
+        val token = syncPrefs.getString(KEY_CACHED_TOKEN, null)?.trim()
+        return (order != null && order.startsWith("GPA.")) ||
+            (token != null && (token.startsWith("GPA.") || token.length > 80))
+    }
+
     fun getCachedAppTheme(): AppTheme {
         val name = syncPrefs.getString("cached_app_theme", AppTheme.SYSTEM.name) ?: AppTheme.SYSTEM.name
         return try {

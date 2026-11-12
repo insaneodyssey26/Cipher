@@ -71,15 +71,10 @@ android {
 
     buildTypes {
         debug {
-            val releaseSigning = signingConfigs.findByName("releaseConfig")
-            if (releaseSigning != null) {
-                signingConfig = releaseSigning
-            } else {
-                applicationIdSuffix = ".debug"
-                versionNameSuffix = "-DEBUG"
-            }
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
             isDebuggable = true
-            manifestPlaceholders["appName"] = if (releaseSigning != null) "@string/app_name" else "Cipher (Debug)"
+            manifestPlaceholders["appName"] = "Cipher (Debug)"
         }
         release {
             val releaseSigning = signingConfigs.findByName("releaseConfig")

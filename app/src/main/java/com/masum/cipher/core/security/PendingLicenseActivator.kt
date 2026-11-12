@@ -15,6 +15,10 @@ class PendingLicenseActivator @Inject constructor(
 
     suspend fun activate() {
         val token = userPreferences.getPendingLicenseToken() ?: return
+        if (userPreferences.isCachedGooglePlayPro()) {
+            userPreferences.setPendingLicenseToken(null)
+            return
+        }
         val deviceId = deviceIdProvider.get() ?: return
 
         val result = licenseEngine.activateLicenseRemote(token, email = null, deviceId = deviceId)
