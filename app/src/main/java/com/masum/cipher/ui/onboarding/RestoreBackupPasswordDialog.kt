@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,12 +25,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.Eye
+import compose.icons.lucideicons.EyeOff
 
 @Composable
 fun RestoreBackupPasswordDialog(
@@ -39,6 +45,7 @@ fun RestoreBackupPasswordDialog(
     onDismiss: () -> Unit
 ) {
     var password by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = { if (!isRestoring) onDismiss() },
@@ -72,8 +79,20 @@ fun RestoreBackupPasswordDialog(
                     singleLine = true,
                     enabled = !isRestoring,
                     isError = errorMessage != null,
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { isPasswordVisible = !isPasswordVisible },
+                            enabled = !isRestoring
+                        ) {
+                            Icon(
+                                imageVector = if (isPasswordVisible) LucideIcons.EyeOff else LucideIcons.Eye,
+                                contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (errorMessage != null) {

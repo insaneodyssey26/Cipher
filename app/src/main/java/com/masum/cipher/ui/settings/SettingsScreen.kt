@@ -48,6 +48,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -86,6 +87,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -192,6 +194,7 @@ fun SettingsScreen(
     
     var showBackupPasswordDialog by remember { mutableStateOf<BackupAction?>(null) }
     var backupPassword by remember { mutableStateOf("") }
+    var isBackupPasswordVisible by remember { mutableStateOf(false) }
     var restoreClearExisting by remember { mutableStateOf(false) }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var isColorPickerExpanded by remember { mutableStateOf(false) }
@@ -199,6 +202,7 @@ fun SettingsScreen(
     val revealPasswordPromptTitle = stringResource(R.string.show_backup_password_title)
     val revealPasswordPromptSubtitle = stringResource(R.string.show_backup_password_prompt)
     var autoBackupSetupPassword by remember { mutableStateOf("") }
+    var isAutoBackupSetupPasswordVisible by remember { mutableStateOf(false) }
     var pendingAutoBackupPassword by remember { mutableStateOf<String?>(null) }
     val autoBackupFolderRequiredMessage = stringResource(R.string.auto_backup_folder_required)
     var showPdfUpsellSheet by remember { mutableStateOf(false) }
@@ -1919,6 +1923,7 @@ Spacer(modifier = Modifier.weight(1f))
             onDismiss = {
                 showBackupPasswordDialog = null
                 backupPassword = ""
+                isBackupPasswordVisible = false
                 restoreClearExisting = false
             },
             confirmText = if (isExport) stringResource(R.string.action_export) else stringResource(R.string.action_import),
@@ -1933,6 +1938,7 @@ Spacer(modifier = Modifier.weight(1f))
                 }
                 showBackupPasswordDialog = null
                 backupPassword = ""
+                isBackupPasswordVisible = false
                 restoreClearExisting = false
             }
         ) {
@@ -1953,8 +1959,17 @@ Spacer(modifier = Modifier.weight(1f))
                     onValueChange = { backupPassword = it },
                     label = { Text(stringResource(R.string.password_label)) },
                     singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (isBackupPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { isBackupPasswordVisible = !isBackupPasswordVisible }) {
+                            Icon(
+                                imageVector = if (isBackupPasswordVisible) LucideIcons.EyeOff else LucideIcons.Eye,
+                                contentDescription = if (isBackupPasswordVisible) "Hide password" else "Show password",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -2036,6 +2051,7 @@ Spacer(modifier = Modifier.weight(1f))
             onDismiss = { 
                 showAutoBackupPasswordSetupDialog = false 
                 autoBackupSetupPassword = ""
+                isAutoBackupSetupPasswordVisible = false
             },
             confirmText = stringResource(R.string.action_enable),
             onConfirm = {
@@ -2043,6 +2059,7 @@ Spacer(modifier = Modifier.weight(1f))
                     val password = autoBackupSetupPassword
                     showAutoBackupPasswordSetupDialog = false
                     autoBackupSetupPassword = ""
+                    isAutoBackupSetupPasswordVisible = false
                     if (state.autoBackupUri != null) {
                         viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEncryptedPassword(password))
                         viewModel.handleIntent(SettingsContract.Intent.SetAutoBackupEnabled(true))
@@ -2067,6 +2084,17 @@ Spacer(modifier = Modifier.weight(1f))
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text(stringResource(R.string.backup_password_placeholder)) },
                     singleLine = true,
+                    visualTransformation = if (isAutoBackupSetupPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { isAutoBackupSetupPasswordVisible = !isAutoBackupSetupPasswordVisible }) {
+                            Icon(
+                                imageVector = if (isAutoBackupSetupPasswordVisible) LucideIcons.EyeOff else LucideIcons.Eye,
+                                contentDescription = if (isAutoBackupSetupPasswordVisible) "Hide password" else "Show password",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
                     textStyle = Typography.bodyLarge,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
