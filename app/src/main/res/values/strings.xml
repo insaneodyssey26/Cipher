@@ -406,6 +406,12 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v641_migration_title">Pro License Migration</string>
+    <string name="whats_new_v641_migration_desc">Added an interactive prompt to help existing license owners pick their purchased plan and redeem their upgrade directly via Google Play.</string>
+    <string name="whats_new_v641_password_title">Show Backup Password</string>
+    <string name="whats_new_v641_password_desc">Added a toggle to show or hide your password when creating and restoring encrypted backups.</string>
+    <string name="whats_new_v641_performance_title">Battery &amp; UI Polish</string>
+    <string name="whats_new_v641_performance_desc">Removed background license checks to save battery, protected active Pro status during backup restores, and fixed screen switching flickers.</string>
     <string name="whats_new_v640_billing_title">Direct Google Play Purchases</string>
     <string name="whats_new_v640_billing_desc">Cipher Pro now runs officially through Google Play instead of external checkouts. No license keys to manage, with automatic access across all your phones.</string>
     <string name="whats_new_v640_onboarding_title">Fresh Welcome &amp; App Selection</string>

@@ -1,5 +1,15 @@
 # Release Notes
 
+## [6.4.1]
+
+### Improved & Fixed
+- **Pro License Migration**: Added an interactive prompt to help earlier Dodo Payments users find their plan and redeem their replacement code in Google Play.
+- **Show Password in Backups**: Added a show/hide password toggle when creating or restoring encrypted backups.
+- **Backup Restore Fix**: Restoring an old backup no longer overrides or disables an active Google Play Pro subscription.
+- **Battery & UI Polish**: Removed leftover background license checks to reduce battery usage, and fixed UI flickers when switching between screens.
+
+---
+
 ## [6.4.0]
 
 ### Added & Improved
