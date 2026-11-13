@@ -395,7 +395,14 @@ class MainActivity : AppCompatActivity() {
                                     userPreferences = userPreferences,
                                     onNavigateToManageApps = { navController.navigate("manage_apps") },
                                     onNavigateToAccounts = { navController.navigate("accounts") },
-                                    onNavigateToPro = { navController.navigate("cipher_pro") }
+                                    onNavigateToPro = { navController.navigate("cipher_pro") },
+                                    onNavigateToProWithPlan = { plan ->
+                                        if (plan != null) {
+                                            navController.navigate("cipher_pro?initialPlan=$plan")
+                                        } else {
+                                            navController.navigate("cipher_pro")
+                                        }
+                                    }
                                 )
                             }
                             composable("split_expenses") {
@@ -564,6 +571,24 @@ class MainActivity : AppCompatActivity() {
                                 com.masum.cipher.ui.pro.CipherProScreen(
                                     userPreferences = userPreferences,
                                     billingManager = billingManager,
+                                    onNavigateBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(
+                                route = "cipher_pro?initialPlan={initialPlan}",
+                                arguments = listOf(
+                                    navArgument("initialPlan") {
+                                        type = NavType.StringType
+                                        nullable = true
+                                        defaultValue = null
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val initialPlan = backStackEntry.arguments?.getString("initialPlan")
+                                com.masum.cipher.ui.pro.CipherProScreen(
+                                    userPreferences = userPreferences,
+                                    billingManager = billingManager,
+                                    initialPlan = initialPlan,
                                     onNavigateBack = { navController.popBackStack() }
                                 )
                             }

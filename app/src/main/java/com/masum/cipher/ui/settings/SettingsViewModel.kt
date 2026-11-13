@@ -92,6 +92,13 @@ class SettingsViewModel @Inject constructor(
             SettingsContract.Intent.CheckForAppUpdates -> checkForAppUpdates()
             is SettingsContract.Intent.DownloadAndInstallUpdate -> downloadAndInstallUpdate(intent.downloadUrl)
             SettingsContract.Intent.DismissUpdateDialog -> updateState { copy(updateCheckResult = null, downloadPercent = null, downloadError = null) }
+            SettingsContract.Intent.DismissMigrationBannerForever -> dismissMigrationBannerForever()
+        }
+    }
+
+    private fun dismissMigrationBannerForever() {
+        viewModelScope.launch {
+            userPreferences.setMigrationBannerDismissed(true)
         }
     }
 
@@ -155,6 +162,7 @@ class SettingsViewModel @Inject constructor(
                         proLicenseToken = settings.proLicenseToken,
                         proOrderId = settings.proOrderId,
                         isLegacyPro = settings.isLegacyPro,
+                        shouldShowMigrationBanner = settings.shouldShowMigrationBanner,
                         showProBadge = settings.showProBadge
                     )
                 }

@@ -535,10 +535,19 @@
     <string name="pro_subscription_manage">सदस्यता प्रबंधित करें या रद्द करें</string>
     <string name="pro_migration_badge">कार्रवाई आवश्यक</string>
     <string name="pro_migration_title">गूगल प्ले पास माइग्रेशन</string>
+    <string name="pro_migration_question_title">क्या आपने पहले प्रो खरीदा था?</string>
+    <string name="pro_migration_question_desc">साइफर ने बिलिंग सीधे गूगल प्ले पर ट्रांसफर कर दी है! यदि आपने पहले डोडो पेमेंट्स से प्रो या लाइफटाइम लिया था, तो आपके लिए मुफ्त रिप्लेसमेंट कोड उपलब्ध है।</string>
+    <string name="pro_migration_choice_yes">हाँ, मैंने पहले खरीदा था</string>
+    <string name="pro_migration_choice_no">नहीं, कभी नहीं खरीदा</string>
+    <string name="pro_migration_humor_title">अरे… क्यों नहीं खरीदा? 🤨</string>
+    <string name="pro_migration_humor_desc">कोई दबाव नहीं, लेकिन विजेट्स और स्मार्ट रूल्स अपने आप तो नहीं बनेंगे! अगर कभी इंडी डेवलपर को सपोर्ट करने का मन बने, तो दरवाजे हमेशा खुले हैं।</string>
+    <string name="pro_migration_humor_cta">प्रो देखें</string>
+    <string name="pro_migration_humor_dismiss">फ्री में ही खुश हूँ</string>
     <string name="pro_migration_desc_lifetime">मैंने सिफर प्रो की बिलिंग गूगल प्ले पर स्थानांतरित कर दी है। खरीदारी वाले ईमेल पर १००% मुफ्त गूगल प्ले लाइफटाइम पास भेजा गया है। कृपया अपना इनबॉक्स या स्पैम देखें। न मिलने पर मुझे सीधे उसी ईमेल से लिखें।</string>
     <string name="pro_migration_desc_subscription">मैंने सिफर प्रो की बिलिंग गूगल प्ले पर स्थानांतरित कर दी है। डोडो बिलिंग रद्द कर दी गई है ताकि कोई अतिरिक्त शुल्क न कटे, और मुफ्त पास भेज दिया गया है। कृपया इनबॉक्स देखें या मुझे लिखें।</string>
     <string name="pro_migration_action_redeem">गूगल प्ले पर रिडीम करें</string>
     <string name="pro_migration_action_contact">डेवलपर को ईमेल करें</string>
+    <string name="pro_migration_action_dismiss_forever">दोबारा न दिखाएं</string>
 
     <string name="accounts_title">खाते और वॉलेट</string>
     <string name="accounts_subtitle">वित्तीय खाते और बहीखाता प्रबंधित करें</string>
@@ -880,4 +889,11 @@
     <string name="debt_delete_confirm_desc">क्या आप वाकई इस रिकॉर्ड को हटाना चाहते हैं? संबद्ध खाता लेन-देन भी अनलिंक हो जाएंगे।</string>
     <string name="debt_repaid_of_total">%2$s में से %1$s चुकाया गया</string>
     <string name="debt_remaining_label">%1$s बाकी</string>
+    <string name="pro_migration_plan_prompt">आपके पास कौन सा प्लान था?</string>
+    <string name="pro_migration_plan_lifetime">लाइफटाइम</string>
+    <string name="pro_migration_plan_annual">वार्षिक</string>
+    <string name="pro_migration_plan_monthly">मासिक</string>
+    <string name="pro_migration_redeem_tip">प्रोमो कोड है? नीचे टैप करें और गूगल प्ले भुगतान में Redeem code चुनें।</string>
+    <string name="pro_action_restore_purchases">खरीदारी पुनर्स्थापित करें</string>
+    <string name="pro_action_redeem_code">कोड रिडीम करें</string>
 </resources>

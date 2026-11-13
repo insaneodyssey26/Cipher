@@ -661,11 +661,27 @@
     <string name="pro_subscription_manage">Manage or cancel subscription</string>
     <string name="pro_migration_badge">Pro Update</string>
     <string name="pro_migration_title">Switching to Google Play</string>
+    <string name="pro_migration_question_title">Previous Pro Member?</string>
+    <string name="pro_migration_question_desc">Cipher recently switched billing directly to Google Play! If you previously purchased a license through the old provider (Dodo Payments), I\'ve got you covered with a free replacement code.</string>
+    <string name="pro_migration_choice_yes">Yes, I purchased earlier</string>
+    <string name="pro_migration_choice_no">No, I never did</string>
+    <string name="pro_migration_humor_title">Wait… why not? 🤨</string>
+    <string name="pro_migration_humor_desc">No pressure, but your budget won\'t organize its own widgets, smart rules, and custom icons! If you ever feel like treating yourself and supporting an indie dev, the door is always open.</string>
+    <string name="pro_migration_humor_cta">Check out Pro</string>
+    <string name="pro_migration_humor_dismiss">I\'m happy with Free</string>
     <string name="pro_migration_desc_lifetime">Cipher has moved to Google Play Billing. You don\'t need to pay again.\n\nI\'ve sent a free lifetime code to your purchase email. Check your inbox or spam.\n\nIf you can\'t find it, tap below to email me with your license details.</string>
     <string name="pro_migration_desc_subscription">Cipher has moved to Google Play Billing. Your old Dodo subscription was cancelled so you won\'t be charged there.\n\nI\'ve sent your free pass code to your purchase email. Check your inbox or spam.\n\nIf you can\'t find it, tap below to email me with your license details.</string>
     <string name="pro_migration_action_redeem">Redeem code</string>
     <string name="pro_migration_action_contact">Email me</string>
+    <string name="pro_migration_action_dismiss_forever">Don\'t show again</string>
 
+    <string name="pro_migration_plan_prompt">Which plan did you have?</string>
+    <string name="pro_migration_plan_lifetime">Lifetime</string>
+    <string name="pro_migration_plan_annual">Annual</string>
+    <string name="pro_migration_plan_monthly">Monthly</string>
+    <string name="pro_migration_redeem_tip">Have a promo code? Tap below, then select Redeem code in Google Play.</string>
+    <string name="pro_action_restore_purchases">Restore Purchases</string>
+    <string name="pro_action_redeem_code">Redeem Code</string>
     <string name="accounts_title">Accounts &amp; Wallets</string>
     <string name="accounts_subtitle">Manage financial accounts and ledgers</string>
     <string name="accounts_combined_net_worth">COMBINED NET WORTH</string>

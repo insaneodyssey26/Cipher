@@ -84,6 +84,7 @@ class SettingsContract {
         data object CheckForAppUpdates : Intent()
         data class DownloadAndInstallUpdate(val downloadUrl: String) : Intent()
         data object DismissUpdateDialog : Intent()
+        data object DismissMigrationBannerForever : Intent()
     }
 
     @Immutable
@@ -126,6 +127,7 @@ class SettingsContract {
         val proLicenseToken: String? = null,
         val proOrderId: String? = null,
         val isLegacyPro: Boolean = false,
+        val shouldShowMigrationBanner: Boolean = false,
         val showProBadge: Boolean = true,
         val isActivatingPro: Boolean = false,
         val proActivationError: String? = null,

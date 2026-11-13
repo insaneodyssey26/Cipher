@@ -474,7 +474,7 @@ fun SettingsScreen(
                 }
             }
 
-            if (state.isLegacyPro) {
+            if (state.shouldShowMigrationBanner) {
                 val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
                 com.masum.cipher.ui.pro.LegacyMigrationBanner(
                     isLifetime = state.proTier.uppercase() == "LIFETIME",
@@ -500,6 +500,9 @@ fun SettingsScreen(
                         } else {
                             onNavigateToPro()
                         }
+                    },
+                    onDismissForever = {
+                        viewModel.handleIntent(SettingsContract.Intent.DismissMigrationBannerForever)
                     }
                 )
             }

@@ -141,11 +141,12 @@ fun DashboardScreen(
     userPreferences: UserPreferences,
     onNavigateToManageApps: () -> Unit,
     onNavigateToAccounts: () -> Unit = {},
-    onNavigateToPro: () -> Unit = {}
+    onNavigateToPro: () -> Unit = {},
+    onNavigateToProWithPlan: (String?) -> Unit = { onNavigateToPro() }
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locale = LocalLocale.current.platformLocale
-    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val snackbarHostState = remember { SnackbarHostState() }
     val view = androidx.compose.ui.platform.LocalView.current
 
@@ -170,8 +171,10 @@ fun DashboardScreen(
     var showWhatsNewSheet by remember { mutableStateOf(false) }
     var showLegacyMigrationDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(shouldShowWhatsNew, settings?.isLegacyPro) {
-        if (settings?.isLegacyPro == true) {
+    val shouldShowMigration = settings?.shouldShowMigrationBanner == true
+
+    LaunchedEffect(shouldShowWhatsNew, shouldShowMigration) {
+        if (shouldShowMigration) {
             showLegacyMigrationDialog = true
         } else if (shouldShowWhatsNew) {
             showWhatsNewSheet = true
@@ -699,19 +702,32 @@ fun DashboardScreen(
         )
     }
 
-    if (showLegacyMigrationDialog && settings?.isLegacyPro == true) {
+    if (showLegacyMigrationDialog && shouldShowMigration) {
         val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
         com.masum.cipher.ui.pro.LegacyMigrationDialog(
             isLifetime = settings?.proTier?.uppercase() == "LIFETIME",
             licenseToken = settings?.proLicenseToken ?: settings?.proOrderId,
             isDark = isDark,
             isHapticsEnabled = isHapticsEnabled,
-            onRedeemClick = {
+            onRedeemClick = { selectedPlan ->
+                showLegacyMigrationDialog = false
+                onNavigateToProWithPlan(selectedPlan)
+            },
+            onExplorePro = {
                 showLegacyMigrationDialog = false
                 onNavigateToPro()
             },
             onDismiss = {
                 view.performVibrate(isHapticsEnabled, isLongPress = false)
+                showLegacyMigrationDialog = false
+                if (shouldShowWhatsNew) {
+                    showWhatsNewSheet = true
+                }
+            },
+            onDismissForever = {
+                coroutineScope.launch {
+                    userPreferences.setMigrationBannerDismissed(true)
+                }
                 showLegacyMigrationDialog = false
                 if (shouldShowWhatsNew) {
                     showWhatsNewSheet = true

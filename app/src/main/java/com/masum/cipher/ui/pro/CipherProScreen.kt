@@ -1,7 +1,9 @@
 package com.masum.cipher.ui.pro
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -146,6 +148,7 @@ private data class PricingCardData(
 fun CipherProScreen(
     userPreferences: UserPreferences,
     billingManager: com.masum.cipher.core.billing.BillingManager? = null,
+    initialPlan: String? = null,
     onNavigateBack: () -> Unit
 ) {
     val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
@@ -309,7 +312,16 @@ fun CipherProScreen(
         )
     }
 
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { plans.size })
+    val initialPageIndex = remember(initialPlan) {
+        when (initialPlan?.lowercase()) {
+            "lifetime" -> 2
+            "annual", "yearly" -> 1
+            "monthly" -> 0
+            else -> 0
+        }
+    }
+
+    val pagerState = rememberPagerState(initialPage = initialPageIndex, pageCount = { plans.size })
 
     Scaffold(
         containerColor = screenBg,
@@ -817,6 +829,20 @@ fun CipherProScreen(
                                         )
                                     }
                                 }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Text(
+                                    text = stringResource(R.string.pro_migration_redeem_tip),
+                                    style = Typography.labelSmall.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 10.5.sp,
+                                        lineHeight = 13.5.sp,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    ),
+                                    color = textSecondary.copy(alpha = 0.85f),
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
                             }
                         }
                     }
@@ -849,7 +875,7 @@ fun CipherProScreen(
                         }
                     ) {
                         Text(
-                            text = "Restore Purchases",
+                            text = stringResource(R.string.pro_action_restore_purchases),
                             style = Typography.bodySmall.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.SemiBold
@@ -1446,7 +1472,7 @@ private fun ActiveProMembershipContent(
                 }
             }
 
-            if (settings.isLegacyPro) {
+            if (settings.shouldShowMigrationBanner) {
                 LegacyMigrationBanner(
                     isLifetime = isLifetime,
                     licenseToken = licenseKey,
@@ -1466,6 +1492,11 @@ private fun ActiveProMembershipContent(
                                 com.masum.cipher.core.billing.BillingManager.BASE_PLAN_YEARLY
                             }
                             billingManager.launchPurchaseFlow(activity, productId, basePlanId)
+                        }
+                    },
+                    onDismissForever = {
+                        coroutineScope.launch {
+                            userPreferences.setMigrationBannerDismissed(true)
                         }
                     }
                 )

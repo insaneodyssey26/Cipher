@@ -552,6 +552,7 @@
     <string name="pro_migration_desc_subscription">Przeniosłem subskrypcje Cipher Pro do Google Play. Twoja subskrypcja Dodo została anulowana, aby uniknąć opłat, a darmowy kod został wysłany na e-mail. Sprawdź skrzynkę odbiorczą lub napisz do mnie.</string>
     <string name="pro_migration_action_redeem">Zrealizuj w Google Play</string>
     <string name="pro_migration_action_contact">Napisz do dewelopera</string>
+    <string name="pro_migration_action_dismiss_forever">Nie pokazuj więcej</string>
 
     <string name="accounts_title">Konta i portfele</string>
     <string name="accounts_subtitle">Zarządzaj kontami finansowymi i rejestrami</string>
@@ -884,4 +885,11 @@
     <string name="debt_delete_confirm_desc">Czy na pewno chcesz usunąć ten wpis? Powiązane transakcje na koncie zostaną odłączone.</string>
     <string name="debt_repaid_of_total">Spłacono %1$s z %2$s</string>
     <string name="debt_remaining_label">Pozostało %1$s</string>
+    <string name="pro_migration_plan_prompt">Jaki plan miałeś wcześniej?</string>
+    <string name="pro_migration_plan_lifetime">Dożywotni</string>
+    <string name="pro_migration_plan_annual">Roczny</string>
+    <string name="pro_migration_plan_monthly">Miesięczny</string>
+    <string name="pro_migration_redeem_tip">Masz kod promocyjny? Dotknij poniżej i wybierz Zrealizuj kod w Google Play.</string>
+    <string name="pro_action_restore_purchases">Przywróć zakupy</string>
+    <string name="pro_action_redeem_code">Zrealizuj kod</string>
 </resources>

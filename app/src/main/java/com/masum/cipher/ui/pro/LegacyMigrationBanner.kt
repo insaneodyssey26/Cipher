@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -59,6 +62,7 @@ import compose.icons.LucideIcons
 import compose.icons.lucideicons.ExternalLink
 import compose.icons.lucideicons.Gift
 import compose.icons.lucideicons.Mail
+import compose.icons.lucideicons.Sparkles
 import compose.icons.lucideicons.X
 
 private const val DEVELOPER_SUPPORT_EMAIL = "skmasumali.dev@gmail.com"
@@ -79,7 +83,8 @@ fun LegacyMigrationBanner(
     isDark: Boolean,
     isHapticsEnabled: Boolean,
     modifier: Modifier = Modifier,
-    onRedeemClick: (() -> Unit)? = null
+    onRedeemClick: (() -> Unit)? = null,
+    onDismissForever: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -167,6 +172,7 @@ fun LegacyMigrationBanner(
                         onClick = {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                             isDismissed = true
+                            onDismissForever?.invoke()
                         },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -267,6 +273,29 @@ fun LegacyMigrationBanner(
                             )
                         }
                     }
+
+                    if (onDismissForever != null) {
+                        TextButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                isDismissed = true
+                                onDismissForever.invoke()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(36.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.pro_migration_action_dismiss_forever),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 12.sp
+                                ),
+                                color = textSecondary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -279,8 +308,10 @@ fun LegacyMigrationDialog(
     licenseToken: String?,
     isDark: Boolean,
     isHapticsEnabled: Boolean,
-    onRedeemClick: (() -> Unit)? = null,
-    onDismiss: () -> Unit
+    onRedeemClick: ((String) -> Unit)? = null,
+    onExplorePro: (() -> Unit)? = null,
+    onDismiss: () -> Unit,
+    onDismissForever: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -288,6 +319,9 @@ fun LegacyMigrationDialog(
     val dialogBg = if (isDark) Color(0xFF1E1A11) else Color(0xFFFFFBEB)
     val textPrimary = if (isDark) Color.White else Color(0xFF0F172A)
     val textSecondary = if (isDark) Color(0xFFCBD5E1) else Color(0xFF475569)
+
+    var currentStep by rememberSaveable { mutableStateOf(0) }
+    var selectedPlan by rememberSaveable { mutableStateOf(if (isLifetime) "lifetime" else "annual") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -306,7 +340,7 @@ fun LegacyMigrationDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = LucideIcons.Gift,
+                        imageVector = if (currentStep == 2) LucideIcons.Sparkles else LucideIcons.Gift,
                         contentDescription = null,
                         tint = accentColor,
                         modifier = Modifier.size(20.dp)
@@ -314,7 +348,11 @@ fun LegacyMigrationDialog(
                 }
 
                 Text(
-                    text = stringResource(R.string.pro_migration_title),
+                    text = when (currentStep) {
+                        1 -> stringResource(R.string.pro_migration_title)
+                        2 -> stringResource(R.string.pro_migration_humor_title)
+                        else -> stringResource(R.string.pro_migration_question_title)
+                    },
                     style = Typography.titleMedium.copy(
                         fontFamily = DMSans,
                         fontWeight = FontWeight.Bold,
@@ -325,101 +363,294 @@ fun LegacyMigrationDialog(
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = if (isLifetime) {
-                        stringResource(R.string.pro_migration_desc_lifetime)
-                    } else {
-                        stringResource(R.string.pro_migration_desc_subscription)
-                    },
-                    style = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        fontSize = 13.5.sp,
-                        lineHeight = 19.sp
-                    ),
-                    color = textSecondary
-                )
-
-                Button(
-                    onClick = {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        onRedeemClick?.invoke()
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = accentColor,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.ExternalLink,
-                            contentDescription = null,
-                            modifier = Modifier.size(15.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                when (currentStep) {
+                    0 -> {
                         Text(
-                            text = stringResource(R.string.pro_migration_action_redeem),
-                            style = Typography.labelMedium.copy(
+                            text = stringResource(R.string.pro_migration_question_desc),
+                            style = Typography.bodyMedium.copy(
                                 fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.5.sp
+                                fontSize = 13.5.sp,
+                                lineHeight = 19.sp
+                            ),
+                            color = textSecondary
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Button(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                currentStep = 1
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = accentColor,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.pro_migration_choice_yes),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                )
                             )
-                        )
-                    }
-                }
+                        }
 
-                OutlinedButton(
-                    onClick = {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        openDeveloperEmail(context, licenseToken)
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.Mail,
-                            contentDescription = null,
-                            tint = textPrimary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                currentStep = 2
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(42.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.pro_migration_choice_no),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = textPrimary
+                            )
+                        }
+                    }
+                    1 -> {
                         Text(
-                            text = stringResource(R.string.pro_migration_action_contact),
+                            text = stringResource(R.string.pro_migration_plan_prompt),
                             style = Typography.labelMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 12.sp
+                                fontFamily = DMSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.5.sp
                             ),
                             color = textPrimary
                         )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val plans = listOf(
+                                "lifetime" to stringResource(R.string.pro_migration_plan_lifetime),
+                                "annual" to stringResource(R.string.pro_migration_plan_annual),
+                                "monthly" to stringResource(R.string.pro_migration_plan_monthly)
+                            )
+                            plans.forEach { (planKey, planLabel) ->
+                                val isSelected = selectedPlan == planKey
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(38.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(if (isSelected) accentColor else accentColor.copy(alpha = 0.12f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isSelected) accentColor else accentColor.copy(alpha = 0.35f),
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable {
+                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                            selectedPlan = planKey
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = planLabel,
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = Lato,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 11.5.sp
+                                        ),
+                                        color = if (isSelected) Color.Black else textPrimary
+                                    )
+                                }
+                            }
+                        }
+
+                        Text(
+                            text = if (selectedPlan == "lifetime") {
+                                stringResource(R.string.pro_migration_desc_lifetime)
+                            } else {
+                                stringResource(R.string.pro_migration_desc_subscription)
+                            },
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp
+                            ),
+                            color = textSecondary
+                        )
+
+                        Button(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                onRedeemClick?.invoke(selectedPlan)
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = accentColor,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.ExternalLink,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(R.string.pro_migration_action_redeem),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.5.sp
+                                    )
+                                )
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                openDeveloperEmail(context, licenseToken)
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.5f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(42.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Mail,
+                                    contentDescription = null,
+                                    tint = textPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(R.string.pro_migration_action_contact),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = Lato,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.sp
+                                    ),
+                                    color = textPrimary
+                                )
+                            }
+                        }
+                    }
+                    2 -> {
+                        Text(
+                            text = stringResource(R.string.pro_migration_humor_desc),
+                            style = Typography.bodyMedium.copy(
+                                fontFamily = Lato,
+                                fontSize = 13.5.sp,
+                                lineHeight = 19.sp
+                            ),
+                            color = textSecondary
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Button(
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                onDismissForever?.invoke()
+                                onDismiss()
+                                onExplorePro?.invoke()
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = accentColor,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.pro_migration_humor_cta),
+                                style = Typography.labelMedium.copy(
+                                    fontFamily = Lato,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                )
+                            )
+                        }
                     }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = "Got it",
-                    style = Typography.labelLarge.copy(
-                        fontFamily = Lato,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = accentColor
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (currentStep == 1 && onDismissForever != null) {
+                    TextButton(
+                        onClick = {
+                            view.performVibrate(isHapticsEnabled, isLongPress = false)
+                            onDismissForever()
+                            onDismiss()
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.pro_migration_action_dismiss_forever),
+                            style = Typography.labelMedium.copy(
+                                fontFamily = Lato,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            color = textSecondary
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                TextButton(
+                    onClick = {
+                        if (currentStep == 2) {
+                            onDismissForever?.invoke()
+                        }
+                        onDismiss()
+                    }
+                ) {
+                    Text(
+                        text = if (currentStep == 2) stringResource(R.string.pro_migration_humor_dismiss) else "Got it",
+                        style = Typography.labelLarge.copy(
+                            fontFamily = Lato,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = accentColor
+                    )
+                }
             }
         }
     )

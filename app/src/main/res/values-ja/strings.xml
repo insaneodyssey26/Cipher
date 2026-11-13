@@ -541,6 +541,7 @@
     <string name="pro_migration_desc_subscription">Cipher Proの課金システムをGoogle Playへ移行しました。今後の二重請求を防ぐためDodo決済は解約済みです。無料パスをお送りしましたのでメールをご確認いただくかご連絡ください。</string>
     <string name="pro_migration_action_redeem">Google Playでコードを利用</string>
     <string name="pro_migration_action_contact">開発者にメールを送信</string>
+    <string name="pro_migration_action_dismiss_forever">今後表示しない</string>
 
     <string name="accounts_title">口座・ウォレット</string>
     <string name="accounts_subtitle">財務口座と取引台帳を管理</string>
@@ -879,4 +880,11 @@
     <string name="debt_delete_confirm_desc">この貸出・借入記録を削除してもよろしいですか？連携された取引も解除されます。</string>
     <string name="debt_repaid_of_total">%2$s 中 %1$s 返済済み</string>
     <string name="debt_remaining_label">残り %1$s</string>
+    <string name="pro_migration_plan_prompt">以前ご利用のプランはどれですか？</string>
+    <string name="pro_migration_plan_lifetime">買い切り</string>
+    <string name="pro_migration_plan_annual">年額プラン</string>
+    <string name="pro_migration_plan_monthly">月額プラン</string>
+    <string name="pro_migration_redeem_tip">プロモーションコードをお持ちですか？下をタップし、Google Playの支払いで「コードを引き換える」を選択してください。</string>
+    <string name="pro_action_restore_purchases">購入を復元</string>
+    <string name="pro_action_redeem_code">コードを引き換える</string>
 </resources>

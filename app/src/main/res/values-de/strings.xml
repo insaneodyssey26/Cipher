@@ -540,6 +540,7 @@
     <string name="pro_migration_desc_subscription">Ich habe die Cipher Pro Abrechnung zu Google Play migriert. Das Dodo-Abonnement wurde gekündigt, damit keine Gebühren mehr anfallen, und ein kostenloser Pass wurde gesendet. Bitte prüfe dein Postfach oder schreibe mir.</string>
     <string name="pro_migration_action_redeem">Auf Google Play einlösen</string>
     <string name="pro_migration_action_contact">Entwickler kontaktieren</string>
+    <string name="pro_migration_action_dismiss_forever">Nicht mehr anzeigen</string>
 
     <string name="accounts_title">Konten &amp; Wallets</string>
     <string name="accounts_subtitle">Finanzkonten und Kontobücher verwalten</string>
@@ -881,4 +882,11 @@
     <string name="debt_delete_confirm_desc">Möchten Sie diesen Eintrag wirklich löschen? Verknüpfte Kontobuchungen werden ebenfalls getrennt.</string>
     <string name="debt_repaid_of_total">%1$s von %2$s zurückgezahlt</string>
     <string name="debt_remaining_label">%1$s verbleibend</string>
+    <string name="pro_migration_plan_prompt">Welchen Tarif hattest du?</string>
+    <string name="pro_migration_plan_lifetime">Lifetime</string>
+    <string name="pro_migration_plan_annual">Jährlich</string>
+    <string name="pro_migration_plan_monthly">Monatlich</string>
+    <string name="pro_migration_redeem_tip">Hast du einen Promo-Code? Tippe unten und wähle Code einlösen bei Google Play.</string>
+    <string name="pro_action_restore_purchases">Käufe wiederherstellen</string>
+    <string name="pro_action_redeem_code">Code einlösen</string>
 </resources>

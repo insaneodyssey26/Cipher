@@ -536,10 +536,19 @@
     <string name="pro_subscription_manage">সাবস্ক্রিপশন পরিচালনা বা বাতিল করুন</string>
     <string name="pro_migration_badge">পদক্ষেপ প্রয়োজন</string>
     <string name="pro_migration_title">গুগল প্লে পাস মাইগ্রেশন</string>
+    <string name="pro_migration_question_title">আগে কি প্রো কিনেছিলেন?</string>
+    <string name="pro_migration_question_desc">সাইফার বিলিং সরাসরি গুগল প্লে-তে স্থানান্তর করেছে! আগে ডোডো পেমেন্টসের মাধ্যমে প্রো বা লাইফটাইম কিনে থাকলে আপনার জন্য ফ্রি রিপ্লেসমেন্ট কোড প্রস্তুত রেখেছি।</string>
+    <string name="pro_migration_choice_yes">হ্যাঁ, আগে কিনেছিলাম</string>
+    <string name="pro_migration_choice_no">না, কিনিনি</string>
+    <string name="pro_migration_humor_title">আরে… কেন কেনেননি? 🤨</string>
+    <string name="pro_migration_humor_desc">কোনো চাপ নেই! তবে উইজেট, স্মার্ট রুলস আর কাস্টম ক্যাটাগরি কিন্তু একা একা সাজবে না! কখনো কোনো ইনডি ডেভেলপারকে সাপোর্ট করতে ইচ্ছে হলে দরজা সব সময় খোলা।</string>
+    <string name="pro_migration_humor_cta">প্রো ফিচার দেখুন</string>
+    <string name="pro_migration_humor_dismiss">ফ্রি সংস্করণেই খুশি</string>
     <string name="pro_migration_desc_lifetime">আমি সাইফার প্রো-এর বিলিং গুগল প্লে-তে স্থানান্তর করেছি। আপনি যে ইমেইল দিয়ে কিনেছিলেন সেখানে ১০০% ফ্রি গুগল প্লে লাইফটাইম পাস পাঠিয়েছি। দয়া করে আপনার ইনবক্স বা স্প্যাম ফোল্ডার দেখুন। না পেলে আমাকে সেই ইমেইল থেকে সরাসরি লিখুন।</string>
     <string name="pro_migration_desc_subscription">আমি সাইফার প্রো-এর বিলিং গুগল প্লে-তে স্থানান্তর করেছি। ডোড়ো বিলিং বাতিল করা হয়েছে যাতে আর কোনো চার্জ না কাটে এবং আপনার ইমেইলে ফ্রি গুগল প্লে পাস পাঠানো হয়েছে। দয়া করে ইনবক্স দেখুন বা আমাকে লিখুন।</string>
     <string name="pro_migration_action_redeem">গুগল প্লে-তে রিডিম করুন</string>
     <string name="pro_migration_action_contact">ডেভেলপারকে ইমেইল করুন</string>
+    <string name="pro_migration_action_dismiss_forever">আর দেখাবেন না</string>
 
     <string name="accounts_title">অ্যাকাউন্ট ও ওয়ালেট</string>
     <string name="accounts_subtitle">আর্থিক অ্যাকাউন্ট ও খতিয়ান পরিচালনা করুন</string>
@@ -881,4 +890,11 @@
     <string name="debt_delete_confirm_desc">আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি মুছে ফেলতে চান? সংযুক্ত লেনদেনগুলোও আনলিংক হবে।</string>
     <string name="debt_repaid_of_total">%2$s এর মধ্যে %1$s পরিশোধিত</string>
     <string name="debt_remaining_label">%1$s বাকি</string>
+    <string name="pro_migration_plan_prompt">আপনার কোন প্ল্যানটি ছিল?</string>
+    <string name="pro_migration_plan_lifetime">লাইফটাইম</string>
+    <string name="pro_migration_plan_annual">বার্ষিক</string>
+    <string name="pro_migration_plan_monthly">মাসিক</string>
+    <string name="pro_migration_redeem_tip">প্রোমো কোড আছে? নিচে ট্যাপ করে গুগল প্লে পেমেন্টে Redeem code বেছে নিন।</string>
+    <string name="pro_action_restore_purchases">ক্রয় পুনরুদ্ধার করুন</string>
+    <string name="pro_action_redeem_code">কোড রিডিম করুন</string>
 </resources>

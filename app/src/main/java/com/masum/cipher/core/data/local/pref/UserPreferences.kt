@@ -279,6 +279,7 @@ class UserPreferences @Inject constructor(
         val SHOW_LICENSE_REVOKED_DIALOG = booleanPreferencesKey("show_license_revoked_dialog")
         val LICENSE_REVOKED_REASON = stringPreferencesKey("license_revoked_reason")
         val BUDGET_ACCOUNT_ID = longPreferencesKey("budget_account_id")
+        val MIGRATION_BANNER_DISMISSED = booleanPreferencesKey("migration_banner_dismissed")
     }
 
     val settingsFlow: Flow<UserSettings> = context.dataStore.data.map { preferences ->
@@ -435,7 +436,8 @@ class UserPreferences @Inject constructor(
             proExpiresAtEpochMs = preferences[Keys.PRO_EXPIRES_AT] ?: 0L,
             showProBadge = preferences[Keys.SHOW_PRO_BADGE] ?: true,
             showLicenseRevokedDialog = preferences[Keys.SHOW_LICENSE_REVOKED_DIALOG] ?: false,
-            licenseRevokedReason = preferences[Keys.LICENSE_REVOKED_REASON]
+            licenseRevokedReason = preferences[Keys.LICENSE_REVOKED_REASON],
+            isMigrationBannerDismissed = preferences[Keys.MIGRATION_BANNER_DISMISSED] ?: false
         )
     }
 
@@ -595,6 +597,10 @@ class UserPreferences @Inject constructor(
 
     suspend fun setNotifyDuplicates(enabled: Boolean) {
         context.dataStore.edit { it[Keys.NOTIFY_DUPLICATES] = enabled }
+    }
+
+    suspend fun setMigrationBannerDismissed(dismissed: Boolean) {
+        context.dataStore.edit { it[Keys.MIGRATION_BANNER_DISMISSED] = dismissed }
     }
 
     suspend fun setLastNotifiedUpdateVersionCode(versionCode: Int) {
@@ -987,7 +993,8 @@ data class UserSettings(
     val proExpiresAtEpochMs: Long = 0L,
     val showProBadge: Boolean = true,
     val showLicenseRevokedDialog: Boolean = false,
-    val licenseRevokedReason: String? = null
+    val licenseRevokedReason: String? = null,
+    val isMigrationBannerDismissed: Boolean = false
 ) {
     val isLegacyPro: Boolean
         get() {
@@ -998,4 +1005,16 @@ data class UserSettings(
                 (token != null && (token.startsWith("GPA.") || token.length > 80))
             return !isGooglePlay
         }
+
+    val isGooglePlayPro: Boolean
+        get() {
+            if (!isPro) return false
+            val order = proOrderId?.trim()
+            val token = proLicenseToken?.trim()
+            return (order != null && order.startsWith("GPA.")) ||
+                (token != null && (token.startsWith("GPA.") || token.length > 80))
+        }
+
+    val shouldShowMigrationBanner: Boolean
+        get() = !isGooglePlayPro && !isMigrationBannerDismissed
 }
