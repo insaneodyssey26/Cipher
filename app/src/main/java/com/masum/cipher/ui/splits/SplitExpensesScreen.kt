@@ -133,7 +133,7 @@ fun SplitExpensesScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val goalsState by goalsViewModel.state.collectAsStateWithLifecycle()
     val debtsState by debtsViewModel.state.collectAsStateWithLifecycle()
-    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val view = LocalView.current
     val context = LocalContext.current
     val locale = LocalLocale.current.platformLocale

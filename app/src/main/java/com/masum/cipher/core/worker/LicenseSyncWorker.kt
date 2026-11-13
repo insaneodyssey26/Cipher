@@ -37,7 +37,7 @@ class LicenseSyncWorker(
 
         entryPoint.pendingLicenseActivator().activate()
 
-        if (!userPreferences.isCachedPro()) {
+        if (!userPreferences.isCachedPro() || userPreferences.isCachedGooglePlayPro()) {
             return Result.success()
         }
 

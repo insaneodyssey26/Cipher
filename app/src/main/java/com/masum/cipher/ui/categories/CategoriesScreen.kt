@@ -99,7 +99,7 @@ fun CategoriesScreen(
     onNavigateToPro: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val view = LocalView.current
     val isHapticsEnabled = settings?.isHapticsEnabled ?: true
     val isPro = settings?.isPro == true

@@ -59,6 +59,8 @@ class LicenseSyncScheduler @Inject constructor(
     }
 
     fun cancelLicenseSync() {
-        WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(WORK_NAME)
+        workManager.cancelUniqueWork("CipherLicenseLaunchSync")
     }
 }

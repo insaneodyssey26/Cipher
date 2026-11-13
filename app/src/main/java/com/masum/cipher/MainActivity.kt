@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity() {
         currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
+        licenseSyncScheduler.cancelLicenseSync()
         appUpdateScheduler.schedulePeriodicUpdateCheck()
         UpdateManager.checkForUpdates(this) {
             updateReady.value = true

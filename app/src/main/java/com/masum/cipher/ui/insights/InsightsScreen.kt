@@ -108,7 +108,7 @@ fun InsightsScreen(
     onNavigateToAccounts: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = null)
+    val settings by userPreferences.settingsFlow.collectAsStateWithLifecycle(initialValue = userPreferences.getCachedSettings())
     val view = androidx.compose.ui.platform.LocalView.current
     var showAddSubDialog by remember { androidx.compose.runtime.mutableStateOf(false) }
     var selectedSubscription by remember { androidx.compose.runtime.mutableStateOf<SubscriptionDetector.Subscription?>(null) }
