@@ -577,26 +577,25 @@ fun SettingsScreen(
                                     ),
                                     color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(
-                                            if (state.isPro) EmeraldIncome.copy(alpha = 0.22f)
-                                             else Color(0xFFF59E0B).copy(alpha = 0.22f)
+                                if (state.isPro) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(EmeraldIncome.copy(alpha = 0.22f))
+                                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = proTierBadgeText,
+                                            style = Typography.labelSmall.copy(
+                                                fontFamily = Lato,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 9.sp,
+                                                letterSpacing = 0.5.sp
+                                            ),
+                                            color = EmeraldIncome
                                         )
-                                        .padding(horizontal = 7.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = if (state.isPro) proTierBadgeText else "UPGRADE",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 9.sp,
-                                            letterSpacing = 0.5.sp
-                                        ),
-                                        color = if (state.isPro) EmeraldIncome else Color(0xFFF59E0B)
-                                    )
+                                    }
                                 }
                             }
                             Spacer(modifier = Modifier.height(2.dp))
