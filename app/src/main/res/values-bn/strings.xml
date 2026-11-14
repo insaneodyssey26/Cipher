@@ -493,7 +493,7 @@
     <string name="pro_faq_devices_a">হ্যাঁ, আপনার নতুন ডিভাইসে লাইফটাইম লাইসেন্স কি প্রবেশ করান অথবা এনক্রিপ্ট করা ব্যাকআপ রিস্টোর করুন।</string>
     <string name="pro_tier_badge_standard">স্ট্যান্ডার্ড</string>
     <string name="pro_tier_badge_save_16" formatted="false">১৬% সাশ্রয়</string>
-    <string name="pro_tier_badge_save_29" formatted="false">২৯% সাশ্রয়</string>
+    <string name="pro_tier_badge_save_29" formatted="false">৩৩% সাশ্রয়</string>
     <string name="pro_tier_badge_lifetime_vip">লাইফটাইম ভিআইপি</string>
     <string name="pro_tier_badge_best_value">সেরা অফার</string>
     <string name="pro_tier_badge_popular_pill">জনপ্রিয়</string>
@@ -894,7 +894,6 @@
     <string name="pro_migration_plan_lifetime">লাইফটাইম</string>
     <string name="pro_migration_plan_annual">বার্ষিক</string>
     <string name="pro_migration_plan_monthly">মাসিক</string>
-    <string name="pro_migration_redeem_tip">প্রোমো কোড আছে? নিচে ট্যাপ করে গুগল প্লে পেমেন্টে Redeem code বেছে নিন।</string>
     <string name="pro_action_restore_purchases">ক্রয় পুনরুদ্ধার করুন</string>
     <string name="pro_action_redeem_code">কোড রিডিম করুন</string>
 </resources>

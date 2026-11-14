@@ -492,7 +492,7 @@
     <string name="pro_faq_devices_a">हाँ, बस अपने नए डिवाइस पर अपनी लाइफटाइम लाइसेंस कुंजी दर्ज करें या अपना एन्क्रिप्टेड बैकअप पुनर्स्थापित करें।</string>
     <string name="pro_tier_badge_standard">मानक</string>
     <string name="pro_tier_badge_save_16" formatted="false">16% बचत</string>
-    <string name="pro_tier_badge_save_29" formatted="false">29% बचत</string>
+    <string name="pro_tier_badge_save_29" formatted="false">33% बचत</string>
     <string name="pro_tier_badge_lifetime_vip">लाइफटाइम वीआईपी</string>
     <string name="pro_tier_badge_best_value">सर्वश्रेष्ठ मूल्य</string>
     <string name="pro_tier_badge_popular_pill">लोकप्रिय</string>
@@ -893,7 +893,6 @@
     <string name="pro_migration_plan_lifetime">लाइफटाइम</string>
     <string name="pro_migration_plan_annual">वार्षिक</string>
     <string name="pro_migration_plan_monthly">मासिक</string>
-    <string name="pro_migration_redeem_tip">प्रोमो कोड है? नीचे टैप करें और गूगल प्ले भुगतान में Redeem code चुनें।</string>
     <string name="pro_action_restore_purchases">खरीदारी पुनर्स्थापित करें</string>
     <string name="pro_action_redeem_code">कोड रिडीम करें</string>
 </resources>

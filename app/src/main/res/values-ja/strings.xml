@@ -494,7 +494,7 @@
     <string name="pro_faq_devices_a">はい、新しい端末で買い切りライセンスキーを入力するか、暗号化バックアップを復元するだけで移行可能です。</string>
     <string name="pro_tier_badge_standard">スタンダード</string>
     <string name="pro_tier_badge_save_16" formatted="false">16% お得</string>
-    <string name="pro_tier_badge_save_29" formatted="false">29% お得</string>
+    <string name="pro_tier_badge_save_29" formatted="false">33% お得</string>
     <string name="pro_tier_badge_lifetime_vip">永久VIP</string>
     <string name="pro_tier_badge_best_value">一番お得</string>
     <string name="pro_tier_badge_popular_pill">人気</string>
@@ -884,7 +884,6 @@
     <string name="pro_migration_plan_lifetime">買い切り</string>
     <string name="pro_migration_plan_annual">年額プラン</string>
     <string name="pro_migration_plan_monthly">月額プラン</string>
-    <string name="pro_migration_redeem_tip">プロモーションコードをお持ちですか？下をタップし、Google Playの支払いで「コードを引き換える」を選択してください。</string>
     <string name="pro_action_restore_purchases">購入を復元</string>
     <string name="pro_action_redeem_code">コードを引き換える</string>
 </resources>

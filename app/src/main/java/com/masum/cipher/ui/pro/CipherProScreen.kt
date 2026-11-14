@@ -829,20 +829,6 @@ fun CipherProScreen(
                                         )
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Text(
-                                    text = stringResource(R.string.pro_migration_redeem_tip),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 10.5.sp,
-                                        lineHeight = 13.5.sp,
-                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                    ),
-                                    color = textSecondary.copy(alpha = 0.85f),
-                                    modifier = Modifier.padding(horizontal = 8.dp)
-                                )
                             }
                         }
                     }

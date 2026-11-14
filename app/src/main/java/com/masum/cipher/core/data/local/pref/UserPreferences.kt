@@ -1016,5 +1016,5 @@ data class UserSettings(
         }
 
     val shouldShowMigrationBanner: Boolean
-        get() = !isGooglePlayPro && !isMigrationBannerDismissed
+        get() = isLegacyPro && !isMigrationBannerDismissed
 }

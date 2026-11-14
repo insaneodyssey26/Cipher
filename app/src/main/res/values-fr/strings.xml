@@ -489,7 +489,7 @@
     <string name="pro_faq_devices_a">Oui, entrez simplement votre clé à vie sur votre nouvel appareil ou restaurez votre sauvegarde chiffrée.</string>
     <string name="pro_tier_badge_standard">Standard</string>
     <string name="pro_tier_badge_save_16" formatted="false">Économisez 16%</string>
-    <string name="pro_tier_badge_save_29" formatted="false">Économisez 29%</string>
+    <string name="pro_tier_badge_save_29" formatted="false">Économisez 33%</string>
     <string name="pro_tier_badge_lifetime_vip">VIP À VIE</string>
     <string name="pro_tier_badge_best_value">MEILLEURE OFFRE</string>
     <string name="pro_tier_badge_popular_pill">POPULAIRE</string>
@@ -884,7 +884,6 @@
     <string name="pro_migration_plan_lifetime">À vie</string>
     <string name="pro_migration_plan_annual">Annuel</string>
     <string name="pro_migration_plan_monthly">Mensuel</string>
-    <string name="pro_migration_redeem_tip">Vous avez un code promo ? Appuyez ci-dessous puis choisissez Utiliser un code sur Google Play.</string>
     <string name="pro_action_restore_purchases">Restaurer les achats</string>
     <string name="pro_action_redeem_code">Utiliser un code</string>
 </resources>

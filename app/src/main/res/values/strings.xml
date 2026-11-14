@@ -624,7 +624,7 @@
     <string name="pro_faq_devices_a">Yes, simply enter your lifetime license key on your new device or restore your encrypted backup.</string>
     <string name="pro_tier_badge_standard">Standard</string>
     <string name="pro_tier_badge_save_16" formatted="false">Save 16%</string>
-    <string name="pro_tier_badge_save_29" formatted="false">Save 29%</string>
+    <string name="pro_tier_badge_save_29" formatted="false">Save 33%</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BEST VALUE</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>
@@ -685,7 +685,6 @@
     <string name="pro_migration_plan_lifetime">Lifetime</string>
     <string name="pro_migration_plan_annual">Annual</string>
     <string name="pro_migration_plan_monthly">Monthly</string>
-    <string name="pro_migration_redeem_tip">Have a promo code? Tap below, then select Redeem code in Google Play.</string>
     <string name="pro_action_restore_purchases">Restore Purchases</string>
     <string name="pro_action_redeem_code">Redeem Code</string>
     <string name="accounts_title">Accounts &amp; Wallets</string>

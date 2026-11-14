@@ -31,10 +31,11 @@ class MigrationEligibilityTest {
     }
 
     @Test
-    fun freeUser_showsMigrationBanner() {
+    fun freeUser_neverShowsMigrationBanner() {
         val settings = createSettings(isPro = false)
         assertFalse(settings.isGooglePlayPro)
-        assertTrue(settings.shouldShowMigrationBanner)
+        assertFalse(settings.isLegacyPro)
+        assertFalse(settings.shouldShowMigrationBanner)
     }
 
     @Test
