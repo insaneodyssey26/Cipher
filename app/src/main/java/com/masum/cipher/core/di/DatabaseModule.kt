@@ -97,11 +97,18 @@ object DatabaseModule {
 
     @Provides
     @Singleton
+    fun provideTransactionRunner(database: AppDatabase): com.masum.cipher.core.data.local.TransactionRunner {
+        return com.masum.cipher.core.data.local.RoomTransactionRunner(database)
+    }
+
+    @Provides
+    @Singleton
     fun provideAccountRepository(
         accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
-        transactionDao: TransactionDao
+        transactionDao: TransactionDao,
+        transactionRunner: com.masum.cipher.core.data.local.TransactionRunner
     ): com.masum.cipher.core.data.repository.AccountRepository {
-        return com.masum.cipher.core.data.repository.AccountRepository(accountDao, transactionDao)
+        return com.masum.cipher.core.data.repository.AccountRepository(accountDao, transactionDao, transactionRunner)
     }
     
     @Provides

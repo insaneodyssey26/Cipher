@@ -12,6 +12,8 @@ import com.masum.cipher.core.domain.CategorizerEngine
 import com.masum.cipher.core.domain.model.TransactionCategory
 import com.masum.cipher.core.notifications.LocalNotificationManager
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +34,12 @@ class ProcessIncomingTransactionUseCase @Inject constructor(
     internal var onNotifyUncategorized: ((Int) -> Unit)? = null
     internal var onNotifyBudgetAlert: ((isExceeded: Boolean, amount: Double, threshold: Int) -> Unit)? = null
     internal var onNotifyDuplicate: ((TransactionEntity) -> Unit)? = null
-    suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? {
+    private val processingLock = Mutex()
+
+    suspend operator fun invoke(transaction: TransactionEntity): TransactionEntity? =
+        processingLock.withLock { process(transaction) }
+
+    private suspend fun process(transaction: TransactionEntity): TransactionEntity? {
         if (transaction.rawSms != null) {
             val timeWindow = 60_000L
             val startTime = transaction.timestamp - timeWindow

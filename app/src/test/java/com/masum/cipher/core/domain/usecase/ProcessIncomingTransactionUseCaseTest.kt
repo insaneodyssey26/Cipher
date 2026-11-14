@@ -13,9 +13,12 @@ import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.UserSettings
 import com.masum.cipher.core.domain.CategorizerEngine
 import com.masum.cipher.core.notifications.LocalNotificationManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -438,8 +441,36 @@ class ProcessIncomingTransactionUseCaseTest {
         assertEquals(true, alertTriggered)
     }
 
+    @Test
+    fun concurrentIdenticalMessagesAreInsertedOnce() = runBlocking {
+        fakeTransactionDao.insertsAreDuplicateCandidates = true
+        val baseSettings = useCase.onGetSettings!!
+        useCase.onGetSettings = {
+            yield()
+            baseSettings()
+        }
+        val message = TransactionEntity(
+            amount = 250.0,
+            merchant = "Zomato",
+            currency = "INR",
+            category = "",
+            timestamp = 100_000L,
+            rawSms = "Rs 250 paid to Zomato Ref 12345",
+            isIncome = false
+        )
+
+        val results = listOf(
+            async { useCase(message) },
+            async { useCase(message.copy()) }
+        ).awaitAll()
+
+        assertEquals(1, fakeTransactionDao.insertedTransactions.size)
+        assertEquals(1, results.count { it != null })
+    }
+
     private class FakeTransactionDao {
         var duplicateReturn: TransactionEntity? = null
+        var insertsAreDuplicateCandidates = false
         val insertedTransactions = mutableListOf<TransactionEntity>()
         val accountExpenses = mutableMapOf<Long, Double>()
 
@@ -462,6 +493,9 @@ class ProcessIncomingTransactionUseCaseTest {
                         val isIncome = args[1] as Boolean
                         val list = mutableListOf<TransactionEntity>()
                         duplicateReturn?.takeIf { it.amount == amount && it.isIncome == isIncome }?.let { list.add(it) }
+                        if (insertsAreDuplicateCandidates) {
+                            list.addAll(insertedTransactions.filter { it.amount == amount && it.isIncome == isIncome })
+                        }
                         list
                     }
                     "insertTransaction" -> {

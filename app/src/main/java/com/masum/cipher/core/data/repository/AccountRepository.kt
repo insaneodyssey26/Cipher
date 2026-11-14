@@ -1,5 +1,6 @@
 package com.masum.cipher.core.data.repository
 
+import com.masum.cipher.core.data.local.TransactionRunner
 import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.AccountFlowTotals
 import com.masum.cipher.core.data.local.dao.TransactionDao
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 @Singleton
 class AccountRepository @Inject constructor(
     private val accountDao: AccountDao,
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val transactionRunner: TransactionRunner
 ) {
     fun getAllAccountsFlow(): Flow<List<AccountEntity>> = accountDao.getAllAccountsFlow()
 
@@ -26,22 +28,22 @@ class AccountRepository @Inject constructor(
 
     suspend fun getDefaultAccount(): AccountEntity? = accountDao.getDefaultAccount()
 
-    suspend fun createAccount(account: AccountEntity): Long {
+    suspend fun createAccount(account: AccountEntity): Long = transactionRunner.run {
         val id = accountDao.insertAccount(account)
         if (account.isDefault) {
             accountDao.clearOtherDefaults(id)
         }
-        return id
+        id
     }
 
-    suspend fun updateAccount(account: AccountEntity) {
+    suspend fun updateAccount(account: AccountEntity) = transactionRunner.run {
         accountDao.updateAccount(account)
         if (account.isDefault) {
             accountDao.clearOtherDefaults(account.id)
         }
     }
 
-    suspend fun deleteAccount(account: AccountEntity) {
+    suspend fun deleteAccount(account: AccountEntity) = transactionRunner.run {
         accountDao.deleteAccount(account)
         val remaining = accountDao.getAllAccounts()
         if (remaining.isNotEmpty() && remaining.none { it.isDefault }) {
@@ -49,7 +51,7 @@ class AccountRepository @Inject constructor(
         }
     }
 
-    suspend fun setDefaultAccount(id: Long) {
+    suspend fun setDefaultAccount(id: Long) = transactionRunner.run {
         accountDao.setAccountAsDefault(id)
         accountDao.clearOtherDefaults(id)
     }
