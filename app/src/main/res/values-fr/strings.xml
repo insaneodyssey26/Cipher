@@ -488,25 +488,20 @@
     <string name="pro_faq_devices_q">Puis-je transférer ma licence sur un nouvel appareil ?</string>
     <string name="pro_faq_devices_a">Oui, entrez simplement votre clé à vie sur votre nouvel appareil ou restaurez votre sauvegarde chiffrée.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16" formatted="false">Économisez 16%</string>
     <string name="pro_tier_badge_save_29" formatted="false">Économisez 33%</string>
     <string name="pro_tier_badge_lifetime_vip">VIP À VIE</string>
     <string name="pro_tier_badge_best_value">MEILLEURE OFFRE</string>
     <string name="pro_tier_badge_popular_pill">POPULAIRE</string>
     <string name="pro_tier_monthly_title">Pass Mensuel</string>
-    <string name="pro_tier_6month_title">Pass 6 Mois Pro</string>
     <string name="pro_tier_annual_title">Pass Annuel 1 An</string>
     <string name="pro_tier_lifetime_title">VIP À Vie</string>
     <string name="pro_period_monthly">/ mois</string>
-    <string name="pro_period_6month">/ 6 mois</string>
     <string name="pro_period_annual">/ an</string>
     <string name="pro_period_lifetime">/ paiement unique</string>
     <string name="pro_subtext_monthly">₹59 facturés chaque mois</string>
-    <string name="pro_subtext_6month">Soit ₹49.80 / mois</string>
     <string name="pro_subtext_annual">Soit ₹41.58 / mois</string>
     <string name="pro_subtext_lifetime">Payez une fois, conservez à vie</string>
     <string name="pro_desc_monthly">Accès complet à Cipher Pro au mois le mois. Idéal pour tester toutes les fonctionnalités avancées.</string>
-    <string name="pro_desc_6month" formatted="false">Six mois de gestion financière fluide et privée. Économisez 16% par rapport au pass mensuel standard.</string>
     <string name="pro_desc_annual">Une année complète de clarté financière. La meilleure économie pour maîtriser budgets, règles et catégories.</string>
     <string name="pro_desc_lifetime">Le pass VIP ultime. Débloquez toutes les fonctionnalités Pro actuelles et futures à vie avec un paiement unique.</string>
     <string name="pro_feature_unlimited_accounts">Comptes et portefeuilles illimités</string>

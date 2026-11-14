@@ -389,7 +389,7 @@ For step-by-step sideloading instructions including the Android 13+ SMS permissi
 
 Cipher is designed from the ground up as a **100% local-first** financial ledger. All SMS alerts, app notifications, transaction records, accounts, and PDF statements are parsed and stored strictly on your device using AES-256 encrypted storage.
 
-There is zero telemetry, zero analytics trackers, zero advertising SDKs, and zero crash reporters. Network communication is used strictly for optional cryptographic Pro product license verification (allocating your 3-device quota). No financial data is ever transmitted to remote servers.
+There is zero telemetry, zero analytics trackers, zero advertising SDKs, and zero crash reporters. Network communication is used strictly for official Google Play purchase verification and, in builds installed outside Google Play, for checking GitHub releases for updates. No financial data is ever transmitted to remote servers.
 
 ---
 

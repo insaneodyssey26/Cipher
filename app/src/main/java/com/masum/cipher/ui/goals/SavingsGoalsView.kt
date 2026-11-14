@@ -209,16 +209,17 @@ fun SavingsGoalsView(
                             )
 
                             Text(
-                                text = stringResource(R.string.goals_of_target, AppFormatters.formatCurrency(state.totalTarget, state.currencySymbol, decimals = 0), ""),
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 12.5.sp
+                                text = stringResource(R.string.goals_target_label, AppFormatters.formatCurrency(state.totalTarget, state.currencySymbol, decimals = 0)),
+                                style = Typography.bodyMedium.copy(
+                                    fontFamily = DMSans,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
                                 ),
                                 maxLines = 1,
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.padding(start = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                             )
                         }
 

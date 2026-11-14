@@ -14,20 +14,20 @@ Cipher is an offline-first, local personal finance ledger application for Androi
 
 ---
 
-## 2. Cipher Pro Licensing & Device Limits
+## 2. Cipher Pro Licensing & Google Play Access
 
-When you purchase a Cipher Pro license (Monthly, 6-Month, Annual, or Lifetime):
+When you purchase a Cipher Pro license (Monthly, Annual, or Lifetime VIP):
 
 * **Personal License Grant**: You receive a personal, non-exclusive, non-transferable license to unlock and use Cipher Pro features.
-* **Google Play Purchases**: Cipher Pro is purchased through Google Play and is tied to the Google account used for the purchase. You can restore it on any device signed in to that account.
-* **Earlier Purchases**: Pro licenses purchased before the move to Google Play remain valid. Holders of those licenses were offered replacement Google Play codes.
+* **Google Play Purchases**: Cipher Pro is purchased through Google Play and is tied to the Google account used for the purchase. You can automatically restore it on any personal device signed in to that account.
+* **Earlier Purchases**: Pro licenses purchased before the move to Google Play remain valid. Holders of those licenses are provided an in-app prompt to claim replacement Google Play codes.
 * **Fair Use**: Cipher Pro is intended solely for the individual purchaser. Sharing, reselling, or attempting to bypass purchase checks is strictly prohibited and may result in Pro access being revoked.
 
 ---
 
 ## 3. Subscriptions, Renewals, Cancellations & Non-Refundability
 
-* **Billing & Renewals**: Monthly, 6-Month, and Annual subscriptions automatically renew at the end of their respective billing cycles unless cancelled.
+* **Billing & Renewals**: Monthly and Annual subscriptions automatically renew at the end of their respective billing cycles unless cancelled.
 * **Managing Subscriptions**: You can manage, update payment methods, or cancel your subscription at any time through the subscriptions section of Google Play.
 * **Cancellation Effect**: If you cancel a subscription, your Cipher Pro features will remain fully active until the end of the paid billing period. Afterward, the app seamlessly reverts to the Standard Edition without deleting any of your local financial data.
 * **Non-Refundable Policy**: All purchases, subscription fees, and lifetime license payments for Cipher Pro are non-refundable once processed, except where mandatory consumer protection laws explicitly provide otherwise. If you experience any technical issues or billing errors, please reach out directly to [skmasumali.dev@gmail.com](mailto:skmasumali.dev@gmail.com) for assistance.

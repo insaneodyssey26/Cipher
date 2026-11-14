@@ -211,6 +211,22 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemDark
                 }
 
+                DisposableEffect(darkTheme) {
+                    enableEdgeToEdge(
+                        statusBarStyle = if (darkTheme) {
+                            SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                        } else {
+                            SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                        },
+                        navigationBarStyle = if (darkTheme) {
+                            SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                        } else {
+                            SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                        }
+                    )
+                    onDispose {}
+                }
+
                 val currentView = androidx.compose.ui.platform.LocalView.current
                 LaunchedEffect(Unit) {
                     kotlinx.coroutines.delay(900)

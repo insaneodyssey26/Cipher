@@ -309,8 +309,8 @@
     <string name="terms_tagline">Clear, transparent terms for Cipher &amp; Cipher Pro. No hidden traps.</string>
     <string name="terms_service_model_title">1. Service Model &amp; Open Source</string>
     <string name="terms_service_model_body">Cipher is an offline-first financial ledger. All transaction parsing, categorizations, and database storage run 100% locally on your device. The core application is open source and licensed under the GNU General Public License v3.0 (GPL-3.0).</string>
-    <string name="terms_licensing_title">2. Pro License &amp; 3-Device Limit</string>
-    <string name="terms_licensing_body">When you purchase Cipher Pro (Monthly, 6-Month, Annual, or Lifetime), you receive a personal, non-transferable license to unlock Pro features. Each license key can be activated on up to 3 personal devices simultaneously. You can manage or revoke device slots anytime from the Cipher Pro screen. License keys cannot be resold, shared publicly, or pirated.</string>
+    <string name="terms_licensing_title">2. Pro License &amp; Google Play Access</string>
+    <string name="terms_licensing_body">When you purchase Cipher Pro (Monthly, Annual, or Lifetime), you receive a personal, non-transferable license to unlock Pro features. Your purchase is tied to your Google Play account and can be restored automatically across all your personal devices signed in with that account. Subscriptions can be managed or cancelled anytime directly in Google Play.</string>
     <string name="privacy_badge">100% Offline &amp; Encrypted</string>
     <string name="terms_badge">GPL-3.0 &amp; Pro Licensing</string>
     <string name="terms_subscriptions_title">3. Subscriptions, Cancellations &amp; Refunds</string>
@@ -619,29 +619,24 @@
     <string name="pro_perk_export_desc">Generate certified account statements and encrypted vault exports.</string>
     <string name="pro_faq_title">Frequently Asked Questions</string>
     <string name="pro_faq_offline_q">Does Pro require an internet connection?</string>
-    <string name="pro_faq_offline_a" formatted="false">All financial calculations, transaction parsing, and records stay strictly offline on your device. Internet access is only used during license key activation and device seat management.</string>
-    <string name="pro_faq_devices_q">Can I transfer my license to a new device?</string>
-    <string name="pro_faq_devices_a">Yes, simply enter your lifetime license key on your new device or restore your encrypted backup.</string>
+    <string name="pro_faq_offline_a" formatted="false">All financial calculations, transaction parsing, and records stay strictly offline on your device. Internet access is only used for Google Play purchase verification.</string>
+    <string name="pro_faq_devices_q">Can I restore my purchase on a new device?</string>
+    <string name="pro_faq_devices_a">Yes, Cipher Pro is linked to your Google Play account. Simply tap Restore Purchases on any device signed in with your Google account.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16" formatted="false">Save 16%</string>
     <string name="pro_tier_badge_save_29" formatted="false">Save 33%</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BEST VALUE</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>
     <string name="pro_tier_monthly_title">Monthly Pass</string>
-    <string name="pro_tier_6month_title">6-Month Pro</string>
     <string name="pro_tier_annual_title">1-Year Annual</string>
     <string name="pro_tier_lifetime_title">Lifetime VIP</string>
     <string name="pro_period_monthly">/ month</string>
-    <string name="pro_period_6month">/ 6 months</string>
     <string name="pro_period_annual">/ year</string>
     <string name="pro_period_lifetime">/ one-time</string>
     <string name="pro_subtext_monthly">Billed every month</string>
-    <string name="pro_subtext_6month">Billed every 6 months</string>
     <string name="pro_subtext_annual">Billed annually</string>
     <string name="pro_subtext_lifetime">Pay once, own forever</string>
     <string name="pro_desc_monthly">Full Cipher Pro access on a flexible month-to-month basis. Perfect if you want to try all advanced features.</string>
-    <string name="pro_desc_6month" formatted="false">Half a year of seamless offline wealth management. Save 16% compared to the standard monthly pass.</string>
     <string name="pro_desc_annual">A full year of uninterrupted financial clarity. Best overall savings for mastering budgets, rules, and categories.</string>
     <string name="pro_desc_lifetime">The ultimate financial clarity pass. Unlock all present and future Pro features forever with a single payment.</string>
     <string name="pro_feature_unlimited_accounts">Unlimited Accounts &amp; Wallets</string>

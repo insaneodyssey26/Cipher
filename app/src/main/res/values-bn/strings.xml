@@ -492,25 +492,20 @@
     <string name="pro_faq_devices_q">আমি কি নতুন ডিভাইসে লাইসেন্স স্থানান্তর করতে পারব?</string>
     <string name="pro_faq_devices_a">হ্যাঁ, আপনার নতুন ডিভাইসে লাইফটাইম লাইসেন্স কি প্রবেশ করান অথবা এনক্রিপ্ট করা ব্যাকআপ রিস্টোর করুন।</string>
     <string name="pro_tier_badge_standard">স্ট্যান্ডার্ড</string>
-    <string name="pro_tier_badge_save_16" formatted="false">১৬% সাশ্রয়</string>
     <string name="pro_tier_badge_save_29" formatted="false">৩৩% সাশ্রয়</string>
     <string name="pro_tier_badge_lifetime_vip">লাইফটাইম ভিআইপি</string>
     <string name="pro_tier_badge_best_value">সেরা অফার</string>
     <string name="pro_tier_badge_popular_pill">জনপ্রিয়</string>
     <string name="pro_tier_monthly_title">মাসিক পাস</string>
-    <string name="pro_tier_6month_title">৬-মাস প্রো</string>
     <string name="pro_tier_annual_title">১-বছর বার্ষিক</string>
     <string name="pro_tier_lifetime_title">লাইফটাইম ভিআইপি</string>
     <string name="pro_period_monthly">/ মাস</string>
-    <string name="pro_period_6month">/ ৬ মাস</string>
     <string name="pro_period_annual">/ বছর</string>
     <string name="pro_period_lifetime">/ একবারের মূল্য</string>
     <string name="pro_subtext_monthly">প্রতি মাসে ₹৫৯ বিল</string>
-    <string name="pro_subtext_6month">কার্যকরী ₹৪৯.৮০ / মাস</string>
     <string name="pro_subtext_annual">কার্যকরী ₹৪১.৫৮ / মাস</string>
     <string name="pro_subtext_lifetime">একবার কিনুন, চিরকাল ব্যবহার করুন</string>
     <string name="pro_desc_monthly">মাসিক ভিত্তিতে সাইফার প্রো-এর সম্পূর্ণ সুবিধা নিন। সব প্রিমিয়াম ফিচার ট্রাই করার জন্য উপযুক্ত।</string>
-    <string name="pro_desc_6month" formatted="false">ছয় মাসের নিরবচ্ছিন্ন ব্যক্তিগত অর্থ ব্যবস্থাপনা। সাধারণ মাসিক পাসের চেয়ে ১৬% সাশ্রয়।</string>
     <string name="pro_desc_annual">পুরো এক বছরের আর্থিক স্পষ্টতা। বাজেট, রুলস ও ক্যাটাগরি ব্যবহারের সবচেয়ে সাশ্রয়ী প্ল্যান।</string>
     <string name="pro_desc_lifetime">সাইফারের চূড়ান্ত ভিআইপি পাস। এককালীন পেমেন্টে বর্তমান এবং ভবিষ্যতের সব প্রো ফিচার আজীবনের জন্য আনলক করুন।</string>
     <string name="pro_feature_unlimited_accounts">আনলিমিটেড অ্যাকাউন্ট ও ওয়ালেট</string>

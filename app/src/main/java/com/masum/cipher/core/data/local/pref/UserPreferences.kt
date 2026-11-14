@@ -189,6 +189,10 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    fun getCachedLastSeenWhatsNewVersionCode(): Int {
+        return syncPrefs.getInt("cached_last_seen_whats_new_version_code", 0)
+    }
+
     fun getCachedSettings(): UserSettings {
         val curCode = getCachedCurrencyCode()
         val curSymbol = getCachedCurrencySymbol()
@@ -214,6 +218,7 @@ class UserPreferences @Inject constructor(
             lastStopTime = 0L,
             monthlyBudget = 0.0,
             hasCompletedOnboarding = isCachedOnboardingCompleted(),
+            lastSeenWhatsNewVersionCode = getCachedLastSeenWhatsNewVersionCode(),
             accentColor = getCachedAccentColor(),
             isNavBarCompressed = isCachedNavBarCompressed(),
             isPro = isPro,
@@ -300,6 +305,8 @@ class UserPreferences @Inject constructor(
             AppTheme.SYSTEM
         }
 
+        val resolvedLastSeenVersion = preferences[Keys.LAST_SEEN_WHATS_NEW_VERSION_CODE] ?: if (preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] == true) 9 else 0
+
         syncPrefs.edit()
             .putString("cached_currency_code", curCode)
             .putString("cached_currency_symbol", curSymbol)
@@ -309,6 +316,7 @@ class UserPreferences @Inject constructor(
             .putString("cached_accent_color", parsedAccentColor.name)
             .putBoolean("cached_navbar_compressed", isNavCompressed)
             .putString("cached_app_theme", parsedTheme.name)
+            .putInt("cached_last_seen_whats_new_version_code", resolvedLastSeenVersion)
             .apply()
 
         UserSettings(
@@ -331,7 +339,7 @@ class UserPreferences @Inject constructor(
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
             accentColor = parsedAccentColor,
             hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
-            lastSeenWhatsNewVersionCode = preferences[Keys.LAST_SEEN_WHATS_NEW_VERSION_CODE] ?: if (preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] == true) 9 else 0,
+            lastSeenWhatsNewVersionCode = resolvedLastSeenVersion,
             autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
             autoBackupFrequency = try {
                 AutoBackupFrequency.valueOf(preferences[Keys.AUTO_BACKUP_FREQUENCY] ?: AutoBackupFrequency.NEVER.name)
@@ -501,6 +509,7 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun setLastSeenWhatsNewVersionCode(versionCode: Int) {
+        syncPrefs.edit().putInt("cached_last_seen_whats_new_version_code", versionCode).apply()
         context.dataStore.edit { it[Keys.LAST_SEEN_WHATS_NEW_VERSION_CODE] = versionCode }
     }
 

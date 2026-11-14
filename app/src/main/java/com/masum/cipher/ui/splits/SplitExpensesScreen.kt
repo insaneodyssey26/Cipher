@@ -334,7 +334,8 @@ fun SplitExpensesScreen(
                     .padding(horizontal = 20.dp, vertical = 6.dp)
                     .height(40.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                     .padding(3.dp)
             ) {
                 val tabWidth = maxWidth / planningTabs.size

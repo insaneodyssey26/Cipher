@@ -504,25 +504,20 @@
     <string name="pro_faq_devices_q">Czy mogę przenieść licencję na nowe urządzenie?</string>
     <string name="pro_faq_devices_a">Tak, wystarczy wprowadzić swój dożywotni klucz licencyjny na nowym urządzeniu lub przywrócić zaszyfrowaną kopię zapasową.</string>
     <string name="pro_tier_badge_standard">Standardowy</string>
-    <string name="pro_tier_badge_save_16" formatted="false">Oszczędź 16%</string>
     <string name="pro_tier_badge_save_29" formatted="false">Oszczędź 33%</string>
     <string name="pro_tier_badge_lifetime_vip">DOŻYWOTNI VIP</string>
     <string name="pro_tier_badge_best_value">NAJLEPSZY WYBÓR</string>
     <string name="pro_tier_badge_popular_pill">POPULARNY</string>
     <string name="pro_tier_monthly_title">Pakiet Miesięczny</string>
-    <string name="pro_tier_6month_title">Pakiet 6-Miesięczny</string>
     <string name="pro_tier_annual_title">Pakiet Roczny</string>
     <string name="pro_tier_lifetime_title">Dożywotni VIP</string>
     <string name="pro_period_monthly">/ miesiąc</string>
-    <string name="pro_period_6month">/ 6 miesięcy</string>
     <string name="pro_period_annual">/ rok</string>
     <string name="pro_period_lifetime">/ jednorazowo</string>
     <string name="pro_subtext_monthly">4,99 zł rozliczane co miesiąc</string>
-    <string name="pro_subtext_6month">Średnio 4,16 zł / miesiąc</string>
     <string name="pro_subtext_annual">Średnio 3,33 zł / miesiąc</string>
     <string name="pro_subtext_lifetime">Płacisz raz, korzystasz na zawsze</string>
     <string name="pro_desc_monthly">Pełny dostęp do Cipher Pro na elastycznych zasadach z miesiąca na miesiąc. Idealny, jeśli chcesz wypróbować wszystkie zaawansowane funkcje.</string>
-    <string name="pro_desc_6month" formatted="false">Pół roku bezproblemowego zarządzania majątkiem offline. Zaoszczędź 16% w porównaniu ze standardowym planem miesięcznym.</string>
     <string name="pro_desc_annual">Cały rok nieprzerwanej przejrzystości finansowej. Najlepsze całościowe oszczędności przy pełnej kontroli budżetów, reguł i kategorii.</string>
     <string name="pro_desc_lifetime">Najwyższy pakiet finansowy. Odblokuj wszystkie obecne i przyszłe funkcje Pro na zawsze przy jednorazowej płatności.</string>
     <string name="pro_feature_unlimited_accounts">Nielimitowane konta i portfele</string>

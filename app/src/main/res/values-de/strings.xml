@@ -492,25 +492,20 @@
     <string name="pro_faq_devices_q">Kann ich meine Lizenz auf ein neues Gerät übertragen?</string>
     <string name="pro_faq_devices_a">Ja, gib einfach deinen lebenslangen Lizenzschlüssel auf dem neuen Gerät ein oder stelle dein verschlüsseltes Backup wieder her.</string>
     <string name="pro_tier_badge_standard">Standard</string>
-    <string name="pro_tier_badge_save_16" formatted="false">16% sparen</string>
     <string name="pro_tier_badge_save_29" formatted="false">33% sparen</string>
     <string name="pro_tier_badge_lifetime_vip">LIFETIME VIP</string>
     <string name="pro_tier_badge_best_value">BESTER WERT</string>
     <string name="pro_tier_badge_popular_pill">BELIEBT</string>
     <string name="pro_tier_monthly_title">Monatspass</string>
-    <string name="pro_tier_6month_title">6-Monats-Pro</string>
     <string name="pro_tier_annual_title">1-Jahres-Pass</string>
     <string name="pro_tier_lifetime_title">Lifetime VIP</string>
     <string name="pro_period_monthly">/ Monat</string>
-    <string name="pro_period_6month">/ 6 Monate</string>
     <string name="pro_period_annual">/ Jahr</string>
     <string name="pro_period_lifetime">/ Einmalzahlung</string>
     <string name="pro_subtext_monthly">₹59 monatlich abgerechnet</string>
-    <string name="pro_subtext_6month">Effektiv ₹49,80 / Monat</string>
     <string name="pro_subtext_annual">Effektiv ₹41,58 / Monat</string>
     <string name="pro_subtext_lifetime">Einmal zahlen, für immer besitzen</string>
     <string name="pro_desc_monthly">Voller Zugriff auf Cipher Pro auf flexibler Monatsbasis. Perfekt, um alle erweiterten Funktionen auszuprobieren.</string>
-    <string name="pro_desc_6month" formatted="false">Ein halbes Jahr nahtlose Offline-Vermögensverwaltung. Spare 16% gegenüber dem Standard-Monatspass.</string>
     <string name="pro_desc_annual">Ein ganzes Jahr finanzielle Klarheit. Beste Gesamtersparnis für Budgets, Regeln und Kategorien.</string>
     <string name="pro_desc_lifetime">Der ultimative VIP-Pass. Schalte alle aktuellen und zukünftigen Pro-Funktionen dauerhaft mit einer Zahlung frei.</string>
     <string name="pro_feature_unlimited_accounts">Unbegrenzte Konten &amp; Wallets</string>

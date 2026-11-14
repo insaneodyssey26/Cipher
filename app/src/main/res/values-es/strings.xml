@@ -491,25 +491,20 @@
     <string name="pro_faq_devices_q">¿Puedo transferir mi licencia a un nuevo dispositivo?</string>
     <string name="pro_faq_devices_a">Sí, solo introduce tu clave de por vida en tu nuevo dispositivo o restaura tu copia cifrada.</string>
     <string name="pro_tier_badge_standard">Estándar</string>
-    <string name="pro_tier_badge_save_16" formatted="false">Ahorra 16%</string>
     <string name="pro_tier_badge_save_29" formatted="false">Ahorra 33%</string>
     <string name="pro_tier_badge_lifetime_vip">VIP DE POR VIDA</string>
     <string name="pro_tier_badge_best_value">MEJOR VALOR</string>
     <string name="pro_tier_badge_popular_pill">POPULAR</string>
     <string name="pro_tier_monthly_title">Pase Mensual</string>
-    <string name="pro_tier_6month_title">Pro 6 Meses</string>
     <string name="pro_tier_annual_title">Pase Anual 1 Año</string>
     <string name="pro_tier_lifetime_title">VIP de por Vida</string>
     <string name="pro_period_monthly">/ mes</string>
-    <string name="pro_period_6month">/ 6 meses</string>
     <string name="pro_period_annual">/ año</string>
     <string name="pro_period_lifetime">/ pago único</string>
     <string name="pro_subtext_monthly">₹59 facturados cada mes</string>
-    <string name="pro_subtext_6month">Efectivo ₹49.80 / mes</string>
     <string name="pro_subtext_annual">Efectivo ₹41.58 / mes</string>
     <string name="pro_subtext_lifetime">Paga una vez, disfrútalo para siempre</string>
     <string name="pro_desc_monthly">Acceso completo a Cipher Pro mes a mes. Ideal si quieres probar todas las funciones avanzadas.</string>
-    <string name="pro_desc_6month" formatted="false">Medio año de gestión patrimonial privada y sin conexión. Ahorra un 16% frente al pase mensual estándar.</string>
     <string name="pro_desc_annual">Un año entero de máxima claridad financiera. El mayor ahorro para dominar presupuestos, reglas y categorías.</string>
     <string name="pro_desc_lifetime">El pase VIP definitivo. Desbloquea todas las funciones Pro actuales y futuras para siempre con un único pago.</string>
     <string name="pro_feature_unlimited_accounts">Cuentas y billeteras ilimitadas</string>
