@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.entity.TransactionEntity
+import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -85,5 +86,31 @@ class TransactionDaoTest {
     @Test
     fun accountFlowTotalsIsEmptyWithoutTransactions() = runBlocking {
         assertEquals(emptyList<Any>(), dao.getAccountFlowTotals().first())
+    }
+
+    @Test
+    fun updatingTransactionKeepsItsSplits() = runBlocking {
+        val splitDao = database.transactionSplitDao()
+        val id = dao.insertTransaction(transaction(1, 500.0, isIncome = false))
+        splitDao.insertSplits(
+            listOf(
+                TransactionSplitEntity(transactionId = id, name = "You", amount = 250.0, isCurrentUser = true),
+                TransactionSplitEntity(transactionId = id, name = "Friend", amount = 250.0)
+            )
+        )
+
+        val rows = dao.updateTransaction(dao.getTransactionById(id)!!.copy(note = "edited"))
+
+        assertEquals(1, rows)
+        assertEquals("edited", dao.getTransactionById(id)?.note)
+        assertEquals(2, splitDao.getSplitsForTransactionSync(id).size)
+    }
+
+    @Test
+    fun updatingUnknownTransactionChangesNothing() = runBlocking {
+        val rows = dao.updateTransaction(transaction(1, 10.0, isIncome = false).copy(id = 999L))
+
+        assertEquals(0, rows)
+        assertEquals(0, dao.getAllTransactionsList().size)
     }
 }

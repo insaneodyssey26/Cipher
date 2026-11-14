@@ -14,6 +14,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class TransactionRepositoryTest {
 
@@ -68,6 +69,33 @@ class TransactionRepositoryTest {
             repository.insertTransferPair(outflow, inflow)
 
             verify(widgetSyncManager, times(1)).syncWidget()
+        }
+    }
+
+    @Test
+    fun updatingExistingTransactionUsesUpdateAndNeverReplaces() {
+        runBlocking {
+            whenever(transactionDao.updateTransaction(any())).thenReturn(1)
+            val edited = outflow.copy(id = 7L, note = "edited")
+
+            repository.updateTransaction(edited)
+
+            verify(transactionDao).updateTransaction(edited)
+            verify(transactionDao, never()).insertTransaction(any())
+            verify(widgetSyncManager, times(1)).syncWidget()
+        }
+    }
+
+    @Test
+    fun updatingMissingTransactionFallsBackToInsert() {
+        runBlocking {
+            whenever(transactionDao.updateTransaction(any())).thenReturn(0)
+            val missing = outflow.copy(id = 9L)
+
+            repository.updateTransaction(missing)
+
+            verify(transactionDao).updateTransaction(missing)
+            verify(transactionDao).insertTransaction(missing)
         }
     }
 }

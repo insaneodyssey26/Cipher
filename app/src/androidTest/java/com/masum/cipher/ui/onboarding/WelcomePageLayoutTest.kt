@@ -56,39 +56,26 @@ class WelcomePageLayoutTest {
     }
 
     @Test
-    fun aRegularPhoneShowsBothActionsWithoutScrolling() {
+    fun aRegularPhoneShowsTheRestoreActionWithoutScrolling() {
         showWelcomePage(widthDp = 411, heightDp = 900, fontScale = 1f)
 
         composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).assertIsDisplayed()
     }
 
     @Test
-    fun aSmallPhoneWithTheLargestFontCanScrollToBothActions() {
+    fun aSmallPhoneWithTheLargestFontCanScrollToTheRestoreAction() {
         showWelcomePage(widthDp = 320, heightDp = 480, fontScale = 2f)
 
         composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).performScrollTo().assertIsDisplayed()
     }
 
     @Test
-    fun aNarrowPhoneStacksTheButtonsInsteadOfSqueezingThem() {
+    fun aNarrowPhoneKeepsTheRestoreActionInsideTheScreenWidth() {
         showWelcomePage(widthDp = 320, heightDp = 900, fontScale = 1f)
 
         val restore = composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).getUnclippedBoundsInRoot()
-        val license = composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).getUnclippedBoundsInRoot()
 
-        assertTrue(license.top >= restore.bottom)
-    }
-
-    @Test
-    fun aRegularPhoneKeepsTheButtonsOnOneRow() {
-        showWelcomePage(widthDp = 411, heightDp = 900, fontScale = 1f)
-
-        val restore = composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).getUnclippedBoundsInRoot()
-        val license = composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).getUnclippedBoundsInRoot()
-
-        assertTrue(license.left >= restore.right)
-        assertTrue(kotlin.math.abs(license.top.value - restore.top.value) < 1f)
+        assertTrue(restore.left >= 0.dp)
+        assertTrue(restore.right <= 320.dp)
     }
 }

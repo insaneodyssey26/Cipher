@@ -216,7 +216,7 @@ class DebtRepository @Inject constructor(
             if (tx != null) {
                 val isIncome = (type == DebtType.BORROWED)
                 val merchantName = if (type == DebtType.BORROWED) "Loan from $personName" else "Loan to $personName"
-                transactionDao.insertTransaction(
+                transactionDao.updateTransaction(
                     tx.copy(
                         amount = amount,
                         merchant = merchantName,

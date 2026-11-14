@@ -31,7 +31,9 @@ class TransactionRepository @Inject constructor(
     }
 
     suspend fun updateTransaction(transaction: TransactionEntity) {
-        transactionDao.insertTransaction(transaction)
+        if (transactionDao.updateTransaction(transaction) == 0) {
+            transactionDao.insertTransaction(transaction)
+        }
         widgetSyncManager.syncWidget()
     }
 

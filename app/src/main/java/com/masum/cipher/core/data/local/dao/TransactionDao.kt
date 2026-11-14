@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -40,6 +41,9 @@ interface TransactionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity): Long
+
+    @Update
+    suspend fun updateTransaction(transaction: TransactionEntity): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransactions(transactions: List<TransactionEntity>): List<Long>

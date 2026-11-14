@@ -21,46 +21,28 @@ class WelcomeReturningUserSectionTest {
     val composeRule = createComposeRule()
 
     private var restoreClicks = 0
-    private var licenseClicks = 0
 
-    private fun show(isPro: Boolean) {
+    private fun show() {
         composeRule.setContent {
             CipherTheme {
-                WelcomeReturningUserSection(
-                    isPro = isPro,
-                    proTier = "LIFETIME",
-                    onRestoreBackup = { restoreClicks++ },
-                    onLicenseKey = { licenseClicks++ }
-                )
+                WelcomeReturningUserSection(onRestoreBackup = { restoreClicks++ })
             }
         }
     }
 
     @Test
-    fun bothActionsAreVisibleAndRespondToTaps() {
-        show(isPro = false)
+    fun restoreActionIsVisibleAndRespondsToTaps() {
+        show()
 
         composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).assertIsDisplayed().assertHasClickAction().performClick()
-        composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).assertIsDisplayed().assertHasClickAction().performClick()
 
         assertEquals(1, restoreClicks)
-        assertEquals(1, licenseClicks)
     }
 
     @Test
-    fun bothActionsMeetTheMinimumTouchTargetHeight() {
-        show(isPro = false)
+    fun restoreActionMeetsTheMinimumTouchTargetHeight() {
+        show()
 
         composeRule.onNodeWithTag(WELCOME_RESTORE_BACKUP_TAG).assertHeightIsAtLeast(48.dp)
-        composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).assertHeightIsAtLeast(48.dp)
-    }
-
-    @Test
-    fun aProUserKeepsAClickableLicenseSlot() {
-        show(isPro = true)
-
-        composeRule.onNodeWithTag(WELCOME_LICENSE_KEY_TAG).assertIsDisplayed().assertHasClickAction().performClick()
-
-        assertEquals(1, licenseClicks)
     }
 }
