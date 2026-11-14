@@ -48,10 +48,8 @@ import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
 import compose.icons.lucideicons.CloudDownload
 import compose.icons.lucideicons.Crown
-import compose.icons.lucideicons.Key
 
 internal const val WELCOME_RESTORE_BACKUP_TAG = "welcome_restore_backup"
-internal const val WELCOME_LICENSE_KEY_TAG = "welcome_license_key"
 
 private const val COMPACT_WIDTH_DP = 360f
 private const val LARGE_FONT_SCALE = 1.3f
@@ -60,8 +58,6 @@ internal fun shouldStackWelcomeActions(availableWidthDp: Float, fontScale: Float
     availableWidthDp < COMPACT_WIDTH_DP || fontScale >= LARGE_FONT_SCALE
 
 private val SecondaryButtonShape = RoundedCornerShape(16.dp)
-private val ProAccent = Color(0xFFE2FF38)
-private val ProAccentSecondary = Color(0xFF38BDF8)
 
 @Composable
 internal fun WelcomeReturningUserSection(
@@ -123,60 +119,6 @@ internal fun WelcomeSecondaryButton(
             maxLines = 2,
             autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 14.5.sp, stepSize = 0.5.sp)
         )
-    }
-}
-
-@Composable
-private fun WelcomeProActiveButton(
-    tier: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .heightIn(min = 56.dp)
-            .clip(SecondaryButtonShape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(ProAccent.copy(alpha = 0.16f), ProAccentSecondary.copy(alpha = 0.16f))
-                )
-            )
-            .border(1.dp, ProAccent.copy(alpha = 0.35f), SecondaryButtonShape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = LucideIcons.Crown,
-            contentDescription = null,
-            tint = ProAccent,
-            modifier = Modifier.size(20.dp)
-        )
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = "CIPHER PRO",
-                style = Typography.labelMedium.copy(
-                    fontFamily = Lato,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    letterSpacing = 0.6.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
-            )
-            Text(
-                text = tier.uppercase(),
-                style = Typography.labelSmall.copy(
-                    fontFamily = Lato,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.5.sp,
-                    letterSpacing = 0.4.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
-        }
     }
 }
 

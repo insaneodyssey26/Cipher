@@ -79,11 +79,6 @@ class MainViewModel @Inject constructor(
                     categoryRepository.addCustomCategory(intent.name, intent.iconName, intent.colorHex)
                 }
             }
-            is MainContract.Intent.DismissLicenseRevokedDialog -> {
-                viewModelScope.launch {
-                    userPreferences.clearLicenseRevokedNotice()
-                }
-            }
         }
     }
 
