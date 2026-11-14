@@ -20,6 +20,7 @@ class BackupCrypto @Inject constructor() {
         const val HEADER_V2 = "CIPHER_VAULT_V2"
         const val LEGACY_KDF_ITERATIONS = 65536
         const val CURRENT_KDF_ITERATIONS = 600000
+        const val MAX_KDF_ITERATIONS = 5_000_000
         private const val SALT_SIZE = 16
         private const val IV_SIZE = 12
         private const val ITERATIONS_FIELD_SIZE = 4
@@ -54,6 +55,9 @@ class BackupCrypto @Inject constructor() {
                     throw BackupCryptoException("This backup file appears to be corrupted or invalid.")
                 }
                 iterations = ByteBuffer.wrap(bytes, headerV2.size, ITERATIONS_FIELD_SIZE).int
+                if (iterations < 1 || iterations > MAX_KDF_ITERATIONS) {
+                    throw BackupCryptoException("This backup file appears to be corrupted or invalid.")
+                }
                 offset = headerV2.size + ITERATIONS_FIELD_SIZE
             }
             hasHeaderV1 -> {

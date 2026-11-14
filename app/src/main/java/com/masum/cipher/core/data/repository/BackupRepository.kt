@@ -41,6 +41,8 @@ import javax.inject.Singleton
 
 class BackupRestoreException(message: String) : Exception(message)
 
+private const val MAX_BACKUP_BYTES = 128L * 1024 * 1024
+
 @Serializable
 data class BackupData(
     val transactions: List<TransactionEntity>,
@@ -165,6 +167,20 @@ class BackupRepository @Inject constructor(
         }
     }
 
+    private fun readBounded(stream: InputStream): ByteArray? {
+        val output = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(8192)
+        var total = 0L
+        while (true) {
+            val read = stream.read(buffer)
+            if (read < 0) break
+            total += read
+            if (total > MAX_BACKUP_BYTES) return null
+            output.write(buffer, 0, read)
+        }
+        return output.toByteArray()
+    }
+
     suspend fun restoreData(
         inputStream: InputStream,
         password: CharArray,
@@ -172,7 +188,10 @@ class BackupRepository @Inject constructor(
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             inputStream.use { stream ->
-                val bytes = stream.readBytes()
+                val bytes = readBounded(stream)
+                    ?: return@withContext Result.failure(
+                        BackupRestoreException("This file is too large to be a Cipher backup.")
+                    )
                 val jsonBytes = try {
                     backupCrypto.decrypt(bytes, password)
                 } catch (e: BackupCryptoException) {

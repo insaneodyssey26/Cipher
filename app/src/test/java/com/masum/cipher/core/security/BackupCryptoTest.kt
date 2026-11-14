@@ -153,4 +153,35 @@ class BackupCryptoTest {
 
         assertTrue(iterations == BackupCrypto.CURRENT_KDF_ITERATIONS)
     }
+
+    private fun v2FileWithIterations(iterations: Int): ByteArray =
+        BackupCrypto.HEADER_V2.toByteArray(Charsets.UTF_8) +
+            java.nio.ByteBuffer.allocate(4).putInt(iterations).array() +
+            ByteArray(16 + 12 + 32)
+
+    @Test
+    fun hostileIterationCountIsRejectedWithoutRunningTheKeyDerivation() {
+        val started = System.nanoTime()
+
+        try {
+            crypto.decrypt(v2FileWithIterations(Int.MAX_VALUE), "any".toCharArray())
+            fail("expected BackupCryptoException")
+        } catch (e: BackupCryptoException) {
+            assertTrue(e.message!!.contains("corrupted", ignoreCase = true))
+        }
+
+        assertTrue(System.nanoTime() - started < 2_000_000_000L)
+    }
+
+    @Test
+    fun zeroOrNegativeIterationCountIsRejected() {
+        listOf(0, -1, Int.MIN_VALUE).forEach { iterations ->
+            try {
+                crypto.decrypt(v2FileWithIterations(iterations), "any".toCharArray())
+                fail("expected BackupCryptoException for $iterations")
+            } catch (e: BackupCryptoException) {
+                assertTrue(e.message!!.contains("corrupted", ignoreCase = true))
+            }
+        }
+    }
 }
