@@ -128,6 +128,24 @@ android {
     }
 }
 
+gradle.taskGraph.whenReady {
+    val publishesRelease = allTasks.any { it.path == ":app:bundleRelease" }
+    if (publishesRelease) {
+        val propertiesFile = rootProject.file("keystore.properties")
+        val properties = Properties()
+        if (propertiesFile.exists()) {
+            FileInputStream(propertiesFile).use { properties.load(it) }
+        }
+        val signingMissing = properties.getProperty("storeFile").isNullOrBlank()
+        val billingKeyMissing = properties.getProperty("playBillingPublicKey").isNullOrBlank()
+        if (signingMissing || billingKeyMissing) {
+            throw GradleException(
+                "bundleRelease needs keystore.properties with a signing config and playBillingPublicKey"
+            )
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

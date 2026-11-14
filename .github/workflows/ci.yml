@@ -44,4 +44,5 @@ jobs:
           path: |
             app/build/reports/tests/testDebugUnitTest
             app/build/reports/lint-results-debug.html
+            app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: ignore
