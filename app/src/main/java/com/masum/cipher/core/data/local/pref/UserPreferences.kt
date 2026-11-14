@@ -894,6 +894,18 @@ class UserPreferences @Inject constructor(
         }
     }
 
+    fun getLastDailySummaryDay(): Long = syncPrefs.getLong("last_daily_summary_day", -1L)
+
+    fun setLastDailySummaryDay(epochDay: Long) {
+        syncPrefs.edit().putLong("last_daily_summary_day", epochDay).apply()
+    }
+
+    fun getLastMonthlyWrappedKey(): Int = syncPrefs.getInt("last_monthly_wrapped_key", -1)
+
+    fun setLastMonthlyWrappedKey(key: Int) {
+        syncPrefs.edit().putInt("last_monthly_wrapped_key", key).apply()
+    }
+
     suspend fun setShowProBadge(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
     }

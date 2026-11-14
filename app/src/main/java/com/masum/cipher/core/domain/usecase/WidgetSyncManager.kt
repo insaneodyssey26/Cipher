@@ -8,6 +8,7 @@ import com.masum.cipher.core.data.local.dao.AccountDao
 import com.masum.cipher.core.data.local.dao.TransactionDao
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.data.local.pref.WidgetKeys
+import com.masum.cipher.core.data.repository.buildAccountItems
 import com.masum.cipher.core.util.DateTimeUtils
 import com.masum.cipher.ui.widget.AccountsWidget
 import com.masum.cipher.ui.widget.BudgetWidget
@@ -53,8 +54,7 @@ class WidgetSyncManager @Inject constructor(
         val dailyAllowance = if (remainingDays > 0) remainingBudget / remainingDays else remainingBudget
 
         val accounts = accountDao.getAllAccounts()
-        val allTransactions = transactionDao.getAllTransactionsList()
-        val rootAccountId = accounts.minByOrNull { it.createdAt }?.id ?: accounts.firstOrNull()?.id ?: 1L
+        val accountItems = buildAccountItems(accounts, transactionDao.getAccountFlowTotals().first())
 
         val budgetAccountsJsonArray = JSONArray().apply {
             put(
@@ -83,42 +83,17 @@ class WidgetSyncManager @Inject constructor(
         val activeAccountName = targetAccount?.name ?: "All Accounts"
 
         val accountsJsonArray = JSONArray()
-        var calculatedNetWorth = 0.0
-
-        if (accounts.isEmpty()) {
-            val defaultTxs = allTransactions.filter { it.accountId == null || it.accountId == 1L }
-            val inc = defaultTxs.filter { it.isIncome }.sumOf { it.amount }
-            val exp = defaultTxs.filter { !it.isIncome }.sumOf { it.amount }
-            val bal = inc - exp
-            calculatedNetWorth = bal
+        accountItems.forEach { item ->
             accountsJsonArray.put(
                 JSONObject().apply {
-                    put("name", "Main Account")
-                    put("type", "BANK")
-                    put("balance", bal)
-                    put("colorHex", 0xFF4F46E5L)
+                    put("name", item.entity.name)
+                    put("type", item.entity.type)
+                    put("balance", item.currentBalance)
+                    put("colorHex", item.entity.colorHex)
                 }
             )
-        } else {
-            accounts.forEach { acc ->
-                val accTxs = allTransactions.filter {
-                    it.accountId == acc.id || (it.accountId == null && acc.id == rootAccountId)
-                }
-                val inc = accTxs.filter { it.isIncome }.sumOf { it.amount }
-                val exp = accTxs.filter { !it.isIncome }.sumOf { it.amount }
-                val currentBal = acc.initialBalance + (inc - exp)
-                calculatedNetWorth += currentBal
-
-                accountsJsonArray.put(
-                    JSONObject().apply {
-                        put("name", acc.name)
-                        put("type", acc.type)
-                        put("balance", currentBal)
-                        put("colorHex", acc.colorHex)
-                    }
-                )
-            }
         }
+        val calculatedNetWorth = accountItems.sumOf { it.currentBalance }
 
         val recentTxs = transactionDao.getRecentTransactionsList(50)
         val recentTxJsonArray = JSONArray()

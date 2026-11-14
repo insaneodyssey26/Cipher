@@ -76,7 +76,7 @@ class AppUpdateWorker(
         } else {
             val result = GitHubUpdateManager.checkForUpdate()
             if (result.isUpdateAvailable) {
-                val numericCode = result.latestVersion.filter { it.isDigit() }.toIntOrNull() ?: 0
+                val numericCode = versionToComparableCode(result.latestVersion)
                 if (numericCode > settings.lastNotifiedUpdateVersionCode) {
                     localNotificationManager.showAppUpdateAvailableNotification(versionName = result.latestVersion)
                     userPreferences.setLastNotifiedUpdateVersionCode(numericCode)
@@ -85,5 +85,10 @@ class AppUpdateWorker(
         }
 
         return Result.success()
+    }
+
+    private fun versionToComparableCode(version: String): Int {
+        val parts = version.split(".").map { it.filter { char -> char.isDigit() }.toIntOrNull() ?: 0 }
+        return parts.getOrElse(0) { 0 } * 10_000 + parts.getOrElse(1) { 0 } * 100 + parts.getOrElse(2) { 0 }
     }
 }

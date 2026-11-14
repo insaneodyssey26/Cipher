@@ -26,14 +26,14 @@ class NotificationScheduler @Inject constructor(
             .build()
 
         val workRequest = PeriodicWorkRequestBuilder<NotificationWorker>(
-            12L, TimeUnit.HOURS
+            3L, TimeUnit.HOURS
         )
             .setConstraints(constraints)
             .build()
 
         workManager.enqueueUniquePeriodicWork(
             WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
         
