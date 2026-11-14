@@ -288,17 +288,6 @@ class MainActivity : AppCompatActivity() {
                                     if (targetScreen == "pro") {
                                         navController.navigate("cipher_pro")
                                     }
-                                } else if (dataUri.host == "test-legacy-pro") {
-                                    val tier = dataUri.getQueryParameter("tier") ?: "LIFETIME"
-                                    userPreferences.setProStatus(
-                                        isPro = true,
-                                        tier = tier,
-                                        token = "DODO-LEGACY-SAMPLE-LICENSE",
-                                        orderId = "dodo_test_ord_12345",
-                                        expiresAt = if (tier.uppercase() == "LIFETIME") 0L else System.currentTimeMillis() + 30L * 86400000L
-                                    )
-                                } else if (dataUri.host == "reset-pro") {
-                                    userPreferences.deactivatePro()
                                 }
                             }
 

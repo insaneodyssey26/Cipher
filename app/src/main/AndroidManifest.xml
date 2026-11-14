@@ -69,7 +69,7 @@
 
         <activity
             android:name=".ui.dialogs.WidgetAccountPickerActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.Cipher.Dialog"
             android:excludeFromRecents="true"
             android:taskAffinity=""
