@@ -275,7 +275,6 @@ class UserPreferences @Inject constructor(
         val PRO_EXPIRES_AT = longPreferencesKey("pro_expires_at")
         val PRO_ENTITLEMENT_HMAC = stringPreferencesKey("pro_entitlement_hmac")
         val SHOW_PRO_BADGE = booleanPreferencesKey("show_pro_badge")
-        val LAST_LICENSE_SYNC_TIME = longPreferencesKey("last_license_sync_time")
         val SHOW_LICENSE_REVOKED_DIALOG = booleanPreferencesKey("show_license_revoked_dialog")
         val LICENSE_REVOKED_REASON = stringPreferencesKey("license_revoked_reason")
         val BUDGET_ACCOUNT_ID = longPreferencesKey("budget_account_id")
@@ -856,14 +855,7 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun deactivatePro() {
-        setPendingLicenseToken(null)
         setProStatus(isPro = false, tier = "FREE", token = null, orderId = null, expiresAt = 0L)
-    }
-
-    fun getPendingLicenseToken(): String? = syncPrefs.getString("pending_license_token", null)
-
-    fun setPendingLicenseToken(token: String?) {
-        syncPrefs.edit().putString("pending_license_token", token).apply()
     }
 
     suspend fun markLicenseRevoked(reason: String = "REVOKED") {
@@ -904,15 +896,6 @@ class UserPreferences @Inject constructor(
 
     suspend fun setShowProBadge(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
-    }
-
-    fun getCachedLastLicenseSyncTime(): Long {
-        return syncPrefs.getLong("cached_last_license_sync_time", 0L)
-    }
-
-    suspend fun setLastLicenseSyncTime(timestamp: Long) {
-        syncPrefs.edit().putLong("cached_last_license_sync_time", timestamp).apply()
-        context.dataStore.edit { it[Keys.LAST_LICENSE_SYNC_TIME] = timestamp }
     }
 }
 

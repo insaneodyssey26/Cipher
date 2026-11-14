@@ -189,15 +189,12 @@ class ExportDataUseCase @Inject constructor(
 }
 
 class ImportDataUseCase @Inject constructor(
-    private val backupRepository: BackupRepository,
-    private val pendingLicenseActivator: com.masum.cipher.core.security.PendingLicenseActivator
+    private val backupRepository: BackupRepository
 ) {
     suspend operator fun invoke(uri: Uri, password: CharArray, clearExisting: Boolean = false): Result<Unit> = withContext(Dispatchers.IO) {
         val inputStream = backupRepository.provideInputStream(uri)
             ?: return@withContext Result.failure(Exception("Could not open file for reading"))
         
-        backupRepository.restoreData(inputStream, password, clearExisting).also { result ->
-            if (result.isSuccess) pendingLicenseActivator.activate()
-        }
+        backupRepository.restoreData(inputStream, password, clearExisting)
     }
 }

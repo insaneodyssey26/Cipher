@@ -115,13 +115,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var notificationScheduler: NotificationScheduler
 
     @Inject
-    lateinit var licenseSyncScheduler: com.masum.cipher.core.worker.LicenseSyncScheduler
-
-    @Inject
     lateinit var appUpdateScheduler: com.masum.cipher.core.worker.AppUpdateScheduler
-
-    @Inject
-    lateinit var licenseEngine: com.masum.cipher.core.security.LicenseEngine
 
     @Inject
     lateinit var securityManager: SecurityManager
@@ -190,7 +184,10 @@ class MainActivity : AppCompatActivity() {
         currentIntentFlow.value = intent
         
         notificationScheduler.scheduleDailyNotifications()
-        licenseSyncScheduler.cancelLicenseSync()
+        androidx.work.WorkManager.getInstance(applicationContext).apply {
+            cancelUniqueWork("CipherLicenseSyncWork")
+            cancelUniqueWork("CipherLicenseLaunchSync")
+        }
         appUpdateScheduler.schedulePeriodicUpdateCheck()
         UpdateManager.checkForUpdates(this) {
             updateReady.value = true
@@ -264,26 +261,7 @@ class MainActivity : AppCompatActivity() {
                             
                             val dataUri = activeIntent.data
                             if (dataUri != null && dataUri.scheme == "cipher") {
-                                if (dataUri.host == "activate") {
-                                    val licenseKey = dataUri.getQueryParameter("key")?.trim()
-                                    val email = dataUri.getQueryParameter("email")?.trim()
-                                    if (!licenseKey.isNullOrBlank()) {
-                                        val deviceId = android.provider.Settings.Secure.getString(
-                                            this@MainActivity.contentResolver,
-                                            android.provider.Settings.Secure.ANDROID_ID
-                                        ) ?: "device_${System.currentTimeMillis()}"
-                                        val validation = licenseEngine.activateLicenseRemote(licenseKey, email, deviceId)
-                                        if (validation.isValid) {
-                                            userPreferences.setProStatus(
-                                                isPro = true,
-                                                tier = validation.tier.identifier,
-                                                token = licenseKey,
-                                                orderId = validation.orderId,
-                                                expiresAt = validation.expiresAtEpochMs
-                                            )
-                                        }
-                                    }
-                                } else if (dataUri.host == "open") {
+                                if (dataUri.host == "open") {
                                     val targetScreen = dataUri.getQueryParameter("screen")
                                     if (targetScreen == "pro") {
                                         navController.navigate("cipher_pro")

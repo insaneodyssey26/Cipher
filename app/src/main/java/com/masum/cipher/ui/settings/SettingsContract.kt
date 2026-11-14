@@ -78,8 +78,6 @@ class SettingsContract {
         data class SetAutoBackupEncryptedPassword(val password: String?) : Intent()
         data object RevealAutoBackupPassword : Intent()
         data object HideAutoBackupPassword : Intent()
-        data class ActivatePro(val licenseKey: String, val email: String?) : Intent()
-        data object DeactivatePro : Intent()
         data class SetShowProBadge(val enabled: Boolean) : Intent()
         data object CheckForAppUpdates : Intent()
         data class DownloadAndInstallUpdate(val downloadUrl: String) : Intent()
@@ -129,9 +127,6 @@ class SettingsContract {
         val isLegacyPro: Boolean = false,
         val shouldShowMigrationBanner: Boolean = false,
         val showProBadge: Boolean = true,
-        val isActivatingPro: Boolean = false,
-        val proActivationError: String? = null,
-        val proActivationSuccess: Boolean = false,
         val isCheckingUpdate: Boolean = false,
         val isInstalledFromPlayStore: Boolean = true,
         val updateCheckResult: com.masum.cipher.core.updates.AppUpdateCheckResult? = null,

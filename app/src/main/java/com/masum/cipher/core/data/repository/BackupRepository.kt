@@ -113,7 +113,6 @@ class BackupRepository @Inject constructor(
                 throw SecurityException("Environment integrity compromised")
             }
             val settings = userPreferences.settingsFlow.first()
-            val isLegacy = settings.isLegacyPro
             val data = BackupData(
                 transactions = transactionDao.getAllTransactions().first(),
                 splits = transactionSplitDao.getAllSplits(),
@@ -147,9 +146,9 @@ class BackupRepository @Inject constructor(
                 notifyNewAppDetected = settings.notifyNewAppDetected,
                 notifyDuplicates = settings.notifyDuplicates,
                 appLanguage = settings.appLanguage,
-                proLicenseToken = if (isLegacy) settings.proLicenseToken else null,
-                proTier = if (isLegacy) settings.proTier else null,
-                proOrderId = if (isLegacy) settings.proOrderId else null
+                proLicenseToken = null,
+                proTier = null,
+                proOrderId = null
             )
             val jsonString = json.encodeToString(data)
             val jsonBytes = jsonString.toByteArray(Charsets.UTF_8)
@@ -238,14 +237,6 @@ class BackupRepository @Inject constructor(
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }
                 data.notifyDuplicates?.let { userPreferences.setNotifyDuplicates(it) }
                 data.appLanguage?.let { userPreferences.setAppLanguage(it) }
-                val token = data.proLicenseToken?.trim()
-                val order = data.proOrderId?.trim()
-                val isGooglePlay = (order != null && order.startsWith("GPA.")) ||
-                    (token != null && (token.startsWith("GPA.") || token.length > 80))
-                val alreadyHasGooglePlayPro = userPreferences.isCachedGooglePlayPro()
-                if (!token.isNullOrBlank() && !isGooglePlay && !alreadyHasGooglePlayPro) {
-                    userPreferences.setPendingLicenseToken(token)
-                }
             }
             Result.success(Unit)
         } catch (e: BackupRestoreException) {

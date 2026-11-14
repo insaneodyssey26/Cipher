@@ -86,8 +86,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.pref.UserPreferences
-import com.masum.cipher.core.security.ActiveDeviceInfo
-import com.masum.cipher.core.security.LicenseEngine
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.EmeraldIncome
@@ -158,7 +156,6 @@ fun CipherProScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val licenseEngine = remember { LicenseEngine() }
 
     val isHapticsEnabled = settings.isHapticsEnabled
     val systemInDark = isSystemInDarkTheme()
@@ -185,8 +182,6 @@ fun CipherProScreen(
     var activatedTierName by remember { mutableStateOf("") }
     var activatedDeviceQuota by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var showBrowsePlans by remember { mutableStateOf(false) }
-    var showDeactivateConfirmDialog by remember { mutableStateOf(false) }
-    var isDeactivatingDevice by remember { mutableStateOf(false) }
     val clipboard = LocalClipboard.current
     val isAlreadyPro = settings.isPro
 
@@ -339,7 +334,6 @@ fun CipherProScreen(
             ActiveProMembershipContent(
                 settings = settings,
                 userPreferences = userPreferences,
-                licenseEngine = licenseEngine,
                 snackbarHostState = snackbarHostState,
                 isDark = isDark,
                 screenBg = screenBg,
@@ -349,14 +343,9 @@ fun CipherProScreen(
                 textSecondary = textSecondary,
                 textDescription = textDescription,
                 isHapticsEnabled = isHapticsEnabled,
-                isDeactivatingDevice = isDeactivatingDevice,
                 onNavigateBack = {
                     view.performVibrate(isHapticsEnabled)
                     onNavigateBack()
-                },
-                onDeactivateClick = {
-                    view.performVibrate(isHapticsEnabled)
-                    showDeactivateConfirmDialog = true
                 },
                 onBrowsePlansClick = {
                     view.performVibrate(isHapticsEnabled)
@@ -874,78 +863,6 @@ fun CipherProScreen(
         }
     }
 
-    if (showDeactivateConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeactivateConfirmDialog = false },
-            containerColor = cardBg,
-            title = {
-                Text(
-                    text = "Deactivate on this device?",
-                    style = Typography.titleMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    ),
-                    color = textPrimary
-                )
-            },
-            text = {
-                Text(
-                    text = "This will return this device to the free tier and immediately free up 1 of your 3 license slots. You can reactivate anytime using your product key.",
-                    style = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        fontSize = 13.5.sp,
-                        lineHeight = 18.sp
-                    ),
-                    color = textSecondary
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDeactivateConfirmDialog = false
-                        isDeactivatingDevice = true
-                        coroutineScope.launch {
-                            val deviceId = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.ANDROID_ID) ?: ""
-                            val token = settings.proLicenseToken ?: userPreferences.getCachedLicenseToken() ?: ""
-                            if (token.isNotBlank() && deviceId.isNotBlank()) {
-                                licenseEngine.deactivateLicenseRemote(token, deviceId)
-                            }
-                            userPreferences.deactivatePro()
-                            isDeactivatingDevice = false
-                            view.performVibrate(isHapticsEnabled, isLongPress = true)
-                            snackbarHostState.showSnackbar("Pro deactivated on this device. License slot freed.")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RoseExpense,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text(
-                        text = "Deactivate & Free Slot",
-                        style = Typography.labelLarge.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeactivateConfirmDialog = false }) {
-                    Text(
-                        text = "Cancel",
-                        style = Typography.labelLarge.copy(
-                            fontFamily = Lato,
-                            color = textSecondary
-                        )
-                    )
-                }
-            }
-        )
-    }
-
     if (showCongratulations) {
         ProCongratulationsDialog(
             isDark = isDark,
@@ -1258,7 +1175,6 @@ private fun ProConfettiBurst(
 private fun ActiveProMembershipContent(
     settings: com.masum.cipher.core.data.local.pref.UserSettings,
     userPreferences: UserPreferences,
-    licenseEngine: LicenseEngine,
     snackbarHostState: SnackbarHostState,
     isDark: Boolean,
     screenBg: Color,
@@ -1268,9 +1184,7 @@ private fun ActiveProMembershipContent(
     textSecondary: Color,
     textDescription: Color,
     isHapticsEnabled: Boolean,
-    isDeactivatingDevice: Boolean,
     onNavigateBack: () -> Unit,
-    onDeactivateClick: () -> Unit,
     onBrowsePlansClick: () -> Unit,
     billingManager: com.masum.cipher.core.billing.BillingManager? = null,
     onCopyLicense: (String) -> Unit
@@ -1279,13 +1193,6 @@ private fun ActiveProMembershipContent(
     val view = LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
-    val currentDeviceId = remember {
-        android.provider.Settings.Secure.getString(
-            context.contentResolver,
-            android.provider.Settings.Secure.ANDROID_ID
-        ) ?: ""
-    }
 
     val proTierDisplayTitle = remember(settings.proTier) {
         when (settings.proTier.uppercase()) {

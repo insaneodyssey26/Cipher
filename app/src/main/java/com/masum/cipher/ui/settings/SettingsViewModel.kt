@@ -1,7 +1,6 @@
 package com.masum.cipher.ui.settings
 
 import android.content.Context
-import android.provider.Settings
 import androidx.lifecycle.viewModelScope
 import com.masum.cipher.R
 import com.masum.cipher.core.data.local.dao.TransactionDao
@@ -38,8 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val keystoreManager: KeystoreManager,
     private val autoBackupScheduler: AutoBackupScheduler,
     private val transactionDao: TransactionDao,
-    private val accountDao: com.masum.cipher.core.data.local.dao.AccountDao,
-    private val licenseEngine: com.masum.cipher.core.security.LicenseEngine
+    private val accountDao: com.masum.cipher.core.data.local.dao.AccountDao
 ) : BaseViewModel<SettingsContract.State, SettingsContract.Intent, SettingsContract.Effect>(
     initialState = SettingsContract.State(
         currencyCode = userPreferences.getCachedCurrencyCode(),
@@ -86,8 +84,6 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetAutoBackupEncryptedPassword -> updateAutoBackupPassword(intent.password)
             SettingsContract.Intent.RevealAutoBackupPassword -> revealAutoBackupPassword()
             SettingsContract.Intent.HideAutoBackupPassword -> updateState { copy(revealedAutoBackupPassword = null) }
-            is SettingsContract.Intent.ActivatePro -> activatePro(intent.licenseKey, intent.email)
-            is SettingsContract.Intent.DeactivatePro -> deactivatePro()
             is SettingsContract.Intent.SetShowProBadge -> updateShowProBadge(intent.enabled)
             SettingsContract.Intent.CheckForAppUpdates -> checkForAppUpdates()
             is SettingsContract.Intent.DownloadAndInstallUpdate -> downloadAndInstallUpdate(intent.downloadUrl)
@@ -378,43 +374,6 @@ class SettingsViewModel @Inject constructor(
     private fun updateCurrency(code: String, symbol: String) {
         viewModelScope.launch {
             userPreferences.setCurrency(code, symbol)
-        }
-    }
-
-    private fun activatePro(licenseKey: String, email: String?) {
-        viewModelScope.launch {
-            updateState { copy(isActivatingPro = true, proActivationError = null, proActivationSuccess = false) }
-            val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "DEVICE_${System.currentTimeMillis()}"
-            val result = licenseEngine.activateLicenseRemote(licenseKey, email, deviceId)
-            if (result.isValid) {
-                userPreferences.setProStatus(
-                    isPro = true,
-                    tier = result.tier.identifier,
-                    token = licenseKey.trim(),
-                    orderId = result.orderId,
-                    expiresAt = result.expiresAtEpochMs
-                )
-                updateState { copy(isActivatingPro = false, proActivationSuccess = true, proActivationError = null) }
-                emitEffect(SettingsContract.Effect.ShowToast("Cipher Pro successfully activated!"))
-            } else {
-                val errorMsg = result.errorMessage ?: "Invalid license key. Please check and try again."
-                updateState { copy(isActivatingPro = false, proActivationError = errorMsg, proActivationSuccess = false) }
-                emitEffect(SettingsContract.Effect.ShowToast(errorMsg))
-            }
-        }
-    }
-
-    private fun deactivatePro() {
-        viewModelScope.launch {
-            val token = userPreferences.getCachedLicenseToken()
-            val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: ""
-            if (!token.isNullOrBlank() && deviceId.isNotBlank()) {
-                withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    licenseEngine.deactivateLicenseRemote(token, deviceId)
-                }
-            }
-            userPreferences.deactivatePro()
-            emitEffect(SettingsContract.Effect.ShowToast("Pro deactivated. Device slot freed."))
         }
     }
 

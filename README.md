@@ -310,10 +310,10 @@ app/
     │   │   ├── SubscriptionDetector.kt
     │   │   └── model/                # ParsedTransaction, TransactionCategory
     │   ├── mvi/                      # MviBase (shared ViewModel base)
-    │   ├── security/                 # BiometricAuthenticator, LicenseEngine, BackupCrypto
+    │   ├── security/                 # BiometricAuthenticator, BackupCrypto
     │   ├── sms/                      # SmsReceiver, SmsParser, SmsPatterns
     │   ├── util/                     # Formatters, PdfGenerator, CurrencyDetect
-    │   └── worker/                   # WorkManager (AutoBackup, Notifications, LicenseSync)
+    │   └── worker/                   # WorkManager (AutoBackup, Notifications)
     │
     └── ui/
         ├── accounts/                 # AccountsScreen, AccountDetails, CreateEditAccount
