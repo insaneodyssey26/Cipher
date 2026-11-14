@@ -289,7 +289,7 @@
     <string name="privacy_biometrics_title">Biometrie</string>
     <string name="privacy_biometrics_body">Wenn Sie die biometrische Sperre aktivieren, wird die Authentifizierung vollständig über das Betriebssystem Ihres Geräts abgewickelt. Cipher greift nie auf biometrische Daten zu.</string>
     <string name="privacy_network_title">Netzwerkzugriff</string>
-    <string name="privacy_network_body">Alle Finanzberechnungen, Transaktionsanalysen und Datenbankspeicherungen laufen zu 100 % lokal und offline auf Ihrem Gerät. Der Netzwerkzugriff wird ausschließlich zur Überprüfung kryptografischer Pro-Lizenzschlüssel verwendet. Es gibt keine Tracking-SDKs, Analysedienste oder Werbe-SDKs.</string>
+    <string name="privacy_network_body">Alle Finanzberechnungen, Transaktionsanalysen und Datenbankspeicherungen laufen zu 100 % lokal und offline auf Ihrem Gerät. Der Netzwerkzugriff wird ausschließlich für Käufe über Google Play und – bei Versionen, die nicht über Google Play installiert wurden – für die Prüfung auf App-Updates bei GitHub verwendet. Es gibt keine Tracking-SDKs, Analysedienste, Absturzberichte oder Werbung.</string>
     <string name="privacy_exports_title">Exporte und Automatische Backups</string>
     <string name="privacy_exports_body">Beim Export von CSV-, PDF-Auszügen oder automatischen Backups werden die Dateien über das native Android-Speicher-Framework auf Ihrem ausgewählten Speicherort abgelegt. Backups werden mit Ihrem Passwort verschlüsselt. Cipher überträgt diese Daten an niemanden.</string>
     <string name="privacy_open_source_title">Open Source</string>

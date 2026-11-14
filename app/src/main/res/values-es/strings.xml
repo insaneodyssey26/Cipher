@@ -288,7 +288,7 @@
     <string name="privacy_biometrics_title">Biometría</string>
     <string name="privacy_biometrics_body">Si habilitas el bloqueo biométrico, la autenticación la gestiona el sistema operativo de tu dispositivo. Cipher nunca almacena ni procesa tus datos biométricos.</string>
     <string name="privacy_network_title">Acceso a la red</string>
-    <string name="privacy_network_body">Todos los cálculos financieros, análisis de transacciones y almacenamiento en base de datos se ejecutan al 100% de forma local y sin conexión en su dispositivo. El acceso a la red se utiliza estrictamente para verificar las claves de licencia criptográfica Pro. No hay SDK de seguimiento, análisis ni anuncios.</string>
+    <string name="privacy_network_body">Todos los cálculos financieros, análisis de transacciones y almacenamiento en base de datos se ejecutan al 100% de forma local y sin conexión en su dispositivo. El acceso a la red se utiliza únicamente para las compras en Google Play y, en las versiones instaladas fuera de Google Play, para buscar actualizaciones de la app en GitHub. No hay SDK de seguimiento, análisis, informes de fallos ni anuncios.</string>
     <string name="privacy_exports_title">Exportaciones y Copias de Seguridad</string>
     <string name="privacy_exports_body">Al exportar un extracto CSV, PDF o configurar la copia de seguridad automática, los archivos se guardan directamente en el almacenamiento de su dispositivo seleccionado. Las copias de seguridad de la base de datos se cifran con su contraseña.</string>
     <string name="privacy_open_source_title">Código Abierto</string>

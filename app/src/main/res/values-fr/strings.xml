@@ -289,7 +289,7 @@
     <string name="privacy_biometrics_title">Biométrie</string>
     <string name="privacy_biometrics_body">Si vous activez le verrouillage biométrique, l\'authentification est gérée par votre système d\'exploitation. Cipher n\'accède jamais à vos données biométriques.</string>
     <string name="privacy_network_title">Accès réseau</string>
-    <string name="privacy_network_body">Tous les calculs financiers, l\'analyse des transactions et le stockage de la base de données s\'exécutent à 100 % localement et hors ligne sur votre appareil. L\'accès réseau est strictement utilisé pour vérifier les clés de licence cryptographiques Pro. Aucun SDK de suivi, analyse ou publicité.</string>
+    <string name="privacy_network_body">Tous les calculs financiers, l\'analyse des transactions et le stockage de la base de données s\'exécutent à 100 % localement et hors ligne sur votre appareil. L\'accès réseau est utilisé uniquement pour les achats via Google Play et, dans les versions installées hors de Google Play, pour rechercher les mises à jour de l\'application sur GitHub. Aucun SDK de suivi, outil d\'analyse, rapport de plantage ni publicité.</string>
     <string name="privacy_exports_title">Exportations et Sauvegardes</string>
     <string name="privacy_exports_body">Lors d\'un export CSV, PDF ou d\'une sauvegarde automatique, les fichiers sont enregistrés dans le dossier de votre choix. Les sauvegardes sont chiffrées avec votre mot de passe.</string>
     <string name="privacy_open_source_title">Open Source</string>

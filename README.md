@@ -67,7 +67,7 @@ Bank sends SMS alert           App sends Notification
   DashboardViewModel ──► UI (Jetpack Compose)
 ```
 
-All financial transactions, parsing, categorization, and database operations run 100% locally and offline on your device. Network access is used solely for Pro license key validation and device seat management. No financial data ever leaves your device.
+All financial transactions, parsing, categorization, and database operations run 100% locally and offline on your device. Network access is used only for Google Play purchases and, in builds installed outside Google Play, for update checks. No financial data ever leaves your device.
 
 ---
 

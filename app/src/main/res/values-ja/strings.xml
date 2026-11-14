@@ -289,7 +289,7 @@
     <string name="privacy_biometrics_title">生体認証</string>
     <string name="privacy_biometrics_body">生体認証ロックを有効にすると、認証はOS側で完結します。Cipherが生体認証データにアクセスすることはありません。</string>
     <string name="privacy_network_title">ネットワークアクセス</string>
-    <string name="privacy_network_body">すべての財務計算、取引解析、データベース保存は、デバイス上で100%ローカルかつオフラインで実行されます。ネットワーク通信は、暗号化されたProライセンスキーの検証にのみ使用されます。トラッキングSDK、アナリティクス、広告は一切ありません。</string>
+    <string name="privacy_network_body">すべての財務計算、取引解析、データベース保存は、デバイス上で100%ローカルかつオフラインで実行されます。ネットワーク通信は、Google Playでの購入と、Google Play以外からインストールしたビルドでのGitHubによるアプリ更新の確認にのみ使用されます。トラッキングSDK、アナリティクス、クラッシュレポーター、広告は一切ありません。</string>
     <string name="privacy_exports_title">エクスポートと自動バックアップ</string>
     <string name="privacy_exports_body">CSVやPDF明細のエクスポート、自動バックアップを設定する際、ファイルは選択したストレージに直接保存されます。データベースのバックアップは設定したパスワードで暗号化されます。Cipherがこのデータを外部へ送信することはありません。</string>
     <string name="privacy_open_source_title">オープンソース</string>
