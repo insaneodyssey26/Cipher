@@ -222,6 +222,10 @@
     <string name="clear_all_data_title">Alle Daten löschen</string>
     <string name="enable_auto_backup_title">Automatisches Backup aktivieren</string>
     <string name="enable_auto_backup_desc">Sichern Sie Ihren Tresor unbemerkt lokal</string>
+    <string name="auto_backup_prompt_title">Automatisches Backup aktivieren?</string>
+    <string name="auto_backup_prompt_desc">Ihre Daten wurden erfolgreich wiederhergestellt. Auf diesem Gerät ist die automatische Sicherung derzeit deaktiviert. Möchten Sie jetzt einen Ordner auswählen und aktivieren?</string>
+    <string name="action_enable_now">Jetzt aktivieren</string>
+    <string name="action_maybe_later">Vielleicht später</string>
     <string name="auto_backup_folder_required">Bitte wählen Sie einen Sicherungsordner aus, um die automatische Sicherung zu aktivieren</string>
     <string name="backup_frequency_title">Backup-Häufigkeit</string>
     <string name="backup_location_title">Backup-Speicherort</string>

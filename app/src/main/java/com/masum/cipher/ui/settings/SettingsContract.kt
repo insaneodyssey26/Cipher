@@ -137,5 +137,6 @@ class SettingsContract {
 
     sealed class Effect : UiEffect {
         data class ShowToast(val message: String) : Effect()
+        data object ShowAutoBackupPrompt : Effect()
     }
 }

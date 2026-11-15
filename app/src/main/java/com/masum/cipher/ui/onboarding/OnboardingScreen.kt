@@ -168,6 +168,7 @@ fun OnboardingScreen(
     var showQuickLangDialog by remember { mutableStateOf(false) }
 
     var showCompletionDialog by remember { mutableStateOf(false) }
+    var showPostRestoreAutoBackupDialog by remember { mutableStateOf(false) }
     var completedSelectedApps by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     val restoreViewModel: RestoreBackupViewModel = hiltViewModel()
@@ -281,7 +282,13 @@ fun OnboardingScreen(
                                     val hasTrackedApps = userPreferences.settingsFlow.first().trackedApps.isNotEmpty()
                                     when (stepAfterPermissions(restoredFromBackup, hasTrackedApps)) {
                                         PostPermissionStep.SELECT_APPS -> page = PERMISSION_PAGE + 1
-                                        PostPermissionStep.FINISH -> onComplete()
+                                        PostPermissionStep.FINISH -> {
+                                            if (restoredFromBackup && !userPreferences.settingsFlow.first().autoBackupEnabled) {
+                                                showPostRestoreAutoBackupDialog = true
+                                            } else {
+                                                onComplete()
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -334,7 +341,56 @@ fun OnboardingScreen(
         OnboardingWelcomeCompleteModal(
             onEnterVault = {
                 showCompletionDialog = false
+                if (restoredFromBackup) {
+                    coroutineScope.launch {
+                        if (!userPreferences.settingsFlow.first().autoBackupEnabled) {
+                            showPostRestoreAutoBackupDialog = true
+                        } else {
+                            onComplete()
+                        }
+                    }
+                } else {
+                    onComplete()
+                }
+            }
+        )
+    }
+
+    if (showPostRestoreAutoBackupDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showPostRestoreAutoBackupDialog = false
                 onComplete()
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            title = { Text(stringResource(R.string.auto_backup_prompt_title), style = Typography.titleLarge, color = MaterialTheme.colorScheme.onSurface) },
+            text = {
+                Text(
+                    text = stringResource(R.string.auto_backup_prompt_desc),
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showPostRestoreAutoBackupDialog = false
+                        onComplete()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.action_enable_now), color = MaterialTheme.colorScheme.onSurface)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showPostRestoreAutoBackupDialog = false
+                        onComplete()
+                    }
+                ) {
+                    Text(stringResource(R.string.action_maybe_later), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         )
     }

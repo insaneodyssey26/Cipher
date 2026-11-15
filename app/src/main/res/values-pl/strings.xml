@@ -222,6 +222,10 @@
     <string name="clear_all_data_title">Wyczyść wszystkie dane</string>
     <string name="enable_auto_backup_title">Włącz automatyczną kopię zapasową</string>
     <string name="enable_auto_backup_desc">Dyskretnie twórz lokalną kopię zapasową sejfu</string>
+    <string name="auto_backup_prompt_title">Włączyć automatyczną kopię zapasową?</string>
+    <string name="auto_backup_prompt_desc">Pomyślnie przywrócono dane. Automatyczna kopia zapasowa jest obecnie wyłączona na tym urządzeniu. Czy chcesz wybrać folder i włączyć ją teraz?</string>
+    <string name="action_enable_now">Włącz teraz</string>
+    <string name="action_maybe_later">Może później</string>
     <string name="auto_backup_folder_required">Wybierz folder, aby włączyć automatyczną kopię zapasową</string>
     <string name="backup_frequency_title">Częstotliwość kopii zapasowych</string>
     <string name="backup_location_title">Lokalizacja kopii zapasowej</string>

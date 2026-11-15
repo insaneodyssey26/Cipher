@@ -199,6 +199,7 @@ fun SettingsScreen(
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var isColorPickerExpanded by remember { mutableStateOf(false) }
     var showAutoBackupPasswordSetupDialog by remember { mutableStateOf(false) }
+    var showPostRestoreAutoBackupDialog by remember { mutableStateOf(false) }
     val revealPasswordPromptTitle = stringResource(R.string.show_backup_password_title)
     val revealPasswordPromptSubtitle = stringResource(R.string.show_backup_password_prompt)
     var autoBackupSetupPassword by remember { mutableStateOf("") }
@@ -253,8 +254,13 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
-            if (effect is SettingsContract.Effect.ShowToast) {
-                Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+            when (effect) {
+                is SettingsContract.Effect.ShowToast -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+                is SettingsContract.Effect.ShowAutoBackupPrompt -> {
+                    showPostRestoreAutoBackupDialog = true
+                }
             }
         }
     }
@@ -2104,6 +2110,24 @@ Spacer(modifier = Modifier.weight(1f))
                     )
                 )
             }
+        }
+    }
+
+    if (showPostRestoreAutoBackupDialog) {
+        VaultSettingsDialog(
+            title = stringResource(R.string.auto_backup_prompt_title),
+            onDismiss = { showPostRestoreAutoBackupDialog = false },
+            confirmText = stringResource(R.string.action_enable_now),
+            onConfirm = {
+                showPostRestoreAutoBackupDialog = false
+                showAutoBackupPasswordSetupDialog = true
+            }
+        ) {
+            Text(
+                text = stringResource(R.string.auto_backup_prompt_desc),
+                style = Typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 

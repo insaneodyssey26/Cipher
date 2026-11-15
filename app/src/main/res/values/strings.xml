@@ -228,6 +228,10 @@
     <string name="clear_all_data_title">Clear All Data</string>
     <string name="enable_auto_backup_title">Enable Auto-Backup</string>
     <string name="enable_auto_backup_desc">Silently backup your vault locally</string>
+    <string name="auto_backup_prompt_title">Enable Auto-Backup?</string>
+    <string name="auto_backup_prompt_desc">Your data was restored successfully. Auto-backup is currently disabled on this device. Would you like to choose a folder and enable scheduled backups now?</string>
+    <string name="action_enable_now">Enable Now</string>
+    <string name="action_maybe_later">Maybe Later</string>
     <string name="auto_backup_folder_required">Please select a backup folder to enable auto-backup</string>
     <string name="backup_frequency_title">Backup Frequency</string>
     <string name="backup_location_title">Backup Location</string>

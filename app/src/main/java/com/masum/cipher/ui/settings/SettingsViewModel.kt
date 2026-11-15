@@ -366,8 +366,16 @@ class SettingsViewModel @Inject constructor(
             val result = importDataUseCase(uri, password, clearExisting)
             updateState { copy(isImporting = false) }
             
-            val message = if (result.isSuccess) "Data imported successfully" else "Import failed: ${result.exceptionOrNull()?.message}"
-            emitEffect(SettingsContract.Effect.ShowToast(message))
+            if (result.isSuccess) {
+                val currentSettings = userPreferences.settingsFlow.first()
+                if (!currentSettings.autoBackupEnabled) {
+                    emitEffect(SettingsContract.Effect.ShowAutoBackupPrompt)
+                } else {
+                    emitEffect(SettingsContract.Effect.ShowToast("Data imported successfully"))
+                }
+            } else {
+                emitEffect(SettingsContract.Effect.ShowToast("Import failed: ${result.exceptionOrNull()?.message}"))
+            }
         }
     }
 

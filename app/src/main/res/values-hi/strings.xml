@@ -221,6 +221,10 @@
     <string name="clear_all_data_title">सभी डेटा हटाएं</string>
     <string name="enable_auto_backup_title">ऑटो-बैकअप सक्षम करें</string>
     <string name="enable_auto_backup_desc">स्थानीय रूप से अपने वॉल्ट का बैकअप लें</string>
+    <string name="auto_backup_prompt_title">ऑटो-बैकअप सक्षम करें?</string>
+    <string name="auto_backup_prompt_desc">आपका डेटा सफलतापूर्वक पुनर्स्थापित हो गया है। इस डिवाइस पर वर्तमान में ऑटो-बैकअप अक्षम है। क्या आप एक फ़ोल्डर चुनकर अभी इसे सक्षम करना चाहते हैं?</string>
+    <string name="action_enable_now">अभी सक्षम करें</string>
+    <string name="action_maybe_later">बाद में</string>
     <string name="auto_backup_folder_required">ऑटो-बैकअप सक्षम करने के लिए कृपया एक बैकअप फ़ोल्डर चुनें</string>
     <string name="backup_frequency_title">बैकअप आवृत्ति</string>
     <string name="backup_location_title">बैकअप स्थान</string>
