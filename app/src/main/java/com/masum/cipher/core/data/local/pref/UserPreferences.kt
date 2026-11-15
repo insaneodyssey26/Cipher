@@ -357,7 +357,7 @@ class UserPreferences @Inject constructor(
             notifySubscriptions = preferences[Keys.NOTIFY_SUBSCRIPTIONS] ?: true,
             notifyNewAppDetected = preferences[Keys.NOTIFY_NEW_APP_DETECTED] ?: true,
             notifyAppUpdates = preferences[Keys.NOTIFY_APP_UPDATES] ?: true,
-            notifyDuplicates = preferences[Keys.NOTIFY_DUPLICATES] ?: false,
+            notifyDuplicates = preferences[Keys.NOTIFY_DUPLICATES] ?: true,
             lastNotifiedUpdateVersionCode = preferences[Keys.LAST_NOTIFIED_UPDATE_VERSION_CODE] ?: 0,
             ignoredSubscriptions = preferences[Keys.IGNORED_SUBSCRIPTIONS] ?: emptySet(),
             categoryBudgets = preferences[Keys.CATEGORY_BUDGETS]?.let { jsonStr ->
@@ -928,7 +928,7 @@ data class UserSettings(
     val notifySubscriptions: Boolean = true,
     val notifyNewAppDetected: Boolean = true,
     val notifyAppUpdates: Boolean = true,
-    val notifyDuplicates: Boolean = false,
+    val notifyDuplicates: Boolean = true,
     val lastNotifiedUpdateVersionCode: Int = 0,
     val ignoredSubscriptions: Set<String> = emptySet(),
     val categoryBudgets: Map<String, Double> = emptyMap(),

@@ -39,6 +39,9 @@ class NotificationActionReceiver : BroadcastReceiver() {
     @Inject
     lateinit var skipSubscriptionUseCase: com.masum.cipher.core.domain.usecase.SkipSubscriptionUseCase
 
+    @Inject
+    lateinit var widgetSyncManager: com.masum.cipher.core.domain.usecase.WidgetSyncManager
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -207,9 +210,17 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     accountId = accountId
                 )
                 transactionRepository.insertTransaction(tx)
+                try {
+                    widgetSyncManager.syncWidget()
+                } catch (_: Exception) {}
                 if (notificationId != -1) {
                     NotificationManagerCompat.from(context).cancel(notificationId)
                 }
+            }
+        } else if (intent.action == ACTION_DISCARD_DUPLICATE_TRANSACTION) {
+            val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            if (notificationId != -1) {
+                NotificationManagerCompat.from(context).cancel(notificationId)
             }
         }
     }
@@ -230,6 +241,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
         const val ACTION_DISCARD_TRANSACTION = "com.masum.cipher.ACTION_DISCARD_TRANSACTION"
         const val ACTION_KEEP_TRANSACTION = "com.masum.cipher.ACTION_KEEP_TRANSACTION"
         const val ACTION_SAVE_DUPLICATE_TRANSACTION = "com.masum.cipher.ACTION_SAVE_DUPLICATE_TRANSACTION"
+        const val ACTION_DISCARD_DUPLICATE_TRANSACTION = "com.masum.cipher.ACTION_DISCARD_DUPLICATE_TRANSACTION"
         const val KEY_TEXT_REPLY = "key_text_reply"
         const val KEY_ACCOUNT_CHOICE = "key_account_choice"
         const val EXTRA_TRANSACTION_ID = "extra_transaction_id"

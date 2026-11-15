@@ -26,6 +26,7 @@ class NotificationActionReceiverTest {
     private val subscriptionDao = mock<SubscriptionDao>()
     private val approveSubscriptionUseCase = mock<ApproveSubscriptionUseCase>()
     private val skipSubscriptionUseCase = mock<SkipSubscriptionUseCase>()
+    private val widgetSyncManager = mock<com.masum.cipher.core.domain.usecase.WidgetSyncManager>()
     private val context = mock<Context>()
 
     private lateinit var receiver: NotificationActionReceiver
@@ -39,6 +40,7 @@ class NotificationActionReceiverTest {
             this.subscriptionDao = this@NotificationActionReceiverTest.subscriptionDao
             this.approveSubscriptionUseCase = this@NotificationActionReceiverTest.approveSubscriptionUseCase
             this.skipSubscriptionUseCase = this@NotificationActionReceiverTest.skipSubscriptionUseCase
+            this.widgetSyncManager = this@NotificationActionReceiverTest.widgetSyncManager
         }
         whenever(context.applicationContext).thenReturn(context)
     }
@@ -89,5 +91,24 @@ class NotificationActionReceiverTest {
 
         verify(skipSubscriptionUseCase).invoke(sub)
         verify(approveSubscriptionUseCase, never()).invoke(any())
+    }
+
+    @Test
+    fun saveDuplicateIntentInsertsTransactionAndSyncsWidget(): Unit = runBlocking {
+        val intent = mock<Intent>()
+        whenever(intent.action).thenReturn(NotificationActionReceiver.ACTION_SAVE_DUPLICATE_TRANSACTION)
+        whenever(intent.getDoubleExtra(org.mockito.kotlin.eq("amount"), any())).thenReturn(50.0)
+        whenever(intent.getStringExtra("merchant")).thenReturn("Starbucks")
+        whenever(intent.getStringExtra("currency")).thenReturn("INR")
+        whenever(intent.getLongExtra(org.mockito.kotlin.eq("timestamp"), any())).thenReturn(1700000000000L)
+        whenever(intent.getStringExtra("category")).thenReturn("Food")
+        whenever(intent.getBooleanExtra(org.mockito.kotlin.eq("is_income"), any())).thenReturn(false)
+        whenever(intent.getIntExtra(org.mockito.kotlin.eq(NotificationActionReceiver.EXTRA_NOTIFICATION_ID), any())).thenReturn(8001)
+
+        receiver.handleAction(context, intent)
+        Thread.sleep(200)
+
+        verify(transactionRepository).insertTransaction(any())
+        verify(widgetSyncManager).syncWidget()
     }
 }

@@ -219,33 +219,6 @@ class LocalNotificationManager @Inject constructor(
         }
     }
 
-    fun showMonthlyWrappedNotification(monthName: String) {
-        scope.launch {
-            val settings = userPreferences.settingsFlow.first()
-            if (!settings.notifyMonthlyWrapped) return@launch
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-            ) return@launch
-
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pendingIntent = PendingIntent.getActivity(context, 4, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-            val builder = NotificationCompat.Builder(context, CHANNEL_SUMMARIES)
-                .setSmallIcon(com.masum.cipher.R.drawable.ic_notification)
-                .setColor("#4F46E5".toColorInt())
-                .setContentTitle("Your $monthName Wrap-up")
-                .setContentText("Your spending report for $monthName is ready! See how you did.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-
-            with(NotificationManagerCompat.from(context)) { notify(1005, builder.build()) }
-        }
-    }
-
     fun showUncategorizedReminderNotification(count: Int) {
         scope.launch {
             val settings = userPreferences.settingsFlow.first()
@@ -587,8 +560,26 @@ class LocalNotificationManager @Inject constructor(
 
             val saveAction = NotificationCompat.Action.Builder(
                 com.masum.cipher.R.drawable.ic_notification,
-                context.getString(R.string.notify_action_save_anyway),
+                context.getString(R.string.notify_action_add_to_dashboard),
                 savePendingIntent
+            ).build()
+
+            val skipIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                action = NotificationActionReceiver.ACTION_DISCARD_DUPLICATE_TRANSACTION
+                putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            }
+
+            val skipPendingIntent = PendingIntent.getBroadcast(
+                context,
+                notificationId + 1,
+                skipIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val skipAction = NotificationCompat.Action.Builder(
+                com.masum.cipher.R.drawable.ic_notification,
+                context.getString(R.string.notify_action_skip),
+                skipPendingIntent
             ).build()
 
             val amountStr = com.masum.cipher.core.util.AppFormatters.formatCurrency(transaction.amount, settings.currencySymbol, decimals = 0)
@@ -602,6 +593,7 @@ class LocalNotificationManager @Inject constructor(
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .addAction(saveAction)
+                .addAction(skipAction)
                 .setAutoCancel(true)
 
             with(NotificationManagerCompat.from(context)) { notify(notificationId, builder.build()) }

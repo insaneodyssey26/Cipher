@@ -827,9 +827,11 @@
     <string name="notify_action_discard">Discard</string>
     <string name="notify_action_keep">Keep</string>
     <string name="notify_action_save_anyway">Save Anyway</string>
+    <string name="notify_action_add_to_dashboard">Add to Dashboard</string>
+    <string name="notify_action_skip">Skip</string>
     <string name="notify_title_review_transaction">Review Transaction</string>
-    <string name="notify_title_duplicate_transaction">Duplicate Transaction Skipped</string>
-    <string name="notify_desc_duplicate_transaction">%1$s at %2$s matched a recent transaction.</string>
+    <string name="notify_title_duplicate_transaction">Potential Duplicate Transaction</string>
+    <string name="notify_desc_duplicate_transaction">Detected %1$s at %2$s. Did you make this payment twice?</string>
     <string name="notify_account_updated_title">Account Updated</string>
     <string name="notify_account_updated_desc">Assigned to %1$s</string>
     <string name="pro_gate_custom_categories_title">Custom Categories Limit</string>
