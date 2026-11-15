@@ -62,7 +62,6 @@ class SettingsViewModel @Inject constructor(
             is SettingsContract.Intent.SetNotifyAllTransactions -> updateNotifyAllTransactions(intent.enabled)
             is SettingsContract.Intent.SetNotifyBudgetAlerts -> updateNotifyBudgetAlerts(intent.enabled)
             is SettingsContract.Intent.SetNotifyDailySummary -> updateNotifyDailySummary(intent.enabled)
-            is SettingsContract.Intent.SetNotifyMonthlyWrapped -> updateNotifyMonthlyWrapped(intent.enabled)
             is SettingsContract.Intent.SetNotifyUncategorizedReminder -> updateNotifyUncategorizedReminder(intent.enabled)
             is SettingsContract.Intent.SetNotifySubscriptions -> updateNotifySubscriptions(intent.enabled)
             is SettingsContract.Intent.SetNotifyNewAppDetected -> updateNotifyNewAppDetected(intent.enabled)
@@ -133,7 +132,6 @@ class SettingsViewModel @Inject constructor(
                         notifyAllTransactions = settings.notifyAllTransactions,
                         notifyBudgetAlerts = settings.notifyBudgetAlerts,
                         notifyDailySummary = settings.notifyDailySummary,
-                        notifyMonthlyWrapped = settings.notifyMonthlyWrapped,
                         notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
                         notifySubscriptions = settings.notifySubscriptions,
                         notifyNewAppDetected = settings.notifyNewAppDetected,
@@ -204,13 +202,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setNotifyDailySummary(enabled)
             updateState { copy(notifyDailySummary = enabled) }
-        }
-    }
-
-    private fun updateNotifyMonthlyWrapped(enabled: Boolean) {
-        viewModelScope.launch {
-            userPreferences.setNotifyMonthlyWrapped(enabled)
-            updateState { copy(notifyMonthlyWrapped = enabled) }
         }
     }
 

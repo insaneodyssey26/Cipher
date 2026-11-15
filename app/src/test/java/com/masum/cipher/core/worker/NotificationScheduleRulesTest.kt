@@ -19,12 +19,4 @@ class NotificationScheduleRulesTest {
         assertFalse(shouldSendDailySummary(hourOfDay = 20, today = 100L, lastSentDay = 100L))
         assertTrue(shouldSendDailySummary(hourOfDay = 20, today = 101L, lastSentDay = 100L))
     }
-
-    @Test
-    fun monthlyWrappedOnlySendsOnTheFirstAndOncePerMonth() {
-        assertFalse(shouldSendMonthlyWrapped(dayOfMonth = 2, monthKey = 202611, lastSentKey = 202610))
-        assertTrue(shouldSendMonthlyWrapped(dayOfMonth = 1, monthKey = 202611, lastSentKey = 202610))
-        assertFalse(shouldSendMonthlyWrapped(dayOfMonth = 1, monthKey = 202611, lastSentKey = 202611))
-        assertTrue(shouldSendMonthlyWrapped(dayOfMonth = 1, monthKey = 202701, lastSentKey = 202612))
-    }
 }

@@ -288,14 +288,13 @@ fun SettingsScreen(
     val matchNotifyTx = query.isBlank() || "transaction alerts".contains(query) || "interactive transaction alerts".contains(query)
     val matchNotifyBudget = query.isBlank() || "budget alerts".contains(query) || "budget warnings".contains(query)
     val matchNotifyDaily = query.isBlank() || "daily spending summary".contains(query) || "daily summary".contains(query)
-    val matchNotifyMonthly = query.isBlank() || "monthly wrapped".contains(query) || "monthly wrap-up".contains(query)
     val matchNotifySubs = query.isBlank() || "subscription reminders".contains(query) || "recurring subscriptions".contains(query)
     val matchNotifyUncategorized = query.isBlank() || "uncategorized reminders".contains(query) || "action needed".contains(query)
     val matchNotifyApp = query.isBlank() || "new app suggestions".contains(query) || "payment app detected".contains(query)
     val matchNotifyUpdates = query.isBlank() || "update notifications".contains(query) || "app updates".contains(query) || "update".contains(query)
     val matchNotifyDuplicates = query.isBlank() || "duplicate transactions".contains(query) || "duplicate".contains(query) || "duplicates".contains(query)
     val matchNotifySystem = query.isBlank() || "system notification channels".contains(query) || "notification channels".contains(query)
-    val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifyMonthly || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifyUpdates || matchNotifyDuplicates || matchNotifySystem
+    val matchNotifications = query.isBlank() || "notifications".contains(query) || "alerts".contains(query) || matchNotifyTx || matchNotifyBudget || matchNotifyDaily || matchNotifySubs || matchNotifyUncategorized || matchNotifyApp || matchNotifyUpdates || matchNotifyDuplicates || matchNotifySystem
 
     val matchBudget = query.isBlank() || "monthly budget".contains(query) || "budget".contains(query)
     val matchGoals = query.isBlank() || "financial goals".contains(query) || matchBudget
@@ -1086,17 +1085,6 @@ Column(modifier = Modifier.fillMaxWidth()) {
                         onCheckedChange = { 
                             view.performVibrate(state.isHapticsEnabled, isLongPress = true)
                             viewModel.handleIntent(SettingsContract.Intent.SetNotifyDailySummary(it)) 
-                        }
-                    )
-                    if (matchNotifyMonthly) VaultSettingsSwitch(
-                        isHapticsEnabled = state.isHapticsEnabled,
-                        icon = LucideIcons.CalendarClock,
-                        title = stringResource(R.string.notify_monthly_title),
-                        description = stringResource(R.string.notify_monthly_desc),
-                        checked = state.notifyMonthlyWrapped,
-                        onCheckedChange = { 
-                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                            viewModel.handleIntent(SettingsContract.Intent.SetNotifyMonthlyWrapped(it)) 
                         }
                     )
                     if (matchNotifySubs) VaultSettingsSwitch(

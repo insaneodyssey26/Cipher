@@ -259,7 +259,6 @@ class UserPreferences @Inject constructor(
         val NOTIFY_ALL_TRANSACTIONS = booleanPreferencesKey("notify_all_transactions")
         val NOTIFY_BUDGET_ALERTS = booleanPreferencesKey("notify_budget_alerts")
         val NOTIFY_DAILY_SUMMARY = booleanPreferencesKey("notify_daily_summary")
-        val NOTIFY_MONTHLY_WRAPPED = booleanPreferencesKey("notify_monthly_wrapped")
         val NOTIFY_UNCATEGORIZED_REMINDER = booleanPreferencesKey("notify_uncategorized_reminder")
         val NOTIFY_SUBSCRIPTIONS = booleanPreferencesKey("notify_subscriptions")
         val NOTIFY_NEW_APP_DETECTED = booleanPreferencesKey("notify_new_app_detected")
@@ -354,7 +353,6 @@ class UserPreferences @Inject constructor(
             notifyAllTransactions = preferences[Keys.NOTIFY_ALL_TRANSACTIONS] ?: true,
             notifyBudgetAlerts = preferences[Keys.NOTIFY_BUDGET_ALERTS] ?: true,
             notifyDailySummary = preferences[Keys.NOTIFY_DAILY_SUMMARY] ?: true,
-            notifyMonthlyWrapped = preferences[Keys.NOTIFY_MONTHLY_WRAPPED] ?: true,
             notifyUncategorizedReminder = preferences[Keys.NOTIFY_UNCATEGORIZED_REMINDER] ?: true,
             notifySubscriptions = preferences[Keys.NOTIFY_SUBSCRIPTIONS] ?: true,
             notifyNewAppDetected = preferences[Keys.NOTIFY_NEW_APP_DETECTED] ?: true,
@@ -575,10 +573,6 @@ class UserPreferences @Inject constructor(
 
     suspend fun setNotifyDailySummary(enabled: Boolean) {
         context.dataStore.edit { it[Keys.NOTIFY_DAILY_SUMMARY] = enabled }
-    }
-
-    suspend fun setNotifyMonthlyWrapped(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.NOTIFY_MONTHLY_WRAPPED] = enabled }
     }
 
     suspend fun setNotifyUncategorizedReminder(enabled: Boolean) {
@@ -867,12 +861,6 @@ class UserPreferences @Inject constructor(
         syncPrefs.edit().putLong("last_daily_summary_day", epochDay).apply()
     }
 
-    fun getLastMonthlyWrappedKey(): Int = syncPrefs.getInt("last_monthly_wrapped_key", -1)
-
-    fun setLastMonthlyWrappedKey(key: Int) {
-        syncPrefs.edit().putInt("last_monthly_wrapped_key", key).apply()
-    }
-
     suspend fun setShowProBadge(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SHOW_PRO_BADGE] = enabled }
     }
@@ -936,7 +924,6 @@ data class UserSettings(
     val notifyAllTransactions: Boolean = true,
     val notifyBudgetAlerts: Boolean = true,
     val notifyDailySummary: Boolean = true,
-    val notifyMonthlyWrapped: Boolean = true,
     val notifyUncategorizedReminder: Boolean = true,
     val notifySubscriptions: Boolean = true,
     val notifyNewAppDetected: Boolean = true,

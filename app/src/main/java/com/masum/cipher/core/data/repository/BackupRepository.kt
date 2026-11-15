@@ -142,7 +142,6 @@ class BackupRepository @Inject constructor(
                 notifyAllTransactions = settings.notifyAllTransactions,
                 notifyBudgetAlerts = settings.notifyBudgetAlerts,
                 notifyDailySummary = settings.notifyDailySummary,
-                notifyMonthlyWrapped = settings.notifyMonthlyWrapped,
                 notifyUncategorizedReminder = settings.notifyUncategorizedReminder,
                 notifySubscriptions = settings.notifySubscriptions,
                 notifyNewAppDetected = settings.notifyNewAppDetected,
@@ -250,7 +249,6 @@ class BackupRepository @Inject constructor(
                 data.notifyAllTransactions?.let { userPreferences.setNotifyAllTransactions(it) }
                 data.notifyBudgetAlerts?.let { userPreferences.setNotifyBudgetAlerts(it) }
                 data.notifyDailySummary?.let { userPreferences.setNotifyDailySummary(it) }
-                data.notifyMonthlyWrapped?.let { userPreferences.setNotifyMonthlyWrapped(it) }
                 data.notifyUncategorizedReminder?.let { userPreferences.setNotifyUncategorizedReminder(it) }
                 data.notifySubscriptions?.let { userPreferences.setNotifySubscriptions(it) }
                 data.notifyNewAppDetected?.let { userPreferences.setNotifyNewAppDetected(it) }

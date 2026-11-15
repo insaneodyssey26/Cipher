@@ -17,7 +17,6 @@ class SettingsContract {
         data class SetNotifyAllTransactions(val enabled: Boolean) : Intent()
         data class SetNotifyBudgetAlerts(val enabled: Boolean) : Intent()
         data class SetNotifyDailySummary(val enabled: Boolean) : Intent()
-        data class SetNotifyMonthlyWrapped(val enabled: Boolean) : Intent()
         data class SetNotifyUncategorizedReminder(val enabled: Boolean) : Intent()
         data class SetNotifySubscriptions(val enabled: Boolean) : Intent()
         data class SetNotifyNewAppDetected(val enabled: Boolean) : Intent()
@@ -95,12 +94,11 @@ class SettingsContract {
         val notifyAllTransactions: Boolean = true,
         val notifyBudgetAlerts: Boolean = true,
         val notifyDailySummary: Boolean = true,
-        val notifyMonthlyWrapped: Boolean = true,
         val notifyUncategorizedReminder: Boolean = true,
         val notifySubscriptions: Boolean = true,
         val notifyNewAppDetected: Boolean = true,
         val notifyAppUpdates: Boolean = true,
-        val notifyDuplicates: Boolean = false,
+        val notifyDuplicates: Boolean = true,
         val isHapticsEnabled: Boolean = true,
         val currencyCode: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().code,
         val currencySymbol: String = com.masum.cipher.core.domain.model.AppCurrency.detectDefault().symbol,

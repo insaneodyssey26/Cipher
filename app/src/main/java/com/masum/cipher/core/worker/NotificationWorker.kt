@@ -33,9 +33,7 @@ class NotificationWorker(
         val userPreferences = entryPoint.userPreferences()
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         val today = LocalDate.now().toEpochDay()
-        val monthKey = calendar.get(Calendar.YEAR) * 100 + calendar.get(Calendar.MONTH) + 1
 
         if (shouldSendDailySummary(hour, today, userPreferences.getLastDailySummaryDay())) {
             val startOfDay = getStartOfDay()
@@ -49,12 +47,6 @@ class NotificationWorker(
             }
         }
 
-        if (shouldSendMonthlyWrapped(dayOfMonth, monthKey, userPreferences.getLastMonthlyWrappedKey())) {
-            val lastMonth = getPreviousMonthName()
-            notificationManager.showMonthlyWrappedNotification(lastMonth)
-            userPreferences.setLastMonthlyWrappedKey(monthKey)
-        }
-
         return Result.success()
     }
 
@@ -66,16 +58,7 @@ class NotificationWorker(
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
     }
-
-    private fun getPreviousMonthName(): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MONTH, -1)
-        return calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, java.util.Locale.getDefault()) ?: "Month"
-    }
 }
 
 internal fun shouldSendDailySummary(hourOfDay: Int, today: Long, lastSentDay: Long): Boolean =
     hourOfDay in 18..23 && lastSentDay != today
-
-internal fun shouldSendMonthlyWrapped(dayOfMonth: Int, monthKey: Int, lastSentKey: Int): Boolean =
-    dayOfMonth == 1 && lastSentKey != monthKey
