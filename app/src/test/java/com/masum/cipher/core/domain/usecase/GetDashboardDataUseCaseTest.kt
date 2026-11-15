@@ -45,7 +45,15 @@ class GetDashboardDataUseCaseTest {
         monthlyBudget = 0.0
     )
 
-    private fun tx(amount: Double, merchant: String, category: String, isIncome: Boolean = false, id: Long = 0L) = TransactionEntity(
+    private fun tx(
+        amount: Double,
+        merchant: String,
+        category: String,
+        isIncome: Boolean = false,
+        id: Long = 0L,
+        note: String? = null,
+        accountId: Long? = null
+    ) = TransactionEntity(
         id = id,
         amount = amount,
         merchant = merchant,
@@ -53,7 +61,9 @@ class GetDashboardDataUseCaseTest {
         category = category,
         timestamp = timeRange.startTime + 1000L,
         rawSms = null,
-        isIncome = isIncome
+        isIncome = isIncome,
+        note = note,
+        accountId = accountId
     )
 
     private fun stub(
@@ -177,6 +187,57 @@ class GetDashboardDataUseCaseTest {
 
         assertEquals(1, state.transactions.size)
         assertEquals("Amazon", state.transactions[0].merchant)
+    }
+
+    @Test
+    fun `search query matches note case insensitively`() {
+        stub(listOf(
+            tx(100.0, "Zomato", "FOOD", note = "Dinner with Sarah"),
+            tx(200.0, "Amazon", "SHOPPING", note = "Phone case")
+        ))
+
+        val state = invoke(query = "sarah")
+
+        assertEquals(1, state.transactions.size)
+        assertEquals("Zomato", state.transactions[0].merchant)
+    }
+
+    @Test
+    fun `search query matches numerical amount`() {
+        stub(listOf(
+            tx(1500.0, "Zomato", "FOOD"),
+            tx(200.0, "Amazon", "SHOPPING")
+        ))
+
+        val state = invoke(query = "1500")
+
+        assertEquals(1, state.transactions.size)
+        assertEquals("Zomato", state.transactions[0].merchant)
+    }
+
+    @Test
+    fun `search query matches account name`() {
+        val accountRepo: com.masum.cipher.core.data.repository.AccountRepository = mock()
+        whenever(accountRepo.getAllAccountsFlow()).thenReturn(flowOf(listOf(
+            com.masum.cipher.core.data.local.entity.AccountEntity(id = 1L, name = "HDFC Bank")
+        )))
+        val customUseCase = GetDashboardDataUseCase(repository, categoryRepository, userPreferences, accountRepo)
+
+        stub(listOf(
+            tx(100.0, "Coffee", "FOOD", accountId = 1L),
+            tx(200.0, "Tea", "FOOD", accountId = 2L)
+        ))
+
+        val state = runBlocking {
+            customUseCase(
+                query = "HDFC",
+                filter = DashboardFilter(),
+                timeRange = timeRange
+            ).first()
+        }
+
+        assertEquals(1, state.transactions.size)
+        assertEquals("Coffee", state.transactions[0].merchant)
     }
 
     // ─── totals and state fields ─────────────────────────────────────────

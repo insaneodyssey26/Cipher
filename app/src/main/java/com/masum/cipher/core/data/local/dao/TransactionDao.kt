@@ -36,7 +36,7 @@ interface TransactionDao {
     )
     fun getAccountFlowTotals(): Flow<List<AccountFlowTotals>>
 
-    @Query("SELECT * FROM transactions WHERE merchant LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%' ORDER BY timestamp DESC")
+    @Query("SELECT * FROM transactions WHERE merchant LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%' OR (note IS NOT NULL AND note LIKE '%' || :query || '%') OR CAST(amount AS TEXT) LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -266,6 +266,7 @@ class AccountDetailsViewModel @Inject constructor(
         filter: AccountTransactionFilter
     ): List<TransactionEntity> {
         val trimmedQuery = query.trim().lowercase()
+        val cleanQuery = trimmedQuery.replace(",", "")
         return list.filter { tx ->
             val matchesType = when (filter) {
                 AccountTransactionFilter.ALL -> true
@@ -276,7 +277,9 @@ class AccountDetailsViewModel @Inject constructor(
             val matchesQuery = trimmedQuery.isEmpty() ||
                 tx.merchant.lowercase().contains(trimmedQuery) ||
                 tx.category.lowercase().contains(trimmedQuery) ||
-                (tx.note?.lowercase()?.contains(trimmedQuery) == true)
+                (tx.note?.lowercase()?.contains(trimmedQuery) == true) ||
+                tx.amount.toString().contains(cleanQuery) ||
+                (cleanQuery.toDoubleOrNull() != null && tx.amount.toLong().toString() == cleanQuery)
             matchesType && matchesQuery
         }
     }

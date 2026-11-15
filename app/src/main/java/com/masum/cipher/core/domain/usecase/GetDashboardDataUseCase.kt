@@ -18,7 +18,8 @@ import javax.inject.Inject
 class GetDashboardDataUseCase @Inject constructor(
     private val repository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val accountRepository: com.masum.cipher.core.data.repository.AccountRepository? = null
 ) {
     operator fun invoke(
         query: String,
@@ -68,13 +69,25 @@ class GetDashboardDataUseCase @Inject constructor(
             }
             StateTuple(rangeInc, rangeExp, monthExp, monthInc, rangeBalance, settings.monthlyBudget, settings.isDynamicBudgetEnabled, deltaPercent, compLabel, prevExp, settings.currencyCode, settings.currencySymbol)
         }.flatMapLatest { stats ->
+            val accountsFlow = accountRepository?.getAllAccountsFlow() ?: kotlinx.coroutines.flow.flowOf(emptyList())
+
             val transactionsFlow = if (query.isBlank()) {
                 repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime)
             } else {
-                repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime).map { list ->
-                    list.filter {
-                        it.merchant.contains(query, ignoreCase = true) ||
-                        it.category.contains(query, ignoreCase = true)
+                combine(
+                    repository.getTransactionsBetween(timeRange.startTime, timeRange.endTime),
+                    accountsFlow
+                ) { list, accounts ->
+                    val accountMap = accounts.associateBy { it.id }
+                    val trimmedQuery = query.trim()
+                    val cleanQuery = trimmedQuery.replace(",", "")
+                    list.filter { tx ->
+                        tx.merchant.contains(trimmedQuery, ignoreCase = true) ||
+                        tx.category.contains(trimmedQuery, ignoreCase = true) ||
+                        (tx.note?.contains(trimmedQuery, ignoreCase = true) == true) ||
+                        tx.amount.toString().contains(cleanQuery) ||
+                        (cleanQuery.toDoubleOrNull() != null && tx.amount.toLong().toString() == cleanQuery) ||
+                        (tx.accountId != null && accountMap[tx.accountId]?.name?.contains(trimmedQuery, ignoreCase = true) == true)
                     }
                 }
             }
