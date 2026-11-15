@@ -426,6 +426,7 @@ fun SavingsGoalsView(
         activeAdjustGoal?.let { goal ->
             DepositWithdrawGoalSheet(
                 goal = goal,
+                accounts = state.accounts,
                 currencySymbol = state.currencySymbol,
                 isHapticsEnabled = state.isHapticsEnabled,
                 onDismiss = { activeAdjustGoal = null },
@@ -438,8 +439,8 @@ fun SavingsGoalsView(
                     viewModel.handleIntent(GoalsContract.Intent.DeleteGoal(goal))
                     activeAdjustGoal = null
                 },
-                onConfirmAdjust = { delta ->
-                    viewModel.handleIntent(GoalsContract.Intent.AdjustSavedAmount(goal.id, delta))
+                onConfirmAdjust = { delta, accountId ->
+                    viewModel.handleIntent(GoalsContract.Intent.AdjustSavedAmount(goal.id, delta, accountId))
                     activeAdjustGoal = null
                 }
             )

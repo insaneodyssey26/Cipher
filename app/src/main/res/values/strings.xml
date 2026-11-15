@@ -938,6 +938,9 @@
     <string name="goals_free_limit_desc">Unlock unlimited savings pots &amp; visual wealth goals with Pro</string>
     <string name="pro_gate_goals_title">Unlimited Savings Pots</string>
     <string name="pro_gate_goals_desc">You\'ve reached the limit of 2 savings pots on the free plan. Upgrade to Cipher Pro to create unlimited goals and pots.</string>
+    <string name="goals_sync_account_label">Update Account Balance</string>
+    <string name="goals_sync_account_deposit_desc">Deduct this amount from your selected account</string>
+    <string name="goals_sync_account_withdraw_desc">Credit this amount back to your selected account</string>
     <string name="database_recovery_title">Secure storage unavailable</string>
     <string name="database_recovery_message">Cipher can\'t unlock your encrypted data on this device. This can happen after moving the app to a new phone or restoring a device. Try again first. If it still fails, you can erase this device\'s data and restore from a Cipher backup file.</string>
     <string name="database_recovery_still_unavailable">Still unavailable. Try again later or erase and restore from a backup.</string>

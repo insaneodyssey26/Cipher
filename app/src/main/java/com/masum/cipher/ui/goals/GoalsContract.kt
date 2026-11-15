@@ -7,6 +7,7 @@ object GoalsContract {
     @Immutable
     data class State(
         val goals: List<GoalEntity> = emptyList(),
+        val accounts: List<com.masum.cipher.core.data.local.entity.AccountEntity> = emptyList(),
         val totalSaved: Double = 0.0,
         val totalTarget: Double = 0.0,
         val currencySymbol: String = "₹",
@@ -43,7 +44,8 @@ object GoalsContract {
 
         data class AdjustSavedAmount(
             val id: Long,
-            val delta: Double
+            val delta: Double,
+            val accountId: Long? = null
         ) : Intent
 
         data class DeleteGoal(val goal: GoalEntity) : Intent

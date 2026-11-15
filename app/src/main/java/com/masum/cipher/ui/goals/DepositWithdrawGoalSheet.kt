@@ -1,9 +1,20 @@
 package com.masum.cipher.ui.goals
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +31,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -52,6 +65,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import com.masum.cipher.core.data.local.entity.AccountEntity
 import com.masum.cipher.core.data.local.entity.GoalEntity
 import com.masum.cipher.core.domain.model.CategoryIconRegistry
 import com.masum.cipher.core.util.AppFormatters
@@ -62,6 +76,7 @@ import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.RoseExpense
 import com.masum.cipher.ui.theme.Typography
 import compose.icons.LucideIcons
+import compose.icons.lucideicons.Check
 import compose.icons.lucideicons.Minus
 import compose.icons.lucideicons.Pencil
 import compose.icons.lucideicons.Plus
@@ -71,12 +86,13 @@ import compose.icons.lucideicons.Trash2
 @Composable
 fun DepositWithdrawGoalSheet(
     goal: GoalEntity,
+    accounts: List<AccountEntity> = emptyList(),
     currencySymbol: String = "₹",
     isHapticsEnabled: Boolean = true,
     onDismiss: () -> Unit,
     onEditGoal: () -> Unit = {},
     onDeleteGoal: () -> Unit = {},
-    onConfirmAdjust: (delta: Double) -> Unit
+    onConfirmAdjust: (delta: Double, accountId: Long?) -> Unit
 ) {
     val view = LocalView.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -85,6 +101,10 @@ fun DepositWithdrawGoalSheet(
     var amountText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var syncWithAccount by remember { mutableStateOf(false) }
+    var selectedAccountId by remember(accounts) {
+        mutableStateOf(accounts.firstOrNull { it.isDefault }?.id ?: accounts.firstOrNull()?.id)
+    }
 
     val goalColor = Color(goal.colorHex.toInt())
     val icon = CategoryIconRegistry.getIcon(goal.iconName)
@@ -390,6 +410,148 @@ fun DepositWithdrawGoalSheet(
                 }
             }
 
+            if (accounts.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                        .padding(14.dp)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    syncWithAccount = !syncWithAccount
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.goals_sync_account_label),
+                                    style = Typography.labelMedium.copy(
+                                        fontFamily = DMSans,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.5.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = if (isDepositMode) {
+                                        stringResource(R.string.goals_sync_account_deposit_desc)
+                                    } else {
+                                        stringResource(R.string.goals_sync_account_withdraw_desc)
+                                    },
+                                    style = Typography.bodySmall.copy(
+                                        fontFamily = Lato,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = syncWithAccount,
+                                onCheckedChange = {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    syncWithAccount = it
+                                }
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = syncWithAccount,
+                            enter = expandVertically(
+                                animationSpec = tween(220, easing = FastOutSlowInEasing)
+                            ) + fadeIn(
+                                animationSpec = tween(180, easing = FastOutSlowInEasing)
+                            ),
+                            exit = shrinkVertically(
+                                animationSpec = tween(180, easing = FastOutSlowInEasing)
+                            ) + fadeOut(
+                                animationSpec = tween(140, easing = FastOutSlowInEasing)
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.dp)
+                                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
+                                )
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    accounts.forEach { acc ->
+                                        val isSelected = selectedAccountId == acc.id
+                                        val accColor = Color(acc.colorHex)
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(
+                                                    if (isSelected) accColor.copy(alpha = 0.18f)
+                                                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+                                                )
+                                                .border(
+                                                    width = if (isSelected) 1.5.dp else 1.dp,
+                                                    color = if (isSelected) accColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                )
+                                                .clickable {
+                                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                    selectedAccountId = acc.id
+                                                }
+                                                .padding(horizontal = 12.dp, vertical = 7.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(8.dp)
+                                                        .clip(CircleShape)
+                                                        .background(accColor)
+                                                )
+                                                Text(
+                                                    text = acc.name,
+                                                    style = Typography.labelMedium.copy(
+                                                        fontFamily = Lato,
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                        fontSize = 12.sp
+                                                    ),
+                                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = LucideIcons.Check,
+                                                        contentDescription = null,
+                                                        tint = accColor,
+                                                        modifier = Modifier.size(13.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             if (errorMessage != null) {
                 Text(
                     text = errorMessage ?: "",
@@ -425,7 +587,8 @@ fun DepositWithdrawGoalSheet(
 
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         val delta = if (isDepositMode) parsed else -parsed
-                        onConfirmAdjust(delta)
+                        val accountToSync = if (syncWithAccount) selectedAccountId else null
+                        onConfirmAdjust(delta, accountToSync)
                         onDismiss()
                     },
                 contentAlignment = Alignment.Center
