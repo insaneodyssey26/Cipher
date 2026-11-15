@@ -2,6 +2,7 @@ package com.masum.cipher.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -222,6 +223,7 @@ fun TransactionDetailsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val view = LocalView.current
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val merchantFocusRequester = remember { FocusRequester() }
     val noteFocusRequester = remember { FocusRequester() }
@@ -728,9 +730,14 @@ fun TransactionDetailsSheet(
                         activeColor = activeThemeColor,
                         onClick = {
                             view.performVibrate(isHapticsEnabled)
-                            isNoteExpanded = !isNoteExpanded
                             if (isNoteExpanded) {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                                isNoteExpanded = false
+                            } else {
+                                isNoteExpanded = true
                                 noteFocusRequester.requestFocus()
+                                keyboardController?.show()
                             }
                         }
                     )
@@ -764,52 +771,73 @@ fun TransactionDetailsSheet(
                         )
                     }
                 }
-            }
 
-            AnimatedVisibility(
-                visible = isNoteExpanded,
-                enter = expandVertically(animationSpec = tween(250)) + fadeIn(),
-                exit = shrinkVertically(animationSpec = tween(200)) + fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                AnimatedVisibility(
+                    visible = isNoteExpanded,
+                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) + fadeIn(animationSpec = tween(180)),
+                    exit = shrinkVertically(animationSpec = tween(180, easing = FastOutSlowInEasing)) + fadeOut(animationSpec = tween(140))
                 ) {
-                    BasicTextField(
-                        value = note,
-                        onValueChange = { if (it.length <= 150) note = it },
-                        textStyle = Typography.bodyMedium.copy(
-                            fontFamily = Lato,
-                            fontSize = 13.5.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        cursorBrush = SolidColor(activeThemeColor),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(noteFocusRequester),
-                        decorationBox = { inner ->
-                            if (note.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.note) + "...",
-                                    style = Typography.bodyMedium.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 13.5.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
+                            thickness = 1.dp
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            BasicTextField(
+                                value = note,
+                                onValueChange = { if (it.length <= 150) note = it },
+                                textStyle = Typography.bodyMedium.copy(
+                                    fontFamily = Lato,
+                                    fontSize = 13.5.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                                cursorBrush = SolidColor(activeThemeColor),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(noteFocusRequester),
+                                decorationBox = { inner ->
+                                    if (note.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.note) + "...",
+                                            style = Typography.bodyMedium.copy(
+                                                fontFamily = Lato,
+                                                fontSize = 13.5.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                            )
+                                        )
+                                    }
+                                    inner()
+                                }
+                            )
+
+                            if (note.isNotEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        view.performVibrate(isHapticsEnabled)
+                                        note = ""
+                                    },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.X,
+                                        contentDescription = "Clear note",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        modifier = Modifier.size(14.dp)
                                     )
-                                )
+                                }
                             }
-                            inner()
                         }
-                    )
+                    }
                 }
             }
 
