@@ -1016,7 +1016,7 @@ fun SubscriptionsCard(
                             style = Typography.titleLarge.copy(
                                 fontFamily = Lato,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp,
+                                fontSize = 19.sp,
                                 letterSpacing = (-0.5).sp
                             ),
                             color = MaterialTheme.colorScheme.onSurface
@@ -1281,7 +1281,7 @@ private fun NetWorthRow(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = AppFormatters.formatCurrency(state.totalNetWorth, state.currencySymbol, locale, decimals = 0),
-                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, letterSpacing = (-0.6).sp),
+                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, letterSpacing = (-0.5).sp),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )

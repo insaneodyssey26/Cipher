@@ -87,10 +87,9 @@ fun CipherTheme(
 
 
     val currentDensity = LocalDensity.current
-    val effectiveFontScale = (currentDensity.fontScale * fontScale).coerceIn(0.7f, 2.0f)
     val scaledDensity = Density(
         density = currentDensity.density,
-        fontScale = effectiveFontScale
+        fontScale = (currentDensity.fontScale * fontScale).coerceIn(0.7f, 2.0f)
     )
 
     MaterialTheme(

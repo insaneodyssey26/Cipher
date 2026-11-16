@@ -265,7 +265,7 @@ fun CategoryDetailSheet(
                     )
                     FitText(
                         text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale, decimals = 0),
-                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 34.sp, letterSpacing = (-1.0).sp),
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 48.sp, letterSpacing = (-1.6).sp),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         softWrap = false

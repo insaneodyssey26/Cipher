@@ -177,12 +177,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { updateSettingsUseCase.theme(theme) }
     }
 
-    private fun updateAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
-        viewModelScope.launch { updateSettingsUseCase.accentColor(color) }
-    }
-
     private fun updateFontScale(scale: Float) {
         viewModelScope.launch { updateSettingsUseCase.fontScale(scale) }
+    }
+
+    private fun updateAccentColor(color: com.masum.cipher.core.data.local.pref.AccentColor) {
+        viewModelScope.launch { updateSettingsUseCase.accentColor(color) }
     }
 
 

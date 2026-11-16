@@ -56,6 +56,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -65,6 +67,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -892,6 +898,21 @@ Column(modifier = Modifier.fillMaxWidth()) {
 
             if (matchFontSize) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                val fontSteps = listOf(0.90f, 1.00f, 1.10f, 1.20f)
+                val fontLabels = listOf(
+                    stringResource(R.string.font_size_compact),
+                    stringResource(R.string.font_size_default),
+                    stringResource(R.string.font_size_comfortable),
+                    stringResource(R.string.font_size_large)
+                )
+                var dragIndex by remember { mutableFloatStateOf(-1f) }
+                val savedIndex = fontSteps.indices.minByOrNull { kotlin.math.abs(fontSteps[it] - state.fontScale) } ?: 1
+                val shownIndex = if (dragIndex >= 0f) dragIndex.toInt() else savedIndex
+                val previewScale by animateFloatAsState(
+                    targetValue = fontSteps[shownIndex],
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+                    label = "fontPreviewScale"
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -907,14 +928,8 @@ Column(modifier = Modifier.fillMaxWidth()) {
                             style = Typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        val activeLabel = when {
-                            state.fontScale <= 0.92f -> stringResource(R.string.font_size_compact)
-                            state.fontScale in 0.93f..1.05f -> stringResource(R.string.font_size_default)
-                            state.fontScale in 1.06f..1.15f -> stringResource(R.string.font_size_comfortable)
-                            else -> stringResource(R.string.font_size_large)
-                        }
                         Text(
-                            text = activeLabel,
+                            text = fontLabels[shownIndex] + " · " + (fontSteps[shownIndex] * 100).toInt() + "%",
                             style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -922,68 +937,67 @@ Column(modifier = Modifier.fillMaxWidth()) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    val fontOptions = listOf(
-                        Triple(stringResource(R.string.font_size_compact), 0.90f, "90%"),
-                        Triple(stringResource(R.string.font_size_default), 1.00f, "100%"),
-                        Triple(stringResource(R.string.font_size_comfortable), 1.10f, "110%"),
-                        Triple(stringResource(R.string.font_size_large), 1.20f, "120%")
-                    )
-
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                             .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                            .padding(3.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            .padding(horizontal = 14.dp, vertical = 16.dp),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        fontOptions.forEach { (label, scaleVal, pct) ->
-                            val isSelected = kotlin.math.abs(state.fontScale - scaleVal) < 0.04f
-                            val activeBg = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-                            val activeText = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            val activeBorder = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color.Transparent
-
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(9.dp))
-                                    .background(activeBg)
-                                    .border(1.dp, activeBorder, RoundedCornerShape(9.dp))
-                                    .clickable {
-                                        if (!isSelected) {
-                                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
-                                            viewModel.handleIntent(SettingsContract.Intent.UpdateFontScale(scaleVal))
-                                        }
-                                    }
-                                    .padding(vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(1.dp)
-                                ) {
-                                    Text(
-                                        text = label,
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 11.5.sp
-                                        ),
-                                        color = activeText,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = pct,
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = DMSans,
-                                            fontSize = 9.5.sp
-                                        ),
-                                        color = activeText.copy(alpha = 0.75f)
-                                    )
-                                }
+                        Text(
+                            text = stringResource(R.string.font_size_preview),
+                            style = Typography.bodyLarge.copy(fontFamily = DMSans, fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.graphicsLayer {
+                                scaleX = previewScale
+                                scaleY = previewScale
+                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
                             }
-                        }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "A",
+                            style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Slider(
+                            value = if (dragIndex >= 0f) dragIndex else savedIndex.toFloat(),
+                            onValueChange = { v ->
+                                val snapped = v.toInt().coerceIn(0, fontSteps.lastIndex).toFloat()
+                                if (snapped != dragIndex) {
+                                    if (dragIndex >= 0f) view.performVibrate(state.isHapticsEnabled, isLongPress = false)
+                                    dragIndex = snapped
+                                }
+                            },
+                            onValueChangeFinished = {
+                                val idx = dragIndex.toInt()
+                                dragIndex = -1f
+                                if (idx in fontSteps.indices && idx != savedIndex) {
+                                    viewModel.handleIntent(SettingsContract.Intent.UpdateFontScale(fontSteps[idx]))
+                                }
+                            },
+                            valueRange = 0f..fontSteps.lastIndex.toFloat(),
+                            steps = fontSteps.size - 2,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant,
+                                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                                inactiveTickColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                        )
+                        Text(
+                            text = "A",
+                            style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

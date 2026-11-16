@@ -224,7 +224,7 @@ fun CategoriesScreen(
                     )
                     Text(
                         text = AppFormatters.formatCompactCurrency(totalExpense, currencySymbol = state.currencySymbol),
-                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, letterSpacing = (-1.0).sp),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 46.sp, letterSpacing = (-1.4).sp),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

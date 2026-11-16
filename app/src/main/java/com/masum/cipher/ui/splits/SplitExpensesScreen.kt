@@ -438,8 +438,8 @@ fun SplitExpensesScreen(
                                     style = androidx.compose.ui.text.TextStyle(
                                         fontFamily = com.masum.cipher.ui.theme.DMSans,
                                         fontWeight = FontWeight.SemiBold,
-                                        fontSize = 32.sp,
-                                        letterSpacing = (-1.0).sp
+                                        fontSize = 42.sp,
+                                        letterSpacing = (-1.2).sp
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1,
