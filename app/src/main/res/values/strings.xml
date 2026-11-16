@@ -407,6 +407,16 @@
     <string name="whats_new_header_title">Cipher Updates</string>
     <string name="whats_new_header_desc">Here is what changed across recent updates</string>
     <string name="whats_new_badge_latest">Latest</string>
+    <string name="whats_new_v650_look_title">New Look</string>
+    <string name="whats_new_v650_look_desc">Every screen has a cleaner, darker design with simpler cards and easier-to-read amounts.</string>
+    <string name="whats_new_v650_textsize_title">Text Size</string>
+    <string name="whats_new_v650_textsize_desc">Make text smaller or bigger across the app from Settings.</string>
+    <string name="whats_new_v650_goals_title">Goals Match Your Accounts</string>
+    <string name="whats_new_v650_goals_desc">Adding money to a goal or taking it out now updates the account you pick.</string>
+    <string name="whats_new_v650_search_title">Better Search</string>
+    <string name="whats_new_v650_search_desc">Find transactions by note, amount or account name.</string>
+    <string name="whats_new_v650_fixes_title">Fixes</string>
+    <string name="whats_new_v650_fixes_desc">Fixed a crash when closing a sheet, kept split expenses intact when editing, and sent summaries only once.</string>
     <string name="whats_new_v641_migration_title">Pro License Migration</string>
     <string name="whats_new_v641_migration_desc">Added an interactive prompt to help existing license owners pick their purchased plan and redeem their upgrade directly via Google Play.</string>
     <string name="whats_new_v641_password_title">Show Backup Password</string>

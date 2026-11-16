@@ -31,8 +31,8 @@ android {
         applicationId = "com.masum.cipher"
         minSdk = 26
         targetSdk = 37
-        versionCode = 63
-        versionName = "6.4.1"
+        versionCode = 64
+        versionName = "6.5.0"
         androidResources {
             localeFilters += listOf("en", "hi", "bn", "es", "fr", "de", "ja", "pl")
         }

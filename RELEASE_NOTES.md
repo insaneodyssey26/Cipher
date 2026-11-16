@@ -1,5 +1,25 @@
 # Release Notes
 
+## [6.5.0]
+
+### New & Improved
+- **New Look**: Every screen has a cleaner, darker design with simpler cards and easier-to-read amounts.
+- **Text Size**: Pick Compact, Default, Comfortable or Large in Settings to make text smaller or bigger across the app.
+- **Goals Match Your Accounts**: Adding money to a goal or taking it out now updates the balance of the account you pick.
+- **Better Search**: Search now finds transactions by note, amount or account name.
+- **Easier Notes**: The note box sits inside the transaction details and has a button to clear it.
+- **Backup Reminder**: After restoring on a new phone, Cipher asks if you want to turn on automatic backups.
+- **Notification Buttons**: Duplicate charge alerts now have buttons to open the app or skip the alert.
+
+### Fixed
+- Fixed a crash that could happen when closing a bottom sheet.
+- Editing a transaction no longer breaks the split expenses linked to it.
+- Daily and monthly summaries are now sent only once.
+- Fixed the status bar colors in light mode.
+- Backup files are now checked more carefully before they are restored.
+
+---
+
 ## [6.4.1]
 
 ### Improved & Fixed
