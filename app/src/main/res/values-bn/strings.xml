@@ -12,7 +12,6 @@
     <string name="widget_passbook_description">আপনার সাম্প্রতিক লেনদেনের লাইভ তালিকা</string>
     <string name="widget_daily_allowance_name">দৈনিক নিরাপদ খরচের সীমা</string>
     <string name="widget_daily_allowance_description">আজকের নিরাপদ খরচের বাজেট এবং নিয়ন্ত্রণ</string>
-    <string name="widget_pro_badge">প্রো</string>
     <string name="widget_pro_locked_msg">Cipher Pro দিয়ে আনলক করুন</string>
     <string name="widget_safe_to_spend_title">আজকের নিরাপদ খরচ</string>
     <string name="widget_net_worth_title">মোট নেট ওয়ার্থ</string>
@@ -21,7 +20,6 @@
     <string name="nav_spend">খরচ</string>
     <string name="nav_categories">বিভাগ</string>
     <string name="nav_insights">বিশ্লেষণ</string>
-    <string name="nav_splits">বিভাজন</string>
     <string name="nav_settings">সেটিংস</string>
 
     <string name="action_save">সংরক্ষণ করুন</string>
@@ -31,7 +29,6 @@
     <string name="action_edit">সম্পাদনা</string>
     <string name="action_search">অনুসন্ধান</string>
     <string name="action_close">বন্ধ করুন</string>
-    <string name="action_add_note">নোট যোগ করুন</string>
     <string name="action_add_transaction">লেনদেন যোগ করুন</string>
     <string name="action_show_all">সব দেখান</string>
     <string name="action_select">নির্বাচন করুন</string>
@@ -39,7 +36,6 @@
 
     <string name="dashboard_total_spent">মোট খরচ</string>
     <string name="dashboard_monthly_budget">মাসিক বাজেট</string>
-    <string name="dashboard_cash_flow">ক্যাশ ফ্লো</string>
     <string name="balance_label">ব্যালেন্স</string>
     <string name="income">আয়</string>
     <string name="expense">ব্যয়</string>
@@ -48,9 +44,6 @@
     <string name="net">নেট</string>
     <string name="more">বেশি</string>
     <string name="less">কম</string>
-    <string name="positive_flow">পজিটিভ ফ্লো</string>
-    <string name="active_flow">অ্যাক্টিভ ফ্লো</string>
-    <string name="no_activity">কোন কার্যকলাপ নেই</string>
     <string name="no_transactions_found">কোন লেনদেন পাওয়া যায়নি</string>
 
     <string name="period_this_week">এই সপ্তাহ</string>
@@ -240,7 +233,6 @@
     <string name="diagnostics_desc">ক্র্যাশ লগ দেখুন ও অনুলিপি করুন</string>
     <string name="contact_dev_title">ডেভেলপারের সাথে যোগাযোগ করুন</string>
     <string name="open_source_title">ওপেন সোর্স</string>
-    <string name="privacy_policy_title">গোপনীয়তা নীতি</string>
     <string name="support_dev_title">উন্নয়নে সমর্থন করুন</string>
     <string name="delete_all_data_dialog_title">সমস্ত ডেটা মুছে ফেলবেন?</string>
     <string name="delete_all_data_dialog_desc">এই পদক্ষেপটি স্থায়ী এবং পূর্বাবস্থায় ফিরিয়ে আনা যাবে না।</string>
@@ -259,7 +251,6 @@
     <string name="action_fix">ঠিক করুন</string>
     <string name="status_granted">অনুমোদিত</string>
     <string name="smart_rules_title">স্মার্ট নিয়ম</string>
-    <string name="smart_rules_empty">এখনও কোনও কাস্টম নিয়ম নেই।\nআপনি যখন কোনও লেনদেনের ক্যাটাগরি সম্পাদনা করবেন তখন নিয়ম তৈরি হবে।</string>
     <string name="smart_rules_tab_categories">ক্যাটাগরি</string>
     <string name="smart_rules_tab_merchants">মার্চেন্ট নাম</string>
     <string name="smart_rules_empty_categories">এখনো কোনো ক্যাটাগরি নিয়ম নেই।\nলেনদেনের ক্যাটাগরি পরিবর্তন করলে নিয়ম তৈরি হয়।</string>
@@ -272,7 +263,6 @@
     <string name="smart_rules_dialog_dismiss">না, শুধু এইবার</string>
     <string name="smart_rules_raw_merchant_label">মূল / SMS মার্চেন্ট নাম</string>
     <string name="smart_rules_clean_merchant_label">নতুন মার্চেন্ট নাম</string>
-    <string name="smart_rules_renamed_to">পরিবর্তিত নাম %1$s</string>
     <string name="smart_rules_always_as">সর্বদা %1$s হিসেবে</string>
     <string name="smart_rules_dialog_new">নতুন নিয়ম</string>
     <string name="smart_rules_dialog_edit">নিয়ম সম্পাদনা</string>
@@ -382,7 +372,6 @@
     <string name="whats_new_v616_license_desc">ব্যাকআপ রিস্টোর করার পর নতুন ফোনে Pro এখন নিজে থেকেই সক্রিয় হয়, এবং আপনার প্ল্যানের নবায়নের তারিখ সঠিকভাবে দেখানো হয়।</string>
     <string name="whats_new_btn_ack">দারুণ</string>
     <string name="settings_tap_for_whats_new">আপডেট</string>
-    <string name="split_expense">খরচ ভাগ করুন</string>
     <string name="split_title">খরচ ভাগ করুন</string>
     <string name="split_mode_equal">সমানভাবে</string>
     <string name="split_mode_exact">নির্দিষ্ট পরিমাণ</string>
@@ -445,7 +434,6 @@
     <string name="custom_category_new_title">নতুন ক্যাটাগরি</string>
     <string name="custom_category_edit_title">ক্যাটাগরি সম্পাদনা</string>
     <string name="custom_category_subtitle">আইকন এবং রঙ দিয়ে কাস্টমাইজ করুন</string>
-    <string name="custom_category_name_label">ক্যাটাগরির নাম</string>
     <string name="custom_category_name_placeholder">যেমন: ফিটনেস ও জিম</string>
     <string name="custom_category_select_icon">আইকন নির্বাচন করুন</string>
     <string name="custom_category_select_color">রঙ নির্বাচন করুন</string>
@@ -456,28 +444,12 @@
     <string name="custom_category_delete_confirm_desc">এই ক্যাটাগরির লেনদেনগুলো স্বয়ংক্রিয়ভাবে সাধারণ (General) ক্যাটাগরিতে স্থানান্তরিত হবে।</string>
     <string name="custom_category_error_empty">ক্যাটাগরির নাম খালি রাখা যাবে না</string>
     <string name="custom_category_error_exists">এই নামের ক্যাটাগরি ইতিমধ্যে রয়েছে</string>
-    <string name="custom_category_section_default">ডিফল্ট ক্যাটাগরি</string>
-    <string name="custom_category_section_custom">কাস্টম ক্যাটাগরি</string>
-    <string name="custom_category_add_btn">ক্যাটাগরি যুক্ত করুন</string>
     <string name="custom_category_badge">কাস্টম</string>
 
     <string name="pro_title">Cipher Pro</string>
     <string name="pro_subtitle">অফলাইন ফাইন্যান্সিয়াল ভল্ট আনলক করুন</string>
     <string name="pro_badge_lifetime">লাইফটাইম অ্যাক্সেস</string>
-    <string name="pro_badge_popular">সর্বাধিক জনপ্রিয়</string>
-    <string name="pro_tier_monthly">মাসিক</string>
-    <string name="pro_tier_lifetime">লাইফটাইম</string>
-    <string name="pro_tier_monthly_desc">মাসিক বিল, যেকোনো সময় বাতিলযোগ্য</string>
-    <string name="pro_tier_lifetime_desc">এককালীন পেমেন্ট, আজীবন ভল্ট</string>
     <string name="pro_btn_upgrade">প্রো-তে আপগ্রেড করুন</string>
-    <string name="pro_btn_activate">লাইসেন্স সক্রিয় করুন</string>
-    <string name="pro_license_title">লাইসেন্স কি (Key) আছে?</string>
-    <string name="pro_license_desc">প্রো সুবিধাগুলো আনলক করতে আপনার লাইসেন্স কি প্রবেশ করান।</string>
-    <string name="pro_license_hint">লাইসেন্স কি প্রবেশ করান বা পেস্ট করুন</string>
-    <string name="pro_license_verify">যাচাই ও সক্রিয় করুন</string>
-    <string name="pro_license_invalid">অবৈধ বা অপরিচিত লাইসেন্স কি</string>
-    <string name="pro_license_success">Cipher Pro সফলভাবে সক্রিয় হয়েছে!</string>
-    <string name="pro_license_already_active">এই ডিভাইসে Cipher Pro সক্রিয় আছে</string>
     <string name="pro_perk_unlimited_accounts_title">সীমাহীন অ্যাকাউন্ট ও কার্ড</string>
     <string name="pro_perk_unlimited_accounts_desc">সীমাহীন ব্যাঙ্ক অ্যাকাউন্ট, ক্রেডিট কার্ড এবং ডিজিটাল ওয়ালেট ট্র্যাক করুন।</string>
     <string name="pro_perk_net_worth_title">লাইভ নেট ওয়ার্থ ও বিশ্লেষণ</string>
@@ -487,19 +459,11 @@
     <string name="pro_perk_smart_rules_title">স্মার্ট অটো-ক্যাটাগরাইজেশন</string>
     <string name="pro_perk_smart_rules_desc">উন্নত মার্চেন্ট অটো-লিঙ্কিং এবং স্বয়ংক্রিয় লেজার অ্যাসাইনমেন্ট।</string>
     <string name="pro_perk_offline_crypto_title">শূন্য ক্লাউড ও প্রাইভেট লেজার</string>
-    <string name="pro_perk_offline_crypto_desc">আর্থিক তথ্য হার্ডওয়্যার কি-স্টোরে এনক্রিপ্ট থাকে এবং কখনোই ফোন ছাড়ে না।</string>
     <string name="pro_perk_export_title">সম্পূর্ণ PDF ও CSV স্টেটমেন্ট</string>
     <string name="pro_perk_export_desc">সার্টিফাইড অ্যাকাউন্ট স্টেটমেন্ট এবং এনক্রিপ্ট করা ভল্ট ব্যাকআপ রপ্তানি করুন।</string>
-    <string name="pro_faq_title">সাধারণ জিজ্ঞাসা (FAQ)</string>
-    <string name="pro_faq_offline_q">প্রো ব্যবহারের জন্য কি ইন্টারনেট সংযোগ প্রয়োজন?</string>
-    <string name="pro_faq_offline_a" formatted="false">সমস্ত আর্থিক হিসাব ও তথ্য সম্পূর্ণ অফলাইনে আপনার ফোনেই থাকে। ইন্টারনেট সংযোগ শুধুমাত্র লাইসেন্স অ্যাক্টিভেশন এবং ডিভাইস সীমার জন্য ব্যবহৃত হয়।</string>
-    <string name="pro_faq_devices_q">আমি কি নতুন ডিভাইসে লাইসেন্স স্থানান্তর করতে পারব?</string>
-    <string name="pro_faq_devices_a">হ্যাঁ, আপনার নতুন ডিভাইসে লাইফটাইম লাইসেন্স কি প্রবেশ করান অথবা এনক্রিপ্ট করা ব্যাকআপ রিস্টোর করুন।</string>
     <string name="pro_tier_badge_standard">স্ট্যান্ডার্ড</string>
     <string name="pro_tier_badge_save_29" formatted="false">৩৩% সাশ্রয়</string>
-    <string name="pro_tier_badge_lifetime_vip">লাইফটাইম ভিআইপি</string>
     <string name="pro_tier_badge_best_value">সেরা অফার</string>
-    <string name="pro_tier_badge_popular_pill">জনপ্রিয়</string>
     <string name="pro_tier_monthly_title">মাসিক পাস</string>
     <string name="pro_tier_annual_title">১-বছর বার্ষিক</string>
     <string name="pro_tier_lifetime_title">লাইফটাইম ভিআইপি</string>
@@ -527,9 +491,6 @@
     <string name="pro_feature_theme_styling">থিম ও স্টাইলিং কাস্টমাইজেশন</string>
     <string name="pro_feature_theme_styling_desc">এক্সক্লুসিভ থিম এবং ব্যক্তিগতকৃত রঙের প্যালেট</string>
     <string name="pro_pricing_adjust_notice">আপনার দেশ অনুযায়ী মূল্য পরিবর্তিত হতে পারে। চেকআউটে স্থানীয় মূল্য দেখানো হবে। ট্যাক্স প্রযোজ্য হতে পারে।</string>
-    <string name="pro_coupon_notice">কুপন কোড আছে? চেকআউটের সময় প্রবেশ করাতে পারেন।</string>
-    <string name="pro_cant_find_key">লাইসেন্স কি খুঁজে পাচ্ছেন না?</string>
-    <string name="pro_customer_portal_link">Google Play-তে পরিচালনা করুন</string>
     <string name="pro_subscription_title">সাবস্ক্রিপশন</string>
     <string name="pro_subscription_body">বিলিং নিরাপদে Google Play পরিচালনা করে। আপনি যেকোনো সময় Google Play সাবস্ক্রিপশন থেকে পরিবর্তন বা বাতিল করতে পারেন।</string>
     <string name="pro_subscription_manage">সাবস্ক্রিপশন পরিচালনা বা বাতিল করুন</string>
@@ -550,7 +511,6 @@
     <string name="pro_migration_action_dismiss_forever">আর দেখাবেন না</string>
 
     <string name="accounts_title">অ্যাকাউন্ট ও ওয়ালেট</string>
-    <string name="accounts_subtitle">আর্থিক অ্যাকাউন্ট ও খতিয়ান পরিচালনা করুন</string>
     <string name="accounts_combined_net_worth">সম্মিলিত মোট সম্পদ (নেট ওয়ার্থ)</string>
     <string name="accounts_liquid_cash">তরল নগদ / ব্যাঙ্ক</string>
     <string name="accounts_total_debt">মোট ক্রেডিট ঋণ</string>
@@ -561,10 +521,6 @@
     <string name="accounts_set_primary">প্রাথমিক অ্যাকাউন্ট হিসেবে সেট করুন</string>
     <string name="accounts_delete_confirm_title">অ্যাকাউন্ট মুছবেন?</string>
     <string name="accounts_delete_confirm_desc">আপনি কি নিশ্চিত যে %1$s মুছতে চান? বিদ্যমান লেনদেনগুলো মূল ইতিহাসে সংরক্ষিত থাকবে।</string>
-    <string name="accounts_delete_success">%1$s মুছে ফেলা হয়েছে</string>
-    <string name="accounts_cannot_delete_only">একমাত্র অ্যাকাউন্ট মুছে ফেলা যাবে না</string>
-    <string name="accounts_created_success">%1$s তৈরি করা হয়েছে</string>
-    <string name="accounts_updated_success">%1$s আপডেট করা হয়েছে</string>
 
     <string name="account_create_title">অ্যাকাউন্ট তৈরি করুন</string>
     <string name="account_edit_title">অ্যাকাউন্ট সম্পাদনা</string>
@@ -578,10 +534,7 @@
     <string name="account_last4_label">কার্ড / অ্যাকাউন্ট নম্বর (শেষ ৪ ডিজিট)</string>
     <string name="account_last4_placeholder">•••• 4821</string>
     <string name="account_last4_desc">ব্যাঙ্ক SMS নোটিফিকেশন স্বয়ংক্রিয়ভাবে এই অ্যাকাউন্টে যুক্ত করে</string>
-    <string name="account_theme_accent_label">কার্ড থিম ও রঙ</string>
-    <string name="account_icon_label">কার্ড আইকন</string>
     <string name="account_primary_toggle_label">প্রাথমিক অ্যাকাউন্ট</string>
-    <string name="account_primary_toggle_desc">অনির্দিষ্ট লেনদেনের জন্য ডিফল্ট গন্তব্য</string>
 
     <string name="account_type_bank">ব্যাঙ্ক অ্যাকাউন্ট</string>
     <string name="account_type_credit_card">ক্রেডিট কার্ড</string>
@@ -611,9 +564,7 @@
     <string name="account_analytics_subtitle">%1$s · প্রবণতা এবং মেট্রিক্স</string>
     <string name="account_analytics_action_btn">অ্যানালিটিক্স ও প্রবণতা দেখুন</string>
     <string name="account_analytics_action_desc">ইন্টারেক্টিভ চার্ট, ক্যাটাগরি বিভাজন এবং মার্চেন্ট</string>
-    <string name="account_analytics_spending_velocity">ব্যয়ের গতি</string>
     <string name="account_analytics_avg_daily">দৈনিক গড়</string>
-    <string name="account_analytics_avg_weekly">সাপ্তাহিক গড়</string>
     <string name="account_analytics_largest_tx">সর্বোচ্চ ব্যয়</string>
     <string name="account_analytics_top_categories">ক্যাটাগরি বিভাজন</string>
     <string name="account_analytics_top_merchants">শীর্ষ মার্চেন্ট</string>
@@ -624,19 +575,14 @@
     <string name="account_analytics_period_90d">৯০ দিন</string>
     <string name="account_analytics_period_1y">১ বছর</string>
     <string name="account_analytics_period_all">সব</string>
-    <string name="account_card_transactions_count">%1$d লেনদেন</string>
-    <string name="account_card_no_transactions">লেনদেন নেই</string>
     <string name="account_balance_positive">ইতিবাচক (+)</string>
     <string name="account_balance_negative">ঋণাত্মক (-)</string>
     <string name="account_set_primary_title">প্রাথমিক অ্যাকাউন্ট হিসেবে সেট করুন</string>
     <string name="account_set_primary_desc">নতুন লেনদেন এবং লেজারের জন্য ডিফল্ট অ্যাকাউন্ট</string>
     <string name="account_save_changes">পরিবর্তন সংরক্ষণ করুন</string>
 
-    <string name="settings_pro_active">সাইফার প্রো সক্রিয়</string>
     <string name="settings_pro_upgrade">প্রো-তে আপগ্রেড করুন</string>
     <string name="settings_pro_unlocked_desc">সমস্ত ফিচার ও কাস্টম ক্যাটাগরি আনলক করা হয়েছে</string>
-    <string name="settings_pro_locked_desc">আনলিমিটেড অ্যাকাউন্ট, নিয়মাবলী, PDF রপ্তানি ও উইজেট</string>
-    <string name="settings_pro_lifetime_badge">লাইফটাইম</string>
 
     <string name="dashboard_period_balance">%1$s ব্যালেন্স</string>
     <string name="dashboard_spending_trend_title">ব্যয়ের গতিধারা</string>
@@ -668,7 +614,6 @@
     <string name="transfer_note_placeholder">যেমন: ক্রেডিট কার্ড বিল পরিশোধ, মাসিক সঞ্চয়</string>
     <string name="transfer_error_same_account">উৎস ও গন্তব্য অ্যাকাউন্ট ভিন্ন হতে হবে</string>
     <string name="transfer_error_invalid_amount">সঠিক পরিমাণ উল্লেখ করুন</string>
-    <string name="transfer_error_insufficient_funds">উৎস অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই</string>
     <string name="transfer_success_msg">%2$s থেকে %3$s-এ %1$s স্থানান্তর করা হয়েছে</string>
     <string name="transfer_out_merchant">%1$s-এ স্থানান্তর</string>
     <string name="transfer_in_merchant">%1$s থেকে স্থানান্তর</string>
@@ -684,8 +629,6 @@
     <string name="account_export_pdf">PDF স্টেটমেন্ট এক্সপোর্ট করুন</string>
     <string name="account_export_csv_desc">স্প্রেডশিট ফরম্যাটে র’ ট্রানজ্যাকশন লেজার (ফ্রি)</string>
     <string name="account_export_pdf_desc">চার্ট ও ব্রেকডাউন সহ এক্সিকিউটিভ সার্টিফাইড স্টেটমেন্ট (প্রো)</string>
-    <string name="account_export_success">স্টেটমেন্ট সফলভাবে এক্সপোর্ট হয়েছে</string>
-    <string name="account_export_error">স্টেটমেন্ট এক্সপোর্ট ব্যর্থ হয়েছে: %1$s</string>
     <string name="notify_action_switch_account">অ্যাকাউন্ট পরিবর্তন</string>
     <string name="notify_action_discard">বাতিল করুন</string>
     <string name="notify_action_keep">রাখুন</string>
@@ -700,24 +643,14 @@
     <string name="pro_gate_smart_rules_title">স্মার্ট নিয়মের সীমা</string>
     <string name="pro_gate_smart_rules_desc">বিনামূল্যে ব্যবহারকারীরা ৩টি পর্যন্ত স্মার্ট নিয়ম তৈরি করতে পারেন। সীমাহীন নিয়মের জন্য Cipher Pro-তে আপগ্রেড করুন।</string>
     <string name="account_frozen_badge">স্থগিত</string>
-    <string name="account_frozen_tooltip">অ্যাকাউন্ট স্থগিত। বিনামূল্যে প্ল্যানে সর্বোচ্চ ২টি সক্রিয় অ্যাকাউন্ট ব্যবহার করা যায়। আনফ্রিজ করতে প্রো-তে আপগ্রেড করুন।</string>
     <string name="rule_paused_badge">স্থগিত</string>
-    <string name="rule_paused_tooltip">স্থগিত (প্রো সীমা)। বিনামূল্যে প্ল্যানে সর্বোচ্চ ৩টি সক্রিয় নিয়ম কার্যকর থাকে।</string>
-    <string name="account_frozen_overlay_title">অ্যাকাউন্ট স্থগিত</string>
-    <string name="account_frozen_overlay_desc">ফ্রি প্ল্যানে ২টি সক্রিয় অ্যাকাউন্ট অন্তর্ভুক্ত। আনলক করতে প্রধান অ্যাকাউন্ট করুন অথবা প্রো-তে আপগ্রেড করুন।</string>
-    <string name="account_make_active_btn">সক্রিয় করুন</string>
     <string name="account_make_primary_btn">প্রধান করুন</string>
     <string name="rule_make_active_btn">সক্রিয় করুন</string>
-    <string name="rule_paused_overlay_desc">ফ্রি প্ল্যানে ৩টি সক্রিয় নিয়ম অন্তর্ভুক্ত। এটি সক্রিয় করতে ট্যাপ করুন।</string>
     <string name="accounts_header_free_count">%1$d/%2$d সক্রিয় অ্যাকাউন্ট</string>
-    <string name="smart_rules_free_banner_title">ফ্রি প্ল্যান: ৩টি সক্রিয় রুল</string>
-    <string name="smart_rules_free_banner_desc">ফ্রি প্ল্যানে সর্বোচ্চ ৩টি অটোমেটেড রুল অন্তর্ভুক্ত। অতিরিক্ত রুলগুলো সংরক্ষিত থাকে কিন্তু স্থগিত থাকে। আনলিমিটেড রুলের জন্য প্রো-তে আপগ্রেড করুন।</string>
     <string name="categories_free_banner_title">ফ্রি প্ল্যান: ৩টি কাস্টম ক্যাটাগরি</string>
     <string name="categories_free_banner_desc">ফ্রি প্ল্যানে সর্বোচ্চ ৩টি কাস্টম ক্যাটাগরি অন্তর্ভুক্ত। অতিরিক্ত ক্যাটাগরিগুলো রিড-অনলি মোডে সংরক্ষিত থাকে। আনলিমিটেড ক্যাটাগরির জন্য প্রো-তে আপগ্রেড করুন।</string>
     <string name="account_locked_title">অ্যাকাউন্ট লক করা হয়েছে</string>
     <string name="account_locked_desc">ফ্রি প্ল্যানে ২টি সক্রিয় অ্যাকাউন্ট অন্তর্ভুক্ত। আনলক করতে প্রধান অ্যাকাউন্ট করুন অথবা প্রো-তে আপগ্রেড করুন।</string>
-    <string name="pro_perk_accent_colors_title">এক্সক্লুসিভ অ্যাকসেন্ট প্যালেট</string>
-    <string name="pro_perk_accent_colors_desc">১২টি প্রাণবন্ত প্যান্টোন ও কুলরস ডিজাইনার থিম রঙ আনলক করুন।</string>
     <string name="pro_gate_accent_colors_title">প্রো থিম কালার</string>
     <string name="pro_gate_accent_colors_desc">সাইফার প্রো-এর সাথে সমস্ত ১৮টি প্রাণবন্ত প্যান্টোন ও ডিজাইনার থিম রঙ আনলক করুন।</string>
 
@@ -759,7 +692,6 @@
     <string name="goals_target_amount">লক্ষ্যমাত্রা</string>
     <string name="goals_saved_amount">সঞ্চিত পরিমাণ</string>
     <string name="goals_initial_amount">প্রাথমিক পরিমাণ (ঐচ্ছিক)</string>
-    <string name="goals_name_label">লক্ষ্যের নাম</string>
     <string name="goals_goal_name_placeholder">যেমন: ছুটি, ইমার্জেন্সি ফান্ড</string>
     <string name="goals_empty_title">কোনো সঞ্চয় পট নেই</string>
     <string name="goals_empty_desc">স্বপ্নের জন্য টাকা জমান এবং ভিজ্যুয়াল পটের মাধ্যমে সঞ্চয়ের অগ্রগতি দেখুন — সম্পূর্ণ গোপনীয় এবং দৈনিক খরচের হিসাব থেকে আলাদা।</string>
@@ -770,7 +702,6 @@
     <string name="goals_name_error_empty">দয়া করে লক্ষ্যের নাম লিখুন</string>
     <string name="goals_select_color">রঙ নির্বাচন করুন</string>
     <string name="goals_select_icon">আইকন নির্বাচন করুন</string>
-    <string name="goals_of_target">%2$s এর মধ্যে %1$s</string>
     <string name="goals_target_label">লক্ষ্য: %1$s</string>
     <string name="goals_deleted">সঞ্চয় লক্ষ্য মুছে ফেলা হয়েছে</string>
     <string name="goals_free_limit_reached">ফ্রি লক্ষ্যের সীমা পূর্ণ (%1$d/%2$d)</string>
@@ -787,7 +718,6 @@
     </plurals>
     <string name="onboarding_returning_title">আপনি কি ইতিমধ্যে Cipher ব্যবহার করেন?</string>
     <string name="onboarding_restore_backup_short">ব্যাকআপ পুনরুদ্ধার</string>
-    <string name="onboarding_license_key_short">লাইসেন্স কী</string>
     <string name="backup_password_dialog_title">আপনার ব্যাকআপ পাসওয়ার্ড</string>
     <string name="backup_password_unavailable">সংরক্ষিত ব্যাকআপ পাসওয়ার্ড এই ডিভাইসে পড়া যাচ্ছে না।</string>
     <string name="backup_password_warning">এই পাসওয়ার্ডটি লিখে নিরাপদ জায়গায় রাখুন। এটি ভুলে গেলে আপনার ব্যাকআপ খোলা যাবে না, আমরাও খুলতে পারব না।</string>
@@ -857,8 +787,6 @@
     <string name="action_add_debt">নতুন ধার / ঋণ</string>
     <string name="action_record_repayment">পরিশোধ</string>
     <string name="action_settle_full">সম্পূর্ণ শোধ</string>
-    <string name="debt_type_lent">আমি ধার দিয়েছি (তারা ফেরত দেবে)</string>
-    <string name="debt_type_borrowed">আমি ধার নিয়েছি (আমাকে ফেরত দিতে হবে)</string>
     <string name="debt_type_lent_short">দেওয়া ধার</string>
     <string name="debt_type_borrowed_short">নেওয়া ঋণ</string>
     <string name="debt_create_title">নতুন ধার / ঋণ</string>
@@ -883,12 +811,10 @@
     <string name="debt_deleted">রেকর্ড মুছে ফেলা হয়েছে</string>
     <string name="debt_delete_confirm_title">ধার রেকর্ড মুছবেন?</string>
     <string name="debt_delete_confirm_desc">আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি মুছে ফেলতে চান? সংযুক্ত লেনদেনগুলোও আনলিংক হবে।</string>
-    <string name="debt_repaid_of_total">%2$s এর মধ্যে %1$s পরিশোধিত</string>
     <string name="debt_remaining_label">%1$s বাকি</string>
     <string name="pro_migration_plan_prompt">আপনার কোন প্ল্যানটি ছিল?</string>
     <string name="pro_migration_plan_lifetime">লাইফটাইম</string>
     <string name="pro_migration_plan_annual">বার্ষিক</string>
     <string name="pro_migration_plan_monthly">মাসিক</string>
     <string name="pro_action_restore_purchases">ক্রয় পুনরুদ্ধার করুন</string>
-    <string name="pro_action_redeem_code">কোড রিডিম করুন</string>
 </resources>

@@ -204,6 +204,11 @@ class MainActivity : AppCompatActivity() {
             val showUpdateReady by updateReady.collectAsStateWithLifecycle()
             
             state.settings?.let { userSettings ->
+                val hapticsView = androidx.compose.ui.platform.LocalView.current
+                androidx.compose.runtime.SideEffect {
+                    com.masum.cipher.ui.components.AppHaptics.enabled = userSettings.isHapticsEnabled
+                    com.masum.cipher.ui.components.AppHaptics.view = hapticsView
+                }
                 val isSystemDark = isSystemInDarkTheme()
                 val darkTheme = when (userSettings.theme) {
                     AppTheme.LIGHT -> false

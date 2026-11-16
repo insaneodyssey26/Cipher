@@ -12,7 +12,6 @@
     <string name="widget_passbook_description">最新の取引履歴をリアルタイム表示</string>
     <string name="widget_daily_allowance_name">本日の安全支出可能額</string>
     <string name="widget_daily_allowance_description">動的な日割り予算と支出コントロール</string>
-    <string name="widget_pro_badge">PRO</string>
     <string name="widget_pro_locked_msg">Cipher Pro でロック解除</string>
     <string name="widget_safe_to_spend_title">本日使える予算</string>
     <string name="widget_net_worth_title">総純資産</string>
@@ -21,7 +20,6 @@
     <string name="nav_spend">支出</string>
     <string name="nav_categories">カテゴリー</string>
     <string name="nav_insights">インサイト</string>
-    <string name="nav_splits">分割</string>
     <string name="nav_settings">設定</string>
 
     <string name="action_save">保存</string>
@@ -31,14 +29,12 @@
     <string name="action_edit">編集</string>
     <string name="action_search">検索</string>
     <string name="action_close">閉じる</string>
-    <string name="action_add_note">+ メモを追加</string>
     <string name="action_add_transaction">取引を追加</string>
     <string name="action_show_all">すべて表示</string>
     <string name="action_select">選択</string>
 
     <string name="dashboard_total_spent">総支出</string>
     <string name="dashboard_monthly_budget">今月の予算</string>
-    <string name="dashboard_cash_flow">キャッシュフロー</string>
     <string name="balance_label">残高</string>
     <string name="income">収入</string>
     <string name="expense">支出</string>
@@ -47,9 +43,6 @@
     <string name="net">純収支</string>
     <string name="more">増加</string>
     <string name="less">減少</string>
-    <string name="positive_flow">プラス収支</string>
-    <string name="active_flow">アクティブ</string>
-    <string name="no_activity">取引なし</string>
     <string name="no_transactions_found">取引が見つかりません</string>
 
     <string name="period_this_week">今週</string>
@@ -240,7 +233,6 @@
     <string name="diagnostics_desc">エラーログの表示とコピー</string>
     <string name="contact_dev_title">開発者に連絡</string>
     <string name="open_source_title">オープンソース</string>
-    <string name="privacy_policy_title">プライバシーポリシー</string>
     <string name="support_dev_title">開発を支援</string>
     <string name="delete_all_data_dialog_title">すべてのデータを削除しますか？</string>
     <string name="delete_all_data_dialog_desc">この操作は取り消せません。</string>
@@ -259,7 +251,6 @@
     <string name="action_fix">修正</string>
     <string name="status_granted">許可済み</string>
     <string name="smart_rules_title">スマートルール</string>
-    <string name="smart_rules_empty">カスタムルールはまだありません。\n取引のカテゴリーを編集するとルールが作成されます。</string>
     <string name="smart_rules_tab_categories">カテゴリ</string>
     <string name="smart_rules_tab_merchants">店舗名の変更</string>
     <string name="smart_rules_empty_categories">カテゴリールールはまだありません。\n取引のカテゴリーを編集するとルールが作成されます。</string>
@@ -272,7 +263,6 @@
     <string name="smart_rules_dialog_dismiss">いいえ、今回のみ</string>
     <string name="smart_rules_raw_merchant_label">元の / SMS店舗名</string>
     <string name="smart_rules_clean_merchant_label">表示する店舗名</string>
-    <string name="smart_rules_renamed_to">%1$s に変更</string>
     <string name="smart_rules_always_as">常に %1$s として分類</string>
     <string name="smart_rules_dialog_new">新しいルール</string>
     <string name="smart_rules_dialog_edit">ルールを編集</string>
@@ -382,7 +372,6 @@
     <string name="whats_new_v616_license_desc">バックアップを復元すると、新しいスマートフォンでもProが自動的に再認証されます。プランの更新日も正しく表示されます。</string>
     <string name="whats_new_btn_ack">最高</string>
     <string name="settings_tap_for_whats_new">アップデート</string>
-    <string name="split_expense">割り勘</string>
     <string name="split_title">支出を分割</string>
     <string name="split_mode_equal">均等</string>
     <string name="split_mode_exact">個別金額</string>
@@ -445,7 +434,6 @@
     <string name="custom_category_new_title">新規カテゴリー</string>
     <string name="custom_category_edit_title">カテゴリーを編集</string>
     <string name="custom_category_subtitle">独自のアイコンと色でカスタマイズ</string>
-    <string name="custom_category_name_label">カテゴリー名</string>
     <string name="custom_category_name_placeholder">例: ジム・フィットネス</string>
     <string name="custom_category_select_icon">アイコンを選択</string>
     <string name="custom_category_select_color">色を選択</string>
@@ -456,29 +444,13 @@
     <string name="custom_category_delete_confirm_desc">このカテゴリーの既存の取引は一般（General）に移動されます。</string>
     <string name="custom_category_error_empty">カテゴリー名を入力してください</string>
     <string name="custom_category_error_exists">このカテゴリー名は既に存在します</string>
-    <string name="custom_category_section_default">デフォルトカテゴリー</string>
-    <string name="custom_category_section_custom">カスタムカテゴリー</string>
-    <string name="custom_category_add_btn">カテゴリーを追加</string>
     <string name="custom_category_new">+ 新規カテゴリー</string>
     <string name="custom_category_badge">カスタム</string>
 
     <string name="pro_title">Cipher Pro</string>
     <string name="pro_subtitle">究極のオフライン財務保管庫をアンロック</string>
     <string name="pro_badge_lifetime">生涯アクセス</string>
-    <string name="pro_badge_popular">一番人気</string>
-    <string name="pro_tier_monthly">月額プラン</string>
-    <string name="pro_tier_lifetime">買い切りプラン</string>
-    <string name="pro_tier_monthly_desc">月額課金・いつでも解約可能</string>
-    <string name="pro_tier_lifetime_desc">一括払い・永久アクセス</string>
     <string name="pro_btn_upgrade">Pro にアップグレード</string>
-    <string name="pro_btn_activate">ライセンスを有効化</string>
-    <string name="pro_license_title">ライセンスキーをお持ちですか？</string>
-    <string name="pro_license_desc">ライセンスキーを入力して Pro 機能を今すぐアンロック。</string>
-    <string name="pro_license_hint">ライセンスキーを入力または貼り付け</string>
-    <string name="pro_license_verify">確認して有効化</string>
-    <string name="pro_license_invalid">無効または認識できないライセンスキーです</string>
-    <string name="pro_license_success">Cipher Pro が正常に有効化されました！</string>
-    <string name="pro_license_already_active">この端末で Cipher Pro は有効です</string>
     <string name="pro_perk_unlimited_accounts_title">無制限の口座・カード管理</string>
     <string name="pro_perk_unlimited_accounts_desc">銀行口座、クレジットカード、電子マネーを無制限に追跡。</string>
     <string name="pro_perk_net_worth_title">リアルタイム純資産・分析</string>
@@ -488,19 +460,11 @@
     <string name="pro_perk_smart_rules_title">スマート自動カテゴリー分類</string>
     <string name="pro_perk_smart_rules_desc">高度な店舗自動マッチングと口座への自動割り当て。</string>
     <string name="pro_perk_offline_crypto_title">完全ローカル・プライベート台帳</string>
-    <string name="pro_perk_offline_crypto_desc">財務データはハードウェアキーストアで暗号化され、端末外に送信されることはありません。</string>
     <string name="pro_perk_export_title">PDF・CSV 明細エクスポート</string>
     <string name="pro_perk_export_desc">認証済み口座明細書と暗号化バックアップの出力。</string>
-    <string name="pro_faq_title">よくある質問 (FAQ)</string>
-    <string name="pro_faq_offline_q">Pro はインターネット接続が必要ですか？</string>
-    <string name="pro_faq_offline_a" formatted="false">すべての財務計算やデータ記録は端末内で100%オフライン処理されます。インターネット通信はライセンスキーの認証および端末上限の管理時にのみ使用されます。</string>
-    <string name="pro_faq_devices_q">新しい端末にライセンスを移行できますか？</string>
-    <string name="pro_faq_devices_a">はい、新しい端末で買い切りライセンスキーを入力するか、暗号化バックアップを復元するだけで移行可能です。</string>
     <string name="pro_tier_badge_standard">スタンダード</string>
     <string name="pro_tier_badge_save_29" formatted="false">33% お得</string>
-    <string name="pro_tier_badge_lifetime_vip">永久VIP</string>
     <string name="pro_tier_badge_best_value">一番お得</string>
-    <string name="pro_tier_badge_popular_pill">人気</string>
     <string name="pro_tier_monthly_title">マンスリーパス</string>
     <string name="pro_tier_annual_title">1年年間パス</string>
     <string name="pro_tier_lifetime_title">永久VIPパス</string>
@@ -528,9 +492,6 @@
     <string name="pro_feature_theme_styling">テーマ＆カラーの自由なカスタマイズ</string>
     <string name="pro_feature_theme_styling_desc">専用テーマや個性的なアクセントカラーパレット</string>
     <string name="pro_pricing_adjust_notice">お住まいの国・地域に合わせて価格が調整されます。現地通貨での金額は購入画面でご確認いただけます（税別/税込）。</string>
-    <string name="pro_coupon_notice">クーポンをお持ちですか？お支払い画面で入力できます。</string>
-    <string name="pro_cant_find_key">ライセンスキーが見つかりませんか？</string>
-    <string name="pro_customer_portal_link">Google Playで管理</string>
     <string name="pro_subscription_title">サブスクリプション</string>
     <string name="pro_subscription_body">お支払いはGoogle Playが安全に処理します。プランの変更や解約はいつでもGoogle Playの定期購入から行えます。</string>
     <string name="pro_subscription_manage">サブスクリプションの管理・解約</string>
@@ -543,7 +504,6 @@
     <string name="pro_migration_action_dismiss_forever">今後表示しない</string>
 
     <string name="accounts_title">口座・ウォレット</string>
-    <string name="accounts_subtitle">財務口座と取引台帳を管理</string>
     <string name="accounts_combined_net_worth">合計純資産</string>
     <string name="accounts_liquid_cash">流動資産 / 銀行預金</string>
     <string name="accounts_total_debt">総クレジットカード負債</string>
@@ -554,10 +514,6 @@
     <string name="accounts_set_primary">メイン口座に設定</string>
     <string name="accounts_delete_confirm_title">口座を削除しますか？</string>
     <string name="accounts_delete_confirm_desc">%1$s を削除してもよろしいですか？この口座に記録されていた取引は全体の履歴に残ります。</string>
-    <string name="accounts_delete_success">%1$s を削除しました</string>
-    <string name="accounts_cannot_delete_only">唯一の口座は削除できません</string>
-    <string name="accounts_created_success">%1$s を作成しました</string>
-    <string name="accounts_updated_success">%1$s を更新しました</string>
 
     <string name="account_create_title">口座を作成</string>
     <string name="account_edit_title">口座を編集</string>
@@ -571,10 +527,7 @@
     <string name="account_last4_label">カード・口座番号 (下4桁)</string>
     <string name="account_last4_placeholder">•••• 4821</string>
     <string name="account_last4_desc">銀行SMSや通知をこの口座に自動で振り分けます</string>
-    <string name="account_theme_accent_label">カードテーマとアクセントカラー</string>
-    <string name="account_icon_label">カードアイコン</string>
     <string name="account_primary_toggle_label">メイン口座</string>
-    <string name="account_primary_toggle_desc">未指定の取引が自動的に振り分けられる基本口座</string>
 
     <string name="account_type_bank">銀行口座</string>
     <string name="account_type_credit_card">クレジットカード</string>
@@ -604,9 +557,7 @@
     <string name="account_analytics_subtitle">%1$s · 支出傾向と指標</string>
     <string name="account_analytics_action_btn">分析と傾向を見る</string>
     <string name="account_analytics_action_desc">インタラクティブチャート、カテゴリー内訳、加盟店</string>
-    <string name="account_analytics_spending_velocity">支出ペース</string>
     <string name="account_analytics_avg_daily">1日平均</string>
-    <string name="account_analytics_avg_weekly">週間平均</string>
     <string name="account_analytics_largest_tx">最大支出</string>
     <string name="account_analytics_top_categories">カテゴリー内訳</string>
     <string name="account_analytics_top_merchants">主要加盟店</string>
@@ -617,19 +568,14 @@
     <string name="account_analytics_period_90d">90日</string>
     <string name="account_analytics_period_1y">1年</string>
     <string name="account_analytics_period_all">すべて</string>
-    <string name="account_card_transactions_count">%1$d 件の取引</string>
-    <string name="account_card_no_transactions">取引なし</string>
     <string name="account_balance_positive">プラス (+)</string>
     <string name="account_balance_negative">マイナス (-)</string>
     <string name="account_set_primary_title">プライマリ口座に設定</string>
     <string name="account_set_primary_desc">新しい取引および元帳のデフォルト口座</string>
     <string name="account_save_changes">変更を保存</string>
 
-    <string name="settings_pro_active">CIPHER PRO 有効</string>
     <string name="settings_pro_upgrade">PRO にアップグレード</string>
     <string name="settings_pro_unlocked_desc">すべての機能とカスタムカテゴリが解除済み</string>
-    <string name="settings_pro_locked_desc">無制限の口座、自動ルール、PDF出力、ウィジェット</string>
-    <string name="settings_pro_lifetime_badge">永久ライセンス</string>
 
     <string name="dashboard_period_balance">%1$sの残高</string>
     <string name="dashboard_spending_trend_title">支出トレンド</string>
@@ -661,7 +607,6 @@
     <string name="transfer_note_placeholder">例: クレジットカード引き落とし、今月の積立</string>
     <string name="transfer_error_same_account">振替元と振替先は異なる口座を指定してください</string>
     <string name="transfer_error_invalid_amount">有効な金額を入力してください</string>
-    <string name="transfer_error_insufficient_funds">振替元口座の残高が不足しています</string>
     <string name="transfer_success_msg">%2$s から %3$s へ %1$s を振り替えました</string>
     <string name="transfer_out_merchant">%1$s への振替</string>
     <string name="transfer_in_merchant">%1$s からの振替</string>
@@ -677,8 +622,6 @@
     <string name="account_export_pdf">PDF明細書をエクスポート</string>
     <string name="account_export_csv_desc">表計算形式の取引台帳データ（無料）</string>
     <string name="account_export_pdf_desc">グラフ付き公式利用明細書（PRO）</string>
-    <string name="account_export_success">明細書が正常にエクスポートされました</string>
-    <string name="account_export_error">明細書のエクスポートに失敗しました: %1$s</string>
     <string name="notify_action_switch_account">口座を変更</string>
     <string name="notify_action_discard">破棄</string>
     <string name="notify_action_keep">保持</string>
@@ -693,24 +636,14 @@
     <string name="pro_gate_smart_rules_title">スマート自動ルールの上限</string>
     <string name="pro_gate_smart_rules_desc">無料版では最大3個のスマートルールを作成できます。無制限に作成するにはCipher Proへアップグレードしてください。</string>
     <string name="account_frozen_badge">凍結</string>
-    <string name="account_frozen_tooltip">口座が凍結されています。無料版では有効な口座は最大2つまでです。ロックを解除するにはProにアップグレードしてください。</string>
     <string name="rule_paused_badge">一時停止中</string>
-    <string name="rule_paused_tooltip">一時停止中（Pro上限）。無料版では有効なルールは最大3個までです。</string>
-    <string name="account_frozen_overlay_title">口座が凍結されています</string>
-    <string name="account_frozen_overlay_desc">無料プランには2つの有効口座が含まれます。メイン口座に設定するかProにアップグレードしてロックを解除してください。</string>
-    <string name="account_make_active_btn">有効にする</string>
     <string name="account_make_primary_btn">メイン口座にする</string>
     <string name="rule_make_active_btn">有効にする</string>
-    <string name="rule_paused_overlay_desc">無料版では3つのルールが有効です。タップしてこのルールを有効にします。</string>
     <string name="accounts_header_free_count">%1$d/%2$d 有効口座</string>
-    <string name="smart_rules_free_banner_title">無料プラン：3つのアクティブルール</string>
-    <string name="smart_rules_free_banner_desc">無料プランには最大3つの自動ルールが含まれます。追加のルールは保存されますが一時停止されます。無制限のルールにはProにアップグレードしてください。</string>
     <string name="categories_free_banner_title">無料プラン：3つのカスタムカテゴリ</string>
     <string name="categories_free_banner_desc">無料プランには最大3つのカスタムカテゴリが含まれます。追加のカテゴリは読み取り専用モードで保存されます。無制限のカテゴリにはProにアップグレードしてください。</string>
     <string name="account_locked_title">アカウントがロックされています</string>
     <string name="account_locked_desc">無料プランには2つの有効口座が含まれます。メイン口座に設定するかProにアップグレードしてロックを解除してください。</string>
-    <string name="pro_perk_accent_colors_title">専用アクセントパレット</string>
-    <string name="pro_perk_accent_colors_desc">12種類の鮮やかなPantone＆Coolorsデザイナーテーマカラーを解放。</string>
     <string name="pro_gate_accent_colors_title">Proテーマカラー</string>
     <string name="pro_gate_accent_colors_desc">Cipher Proですべての18種類の鮮やかなPantoneおよびデザイナーアクセントテーマをアンロック。</string>
 
@@ -751,7 +684,6 @@
     <string name="goals_target_amount">目標金額</string>
     <string name="goals_saved_amount">現在の貯金額</string>
     <string name="goals_initial_amount">初期金額（任意）</string>
-    <string name="goals_name_label">目標名</string>
     <string name="goals_goal_name_placeholder">例: 旅行、緊急資金</string>
     <string name="goals_empty_title">貯金ポットがまだありません</string>
     <string name="goals_empty_desc">夢や目標のためにお金を取り分け、ビジュアルポットで進捗を確認できます。日々の支出とは完全に分けて安全に管理されます。</string>
@@ -762,7 +694,6 @@
     <string name="goals_name_error_empty">目標名を入力してください</string>
     <string name="goals_select_color">色を選択</string>
     <string name="goals_select_icon">アイコンを選択</string>
-    <string name="goals_of_target">%2$s 中 %1$s</string>
     <string name="goals_target_label">目標: %1$s</string>
     <string name="goals_deleted">貯金ポットを削除しました</string>
     <string name="goals_free_limit_reached">無料枠の目標上限に達しました (%1$d/%2$d)</string>
@@ -777,7 +708,6 @@
     </plurals>
     <string name="onboarding_returning_title">すでにCipherをお使いですか？</string>
     <string name="onboarding_restore_backup_short">バックアップから復元</string>
-    <string name="onboarding_license_key_short">ライセンスキー</string>
     <string name="backup_password_dialog_title">バックアップのパスワード</string>
     <string name="backup_password_unavailable">保存されているバックアップのパスワードをこの端末で読み取れません。</string>
     <string name="backup_password_warning">このパスワードを書き留めて、安全な場所に保管してください。忘れるとバックアップを開けなくなり、私たちにも開くことはできません。</string>
@@ -847,8 +777,6 @@
     <string name="action_add_debt">新規貸出・借入</string>
     <string name="action_record_repayment">返済</string>
     <string name="action_settle_full">全額精算</string>
-    <string name="debt_type_lent">お金を貸した（返してもらう）</string>
-    <string name="debt_type_borrowed">お金を借りた（返す）</string>
     <string name="debt_type_lent_short">貸出</string>
     <string name="debt_type_borrowed_short">借入</string>
     <string name="debt_create_title">新規貸出・借入</string>
@@ -873,12 +801,10 @@
     <string name="debt_deleted">記録を削除しました</string>
     <string name="debt_delete_confirm_title">記録を削除しますか？</string>
     <string name="debt_delete_confirm_desc">この貸出・借入記録を削除してもよろしいですか？連携された取引も解除されます。</string>
-    <string name="debt_repaid_of_total">%2$s 中 %1$s 返済済み</string>
     <string name="debt_remaining_label">残り %1$s</string>
     <string name="pro_migration_plan_prompt">以前ご利用のプランはどれですか？</string>
     <string name="pro_migration_plan_lifetime">買い切り</string>
     <string name="pro_migration_plan_annual">年額プラン</string>
     <string name="pro_migration_plan_monthly">月額プラン</string>
     <string name="pro_action_restore_purchases">購入を復元</string>
-    <string name="pro_action_redeem_code">コードを引き換える</string>
 </resources>

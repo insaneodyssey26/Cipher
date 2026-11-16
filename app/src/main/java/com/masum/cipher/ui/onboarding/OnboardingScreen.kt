@@ -26,7 +26,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -100,6 +100,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.masum.cipher.R
+import androidx.compose.ui.draw.drawBehind
 import com.masum.cipher.core.data.local.pref.AccentColor
 import com.masum.cipher.core.data.local.pref.AppTheme
 import com.masum.cipher.core.domain.model.AppCurrency
@@ -373,7 +374,7 @@ fun OnboardingScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         showPostRestoreAutoBackupDialog = false
                         onComplete()
                     },
@@ -384,7 +385,7 @@ fun OnboardingScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         showPostRestoreAutoBackupDialog = false
                         onComplete()
                     }
@@ -422,7 +423,6 @@ private fun OnboardingTopBar(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -440,52 +440,25 @@ private fun OnboardingTopBar(
             }
         }
 
-        Row(
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.Center
         ) {
             if (currentPage > 0) {
-                repeat(totalPages) { idx ->
-                    val isCompleted = idx < currentPage
-                    val isCurrent = idx == currentPage
-                    val progressFraction by animateFloatAsState(
-                        targetValue = when {
-                            isCompleted -> 1f
-                            isCurrent -> 1f
-                            else -> 0f
-                        },
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessLow
-                        ),
-                        label = "prog_step_$idx"
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(3.5.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(progressFraction)
-                                .height(3.5.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isCurrent) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                )
-                        )
-                    }
-                }
+                Text(
+                    text = "%02d / %02d".format(currentPage + 1, totalPages),
+                    style = Typography.labelMedium.copy(
+                        fontFamily = Lato,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp,
+                        letterSpacing = 1.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-
         Box(
             modifier = Modifier.width(68.dp),
             contentAlignment = Alignment.CenterEnd
@@ -493,7 +466,6 @@ private fun OnboardingTopBar(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -566,128 +538,87 @@ internal fun WelcomePage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = viewportHeight)
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 28.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(modifier = Modifier.height(36.dp))
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
                     StaggeredEntrance(visible = entered, delayMillis = 0) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(76.dp)
-                                    .clip(RoundedCornerShape(22.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.outlineVariant,
-                                        RoundedCornerShape(22.dp)
-                                    )
-                                    .padding(14.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
-                                    contentDescription = "Cipher Logo",
-                                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_cipher_logo_mono),
+                                contentDescription = "Cipher Logo",
+                                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                                modifier = Modifier.size(40.dp)
+                            )
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(32.dp))
 
                             Text(
                                 text = "cipher.",
                                 style = Typography.displayLarge.copy(
                                     fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 44.sp,
-                                    letterSpacing = (-1.2).sp,
-                                    lineHeight = 46.sp
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 68.sp,
+                                    letterSpacing = (-3).sp,
+                                    lineHeight = 68.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             Text(
                                 text = stringResource(R.string.onboarding_welcome_greet_lead),
                                 style = Typography.headlineSmall.copy(
                                     fontFamily = DMSans,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 20.sp,
-                                    letterSpacing = (-0.3).sp
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 22.sp,
+                                    lineHeight = 28.sp,
+                                    letterSpacing = (-0.4).sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             Text(
                                 text = stringResource(R.string.onboarding_welcome_tagline_simple),
                                 style = Typography.bodyMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 14.5.sp,
-                                    lineHeight = 21.sp,
-                                    letterSpacing = (-0.1).sp
+                                    fontFamily = DMSans,
+                                    fontSize = 15.sp,
+                                    lineHeight = 22.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 8.dp)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(26.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
 
                     StaggeredEntrance(visible = entered, delayMillis = 120) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outlineVariant,
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .padding(horizontal = 16.dp, vertical = 18.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             WelcomeFeatureBenefit(
-                                icon = LucideIcons.ShieldCheck,
+                                index = 1,
                                 title = stringResource(R.string.onboarding_feature_offline_simple_title),
-                                description = stringResource(R.string.onboarding_feature_offline_simple_desc),
-                                iconTint = MaterialTheme.colorScheme.onSurface
+                                description = stringResource(R.string.onboarding_feature_offline_simple_desc)
                             )
                             WelcomeFeatureBenefit(
-                                icon = LucideIcons.Zap,
+                                index = 2,
                                 title = stringResource(R.string.onboarding_feature_auto_simple_title),
-                                description = stringResource(R.string.onboarding_feature_auto_simple_desc),
-                                iconTint = MaterialTheme.colorScheme.onSurface
+                                description = stringResource(R.string.onboarding_feature_auto_simple_desc)
                             )
                             WelcomeFeatureBenefit(
-                                icon = LucideIcons.ChartBar,
+                                index = 3,
                                 title = stringResource(R.string.onboarding_feature_insights_simple_title),
-                                description = stringResource(R.string.onboarding_feature_insights_simple_desc),
-                                iconTint = MaterialTheme.colorScheme.onSurface
+                                description = stringResource(R.string.onboarding_feature_insights_simple_desc)
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 StaggeredEntrance(visible = entered, delayMillis = 240) {
                     Column(
@@ -697,8 +628,6 @@ internal fun WelcomePage(
                     ) {
                         PrimaryActionButton(
                             label = stringResource(R.string.onboarding_welcome_begin),
-                            containerColor = MaterialTheme.colorScheme.onSurface,
-                            contentColor = MaterialTheme.colorScheme.surface,
                             onClick = {
                                 view.performVibrate(true, isLongPress = false)
                                 onNext()
@@ -719,50 +648,57 @@ internal fun WelcomePage(
 
 @Composable
 private fun WelcomeFeatureBenefit(
-    icon: ImageVector,
+    index: Int,
     title: String,
-    description: String,
-    iconTint: Color = MaterialTheme.colorScheme.primary
+    description: String
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(iconTint.copy(alpha = 0.12f)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f))
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = title,
-                style = Typography.titleSmall.copy(
-                    fontFamily = Lato,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(3.dp))
-            Text(
-                text = description,
-                style = Typography.bodySmall.copy(
-                    fontFamily = Lato,
+                text = "0$index",
+                style = Typography.labelMedium.copy(
+                    fontFamily = DMSans,
+                    fontWeight = FontWeight.Medium,
                     fontSize = 13.sp,
-                    lineHeight = 18.5.sp
+                    letterSpacing = 0.5.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.padding(top = 2.dp)
             )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = Typography.titleSmall.copy(
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = description,
+                    style = Typography.bodySmall.copy(
+                        fontFamily = DMSans,
+                        fontSize = 13.5.sp,
+                        lineHeight = 19.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -1910,7 +1846,7 @@ private fun CurrencySelectionPage(
                                             .clickable(
                                                 interactionSource = remember { MutableInteractionSource() },
                                                 indication = null,
-                                                onClick = { searchQuery = "" }
+                                                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); searchQuery = "" }
                                             )
                                     )
                                 }
@@ -2174,7 +2110,7 @@ private fun PermissionPage(onComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    TextButton(onClick = { showTour = true }) {
+                    TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showTour = true }) {
                         Text(
                             text = stringResource(R.string.onboarding_take_tour),
                             style = Typography.labelMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
@@ -2209,12 +2145,12 @@ private fun PermissionPage(onComplete: () -> Unit) {
             title = { Text("Enable Automatic Tracking", style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold)) },
             text = { Text("Cipher needs SMS and notification access to automatically save your spending on your phone. Without this, you'll need to enter expenses by hand.", style = Typography.bodyMedium.copy(fontFamily = Lato)) },
             confirmButton = {
-                Button(onClick = { showSkipDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                Button(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showSkipDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                     Text("Grant Permissions", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSkipDialog = false; onComplete() }) {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showSkipDialog = false; onComplete() }) {
                     Text("Enter Manually", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
@@ -2228,12 +2164,12 @@ private fun PermissionPage(onComplete: () -> Unit) {
             title = { Text("Daily Spending Alerts", style = Typography.titleMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold)) },
             text = { Text("Without notifications, you won't get helpful daily spending summaries or budget warnings.", style = Typography.bodyMedium.copy(fontFamily = Lato)) },
             confirmButton = {
-                Button(onClick = { showPostNotifDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+                Button(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showPostNotifDialog = false }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
                     Text("Grant Permission", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showPostNotifDialog = false; onComplete() }) {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showPostNotifDialog = false; onComplete() }) {
                     Text("Proceed Without Alerts", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
@@ -2254,107 +2190,66 @@ private fun CapabilityCard(
     isEnabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "cap_scale"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.055f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f)
-            )
-            .border(
-                1.dp,
-                if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
-                RoundedCornerShape(16.dp)
-            )
-            .clickable(interactionSource = interactionSource, indication = null) { onToggle(!isEnabled) }
-            .padding(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f))
+        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onToggle(!isEnabled) }
+                .padding(vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(22.dp)
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = Typography.titleSmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 15.sp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = description,
+                    style = Typography.bodySmall.copy(fontFamily = DMSans, fontSize = 13.sp, lineHeight = 18.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(13.dp))
-                    .background(
-                        if (isEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(if (isEnabled) MaterialTheme.colorScheme.onSurface else Color.Transparent)
+                    .border(
+                        1.5.dp,
+                        if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(21.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = title,
-                        style = Typography.titleSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f, fill = false)
+                if (isEnabled) {
+                    Icon(
+                        imageVector = LucideIcons.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.size(15.dp)
                     )
-                    if (isEnabled) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(EmeraldIncome.copy(alpha = 0.13f))
-                                .padding(horizontal = 5.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.onboarding_status_active),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 8.5.sp
-                                ),
-                                color = EmeraldIncome,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
-                    }
                 }
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = description,
-                    style = Typography.bodySmall.copy(
-                        fontFamily = Lato,
-                        fontSize = 11.5.sp,
-                        lineHeight = 15.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Switch(checked = isEnabled, onCheckedChange = onToggle)
         }
     }
 }
@@ -2547,23 +2442,16 @@ private fun QuickLanguagePickerModal(
 
 @Composable
 private fun StepLabel(text: String) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
-    ) {
-        Text(
-            text = text,
-            style = Typography.labelSmall.copy(
-                fontFamily = Lato,
-                fontWeight = FontWeight.Bold,
-                fontSize = 9.5.sp,
-                letterSpacing = 1.2.sp
-            ),
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
+    Text(
+        text = text.uppercase(),
+        style = Typography.labelSmall.copy(
+            fontFamily = DMSans,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 11.sp,
+            letterSpacing = 1.6.sp
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Composable
@@ -2586,14 +2474,9 @@ private fun SelectionTile(
             .clip(RoundedCornerShape(14.dp))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
             )
-            .border(
-                1.dp,
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
-                RoundedCornerShape(14.dp)
-            )
+            .then(if (isSelected) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.7f), RoundedCornerShape(14.dp)) else Modifier)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .padding(horizontal = 13.dp, vertical = 11.dp)
     ) { content() }
@@ -2617,9 +2500,10 @@ private fun PrimaryActionButton(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .height(56.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .height(58.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(containerColor)
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.14f), Color.Transparent)))
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -2727,7 +2611,7 @@ private fun AppTourDialog(onDismiss: () -> Unit) {
 
                 PrimaryActionButton(
                     label = if (pagerState.currentPage == 2) "Got It" else "Next",
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         if (pagerState.currentPage < 2) {
                             coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
                         } else {

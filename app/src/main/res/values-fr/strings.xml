@@ -12,7 +12,6 @@
     <string name="widget_passbook_description">Flux en direct de vos transactions les plus récentes</string>
     <string name="widget_daily_allowance_name">Dépense Quotidienne Sûre</string>
     <string name="widget_daily_allowance_description">Allocation quotidienne dynamique et contrôle budgétaire</string>
-    <string name="widget_pro_badge">PRO</string>
     <string name="widget_pro_locked_msg">Débloquer avec Cipher Pro</string>
     <string name="widget_safe_to_spend_title">Sûr à dépenser aujourd\'hui</string>
     <string name="widget_net_worth_title">Valeur Nette Totale</string>
@@ -21,7 +20,6 @@
     <string name="nav_spend">Dépenses</string>
     <string name="nav_categories">Catégories</string>
     <string name="nav_insights">Aperçu</string>
-    <string name="nav_splits">Partages</string>
     <string name="nav_settings">Paramètres</string>
 
     <string name="action_save">Enregistrer</string>
@@ -31,14 +29,12 @@
     <string name="action_edit">Modifier</string>
     <string name="action_search">Rechercher</string>
     <string name="action_close">Fermer</string>
-    <string name="action_add_note">+ Ajouter une note</string>
     <string name="action_add_transaction">Ajouter une transaction</string>
     <string name="action_show_all">Tout afficher</string>
     <string name="action_select">Sélectionner</string>
 
     <string name="dashboard_total_spent">Dépenses Totales</string>
     <string name="dashboard_monthly_budget">Budget Mensuel</string>
-    <string name="dashboard_cash_flow">Flux de Trésorerie</string>
     <string name="balance_label">Solde</string>
     <string name="income">Revenus</string>
     <string name="expense">Dépenses</string>
@@ -47,9 +43,6 @@
     <string name="net">Net</string>
     <string name="more">plus</string>
     <string name="less">moins</string>
-    <string name="positive_flow">Flux Positif</string>
-    <string name="active_flow">Flux Actif</string>
-    <string name="no_activity">Aucune Activité</string>
     <string name="no_transactions_found">Aucune transaction trouvée</string>
 
     <string name="period_this_week">Cette semaine</string>
@@ -240,7 +233,6 @@
     <string name="diagnostics_desc">Afficher et copier les journaux d\'erreurs</string>
     <string name="contact_dev_title">Contacter le développeur</string>
     <string name="open_source_title">Open Source</string>
-    <string name="privacy_policy_title">Politique de confidentialité</string>
     <string name="support_dev_title">Soutenir le développement</string>
     <string name="delete_all_data_dialog_title">Supprimer toutes les données ?</string>
     <string name="delete_all_data_dialog_desc">Cette action est définitive et irréversible.</string>
@@ -259,7 +251,6 @@
     <string name="action_fix">Corriger</string>
     <string name="status_granted">Accordé</string>
     <string name="smart_rules_title">Règles intelligentes</string>
-    <string name="smart_rules_empty">Aucune règle personnalisée.\nLes règles sont créées lorsque vous modifiez la catégorie d\'une transaction.</string>
     <string name="smart_rules_tab_categories">Catégories</string>
     <string name="smart_rules_tab_merchants">Noms de commerçants</string>
     <string name="smart_rules_empty_categories">Aucune règle de catégorie pour le moment.\nLes règles sont créées lorsque vous modifiez la catégorie d\'une transaction.</string>
@@ -272,7 +263,6 @@
     <string name="smart_rules_dialog_dismiss">Non, seulement cette fois</string>
     <string name="smart_rules_raw_merchant_label">Nom d\'origine / SMS du commerçant</string>
     <string name="smart_rules_clean_merchant_label">Nom affiché</string>
-    <string name="smart_rules_renamed_to">Renommé en %1$s</string>
     <string name="smart_rules_always_as">Toujours comme %1$s</string>
     <string name="smart_rules_dialog_new">Nouvelle règle</string>
     <string name="smart_rules_dialog_edit">Modifier la règle</string>
@@ -378,7 +368,6 @@
     <string name="whats_new_v616_license_desc">Pro se réactive désormais sur un nouveau téléphone après la restauration d\'une sauvegarde, et la date de renouvellement de votre formule s\'affiche correctement.</string>
     <string name="whats_new_btn_ack">Génial</string>
     <string name="settings_tap_for_whats_new">Mises à jour</string>
-    <string name="split_expense">Partager la dépense</string>
     <string name="split_title">Partager la dépense</string>
     <string name="split_mode_equal">Équitable</string>
     <string name="split_mode_exact">Montant exact</string>
@@ -441,7 +430,6 @@
     <string name="custom_category_new_title">Nouvelle catégorie</string>
     <string name="custom_category_edit_title">Modifier la catégorie</string>
     <string name="custom_category_subtitle">Personnalisez avec une icône et une couleur</string>
-    <string name="custom_category_name_label">Nom de la catégorie</string>
     <string name="custom_category_name_placeholder">ex. Salle de sport &amp; Fitness</string>
     <string name="custom_category_select_icon">CHOISIR UNE ICÔNE</string>
     <string name="custom_category_select_color">CHOISIR UNE COULEUR</string>
@@ -452,28 +440,12 @@
     <string name="custom_category_delete_confirm_desc">Les transactions existantes dans cette catégorie seront déplacées vers Général.</string>
     <string name="custom_category_error_empty">Le nom de catégorie ne peut pas être vide</string>
     <string name="custom_category_error_exists">Une catégorie avec ce nom existe déjà</string>
-    <string name="custom_category_section_default">Catégories par défaut</string>
-    <string name="custom_category_section_custom">Catégories personnalisées</string>
-    <string name="custom_category_add_btn">Ajouter une catégorie</string>
     <string name="custom_category_badge">Personnalisée</string>
 
     <string name="pro_title">Cipher Pro</string>
     <string name="pro_subtitle">Déverrouillez le coffre financier hors ligne ultime</string>
     <string name="pro_badge_lifetime">ACCÈS À VIE</string>
-    <string name="pro_badge_popular">LE PLUS POPULAIRE</string>
-    <string name="pro_tier_monthly">Mensuel</string>
-    <string name="pro_tier_lifetime">À vie</string>
-    <string name="pro_tier_monthly_desc">Facturation mensuelle, résiliation à tout moment</string>
-    <string name="pro_tier_lifetime_desc">Paiement unique, coffre-fort pour toujours</string>
     <string name="pro_btn_upgrade">Passer à Pro</string>
-    <string name="pro_btn_activate">Activer la licence</string>
-    <string name="pro_license_title">Vous avez une clé de licence ?</string>
-    <string name="pro_license_desc">Saisissez votre clé pour débloquer les fonctionnalités Pro instantanément.</string>
-    <string name="pro_license_hint">Saisir ou coller la clé de licence</string>
-    <string name="pro_license_verify">Vérifier et activer</string>
-    <string name="pro_license_invalid">Clé de licence invalide ou non reconnue</string>
-    <string name="pro_license_success">Cipher Pro activé avec succès !</string>
-    <string name="pro_license_already_active">Cipher Pro est actif sur cet appareil</string>
     <string name="pro_perk_unlimited_accounts_title">Comptes et cartes illimités</string>
     <string name="pro_perk_unlimited_accounts_desc">Suivez des comptes bancaires, cartes de crédit et portefeuilles illimités.</string>
     <string name="pro_perk_net_worth_title">Patrimoine net en direct &amp; Analyses</string>
@@ -483,19 +455,11 @@
     <string name="pro_perk_smart_rules_title">Catégorisation automatique intelligente</string>
     <string name="pro_perk_smart_rules_desc">Association automatique des commerçants et affectation aux comptes.</string>
     <string name="pro_perk_offline_crypto_title">Zéro cloud et grand livre privé</string>
-    <string name="pro_perk_offline_crypto_desc">Vos données financières sont chiffrées par keystore matériel et ne quittent jamais l\'appareil.</string>
     <string name="pro_perk_export_title">Relevés complets en PDF et CSV</string>
     <string name="pro_perk_export_desc">Générez des relevés de compte certifiés et des sauvegardes chiffrées.</string>
-    <string name="pro_faq_title">Foire aux questions</string>
-    <string name="pro_faq_offline_q">Pro nécessite-t-il une connexion Internet ?</string>
-    <string name="pro_faq_offline_a" formatted="false">Tous vos calculs et données financières restent strictement hors ligne sur votre appareil. L\'accès Internet est utilisé uniquement pour l\'activation de la licence et la gestion des appareils.</string>
-    <string name="pro_faq_devices_q">Puis-je transférer ma licence sur un nouvel appareil ?</string>
-    <string name="pro_faq_devices_a">Oui, entrez simplement votre clé à vie sur votre nouvel appareil ou restaurez votre sauvegarde chiffrée.</string>
     <string name="pro_tier_badge_standard">Standard</string>
     <string name="pro_tier_badge_save_29" formatted="false">Économisez 33%</string>
-    <string name="pro_tier_badge_lifetime_vip">VIP À VIE</string>
     <string name="pro_tier_badge_best_value">MEILLEURE OFFRE</string>
-    <string name="pro_tier_badge_popular_pill">POPULAIRE</string>
     <string name="pro_tier_monthly_title">Pass Mensuel</string>
     <string name="pro_tier_annual_title">Pass Annuel 1 An</string>
     <string name="pro_tier_lifetime_title">VIP À Vie</string>
@@ -523,9 +487,6 @@
     <string name="pro_feature_theme_styling">Personnalisation des thèmes et styles</string>
     <string name="pro_feature_theme_styling_desc">Thèmes exclusifs et palettes de couleurs personnalisées</string>
     <string name="pro_pricing_adjust_notice">Les tarifs s\'adaptent à votre pays. Votre prix local s\'affichera lors du paiement. Des taxes peuvent s\'appliquer.</string>
-    <string name="pro_coupon_notice">Vous avez un coupon ? Vous pouvez l\'ajouter au moment de payer.</string>
-    <string name="pro_cant_find_key">Clé de licence introuvable ?</string>
-    <string name="pro_customer_portal_link">Gérer sur Google Play</string>
     <string name="pro_subscription_title">Abonnement</string>
     <string name="pro_subscription_body">La facturation est gérée en toute sécurité par Google Play. Vous pouvez résilier ou modifier votre forfait à tout moment depuis vos abonnements Google Play.</string>
     <string name="pro_subscription_manage">Gérer ou résilier l\'abonnement</string>
@@ -538,7 +499,6 @@
     <string name="pro_migration_action_dismiss_forever">Ne plus afficher</string>
 
     <string name="accounts_title">Comptes et portefeuilles</string>
-    <string name="accounts_subtitle">Gérer les comptes financiers et grands livres</string>
     <string name="accounts_combined_net_worth">PATRIMOINE NET COMBINÉ</string>
     <string name="accounts_liquid_cash">Liquidités / Banques</string>
     <string name="accounts_total_debt">Dette totale de crédit</string>
@@ -549,10 +509,6 @@
     <string name="accounts_set_primary">Définir comme compte principal</string>
     <string name="accounts_delete_confirm_title">Supprimer le compte ?</string>
     <string name="accounts_delete_confirm_desc">Voulez-vous vraiment supprimer %1$s ? Les transactions existantes resteront dans votre historique général.</string>
-    <string name="accounts_delete_success">%1$s supprimé</string>
-    <string name="accounts_cannot_delete_only">Impossible de supprimer le seul compte restant</string>
-    <string name="accounts_created_success">%1$s créé</string>
-    <string name="accounts_updated_success">%1$s mis à jour</string>
 
     <string name="account_create_title">Créer un compte</string>
     <string name="account_edit_title">Modifier le compte</string>
@@ -566,10 +522,7 @@
     <string name="account_last4_label">CHIFFRES DE CARTE / COMPTE (4 DERNIERS)</string>
     <string name="account_last4_placeholder">•••• 4821</string>
     <string name="account_last4_desc">Associe automatiquement les alertes SMS bancaires à ce compte</string>
-    <string name="account_theme_accent_label">THÈME ET COULEUR DE CARTE</string>
-    <string name="account_icon_label">ICÔNE DE CARTE</string>
     <string name="account_primary_toggle_label">COMPTE PRINCIPAL</string>
-    <string name="account_primary_toggle_desc">Destination par défaut pour les transactions non assignées</string>
 
     <string name="account_type_bank">Compte bancaire</string>
     <string name="account_type_credit_card">Carte de crédit</string>
@@ -599,9 +552,7 @@
     <string name="account_analytics_subtitle">%1$s · Tendances &amp; Métriques</string>
     <string name="account_analytics_action_btn">Voir analyses &amp; tendances</string>
     <string name="account_analytics_action_desc">Graphiques interactifs, catégories &amp; commerçants</string>
-    <string name="account_analytics_spending_velocity">Vitesse de dépense</string>
     <string name="account_analytics_avg_daily">Moyenne quotidienne</string>
-    <string name="account_analytics_avg_weekly">Moyenne hebdomadaire</string>
     <string name="account_analytics_largest_tx">Plus grande dépense</string>
     <string name="account_analytics_top_categories">Répartition par catégorie</string>
     <string name="account_analytics_top_merchants">Principaux commerçants</string>
@@ -612,19 +563,14 @@
     <string name="account_analytics_period_90d">90J</string>
     <string name="account_analytics_period_1y">1 An</string>
     <string name="account_analytics_period_all">Tout</string>
-    <string name="account_card_transactions_count">%1$d Txns</string>
-    <string name="account_card_no_transactions">Aucune Txn</string>
     <string name="account_balance_positive">Positif (+)</string>
     <string name="account_balance_negative">Négatif (-)</string>
     <string name="account_set_primary_title">Définir comme compte principal</string>
     <string name="account_set_primary_desc">Compte par défaut pour les nouvelles transactions et le grand livre</string>
     <string name="account_save_changes">Enregistrer les modifications</string>
 
-    <string name="settings_pro_active">CIPHER PRO ACTIF</string>
     <string name="settings_pro_upgrade">PASSER À PRO</string>
     <string name="settings_pro_unlocked_desc">Toutes les fonctionnalités et catégories personnalisées débloquées</string>
-    <string name="settings_pro_locked_desc">Comptes, règles, exports PDF et widgets illimités</string>
-    <string name="settings_pro_lifetime_badge">À VIE</string>
 
     <string name="dashboard_period_balance">SOLDE %1$s</string>
     <string name="dashboard_spending_trend_title">Tendance des dépenses</string>
@@ -656,7 +602,6 @@
     <string name="transfer_note_placeholder">ex. Paiement carte de crédit, Épargne mensuelle</string>
     <string name="transfer_error_same_account">Les comptes d\'origine et de destination doivent être différents</string>
     <string name="transfer_error_invalid_amount">Veuillez entrer un montant valide</string>
-    <string name="transfer_error_insufficient_funds">Solde insuffisant sur le compte d\'origine</string>
     <string name="transfer_success_msg">%1$s transféré de %2$s vers %3$s</string>
     <string name="transfer_out_merchant">Virement vers %1$s</string>
     <string name="transfer_in_merchant">Virement de %1$s</string>
@@ -672,8 +617,6 @@
     <string name="account_export_pdf">Exporter le relevé PDF</string>
     <string name="account_export_csv_desc">Livre des transactions au format tableur (Gratuit)</string>
     <string name="account_export_pdf_desc">Relevé certifié avec graphiques et détails (PRO)</string>
-    <string name="account_export_success">Relevé exporté avec succès</string>
-    <string name="account_export_error">Échec de l\'exportation du relevé : %1$s</string>
     <string name="notify_action_switch_account">Changer de compte</string>
     <string name="notify_action_discard">Ignorer</string>
     <string name="notify_action_keep">Conserver</string>
@@ -688,24 +631,14 @@
     <string name="pro_gate_smart_rules_title">Limite de règles intelligentes</string>
     <string name="pro_gate_smart_rules_desc">Les utilisateurs gratuits peuvent créer jusqu\'à 3 règles intelligentes. Passez à Cipher Pro pour des règles illimitées.</string>
     <string name="account_frozen_badge">GELÉ</string>
-    <string name="account_frozen_tooltip">Compte gelé. La version gratuite est limitée à 2 comptes actifs. Passez à Pro pour débloquer.</string>
     <string name="rule_paused_badge">EN PAUSE</string>
-    <string name="rule_paused_tooltip">En pause (limite Pro). La version gratuite est limitée à 3 règles actives.</string>
-    <string name="account_frozen_overlay_title">COMPTE GELÉ</string>
-    <string name="account_frozen_overlay_desc">Le forfait gratuit comprend 2 comptes actifs. Définissez comme principal ou passez à Pro pour déverrouiller.</string>
-    <string name="account_make_active_btn">Activer</string>
     <string name="account_make_primary_btn">Définir comme principal</string>
     <string name="rule_make_active_btn">Activer</string>
-    <string name="rule_paused_overlay_desc">L\'offre gratuite comprend 3 règles actives. Touchez pour activer cette règle.</string>
     <string name="accounts_header_free_count">%1$d/%2$d Comptes actifs</string>
-    <string name="smart_rules_free_banner_title">Forfait gratuit : 3 règles actives</string>
-    <string name="smart_rules_free_banner_desc">Le forfait gratuit comprend jusqu\'à 3 règles automatisées. Les règles supplémentaires restent enregistrées mais en pause. Passez à Pro pour des règles illimitées.</string>
     <string name="categories_free_banner_title">Forfait gratuit : 3 catégories personnalisées</string>
     <string name="categories_free_banner_desc">Le forfait gratuit comprend jusqu\'à 3 catégories personnalisées. Les catégories supplémentaires restent enregistrées en lecture seule. Passez à Pro pour des catégories illimitées.</string>
     <string name="account_locked_title">COMPTE VERROUILLÉ</string>
     <string name="account_locked_desc">Le forfait gratuit comprend 2 comptes actifs. Définissez comme principal ou passez à Pro pour déverrouiller.</string>
-    <string name="pro_perk_accent_colors_title">Palettes d\'Accents Exclusives</string>
-    <string name="pro_perk_accent_colors_desc">Débloquez 12 couleurs vibrantes de designer Pantone et Coolors.</string>
     <string name="pro_gate_accent_colors_title">Couleurs de Thème Pro</string>
     <string name="pro_gate_accent_colors_desc">Débloquez les 18 thèmes d\'accentuation Pantone et designer avec Cipher Pro.</string>
 
@@ -747,7 +680,6 @@
     <string name="goals_target_amount">Montant cible</string>
     <string name="goals_saved_amount">Montant épargné</string>
     <string name="goals_initial_amount">Montant initial (optionnel)</string>
-    <string name="goals_name_label">Nom de l\'objectif</string>
     <string name="goals_goal_name_placeholder">ex. Vacances, Épargne de secours</string>
     <string name="goals_empty_title">Aucune cagnotte pour l\'instant</string>
     <string name="goals_empty_desc">Mettez de l\'argent de côté pour vos projets et suivez votre progression avec des cagnottes visuelles — 100 % privé et séparé de vos dépenses quotidiennes.</string>
@@ -758,7 +690,6 @@
     <string name="goals_name_error_empty">Veuillez saisir un nom d\'objectif</string>
     <string name="goals_select_color">CHOISIR UNE COULEUR</string>
     <string name="goals_select_icon">CHOISIR UNE ICÔNE</string>
-    <string name="goals_of_target">%1$s sur %2$s</string>
     <string name="goals_target_label">Objectif : %1$s</string>
     <string name="goals_deleted">Cagnotte d\'épargne supprimée</string>
     <string name="goals_free_limit_reached">Limite d\'objectifs gratuits atteinte (%1$d/%2$d)</string>
@@ -777,7 +708,6 @@
     </plurals>
     <string name="onboarding_returning_title">Vous utilisez déjà Cipher ?</string>
     <string name="onboarding_restore_backup_short">Restaurer</string>
-    <string name="onboarding_license_key_short">Clé de licence</string>
     <string name="backup_password_dialog_title">Votre mot de passe de sauvegarde</string>
     <string name="backup_password_unavailable">Le mot de passe de sauvegarde enregistré est illisible sur cet appareil.</string>
     <string name="backup_password_warning">Notez ce mot de passe et conservez-le en lieu sûr. Si vous l’oubliez, vos sauvegardes ne pourront pas être ouvertes, même par nous.</string>
@@ -847,8 +777,6 @@
     <string name="action_add_debt">Nouvelle dette / prêt</string>
     <string name="action_record_repayment">Rembourser</string>
     <string name="action_settle_full">Régler la totalité</string>
-    <string name="debt_type_lent">J\'ai prêté de l\'argent (On me doit)</string>
-    <string name="debt_type_borrowed">J\'ai emprunté de l\'argent (Je dois)</string>
     <string name="debt_type_lent_short">Prêté</string>
     <string name="debt_type_borrowed_short">Emprunté</string>
     <string name="debt_create_title">Nouvelle dette / prêt</string>
@@ -873,12 +801,10 @@
     <string name="debt_deleted">Enregistrement supprimé</string>
     <string name="debt_delete_confirm_title">Supprimer l\'enregistrement ?</string>
     <string name="debt_delete_confirm_desc">Voulez-vous vraiment supprimer cet enregistrement ? Les transactions associées seront également dissociées.</string>
-    <string name="debt_repaid_of_total">%1$s sur %2$s remboursé</string>
     <string name="debt_remaining_label">%1$s restant</string>
     <string name="pro_migration_plan_prompt">Quel forfait aviez-vous ?</string>
     <string name="pro_migration_plan_lifetime">À vie</string>
     <string name="pro_migration_plan_annual">Annuel</string>
     <string name="pro_migration_plan_monthly">Mensuel</string>
     <string name="pro_action_restore_purchases">Restaurer les achats</string>
-    <string name="pro_action_redeem_code">Utiliser un code</string>
 </resources>

@@ -10,7 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.masum.cipher.R
+import androidx.compose.foundation.lazy.itemsIndexed
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
@@ -185,34 +186,21 @@ fun AppSelectionScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.09f))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.onboarding_apps_step_label),
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 9.5.sp,
-                                letterSpacing = 1.2.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
+                    Text(
+                        text = stringResource(R.string.onboarding_apps_step_label).uppercase(),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = DMSans,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.6.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (!isLoading && selectedApps.isNotEmpty()) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                    RoundedCornerShape(20.dp)
-                                )
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
@@ -221,7 +209,7 @@ fun AppSelectionScreen(
                                         showSelectedAppsDialog = true
                                     }
                                 )
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .padding(horizontal = 14.dp, vertical = 7.dp)
                         ) {
                             Text(
                                 text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
@@ -231,7 +219,7 @@ fun AppSelectionScreen(
                                     fontSize = 11.sp,
                                     letterSpacing = 0.2.sp
                                 ),
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -266,14 +254,9 @@ fun AppSelectionScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
-                    RoundedCornerShape(14.dp)
-                )
-                .padding(horizontal = 14.dp, vertical = 12.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                .padding(horizontal = 18.dp, vertical = 13.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -396,8 +379,8 @@ fun AppSelectionScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .scale(btnScale)
-                .height(56.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .height(58.dp)
+                .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .clickable(interactionSource = btnInteractionSource, indication = null) {
                     view.performVibrate(true, isLongPress = false)
@@ -472,116 +455,66 @@ private fun SelectedAppsDialog(
     val selectedAppList = remember(selectedApps, allApps) {
         selectedApps.mapNotNull { appMap[it] }.sortedBy { it.appName }
     }
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-
     val closeSheet: () -> Unit = {
         coroutineScope.launch {
             sheetState.hide()
             onDismiss()
         }
     }
+    val dm = DMSans
 
-    val sheetBg = if (isDark) Color(0xFF13161C) else MaterialTheme.colorScheme.surface
-    val itemBg = if (isDark) Color(0xFF1B1F27) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-    val itemBorder = if (isDark) Color(0xFF282E3A) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        sheetGesturesEnabled = false,
-        containerColor = sheetBg,
-        dragHandle = null
+        sheetGesturesEnabled = false
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .imePadding()
-                .padding(top = 18.dp, bottom = 20.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 22.dp, vertical = 6.dp),
+                    .padding(horizontal = 24.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
                         text = stringResource(R.string.onboarding_selected_apps_title),
                         style = Typography.titleLarge.copy(
-                            fontFamily = DMSans,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            fontSize = 19.sp,
-                            letterSpacing = (-0.4).sp
+                            fontFamily = dm,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            fontSize = 24.sp,
+                            letterSpacing = (-0.5).sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = selectedApps.size.toString(),
-                            style = Typography.labelSmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 11.5.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.onboarding_apps_selected_count, selectedApps.size),
+                        style = Typography.bodySmall.copy(fontFamily = dm, fontSize = 13.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (selectedApps.isNotEmpty()) {
-                        TextButton(
-                            onClick = onClearAll,
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.onboarding_selected_apps_clear),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    fontSize = 12.sp
-                                ),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-
-                    Box(
+                if (selectedApps.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.onboarding_selected_apps_clear),
+                        style = Typography.labelSmall.copy(
+                            fontFamily = dm,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            fontSize = 12.sp
+                        ),
+                        color = MaterialTheme.colorScheme.error,
                         modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(if (isDark) Color(0xFF202530) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = closeSheet
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.X,
-                            contentDescription = stringResource(R.string.action_cancel),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.10f))
+                            .clickable(onClick = onClearAll)
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             if (removedHistory.isNotEmpty()) {
                 val lastPkg = removedHistory.lastOrNull()
@@ -589,85 +522,54 @@ private fun SelectedAppsDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 4.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isDark) Color(0xFF1E2430) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                        .border(1.dp, itemBorder, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                        .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = if (lastAppName.isNotBlank()) "Removed $lastAppName" else "Removed app",
-                        style = Typography.bodySmall.copy(
-                            fontFamily = Lato,
-                            fontSize = 12.5.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                        ),
+                        style = Typography.bodySmall.copy(fontFamily = dm, fontSize = 13.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
+                    Text(
+                        text = stringResource(R.string.action_undo),
+                        style = Typography.labelSmall.copy(fontFamily = dm, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, fontSize = 13.sp),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .clip(RoundedCornerShape(50))
                             .clickable(onClick = onUndo)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.Undo2,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.action_undo),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             if (selectedAppList.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 40.dp),
+                        .padding(vertical = 48.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.onboarding_selected_apps_empty),
-                        style = Typography.bodyMedium.copy(
-                            fontFamily = Lato,
-                            fontSize = 14.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        style = Typography.bodyMedium.copy(fontFamily = dm, fontSize = 14.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 420.dp)
-                        .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .heightIn(max = 440.dp)
+                        .padding(horizontal = 24.dp, vertical = 4.dp)
                 ) {
-                    items(selectedAppList, key = { it.packageName }) { app ->
+                    itemsIndexed(selectedAppList, key = { _, app -> app.packageName }) { index, app ->
                         var icon by remember(app.packageName) { mutableStateOf(appIconCache.get(app.packageName)) }
                         LaunchedEffect(app.packageName) {
                             if (icon == null) {
@@ -686,8 +588,7 @@ private fun SelectedAppsDialog(
                                 }
                             }
                         }
-
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .animateItem(
@@ -698,70 +599,67 @@ private fun SelectedAppsDialog(
                                         easing = androidx.compose.animation.core.FastOutSlowInEasing
                                     )
                                 )
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(itemBg)
-                                .border(1.dp, itemBorder, RoundedCornerShape(14.dp))
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
                                 icon?.let { bitmap ->
                                     Image(
                                         bitmap = bitmap,
                                         contentDescription = app.appName,
-                                        modifier = Modifier.size(38.dp).clip(RoundedCornerShape(9.dp))
+                                        modifier = Modifier.size(44.dp).clip(RoundedCornerShape(13.dp))
                                     )
-                                } ?: Box(modifier = Modifier.size(38.dp))
-
-                                Column(modifier = Modifier.weight(1f)) {
+                                } ?: Box(modifier = Modifier.size(44.dp))
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
                                     Text(
                                         text = app.appName,
                                         style = Typography.titleSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                            fontSize = 14.sp
+                                            fontFamily = dm,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                                            fontSize = 15.sp
                                         ),
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = app.packageName,
-                                        style = Typography.bodySmall.copy(
-                                            fontFamily = Lato,
-                                            fontSize = 11.sp,
-                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                        style = Typography.bodySmall.copy(fontFamily = dm, fontSize = 11.5.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                                        .clickable { onDeselect(app.packageName) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = LucideIcons.X,
+                                        contentDescription = "Remove",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
                             }
-
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isDark) Color(0xFF242A36) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null,
-                                        onClick = { onDeselect(app.packageName) }
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.X,
-                                    contentDescription = "Remove",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(13.dp)
+                            if (index < selectedAppList.lastIndex) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 58.dp)
+                                        .height(0.5.dp)
+                                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.22f))
                                 )
                             }
                         }
@@ -769,32 +667,13 @@ private fun SelectedAppsDialog(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = closeSheet
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.action_done),
-                    style = Typography.labelMedium.copy(
-                        fontFamily = Lato,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        fontSize = 14.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+            com.masum.cipher.ui.components.FormPrimaryButton(
+                text = stringResource(R.string.action_done),
+                enabled = true,
+                accent = MaterialTheme.colorScheme.primary,
+                background = Color.Transparent,
+                onClick = closeSheet
+            )
         }
     }
 }
@@ -848,16 +727,11 @@ private fun AppGridItem(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f)
-                    )
-                    .border(
-                        1.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.40f)
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-                        RoundedCornerShape(16.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = if (isSelected) 0.10f else 0.05f))
+                    .then(
+                        if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
+                        else Modifier
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -901,7 +775,7 @@ private fun AppGridItem(
                 fontSize = 10.5.sp,
                 lineHeight = 13.sp
             ),
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center

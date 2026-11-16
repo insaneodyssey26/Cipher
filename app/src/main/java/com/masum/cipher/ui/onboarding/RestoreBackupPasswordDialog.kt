@@ -83,7 +83,7 @@ fun RestoreBackupPasswordDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
                         IconButton(
-                            onClick = { isPasswordVisible = !isPasswordVisible },
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); isPasswordVisible = !isPasswordVisible },
                             enabled = !isRestoring
                         ) {
                             Icon(
@@ -111,7 +111,7 @@ fun RestoreBackupPasswordDialog(
             } else {
                 TextButton(
                     enabled = password.isNotBlank(),
-                    onClick = { onConfirm(password.toCharArray()) }
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onConfirm(password.toCharArray()) }
                 ) {
                     Text(
                         text = stringResource(R.string.action_import),

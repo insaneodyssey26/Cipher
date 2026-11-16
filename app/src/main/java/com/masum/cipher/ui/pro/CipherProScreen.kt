@@ -12,7 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,6 +67,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
@@ -175,8 +176,6 @@ fun CipherProScreen(
     val textDescription = if (isDark) Color(0xFFCBD5E1) else Color(0xFF475569)
     val topPillTrackBg = if (isDark) Color(0xFF262E39) else Color(0xFFE2E8F0)
     val topPillActiveBg = if (isDark) Color(0xFF11151B) else Color(0xFFFFFFFF)
-    val ctaButtonBg = if (isDark) Color.White else Color(0xFF0F172A)
-    val ctaButtonText = if (isDark) Color.Black else Color.White
 
     var showCongratulations by remember { mutableStateOf(false) }
     var activatedTierName by remember { mutableStateOf("") }
@@ -318,8 +317,24 @@ fun CipherProScreen(
 
     val pagerState = rememberPagerState(initialPage = initialPageIndex, pageCount = { plans.size })
 
+    val glowTarget = plans[pagerState.currentPage.coerceIn(0, plans.lastIndex)].let { if (isDark) it.accentColorDark else it.accentColorLight }
+    val glowColor by androidx.compose.animation.animateColorAsState(
+        targetValue = glowTarget,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "pro_glow"
+    )
+
     Scaffold(
-        containerColor = screenBg,
+        modifier = Modifier
+            .background(screenBg)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(glowColor.copy(alpha = if (isDark) 0.22f else 0.16f), Color.Transparent),
+                    center = androidx.compose.ui.geometry.Offset(540f, 0f),
+                    radius = 1300f
+                )
+            ),
+        containerColor = Color.Transparent,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -527,15 +542,31 @@ fun CipherProScreen(
                     val planAccent = if (isDark) plan.accentColorDark else plan.accentColorLight
                     val planOnAccent = if (isDark) plan.onAccentColorDark else plan.onAccentColorLight
 
+                    val pageDistance = (((pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction)).let { kotlin.math.abs(it) }.coerceIn(0f, 1f)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(28.dp))
+                            .graphicsLayer {
+                                val sc = 1f - 0.06f * pageDistance
+                                scaleX = sc
+                                scaleY = sc
+                                alpha = 1f - 0.4f * pageDistance
+                            }
+                            .clip(RoundedCornerShape(32.dp))
                             .background(cardBg)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(planAccent.copy(alpha = if (isDark) 0.16f else 0.10f), Color.Transparent),
+                                    center = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                    radius = 900f
+                                )
+                            )
                             .border(
-                                width = 1.5.dp,
-                                color = planAccent,
-                                shape = RoundedCornerShape(28.dp)
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    listOf(planAccent.copy(alpha = 0.85f), planAccent.copy(alpha = 0.12f))
+                                ),
+                                shape = RoundedCornerShape(32.dp)
                             )
                             .padding(horizontal = 22.dp, vertical = 20.dp)
                     ) {
@@ -588,8 +619,9 @@ fun CipherProScreen(
                                             text = plan.mainPrice,
                                             style = Typography.displaySmall.copy(
                                                 fontFamily = DMSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 32.sp
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 42.sp,
+                                                letterSpacing = (-1.2).sp
                                             ),
                                             color = planAccent
                                         )
@@ -694,13 +726,13 @@ fun CipherProScreen(
                                             modifier = Modifier
                                                 .size(22.dp)
                                                 .clip(CircleShape)
-                                                .background(planAccent),
+                                                .background(planAccent.copy(alpha = 0.16f)),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 imageVector = LucideIcons.Check,
                                                 contentDescription = null,
-                                                tint = planOnAccent,
+                                                tint = planAccent,
                                                 modifier = Modifier.size(13.dp)
                                             )
                                         }
@@ -789,11 +821,11 @@ fun CipherProScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(48.dp),
-                                    shape = CircleShape,
+                                        .height(54.dp),
+                                    shape = RoundedCornerShape(20.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = ctaButtonBg,
-                                        contentColor = ctaButtonText
+                                        containerColor = planAccent,
+                                        contentColor = planOnAccent
                                     )
                                 ) {
                                     Row(
@@ -803,7 +835,7 @@ fun CipherProScreen(
                                         Icon(
                                             imageVector = LucideIcons.Sparkles,
                                             contentDescription = null,
-                                            tint = ctaButtonText,
+                                            tint = planOnAccent,
                                             modifier = Modifier.size(15.dp)
                                         )
                                         Spacer(modifier = Modifier.width(7.dp))
@@ -814,7 +846,7 @@ fun CipherProScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp
                                             ),
-                                            color = ctaButtonText
+                                            color = planOnAccent
                                         )
                                     }
                                 }

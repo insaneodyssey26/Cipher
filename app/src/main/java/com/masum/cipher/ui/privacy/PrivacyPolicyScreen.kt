@@ -3,7 +3,7 @@ package com.masum.cipher.ui.privacy
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,6 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.masum.cipher.R
+import androidx.compose.ui.text.TextStyle
+import com.masum.cipher.ui.components.FormTopBar
+import com.masum.cipher.ui.components.ambientBackdrop
 import com.masum.cipher.core.util.performVibrate
 import com.masum.cipher.ui.theme.DMSans
 import compose.icons.LucideIcons
@@ -90,23 +93,12 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
     )
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.privacy_terms_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(LucideIcons.ArrowLeft, contentDescription = stringResource(R.string.action_back))
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            FormTopBar(
+                title = stringResource(R.string.privacy_terms_title),
+                onBack = onNavigateBack
             )
         }
     ) { padding ->
@@ -120,8 +112,8 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 6.dp)
                     .height(46.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                     .padding(4.dp)
             ) {
                 val tabWidth = maxWidth / tabs.size
@@ -133,8 +125,9 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
                         .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                         .width(tabWidth)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.primary)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(50))
                 )
 
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -144,7 +137,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(RoundedCornerShape(50))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
@@ -163,7 +156,7 @@ fun PrivacyPolicyScreen(onNavigateBack: () -> Unit) {
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                 ),
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -205,8 +198,8 @@ private fun PrivacyPolicyPage(onSwitchToTerms: () -> Unit) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         item {
             PolicyHeaderCard(
@@ -292,7 +285,7 @@ private fun PrivacyPolicyPage(onSwitchToTerms: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     FilledTonalButton(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             val intent = Intent(Intent.ACTION_VIEW, "https://github.com/insaneodyssey26/cipher".toUri())
                             context.startActivity(intent)
                         },
@@ -341,8 +334,8 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         item {
             PolicyHeaderCard(
@@ -413,7 +406,7 @@ private fun TermsOfServicePage(onSwitchToPrivacy: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     FilledTonalButton(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             val intent = Intent(Intent.ACTION_SENDTO, "mailto:skmasumali.dev@gmail.com".toUri())
                             context.startActivity(intent)
                         },
@@ -462,74 +455,38 @@ private fun PolicyHeaderCard(
     badgeIcon: ImageVector,
     tagline: String
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(
+        Text(
+            text = "cipher.",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontFamily = DMSans,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 34.sp,
+                letterSpacing = (-1.2).sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = badgeText,
+            style = TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "cipher.",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.8).sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    border = androidx.compose.foundation.BorderStroke(
-                        0.5.dp,
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = badgeIcon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = badgeText,
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-
-            Text(
-                text = tagline,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 0.1.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-                lineHeight = 21.sp
-            )
-        }
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                .padding(horizontal = 14.dp, vertical = 6.dp)
+        )
+        Text(
+            text = tagline,
+            style = TextStyle(fontFamily = DMSans, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 23.sp, textAlign = TextAlign.Center),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
     }
 }
 
@@ -593,61 +550,50 @@ private fun PolicyCard(
         buildPolicyAnnotatedString(body, linkColor)
     }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
-        )
-    ) {
-        Column(
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .height(0.5.dp)
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 22.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (icon != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    }
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(19.dp)
+                    )
                 }
-
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.1.sp
-                    ),
+                    style = TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, letterSpacing = (-0.2).sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Text(
+                    text = annotatedBody,
+                    style = TextStyle(fontFamily = DMSans, fontSize = 14.5.sp, lineHeight = 23.sp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f)
+                )
             }
-
-            Text(
-                text = annotatedBody,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 0.1.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-                lineHeight = 22.sp
-            )
         }
     }
 }
