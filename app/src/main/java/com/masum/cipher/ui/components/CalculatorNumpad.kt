@@ -1,7 +1,7 @@
 package com.masum.cipher.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,26 +69,26 @@ fun CalculatorNumpad(
         val rowModifier = Modifier.fillMaxWidth().height(60.dp)
         
         Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-            NumpadButton("1", modifier = Modifier.weight(1f), onClick = { onKeyClick("1") })
-            NumpadButton("2", modifier = Modifier.weight(1f), onClick = { onKeyClick("2") })
-            NumpadButton("3", modifier = Modifier.weight(1f), onClick = { onKeyClick("3") })
-            NumpadButton("÷", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("/") })
+            NumpadButton("1", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("1") })
+            NumpadButton("2", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("2") })
+            NumpadButton("3", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("3") })
+            NumpadButton("÷", isOperator = true, modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("/") })
         }
         Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-            NumpadButton("4", modifier = Modifier.weight(1f), onClick = { onKeyClick("4") })
-            NumpadButton("5", modifier = Modifier.weight(1f), onClick = { onKeyClick("5") })
-            NumpadButton("6", modifier = Modifier.weight(1f), onClick = { onKeyClick("6") })
-            NumpadButton("×", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("*") })
+            NumpadButton("4", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("4") })
+            NumpadButton("5", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("5") })
+            NumpadButton("6", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("6") })
+            NumpadButton("×", isOperator = true, modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("*") })
         }
         Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-            NumpadButton("7", modifier = Modifier.weight(1f), onClick = { onKeyClick("7") })
-            NumpadButton("8", modifier = Modifier.weight(1f), onClick = { onKeyClick("8") })
-            NumpadButton("9", modifier = Modifier.weight(1f), onClick = { onKeyClick("9") })
-            NumpadButton("-", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("-") })
+            NumpadButton("7", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("7") })
+            NumpadButton("8", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("8") })
+            NumpadButton("9", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("9") })
+            NumpadButton("-", isOperator = true, modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("-") })
         }
         Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-            NumpadButton(".", modifier = Modifier.weight(1f), onClick = { onKeyClick(".") })
-            NumpadButton("0", modifier = Modifier.weight(1f), onClick = { onKeyClick("0") })
+            NumpadButton(".", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick(".") })
+            NumpadButton("0", modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("0") })
             
             Box(
                 modifier = Modifier
@@ -110,7 +110,7 @@ fun CalculatorNumpad(
                 )
             }
             
-            NumpadButton("+", isOperator = true, modifier = Modifier.weight(1f), onClick = { onKeyClick("+") })
+            NumpadButton("+", isOperator = true, modifier = Modifier.weight(1f), onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onKeyClick("+") })
         }
     }
 }

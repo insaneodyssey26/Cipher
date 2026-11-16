@@ -2,7 +2,7 @@ package com.masum.cipher.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -29,13 +29,23 @@ fun VaultCard(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     shape: Shape = RoundedCornerShape(24.dp),
     contentPadding: Dp = 16.dp,
+    flat: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    if (flat) {
+        Box(
+            modifier = modifier
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(contentPadding)
+        ) { content() }
+        return
+    }
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
+        targetValue = if (isPressed) 0.98f else 1f,
         animationSpec = VaultMotion.InteractiveSpring,
         label = "CardScale"
     )

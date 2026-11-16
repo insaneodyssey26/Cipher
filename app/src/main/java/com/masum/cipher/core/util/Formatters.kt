@@ -93,6 +93,13 @@ object AppFormatters {
     fun formatDateTime(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
         getDateTimeFormatter(locale).format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
 
+    private val timeFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+
+    fun formatTimeOnly(timestamp: Long, zoneId: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =
+        timeFormatters.computeIfAbsent(locale) {
+            DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(locale, "jm"), locale)
+        }.format(Instant.ofEpochMilli(timestamp).atZone(zoneId))
+
     fun getDay(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
 

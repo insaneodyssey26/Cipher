@@ -19,8 +19,13 @@ fun View.performVibrate(isHapticsEnabled: Boolean, isLongPress: Boolean = false)
     performHaptic(isHapticsEnabled, if (isLongPress) HapticIntensity.HEAVY else HapticIntensity.LIGHT)
 }
 
+private var lastHapticUptime = 0L
+
 fun View.performHaptic(isHapticsEnabled: Boolean, intensity: HapticIntensity = HapticIntensity.LIGHT) {
     if (!isHapticsEnabled) return
+    val nowUptime = android.os.SystemClock.uptimeMillis()
+    if (intensity == HapticIntensity.LIGHT && nowUptime - lastHapticUptime < 90L) return
+    lastHapticUptime = nowUptime
 
     val feedbackConstant = when (intensity) {
         HapticIntensity.LIGHT -> HapticFeedbackConstants.KEYBOARD_TAP

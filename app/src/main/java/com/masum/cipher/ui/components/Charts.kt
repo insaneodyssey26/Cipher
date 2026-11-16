@@ -11,7 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -293,7 +293,7 @@ fun SpendingTrendChart(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp)
                 .height(220.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp)),
+                ,
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -346,8 +346,8 @@ fun SpendingTrendChart(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            tonalElevation = 2.dp
+            color = androidx.compose.ui.graphics.Color.Transparent,
+            tonalElevation = 0.dp
         ) {
             Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
                 Row(
@@ -722,7 +722,7 @@ fun PeakHoursChart(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .height(180.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, androidx.compose.foundation.shape.RoundedCornerShape(20.dp)),
+                ,
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -775,10 +775,10 @@ fun PeakHoursChart(
     }
 
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         shape = RoundedCornerShape(20.dp),
-        color = surfaceVariant,
-        tonalElevation = 2.dp
+        color = androidx.compose.ui.graphics.Color.Transparent,
+        tonalElevation = 0.dp
     ) {
         Box(
             modifier = Modifier
