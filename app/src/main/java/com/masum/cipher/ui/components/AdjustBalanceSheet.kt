@@ -2,7 +2,7 @@ package com.masum.cipher.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -101,18 +101,10 @@ fun AdjustBalanceSheet(
     val difference = parsedNewBalance?.let { it - currentBalance }
     val isSuffix = AppFormatters.isSuffixCurrency(currencySymbol, locale)
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 4.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(2.dp))
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier
@@ -263,7 +255,7 @@ fun AdjustBalanceSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .padding(horizontal = 16.dp, vertical = 14.dp)
                 ) {
                     Row(
@@ -361,7 +353,7 @@ fun AdjustBalanceSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 14.dp, vertical = 12.dp)
                 ) {
                     BasicTextField(
@@ -381,7 +373,7 @@ fun AdjustBalanceSheet(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                     .clickable {
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         showDatePicker = true
@@ -427,7 +419,7 @@ fun AdjustBalanceSheet(
                     onDismissRequest = { showDatePicker = false },
                     confirmButton = {
                         TextButton(
-                            onClick = {
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                                 datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
                                     selectedTimestamp = DateTimeUtils.utcEpochMillisToLocalStartOfDay(pickedUtcMillis)
                                 }
@@ -439,7 +431,7 @@ fun AdjustBalanceSheet(
                     },
                     dismissButton = {
                         TextButton(
-                            onClick = { showDatePicker = false }
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showDatePicker = false }
                         ) {
                             Text(stringResource(R.string.cancel))
                         }

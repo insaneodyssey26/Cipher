@@ -15,7 +15,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +54,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -241,23 +241,14 @@ fun TransactionSplitSheet(
         }
     }
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = Modifier
             .statusBarsPadding()
             .padding(top = 12.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, bottom = 4.dp)
-                    .size(width = 38.dp, height = 4.5.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier
@@ -402,7 +393,7 @@ fun TransactionSplitSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(14.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                                     .padding(horizontal = 14.dp, vertical = 11.dp)
                             ) {
                                 if (standaloneExpenseName.isBlank()) {
@@ -451,7 +442,7 @@ fun TransactionSplitSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(14.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                                     .padding(horizontal = 12.dp, vertical = 11.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -554,7 +545,7 @@ fun TransactionSplitSheet(
                     .animateContentSize(animationSpec = spring(dampingRatio = 0.85f, stiffness = 400f))
                     .clip(RoundedCornerShape(20.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                     .padding(vertical = 4.dp)
             ) {
                 participants.forEachIndexed { index, participant ->
@@ -854,7 +845,7 @@ fun TransactionSplitSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(14.dp))
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                                     .padding(horizontal = 14.dp, vertical = 10.dp)
                             ) {
                                 if (newPersonName.isBlank()) {
@@ -871,7 +862,7 @@ fun TransactionSplitSheet(
                     )
 
                     Surface(
-                        onClick = { addParticipantWithName(newPersonName) },
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); addParticipantWithName(newPersonName) },
                         shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(42.dp)
@@ -898,7 +889,7 @@ fun TransactionSplitSheet(
                             contentType = { "suggestion_item" }
                         ) { name ->
                             Surface(
-                                onClick = { addParticipantWithName(name) },
+                                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); addParticipantWithName(name) },
                                 shape = RoundedCornerShape(10.dp),
                                 color = MaterialTheme.colorScheme.surface,
                                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))

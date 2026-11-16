@@ -12,7 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,7 +53,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -264,23 +264,15 @@ fun TransactionDetailsSheet(
         }
     }
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = Modifier
             .statusBarsPadding()
             .padding(top = 12.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, bottom = 4.dp)
-                    .size(width = 38.dp, height = 4.5.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        tint = if (isIncome) EmeraldIncome else RoseExpense
     ) {
         Column(
             modifier = Modifier
@@ -451,7 +443,7 @@ fun TransactionDetailsSheet(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                     .padding(vertical = 4.dp)
             ) {
                 Row(
@@ -640,7 +632,7 @@ fun TransactionDetailsSheet(
                             onDismissRequest = { showAccountMenu = false },
                             modifier = Modifier
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                                .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                         ) {
                             accounts.forEach { acc ->
                                 val isSelected = acc.id == selectedAccountId
@@ -892,7 +884,7 @@ fun TransactionDetailsSheet(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
                             selectedTimestamp = DateTimeUtils.utcEpochMillisToLocalStartOfDay(pickedUtcMillis)
                         }
@@ -903,7 +895,7 @@ fun TransactionDetailsSheet(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showDatePicker = false }) {
                     Text(stringResource(R.string.action_cancel))
                 }
             }
@@ -1335,163 +1327,122 @@ private fun OriginalMessageDialog(
         }
     }
 
+    val dm = com.masum.cipher.ui.theme.DMSans
+    val sourceAccent = if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary else EmeraldIncome
+    val badgeText = if (sourceInfo.sourceName == "App Notification" || sourceInfo.sourceName == "Bank SMS" || sourceInfo.sourceName == "UPI Notification") {
+        sourceInfo.sourceName
+    } else {
+        "${sourceInfo.type} • ${sourceInfo.sourceName}"
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .clip(RoundedCornerShape(22.dp))
+                .clip(RoundedCornerShape(32.dp))
                 .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, White10, RoundedCornerShape(22.dp))
-                .padding(20.dp)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.MessageSquareText,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(17.dp)
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.original_message_title),
-                            style = Typography.titleMedium.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = LucideIcons.X,
-                            contentDescription = stringResource(R.string.action_close),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                val badgeText = if (sourceInfo.sourceName == "App Notification" || sourceInfo.sourceName == "Bank SMS" || sourceInfo.sourceName == "UPI Notification") {
-                    sourceInfo.sourceName
-                } else {
-                    "${sourceInfo.type} • ${sourceInfo.sourceName}"
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else EmeraldIncome.copy(alpha = 0.12f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(sourceAccent.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (sourceInfo.isAppNotification) LucideIcons.Bell else LucideIcons.MessageSquareText,
                         contentDescription = null,
-                        tint = if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary else EmeraldIncome,
-                        modifier = Modifier.size(12.dp)
+                        tint = sourceAccent,
+                        modifier = Modifier.size(23.dp)
+                    )
+                }
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(
+                        text = stringResource(R.string.original_message_title).uppercase(),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 10.5.sp, letterSpacing = 1.4.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     Text(
                         text = badgeText,
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        ),
-                        color = if (sourceInfo.isAppNotification) MaterialTheme.colorScheme.primary else EmeraldIncome
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, letterSpacing = (-0.2).sp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                        .border(1.dp, White10, RoundedCornerShape(14.dp))
-                        .padding(14.dp)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                        .clickable(onClick = onDismiss),
+                    contentAlignment = Alignment.Center
                 ) {
-                    SelectionContainer {
-                        Text(
-                            text = sourceInfo.cleanText,
-                            style = Typography.bodyMedium.copy(
-                                fontFamily = Lato,
-                                fontSize = 13.sp,
-                                lineHeight = 19.sp,
-                                letterSpacing = 0.2.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
-                        )
-                    }
+                    Icon(
+                        imageVector = LucideIcons.X,
+                        contentDescription = stringResource(R.string.action_close),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp, bottomEnd = 22.dp, bottomStart = 6.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                    .padding(horizontal = 18.dp, vertical = 16.dp)
+            ) {
+                SelectionContainer {
+                    Text(
+                        text = sourceInfo.cleanText,
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontSize = 14.sp, lineHeight = 21.sp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled)
-                            coroutineScope.launch {
-                                clipboard.setClipEntry(ClipData.newPlainText("cipher_message", sourceInfo.cleanText).toClipEntry())
-                            }
-                            isCopied = true
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isCopied) EmeraldIncome.copy(alpha = 0.15f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            contentColor = if (isCopied) EmeraldIncome else MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (isCopied) LucideIcons.Check else LucideIcons.Copy,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = if (isCopied) stringResource(R.string.original_message_copied) else stringResource(R.string.action_copy),
-                                style = Typography.labelMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp
-                                )
-                            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(if (isCopied) EmeraldIncome else MaterialTheme.colorScheme.primary)
+                    .clickable {
+                        view.performVibrate(isHapticsEnabled)
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipData.newPlainText("cipher_message", sourceInfo.cleanText).toClipEntry())
                         }
-                    }
+                        isCopied = true
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isCopied) LucideIcons.Check else LucideIcons.Copy,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(17.dp)
+                    )
+                    Text(
+                        text = if (isCopied) stringResource(R.string.original_message_copied) else stringResource(R.string.action_copy),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 15.sp),
+                        color = Color.White
+                    )
                 }
             }
         }

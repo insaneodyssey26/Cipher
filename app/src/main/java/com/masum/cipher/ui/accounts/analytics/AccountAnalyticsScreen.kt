@@ -2,7 +2,7 @@ package com.masum.cipher.ui.accounts.analytics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.ambientBackdrop
 import com.masum.cipher.core.domain.model.AccountType
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -85,7 +86,8 @@ fun AccountAnalyticsScreen(
     val accountType = account?.let { AccountType.fromKey(it.type) } ?: AccountType.BANK
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             Row(
                 modifier = Modifier
@@ -105,7 +107,7 @@ fun AccountAnalyticsScreen(
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                             .clickable {
                                 view.performVibrate(state.isHapticsEnabled, isLongPress = false)
                                 onNavigateBack()
@@ -193,7 +195,7 @@ fun AccountAnalyticsScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -238,7 +240,7 @@ fun AccountAnalyticsScreen(
                         .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.15f))
                         .clip(RoundedCornerShape(20.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                         .padding(18.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -375,7 +377,7 @@ fun AccountAnalyticsScreen(
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.10f))
                             .clip(RoundedCornerShape(16.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                             .padding(14.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -413,7 +415,7 @@ fun AccountAnalyticsScreen(
                             .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.10f))
                             .clip(RoundedCornerShape(16.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                             .padding(14.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -465,7 +467,7 @@ fun AccountAnalyticsScreen(
                             .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.15f))
                             .clip(RoundedCornerShape(20.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                             .padding(18.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -509,7 +511,7 @@ fun AccountAnalyticsScreen(
                             .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.15f))
                             .clip(RoundedCornerShape(20.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                             .padding(18.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -542,7 +544,7 @@ fun AccountAnalyticsScreen(
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                                             .padding(horizontal = 12.dp, vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
@@ -621,7 +623,7 @@ fun AccountAnalyticsScreen(
                             .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.15f))
                             .clip(RoundedCornerShape(20.dp))
                             .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
                             .padding(18.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
