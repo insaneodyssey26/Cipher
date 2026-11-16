@@ -6,7 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +38,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -71,6 +71,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.domain.groupByMerchant
@@ -211,692 +213,313 @@ fun CategoryDetailSheet(
         }
     }
 
-    ModalBottomSheet(
+    val dm = DMSans
+    val grouped = remember(categoryTransactions) {
+        categoryTransactions.groupBy { tx ->
+            Calendar.getInstance().apply { timeInMillis = tx.timestamp }.let { it.get(Calendar.YEAR) * 1000 + it.get(Calendar.DAY_OF_YEAR) }
+        }.values.toList()
+    }
+    val maxMerchant = topMerchants.maxOfOrNull { it.totalAmount } ?: 1.0
+    val budgetColor = when {
+        isOverBudget -> RoseExpense
+        budgetPercentInt >= 85 -> Color(0xFFF59E0B)
+        else -> EmeraldIncome
+    }
+
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = Modifier
             .statusBarsPadding()
             .padding(top = 12.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, bottom = 4.dp)
-                    .size(width = 38.dp, height = 4.5.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(3.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        tint = categoryColor,
+        tintAlpha = 0.2f
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars)
+                .nestedScroll(consumeOverscrollConnection),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 6.dp, bottom = 32.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.view_breakdown_transactions),
-                    style = Typography.titleMedium.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                IconButton(
-                    onClick = {
-                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                        closeWithAnimation()
-                    },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface)
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = LucideIcons.X,
-                        contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(68.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(categoryColor.copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(imageVector = categoryIcon, contentDescription = null, tint = categoryColor, modifier = Modifier.size(32.dp))
+                    }
+                    Text(
+                        text = categoryTitle.uppercase(),
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, letterSpacing = 1.6.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    FitText(
+                        text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale, decimals = 0),
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 48.sp, letterSpacing = (-1.6).sp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                    Text(
+                        text = "${String.format(java.util.Locale.getDefault(), "%.1f", categoryData.percentage * 100)}% of spending  ·  $txCount ${if (txCount == 1) "transaction" else "transactions"}",
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .nestedScroll(consumeOverscrollConnection),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        categoryColor.copy(alpha = 0.22f),
-                                        MaterialTheme.colorScheme.surface,
-                                        MaterialTheme.colorScheme.surface
-                                    )
-                                )
-                            )
-                            .border(1.2.dp, categoryColor.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
-                            .padding(18.dp)
-                    ) {
-                        Column(
+            item {
+                Spacer(Modifier.height(26.dp))
+                if (hasBudget) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(46.dp)
-                                            .clip(RoundedCornerShape(14.dp))
-                                            .background(categoryColor.copy(alpha = 0.2f))
-                                            .border(1.dp, categoryColor.copy(alpha = 0.5f), RoundedCornerShape(14.dp)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = categoryIcon,
-                                            contentDescription = null,
-                                            tint = categoryColor,
-                                            modifier = Modifier.size(24.dp)
-                                        )
+                            Text(
+                                text = if (isOverBudget) "Over budget" else "$budgetPercentInt% of budget",
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                                color = budgetColor
+                            )
+                            Text(
+                                text = "Edit",
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        showBudgetDialog = true
                                     }
-
-                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        Text(
-                                            text = categoryTitle,
-                                            style = Typography.titleMedium.copy(
-                                                fontFamily = DMSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 17.5.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.percent_of_expenses, String.format(locale, "%.1f", categoryData.percentage * 100)),
-                                            style = Typography.bodySmall.copy(
-                                                fontFamily = Lato,
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Medium
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = categoryColor.copy(alpha = 0.16f),
-                                    border = BorderStroke(1.dp, categoryColor.copy(alpha = 0.4f))
-                                ) {
-                                    Text(
-                                        text = "${String.format(locale, "%.1f", categoryData.percentage * 100)}%",
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 12.5.sp
-                                        ),
-                                        color = categoryColor,
-                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.5.dp)
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(
-                                        text = "Total Spent",
-                                        style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.5.sp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = AppFormatters.formatCurrency(totalSpent, currencySymbol, locale),
-                                        style = Typography.headlineMedium.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = if (totalSpent >= 1_000_000_000) 20.sp else 24.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-
-                                if (hasBudget) {
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = if (isOverBudget) RoseExpense.copy(alpha = 0.12f) else EmeraldIncome.copy(alpha = 0.12f),
-                                        border = BorderStroke(0.5.dp, if (isOverBudget) RoseExpense.copy(alpha = 0.4f) else EmeraldIncome.copy(alpha = 0.4f))
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(6.dp)
-                                                    .clip(CircleShape)
-                                                    .background(if (isOverBudget) RoseExpense else EmeraldIncome)
-                                            )
-                                            Text(
-                                                text = if (isOverBudget) "OVER LIMIT" else "$budgetPercentInt% OF LIMIT",
-                                                style = Typography.labelSmall.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 10.sp
-                                                ),
-                                                color = if (isOverBudget) RoseExpense else EmeraldIncome
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                            )
                         }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(animatedBudgetProgress)
+                                    .fillMaxHeight()
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(budgetColor)
+                            )
+                        }
+                        Text(
+                            text = if (isOverBudget) "${AppFormatters.formatCurrency(totalSpent - categoryBudget, currencySymbol, locale, decimals = 0)} over a ${AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale, decimals = 0)} limit"
+                            else "${AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale, decimals = 0)} left  ·  safe to spend ${AppFormatters.formatCurrency(safeDailySpend, currencySymbol, locale, decimals = 0)}/day",
+                            style = TextStyle(fontFamily = dm, fontSize = 12.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                }
-
-                item {
-                    Column(
+                } else {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                             .clickable {
                                 view.performVibrate(isHapticsEnabled, isLongPress = false)
                                 showBudgetDialog = true
                             }
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        if (categoryBudget > 0) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Target,
-                                        contentDescription = null,
-                                        tint = categoryColor,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Text(
-                                        text = "${stringResource(R.string.limit_suffix)}: ${AppFormatters.formatCurrency(categoryBudget, currencySymbol, locale)}",
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = LucideIcons.Settings,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(11.dp)
-                                        )
-                                        Text(
-                                            text = "Edit Limit",
-                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 10.5.sp, fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(7.dp)
-                                    .clip(RoundedCornerShape(3.5.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(animatedBudgetProgress)
-                                        .fillMaxHeight()
-                                        .clip(RoundedCornerShape(3.5.dp))
-                                        .background(if (isOverBudget) RoseExpense else categoryColor)
-                                )
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = if (isOverBudget) {
-                                        "Exceeded by ${AppFormatters.formatCurrency(totalSpent - categoryBudget, currencySymbol, locale)}"
-                                    } else {
-                                        "${AppFormatters.formatCurrency(remainingBudget, currencySymbol, locale)} remaining"
-                                    },
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 11.5.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    color = if (isOverBudget) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-
-                                if (!isOverBudget) {
-                                    Text(
-                                        text = "${stringResource(R.string.safe_daily_spend)}: ${AppFormatters.formatCurrency(safeDailySpend, currencySymbol, locale)}/${stringResource(R.string.day_unit)}",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold
-                                        ),
-                                        color = EmeraldIncome
-                                    )
-                                }
-                            }
-                        } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(34.dp)
-                                            .clip(CircleShape)
-                                            .background(categoryColor.copy(alpha = 0.14f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = LucideIcons.Target,
-                                            contentDescription = null,
-                                            tint = categoryColor,
-                                            modifier = Modifier.size(17.dp)
-                                        )
-                                    }
-
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.set_category_budget),
-                                            style = Typography.titleSmall.copy(
-                                                fontFamily = DMSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 13.5.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.set_spending_limit_for, categoryTitle),
-                                            style = Typography.bodySmall.copy(fontSize = 11.sp, fontFamily = Lato),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = categoryColor.copy(alpha = 0.16f),
-                                    border = BorderStroke(0.5.dp, categoryColor.copy(alpha = 0.4f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = LucideIcons.Plus,
-                                            contentDescription = null,
-                                            tint = categoryColor,
-                                            modifier = Modifier.size(11.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.set_limit),
-                                            style = Typography.labelSmall.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 11.sp
-                                            ),
-                                            color = categoryColor
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.avg_spend_header),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
-                                    style = Typography.titleMedium.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-
-                        Surface(
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.count_header),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = "$txCount txs",
-                                    style = Typography.titleMedium.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-
-                        Surface(
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.largest_header),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
-                                    style = Typography.titleMedium.copy(
-                                        fontFamily = DMSans,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (topMerchants.isNotEmpty()) {
-                    item {
-                        Column(
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                                .size(38.dp)
+                                .clip(RoundedCornerShape(13.dp))
+                                .background(categoryColor.copy(alpha = 0.18f)),
+                            contentAlignment = Alignment.Center
                         ) {
+                            Icon(imageVector = LucideIcons.Target, contentDescription = null, tint = categoryColor, modifier = Modifier.size(19.dp))
+                        }
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = stringResource(R.string.top_merchants),
-                                style = Typography.labelMedium.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.5.sp
-                                ),
+                                text = "Set a monthly budget",
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Get a safe daily spend for this category",
+                                style = TextStyle(fontFamily = dm, fontSize = 11.5.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-
-                            topMerchants.forEach { merchantSpend ->
-                                val merchantPercent = if (totalSpent > 0) (merchantSpend.totalAmount / totalSpent).toFloat() else 0f
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(5.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = merchantSpend.merchant,
-                                            style = Typography.bodyMedium.copy(
-                                                fontFamily = Lato,
-                                                fontWeight = FontWeight.SemiBold,
-                                                fontSize = 13.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            text = AppFormatters.formatCurrency(merchantSpend.totalAmount, currencySymbol, locale),
-                                            style = Typography.bodyMedium.copy(
-                                                fontFamily = DMSans,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 13.sp
-                                            ),
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(5.dp)
-                                            .clip(RoundedCornerShape(2.5.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth(merchantPercent.coerceIn(0f, 1f))
-                                                .fillMaxHeight()
-                                                .clip(RoundedCornerShape(2.5.dp))
-                                                .background(categoryColor.copy(alpha = 0.85f))
-                                        )
-                                    }
-                                }
-                            }
                         }
                     }
                 }
+                Spacer(Modifier.height(26.dp))
+            }
 
-                if (categoryTransactions.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "${stringResource(R.string.transactions_header)} (${categoryTransactions.size})",
-                            style = Typography.labelMedium.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.5.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-
-                    item {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    listOf(
+                        "Average" to AppFormatters.formatCompactCurrency(avgSpend, currencySymbol = currencySymbol),
+                        "Largest" to AppFormatters.formatCompactCurrency(maxSpend, currencySymbol = currencySymbol),
+                        "Count" to txCount.toString()
+                    ).forEachIndexed { index, (label, value) ->
                         Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = when (index) { 0 -> Alignment.Start; 1 -> Alignment.CenterHorizontally; else -> Alignment.End },
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = label.uppercase(),
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 9.5.sp, letterSpacing = 0.9.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                            Text(
+                                text = value,
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(30.dp))
+            }
+
+            if (topMerchants.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "TOP MERCHANTS",
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 10.5.sp, letterSpacing = 1.4.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.height(14.dp))
+                }
+                items(topMerchants.size) { index ->
+                    val m = topMerchants[index]
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = m.merchant,
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.Medium, fontSize = 14.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "${m.count}×  ${AppFormatters.formatCurrency(m.totalAmount, currencySymbol, locale, decimals = 0)}",
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-                                .padding(vertical = 4.dp)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
                         ) {
-                            categoryTransactions.forEachIndexed { index, tx ->
-                                if (index > 0) {
-                                    HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                                        thickness = 1.dp
-                                    )
-                                }
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                            onTransactionClick(tx)
-                                        }
-                                        .padding(horizontal = 14.dp, vertical = 11.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(categoryColor)
-                                        )
-
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = tx.merchant.ifEmpty { stringResource(R.string.expense) },
-                                                style = Typography.bodyMedium.copy(
-                                                    fontFamily = Lato,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    fontSize = 13.5.sp
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Text(
-                                                text = "${AppFormatters.formatDay(tx.timestamp, locale = locale)}${if (!tx.note.isNullOrBlank()) " • ${tx.note}" else ""}",
-                                                style = Typography.bodySmall.copy(
-                                                    fontFamily = Lato,
-                                                    fontSize = 11.5.sp
-                                                ),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
-
-                                    Spacer(Modifier.width(8.dp))
-
-                                    Text(
-                                        text = "-${AppFormatters.formatCurrency(tx.amount, currencySymbol, locale)}",
-                                        style = Typography.titleSmall.copy(
-                                            fontFamily = DMSans,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.5.sp
-                                        ),
-                                        color = RoseExpense,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth((m.totalAmount / maxMerchant).toFloat().coerceIn(0.02f, 1f))
+                                    .fillMaxHeight()
+                                    .background(categoryColor)
+                            )
                         }
+                    }
+                }
+                item { Spacer(Modifier.height(14.dp)) }
+            }
+
+            item {
+                Text(
+                    text = stringResource(R.string.view_breakdown_transactions).uppercase(),
+                    style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 10.5.sp, letterSpacing = 1.4.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            grouped.forEach { dayTxs ->
+                item {
+                    Text(
+                        text = AppFormatters.formatFullDate(dayTxs.first().timestamp),
+                        style = TextStyle(fontFamily = dm, fontWeight = FontWeight.Medium, fontSize = 12.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 14.dp, bottom = 4.dp)
+                    )
+                }
+                items(dayTxs.size) { i ->
+                    val tx = dayTxs[i]
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                onTransactionClick(tx)
+                            }
+                            .padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(categoryColor.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = tx.merchant.trim().take(1).uppercase().ifEmpty { "?" },
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                                color = categoryColor
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = tx.merchant,
+                                style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = AppFormatters.formatDateTime(tx.timestamp, locale = locale),
+                                style = TextStyle(fontFamily = dm, fontSize = 11.5.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Text(
+                            text = "-${AppFormatters.formatCurrency(tx.amount, currencySymbol, locale, decimals = 0)}",
+                            style = TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, letterSpacing = (-0.2).sp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }

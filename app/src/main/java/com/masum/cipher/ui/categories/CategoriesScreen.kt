@@ -10,7 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.res.stringResource
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.ambientBackdrop
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -151,7 +152,8 @@ fun CategoriesScreen(
     val budgetedCount = categoryBudgets.count { it.value > 0 }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -190,7 +192,7 @@ fun CategoriesScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
                 )
             )
         }
@@ -203,131 +205,105 @@ fun CategoriesScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    contentPadding = 18.dp
+                val dm = com.masum.cipher.ui.theme.DMSans
+                val shareSegments = remember(allCategoryItems, state.customCategories) {
+                    allCategoryItems.filter { it.amount > 0 }.take(7).map {
+                        it.amount to CategoryHelper.resolveCategory(it.category, state.customCategories).color
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(R.string.dashboard_total_spent).uppercase(),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 10.5.sp, letterSpacing = 1.4.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = AppFormatters.formatCompactCurrency(totalExpense, currencySymbol = state.currencySymbol),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 46.sp, letterSpacing = (-1.4).sp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (shareSegments.isNotEmpty()) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f, fill = false)) {
-                                Text(
-                                    text = stringResource(R.string.dashboard_total_spent).uppercase(),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
-                                        letterSpacing = 1.2.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = AppFormatters.formatCompactCurrency(totalExpense, currencySymbol = state.currencySymbol),
-                                    style = Typography.headlineLarge.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 28.sp,
-                                        letterSpacing = (-0.8).sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            Column(horizontalAlignment = Alignment.End) {
+                            shareSegments.forEach { (amount, color) ->
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "$activeCount ${stringResource(R.string.active_suffix)}",
-                                        style = Typography.labelSmall.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                if (budgetedCount > 0) {
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "$budgetedCount budgeted",
-                                        style = Typography.bodySmall.copy(
-                                            fontFamily = Lato,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                                        .weight(amount.toFloat().coerceAtLeast(0.0001f))
+                                        .fillMaxHeight()
+                                        .background(color)
+                                )
                             }
                         }
                     }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(
+                            "$activeCount ${stringResource(R.string.active_suffix)}",
+                            if (budgetedCount > 0) "$budgetedCount budgeted" else null
+                        ).filterNotNull().forEach { label ->
+                            Text(
+                                text = label,
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.Medium, fontSize = 11.5.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(2.dp))
             }
 
             if (!isPro) {
                 item {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f), MaterialTheme.colorScheme.primary.copy(alpha = 0.04f))
+                                )
+                            )
                             .clickable {
                                 view.performVibrate(isHapticsEnabled)
                                 showProGateSheet = true
                             }
-                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.Sparkles,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.categories_free_banner_title),
-                                    style = Typography.labelMedium.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.5.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = stringResource(R.string.categories_free_banner_desc),
-                                    style = Typography.bodySmall.copy(
-                                        fontFamily = Lato,
-                                        fontSize = 11.sp,
-                                        lineHeight = 14.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            Icon(imageVector = LucideIcons.Sparkles, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(17.dp))
+                        }
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = stringResource(R.string.categories_free_banner_title),
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.categories_free_banner_desc),
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontSize = 11.5.sp, lineHeight = 15.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -337,13 +313,8 @@ fun CategoriesScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
                         .clickable {
                             view.performVibrate(isHapticsEnabled, isLongPress = false)
                             if (!isPro && state.customCategories.size >= 3) {
@@ -354,54 +325,31 @@ fun CategoriesScreen(
                             }
                         }
                         .padding(horizontal = 16.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = LucideIcons.Plus,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = stringResource(R.string.custom_category_new_title),
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = stringResource(R.string.custom_category_subtitle),
-                                style = Typography.bodySmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Icon(imageVector = LucideIcons.Plus, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(19.dp))
                     }
-
-                    Icon(
-                        imageVector = LucideIcons.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = stringResource(R.string.custom_category_new_title),
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.custom_category_subtitle),
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontSize = 11.5.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(imageVector = LucideIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.size(16.dp))
                 }
             }
 
@@ -446,7 +394,8 @@ fun CategoriesScreen(
                         view.performVibrate(isHapticsEnabled, isLongPress = false)
                         expandedCategory = if (isExpanded) null else categoryData.category
                     },
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(22.dp),
                     contentPadding = 14.dp
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -462,9 +411,9 @@ fun CategoriesScreen(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(categoryColor.copy(alpha = 0.15f)),
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(categoryColor.copy(alpha = 0.16f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -904,7 +853,7 @@ fun CategoriesScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         viewModel.handleIntent(InsightsContract.Intent.SaveMerchantRule(prompt.rawMerchant, prompt.newMerchant))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -913,7 +862,7 @@ fun CategoriesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                     viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt)
                 }) {
                     Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -944,7 +893,7 @@ fun CategoriesScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         viewModel.handleIntent(InsightsContract.Intent.SaveCategoryRule(tx.merchant, tx.category))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -953,7 +902,7 @@ fun CategoriesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                     viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt)
                 }) {
                     Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -12,7 +12,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +41,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -69,6 +69,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import com.masum.cipher.ui.components.FormTextRow
+import com.masum.cipher.ui.components.FormSelectableChip
+import com.masum.cipher.ui.components.FormPrimaryButton
+import com.masum.cipher.ui.components.FormGroup
+import com.masum.cipher.ui.components.FormEyebrow
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.domain.model.CategoryHelper
 import com.masum.cipher.core.util.performVibrate
@@ -142,126 +149,104 @@ fun DashboardFilterSheet(
                 maxInput.toDoubleOrNull() != null
     }
 
-    ModalBottomSheet(
+    val dm = com.masum.cipher.ui.theme.DMSans
+    val accent = MaterialTheme.colorScheme.primary
+    val allCategories = remember(customCategories) {
+        CategoryHelper.getAllCategories(customCategories, includeIncome = true)
+    }
+
+    CipherSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .width(36.dp)
-                    .height(4.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f))
-            )
-        }
+        sheetState = sheetState
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 0.dp),
+            verticalArrangement = Arrangement.spacedBy(26.dp)
         ) {
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = stringResource(R.string.filter_title),
-                            style = Typography.titleLarge.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
-                            ),
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, letterSpacing = (-0.5).sp),
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Text(
-                            text = stringResource(R.string.filter_subtitle),
-                            style = Typography.bodySmall.copy(fontSize = 11.5.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
-
                     if (draftIsActive) {
-                        TextButton(
-                            onClick = {
-                                view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                draftType = DashboardContract.FilterType.ALL
-                                draftCategories = emptySet()
-                                minInput = ""
-                                maxInput = ""
-                            }
-                        ) {
-                            Text(
-                                text = stringResource(R.string.action_delete),
-                                style = Typography.labelMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                        Text(
+                            text = stringResource(R.string.action_delete),
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.10f))
+                                .clickable {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    draftType = DashboardContract.FilterType.ALL
+                                    draftCategories = emptySet()
+                                    minInput = ""
+                                    maxInput = ""
+                                }
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        )
                     }
                 }
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = stringResource(R.string.tx_type).uppercase(),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                            letterSpacing = 1.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    val types = listOf(
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FormEyebrow(text = stringResource(R.string.tx_type))
+                    val typeOptions = listOf(
                         DashboardContract.FilterType.ALL to stringResource(R.string.all),
                         DashboardContract.FilterType.EXPENSE to stringResource(R.string.expenses),
                         DashboardContract.FilterType.INCOME to stringResource(R.string.income)
                     )
-                    val selectedIndex = types.indexOfFirst { it.first == draftType }.coerceAtLeast(0)
-
+                    val selectedIdx = typeOptions.indexOfFirst { it.first == draftType }.coerceAtLeast(0)
+                    val typeAccent = when (draftType) {
+                        DashboardContract.FilterType.EXPENSE -> com.masum.cipher.ui.theme.RoseExpense
+                        DashboardContract.FilterType.INCOME -> com.masum.cipher.ui.theme.EmeraldIncome
+                        else -> accent
+                    }
                     BoxWithConstraints(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(42.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .height(46.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                             .padding(3.dp)
                     ) {
-                        val tabWidth = maxWidth / types.size
-                        val indicatorOffset by animateDpAsState(
-                            targetValue = tabWidth * selectedIndex,
-                            animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-                            label = "type_indicator_offset"
+                        val segment = maxWidth / typeOptions.size
+                        val offsetX by animateDpAsState(
+                            targetValue = segment * selectedIdx,
+                            animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
+                            label = "type_segment"
                         )
-
                         Box(
                             modifier = Modifier
-                                .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
-                                .width(tabWidth)
+                                .offset { IntOffset(offsetX.roundToPx(), 0) }
+                                .width(segment)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(9.dp))
-                                .background(MaterialTheme.colorScheme.primary)
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(0.5.dp, typeAccent.copy(alpha = 0.6f), RoundedCornerShape(50))
                         )
-
                         Row(modifier = Modifier.fillMaxSize()) {
-                            types.forEach { (type, label) ->
-                                val isSelected = draftType == type
+                            typeOptions.forEach { (type, label) ->
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight()
-                                        .clip(RoundedCornerShape(9.dp))
+                                        .clip(RoundedCornerShape(50))
                                         .clickable(
                                             interactionSource = remember { MutableInteractionSource() },
                                             indication = null
@@ -273,12 +258,12 @@ fun DashboardFilterSheet(
                                 ) {
                                     Text(
                                         text = label,
-                                        style = Typography.labelMedium.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 12.5.sp
+                                        style = androidx.compose.ui.text.TextStyle(
+                                            fontFamily = dm,
+                                            fontWeight = if (draftType == type) FontWeight.SemiBold else FontWeight.Medium,
+                                            fontSize = 13.sp
                                         ),
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                        color = if (draftType == type) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -288,109 +273,74 @@ fun DashboardFilterSheet(
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "${stringResource(R.string.categories_header).uppercase()} (${draftCategories.size})",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 10.sp,
-                                letterSpacing = 1.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
+                        FormEyebrow(text = "${stringResource(R.string.categories_header)} · ${draftCategories.size}")
                         if (draftCategories.isNotEmpty()) {
                             Text(
                                 text = stringResource(R.string.action_cancel),
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 11.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable {
-                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                    draftCategories = emptySet()
-                                }
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                                color = accent,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .clickable {
+                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                        draftCategories = emptySet()
+                                    }
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
                     }
-
-                    val allCategories = remember(customCategories) {
-                        CategoryHelper.getAllCategories(customCategories, includeIncome = true)
-                    }
-
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        for (cat in allCategories) {
-                            val isSelected = draftCategories.contains(cat.name) || draftCategories.contains(cat.displayName)
-                            val catColor = cat.color
-
-                            val animatedBgColor by animateColorAsState(
-                                targetValue = if (isSelected) catColor.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                                animationSpec = tween(200),
-                                label = "chip_bg"
-                            )
-                            val animatedBorderColor by animateColorAsState(
-                                targetValue = if (isSelected) catColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-                                animationSpec = tween(200),
-                                label = "chip_border"
-                            )
-
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        allCategories.chunked(4).forEach { rowCats ->
                             Row(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(animatedBgColor)
-                                    .border(
-                                        width = 1.dp,
-                                        color = animatedBorderColor,
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                                    .clickable {
-                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                        draftCategories = if (isSelected) {
-                                            draftCategories - cat.name - cat.displayName
-                                        } else {
-                                            draftCategories + cat.name
-                                        }
-                                    }
-                                    .padding(horizontal = 10.dp, vertical = 7.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                AnimatedContent(
-                                    targetState = isSelected,
-                                    transitionSpec = {
-                                        (fadeIn(tween(180)) + scaleIn(initialScale = 0.7f)) togetherWith
-                                        (fadeOut(tween(180)) + scaleOut(targetScale = 0.7f))
-                                    },
-                                    label = "cat_icon"
-                                ) { selected ->
-                                    Icon(
-                                        imageVector = if (selected) LucideIcons.Check else cat.icon,
-                                        contentDescription = null,
-                                        tint = if (selected) catColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(14.dp)
-                                    )
+                                rowCats.forEach { cat ->
+                                    val isSelected = draftCategories.contains(cat.name) || draftCategories.contains(cat.displayName)
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(18.dp))
+                                            .background(if (isSelected) cat.color.copy(alpha = 0.18f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                                            .then(if (isSelected) Modifier.border(1.5.dp, cat.color.copy(alpha = 0.85f), RoundedCornerShape(18.dp)) else Modifier)
+                                            .clickable {
+                                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                                draftCategories = if (isSelected) draftCategories - cat.name - cat.displayName else draftCategories + cat.name
+                                            }
+                                            .padding(horizontal = 4.dp, vertical = 12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = cat.icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) cat.color else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                        Text(
+                                            text = if (cat.titleRes != null) stringResource(cat.titleRes) else cat.displayName,
+                                            style = androidx.compose.ui.text.TextStyle(
+                                                fontFamily = dm,
+                                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                                fontSize = 10.5.sp,
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            ),
+                                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
-                                Text(
-                                    text = if (cat.titleRes != null) stringResource(cat.titleRes) else cat.displayName,
-                                    style = Typography.labelMedium.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        fontSize = 12.sp
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                repeat(4 - rowCats.size) { Spacer(Modifier.weight(1f)) }
                             }
                         }
                     }
@@ -398,167 +348,79 @@ fun DashboardFilterSheet(
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = stringResource(R.string.amount_range).uppercase(),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                            letterSpacing = 1.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FormEyebrow(text = stringResource(R.string.amount_range))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         for (range in quickRanges) {
-                            val currentMin = minInput.toDoubleOrNull()
-                            val currentMax = maxInput.toDoubleOrNull()
-                            val isSelected = currentMin == range.min && currentMax == range.max
-
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable {
-                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                        minInput = range.min?.toInt()?.toString() ?: ""
-                                        maxInput = range.max?.toInt()?.toString() ?: ""
-                                    }
-                                    .padding(vertical = 7.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = range.label,
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        fontSize = 10.5.sp
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            FormSelectableChip(
+                                label = range.label,
+                                selected = minInput.toDoubleOrNull() == range.min && maxInput.toDoubleOrNull() == range.max,
+                                accent = accent,
+                                onClick = {
+                                    view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                    minInput = range.min?.toInt()?.toString() ?: ""
+                                    maxInput = range.max?.toInt()?.toString() ?: ""
+                                }
+                            )
                         }
                     }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        val minLabel = stringResource(R.string.min)
-                        val maxLabel = stringResource(R.string.max)
-                        OutlinedTextField(
-                            value = minInput,
-                            onValueChange = { input ->
-                                if (input.all { it.isDigit() } && input.length <= 8) {
-                                    minInput = input
-                                }
-                            },
-                            label = { Text("$minLabel ($currencySymbol)", fontSize = 12.sp) },
-                            placeholder = { Text("0", fontSize = 12.sp) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        OutlinedTextField(
-                            value = maxInput,
-                            onValueChange = { input ->
-                                if (input.all { it.isDigit() } && input.length <= 8) {
-                                    maxInput = input
-                                }
-                            },
-                            label = { Text("$maxLabel ($currencySymbol)", fontSize = 12.sp) },
-                            placeholder = { Text("0", fontSize = 12.sp) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
+                    FormGroup {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            FormTextRow(
+                                icon = LucideIcons.Check,
+                                label = stringResource(R.string.min),
+                                value = minInput,
+                                onValueChange = { input -> if (input.all { it.isDigit() } && input.length <= 8) minInput = input },
+                                placeholder = "0",
+                                accent = accent,
+                                prefix = currencySymbol,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                                modifier = Modifier.weight(1f)
+                            )
+                            FormTextRow(
+                                icon = LucideIcons.Check,
+                                label = stringResource(R.string.max),
+                                value = maxInput,
+                                onValueChange = { input -> if (input.all { it.isDigit() } && input.length <= 8) maxInput = input },
+                                placeholder = "∞",
+                                accent = accent,
+                                prefix = currencySymbol,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
 
             item {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            closeWithAnimation()
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.action_cancel),
-                            style = Typography.labelLarge.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Button(
-                        onClick = {
-                            view.performVibrate(isHapticsEnabled, isLongPress = false)
-                            val filter = DashboardFilter(
+                FormPrimaryButton(
+                    background = androidx.compose.ui.graphics.Color.Transparent,
+                    text = if (draftIsActive) stringResource(R.string.action_done) else stringResource(R.string.action_show_all),
+                    enabled = true,
+                    accent = accent,
+                    onClick = {
+                        view.performVibrate(isHapticsEnabled, isLongPress = false)
+                        onApplyFilter(
+                            DashboardFilter(
                                 type = draftType,
                                 selectedCategories = draftCategories,
                                 minAmount = minInput.toDoubleOrNull(),
                                 maxAmount = maxInput.toDoubleOrNull()
                             )
-                            onApplyFilter(filter)
-                            closeWithAnimation()
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                    ) {
-                        Text(
-                            text = if (draftIsActive) stringResource(R.string.action_done) else stringResource(R.string.action_show_all),
-                            style = Typography.labelLarge.copy(
-                                fontFamily = Lato,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimary
                         )
+                        closeWithAnimation()
                     }
-                }
+                )
             }
         }
     }

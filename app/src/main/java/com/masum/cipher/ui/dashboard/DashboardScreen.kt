@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -13,7 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -785,63 +786,76 @@ private fun LazyListScope.dashboardTransactionListContent(
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
                     .padding(top = 16.dp, bottom = 8.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
-                    .padding(20.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = LucideIcons.BellRing,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp).padding(end = 8.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF59E0B).copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LucideIcons.BellRing,
+                            contentDescription = null,
+                            tint = Color(0xFFF59E0B),
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
                     Text(
-                        text = "Action Needed",
-                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onErrorContainer
+                        text = "Due today",
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 15.sp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 state.pendingSubscriptions.forEach { subscription ->
                     val amountStr = "${state.currencySymbol}${String.format(locale, "%.0f", subscription.amount)}"
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = subscription.merchant,
-                                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.Medium, fontSize = 14.5.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "Due for $amountStr",
-                                style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
+                                text = amountStr,
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(
-                                onClick = { onSkipSubscription(subscription) },
-                                contentPadding = PaddingValues(horizontal = 12.dp)
-                            ) {
-                                Text("Skip", color = MaterialTheme.colorScheme.error)
-                            }
-                            Button(
-                                onClick = { onApproveSubscription(subscription) },
-                                contentPadding = PaddingValues(horizontal = 12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                Text("Log", color = MaterialTheme.colorScheme.onError)
-                            }
-                        }
+                        Text(
+                            text = "Skip",
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable { onSkipSubscription(subscription) }
+                                .padding(horizontal = 14.dp, vertical = 9.dp)
+                        )
+                        Text(
+                            text = "Log",
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable { onApproveSubscription(subscription) }
+                                .padding(horizontal = 18.dp, vertical = 9.dp)
+                        )
                     }
                 }
             }
@@ -916,20 +930,44 @@ private fun LazyListScope.dashboardTransactionListContent(
                     modifier = Modifier.padding(start = 24.dp, top = if (groupIndex == 0) 14.dp else 24.dp, bottom = 8.dp)
                 )
             }
-            itemsIndexed(
-                items = transactions,
-                key = { _, t -> t.id },
-                contentType = { _, _ -> "transaction_item" }
-            ) { index, transaction ->
-                StaggeredEntranceItem(index = index) {
-                    TransactionItem(
-                        transaction = transaction,
-                        customCategories = state.customCategories,
-                        privacyMode = privacyMode,
-                        currencySymbol = state.currencySymbol,
-                        splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
-                        onClick = { onTransactionClick(transaction) }
-                    )
+            val dayGroups = transactions.groupBy { tx ->
+                java.util.Calendar.getInstance().apply { timeInMillis = tx.timestamp }.let { it.get(java.util.Calendar.YEAR) * 1000 + it.get(java.util.Calendar.DAY_OF_YEAR) }
+            }
+            dayGroups.values.forEachIndexed { dayIndex, dayTxs ->
+                item(key = "day_${dayTxs.first().id}", contentType = "day_group") {
+                    StaggeredEntranceItem(index = dayIndex) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            DashboardDayHeader(
+                                transactions = dayTxs,
+                                currencySymbol = state.currencySymbol,
+                                privacyMode = privacyMode,
+                                locale = locale
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                                    .padding(top = 8.dp)
+                                    .clip(RoundedCornerShape(26.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                dayTxs.forEachIndexed { index, transaction ->
+                                    TransactionItem(
+                                        transaction = transaction,
+                                        customCategories = state.customCategories,
+                                        privacyMode = privacyMode,
+                                        currencySymbol = state.currencySymbol,
+                                        splits = state.splitsByTransactionId[transaction.id] ?: emptyList(),
+                                        modifier = Modifier,
+                                        showDivider = index < dayTxs.lastIndex,
+                                        showDate = false,
+                                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onTransactionClick(transaction) }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1229,7 +1267,7 @@ private fun SmartRulePromptDialogs(
             },
             confirmButton = {
                 Button(
-                    onClick = { onSaveMerchantRule(prompt.rawMerchant, prompt.newMerchant) },
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onSaveMerchantRule(prompt.rawMerchant, prompt.newMerchant) },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
@@ -1265,7 +1303,7 @@ private fun SmartRulePromptDialogs(
             },
             confirmButton = {
                 Button(
-                    onClick = { onSaveCategoryRule(tx.merchant, tx.category) },
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); onSaveCategoryRule(tx.merchant, tx.category) },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(stringResource(R.string.smart_rules_dialog_confirm), color = MaterialTheme.colorScheme.onSurface)
@@ -1296,19 +1334,9 @@ private fun SpendingComparisonSheet(
     val view = androidx.compose.ui.platform.LocalView.current
     val coroutineScope = rememberCoroutineScope()
     val comparisonSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
-        sheetState = comparisonSheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 4.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        sheetState = comparisonSheetState
     ) {
         Column(
             modifier = Modifier
@@ -1841,8 +1869,13 @@ private fun DashboardHero(
                                     RoundedCornerShape(20.dp)
                                 )
                                 .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                    width = 0.8.dp,
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f),
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
+                                        )
+                                    ),
                                     shape = RoundedCornerShape(20.dp)
                                 )
                                 .padding(vertical = 12.dp, horizontal = 16.dp)
@@ -1867,8 +1900,13 @@ private fun DashboardHero(
                                     RoundedCornerShape(16.dp)
                                 )
                                 .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                                    width = 0.8.dp,
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f),
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
+                                        )
+                                    ),
                                     shape = RoundedCornerShape(16.dp)
                                 )
                                 .padding(vertical = 7.dp, horizontal = 12.dp)
@@ -2067,7 +2105,7 @@ private fun DashboardHero(
                         
                         if (textFieldValue.text.isNotEmpty()) {
                             Spacer(modifier = Modifier.width(4.dp))
-                            IconButton(onClick = { 
+                            IconButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); 
                                 textFieldValue = androidx.compose.ui.text.input.TextFieldValue("")
                                 onSearchQueryChanged("") 
                                 focusManager.clearFocus()
@@ -2178,19 +2216,40 @@ fun TransactionItem(
     privacyMode: Boolean,
     currencySymbol: String = "₹",
     splits: List<com.masum.cipher.core.data.local.entity.TransactionSplitEntity> = emptyList(),
-    modifier: Modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+    modifier: Modifier = Modifier.padding(horizontal = 24.dp),
+    showDivider: Boolean = false,
+    showDate: Boolean = true,
     onClick: () -> Unit
 ) {
     val locale = LocalLocale.current.platformLocale
-    VaultCard(
-        modifier = modifier,
-        onClick = onClick,
-        contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val rowInteraction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val rowPressed by rowInteraction.collectIsPressedAsState()
+    val rowScale by animateFloatAsState(
+        targetValue = if (rowPressed) 0.985f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "RowScale"
+    )
+    val rowShape = RoundedCornerShape(18.dp)
+    val pressedBg by androidx.compose.animation.animateColorAsState(
+        targetValue = if (rowPressed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f) else Color.Transparent,
+        label = "RowPressBg"
+    )
+    Column(modifier = modifier) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = rowScale
+                scaleY = rowScale
+            }
+            .clip(rowShape)
+            .background(pressedBg)
+            .clickable(interactionSource = rowInteraction, indication = null, onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 13.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
             val category = remember(transaction.category, customCategories) {
@@ -2199,7 +2258,7 @@ fun TransactionItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(category.color.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                    .background(category.color.copy(alpha = 0.14f), RoundedCornerShape(15.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -2264,7 +2323,7 @@ fun TransactionItem(
                     }
                 }
                 Text(
-                    text = AppFormatters.formatDateTime(transaction.timestamp, locale = locale),
+                    text = if (showDate) AppFormatters.formatDateTime(transaction.timestamp, locale = locale) else AppFormatters.formatTimeOnly(transaction.timestamp, locale = locale),
                     style = Typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -2296,8 +2355,9 @@ fun TransactionItem(
                 Text(
                     text = if (privacyMode) "•••" else signedAmount,
                     style = Typography.titleMedium.copy(
-                        fontFamily = Lato,
-                        fontWeight = FontWeight.SemiBold
+                        fontFamily = DMSans,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = (-0.2).sp
                     ),
                     color = if (transaction.isIncome) EmeraldIncome else RoseExpense,
                     maxLines = 1,
@@ -2319,6 +2379,63 @@ fun TransactionItem(
                 }
             }
         }
+    }
+    if (showDivider) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 64.dp)
+                .height(0.5.dp)
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        )
+    }
+    }
+}
+
+@Composable
+private fun DashboardDayHeader(
+    transactions: List<TransactionEntity>,
+    currencySymbol: String,
+    privacyMode: Boolean,
+    locale: Locale
+) {
+    val first = transactions.first().timestamp
+    val label = remember(first, locale) {
+        val now = java.util.Calendar.getInstance()
+        val day = java.util.Calendar.getInstance().apply { timeInMillis = first }
+        fun sameDay(a: java.util.Calendar, b: java.util.Calendar) =
+            a.get(java.util.Calendar.YEAR) == b.get(java.util.Calendar.YEAR) && a.get(java.util.Calendar.DAY_OF_YEAR) == b.get(java.util.Calendar.DAY_OF_YEAR)
+        when {
+            sameDay(now, day) -> "today"
+            sameDay(now.apply { add(java.util.Calendar.DAY_OF_YEAR, -1) }, day) -> "yesterday"
+            else -> java.text.SimpleDateFormat("EEEE, d MMM", locale).format(Date(first))
+        }
+    }
+    val title = when (label) {
+        "today" -> stringResource(R.string.today)
+        "yesterday" -> stringResource(R.string.yesterday)
+        else -> label
+    }
+    val net = remember(transactions) {
+        transactions.filter { !it.category.equals("TRANSFER", ignoreCase = true) }.sumOf { if (it.isIncome) it.amount else -it.amount }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 32.dp, end = 32.dp, top = 22.dp, bottom = 0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = if (privacyMode) "•••" else (if (net >= 0) "+" else "-") + AppFormatters.formatCurrency(kotlin.math.abs(net), currencySymbol, locale, decimals = 0),
+            style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.Medium, fontSize = 12.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

@@ -2,7 +2,7 @@ package com.masum.cipher.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +31,7 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -56,6 +56,13 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.R
+import androidx.compose.ui.graphics.graphicsLayer
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.Calendar
+import compose.icons.lucideicons.Clock
+import compose.icons.lucideicons.Repeat
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.foundation.horizontalScroll
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.domain.SubscriptionDetector
 import com.masum.cipher.core.domain.model.CategoryHelper
@@ -84,6 +91,20 @@ fun EditSubscriptionSheet(
         mutableStateOf(CategoryHelper.resolveCategory(subscription?.category ?: TransactionCategory.OTHERS.name, customCategories))
     }
     var categoryExpanded by remember { mutableStateOf(false) }
+    val presetDays = remember { listOf(30, 90, 365) }
+    val initialDays = frequencyDays.toIntOrNull() ?: 30
+    var customMode by remember { mutableStateOf(initialDays !in presetDays) }
+    var customUnit by remember {
+        mutableStateOf(
+            when {
+                initialDays % 365 == 0 -> 365
+                initialDays % 30 == 0 -> 30
+                initialDays % 7 == 0 -> 7
+                else -> 1
+            }
+        )
+    }
+    var customCount by remember { mutableStateOf((initialDays / customUnit).coerceAtLeast(1).toString()) }
     
     var nextExpectedDate by remember { androidx.compose.runtime.mutableLongStateOf(subscription?.nextExpectedDate ?: System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -120,20 +141,14 @@ fun EditSubscriptionSheet(
         }
     }
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 4.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        sheetState = sheetState
     ) {
+        val isEditing = subscription != null
+        val parsedAmount = amountText.toDoubleOrNull() ?: 0.0
+        val isValid = merchant.isNotBlank() && parsedAmount > 0.0
+        val accent = MaterialTheme.colorScheme.primary
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,109 +156,233 @@ fun EditSubscriptionSheet(
                 .imePadding()
                 .nestedScroll(consumeOverscrollConnection)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val isEditing = subscription != null
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = if (isEditing) "Subscription Details" else "Add Subscription",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FormEyebrow(text = "Recurring payment")
+                    Text(
+                        text = if (isEditing) "Subscription details" else "New subscription",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontFamily = com.masum.cipher.ui.theme.DMSans,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 22.sp,
+                            letterSpacing = (-0.4).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 if (isEditing && onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text("Delete", color = MaterialTheme.colorScheme.error)
-                    }
+                    Text(
+                        text = "Delete",
+                        style = TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.10f))
+                            .clickable(onClick = onDelete)
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
                 }
             }
 
             if (subscription != null) {
                 val monthlyEst = subscription.amount * (30.0 / subscription.frequencyDays.coerceAtLeast(1).toDouble())
-                val trackType = if (subscription.confidence == 1.0f) "Manual Entry" else "Auto-Detected"
-                
-                VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colorScheme.surface
+                val trackType = if (subscription.confidence == 1.0f) "Manual entry" else "Auto-detected"
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Monthly Average", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(
-                                "${AppFormatters.formatCurrency(monthlyEst, currencySymbol)}/mo",
-                                style = MaterialTheme.typography.titleSmall.copy(fontFamily = com.masum.cipher.ui.theme.Lato, fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Tracking Method", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(trackType, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
-                        }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        FormEyebrow(text = "Monthly average")
+                        Text(
+                            text = "${AppFormatters.formatCurrency(monthlyEst, currencySymbol)}/mo",
+                            style = TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, letterSpacing = (-0.6).sp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
+                    Text(
+                        text = trackType,
+                        style = TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.Medium, fontSize = 11.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
                 }
             }
 
-            SheetTextFieldSimple(
-                value = merchant,
-                onValueChange = { merchant = it },
-                label = "Merchant / Name"
+            Spacer(Modifier.height(10.dp))
+
+            FormHeroAmount(
+                value = amountText,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() || it == '.' } && input.count { it == '.' } <= 1 && input.length <= 10) amountText = input
+                },
+                currencySymbol = currencySymbol,
+                accent = accent,
+                placeholder = "0",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.weight(1f)) {
-                    SheetTextFieldSimple(
-                        value = amountText,
-                        onValueChange = { amountText = it },
-                        label = "Amount",
-                        prefix = currencySymbol,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    SheetTextFieldSimple(
-                        value = frequencyDays,
-                        onValueChange = { frequencyDays = it },
-                        label = "Frequency (Days)",
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
-            }
+            Spacer(Modifier.height(16.dp))
 
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                    .clickable { showDatePicker = true }
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
             ) {
-                Column {
-                    Text(
-                        text = "STARTING / NEXT DATE",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 1.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                listOf("Monthly" to 30, "Quarterly" to 90, "Yearly" to 365).forEach { (label, days) ->
+                    FormSelectableChip(
+                        label = label,
+                        selected = !customMode && frequencyDays == days.toString(),
+                        accent = accent,
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
+                            customMode = false
+                            frequencyDays = days.toString()
+                        }
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = AppFormatters.getDay().format(Date(nextExpectedDate)),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onBackground
+                }
+                FormSelectableChip(
+                    label = "Custom",
+                    selected = customMode,
+                    accent = accent,
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
+                        customMode = true
+                        frequencyDays = ((customCount.toIntOrNull() ?: 1).coerceAtLeast(1) * customUnit).toString()
+                    }
+                )
+            }
+
+            Spacer(Modifier.height(22.dp))
+
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                FormGroup {
+                    FormTextRow(
+                        icon = LucideIcons.Repeat,
+                        label = "Merchant / name",
+                        value = merchant,
+                        onValueChange = { merchant = it },
+                        placeholder = "e.g. Netflix, Rent, Gym",
+                        accent = accent,
+                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words)
                     )
+                    androidx.compose.animation.AnimatedVisibility(visible = customMode) {
+                        Column {
+                            FormHairline()
+                            FormTextRow(
+                                icon = LucideIcons.Clock,
+                                label = "Repeats every",
+                                value = customCount,
+                                onValueChange = { input ->
+                                    if (input.length <= 3 && input.all { c -> c.isDigit() }) {
+                                        customCount = input
+                                        frequencyDays = ((input.toIntOrNull() ?: 1).coerceAtLeast(1) * customUnit).toString()
+                                    }
+                                },
+                                placeholder = "1",
+                                accent = accent,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(start = 18.dp, end = 18.dp, bottom = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf("Days" to 1, "Weeks" to 7, "Months" to 30, "Years" to 365).forEach { (label, unitDays) ->
+                                    FormSelectableChip(
+                                        label = label,
+                                        selected = customUnit == unitDays,
+                                        accent = accent,
+                                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
+                                            customUnit = unitDays
+                                            frequencyDays = ((customCount.toIntOrNull() ?: 1).coerceAtLeast(1) * unitDays).toString()
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    FormHairline()
+                    FormLabelValueRow(
+                        icon = LucideIcons.Calendar,
+                        label = "Starting / next date",
+                        value = AppFormatters.getDay().format(Date(nextExpectedDate)),
+                        placeholder = "",
+                        accent = accent,
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showDatePicker = true }
+                    )
+                    FormHairline()
+                    FormLabelValueRow(
+                        icon = selectedCategory.icon,
+                        label = "Category",
+                        value = selectedCategory.titleRes?.let { stringResource(it) } ?: selectedCategory.displayName,
+                        placeholder = "",
+                        accent = selectedCategory.color,
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); categoryExpanded = !categoryExpanded },
+                        trailing = {
+                            val chevron by androidx.compose.animation.core.animateFloatAsState(
+                                targetValue = if (categoryExpanded) 180f else 0f,
+                                label = "category_chevron"
+                            )
+                            Icon(
+                                imageVector = compose.icons.LucideIcons.ChevronDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .graphicsLayer { rotationZ = chevron }
+                            )
+                        }
+                    )
+                    androidx.compose.animation.AnimatedVisibility(visible = categoryExpanded) {
+                        val allCategories = remember(customCategories) {
+                            CategoryHelper.getAllCategories(customCategories, includeIncome = false)
+                        }
+                        androidx.compose.foundation.layout.FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 18.dp, end = 18.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            allCategories.forEach { category ->
+                                FormSelectableChip(
+                                    label = if (category.titleRes != null) stringResource(category.titleRes) else category.displayName,
+                                    selected = category.name == selectedCategory.name,
+                                    accent = category.color,
+                                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
+                                        selectedCategory = category
+                                        categoryExpanded = false
+                                    },
+                                    leading = {
+                                        Icon(
+                                            imageVector = category.icon,
+                                            contentDescription = null,
+                                            tint = category.color,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -255,7 +394,7 @@ fun EditSubscriptionSheet(
                     onDismissRequest = { showDatePicker = false },
                     confirmButton = {
                         TextButton(
-                            onClick = {
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                                 datePickerState.selectedDateMillis?.let { pickedUtcMillis ->
                                     val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                                         timeInMillis = pickedUtcMillis
@@ -275,7 +414,7 @@ fun EditSubscriptionSheet(
                     },
                     dismissButton = {
                         TextButton(
-                            onClick = { showDatePicker = false }
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showDatePicker = false }
                         ) {
                             Text(stringResource(R.string.cancel))
                         }
@@ -288,240 +427,16 @@ fun EditSubscriptionSheet(
                 }
             }
 
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                        .padding(horizontal = 16.dp, vertical = 14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "CATEGORY",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    letterSpacing = 1.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .background(selectedCategory.color.copy(alpha = 0.15f), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = selectedCategory.icon,
-                                        contentDescription = null,
-                                        tint = selectedCategory.color,
-                                        modifier = Modifier.size(13.dp)
-                                    )
-                                }
-                                Text(
-                                    text = selectedCategory.titleRes?.let { stringResource(it) } ?: selectedCategory.displayName,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                            }
-                        }
-                        Icon(
-                            imageVector = compose.icons.LucideIcons.ChevronDown,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+            Spacer(Modifier.height(4.dp))
 
-                MaterialTheme(
-                    colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    ExposedDropdownMenu(
-                        expanded = categoryExpanded,
-                        onDismissRequest = { categoryExpanded = false },
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(4.dp)
-                    ) {
-                        val allCategories = remember(customCategories) {
-                            CategoryHelper.getAllCategories(customCategories, includeIncome = false)
-                        }
-                        allCategories.forEach { category ->
-                            val isSelected = category.name == selectedCategory.name
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = if (category.titleRes != null) stringResource(category.titleRes) else category.displayName,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                            ),
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                        )
-                                        if (category.isCustom) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .background(
-                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                                        shape = RoundedCornerShape(4.dp)
-                                                    )
-                                                    .padding(horizontal = 4.dp, vertical = 1.dp)
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.custom_category_badge),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold
-                                                    ),
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
-                                onClick = {
-                                    selectedCategory = category
-                                    categoryExpanded = false
-                                },
-                                leadingIcon = {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .background(category.color.copy(alpha = 0.15f), CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = category.icon,
-                                            contentDescription = null,
-                                            tint = category.color,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                            )
-                        }
-                    }
-                }
-            }
-
-            Button(
-                onClick = {
-                    val finalAmount = amountText.toDoubleOrNull() ?: 0.0
-                    val freq = frequencyDays.toIntOrNull() ?: 30
-                    if (merchant.isNotBlank() && finalAmount > 0) {
-                        onConfirm(merchant, finalAmount, selectedCategory.name, freq, nextExpectedDate)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text(
-                    text = if (isEditing) "Save Changes" else "Add Subscription",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SheetTextFieldSimple(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    prefix: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    readOnly: Boolean = false
-) {
-    val surface = MaterialTheme.colorScheme.surface
-    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
-    val onSurfaceVar = MaterialTheme.colorScheme.onSurfaceVariant
-    val onBg = MaterialTheme.colorScheme.onBackground
-    val outline = MaterialTheme.colorScheme.outline
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(surface, RoundedCornerShape(12.dp))
-            .border(1.dp, outlineVariant, RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                letterSpacing = 1.sp,
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = onSurfaceVar
-        )
-        Spacer(Modifier.height(4.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (prefix != null) {
-                Text(
-                    text = prefix,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = onSurfaceVar
-                )
-                Spacer(Modifier.width(4.dp))
-            }
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = onBg
-                ),
-                singleLine = true,
-                readOnly = readOnly,
-                keyboardOptions = keyboardOptions,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (value.isEmpty()) {
-                        Text(
-                            text = "—",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = outline
-                        )
-                    }
-                    inner()
+            FormPrimaryButton(
+                background = androidx.compose.ui.graphics.Color.Transparent,
+                text = if (isEditing) "Save changes" else "Add subscription",
+                enabled = isValid,
+                accent = accent,
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
+                    val freq = frequencyDays.toIntOrNull()?.coerceAtLeast(1) ?: 30
+                    if (isValid) onConfirm(merchant, parsedAmount, selectedCategory.name, freq, nextExpectedDate)
                 }
             )
         }

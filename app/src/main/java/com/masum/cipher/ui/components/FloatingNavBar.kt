@@ -10,7 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -100,7 +100,6 @@ fun FloatingNavBar(
                 )
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface, CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
         ) {
             AnimatedContent(
                 targetState = isCompressed,

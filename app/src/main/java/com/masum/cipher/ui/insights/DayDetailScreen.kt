@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.ambientBackdrop
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.util.performVibrate
@@ -102,7 +103,8 @@ fun DayDetailScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -136,7 +138,7 @@ fun DayDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -265,7 +267,7 @@ fun DayDetailScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         viewModel.handleIntent(InsightsContract.Intent.SaveMerchantRule(prompt.rawMerchant, prompt.newMerchant))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -274,7 +276,7 @@ fun DayDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                     viewModel.handleIntent(InsightsContract.Intent.DismissMerchantRulePrompt)
                 }) {
                     Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -305,7 +307,7 @@ fun DayDetailScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         viewModel.handleIntent(InsightsContract.Intent.SaveCategoryRule(tx.merchant, tx.category))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -314,7 +316,7 @@ fun DayDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                     viewModel.handleIntent(InsightsContract.Intent.DismissCategoryRulePrompt)
                 }) {
                     Text(stringResource(R.string.smart_rules_dialog_dismiss), color = MaterialTheme.colorScheme.onSurfaceVariant)

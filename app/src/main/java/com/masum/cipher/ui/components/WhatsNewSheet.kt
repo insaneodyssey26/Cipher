@@ -21,7 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -41,6 +41,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.masum.cipher.BuildConfig
 import com.masum.cipher.R
+import compose.icons.LucideIcons
+import compose.icons.lucideicons.ChevronDown
+import compose.icons.lucideicons.Sparkles
+import androidx.compose.material3.Icon
+import com.masum.cipher.ui.components.clickable
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.animateContentSize
 import com.masum.cipher.ui.theme.DMSans
 import com.masum.cipher.ui.theme.Lato
 import com.masum.cipher.ui.theme.Typography
@@ -67,22 +77,9 @@ fun WhatsNewSheet(
         }
     }
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 8.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        RoundedCornerShape(2.dp)
-                    )
-            )
-        },
-        tonalElevation = 0.dp
+        sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
@@ -95,31 +92,33 @@ fun WhatsNewSheet(
                     .padding(horizontal = 24.dp)
                     .padding(top = 8.dp, bottom = 16.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.whats_new_header_title),
-                    style = Typography.headlineSmall.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        letterSpacing = (-0.5).sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(3.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(R.string.whats_new_header_title),
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 28.sp, letterSpacing = (-0.9).sp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "v$versionName",
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.whats_new_header_desc),
-                    style = Typography.bodyMedium.copy(
-                        fontFamily = Lato,
-                        fontSize = 13.sp
-                    ),
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontSize = 13.5.sp, lineHeight = 19.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                thickness = 1.dp
-            )
 
             Column(
                 modifier = Modifier
@@ -128,7 +127,7 @@ fun WhatsNewSheet(
                     .nestedScroll(consumeOverscrollConnection)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 WhatsNewVersionSection(
                     versionTitle = "v6.4.1",
@@ -147,11 +146,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v641_performance_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.4.0"
@@ -174,11 +168,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.3.0"
                 ) {
@@ -200,11 +189,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.2.8"
                 ) {
@@ -221,11 +205,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v628_performance_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.2.6"
@@ -244,11 +223,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.2.5"
                 ) {
@@ -265,11 +239,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v625_anim_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.2.0"
@@ -288,11 +257,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.1.6"
                 ) {
@@ -305,11 +269,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v616_license_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.1.5"
@@ -332,11 +291,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.1.2"
                 ) {
@@ -354,11 +308,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.1.1"
                 ) {
@@ -371,11 +320,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v611_quick_edit_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.1.0"
@@ -394,11 +338,6 @@ fun WhatsNewSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
-
                 WhatsNewVersionSection(
                     versionTitle = "v6.0.8"
                 ) {
@@ -411,11 +350,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v608_button_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.0.7"
@@ -433,11 +367,6 @@ fun WhatsNewSheet(
                         description = stringResource(R.string.whats_new_v607_category_palette_desc)
                     )
                 }
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f),
-                    thickness = 1.dp
-                )
 
                 WhatsNewVersionSection(
                     versionTitle = "v6.0.2"
@@ -476,7 +405,7 @@ fun WhatsNewSheet(
             ) {
                 if (onExplorePro != null && !isPro) {
                     Button(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             coroutineScope.launch {
                                 sheetState.hide()
                             }.invokeOnCompletion {
@@ -487,8 +416,8 @@ fun WhatsNewSheet(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
+                            .height(54.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text(
@@ -503,7 +432,7 @@ fun WhatsNewSheet(
                     }
 
                     Button(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             coroutineScope.launch {
                                 sheetState.hide()
                             }.invokeOnCompletion {
@@ -514,8 +443,8 @@ fun WhatsNewSheet(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp),
-                        shape = RoundedCornerShape(12.dp),
+                            .height(50.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -533,7 +462,7 @@ fun WhatsNewSheet(
                     }
                 } else {
                     Button(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             coroutineScope.launch {
                                 sheetState.hide()
                             }.invokeOnCompletion {
@@ -544,8 +473,8 @@ fun WhatsNewSheet(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
+                            .height(54.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         Text(
@@ -570,42 +499,62 @@ private fun WhatsNewVersionSection(
     isLatest: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    var expanded by androidx.compose.runtime.saveable.rememberSaveable(versionTitle) { mutableStateOf(isLatest) }
+    val chevron by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "whats_new_chevron"
+    )
+    val shape = RoundedCornerShape(26.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+            .animateContentSize()
+    ) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (isLatest) Modifier else Modifier.clickable { expanded = !expanded })
+                .padding(horizontal = 20.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = versionTitle,
-                style = Typography.titleMedium.copy(
-                    fontFamily = DMSans,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
+                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 17.sp, letterSpacing = (-0.3).sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
             )
             if (isLatest) {
-                Box(
+                Text(
+                    text = stringResource(R.string.whats_new_badge_latest),
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.whats_new_badge_latest).uppercase(),
-                        style = Typography.labelSmall.copy(
-                            fontFamily = DMSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 9.5.sp,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = LucideIcons.ChevronDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .graphicsLayer { rotationZ = chevron }
+                )
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            content()
+        if (expanded) {
+            Column(
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                content()
+            }
         }
     }
 }
@@ -617,38 +566,20 @@ private fun WhatsNewFeatureEntry(
 ) {
     Row(
         verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier
-                .padding(top = 6.dp)
-                .size(5.dp)
-                .background(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                    CircleShape
-                )
-        )
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Text(
                 text = title,
-                style = Typography.bodyMedium.copy(
-                    fontFamily = DMSans,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.5.sp
-                ),
+                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = description,
-                style = Typography.bodySmall.copy(
-                    fontFamily = Lato,
-                    fontSize = 12.5.sp,
-                    lineHeight = 17.sp
-                ),
+                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontSize = 13.sp, lineHeight = 19.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

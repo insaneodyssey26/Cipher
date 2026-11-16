@@ -117,7 +117,7 @@ fun DatabaseRecoveryScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { retryFailed = !onRetry() },
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); retryFailed = !onRetry() },
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -137,7 +137,7 @@ fun DatabaseRecoveryScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(
-                onClick = { showEraseConfirmation = true },
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showEraseConfirmation = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -176,7 +176,7 @@ fun DatabaseRecoveryScreen(
             },
             confirmButton = {
                 TextButton(
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         showEraseConfirmation = false
                         onErase()
                     }
@@ -192,7 +192,7 @@ fun DatabaseRecoveryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEraseConfirmation = false }) {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showEraseConfirmation = false }) {
                     Text(
                         text = stringResource(R.string.action_cancel),
                         style = Typography.labelLarge.copy(

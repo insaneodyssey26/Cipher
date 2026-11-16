@@ -3,7 +3,7 @@ package com.masum.cipher.ui.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -126,7 +126,7 @@ fun CreateCustomCategorySheet(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showDeleteConfirm = false }) {
                     Text(
                         text = stringResource(R.string.action_cancel),
                         style = Typography.labelLarge.copy(fontFamily = DMSans)
@@ -353,7 +353,7 @@ fun CreateCustomCategorySheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+                        .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
                         .padding(6.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {

@@ -3,7 +3,7 @@ package com.masum.cipher.ui.settings.rules
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,6 +73,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.masum.cipher.R
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.masum.cipher.ui.components.ambientBackdrop
 import com.masum.cipher.core.data.local.entity.CategoryRuleEntity
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.MerchantAliasEntity
@@ -173,7 +175,8 @@ fun SmartRulesScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -268,7 +271,7 @@ fun SmartRulesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
                 )
             )
         },
@@ -276,8 +279,8 @@ fun SmartRulesScreen(
             FloatingActionButton(
                 onClick = {
                     view.performVibrate(state.isHapticsEnabled)
-                    val totalRules = state.categoryRules.size + state.merchantRules.size
-                    if (!state.isPro && totalRules >= 3) {
+                    val rulesInTab = if (pagerState.currentPage == 0) state.categoryRules.size else state.merchantRules.size
+                    if (!state.isPro && rulesInTab >= 3) {
                         viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
                     } else {
                         if (pagerState.currentPage == 0) {
@@ -301,67 +304,55 @@ fun SmartRulesScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            SecondaryTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.primary,
-                indicator = {
-                    TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(pagerState.currentPage),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                    .padding(3.dp)
             ) {
-                Tab(
-                    selected = pagerState.currentPage == 0,
-                    onClick = {
-                        view.performVibrate(state.isHapticsEnabled)
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(0)
-                        }
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(R.string.smart_rules_tab_categories),
-                            style = Typography.titleSmall.copy(
-                                fontWeight = if (pagerState.currentPage == 0) FontWeight.Bold else FontWeight.Normal
-                            ),
-                            color = if (pagerState.currentPage == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    icon = {
+                listOf(
+                    Triple(0, stringResource(R.string.smart_rules_tab_categories), LucideIcons.Tag),
+                    Triple(1, stringResource(R.string.smart_rules_tab_merchants), LucideIcons.Store)
+                ).forEach { (index, title, icon) ->
+                    val selected = pagerState.currentPage == index
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(50))
+                            .background(if (selected) MaterialTheme.colorScheme.surface else Color.Transparent)
+                            .then(if (selected) Modifier.border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(50)) else Modifier)
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                view.performVibrate(state.isHapticsEnabled)
+                                coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Icon(
-                            imageVector = LucideIcons.Tag,
+                            imageVector = icon,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(7.dp))
+                        Text(
+                            text = title,
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontFamily = com.masum.cipher.ui.theme.DMSans,
+                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                                fontSize = 13.sp
+                            ),
+                            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                )
-                Tab(
-                    selected = pagerState.currentPage == 1,
-                    onClick = {
-                        view.performVibrate(state.isHapticsEnabled)
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(1)
-                        }
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(R.string.smart_rules_tab_merchants),
-                            style = Typography.titleSmall.copy(
-                                fontWeight = if (pagerState.currentPage == 1) FontWeight.Bold else FontWeight.Normal
-                            ),
-                            color = if (pagerState.currentPage == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = LucideIcons.Store,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                )
+                }
             }
 
             if (!state.isPro) {
@@ -370,8 +361,11 @@ fun SmartRulesScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                        .background(
+                            androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f), MaterialTheme.colorScheme.primary.copy(alpha = 0.04f))
+                            )
+                        )
                         .clickable {
                             view.performVibrate(state.isHapticsEnabled)
                             viewModel.handleIntent(SmartRulesContract.Intent.ShowProGate)
@@ -399,7 +393,7 @@ fun SmartRulesScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(R.string.smart_rules_free_banner_title),
+                                text = stringResource(R.string.smart_rules_usage_title),
                                 style = Typography.labelMedium.copy(
                                     fontFamily = Lato,
                                     fontWeight = FontWeight.Bold,
@@ -408,7 +402,7 @@ fun SmartRulesScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = stringResource(R.string.smart_rules_free_banner_desc),
+                                text = stringResource(R.string.smart_rules_usage_desc, minOf(state.categoryRules.size, 3), minOf(state.merchantRules.size, 3)),
                                 style = Typography.bodySmall.copy(
                                     fontFamily = Lato,
                                     fontSize = 11.sp,
@@ -610,7 +604,7 @@ private fun CategoryRuleItem(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isPaused) 0.25f else 0.4f)
+        backgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isPaused) 0.5f else 1f)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -619,7 +613,7 @@ private fun CategoryRuleItem(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(categoryItem.color.copy(alpha = if (isPaused) 0.05f else 0.1f), RoundedCornerShape(12.dp)),
+                    .background(categoryItem.color.copy(alpha = if (isPaused) 0.06f else 0.16f), RoundedCornerShape(15.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -642,7 +636,8 @@ private fun CategoryRuleItem(
                         style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isPaused) 0.6f else 1f),
                         maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (isPaused) {
                         Box(
@@ -660,7 +655,9 @@ private fun CategoryRuleItem(
                                     fontSize = 8.5.sp,
                                     letterSpacing = 0.6.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }
@@ -738,7 +735,7 @@ private fun MerchantRuleItem(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         contentPadding = 12.dp,
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isPaused) 0.25f else 0.4f)
+        backgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isPaused) 0.5f else 1f)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -773,7 +770,8 @@ private fun MerchantRuleItem(
                         style = Typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isPaused) 0.6f else 1f),
                         maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (isPaused) {
                         Box(
@@ -791,7 +789,9 @@ private fun MerchantRuleItem(
                                     fontSize = 8.5.sp,
                                     letterSpacing = 0.6.sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }
@@ -977,7 +977,7 @@ private fun CategoryRuleEditDialog(
                                             }
                                         }
                                     },
-                                    onClick = {
+                                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                                         selectedCategory = cat
                                         expanded = false
                                     },
@@ -1008,7 +1008,7 @@ private fun CategoryRuleEditDialog(
         },
         confirmButton = {
             Button(
-                onClick = { 
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); 
                     if (merchantName.isNotBlank()) {
                         onSave(merchantName, selectedCategory.name)
                     }
@@ -1071,7 +1071,7 @@ private fun MerchantRuleEditDialog(
         },
         confirmButton = {
             Button(
-                onClick = { 
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); 
                     if (rawMerchant.isNotBlank() && cleanMerchant.isNotBlank()) {
                         onSave(rawMerchant, cleanMerchant)
                     }

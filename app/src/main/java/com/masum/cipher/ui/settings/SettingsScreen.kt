@@ -8,10 +8,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.ambientBackdrop
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -50,7 +51,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -323,15 +324,14 @@ fun SettingsScreen(
     val matchAbout = query.isBlank() || "about".contains(query) || "support".contains(query) || matchRate || matchFeedback || matchUpdate || matchCrash || matchContact || matchSource || matchPrivacyPol || matchSupportDev
 
     Scaffold(
-        modifier = Modifier.pointerInput(Unit) {
+        modifier = Modifier.ambientBackdrop().pointerInput(Unit) {
             detectTapGestures(onTap = { focusManager.clearFocus() })
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
                     .statusBarsPadding()
                     .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 12.dp)
             ) {
@@ -1265,7 +1265,7 @@ SettingsSection(stringResource(R.string.settings_data_backup), icon = LucideIcon
                     title = stringResource(R.string.enable_auto_backup_title),
                     description = stringResource(R.string.enable_auto_backup_desc),
                     checked = state.autoBackupEnabled,
-                    onCheckedChange = { 
+                    onCheckedChange = { com.masum.cipher.ui.components.AppHaptics.tick(); 
                         if (it) {
                             showAutoBackupPasswordSetupDialog = true
                         } else {
@@ -1338,7 +1338,7 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     icon = LucideIcons.Star,
                     title = stringResource(R.string.rate_play_store_title),
                     subtitle = stringResource(R.string.rate_play_store_desc),
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         try {
                             context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
                         } catch (_: android.content.ActivityNotFoundException) {
@@ -1352,7 +1352,7 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                 if (matchFeedback) VaultSettingsItem(
                     icon = LucideIcons.MessagesSquare,
                     title = stringResource(R.string.feedback_title),
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         val intent = Intent(Intent.ACTION_VIEW, "https://tally.so/r/gDz7NK".toUri())
                         context.startActivity(intent)
                     }
@@ -1362,7 +1362,7 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     title = stringResource(R.string.check_updates_title),
                     subtitle = if (state.isInstalledFromPlayStore) stringResource(R.string.check_updates_desc) else "Check for the latest updates on GitHub",
                     loading = state.isCheckingUpdate,
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         if (state.isInstalledFromPlayStore) {
                             try {
                                 context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.masum.cipher".toUri()))
@@ -1378,13 +1378,13 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     icon = LucideIcons.Bug,
                     title = stringResource(R.string.diagnostics_title),
                     subtitle = stringResource(R.string.diagnostics_desc),
-                    onClick = { showCrashLogDialog = true }
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showCrashLogDialog = true }
                 )
                 if (matchContact) VaultSettingsItem(
                     icon = LucideIcons.Mail,
                     title = stringResource(R.string.contact_dev_title),
                     subtitle = "skmasumali.dev@gmail.com",
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
                             data = "mailto:skmasumali.dev@gmail.com".toUri()
                             putExtra(Intent.EXTRA_SUBJECT, "Hello from Cipher App!")
@@ -1397,7 +1397,7 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     icon = LucideIcons.Github,
                     title = stringResource(R.string.open_source_title),
                     subtitle = "github.com/insaneodyssey26/cipher",
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         val intent = Intent(Intent.ACTION_VIEW,
                             "https://github.com/insaneodyssey26/cipher".toUri())
                         context.startActivity(intent)
@@ -1412,7 +1412,7 @@ SettingsSection(stringResource(R.string.settings_about_support), icon = LucideIc
                     icon = LucideIcons.Coffee,
                     title = stringResource(R.string.support_dev_title),
                     subtitle = "ko-fi.com/insane_odyssey",
-                    onClick = {
+                    onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                         val intent = Intent(Intent.ACTION_VIEW,
                             "https://ko-fi.com/insane_odyssey".toUri())
                         context.startActivity(intent)
@@ -1765,7 +1765,7 @@ Spacer(modifier = Modifier.weight(1f))
             confirmButton = {
                 if (crashLog != null) {
                     TextButton(
-                        onClick = {
+                        onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                             val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                             val clip = android.content.ClipData.newPlainText("Crash Log", crashLog)
                             clipboard.setPrimaryClip(clip)
@@ -1781,7 +1781,7 @@ Spacer(modifier = Modifier.weight(1f))
                 Row {
                     if (crashLog != null) {
                         TextButton(
-                            onClick = {
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick();
                                 com.masum.cipher.core.util.CrashReporter.clearCrashLog(context)
                                 Toast.makeText(context, "Crash log cleared", Toast.LENGTH_SHORT).show()
                                 showCrashLogDialog = false
@@ -1790,7 +1790,7 @@ Spacer(modifier = Modifier.weight(1f))
                             Text("CLEAR", color = MaterialTheme.colorScheme.error)
                         }
                     }
-                    TextButton(onClick = { showCrashLogDialog = false }) {
+                    TextButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); showCrashLogDialog = false }) {
                         Text(if (crashLog == null) "OK" else "CLOSE", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -1958,7 +1958,7 @@ Spacer(modifier = Modifier.weight(1f))
                     visualTransformation = if (isBackupPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        IconButton(onClick = { isBackupPasswordVisible = !isBackupPasswordVisible }) {
+                        IconButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); isBackupPasswordVisible = !isBackupPasswordVisible }) {
                             Icon(
                                 imageVector = if (isBackupPasswordVisible) LucideIcons.EyeOff else LucideIcons.Eye,
                                 contentDescription = if (isBackupPasswordVisible) "Hide password" else "Show password",
@@ -1985,14 +1985,14 @@ Spacer(modifier = Modifier.weight(1f))
                             description = stringResource(R.string.restore_mode_merge_desc),
                             icon = LucideIcons.FolderSync,
                             isSelected = !restoreClearExisting,
-                            onClick = { restoreClearExisting = false }
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); restoreClearExisting = false }
                         )
                         RestoreOptionCard(
                             title = stringResource(R.string.restore_mode_clean_title),
                             description = stringResource(R.string.restore_mode_clean_desc),
                             icon = LucideIcons.RefreshCw,
                             isSelected = restoreClearExisting,
-                            onClick = { restoreClearExisting = true }
+                            onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); restoreClearExisting = true }
                         )
                     }
                 }
@@ -2083,7 +2083,7 @@ Spacer(modifier = Modifier.weight(1f))
                     visualTransformation = if (isAutoBackupSetupPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        IconButton(onClick = { isAutoBackupSetupPasswordVisible = !isAutoBackupSetupPasswordVisible }) {
+                        IconButton(onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); isAutoBackupSetupPasswordVisible = !isAutoBackupSetupPasswordVisible }) {
                             Icon(
                                 imageVector = if (isAutoBackupSetupPasswordVisible) LucideIcons.EyeOff else LucideIcons.Eye,
                                 contentDescription = if (isAutoBackupSetupPasswordVisible) "Hide password" else "Show password",
@@ -2212,19 +2212,27 @@ private fun SettingsSection(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (icon != null) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp).padding(end = 16.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 14.dp)
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(11.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                     Text(
                         text = title.lowercase().replaceFirstChar { it.uppercase() },
                         style = Typography.titleMedium.copy(
-                            fontFamily = Lato,
+                            fontFamily = com.masum.cipher.ui.theme.DMSans,
                             fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.5.sp,
                             fontSize = 15.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurface
@@ -2233,7 +2241,8 @@ private fun SettingsSection(
                 
                 if (onToggle != null) {
                     val rotation by androidx.compose.animation.core.animateFloatAsState(
-                        targetValue = if (isExpanded) 180f else 0f
+                        targetValue = if (isExpanded) 180f else 0f,
+                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 400f)
                     )
                     Icon(
                         imageVector = LucideIcons.ChevronDown,
@@ -2283,14 +2292,22 @@ private fun VaultSettingsItem(
         }.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = titleColor.copy(alpha = 0.6f), modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(titleColor.copy(alpha = 0.07f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = titleColor.copy(alpha = 0.75f), modifier = Modifier.size(16.dp))
+        }
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(text = title, style = Typography.titleSmall, color = titleColor)
+                Text(text = title, style = Typography.titleSmall.copy(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.Medium), color = titleColor)
                 badge?.invoke()
             }
             if (subtitle != null) {
@@ -2322,10 +2339,18 @@ private fun VaultSettingsSwitch(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+        }
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = Typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = title, style = Typography.titleSmall.copy(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.Medium), color = MaterialTheme.colorScheme.onSurface)
             Text(text = description, style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -2336,10 +2361,12 @@ private fun VaultSettingsSwitch(
                 onCheckedChange(it)
             },
             colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onSurface,
+                checkedThumbColor = Color.White,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedBorderColor = Color.Transparent,
                 uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                uncheckedTrackColor = MaterialTheme.colorScheme.surface
+                uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
             )
         )
     }
@@ -2551,11 +2578,10 @@ private fun PermissionsHealthSheet(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    ModalBottomSheet(
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier

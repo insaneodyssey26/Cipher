@@ -5,7 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +44,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.masum.cipher.ui.components.CipherSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -83,6 +83,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.FitText
+import androidx.compose.ui.graphics.Color
+import com.masum.cipher.ui.components.FormTextRow
+import com.masum.cipher.ui.components.FormSelectableChip
+import com.masum.cipher.ui.components.FormPrimaryButton
+import com.masum.cipher.ui.components.FormHairline
+import com.masum.cipher.ui.components.FormGroup
+import com.masum.cipher.ui.components.FormEyebrow
+import com.masum.cipher.ui.components.ambientBackdrop
 import com.masum.cipher.core.data.local.pref.UserPreferences
 import com.masum.cipher.core.domain.model.AppCurrency
 import com.masum.cipher.core.util.AppFormatters
@@ -184,7 +193,8 @@ fun CurrencySelectionScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.ambientBackdrop(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -220,7 +230,7 @@ fun CurrencySelectionScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
                 )
             )
         }
@@ -232,91 +242,40 @@ fun CurrencySelectionScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                 .padding(horizontal = 20.dp)
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                    .border(1.dp, White10, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "PREVIEW",
-                            style = Typography.labelSmall.copy(
-                                fontFamily = DMSans,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                letterSpacing = 0.8.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "$currentCode • $currentSymbol",
-                                style = Typography.labelSmall.copy(
-                                    fontFamily = Lato,
-                                    fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Column {
-                            Text(
-                                text = "Standard",
-                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.5.sp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                            )
-                            Text(
-                                text = sampleFormatted,
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = "Compact",
-                                style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 11.5.sp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-                            )
-                            Text(
-                                text = sampleCompact,
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = Lato,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 17.sp
-                                ),
-                                color = EmeraldIncome
-                            )
-                        }
-                    }
+                    FormEyebrow(text = "Preview")
+                    Text(
+                        text = "$currentCode  ·  $currentSymbol",
+                        style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 11.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                            .padding(horizontal = 12.dp, vertical = 5.dp)
+                    )
                 }
+                FitText(
+                    text = sampleFormatted,
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 40.sp, letterSpacing = (-1.2).sp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false
+                )
+                Text(
+                    text = "Compact  ·  $sampleCompact",
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                    color = EmeraldIncome
+                )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -326,8 +285,7 @@ fun CurrencySelectionScreen(
                     .fillMaxWidth()
                     .height(50.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
-                    .border(1.dp, White10, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -391,7 +349,7 @@ fun CurrencySelectionScreen(
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(9.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 28.dp)
             ) {
                 if (searchQuery.isEmpty()) {
@@ -408,7 +366,6 @@ fun CurrencySelectionScreen(
                                         )
                                     )
                                 )
-                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f), RoundedCornerShape(16.dp))
                                 .clickable {
                                     view.performVibrate(isHapticsEnabled)
                                     editingCustomCurrency = null
@@ -577,13 +534,13 @@ private fun CurrencyScreenRow(
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        else MaterialTheme.colorScheme.surface,
         label = "currency_screen_row_bg"
     )
 
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-        else White10,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+        else Color.Transparent,
         label = "currency_screen_row_border"
     )
 
@@ -620,11 +577,6 @@ private fun CurrencyScreenRow(
                     .background(
                         if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
                         else MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-                    )
-                    .border(
-                        1.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.40f) else White10,
-                        RoundedCornerShape(12.dp)
                     )
                     .padding(horizontal = 6.dp),
                 contentAlignment = Alignment.Center
@@ -800,23 +752,16 @@ private fun CreateCustomCurrencySheet(
         }
     }
 
-    ModalBottomSheet(
+    val accent = MaterialTheme.colorScheme.primary
+    val symbolPreview = if (finalSymbol.isNotBlank()) finalSymbol else "$"
+
+    CipherSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         modifier = Modifier
             .statusBarsPadding()
             .padding(top = 16.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 4.dp)
-                    .size(width = 36.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp))
-            )
-        },
-        tonalElevation = 0.dp
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
     ) {
         Column(
             modifier = Modifier
@@ -824,263 +769,135 @@ private fun CreateCustomCurrencySheet(
                 .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                 .nestedScroll(consumeOverscrollConnection)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                FormEyebrow(text = "Custom currency")
                 Text(
-                    text = if (initialCurrency != null) "Edit Custom Currency" else "Create Custom Currency",
-                    style = Typography.titleLarge.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    ),
+                    text = if (initialCurrency != null) "Edit currency" else "New currency",
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, letterSpacing = (-0.5).sp),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = LucideIcons.X,
-                        contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                OutlinedTextField(
-                    value = customCodeInput,
-                    onValueChange = { if (it.length <= 6) customCodeInput = it.uppercase(Locale.ROOT) },
-                    label = { Text("ISO Code (e.g. BTC, AED)", fontSize = 12.sp) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1.2f),
-                    shape = RoundedCornerShape(14.dp),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Characters,
-                        imeAction = ImeAction.Next
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                    )
-                )
-
-                OutlinedTextField(
-                    value = customSymbolInput,
-                    onValueChange = { if (it.length <= 6) customSymbolInput = it },
-                    label = { Text("Symbol (e.g. ₿, د.إ)", fontSize = 12.sp) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                    )
-                )
-            }
-
-            OutlinedTextField(
-                value = customNameInput,
-                onValueChange = { if (it.length <= 30) customNameInput = it },
-                label = { Text("Full Name (Optional, e.g. Bitcoin)", fontSize = 12.sp) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Done
-                ),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                )
-            )
-
-            Text(
-                text = "Symbol Position",
-                style = Typography.labelMedium.copy(
-                    fontFamily = DMSans,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.5.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                    .border(1.dp, White10, RoundedCornerShape(12.dp))
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .padding(horizontal = 24.dp, vertical = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                CurrencyOptionPill(
-                    title = "Before (${if (finalSymbol.isNotBlank()) finalSymbol else "$"}100)",
-                    isSelected = !isSuffix,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        view.performVibrate(true)
-                        isSuffix = false
-                    }
+                FitText(
+                    text = previewText,
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 44.sp, letterSpacing = (-1.2).sp),
+                    color = accent,
+                    maxLines = 1,
+                    softWrap = false
                 )
-                CurrencyOptionPill(
-                    title = "After (100${if (finalSymbol.isNotBlank()) finalSymbol else "$"})",
-                    isSelected = isSuffix,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        view.performVibrate(true)
-                        isSuffix = true
-                    }
-                )
-            }
-
-            Text(
-                text = "Symbol Spacing",
-                style = Typography.labelMedium.copy(
-                    fontFamily = DMSans,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.5.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                    .border(1.dp, White10, RoundedCornerShape(12.dp))
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                CurrencyOptionPill(
-                    title = "No Space",
-                    isSelected = !hasSpace,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        view.performVibrate(true)
-                        hasSpace = false
-                    }
-                )
-                CurrencyOptionPill(
-                    title = "With Space",
-                    isSelected = hasSpace,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        view.performVibrate(true)
-                        hasSpace = true
-                    }
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
-                    .border(1.dp, White10, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Preview:",
-                        style = Typography.bodySmall.copy(fontFamily = Lato, fontSize = 12.5.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = previewText,
-                        style = Typography.titleMedium.copy(
-                            fontFamily = Lato,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        ),
-                        color = EmeraldIncome
-                    )
-                }
-            }
-
-            Button(
-                onClick = {
-                    if (isValid) {
-                        onApply(finalCode, finalSymbol, finalName, isSuffix, hasSpace)
-                    }
-                },
-                enabled = isValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
                 Text(
-                    text = if (initialCurrency != null) "Save Currency Changes" else "Apply Currency to Vault",
-                    style = Typography.titleSmall.copy(
-                        fontFamily = DMSans,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.5.sp
-                    )
+                    text = finalName.ifBlank { finalCode.ifBlank { "Live preview" } },
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.Medium, fontSize = 12.5.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                FormGroup {
+                    FormTextRow(
+                        icon = LucideIcons.Search,
+                        label = "ISO code",
+                        value = customCodeInput,
+                        onValueChange = { if (it.length <= 6) customCodeInput = it.uppercase(Locale.ROOT) },
+                        placeholder = "BTC, AED, XAU",
+                        accent = accent,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Next)
+                    )
+                    FormHairline()
+                    FormTextRow(
+                        icon = LucideIcons.Plus,
+                        label = "Symbol",
+                        value = customSymbolInput,
+                        onValueChange = { if (it.length <= 6) customSymbolInput = it },
+                        placeholder = "₿, د.إ",
+                        accent = accent,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    )
+                    FormHairline()
+                    FormTextRow(
+                        icon = LucideIcons.Check,
+                        label = "Full name (optional)",
+                        value = customNameInput,
+                        onValueChange = { if (it.length <= 30) customNameInput = it },
+                        placeholder = "Bitcoin",
+                        accent = accent,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done)
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FormEyebrow(text = "Symbol position", modifier = Modifier.padding(start = 4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FormSelectableChip(
+                            label = "Before (${symbolPreview}100)",
+                            selected = !isSuffix,
+                            accent = accent,
+                            onClick = {
+                                view.performVibrate(true)
+                                isSuffix = false
+                            }
+                        )
+                        FormSelectableChip(
+                            label = "After (100${symbolPreview})",
+                            selected = isSuffix,
+                            accent = accent,
+                            onClick = {
+                                view.performVibrate(true)
+                                isSuffix = true
+                            }
+                        )
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FormEyebrow(text = "Symbol spacing", modifier = Modifier.padding(start = 4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FormSelectableChip(
+                            label = "No space",
+                            selected = !hasSpace,
+                            accent = accent,
+                            onClick = {
+                                view.performVibrate(true)
+                                hasSpace = false
+                            }
+                        )
+                        FormSelectableChip(
+                            label = "With space",
+                            selected = hasSpace,
+                            accent = accent,
+                            onClick = {
+                                view.performVibrate(true)
+                                hasSpace = true
+                            }
+                        )
+                    }
+                }
+            }
+
+            FormPrimaryButton(
+                background = androidx.compose.ui.graphics.Color.Transparent,
+                text = if (initialCurrency != null) "Save currency changes" else "Apply currency",
+                enabled = isValid,
+                accent = accent,
+                onClick = { com.masum.cipher.ui.components.AppHaptics.tick(); if (isValid) onApply(finalCode, finalSymbol, finalName, isSuffix, hasSpace) }
+            )
         }
     }
 }
 
-@Composable
-private fun CurrencyOptionPill(
-    title: String,
-    isSelected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
-        label = "pill_bg"
-    )
-    val textColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "pill_txt"
-    )
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(9.dp))
-            .background(backgroundColor)
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = title,
-            style = Typography.labelMedium.copy(
-                fontFamily = DMSans,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                fontSize = 12.sp
-            ),
-            color = textColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
