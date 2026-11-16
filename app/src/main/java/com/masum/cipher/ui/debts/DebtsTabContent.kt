@@ -220,8 +220,8 @@ fun DebtsTabContent(
                     style = TextStyle(
                         fontFamily = DMSans,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 40.sp,
-                        letterSpacing = (-1.2).sp
+                        fontSize = 32.sp,
+                        letterSpacing = (-1.0).sp
                     ),
                     color = netColor,
                     maxLines = 1,

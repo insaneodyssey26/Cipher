@@ -270,9 +270,10 @@ fun SettingsScreen(
 
     val matchTheme = query.isBlank() || "light".contains(query) || "dark".contains(query) || "system".contains(query) || "theme".contains(query)
     val matchAccent = query.isBlank() || "accent color".contains(query)
+    val matchFontSize = query.isBlank() || "text size".contains(query) || "font size".contains(query) || "text".contains(query) || "font".contains(query) || "scale".contains(query)
     val matchHaptic = query.isBlank() || "haptic feedback".contains(query) || "physical response to touch".contains(query)
     val matchProBadge = query.isBlank() || "show pro badge".contains(query) || "pro badge".contains(query) || "badge".contains(query)
-    val matchAppearance = query.isBlank() || "appearance".contains(query) || "interaction".contains(query) || matchTheme || matchAccent || matchHaptic || (state.isPro && matchProBadge)
+    val matchAppearance = query.isBlank() || "appearance".contains(query) || "interaction".contains(query) || matchTheme || matchAccent || matchFontSize || matchHaptic || (state.isPro && matchProBadge)
 
     val matchBiometric = query.isBlank() || "biometric lock".contains(query) || "require authentication to open the app".contains(query)
     val matchAutoLock = query.isBlank() || "auto-lock timer".contains(query) || "auto lock".contains(query)
@@ -882,6 +883,104 @@ Column(modifier = Modifier.fillMaxWidth()) {
                                             maxLines = 1
                                         )
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (matchFontSize) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.font_size_title),
+                            style = Typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        val activeLabel = when {
+                            state.fontScale <= 0.92f -> stringResource(R.string.font_size_compact)
+                            state.fontScale in 0.93f..1.05f -> stringResource(R.string.font_size_default)
+                            state.fontScale in 1.06f..1.15f -> stringResource(R.string.font_size_comfortable)
+                            else -> stringResource(R.string.font_size_large)
+                        }
+                        Text(
+                            text = activeLabel,
+                            style = Typography.bodySmall.copy(fontFamily = DMSans, fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val fontOptions = listOf(
+                        Triple(stringResource(R.string.font_size_compact), 0.90f, "90%"),
+                        Triple(stringResource(R.string.font_size_default), 1.00f, "100%"),
+                        Triple(stringResource(R.string.font_size_comfortable), 1.10f, "110%"),
+                        Triple(stringResource(R.string.font_size_large), 1.20f, "120%")
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                            .padding(3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        fontOptions.forEach { (label, scaleVal, pct) ->
+                            val isSelected = kotlin.math.abs(state.fontScale - scaleVal) < 0.04f
+                            val activeBg = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            val activeText = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            val activeBorder = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color.Transparent
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(9.dp))
+                                    .background(activeBg)
+                                    .border(1.dp, activeBorder, RoundedCornerShape(9.dp))
+                                    .clickable {
+                                        if (!isSelected) {
+                                            view.performVibrate(state.isHapticsEnabled, isLongPress = true)
+                                            viewModel.handleIntent(SettingsContract.Intent.UpdateFontScale(scaleVal))
+                                        }
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(1.dp)
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = Typography.labelMedium.copy(
+                                            fontFamily = DMSans,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 11.5.sp
+                                        ),
+                                        color = activeText,
+                                        maxLines = 1
+                                    )
+                                    Text(
+                                        text = pct,
+                                        style = Typography.labelSmall.copy(
+                                            fontFamily = DMSans,
+                                            fontSize = 9.5.sp
+                                        ),
+                                        color = activeText.copy(alpha = 0.75f)
+                                    )
                                 }
                             }
                         }

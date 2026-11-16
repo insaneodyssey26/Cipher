@@ -266,7 +266,7 @@ fun CurrencySelectionScreen(
                 }
                 FitText(
                     text = sampleFormatted,
-                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 40.sp, letterSpacing = (-1.2).sp),
+                    style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, letterSpacing = (-1.0).sp),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     softWrap = false

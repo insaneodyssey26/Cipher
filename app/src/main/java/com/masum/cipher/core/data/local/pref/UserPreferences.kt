@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -60,6 +61,10 @@ class UserPreferences @Inject constructor(
 
     fun isCachedNavBarCompressed(): Boolean {
         return syncPrefs.getBoolean("cached_navbar_compressed", false)
+    }
+
+    fun getCachedFontScale(): Float {
+        return syncPrefs.getFloat("cached_app_font_scale", 1.0f)
     }
 
     fun isCachedOnboardingCompleted(): Boolean {
@@ -220,6 +225,7 @@ class UserPreferences @Inject constructor(
             hasCompletedOnboarding = isCachedOnboardingCompleted(),
             lastSeenWhatsNewVersionCode = getCachedLastSeenWhatsNewVersionCode(),
             accentColor = getCachedAccentColor(),
+            fontScale = getCachedFontScale(),
             isNavBarCompressed = isCachedNavBarCompressed(),
             isPro = isPro,
             proTier = proTier,
@@ -244,6 +250,7 @@ class UserPreferences @Inject constructor(
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val TRACKED_APPS = stringSetPreferencesKey("tracked_apps")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val APP_FONT_SCALE = floatPreferencesKey("app_font_scale")
         val HAS_SEEN_NOTIFICATION_FEATURE = booleanPreferencesKey("has_seen_notification_feature")
         val LAST_SEEN_WHATS_NEW_VERSION_CODE = intPreferencesKey("last_seen_whats_new_version_code")
         
@@ -297,6 +304,7 @@ class UserPreferences @Inject constructor(
             AccentColor.INDIGO
         }
         val isNavCompressed = preferences[Keys.NAVBAR_COMPRESSED] ?: false
+        val resolvedFontScale = preferences[Keys.APP_FONT_SCALE] ?: 1.0f
 
         val parsedTheme = try {
             AppTheme.valueOf(preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM.name)
@@ -313,6 +321,7 @@ class UserPreferences @Inject constructor(
             .putBoolean("cached_currency_has_space", hasSpace)
             .putBoolean("cached_onboarding_completed", hasOnboarded)
             .putString("cached_accent_color", parsedAccentColor.name)
+            .putFloat("cached_app_font_scale", resolvedFontScale)
             .putBoolean("cached_navbar_compressed", isNavCompressed)
             .putString("cached_app_theme", parsedTheme.name)
             .putInt("cached_last_seen_whats_new_version_code", resolvedLastSeenVersion)
@@ -337,6 +346,7 @@ class UserPreferences @Inject constructor(
             hasCompletedOnboarding = preferences[Keys.ONBOARDING_COMPLETED] ?: false,
             trackedApps = preferences[Keys.TRACKED_APPS] ?: emptySet(),
             accentColor = parsedAccentColor,
+            fontScale = resolvedFontScale,
             hasSeenNotificationFeature = preferences[Keys.HAS_SEEN_NOTIFICATION_FEATURE] ?: false,
             lastSeenWhatsNewVersionCode = resolvedLastSeenVersion,
             autoBackupEnabled = preferences[Keys.AUTO_BACKUP_ENABLED] ?: false,
@@ -495,6 +505,12 @@ class UserPreferences @Inject constructor(
     suspend fun setAccentColor(accentColor: AccentColor) {
         syncPrefs.edit().putString("cached_accent_color", accentColor.name).apply()
         context.dataStore.edit { it[Keys.ACCENT_COLOR] = accentColor.name }
+    }
+
+    suspend fun setFontScale(scale: Float) {
+        val sanitized = scale.coerceIn(0.85f, 1.25f)
+        syncPrefs.edit().putFloat("cached_app_font_scale", sanitized).apply()
+        context.dataStore.edit { it[Keys.APP_FONT_SCALE] = sanitized }
     }
 
     suspend fun setNavBarCompressed(compressed: Boolean) {
@@ -912,6 +928,7 @@ data class UserSettings(
     val hasCompletedOnboarding: Boolean = false,
     val trackedApps: Set<String> = emptySet(),
     val accentColor: AccentColor = AccentColor.INDIGO,
+    val fontScale: Float = 1.0f,
     val hasSeenNotificationFeature: Boolean = false,
     val lastSeenWhatsNewVersionCode: Int = 0,
     val autoBackupEnabled: Boolean = false,

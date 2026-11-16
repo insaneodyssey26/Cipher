@@ -91,6 +91,7 @@ class QuickSwitchAccountActivity : ComponentActivity() {
             var isHapticsEnabled by remember { mutableStateOf(true) }
             var themeMode by remember { mutableStateOf(AppTheme.SYSTEM) }
             var accentColorHex by remember { mutableStateOf(0xFF4F46E5) }
+            var fontScale by remember { mutableStateOf(1.0f) }
             val scope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
@@ -98,6 +99,7 @@ class QuickSwitchAccountActivity : ComponentActivity() {
                 isHapticsEnabled = settings.isHapticsEnabled
                 themeMode = settings.theme
                 accentColorHex = settings.accentColor.colorValue
+                fontScale = settings.fontScale
                 transaction = transactionRepository.getTransactionById(transactionId)
                 val allAccounts = accountRepository.getAllAccountsFlow().first()
                 accounts = if (settings.isPro || allAccounts.size <= 2) {
@@ -118,7 +120,8 @@ class QuickSwitchAccountActivity : ComponentActivity() {
 
             CipherTheme(
                 darkTheme = darkTheme,
-                accentColor = Color(accentColorHex)
+                accentColor = Color(accentColorHex),
+                fontScale = fontScale
             ) {
                 QuickSwitchDialogContent(
                     transaction = transaction,

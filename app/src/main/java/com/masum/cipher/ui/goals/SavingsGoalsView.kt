@@ -153,8 +153,8 @@ fun SavingsGoalsView(
                         style = androidx.compose.ui.text.TextStyle(
                             fontFamily = DMSans,
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 42.sp,
-                            letterSpacing = (-1.2).sp
+                            fontSize = 32.sp,
+                            letterSpacing = (-1.0).sp
                         ),
                         maxLines = 1,
                         softWrap = false,

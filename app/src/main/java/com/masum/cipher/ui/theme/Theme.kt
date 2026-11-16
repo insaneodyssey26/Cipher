@@ -5,12 +5,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 @Composable
 fun CipherTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     accentColor: Color = ElectricIndigo,
+    fontScale: Float = 1.0f,
     content: @Composable () -> Unit
 ) {
     val accentSubtle = accentColor.copy(alpha = 0.08f)
@@ -82,9 +86,20 @@ fun CipherTheme(
     }
 
 
+    val currentDensity = LocalDensity.current
+    val effectiveFontScale = (currentDensity.fontScale * fontScale).coerceIn(0.7f, 2.0f)
+    val scaledDensity = Density(
+        density = currentDensity.density,
+        fontScale = effectiveFontScale
+    )
+
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+        typography = Typography
+    ) {
+        CompositionLocalProvider(
+            LocalDensity provides scaledDensity,
+            content = content
+        )
+    }
 }

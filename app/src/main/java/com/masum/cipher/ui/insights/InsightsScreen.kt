@@ -725,7 +725,7 @@ private fun InsightHero(state: InsightsContract.State) {
 
         FitText(
             text = AppFormatters.formatCurrency(totalSpent, state.currencySymbol, locale, decimals = 0),
-            style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 44.sp, letterSpacing = (-1.4).sp),
+            style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 32.sp, letterSpacing = (-1.0).sp),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             softWrap = false,

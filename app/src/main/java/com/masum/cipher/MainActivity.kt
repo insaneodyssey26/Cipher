@@ -155,7 +155,8 @@ class MainActivity : AppCompatActivity() {
             }
             CipherTheme(
                 darkTheme = darkTheme,
-                accentColor = Color(userPreferences.getCachedAccentColor().colorValue)
+                accentColor = Color(userPreferences.getCachedAccentColor().colorValue),
+                fontScale = userPreferences.getCachedFontScale()
             ) {
                 DatabaseRecoveryScreen(
                     onRetry = {
@@ -241,7 +242,8 @@ class MainActivity : AppCompatActivity() {
 
                 CipherTheme(
                     darkTheme = darkTheme,
-                    accentColor = Color(userSettings.accentColor.colorValue)
+                    accentColor = Color(userSettings.accentColor.colorValue),
+                    fontScale = userSettings.fontScale
                 ) {
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {

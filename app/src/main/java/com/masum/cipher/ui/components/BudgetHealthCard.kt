@@ -165,7 +165,7 @@ fun BudgetHealthCard(
 
             FitText(
                 text = if (isOverBudget) "${money(-remainingBudget)} over" else "${money(remainingBudget)} left",
-                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, letterSpacing = (-1.2).sp),
+                style = androidx.compose.ui.text.TextStyle(fontFamily = dm, fontWeight = FontWeight.SemiBold, fontSize = 28.sp, letterSpacing = (-0.8).sp),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 softWrap = false
