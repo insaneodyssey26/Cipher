@@ -2,7 +2,7 @@ package com.masum.cipher.ui.goals
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.FitText
+import androidx.compose.ui.draw.drawBehind
 import com.masum.cipher.core.data.local.entity.GoalEntity
 import com.masum.cipher.core.util.AppFormatters
 import com.masum.cipher.core.util.performVibrate
@@ -130,114 +132,67 @@ fun SavingsGoalsView(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item(span = { GridItemSpan(2) }) {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(22.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(22.dp))
-                        .padding(18.dp)
+                        .padding(start = 4.dp, end = 4.dp, top = 12.dp, bottom = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    Text(
+                        text = stringResource(R.string.goals_total_saved).uppercase(),
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 10.5.sp,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                    FitText(
+                        text = AppFormatters.formatCurrency(state.totalSaved, state.currencySymbol, decimals = 0),
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = DMSans,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 42.sp,
+                            letterSpacing = (-1.2).sp
+                        ),
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = LucideIcons.Target,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-
-                                Text(
-                                    text = stringResource(R.string.goals_total_saved),
-                                    style = Typography.labelMedium.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.5.sp,
-                                        letterSpacing = 0.8.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            Text(
-                                text = "$overallProgressPercent%",
-                                style = Typography.titleMedium.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                ),
-                                color = EmeraldIncome
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Text(
-                                text = AppFormatters.formatCurrency(state.totalSaved, state.currencySymbol, decimals = 0),
-                                style = Typography.headlineMedium.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 24.sp
-                                ),
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Text(
-                                text = stringResource(R.string.goals_target_label, AppFormatters.formatCurrency(state.totalTarget, state.currencySymbol, decimals = 0)),
-                                style = Typography.bodyMedium.copy(
-                                    fontFamily = DMSans,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 14.sp
-                                ),
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(start = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-                            )
-                        }
-
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                        ) {
-                            Box(
-                                modifier = Modifier
                                 .fillMaxWidth(overallProgressFraction)
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp))
                                 .background(EmeraldIncome)
-                            )
-                        }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "$overallProgressPercent%",
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                            color = EmeraldIncome
+                        )
+                        Text(
+                            text = stringResource(R.string.goals_target_label, AppFormatters.formatCurrency(state.totalTarget, state.currencySymbol, decimals = 0)),
+                            style = androidx.compose.ui.text.TextStyle(fontFamily = Lato, fontWeight = FontWeight.Medium, fontSize = 12.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -419,6 +374,52 @@ fun SavingsGoalsView(
                             activeAdjustGoal = goal
                         }
                     )
+                }
+                item(key = "add_goal_tile") {
+                    val outlineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(176.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .drawBehind {
+                                drawRoundRect(
+                                    color = outlineColor,
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(22.dp.toPx()),
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                        width = 1.5.dp.toPx(),
+                                        pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(14f, 12f))
+                                    )
+                                )
+                            }
+                            .clickable { handleCreateGoalClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = LucideIcons.Plus,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.goals_new_goal),
+                                style = androidx.compose.ui.text.TextStyle(fontFamily = DMSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -6,7 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import com.masum.cipher.ui.components.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +64,7 @@ import com.masum.cipher.ui.goals.GoalsContract
 import com.masum.cipher.ui.goals.GoalsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.masum.cipher.R
+import com.masum.cipher.ui.components.FitText
 import com.masum.cipher.core.data.local.entity.CustomCategoryEntity
 import com.masum.cipher.core.data.local.entity.TransactionEntity
 import com.masum.cipher.core.data.local.entity.TransactionSplitEntity
@@ -228,7 +229,15 @@ fun SplitExpensesScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .background(
+                androidx.compose.ui.graphics.Brush.verticalGradient(
+                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), Color.Transparent),
+                    endY = 1100f
+                )
+            ),
+        containerColor = Color.Transparent,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -318,7 +327,7 @@ fun SplitExpensesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -333,9 +342,8 @@ fun SplitExpensesScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 6.dp)
                     .height(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                     .padding(3.dp)
             ) {
                 val tabWidth = maxWidth / planningTabs.size
@@ -350,8 +358,9 @@ fun SplitExpensesScreen(
                         .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                         .width(tabWidth)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(MaterialTheme.colorScheme.primary)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(50))
                 )
 
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -361,7 +370,7 @@ fun SplitExpensesScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(9.dp))
+                                .clip(RoundedCornerShape(50))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = null
@@ -380,7 +389,7 @@ fun SplitExpensesScreen(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 12.5.sp
                                 ),
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -399,130 +408,93 @@ fun SplitExpensesScreen(
                             verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                     item {
-                        VaultCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    contentPadding = 18.dp
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        val loading = state.isLoading && state.transactions.isEmpty()
+                        val settledW = totalSettledAmount.toFloat().coerceAtLeast(0f)
+                        val pendingW = totalPendingAmount.toFloat().coerceAtLeast(0f)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 4.dp, end = 4.dp, top = 10.dp, bottom = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.split_hub_total_lent).uppercase(),
-                                    style = Typography.labelSmall.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp,
-                                        letterSpacing = 1.2.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Text(
+                                text = stringResource(R.string.split_hub_total_lent).uppercase(),
+                                style = androidx.compose.ui.text.TextStyle(
+                                    fontFamily = com.masum.cipher.ui.theme.DMSans,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 10.5.sp,
+                                    letterSpacing = 1.4.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                            if (loading) {
+                                ShimmerBox(
+                                    modifier = Modifier.width(160.dp).height(44.dp),
+                                    shape = RoundedCornerShape(8.dp)
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                if (state.isLoading && state.transactions.isEmpty()) {
-                                    ShimmerBox(
-                                        modifier = Modifier
-                                            .width(130.dp)
-                                            .height(32.dp),
-                                        shape = RoundedCornerShape(6.dp)
-                                    )
-                                } else {
+                            } else {
+                                FitText(
+                                    text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSharedAmount, state.currencySymbol, locale, decimals = 0),
+                                    style = androidx.compose.ui.text.TextStyle(
+                                        fontFamily = com.masum.cipher.ui.theme.DMSans,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 42.sp,
+                                        letterSpacing = (-1.2).sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 6.dp)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                if (settledW > 0f) Box(Modifier.weight(settledW).height(4.dp).background(EmeraldIncome))
+                                if (pendingW > 0f) Box(Modifier.weight(pendingW).height(4.dp).background(RoseExpense.copy(alpha = 0.85f)))
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Box(Modifier.size(6.dp).clip(CircleShape).background(EmeraldIncome))
+                                        Text(
+                                            text = stringResource(R.string.split_hub_total_settled),
+                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.5.sp, fontWeight = FontWeight.Medium),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                     Text(
-                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSharedAmount, state.currencySymbol, locale, decimals = 0),
-                                        style = Typography.headlineLarge.copy(
-                                            fontFamily = Lato,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 28.sp,
-                                            letterSpacing = (-0.8).sp
-                                        ),
+                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSettledAmount, state.currencySymbol, locale, decimals = 0),
+                                        style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = LucideIcons.Users,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.split_hub_total_settled),
-                                    style = Typography.labelSmall.copy(fontSize = 11.sp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                if (state.isLoading && state.transactions.isEmpty()) {
-                                    ShimmerBox(
-                                        modifier = Modifier
-                                            .width(60.dp)
-                                            .height(18.dp),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                } else {
-                                    Text(
-                                        text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalSettledAmount, state.currencySymbol, locale, decimals = 0),
-                                        style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                        color = EmeraldIncome
-                                    )
-                                }
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .height(24.dp)
-                                    .width(1.dp)
-                                    .background(White10)
-                            )
-
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.split_hub_total_pending),
-                                    style = Typography.labelSmall.copy(fontSize = 11.sp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                if (state.isLoading && state.transactions.isEmpty()) {
-                                    ShimmerBox(
-                                        modifier = Modifier
-                                            .width(60.dp)
-                                            .height(18.dp),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                } else {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp), horizontalAlignment = Alignment.End) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.split_hub_total_pending),
+                                            style = Typography.labelSmall.copy(fontFamily = Lato, fontSize = 11.5.sp, fontWeight = FontWeight.Medium),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Box(Modifier.size(6.dp).clip(CircleShape).background(RoseExpense.copy(alpha = 0.85f)))
+                                    }
                                     Text(
                                         text = if (privacyMode) "•••" else AppFormatters.formatCurrency(totalPendingAmount, state.currencySymbol, locale, decimals = 0),
-                                        style = Typography.bodyMedium.copy(fontFamily = Lato, fontWeight = FontWeight.Bold),
-                                        color = if (totalPendingAmount > 0) RoseExpense else MaterialTheme.colorScheme.onSurfaceVariant
+                                        style = androidx.compose.ui.text.TextStyle(fontFamily = com.masum.cipher.ui.theme.DMSans, fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }
                         }
                     }
-                }
-            }
 
             item {
                 val tabs = listOf(
@@ -532,58 +504,20 @@ fun SplitExpensesScreen(
                 )
                 val selectedTabIndex = tabs.indexOfFirst { it.first == selectedTab }.coerceAtLeast(0)
 
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(3.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val tabWidth = maxWidth / tabs.size
-                    val indicatorOffset by animateDpAsState(
-                        targetValue = tabWidth * selectedTabIndex,
-                        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-                        label = "split_tab_offset"
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
-                            .width(tabWidth)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        tabs.forEachIndexed { _, (tab, title) ->
-                            val isSelected = selectedTab == tab
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .clip(RoundedCornerShape(9.dp))
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) {
-                                        view.performVibrate(isHapticsEnabled, isLongPress = false)
-                                        selectedTab = tab
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = title,
-                                    style = Typography.labelMedium.copy(
-                                        fontFamily = Lato,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        fontSize = 12.5.sp
-                                    ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                    tabs.forEach { (tab, title) ->
+                        com.masum.cipher.ui.components.FormSelectableChip(
+                            label = title,
+                            selected = selectedTab == tab,
+                            accent = MaterialTheme.colorScheme.onSurface,
+                            onClick = {
+                                view.performVibrate(isHapticsEnabled, isLongPress = false)
+                                selectedTab = tab
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -828,11 +762,14 @@ private fun SplitTransactionCard(
     val myShare = splits.find { it.isCurrentUser }?.amount ?: (transaction.amount / splits.size)
     val otherSplits = splits.filter { !it.isCurrentUser }
 
-    VaultCard(
-        modifier = Modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentPadding = 16.dp,
-        onClick = onEdit
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f), RoundedCornerShape(22.dp))
+            .clickable(onClick = onEdit)
+            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -1076,9 +1013,8 @@ private fun SplitTransactionCard(
                 ) {
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(RoseExpense.copy(alpha = 0.1f))
-                            .border(1.dp, RoseExpense.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(50))
+                            .border(0.5.dp, RoseExpense.copy(alpha = 0.45f), RoundedCornerShape(50))
                             .clickable { onDelete() }
                             .padding(horizontal = 9.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -1103,9 +1039,8 @@ private fun SplitTransactionCard(
 
                     Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(50))
+                            .border(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(50))
                             .clickable { onShare() }
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -1114,7 +1049,7 @@ private fun SplitTransactionCard(
                         Icon(
                             imageVector = LucideIcons.Share2,
                             contentDescription = "Share",
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(13.dp)
                         )
                         Text(
@@ -1124,7 +1059,7 @@ private fun SplitTransactionCard(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
